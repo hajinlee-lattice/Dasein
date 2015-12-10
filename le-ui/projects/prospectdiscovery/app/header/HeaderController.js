@@ -1,15 +1,15 @@
-angular.module('mainApp.core.controllers.MainHeaderController', [
+angular.module('pd.header', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.login.services.LoginService',
     'mainApp.core.services.FeatureFlagService'
 ])
 
 .controller('MainHeaderCtrl', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
-console.log('ResourceUtility', $scope.ResourceUtility);
+
+    console.log('ResourceUtility', $scope.ResourceUtility);
     var clientSession = BrowserStorageUtility.getClientSession();
 
     if (clientSession != null) {
@@ -24,11 +24,39 @@ console.log('ResourceUtility', $scope.ResourceUtility);
         });
     }
 
+    $(".dropdown > a").click(function(e){
+        $(this).toggleClass("active");
+        $(".dropdown > ul").toggle();
+        e.stopPropagation();
+    });
+
+    $(document).click(function() {
+        if ($(".dropdown > ul").is(':visible')) {
+            $(".dropdown > ul", this).hide();
+            $(".dropdown > a").removeClass('active');
+        }
+    });
+    // Toggle Collapsible Areas
+    $(".toggle > a").click(function(e){
+        $(this).parent().toggleClass("open");
+        e.preventDefault();
+        if ($(".toggle > ul").is(':visible')) {
+            $(".toggle > a > span:last-child").removeClass("fa-angle-double-down");
+            $(".toggle > a > span:last-child").addClass("fa-angle-double-up");
+        } else {
+            $(".toggle > a > span:last-child").removeClass("fa-angle-double-up");
+            $(".toggle > a > span:last-child").addClass("fa-angle-double-down");
+        }
+    });
+
     $scope.handleClick = function ($event, name) {
         $event ? $event.preventDefault() : null;
 
         switch(name) {
-            case 'dropdown': 
+            case 'dropdown':
+                // Clickable Dropdown
+
+
                 break;
             case 'logout': 
                 LoginService.Logout(); 
@@ -39,4 +67,20 @@ console.log('ResourceUtility', $scope.ResourceUtility);
 
         name ? $rootScope.$broadcast(NavUtility[name]) : null;
     };
+
+    checkBrowserWidth();
+    $(window).resize(checkBrowserWidth);
+
+    $scope.handleSidebarToggle = function ($event) {
+        console.log('BUH');
+        $("body").toggleClass("open-nav");
+    }
+
+    function checkBrowserWidth(){
+        if (window.matchMedia("(min-width: 768px)").matches) {
+            $("body").addClass("open-nav");
+        } else {
+            $("body").removeClass("open-nav");
+        }
+    }
 });

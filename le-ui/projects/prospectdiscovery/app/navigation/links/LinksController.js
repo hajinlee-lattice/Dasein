@@ -1,4 +1,4 @@
-angular.module('controllers.navigation.links', [
+angular.module('pd.navigation.links', [
 
 ])
 

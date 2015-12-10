@@ -285,12 +285,12 @@ module.exports = function (grunt) {
             },
             dist:    {
                 files: {
-                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/assets/styles/main.scss'
+                    '<%= pls.app %>/assets/styles/production_<%= versionString %>.min.css': '<%= pls.app %>/app/app.scss'
                 }
             },
             dev:     {
                 files: {
-                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
+                    '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/app/app.scss'
                 }
             }
         },

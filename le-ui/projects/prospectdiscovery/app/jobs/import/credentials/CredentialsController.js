@@ -1,4 +1,4 @@
-angular.module('controllers.jobs.import.credentials', [
+angular.module('pd.jobs.import.credentials', [
     'mainApp.appCommon.directives.ngQtipDirective',
     'mainApp.appCommon.directives.helperMarkDirective',
     'mainApp.appCommon.utilities.ResourceUtility',

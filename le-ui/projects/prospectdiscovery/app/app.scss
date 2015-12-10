@@ -1,12 +1,14 @@
 @import "header/HeaderStyles";
 @import "jobs/status/StatusStyles";
 @import "jobs/import/ready/ReadyStyles";
+@import "builder/industries/IndustriesStyles";
+@import "builder/locations/LocationsStyles";
 @import "markets/MarketsStyles";
 @import "markets/prospect/ProspectsStyles";
+@import "navigation/subnav/SubNavStyles";
 @import "navigation/table/TableStyles";
 @import "navigation/message/MessageStyles";
 @import "navigation/links/LinksStyles";
-@import "navigation/subnav/SubNavStyles";
 @import "navigation/navdash/NavDashStyles";
 
 body {
@@ -29,7 +31,7 @@ table td {
     padding: 1em;
 }
 h4 {
-    font-size: 220%;
+    font-size: 200%;
 }
 
 @media (max-width: 1280px) {

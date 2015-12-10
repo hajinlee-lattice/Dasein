@@ -1,4 +1,4 @@
-angular.module('controllers.navigation.table', [
+angular.module('pd.navigation.table', [
 
 ])
 

@@ -1,4 +1,4 @@
-angular.module('controllers.markets.builder', [
+angular.module('pd.builder', [
 
 ])
 

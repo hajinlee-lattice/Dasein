@@ -1,4 +1,4 @@
-angular.module('controllers.jobs.import.ready', [
+angular.module('pd.jobs.import.ready', [
 
 ])
 .controller('ImportReadyController', function($scope, $rootScope, $stateParams) {

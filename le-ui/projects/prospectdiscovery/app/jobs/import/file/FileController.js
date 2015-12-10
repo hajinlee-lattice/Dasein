@@ -1,4 +1,4 @@
-angular.module('controllers.jobs.import.file', [
+angular.module('pd.jobs.import.file', [
 
 ])
 

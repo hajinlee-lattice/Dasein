@@ -1,4 +1,4 @@
-angular.module('controllers.markets.DashboardController', [
+angular.module('pd.markets.dashboard', [
 
 ])
 

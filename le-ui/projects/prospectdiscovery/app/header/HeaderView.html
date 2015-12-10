@@ -1,96 +1,67 @@
 <header data-ng-controller="MainHeaderCtrl">
+    <div class="secondary-nav">
 
-    <a href="#/" class="logo"><img src="/demo/img/logo_lattice.png" alt="Lattice Logo" /></a>
-    <!-- 
-    <a class="" href="#/" data-ng-hide="mandatePasswordChange"> <img src="/assets/images/LatticeColorLogo.png" alt=""> </a> 
-    <span class="logo" data-ng-show="mandatePasswordChange"> <img src="assets/images/logo_lattice.png" alt=""> </span>  
-    -->
+        <button id="toggleNav" class="nav-button" data-ng-click="handleSidebarToggle($event)">
+            <span class="fa fa-bars"></span>
+        </button>
 
-    <ul class="menu">
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="fingerprints"><span class="fa fa-hand-paper-o"></span>Analyze Your Customer Fingerprints</a>
-        </li>
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="markets.list"><span class="fa fa-bullseye"></span>Manage Target Markets</a>
+        <div class="profile-nav dropdown">
+            <a href="javascript:void(0)" title="" data-ng-click="handleClick($event, 'dropdown')">
+                {{userDisplayName}} <span class="fa fa-angle-down"></span>
+            </a>
             <ul>
-                <li role="presentation" ui-sref-active="active"><a href="#">Create a Target Market</a></li>
-                <li role="presentation" ui-sref-active="active"><a href="#">ROI Dashboard</a></li>
-                <li role="presentation" ui-sref-active="active"><a href="#">Prospecting Schedule</a></li>
-                <li role="presentation" ui-sref-active="active"><a href="#">Prospecting History</a></li>
+                <li data-ng-click="handleClick($event, 'settings')">
+                    <a href="javascript:void(0)" title="">{{ResourceUtility.getString('HEADER_SETTINGS')}}</a>
+                </li>
+                <li data-ng-click="handleClick($event, 'logout')">
+                    <a href="javascript:void(0)" title="">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a>
+                </li>
             </ul>
-        </li>
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="jobs.status"><span class="fa fa-cog"></span>Jobs <span class="loading pull-right"></span></a>
-            <ul>
-                <li role="presentation" ui-sref-active="active"><a href="#">Import Data</a></li>
-            </ul>
-        </li>
-        <li role="presentation" ui-sref-active="active">
-            <a ui-sref="#"><span class="fa fa-user"></span>Manage Users</a>
-        </li>
-    </ul>
+        </div>
 
-
-
-
+    </div>
 
     <!--
+    <div id="outer-wrap">
+        <div id="inner-wrap">
+            <nav id="nav" class="primary-nav" role="navigation">
+                <div id="mainHeaderView"></div>
+            </nav>
+            
+            <section id="main" role="main" class="main-content">
+                
+                <div class="secondary-nav">
+                    <button id="toggleNav" class="nav-button"><span class="fa fa-bars"></span></button>
+                    <div class="profile-nav dropdown">
+                        <a href="#" title="">superuser <span class="fa fa-angle-down"></span></a>
+                        <ul>
+                            <li><a href="#" title="">Settings</a></li>
+                            <li><a href="#" title="">Sign Out</a></li>
+                        </ul>
+                    </div>
+                </div>
 
+                <div id="mainContentView" ui-view></div>
+            </section>
 
-    Check index.html for where the profile nav code's placement. 
-
-
-    -->
-
+        </div>
+    </div>
 
 
     <ul class="columns ten nav nav-pills top-nav">
         <li class="dropdown li-nav-personal">
-            <a data-toggle="dropdown" class="dropdown-toggle nav-personal" style="color:black;" href="#/" data-ng-click="handleClick($event, 'dropdown')"> 
+            <a data-toggle="dropdown" class="dropdown-toggle nav-personal" style="color:black;" href="javascript:void(0)" data-ng-click="handleClick($event, 'dropdown')"> 
                 <span class="username">{{userDisplayName}}</span> <i class="fa fa-caret-down"></i></b>
             </a>
             <ul class="dropdown-menu dropdown-menu-2">
-                <!--
                 <li>
-                    <a href="#" data-ng-click="handleClick($event, 'UPDATE_PASSWORD_NAV_EVENT')" data-ng-hide="mandatePasswordChange">
-                        {{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}
-                    </a>
-                </li>
-                <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange">
-                    <a href="#" data-ng-click="handleClick($event, 'USER_MANAGEMENT_NAV_EVENT')">
-                        {{ResourceUtility.getString('HEADER_MANAGE_USERS')}}
-                    </a>
-                </li>
-                <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange">
-                    <a href="#" data-ng-click="handleClick($event, 'MANAGE_CREDENTIALS_NAV_EVENT')">
-                        {{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}
-                    </a>
-                </li>
-                <li data-ng-if="showModelCreationHistoryDropdown" data-ng-hide="mandatePasswordChange">
-                    <a href="#" data-ng-click="handleClick($event, 'MODEL_CREATION_HISTORY_NAV_EVENT')">
-                        {{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}
-                    </a>
-                </li>
-                <li data-ng-if="showActivateModel" data-ng-hide="mandatePasswordChange">
-                    <a href="#" data-ng-click="handleClick($event, 'ACTIVATE_MODEL')">
-                        {{ResourceUtility.getString('HEADER_ACTIVATE_MODEL')}}
-                    </a>
-                </li>
-                <li data-ng-if="showSetup" data-ng-hide="mandatePasswordChange">
-                    <a href="#" data-ng-click="handleClick($event, 'SETUP_NAV_EVENT')">
-                        {{ResourceUtility.getString('HEADER_MANAGE_FIELDS')}}
-                    </a>
-                </li>
-                -->
-                <li>
-                    <a href="#" data-ng-click="handleClick($event, 'logout')">
+                    <a href="javascript:void(0)" data-ng-click="handleClick($event, 'logout')">
                         {{ResourceUtility.getString('HEADER_LOGOUT')}}
                     </a>
                 </li>
             </ul>
         </li>
     </ul>
-
-
+    -->
 
 </header>

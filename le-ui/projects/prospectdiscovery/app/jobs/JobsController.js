@@ -1,9 +1,8 @@
-angular.module('controllers.jobs', [
-    'controllers.jobs.import.credentials',
-    'controllers.jobs.import.file',
-    'controllers.jobs.import.ready',
-    'controllers.jobs.status',
-    'services.jobs'
+angular.module('pd.jobs', [
+    'pd.jobs.import.credentials',
+    'pd.jobs.import.file',
+    'pd.jobs.import.ready',
+    'pd.jobs.status'
 ])
 
 .controller('JobsCtrl', function($scope, $rootScope, $http, JobsService) {

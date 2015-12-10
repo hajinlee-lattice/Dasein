@@ -3,22 +3,16 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'mainApp.appCommon.utilities.EvergageUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',
-    'mainApp.core.services.HelpService',
-    'mainApp.core.controllers.MainHeaderController',
-    'mainApp.core.controllers.MainViewController',
-    'mainApp.login.services.LoginService',
-    'mainApp.config.services.ConfigService',
-    'mainApp.appCommon.modals.SimpleModal',
-    'controllers.markets.builder',
-    'controllers.navigation.table',
-    'controllers.navigation.message',
-    'controllers.navigation.links',
-    'controllers.navigation.navdash',
-    'controllers.navigation.subnav'
+    'pd.login',
+    'pd.navigation',
+    'pd.header',
+    'pd.markets',
+    'pd.builder',
+    'pd.jobs'
 ])
 
 .run(['$rootScope', '$state', function($rootScope, $state) {
@@ -36,31 +30,33 @@ var mainApp = angular.module('mainApp', [
     $stateProvider
         .state('home', {
             url: '/',
-            //templateUrl: './app/main/MainView.html'
             redirectTo: 'jobs.status'
         })
         .state('fingerprints', {
             url: '/fingerprints',
-            templateUrl: './app/fingerprints/FingerprintsView.html'
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "main": {
+                    templateUrl: './app/fingerprints/FingerprintsView.html'
+                }
+            }
         })
         .state('markets', {
             url: '/markets',
-            redirectTo: 'markets.dashboard',
-            template:
-                '<div ui-view="navigation"></div>' +
-                '<div ui-view="summary"></div>' +
-                '<div ui-view="main"></div>'
+            redirectTo: 'markets.dashboard'
         })
         .state('markets.dashboard', {
             url: '/dashboard',
             views: {
-                "navigation": {
-                    templateUrl: './app/navigation/links/LinksView.html'
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
                 },
-                "summary": {
+                "summary@": {
                     templateUrl: './app/navigation/navdash/NavDashView.html'
                 },
-                "main": {
+                "main@": {
                     templateUrl: './app/markets/dashboard/DashboardView.html'
                 }
             }
@@ -68,41 +64,69 @@ var mainApp = angular.module('mainApp', [
         .state('markets.list', {
             url: '/status',
             views: {
-                "navigation": {
-                    templateUrl: './app/navigation/links/LinksView.html'
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
                 },
-                "summary": {
+                "summary@": {
                     template: ''
                 },
-                "main": {
+                "main@": {
                     templateUrl: './app/markets/MarketsView.html'
                 }
             }
         })
-        .state('markets.builder', {
+        .state('builder', {
             url: '/builder',
+            redirectTo: 'builder.industries',
             views: {
-                "navigation": {
-                    templateUrl: './app/navigation/links/LinksView.html'
-                },
-                "summary": {
+                "summary@": {
                     templateUrl: './app/navigation/subnav/SubNavView.html'
+                }
+            }
+        })
+        .state('builder.industries', {
+            url: '/industries',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/BuilderView.html'
                 },
-                "main": {
-                    templateUrl: './app/markets/builder/BuilderView.html'
+                "main@": {
+                    templateUrl: './app/builder/industries/IndustriesView.html'
+                }
+            }
+        })
+        .state('builder.locations', {
+            url: '/locations',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/BuilderView.html'
+                },
+                "main@": {
+                    templateUrl: './app/builder/locations/LocationsView.html'
+                }
+            }
+        })
+        .state('builder.firmographics', {
+            url: '/firmographics',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/BuilderView.html'
+                },
+                "main@": {
+                    templateUrl: './app/builder/states/FirmographicsView.html'
                 }
             }
         })
         .state('markets.prospect_schedule', {
             url: '/prospect_schedule',
             views: {
-                "navigation": {
-                    templateUrl: './app/navigation/links/LinksView.html'
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
                 },
-                "summary": {
+                "summary@": {
                     template: ''
                 },
-                "main": {
+                "main@": {
                     templateUrl: './app/markets/prospect/ScheduleView.html'
                 }
             }
@@ -110,30 +134,31 @@ var mainApp = angular.module('mainApp', [
         .state('markets.prospect_list', {
             url: '/prospect_list',
             views: {
-                "navigation": {
-                    templateUrl: './app/navigation/links/LinksView.html'
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
                 },
-                "summary": {
+                "summary@": {
                     template: ''
                 },
-                "main": {
+                "main@": {
                     templateUrl: './app/markets/prospect/ListView.html'
                 }
             }
         })
         .state('jobs', {
             url: '/jobs',
-            template:
-                '<div ui-view="summary"></div>' +
-                '<div ui-view="main"></div>'
+            redirectTo: 'jobs.status'
         })
         .state('jobs.status', {
             url: '/status',
             views: {
-                "summary@jobs": {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "summary@": {
                     templateUrl: './app/navigation/table/TableView.html'
                 },
-                "main@jobs": {
+                "main@": {
                     templateUrl: './app/jobs/status/StatusView.html'
                 }
             }
@@ -144,10 +169,13 @@ var mainApp = angular.module('mainApp', [
         .state('jobs.import.credentials', {
             url: '/credentials',
             views: {
-                "summary@jobs": {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "summary@": {
                     templateUrl: './app/navigation/message/MessageView.html'
                 },
-                "main@jobs": {
+                "main@": {
                     templateUrl: './app/jobs/import/credentials/CredentialsView.html'
                 }
             }
@@ -155,10 +183,13 @@ var mainApp = angular.module('mainApp', [
         .state('jobs.import.file', {
             url: '/file',
             views: {
-                "summary@jobs": {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "summary@": {
                     templateUrl: './app/navigation/message/MessageView.html'
                 },
-                "main@jobs": {
+                "main@": {
                     templateUrl: './app/jobs/import/file/FileView.html'
                 }
             }
@@ -166,10 +197,13 @@ var mainApp = angular.module('mainApp', [
         .state('jobs.import.processing', {
             url: '/processing',
             views: {
-                "summary@jobs": {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "summary@": {
                     templateUrl: './app/navigation/message/MessageView.html'
                 },
-                "main@jobs": {
+                "main@": {
                     templateUrl: './app/jobs/import/processing/ProcessingView.html'
                 }
             }
@@ -177,17 +211,16 @@ var mainApp = angular.module('mainApp', [
         .state('jobs.import.ready', {
             url: '/ready/:jobId',
             views: {
-                "summary@jobs": {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/RootView.html'
+                },
+                 "summary@": {
                     templateUrl: './app/navigation/table/TableView.html'
                 },
-                "main@jobs": {
+                "main@": {
                     templateUrl: './app/jobs/import/ready/ReadyView.html'
                 }
             }
-        })
-        .state('admin', {
-            url: '/admin',
-            templateUrl: './app/admin/AdminView.html'
         });
 }])
 
@@ -205,7 +238,7 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, LoginService) {
     $scope.showFooter = false;
     $scope.sessionExpired = false;
     
@@ -287,13 +320,6 @@ var mainApp = angular.module('mainApp', [
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
         });
-    };
-    
-    $scope.privacyPolicyClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-        HelpService.OpenPrivacyPolicy();
     };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
