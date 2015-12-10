@@ -393,7 +393,7 @@ class LPConfigRunner(SessionRunner):
         while (count < 120):
             models = self.lpGetModel(authorization);
 
-            if len(models) >= modelPriority:
+            if len(models) > modelPriority:
                 break;
             print "we can't get the model, will try again after 30 seconds."
             count = count + 1
