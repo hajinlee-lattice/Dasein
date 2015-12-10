@@ -397,7 +397,7 @@ class LPConfigRunner(SessionRunner):
                 break;
             print "we can't get the model, will try again after 30 seconds."
             count = count + 1
-            time.sleep(120)
+            time.sleep(30)
         if count == 120:
             print "The existing models: %d is less than the expected: %d" % (len(models), modelPriority + 1)
             return False;
