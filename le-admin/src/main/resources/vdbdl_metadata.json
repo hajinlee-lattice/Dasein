@@ -7,7 +7,7 @@
         "Helper": "Leave it blank if it is the same as Tenant Id."
       } },
       { "Node": "TemplateVersion",
-        "Data": {"Type": "options", "Options": ["2.0"], "DynamicOptions": true } },
+        "Data": {"Type": "options", "Options": ["2.1.1"], "DynamicOptions": true } },
       { "Node": "VisiDB", 
         "Children" : [
           { "Node": "VisiDBName", "Data": {"Type": "string", "Helper": "Leave it blank if it is the same as Tenant Id."}},
