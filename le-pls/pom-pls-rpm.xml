@@ -31,6 +31,7 @@
                 <db.properties.path>../le-db/conf/env/buildmachine</db.properties.path>
                 <pls.properties.path>conf/env/buildmachine</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -48,24 +49,8 @@
                 <db.properties.path>../le-db/conf/env/devcluster</db.properties.path>
                 <pls.properties.path>conf/env/devcluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
-                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <db.properties.path>../le-db/conf/env/intcluster</db.properties.path>
-                <pls.properties.path>conf/env/intcluster</pls.properties.path>
-                <security.properties.path>../le-security/conf/env/intcluster</security.properties.path>
-                <bin.env.path>bin/env/intcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
@@ -97,6 +82,7 @@
                 <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
                 <pls.properties.path>conf/env/prodcluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -110,9 +96,10 @@
                 </property>
             </activation>
             <properties>
-                <db.properties.path>conf/env/prodcluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
                 <pls.properties.path>conf/env/stage</pls.properties.path>
-                <security.properties.path>conf/env/stage</security.properties.path>
+                <security.properties.path>../le-securityconf/env/stage</security.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/stage</proxy.properties.path>
                 <bin.env.path>bin/env/stage</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -159,6 +146,9 @@
                                 </source>
                                 <source>
                                     <location>${security.properties.path}/security.properties</location>
+                                </source>
+                                <source>
+                                    <location>${proxy.properties.path}/proxy.properties</location>
                                 </source>
                                 <source>
                                     <location>certificates/${jks.name}</location>
