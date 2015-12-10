@@ -17,7 +17,7 @@ public class MetadataInstaller extends LatticeComponentInstaller {
     @Override
     public DocumentDirectory installComponentAndModifyConfigDir(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir) {
         try {
-            componentManager.provisionTenant(space, configDir);
+            componentManager.provisionImportTables(space, configDir);
             return configDir;
         } catch (Exception e) {
             log.error(e);

@@ -30,7 +30,7 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Autowired
     private TableEntityMgr tableEntityMgr;
-    
+
     @Autowired
     private TableTypeHolder tableTypeHolder;
 
@@ -42,6 +42,16 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public List<Table> getTables(CustomerSpace customerSpace) {
         return tableEntityMgr.findAll();
+    }
+
+    @Override
+    public Table getImportTable(CustomerSpace customerSpace, String name) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        try {
+            return tableEntityMgr.findByName(name);
+        } finally {
+            tableTypeHolder.setTableType(TableType.DATATABLE);
+        }
     }
 
     @Override
@@ -76,13 +86,27 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void updateTable(CustomerSpace customerSpace, Table table) {
-        Table t = tableEntityMgr.findByName(table.getName());
-        if (t != null) {
-            tableEntityMgr.delete(t);
+    public void deleteImportTable(CustomerSpace customerSpace, String tableName) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        try {
+            deleteTable(customerSpace, tableName);
+        } finally {
+            tableTypeHolder.setTableType(TableType.DATATABLE);
         }
+    }
 
-        tableEntityMgr.create(table);
+    @Override
+    public void updateTable(CustomerSpace customerSpace, Table table) {
+        tableTypeHolder.setTableType(table.getTableType());
+        try {
+            Table t = tableEntityMgr.findByName(table.getName());
+            if (t != null) {
+                tableEntityMgr.delete(t);
+            }
+            tableEntityMgr.create(table);
+        } finally {
+            tableTypeHolder.setTableType(TableType.DATATABLE);
+        }
     }
 
     @Override

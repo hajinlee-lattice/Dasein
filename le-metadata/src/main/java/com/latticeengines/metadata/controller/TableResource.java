@@ -78,6 +78,14 @@ public class TableResource {
         return tableResourceHelper.deleteTable(customerSpace, tableName, request);
     }
 
+    @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset tables")
+    public Boolean resetTables(@PathVariable String customerSpace, //
+            HttpServletRequest request) {
+        return tableResourceHelper.resetTables(customerSpace, request);
+    }
+
     @RequestMapping(value = "/validations", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Validate metadata")
