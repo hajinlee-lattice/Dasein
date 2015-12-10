@@ -107,10 +107,10 @@
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
                 <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/procluster</security.properties.path>
-                <metadata.properties.path>../le-metadata/conf/env/procluster</metadata.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/procluster</dataflowapi.properties.path>
-                <propdata.properties.path>../le-propdata/conf/env/procluster</propdata.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <metadata.properties.path>../le-metadata/conf/env/prodcluster</metadata.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
                 <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/prodcluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
