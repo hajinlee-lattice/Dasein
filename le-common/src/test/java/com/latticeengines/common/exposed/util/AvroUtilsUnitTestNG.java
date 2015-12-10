@@ -42,7 +42,7 @@ public class AvroUtilsUnitTestNG {
     }
     
     @SuppressWarnings("deprecation")
-    @Test(groups = "unit", dataProvider = "avscFileProvider")
+    @Test(groups = "unit", dataProvider = "avscFileProvider", enabled = false)
     public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
         URL url = ClassLoader.getSystemResource(String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
         File avscFile = new File(url.getFile());
