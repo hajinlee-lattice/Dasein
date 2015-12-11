@@ -5,51 +5,63 @@
 .jobs-header span {
     text-align: right;
 }
+.jobs-table {
+    border-bottom: solid 3px #e7e7e7;
+}
 .panel .panel-heading.custom-heading {
     height: 38px;
-    background: #d0d0d0;
-    padding: 8px 0px !important;
+    background: rgb(73,126,184);
+    padding-left: 25px !important;
     font-size: 125%;
-    color: #000;
+    color: white;
 }
 
+.chevron-row {
+    text-align: center;
+}
 .breadcrumb {
     /*centering*/
     display: inline-block;
     overflow: hidden;
+    background-color: #e7e7e7 !important;
+    text-align: center;
 }
 
-.breadcrumb a {
+.breadcrumb div {
     color: black !important;
     text-decoration: none;
     outline: none;
-    display: block;
+    display: table;
     float: left;
     font-size: 15px;
-    line-height: 60px;
-    padding: 0 50px 0 55px;
-    margin-top: 10px;
     position: relative;
+    height: 60px;
+    width: 205px;
+    margin-top: 10px;
 }
-/*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
-.breadcrumb a:first-child {
-    padding-left: 35px;
-}
-.breadcrumb a:first-child:before {
+.breadcrumb div:first-child:before {
     left: 14px;
 }
-
+.chevron-content {
+    display: table-cell;
+    vertical-align: middle;
+}
+.chevron-content.chevron-content-text {
+    padding-left: 30px;
+}
+.chevron-content.chevron-content-text:first-child {
+    // padding-left: 0px;
+}
 .jobs-table-content {
-    background: white;
     font-size: 125%;
     
     div.clearfix {
-        padding: 0.5em 0.5em 0.5em 0em;
+        padding-left: 25px;
     }
 }
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
-.breadcrumb a:after {
+.breadcrumb div:after {
     content: '';
     position: absolute;
     top: 0;
@@ -66,40 +78,35 @@
     background: white;
     /*stylish arrow design using box shadow*/
     box-shadow: 
-        5px -5px 0 5px #ddd;
+        5px -5px 0 5px #e7e7e7;
     border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
-.breadcrumb a:last-child:after {
+.breadcrumb div:last-child:after {
     content: none;
 }
 
 .breadcrumb.flat {
-    background: #ddd;
     padding: 0px 0px;
     border-radius: 0px;
 }
-.flat a, .flat a:after {
+.flat div {
     background: white;
     color: black;
     transition: all 0.5s;
 }
-.flat a.state-finished-true, .flat a.state-finished-true:after {
-    background: rgb(113, 188, 81);
-}
-.flat a .icon {
-    position: absolute;
+.flat div .icon {
     right: 0;
     z-index: 99;
-    top: 0;
+    padding-right: 10px;
 }
-.flat a span:last-child, .flat a span:nth-last-child(2) {
+.fa.fa-check {
+    color: rgb(113, 188, 81);
+}
+.flat div span:last-child, .flat div span:nth-last-child(2) {
     right: 15px;
 }
 .expanded-true {
     background: #e7e7e7;
     margin-bottom: 3px;
-}
-.expanded-false {
-    border-bottom: solid 3px #ddd;
 }

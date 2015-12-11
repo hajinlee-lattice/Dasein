@@ -11,19 +11,17 @@
             <a ui-sref="jobs.import.credentials"><button class="button orange-button">Import Data</button></a>
         </span>
     </div>
-    <div class="row">
+    <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
             <div class="panel-heading custom-heading">
-                <span class="col-md-3">Timestamp</span>
-                <span class="col-md-3">Job Type</span>
-                <span class="col-md-3">Status</span>
-                <span class="col-md-3">User</span>
+                <span class="columns three">Timestamp</span>
+                <span class="columns three">Job Type</span>
+                <span class="columns three">Status</span>
+                <span class="columns three">User</span>
             </div>
             <div class="jobs-table-content">
-                <div data-ng-repeat="job in jobs">
-                    <data-job-status-row job="job"></data-job-status-row>
-                </div>
-                <div data-ng-show="showEmptyJobsMessage" class="text-center">
+                <div data-job-status-row data-ng-repeat="job in jobs" job="job" statuses="statuses"></div>
+                <div data-ng-show="showEmptyJobsMessage">
                     There are no jobs to show at the moment
                 </div>
             </div>

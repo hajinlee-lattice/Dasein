@@ -9,8 +9,12 @@
     font-size: 22px;
 }
 .gray-summary-list {
-    background: #e7e7e7;
+    background: #e7e7e7 !important;
     margin-top: 20px;
+}
+.gray-summary-list h3, .gray-summary-list dl dt, .gray-summary-list dl dd {
+    color: black !important;
+    font-weight: lighter;
 }
 .summary-desc {
     clear: both;
@@ -22,29 +26,30 @@
     display: inline-block;
     overflow: hidden;
     margin-bottom: 0px;
+    text-align: center;
 }
 
-.summary-desc .breadcrumb a {
+.summary-desc .breadcrumb div {
     color: black !important;
     text-decoration: none;
     outline: none;
-    display: block;
+    display: table;
     float: left;
     font-size: 15px;
-    line-height: 60px;
     margin-top: 10px;
     position: relative;
+    padding-left: 15px
 }
 /*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
-.summary-desc .breadcrumb a:first-child {
+.summary-desc .breadcrumb div:first-child {
     padding-left: 35px;
 }
-.summary-desc .breadcrumb a:first-child:before {
+.summary-desc .breadcrumb div:first-child:before {
     left: 14px;
 }
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
-.summary-desc .breadcrumb a:after {
+.summary-desc .breadcrumb div:after {
     content: '';
     position: absolute;
     top: 0;
@@ -66,27 +71,27 @@
     border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
-.summary-desc .breadcrumb a:last-child:after {
+.summary-desc .breadcrumb div:last-child:after {
     content: none;
 }
 
 .summary-desc .breadcrumb.flat {
-    background: white;
+    background: white !important;
     padding: 0px 0px;
     border-radius: 0px
 }
-.summary-desc .flat a, .summary-desc .flat a:after {
-    background: rgb(113, 188, 81);
+.summary-desc .flat div, .summary-desc .flat div:after {
+    background: #e7e7e7;
     color: black;
     transition: all 0.5s;
 }
-.summary-desc .flat a .icon {
-    position: absolute;
+.summary-desc .flat div .icon {
     right: 0;
     z-index: 99;
     top: 0;
+    padding-right: 17px;
 }
-.summary-desc .flat a span:last-child, .summary-desc .flat a span:nth-last-child(2) {
+.summary-desc .flat div span:last-child, .summary-desc .flat div span:nth-last-child(2) {
     right: 15px;
 }
 .pd-summary.import-summary {
@@ -104,4 +109,7 @@
 }
 .completion-times span:not(:first-child) {
     margin-left: 100px;
+}
+.completion-times span:first-child {
+    padding-left: 30px
 }

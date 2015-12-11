@@ -1,21 +1,22 @@
 angular
-    .module('pd.jobs.status', [])
+    .module('pd.jobs.status', [
+    ])
     .directive('jobStatusRow', function() {
         return {
-            restrict: 'AECM',
+            restrict: 'EA',
             templateUrl: 'app/jobs/status/JobStatusRow.html',
             scope: {
                 job: '=',
+                statuses: '='
             },
             controller: ['$scope', 'JobsService', function ($scope, JobsService) {
                 $scope.showStatusLink = false;
-                $scope.jobRowExpanded = false;
+                $scope.jobRowExpanded = $scope.statuses[$scope.job.id];
                 $scope.jobCompleted = false;
                 $scope.statusLinkText;
                 $scope.statusLinkState;
                 $scope.jobId = $scope.job.id;
 
-                /** State variables to track which steps have been completed and which steps is running */
                 $scope.jobStepsRunningStates = { load_data: false, match_data: false,
                         generate_insights: false, create_model: false, create_global_target_market: false };
                 $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
@@ -33,6 +34,7 @@ angular
                 
                 $scope.expandJobStatus = function() {
                     $scope.jobRowExpanded = true;
+                    $scope.statuses[$scope.jobId] = true;
                     JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
                         if (jobStatus.success) {
                             if (jobStatus.resultObj.jobStatus == "Running") {
@@ -44,8 +46,14 @@ angular
                     });
                 };
                 
+                // need this to get the status of job that is expanded after refresh
+                if ($scope.jobRowExpanded) {
+                    $scope.expandJobStatus();
+                }
+                
                 $scope.unexpandJobStatus = function() {
                     $scope.jobRowExpanded = false;
+                    $scope.statuses[$scope.jobId] = false;
                     cancelPeriodJobStatusQuery();
                 };
                 
