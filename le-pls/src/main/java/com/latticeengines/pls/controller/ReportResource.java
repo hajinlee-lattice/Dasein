@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "report", description = "REST resource for reports")
 @RestController
 @RequestMapping("/reports")
-@PreAuthorize("hasRole('View_PLS_Reporting')")
+@PreAuthorize("hasRole('View_PLS_Reports')")
 public class ReportResource {
 
     @Autowired
@@ -29,7 +29,7 @@ public class ReportResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a report")
-    @PreAuthorize("hasRole('Edit_PLS_Reporting')")
+    @PreAuthorize("hasRole('Edit_PLS_Reports')")
     public SimpleBooleanResponse createOrUpdate(@RequestBody Report report) {
         reportService.createOrUpdateReport(report);
         return SimpleBooleanResponse.successResponse();
@@ -56,6 +56,7 @@ public class ReportResource {
     @RequestMapping(value = "/{reportName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a report by a name")
+    @PreAuthorize("hasRole('Edit_PLS_Reports')")
     public SimpleBooleanResponse deleteReportByName(@PathVariable String reportName) {
         reportService.deleteReportByName(reportName);
         return SimpleBooleanResponse.successResponse();
