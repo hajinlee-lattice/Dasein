@@ -171,6 +171,25 @@ Logo
 /* 
 Primary Sidebar Nav Menu Styling
 ==================================================== */
+.menu-header {
+  padding: 1em 0.25em 0 1.75em;
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+  a.button.icon-button {
+    float: left;
+    background: #65696f;
+    padding: 2px 9px;
+  }
+  h3 {
+    float: left;
+    color: #65696f;
+    font-size: 21px;
+    margin-left: 10px;
+  }
+}
 .menu {
   -webkit-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
   -moz-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
@@ -188,6 +207,9 @@ Primary Sidebar Nav Menu Styling
       background-color: #2d333c;
     }
   }
+  & > li > a span:first-of-type {
+    font-size: 27px;
+  }
   li.active > a {
     background-color: #2d333c;
     border-left: #ef6a30 solid 4px;
@@ -198,8 +220,11 @@ Primary Sidebar Nav Menu Styling
   .fa {
     display: inline-block;
     margin-right: 12px;
-    font-size: 20px;
+    font-size: 16px;
     color: #fff;
+    &.blue-text {
+      color: $blue-text;
+    }
   }
   .fa-circle-thin, .fa-check-circle-o {
     background-color: #222831; 
@@ -207,31 +232,39 @@ Primary Sidebar Nav Menu Styling
   &.progress-menu a, &.progress-menu li > div {    
     background-image: url("/demo/img/bkg-nav-full-piping.png");
     background-repeat: no-repeat;
-    background-position: 28px;
+    background-position: 31px;
   }
-  &.progress-menu > li:first-of-type a {
-    background-position: 28px 20px;
+  &.progress-menu li ul li a {
+    padding: 0 0.5em 0 4em;
   }
-  &.progress-menu > li:last-child a {
-    background-position: 28px -320px;
+  &.progress-menu > li:first-of-type > a {
+    background-position: 31px 20px;
+  }
+  &.progress-menu > li:last-child > a {
+    background-position: 31px -320px;
   }
   &.progress-menu li > div {
     background-image: url("/demo/img/bkg-nav-full-piping.png");
     background-repeat: no-repeat;
-    background-position: 28px;
+    background-position: 31px;
     padding-top: 10px;
     p, ul {
       margin-bottom: 10px;
     }
   }
+  &.progress-menu li:last-child > div {
+    background-image: none;
+  }
+
 }
+
 .toggle {
-  ul {
-    display: none;
+  & > ul, & > div {
+    display: none !important;
   }
   &.open {
-    ul {
-      display: block;
+    & > ul, & > div {
+      display: block !important;
     }
   }
 }

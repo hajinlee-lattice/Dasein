@@ -161,7 +161,7 @@ Lists
 		float: left;
 		clear: left;
 		text-align: left;
-		width: 160px;
+		width: 63%;
 	}
 }
 .summary-list dt:after {
@@ -172,7 +172,7 @@ Lists
 		color: #497eb8;
 	}
 	@include media(">medium") {
-		margin: 0 0 0 164px;
+		margin: 0 0 0 65%;
 		padding: 0;
 		text-align: right;
 	}
