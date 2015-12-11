@@ -19,7 +19,7 @@ alias dftests='mvn -Pfunctional -DargLine="" -DDATAFLOW_PROPDIR=conf/env/dev/ -D
 alias dfapitests='mvn -Pfunctional -DargLine="" -DDATAFLOWAPI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
 alias dfapidptests='mvn -Pdeployment -DargLine="" -DDATAFLOWAPI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
 alias dptests='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/dev/ -DDB_PROPDIR=../le-db/conf/env/dev clean dependency:copy-dependencies verify'
-alias eaitests='mvn -Pfunctional -DargLine="" -DEAI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
+alias eaitests='mvn -Pfunctional -DargLine="" -DEAI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -DPROXY_PROPDIR=../le-proxy/conf/env/dev verify'
 alias sparktests='mvn -Pfunctional -DargLine="" -DSPARKDB_PROPDIR=conf/env/dev/ clean dependency:copy-dependencies verify'
 alias schedtests='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/dev/ -Dfunctional.groups=functional.scheduler clean dependency:copy-dependencies verify'
 alias schedtests-dc='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/functional/ -Dfunctional.groups=functional.scheduler clean dependency:copy-dependencies verify'
