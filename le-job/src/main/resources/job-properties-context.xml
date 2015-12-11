@@ -33,6 +33,7 @@
                 <value>file:${SCORING_PROPDIR}/scoring.properties</value>
                 <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
+                <value>file:${PROXY_PROPDIR}/proxy.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
