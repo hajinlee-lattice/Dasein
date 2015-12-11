@@ -143,6 +143,7 @@ public class SegmentResource {
             log.info("updateSegments:" + segments);
             dataLoaderService.setSegments(CustomerSpace.parse(tenant.getId()).getTenantId(),
                     tenantConfigService.getDLRestServiceAddress(tenant.getId()), segments);
+            segmentService.synchronizeModelingAndScoring(tenant);
 
             // Models assigned to segments are considered active, those
             // otherwise are inactive.
