@@ -49,6 +49,9 @@
                 <pls.properties.path>
                     ../le-pls/conf/env/buildmachine
                 </pls.properties.path>
+                <proxy.properties.path>
+                    ../le-proxy/conf/env/buildmachine
+                </proxy.properties.path>
                 <security.properties.path>
                     ../le-security/conf/env/buildmachine
                 </security.properties.path>
@@ -88,43 +91,10 @@
                 <security.properties.path>
                     ../le-security/conf/env/devcluster
                 </security.properties.path>
+                <proxy.properties.path>
+                    ../le-proxy/conf/env/devcluster
+                </proxy.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <job.properties.path>conf/env/intcluster</job.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/intcluster
-                </dataplatform.properties.path>
-                <dataflow.properties.path>
-                    ../le-dataflow/conf/env/intcluster
-                </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/intcluster</db.properties.path>
-                <propdata.properties.path>
-                    ../le-propdata/conf/env/intcluster
-                </propdata.properties.path>
-                <score.properties.path>
-                    ../le-scoring/conf/env/intcluster
-                </score.properties.path>
-                <dellebi.properties.path>
-                    ../le-dellebi/conf/env/intcluster
-                </dellebi.properties.path>
-                <pls.properties.path>
-                    ../le-pls/conf/env/intcluster
-                </pls.properties.path>
-                <security.properties.path>
-                    ../le-security/conf/env/intcluster
-                </security.properties.path>
-                <bin.env.path>bin/env/intcluster</bin.env.path>
             </properties>
         </profile>
         <profile>
@@ -159,6 +129,9 @@
                 <security.properties.path>
                     ../le-security/conf/env/qacluster
                 </security.properties.path>
+                <proxy.properties.path>
+                    ../le-proxy/conf/env/qacluster
+                </proxy.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -194,6 +167,9 @@
                 <security.properties.path>
                     ../le-security/conf/env/prodcluster
                 </security.properties.path>
+                <proxy.properties.path>
+                    ../le-proxy/conf/env/prodcluster
+                </proxy.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -257,6 +233,9 @@
                                 </source>
                                 <source>
                                     <location>${security.properties.path}/security.properties</location>
+                                </source>
+                                <source>
+                                    <location>${proxy.properties.path}/proxy.properties</location>
                                 </source>
                             </sources>
                         </mapping>
