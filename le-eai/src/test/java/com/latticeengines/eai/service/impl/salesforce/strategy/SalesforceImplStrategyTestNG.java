@@ -56,7 +56,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     private void cleanUp() throws Exception {
-        crmCredentialZKService.removeCredentials("sfdc", customer, true);
+        cleanupCamilleAndHdfs(customer);
     }
 
     @Test(groups = "functional")

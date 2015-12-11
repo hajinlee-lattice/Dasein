@@ -31,9 +31,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
-
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -46,8 +43,6 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
@@ -127,14 +122,6 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     }
 
     protected void initZK(String customer) throws Exception {
-        BatonService baton = new BatonServiceImpl();
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
-        spaceInfo.properties = new CustomerSpaceProperties();
-        spaceInfo.properties.displayName = "";
-        spaceInfo.properties.description = "";
-        spaceInfo.featureFlags = "";
-        baton.createTenant(customer, customer, "defaultspaceId", spaceInfo);
-
         Camille camille = CamilleEnvironment.getCamille();
         Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(customer), "Eai");
