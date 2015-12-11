@@ -58,11 +58,11 @@ class SalePrismEnvironments(object):
     JAMSDBPassword=paras.get("JAMSDBPassword")
     tenantDBUser=paras.get("tenantDBUser")
     tenantDBPassword=paras.get("tenantDBPassword")
+    tenantDBUrl=host+"\\"+paras.get("tenantDBInstance")
     #configuration in Properties
     log=LogFactory.getLog("End2End",True)
     OTK=getOneTimeKey(tenantName,jdbc)
     ODBCSqlServer="{SQL SERVER}"
-    tenantDBUrl=host
     #webdriver
     driverType=paras.get("driverType")
     def __init__(self):

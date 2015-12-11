@@ -58,7 +58,7 @@ class DealPlay(object):
 				if k == "AppConfig.System.DataLoaderTenantName":
 					value=tenant
 				if k== "AppConfig.System.EnableModelingService":
-					if useDataPlatform == "FALSE":
+					if useDataPlatform == "False":
 						value="FALSE"
 					else:
 						value="TRUE"
@@ -87,7 +87,7 @@ class DealPlay(object):
 		assert response.status_code==200
 		log.info("reset cache successfully")
 	def createPlayByREST(self,needCleanUpTenantDB=SalePrismEnvironments.needCleanUpTenantDB,UseEVModel=False,playType=SalePrismEnvironments.playType):
-		if needCleanUpTenantDB:
+		if needCleanUpTenantDB == "True":
 			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')
