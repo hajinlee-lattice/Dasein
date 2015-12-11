@@ -41,6 +41,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/buildmachine</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/buildmachine</workflowapi.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -66,6 +67,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/devcluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/devcluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/devcluster</workflowapi.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -90,6 +92,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/qacluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -114,6 +117,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/prodcluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -198,6 +202,9 @@
                                 </source>
                                 <source>
                                     <location>${workflowapi.properties.path}/workflowapi.properties</location>
+                                </source>
+                                <source>
+                                    <location>${proxy.properties.path}/proxy.properties</location>
                                 </source>
                             </sources>
                         </mapping>
