@@ -1,0 +1,19 @@
+.tile {
+	border: #d0d0d0 solid 1px;
+	padding: 0.75em;
+	&:hover {
+		background: #e7e7e7;
+	}
+	label:hover, input[type=checkbox]:hover {
+		cursor: pointer;
+	}
+	.stats {
+		margin-bottom: 1em;
+	}
+	.stats dt {
+		font-size: 0.6em
+	}
+	.stats dd {
+		font-size: 1.25em;
+	}
+}
