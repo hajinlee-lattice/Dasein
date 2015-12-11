@@ -26,11 +26,17 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "View_PLS_Reporting";
         }
-    }, //
-    EDIT_PLS_REPORTING {
+    },
+    VIEW_PLS_REPORTS {
         @Override
         public String getAuthority() {
-            return "Edit_PLS_Reporting";
+            return "View_PLS_Reports";
+        }
+    }, //
+    EDIT_PLS_REPORTS {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Reports";
         }
     }, //
     VIEW_PLS_MODELS {
