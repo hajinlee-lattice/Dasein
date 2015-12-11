@@ -178,7 +178,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 null, //
                 metadataService, //
                 hadoopConfiguration, //
-                false);
+                false, //
+                null);
     }
 
     @Override
@@ -269,6 +270,22 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     public ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
             int numMappers, String javaColumnTypeMappings, String exportColumns) {
         String jobName = jobNameService.createJobName(customer, "sqoop-export");
+        return exportDataSync(table, //
+                sourceDir, //
+                creds, //
+                queue, //
+                jobName, //
+                numMappers, //
+                javaColumnTypeMappings, //
+                exportColumns, //
+                null);
+    }
+
+    @Override
+    public ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue,
+            String customer, int numMappers, String javaColumnTypeMappings, String exportColumns,
+            String optionalEnclosure) {
+        String jobName = jobNameService.createJobName(customer, "sqoop-export");
         return super.exportData(table, //
                 sourceDir, //
                 creds, //
@@ -279,7 +296,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 exportColumns, //
                 metadataService, //
                 hadoopConfiguration, //
-                true);
+                true, //
+                optionalEnclosure);
     }
 
 }

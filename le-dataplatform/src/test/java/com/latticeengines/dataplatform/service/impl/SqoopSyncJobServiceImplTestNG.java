@@ -73,17 +73,17 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     @Test(groups = "functional", enabled = true)
     public void importDataForFile() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        URL inputUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
         DbCreds creds = new DbCreds(builder);
-        
+
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Nutanix.csv", "/tmp");
 
-        String[] types = new String[] {
-                "Long", //
+        String[] types = new String[] { "Long", //
                 "String", //
                 "String", //
                 "Long", //
@@ -100,36 +100,14 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 "String", //
                 "String", //
                 "Float", //
-                "Float",//
-                "Float", //
-                "Float", //
-                "Float", //
-                "String", //
-                "Float", //
-                "String", //
-                "Float", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "String", //
-                "Float", //
-                "Float", //
-                "Float", //
-                "Float",//
-                "Float", //
-                "Float", //
-                "String", //
-                "Float", //
-                "Float", //
-                "String", //
-                "String", //
-                "Float", //
                 "Float", //
                 "Float", //
                 "Float", //
                 "Float", //
                 "String", //
+                "Float", //
+                "String", //
+                "Float", //
                 "String", //
                 "String", //
                 "String", //
@@ -137,6 +115,28 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 "String", //
                 "Float", //
                 "Float", //
+                "Float", //
+                "Float", //
+                "Float", //
+                "Float", //
+                "String", //
+                "Float", //
+                "Float", //
+                "String", //
+                "String", //
+                "Float", //
+                "Float", //
+                "Float", //
+                "Float", //
+                "Float", //
+                "String", //
+                "String", //
+                "String", //
+                "String", //
+                "String", //
+                "String", //
+                "Float", //
+                "Float", //
                 "String", //
                 "String", //
                 "String", //
@@ -212,8 +212,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 "Float", //
                 "Float", //
                 "Float", //
-                "Float"
-        };
+                "Float" };
         Properties props = new Properties();
         props.put("trimHeaders", "true");
         props.put("columnTypes", StringUtils.join(types, ","));
@@ -223,7 +222,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 creds, //
                 LedpQueueAssigner.getModelingQueueNameForSubmission(), //
                 "Nutanix", //
-                Arrays.<String>asList(new String[] { "Nutanix_EventTable_Clean" }), //
+                Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }), //
                 null, //
                 1, //
                 props);
@@ -232,14 +231,15 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile", new HdfsFilenameFilter() {
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile",
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String fileName) {
-                return fileName.endsWith(".avro");
-            }
+                    @Override
+                    public boolean accept(String fileName) {
+                        return fileName.endsWith(".avro");
+                    }
 
-        });
+                });
 
         assertEquals(files.size(), 1);
 
@@ -266,6 +266,77 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
             i++;
         }
     }
+
+    @Test(groups = "functional", enabled = true)
+    public void exportDataToSQLServerWithEnclosure() throws Exception {
+        URL inputUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        String targetTable = "STG_WARRANTY_GLOBAL";
+        String sourceDir = "/tmp/Warranty_Dell.txt";
+        String targetColumns = "ORDER_BUSINESS_UNIT_ID,LOCAL_CHANNEL,SERVICE_TAG_ID,ORDER_NUMBER,"
+                + "SERVICE_CONTRACT_ORDER_NUMBER,SERVICE_CONTRACT_START_DATE,SERVICE_CONTRACT_END_DATE,"
+                + "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM,BRAND_DESC,SERVICE_LEVEL_CODE,CUSTOMER_NUMBER,"
+                + "SERVICE_CONTRACT_CUSTOMER_NUMBER,PRODUCT_LINE_PARENT,PRODUCT_LINE_DESC,PRODUCT_LINE,"
+                + "SERVICE_CONTRACT_STATUS_DESC,SOURCE_SYSTEM_UPDATE_DATE,REGION_CODE";
+        String optionalEnclosure = "\\\"";
+
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt",
+                "/tmp");
+
+        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
+                sourceDir, //
+                getSQLServerCreds(), //
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
+                "DellEbi_Warranty", //
+                1, //
+                null, //
+                targetColumns, //
+                optionalEnclosure);
+
+        log.info(String.format("Waiting for appId %s", appId));
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void exportDataToSQLServer() throws Exception {
+        URL inputUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        String targetTable = "STG_SKU_MANUFACTURER";
+        String sourceDir = "/tmp/SKU_Mfg_Dell.txt";
+        String targetColumns = "MFG_NAME,SUBCLASS_DESC,ITM_SHRT_DESC,MFG_PART_NUM";
+
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt",
+                "/tmp");
+
+        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
+                sourceDir, //
+                getSQLServerCreds(), //
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
+                "DellEbi_SKU_Mfg", //
+                1, //
+                null, //
+                targetColumns);
+
+        log.info(String.format("Waiting for appId %s", appId));
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+    }
+
+    private DbCreds getSQLServerCreds() {
+        String targetJdbcHost = "10.51.15.145";
+        String targetJdbcPort = "1433";
+        String targetJdbcDb = "DELL_EBI_STAGE_FINAL_USE_DEV";
+        String targetJdbcUser = "hadoop";
+        String targetJdbcPassword = "h@d00p";
+        String targetJdbcType = "SQLServer";
+
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
+                .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+        DbCreds creds = new DbCreds(builder);
+        return creds;
+    }
 }
-
-

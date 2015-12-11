@@ -42,7 +42,8 @@ public class SqoopJobServiceImpl {
             String exportColumns, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
-            boolean sync) {
+            boolean sync, //
+            String optionalEnclosure) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapreduce.job.queuename=" + queue);
@@ -68,6 +69,10 @@ public class SqoopJobServiceImpl {
         if (exportColumns != null) {
             cmds.add("--columns");
             cmds.add(exportColumns);
+        }
+        if (optionalEnclosure != null) {
+            cmds.add("--optionally-enclosed-by");
+            cmds.add(optionalEnclosure);
         }
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
