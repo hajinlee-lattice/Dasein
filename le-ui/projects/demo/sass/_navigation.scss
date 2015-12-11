@@ -270,33 +270,6 @@ Primary Sidebar Nav Menu Styling
 }
 
 
-/* 
-Dropdowns
-==================================================== */
-.dropdown {
-  position: relative;
-}
-.dropdown > ul {
-  display: none;
-  background: $pearl-white;
-  text-align: left;
-  position:absolute;
-  right: 4px;
-  border: $cobalt solid 1px;
-  -webkit-box-shadow: 0px 2px 1px -2px $onyx;
-  -moz-box-shadow:    0px 2px 1px -2px $onyx;
-  box-shadow:         0px 2px 1px -2px $onyx;
-}
-.dropdown ul li a {
-  display: block;
-  padding: 4px 12px;
-  width: 150px;
-}
-.dropdown > a.active {
-  background: $palladium;
-}
-
-
 
 /* 
 Page Summary / Sub-Nav Headers
