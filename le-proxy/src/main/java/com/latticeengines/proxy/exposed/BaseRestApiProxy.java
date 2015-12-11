@@ -86,4 +86,8 @@ public abstract class BaseRestApiProxy {
     public String getMicroserviceHostPort() {
         return microserviceHostPort;
     }
+
+    public void setMicroserviceHostPort(String microserviceHostPort) {
+        this.microserviceHostPort = microserviceHostPort;
+    }
 }

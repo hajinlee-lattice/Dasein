@@ -3,13 +3,8 @@ package com.latticeengines.eai.controller;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.client.RestTemplate;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -17,11 +12,9 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 
-public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestNGBase {
-
-    @Value("${eai.test.service.url}")
-    private String url;
+public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
@@ -39,12 +32,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
     private String sandboxLoginUrl;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @BeforeClass(groups = "deployment")
-    private void setup() throws Exception {
-        url = url + "/validatecredential/customerspaces/{customerSpace}/sourcetypes/{sourceType}";
-    }
+    private ValidateCredentialProxy validateCredentialProxy;
 
     // test production
     @Test(groups = "deployment", enabled = true)
@@ -54,16 +42,12 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
         cred.setPassword(CipherUtils.encrypt(salesforcePasswd));
         cred.setSecurityToken(salesforceSecurityToken);
         cred.setUrl(productionLoginUrl);
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", "somecustomer");
-        uriVariables.put("sourceType", CrmConstants.CRM_SFDC);
-        SimpleBooleanResponse response = restTemplate.postForObject(url, cred, SimpleBooleanResponse.class,
-                uriVariables);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertTrue(response.isSuccess());
     }
 
-    // test sandbox
+    // test sandboxRestTemplate restTemplate;
     @Test(groups = "deployment", enabled = true)
     public void testValidSandboxCredential() throws Exception {
         CrmCredential cred = new CrmCredential();
@@ -71,11 +55,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
         cred.setPassword(CipherUtils.encrypt("Happy2010"));
         cred.setSecurityToken("5aGieJUACRPQ21CG3nUwn8iz");
         cred.setUrl(sandboxLoginUrl);
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", "somecustomer");
-        uriVariables.put("sourceType", CrmConstants.CRM_SFDC);
-        SimpleBooleanResponse response = restTemplate.postForObject(url, cred, SimpleBooleanResponse.class,
-                uriVariables);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertTrue(response.isSuccess());
     }
@@ -86,11 +66,7 @@ public class SourceCredentialResourceDeploymentTestNG extends EaiFunctionalTestN
         cred.setUserName(salesforceUserName);
         cred.setPassword(salesforcePasswd + "ab");
         cred.setUrl(productionLoginUrl);
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", "somecustomer");
-        uriVariables.put("sourceType", CrmConstants.CRM_SFDC);
-        SimpleBooleanResponse response = restTemplate.postForObject(url, cred, SimpleBooleanResponse.class,
-                uriVariables);
+        SimpleBooleanResponse response = validateCredentialProxy.validateCredential("somecustomer", CrmConstants.CRM_SFDC, cred);
         System.out.println(response);
         assertFalse(response.isSuccess());
     }

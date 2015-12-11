@@ -15,10 +15,10 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 
-@Component("sourceCredentialResourceHelper")
-public class SourceCredentialResourceHelper {
+@Component("validateCredentialResourceHelper")
+public class ValidateCredentialResourceHelper {
 
-    private Logger log = Logger.getLogger(SourceCredentialResourceHelper.class);
+    private Logger log = Logger.getLogger(ValidateCredentialResourceHelper.class);
 
     @Autowired
     private EaiCredentialValidationService eaiCredentialValidationService;

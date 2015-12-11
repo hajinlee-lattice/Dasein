@@ -10,22 +10,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.network.exposed.eai.ValidateCredentialInterface;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "validateCredential", description = "REST resource for importing data into Lattice")
 @RestController
 @RequestMapping("/validatecredential/customerspaces/{customerSpace}")
-public class SourceCredentialResource {
+public class ValidateCredentialResource implements ValidateCredentialInterface{
 
     @Autowired
-    private SourceCredentialResourceHelper sourceCredentialResourceHelper;
+    private ValidateCredentialResourceHelper validateCredentialResourceHelper;
 
     @RequestMapping(value = "/sourcetypes/{sourceType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create an import data job")
-    public SimpleBooleanResponse verifySourceCredential(@PathVariable String customerSpace,
+    @ApiOperation(value = "validate credential")
+    public SimpleBooleanResponse validateCredential(@PathVariable String customerSpace,
             @PathVariable String sourceType, @RequestBody CrmCredential crmCredential) {
-        return sourceCredentialResourceHelper.validateSourceCredential(customerSpace, sourceType, crmCredential);
+        return validateCredentialResourceHelper.validateSourceCredential(customerSpace, sourceType, crmCredential);
     }
 }

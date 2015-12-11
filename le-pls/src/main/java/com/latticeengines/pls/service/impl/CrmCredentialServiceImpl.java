@@ -1,8 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -10,7 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
@@ -45,8 +43,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     @Autowired
     CrmCredentialZKService crmCredentialZKService;
 
-    @Value("${pls.microservice.rest.endpoint.hostport}")
-    private String microServiceUrl;
+    @Autowired
+    ValidateCredentialProxy validateCredentialProxy;
 
     @Override
     public CrmCredential verifyCredential(String crmType, String tenantId, Boolean isProduction,
@@ -93,25 +91,19 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     @VisibleForTesting
     void validateCredentialUsingEai(String tenantId, String crmType, CrmCredential crmCredential, Boolean isProduction) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-        RestTemplate restTemplate = new RestTemplate();
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace.toString());
-        uriVariables.put("sourceType", CrmConstants.CRM_SFDC);
 
         String url = "https://login.salesforce.com";
         if (!isProduction) {
             url = url.replace("://login", "://test");
         }
-
         crmCredential.setUrl(url);
-        String password = crmCredential.getPassword();
 
+        String password = crmCredential.getPassword();
         try {
             crmCredential.setPassword(CipherUtils.encrypt(password));
+            
             ResponseDocument<?> response = SimpleBooleanResponse.emptyFailedResponse(Collections.<String> emptyList());
-            response = restTemplate.postForObject(microServiceUrl
-                    + "/eai/validatecredential/customerspaces/{customerSpace}/sourcetypes/{sourceType}", crmCredential,
-                    SimpleBooleanResponse.class, uriVariables);
+            response = validateCredentialProxy.validateCredential(customerSpace.toString(), crmType, crmCredential);
             if (!response.isSuccess()) {
                 throw new RuntimeException("Validation Failed!");
             }
@@ -189,11 +181,6 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     @Override
     public void removeCredentials(String crmType, String tenantId, Boolean isProduction) {
         crmCredentialZKService.removeCredentials(crmType, tenantId, isProduction);
-    }
-
-    @VisibleForTesting
-    void setMicroServiceUrl(String microServiceUrl) {
-        this.microServiceUrl = microServiceUrl;
     }
 
 }

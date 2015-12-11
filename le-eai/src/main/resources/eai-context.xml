@@ -29,6 +29,7 @@
             expression="com.latticeengines.eai.appmaster.service.*" />
     </context:component-scan>
 
+    <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:eai-yarn-client-context.xml" />
     <import resource="classpath:eai-import-context.xml" />
     <import resource="classpath:dataplatform-context.xml" />

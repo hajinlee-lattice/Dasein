@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.functionalframework.SourceCredentialValidationServlet;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
@@ -39,6 +40,9 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private CustomerSpace customerSpace;
 
+    @Autowired
+    private ValidateCredentialProxy validateCredentialProxy;
+
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
@@ -51,7 +55,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
         customerSpace = CustomerSpace.parse(tenantId);
 
-        ((CrmCredentialServiceImpl) crmService).setMicroServiceUrl("http://localhost:8082");
+        validateCredentialProxy.setMicroserviceHostPort("http://localhost:8082");
         httpServer = new StandaloneHttpServer();
         httpServer.init();
         httpServer.addServlet(new SourceCredentialValidationServlet(), "/eai/validatecredential/customerspaces/"
