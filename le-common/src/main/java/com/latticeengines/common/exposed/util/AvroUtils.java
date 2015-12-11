@@ -247,7 +247,7 @@ public class AvroUtils {
         case BOOLEAN:
             return "BOOLEAN";
         case BYTES:
-            return "STRING";
+            return "BINARY";
 
         default:
             throw new RuntimeException("Unknown hive type for avro type " + avroType);
@@ -282,21 +282,14 @@ public class AvroUtils {
 
     }
 
-    public static String generateHiveCreateTableStatement(String tableName, String path, Schema schema) {
-        StringBuilder sb = new StringBuilder();
-        if (tableName == null) {
-            tableName = schema.getName();
-        }
-        sb.append(String.format("CREATE TABLE %s (\n", tableName));
-        int size = schema.getFields().size();
-        int i = 1;
-        for (Field field : schema.getFields()) {
-            sb.append(String.format("  %s %s%s\n", field.name(),
-                    getHiveType(field.schema().getTypes().get(0).getType()), i == size ? ")" : ","));
-            i++;
-        }
-        sb.append("STORED AS AVRO LOCATION '" + path + "'");
-        return sb.toString();
+    public static String generateHiveCreateTableStatement(String tableName, String pathDir, Schema schema) {
+        String template = "CREATE EXTERNAL TABLE %s COMMENT \"%s\"" + //
+                          " ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'" + //
+                          " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
+                          " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
+                          " LOCATION '%s'" +
+                          " TBLPROPERTIES ('avro.schema.literal'='%s')";
+        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, schema.toString());
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
