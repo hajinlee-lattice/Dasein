@@ -165,7 +165,7 @@ public enum LedpCode {
     LEDP_18070("Default target market already exists."), //
     LEDP_18071("Report with name {0} already exists."), //
     LEDP_18072("Failed to run load group {0}, error: {1}."), //
-    
+    LEDP_18073("Failed to synchronize modeling and scoring, error: {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
