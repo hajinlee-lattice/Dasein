@@ -23,6 +23,8 @@ import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
@@ -60,6 +62,12 @@ public class HdfsUtils {
         }
     }
 
+    public static final boolean isDirectory(Configuration configuration, String path) throws Exception {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            return fs.isDirectory(new Path(path));
+        }
+    }
+
     public static final void rmdir(Configuration configuration, String dir) throws Exception {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.delete(new Path(dir), true);
@@ -78,14 +86,21 @@ public class HdfsUtils {
             }
         }
     }
-    
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath) 
-            throws Exception{
+
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
+            throws Exception {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
             }
         }
+    }
+
+    public static final void copyLocalResourceToHdfs(Configuration configuration, String resourcePath, String hdfsPath)
+            throws Exception {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource resource = resolver.getResource(resourcePath);
+        copyLocalToHdfs(configuration, resource.getFile().getAbsolutePath(), hdfsPath);
     }
 
     public static final void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)

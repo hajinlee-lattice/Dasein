@@ -62,8 +62,15 @@ public class AvroUtils {
         if (matches.size() == 0) {
             throw new RuntimeException(String.format("No such file could be found: %s", path));
         }
-        String first = matches.get(0);
-        return AvroUtils.getSchema(config, new Path(first));
+        Set<Schema> schemas = new HashSet<>();
+        for (String match : matches) {
+            schemas.add(AvroUtils.getSchema(config, new Path(match)));
+        }
+        if (schemas.size() != 1) {
+            throw new RuntimeException(String.format("All avro schemas in file glob %s must be the same", path));
+        }
+
+        return (Schema) schemas.toArray()[0];
     }
 
     public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {
@@ -151,35 +158,37 @@ public class AvroUtils {
                 fieldBuilder = fieldBuilder.prop(k, v);
             }
 
-            Type type = field.schema().getTypes().get(0).getType();
-
-            switch (type) {
-            case DOUBLE:
-                fieldAssembler = fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion().noDefault();
-                break;
-            case FLOAT:
-                fieldAssembler = fieldBuilder.type().unionOf().floatType().and().nullType().endUnion().noDefault();
-                break;
-            case INT:
-                fieldAssembler = fieldBuilder.type().unionOf().intType().and().nullType().endUnion().noDefault();
-                break;
-            case LONG:
-                fieldAssembler = fieldBuilder.type().unionOf().longType().and().nullType().endUnion().noDefault();
-                break;
-            case STRING:
-                fieldAssembler = fieldBuilder.type().unionOf().stringType().and().nullType().endUnion().noDefault();
-                break;
-            case BOOLEAN:
-                fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
-                break;
-            default:
-                break;
-            }
+            Type type = getType(field);
+            fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
 
             i++;
         }
         Schema schema = fieldAssembler.endRecord();
         return new Object[] { schema, map };
+    }
+
+    private static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,
+            FieldBuilder<Schema> fieldBuilder, Type type) {
+        switch (type) {
+        case DOUBLE:
+            return fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion().noDefault();
+        case FLOAT:
+            return fieldBuilder.type().unionOf().floatType().and().nullType().endUnion().noDefault();
+        case INT:
+            return fieldBuilder.type().unionOf().intType().and().nullType().endUnion().noDefault();
+        case LONG:
+            return fieldBuilder.type().unionOf().longType().and().nullType().endUnion().noDefault();
+        case STRING:
+            return fieldBuilder.type().unionOf().stringType().and().nullType().endUnion().noDefault();
+        case BOOLEAN:
+            return fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
+        default:
+            return fieldAssembler;
+        }
+    }
+
+    private static Type getType(Field field) {
+        return field.schema().getTypes().get(0).getType();
     }
 
     private static void setValues(GenericRecord r, Schema s, Schema combined, ModifiableRecordBuilder recordBldr,
@@ -226,7 +235,13 @@ public class AvroUtils {
         default:
             throw new RuntimeException("Unknown java type for avro type " + avroType);
         }
+    }
 
+    public static String getHiveType(String avroType) {
+        if (avroType == null) {
+            return null;
+        }
+        return getHiveType(Type.valueOf(avroType.toUpperCase()));
     }
 
     public static String getHiveType(Type avroType) {
@@ -283,13 +298,29 @@ public class AvroUtils {
     }
 
     public static String generateHiveCreateTableStatement(String tableName, String pathDir, Schema schema) {
+        Schema simplified = extractTypeInformation(schema);
+
         String template = "CREATE EXTERNAL TABLE %s COMMENT \"%s\"" + //
-                          " ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'" + //
-                          " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
-                          " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
-                          " LOCATION '%s'" +
-                          " TBLPROPERTIES ('avro.schema.literal'='%s')";
-        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, schema.toString());
+                " ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.avro.AvroSerDe'" + //
+                " STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat'" + //
+                " OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat'" + //
+                " LOCATION '%s'" + " TBLPROPERTIES ('avro.schema.literal'='%s')";
+        return String.format(template, tableName, "Auto-generated table from metadata service.", pathDir, simplified);
+    }
+
+    public static Schema extractTypeInformation(Schema schema) {
+        FieldAssembler<Schema> assembler = SchemaBuilder //
+                .record(schema.getName()) //
+                .namespace(schema.getNamespace()) //
+                .doc(schema.getDoc()) //
+                .fields();
+
+        for (Field field : schema.getFields()) {
+            FieldBuilder<Schema> fieldBuilder = assembler.name(field.name());
+            assembler = constructFieldWithType(assembler, fieldBuilder, getType(field));
+        }
+
+        return assembler.endRecord();
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {

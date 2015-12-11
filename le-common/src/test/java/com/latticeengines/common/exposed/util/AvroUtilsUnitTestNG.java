@@ -23,40 +23,38 @@ public class AvroUtilsUnitTestNG {
         Schema s1 = Schema.parse(avroFile1);
         Schema s2 = Schema.parse(avroFile2);
 
-        
         Object[] combinedSchema = AvroUtils.combineSchemas(s1, s2);
 
-        assertEquals(((Schema) combinedSchema[0]).getFields().size(), s1.getFields().size()
-                + s2.getFields().size());
-        
+        assertEquals(((Schema) combinedSchema[0]).getFields().size(), s1.getFields().size() + s2.getFields().size());
+
         String uuid = ((Schema) combinedSchema[0]).getProp("uuid");
         assertNotEquals("abc", uuid);
         String uuids = ((Schema) combinedSchema[0]).getProp("uuids");
         assertNotNull(uuids);
         assertEquals("abc,xyz", uuids);
-        
+
         combinedSchema = AvroUtils.combineSchemas(s1, ((Schema) combinedSchema[0]));
         uuids = ((Schema) combinedSchema[0]).getProp("uuids");
         assertNotNull(uuids);
         assertEquals("abc,abc,xyz", uuids);
     }
-    
+
     @SuppressWarnings("deprecation")
     @Test(groups = "unit", dataProvider = "avscFileProvider", enabled = true)
     public void generateHiveCreateTableStatement(String avscFileName) throws Exception {
-        URL url = ClassLoader.getSystemResource(String.format("com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
+        URL url = ClassLoader.getSystemResource(String.format(
+                "com/latticeengines/common/exposed/util/avroUtilsData/%s", avscFileName));
         File avscFile = new File(url.getFile());
         Schema schema = Schema.parse(avscFile);
         String hiveTableDDL = AvroUtils.generateHiveCreateTableStatement("ABC", "/tmp/Stoplist", schema);
         System.out.println(hiveTableDDL);
     }
-    
+
     @DataProvider(name = "avscFileProvider")
     public Object[][] getAvscFile() {
-        return new Object[][] { 
-          { "aps.avsc" }, //
-          { "leaccount.avsc" }, //
-          { "leaccountextensions.avsc" }
-        };
+        return new Object[][] { { "aps.avsc" }, //
+                { "leaccount.avsc" }, //
+                { "leaccountextensions.avsc" } };
     }
+
 }
