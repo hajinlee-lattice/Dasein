@@ -18,7 +18,7 @@ from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 from PlaymakerEnd2End.tools.DBHelper import DealDB
 log=SalePrismEnvironments.log
 class PlayTypes(object):
-	t_allTypes=['AnalyticList','CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','List','RuleBased','Winback']
+	t_allTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback']
 	t_AnalyticList='AnalyticList'
 	t_CSRepeatPurchase='CSRepeatPurchase'
 	t_CSFirstPurchase='CSFirstPurchase'
@@ -58,7 +58,7 @@ class DealPlay(object):
 				if k == "AppConfig.System.DataLoaderTenantName":
 					value=tenant
 				if k== "AppConfig.System.EnableModelingService":
-					if useDataPlatform == "False":
+					if str(useDataPlatform).upper() == "FALSE":
 						value="FALSE"
 					else:
 						value="TRUE"
@@ -86,8 +86,8 @@ class DealPlay(object):
 		response=requests.post(resetCacheUrl,data=resetCacheXML,headers=resetCacheHeaders,verify=False)
 		assert response.status_code==200
 		log.info("reset cache successfully")
-	def createPlayByREST(self,needCleanUpTenantDB=SalePrismEnvironments.needCleanUpTenantDB,UseEVModel=False,playType=SalePrismEnvironments.playType):
-		if needCleanUpTenantDB == "True":
+	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
+		if SalePrismEnvironments.needCleanUpTenantDB:
 			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')

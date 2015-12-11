@@ -19,14 +19,14 @@ class TestSteps(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print 'this is set up method!'
-		if not setUpEnvironments.haveSetUp:
+		if SalePrismEnvironments.needSetupEnvironment:
 			try:
 				print 'set up started'
 				setUpEnvironments.setUp()
-				setUpEnvironments.haveSetUp=True
+				SalePrismEnvironments.needSetupEnvironment=False
 			except Exception,e:
 				log.error('set up failed: '+str(e.message))
-				setUpEnvironments.haveSetUp=False
+				SalePrismEnvironments.needSetupEnvironment=True
 	def test_SimpleDataFlow(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST()#create a play
@@ -60,6 +60,8 @@ class TestSteps(unittest.TestCase):
 		numberOfRecommendations=0
 		playIdList=[]
 		playNameList=[]
+		playDealer.cleanUpPlaysAndPreleads()
+		SalePrismEnvironments.needCleanUpTenantDB=False
 		LatticeGeneratesId=None
 		#create all play and do score
 		for playType in PlayTypes.t_allTypes:
@@ -91,7 +93,7 @@ class TestSteps(unittest.TestCase):
 		for id in playIdList:
 			selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%id
 			numberOfRecommendations=numberOfRecommendations+len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
-		log.info("This play generated %s recommendations "%numberOfRecommendations)
+		log.info("This play generated %s recommendations "% str(numberOfRecommendations))
 		playLaunchTime=playDealer.launchPlay(launchAllPlays=True)#launch all play
 		time.sleep(10)
 		numberOf2800=0
@@ -111,19 +113,20 @@ class TestSteps(unittest.TestCase):
 		for name in playNameList:
 			sfdcDealer.checkRecommendations(name)
 		sfdcDealer.quit()
+		SalePrismEnvironments.needCleanUpTenantDB=True
 
 class EVModelingE2E(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print 'this is set up method!'
-		if not setUpEnvironments.haveSetUp:
+		if SalePrismEnvironments.needSetupEnvironment:
 			try:
 				print 'set up started'
 				setUpEnvironments.setUp()
-				setUpEnvironments.haveSetUp=True
+				SalePrismEnvironments.needSetupEnvironment=False
 			except Exception,e:
 				log.error('set up failed: '+str(e.message))
-				setUpEnvironments.haveSetUp=False
+				SalePrismEnvironments.needSetupEnvironment=True
 	def test_Play_Without_EVModel(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST(playType=PlayTypes.t_CSRepeatPurchase,UseEVModel=False)#create a play
@@ -144,15 +147,14 @@ class EVModelingE2E(unittest.TestCase):
 		log.info("numberOf2800 is %s"%numberOf2800)
 		assert numberOf2800==numberOfRecommendations
 		dlDealer=DataloaderDealer()
-		#sfdcDealer.configOTK()
 		assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
 		sfdcDealer=DealSFDC()
-		#sfdcDealer.configDanteServer()
 		sfdcDealer.loginSF()
 		sfdcDealer.resetSFDC()
 		sfdcDealer.syncData()
-		sfdcDealer.checkRecommendations(playName)
+		Num_page_Recommendation=sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
+		assert Num_page_Recommendation==numberOfRecommendations,log.error("number recommendation in page is not right, it should be %s, but actually is %s" %(str(numberOfRecommendations),str(Num_page_Recommendation)))
 
 
 if __name__ == '__main__':

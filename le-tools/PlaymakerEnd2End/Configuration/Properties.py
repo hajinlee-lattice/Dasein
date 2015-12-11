@@ -17,7 +17,16 @@ class SalePrismEnvironments(object):
     with open(rootPath+"\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
-    needCleanUpTenantDB=paras.get("needCleanUpTenantDB")
+    needSetupEnvironment=True
+    if str(paras.get("needSetUpEnvironment")).upper()=='FALSE':
+        needSetupEnvironment=False
+    elif str(paras.get("needSetUpEnvironment")).upper()=='TRUE':
+         needSetupEnvironment=True
+    needCleanUpTenantDB=True
+    if str(paras.get("needCleanUpTenantDB")).upper()=='FALSE':
+        needSetupEnvironment=False
+    elif str(paras.get("needCleanUpTenantDB")).upper()=='TRUE':
+         needSetupEnvironment=True
     withModelingOnDataPlatform=paras.get("withModelingOnDataPlatform")
     tenantName=paras.get('tenantName')
     host=paras.get('host')
