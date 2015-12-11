@@ -45,6 +45,7 @@ public class SalesforceImplStrategyTestNG extends EaiFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     private void setup() throws Exception {
+        cleanupCamilleAndHdfs(customer);
         initZK(customer);
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
