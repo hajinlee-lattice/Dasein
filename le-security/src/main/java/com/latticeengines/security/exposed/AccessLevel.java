@@ -5,91 +5,81 @@ import java.util.List;
 
 public enum AccessLevel {
 
-    EXTERNAL_USER(
-        Arrays.asList(
-            GrantedRight.VIEW_PLS_REPORTS,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS
-        )
-    ),
-    EXTERNAL_ADMIN(
-        Arrays.asList(
-            GrantedRight.VIEW_PLS_REPORTS,
-            GrantedRight.EDIT_PLS_REPORTS,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.EDIT_PLS_DATA,
-            GrantedRight.VIEW_PLS_USERS,
-            GrantedRight.EDIT_PLS_USERS,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.CREATE_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS
-        )
-    ),
-    INTERNAL_USER(
-        Arrays.asList(
-            GrantedRight.VIEW_PLS_REPORTS,
-            GrantedRight.EDIT_PLS_REPORTS,
-            GrantedRight.VIEW_PLS_REPORTING,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS
-        )
-    ),
-    INTERNAL_ADMIN(
-        Arrays .asList(
-            GrantedRight.VIEW_PLS_REPORTS,
-            GrantedRight.EDIT_PLS_REPORTS,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.EDIT_PLS_DATA,
-            GrantedRight.VIEW_PLS_USERS,
-            GrantedRight.EDIT_PLS_USERS,
-            GrantedRight.VIEW_PLS_CONFIGURATIONS,
-            GrantedRight.EDIT_PLS_CONFIGURATIONS,
-            GrantedRight.VIEW_PLS_REPORTING,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.EDIT_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.EDIT_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS,
-            GrantedRight.EDIT_PLS_QUOTAS
-        )
-    ),
-    SUPER_ADMIN(
-        Arrays.asList(
-            GrantedRight.VIEW_PLS_REPORTS,
-            GrantedRight.EDIT_PLS_REPORTS,
-            GrantedRight.VIEW_PLS_DATA,
-            GrantedRight.EDIT_PLS_DATA,
-            GrantedRight.VIEW_PLS_USERS,
-            GrantedRight.EDIT_PLS_USERS,
-            GrantedRight.VIEW_PLS_CONFIGURATIONS,
-            GrantedRight.EDIT_PLS_CONFIGURATIONS,
-            GrantedRight.VIEW_PLS_REPORTING,
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.EDIT_PLS_MODELS,
-            GrantedRight.CREATE_PLS_MODELS,
-            GrantedRight.VIEW_PLS_JOBS,
-            GrantedRight.EDIT_PLS_JOBS,
-            GrantedRight.VIEW_PLS_TARGETMARKETS,
-            GrantedRight.EDIT_PLS_TARGETMARKETS,
-            GrantedRight.CREATE_PLS_TARGETMARKETS,
-            GrantedRight.VIEW_PLS_QUOTAS,
-            GrantedRight.EDIT_PLS_QUOTAS,
-            GrantedRight.CREATE_PLS_QUOTAS
-        )
-    );
+    EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_QUOTAS //
+            ) //
+    ), //
+    EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
+            GrantedRight.VIEW_PLS_USERS, //
+            GrantedRight.EDIT_PLS_USERS, //
+            GrantedRight.VIEW_PLS_CONFIGURATIONS, //
+            GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.CREATE_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_QUOTAS //
+            ) //
+    ), //
+    INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_REPORTING, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_QUOTAS //
+            ) //
+    ), //
+    INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
+            GrantedRight.VIEW_PLS_USERS, //
+            GrantedRight.EDIT_PLS_USERS, //
+            GrantedRight.VIEW_PLS_CONFIGURATIONS, //
+            GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_REPORTING, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.EDIT_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.EDIT_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_QUOTAS, //
+            GrantedRight.EDIT_PLS_QUOTAS //
+            )), SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            GrantedRight.EDIT_PLS_REPORTS, //
+            GrantedRight.VIEW_PLS_DATA, //
+            GrantedRight.EDIT_PLS_DATA, //
+            GrantedRight.VIEW_PLS_USERS, //
+            GrantedRight.EDIT_PLS_USERS, //
+            GrantedRight.VIEW_PLS_CONFIGURATIONS, //
+            GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_REPORTING, //
+            GrantedRight.VIEW_PLS_MODELS, //
+            GrantedRight.EDIT_PLS_MODELS, //
+            GrantedRight.CREATE_PLS_MODELS, //
+            GrantedRight.VIEW_PLS_JOBS, //
+            GrantedRight.EDIT_PLS_JOBS, //
+            GrantedRight.VIEW_PLS_TARGETMARKETS, //
+            GrantedRight.EDIT_PLS_TARGETMARKETS, //
+            GrantedRight.CREATE_PLS_TARGETMARKETS, //
+            GrantedRight.VIEW_PLS_QUOTAS, //
+            GrantedRight.EDIT_PLS_QUOTAS, //
+            GrantedRight.CREATE_PLS_QUOTAS //
+            ) //
+    ); //
 
     private List<GrantedRight> grantedRights;
 
