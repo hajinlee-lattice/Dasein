@@ -20,4 +20,6 @@ public interface WorkflowInterface {
     Job getWorkflowExecution(String workflowId);
 
     List<Job> getWorkflowExecutionsForTenant(long tenantPid);
+
+    void stopWorkflow(String workflowId);
 }

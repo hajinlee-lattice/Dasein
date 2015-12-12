@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowAppContext;
@@ -94,6 +96,7 @@ public class WorkflowResource implements WorkflowInterface {
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a workflow execution")
+    @Override
     public Job getWorkflowExecution(@PathVariable String workflowId) {
         return workflowService.getJob(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }
@@ -101,13 +104,14 @@ public class WorkflowResource implements WorkflowInterface {
     @RequestMapping(value = "/jobs/{tenantPid}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of workflow executions for a tenant")
+    @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
         Tenant tenant = new Tenant();
         tenant.setPid(tenantPid);
         Tenant tenantWithPid = tenantEntityMgr.findByKey(tenant);
         if (tenantWithPid == null) {
             log.info("Could not find tenant with id:" + tenantPid);
-            // TODO handle this case
+            throw new LedpException(LedpCode.LEDP_28016, new String[] { String.valueOf(tenantPid) });
         }
         log.info("Looking for workflows for tenant: " + tenantWithPid.toString());
         List<WorkflowAppContext> workflowAppContexts = workflowAppContextEntityMgr
@@ -119,6 +123,14 @@ public class WorkflowResource implements WorkflowInterface {
         }
 
         return jobs;
+    }
+
+    @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Stop an executing workflow")
+    @Override
+    public void stopWorkflow(@PathVariable String workflowId) {
+        workflowService.stop(new WorkflowExecutionId(Long.valueOf(workflowId)));
     }
 
 }

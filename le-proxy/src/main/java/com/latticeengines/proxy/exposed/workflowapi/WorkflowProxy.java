@@ -53,4 +53,10 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
         return get("getWorkflowExecutionsForTenant", url, List.class);
     }
+
+    @Override
+    public void stopWorkflow(String workflowId) {
+        String url = constructUrl("/job/{workflowId}/stop", workflowId);
+        post("stopWorkflow", url, null, Void.class);
+    }
 }

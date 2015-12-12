@@ -38,7 +38,7 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
-    // @PreAuthorize("hasRole('View_PLS_Jobs')")
+    @PreAuthorize("hasRole('View_PLS_Jobs')")
     public Job find(@PathVariable String jobId) {
         return workflowProxy.getWorkflowExecution(jobId);
     }
@@ -60,11 +60,11 @@ public class JobResource {
         return jobs;
     }
 
-    @RequestMapping(value = "/{jobId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{jobId}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Cancel a job")
-    // @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    @ApiOperation(value = "Cancel a running job")
+    @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public void cancel(@PathVariable String jobId) {
-        // TODO
+        workflowProxy.stopWorkflow(jobId);
     }
 }
