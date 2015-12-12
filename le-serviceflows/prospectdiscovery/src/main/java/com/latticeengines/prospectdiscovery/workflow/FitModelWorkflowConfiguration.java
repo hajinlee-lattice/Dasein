@@ -14,6 +14,7 @@ import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfigurati
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -29,6 +30,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private ChooseModelStepConfiguration chooseModel = new ChooseModelStepConfiguration();
+        private ScoreStepConfiguration score = new ScoreStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             fitModel.setCustomerSpace(customerSpace);
@@ -105,13 +107,34 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             chooseModel.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
-
+        
+        public Builder uniqueKeyColumn(String uniqueKeyColumn) {
+            score.setUniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+        
+        public Builder sourceDir(String sourceDir) {
+            score.setSourceDir(sourceDir);
+            return this;
+        }
+        
+        public Builder modelId(String modelId) {
+            score.setModelId(modelId);
+            return this;
+        }
+        
+        public Builder registerScoredTable(Boolean registerScoredTable) {
+            score.setRegisterScoredTable(registerScoredTable);
+            return this;
+        }
+        
         public FitModelWorkflowConfiguration build() {
             importData.microserviceStepConfiguration(microservice);
             dataFlow.microserviceStepConfiguration(microservice);
             match.microserviceStepConfiguration(microservice);
             model.microserviceStepConfiguration(microservice);
             chooseModel.microserviceStepConfiguration(microservice);
+            score.microserviceStepConfiguration(microservice);
 
             fitModel.add(microservice);
             fitModel.add(importData);
@@ -119,6 +142,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             fitModel.add(match);
             fitModel.add(model);
             fitModel.add(chooseModel);
+            fitModel.add(score);
 
             return fitModel;
         }

@@ -12,6 +12,7 @@ import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
 import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
+import com.latticeengines.serviceflows.workflow.scoring.Score;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -36,6 +37,9 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired
     private ChooseModel chooseModel;
+    
+    @Autowired
+    private Score score;
 
     @Bean
     public Job fitModelWorkflowJob() throws Exception {
@@ -50,6 +54,7 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(sample) //
                 .next(profileAndModel) //
                 .next(chooseModel) //
+                .next(score) //
                 .build();
     }
 
