@@ -35,7 +35,7 @@ public class ScoringMapperValidateUtil {
         long totalRecordCount = modelAndLeadInfo.getTotalRecordCount();
         if (totalRecordCount == 0) {
             log.error("The mapper gets zero record.");
-            throw new LedpException(LedpCode.LEDP_20015);
+            return;
         }
         long totalRecordTransformed = 0;
         Map<String, ModelInfo> modelInfoMap = modelAndLeadInfo.getModelInfoMap();

@@ -21,7 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "scoring", description = "REST resource for scoring service by Lattice")
 @RestController
-@RequestMapping("/scoringJobs")
+@RequestMapping("/scoringjobs")
 public class ScoringResource {
 
     @Autowired

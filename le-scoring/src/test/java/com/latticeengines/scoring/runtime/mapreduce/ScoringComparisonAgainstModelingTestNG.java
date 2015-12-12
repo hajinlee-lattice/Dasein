@@ -208,7 +208,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         scoringJdbcTemplate.execute(String.format("Update [%s] Set [%s] = '%s'", inputLeadsTable, ScoringDaemonService.MODEL_GUID, modelId));
         scoringDataPath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/data/1.avro";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoringLeadFile.getAbsolutePath(), scoringDataPath);
-        // deletet he temp file
+        // delete the temp file
         scoringLeadFile.delete();
     }
 

@@ -45,7 +45,10 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
             long transformStartTime = System.currentTimeMillis();
             ModelAndRecordInfo modelAndRecordInfo = ScoringMapperTransformUtil.prepareRecordsForScoring(context,
                     localizedFiles, recordFileThreshold);
-
+            
+            if (modelAndRecordInfo.getTotalRecordCount() == 0) {
+                return;
+            }
             long transformEndTime = System.currentTimeMillis();
             long transformationTotalTime = transformEndTime - transformStartTime;
             log.info("The transformation takes " + (transformationTotalTime * 1.66667e-5) + " mins");
