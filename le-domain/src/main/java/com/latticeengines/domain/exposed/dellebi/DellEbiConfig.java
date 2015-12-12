@@ -38,13 +38,13 @@ public class DellEbiConfig implements HasPid, Serializable {
     @Column(name = "TargetColumns", nullable = false)
     private String targetColumns;
 
-//    @Column(name = "TargetTable", nullable = false)
+    @Column(name = "TargetTable", nullable = false)
     private String targetTable;
 
     @Column(name = "StartDate", nullable = true)
     private Date startDate;
 
-//    @Column(name = "IsDeleted", nullable = true)
+    @Column(name = "IsDeleted", nullable = true)
     private Boolean isDeleted;
 
     @Override
