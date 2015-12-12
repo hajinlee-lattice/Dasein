@@ -96,14 +96,14 @@ public class DailyFlow {
             String workOutDir = dellEbiFlowService.getOutputDir(context);
             hadoopfilesystemoperations.cleanFolder(workOutDir);
             flowConnector.connect(flow).complete();
-            log.info("Cascading finished to process quote file! type=" + flow.getName());
+            log.info("Cascading finished to process DellEbi file! type=" + flow.getName());
 
         } catch (PlannerException e) {
             log.error("Cascading failed!", e);
             mailSender.sendEmail(mailReceiveList,
                     "Dell EBI daily refresh just failed! file=" + fileName,
                     "check " + dellebiEnv + " environment. error=" + e);
-            dellEbiFlowService.registerFailedFile(context);
+            dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
 
@@ -112,7 +112,7 @@ public class DailyFlow {
             mailSender.sendEmail(mailReceiveList,
                     "Dell EBI daily refresh just failed! file=" + fileName,
                     "check " + dellebiEnv + " environment. error=" + e);
-            dellEbiFlowService.registerFailedFile(context);
+            dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
         }

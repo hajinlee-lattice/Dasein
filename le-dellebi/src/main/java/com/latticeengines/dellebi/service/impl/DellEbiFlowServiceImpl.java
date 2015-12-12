@@ -3,13 +3,16 @@ package com.latticeengines.dellebi.service.impl;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
+import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
@@ -22,6 +25,12 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Autowired
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
+
+    @Value("${dellebi.output.table.sample}")
+    private String targetTable;
+
+    @Autowired
+    private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     @Override
     public DataFlowContext getFile() {
@@ -93,6 +102,16 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     @Override
     public boolean deleteFile(DataFlowContext context) {
         String zipFileName = context.getProperty(ZIP_FILE_NAME, String.class);
+        Boolean isDeleted;
+        String fileType;
+
+        fileType = getFileType(context).getType();
+
+        isDeleted = dellEbiConfigEntityMgr.getIsDeleted(fileType);
+
+        if (!isDeleted || isDeleted == false)
+            return true;
+
         if (isSmb(context)) {
             return smbFileFlowService.deleteFile(zipFileName);
         }
@@ -100,17 +119,23 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     }
 
     @Override
-    public void registerFailedFile(DataFlowContext context) {
+    public void registerFailedFile(DataFlowContext context, String err) {
         String zipFileName = context.getProperty(ZIP_FILE_NAME, String.class);
         if (isSmb(context)) {
             smbFileFlowService.registerFailedFile(zipFileName);
         }
         localFileFlowService.registerFailedFile(zipFileName);
+
+        DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(LOG_ENTRY,
+                DellEbiExecutionLog.class);
+        dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
     }
 
     @Override
     public boolean runStoredProcedure(DataFlowContext context) {
-        if (isSmb(context)) {
+
+        String type = context.getProperty(FILE_TYPE, String.class);
+        if (isSmb(context) && type.equals(FileType.QUOTE.getType())) {
             return true;
         }
         return false;
@@ -129,5 +154,15 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         String fileType = context.getProperty(FILE_TYPE, String.class);
 
         return dellEbiConfigEntityMgr.getTargetColumns(fileType);
+    }
+
+    @Override
+    public String getTargetTable(DataFlowContext context) {
+        String fileType = context.getProperty(FILE_TYPE, String.class);
+
+        if (fileType.equals(FileType.QUOTE.getType())) {
+            return targetTable;
+        }
+        return dellEbiConfigEntityMgr.getTargetTable(fileType);
     }
 }

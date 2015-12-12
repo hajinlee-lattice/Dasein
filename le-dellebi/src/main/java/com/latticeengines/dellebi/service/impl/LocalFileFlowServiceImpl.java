@@ -28,6 +28,11 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     @Value("${dellebi.local.datatarget.dbname}")
     private String localTargetDB;
 
+    @Value("${dellebi.datatarget.stagefinal.dbname}")
+    private String stageFinalTargetDB;
+
+    private DataFlowContext context;
+
     public File getScanedFile() {
 
         try {
@@ -44,13 +49,13 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             for (File zipFile : files) {
                 if (isValidFile(zipFile)) {
                     String zipFileName = zipFile.getName();
-                    log.info("Found one new file, name=" + zipFileName);
+                    log.info("Found one new local file, name=" + zipFileName);
 
                     return zipFile;
                 }
             }
         } catch (Exception ex) {
-            log.warn("Failed to get Smb file! error=" + ex.getMessage());
+            log.warn("Failed to get local file! error=" + ex.getMessage());
         }
 
         return null;
@@ -59,7 +64,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     @Override
     public DataFlowContext getContext() {
 
-        DataFlowContext context = new DataFlowContext();
+        context = new DataFlowContext();
 
         File scanedFile = getScanedFile();
 
@@ -67,7 +72,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             String txtFileName = null;
 
             String zipFileName = scanedFile.getName();
-            String fileType = getFileType(zipFileName).toString();
+            String fileType = getFileType(zipFileName).getType();
 
             DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
 
@@ -83,14 +88,14 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
                 context.setProperty(DellEbiFlowService.FILE_SOURCE,
-                        DellEbiFlowService.FILE_SOURCE_SMB);
+                        DellEbiFlowService.FILE_SOURCE_LOCAL);
                 context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
 
                 return context;
 
             } catch (Exception ex) {
                 ex.printStackTrace();
-                log.warn("Failed to get Smb file! error=" + ex.getMessage());
+                log.warn("Failed to get local file! error=" + ex.getMessage());
                 dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
             }
         }
@@ -106,7 +111,11 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
     @Override
     public String getTargetDB() {
-        return localTargetDB;
+        String type = context.getProperty(DellEbiFlowService.FILE_TYPE, String.class);
+        if (type.equals(FileType.QUOTE.getType()))
+            return localTargetDB;
+        else
+            return stageFinalTargetDB;
     }
 
     protected boolean isValidFile(File file) {
@@ -150,7 +159,10 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
         String fileName = file.getName();
         Long dateLong1, dateLong2;
         FileType type = getFileType(fileName);
-        String typeName = type.toString();
+        if (type == null)
+            return false;
+
+        String typeName = type.getType();
 
         Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
 

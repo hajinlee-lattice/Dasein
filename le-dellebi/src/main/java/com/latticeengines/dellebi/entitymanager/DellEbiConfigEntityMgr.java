@@ -25,4 +25,8 @@ public interface DellEbiConfigEntityMgr {
 
     Date getStartDate(String type);
 
+    String getTargetTable(String type);
+
+    Boolean getIsDeleted(String type);
+
 }

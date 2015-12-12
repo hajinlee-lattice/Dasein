@@ -118,4 +118,28 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
 
         return config.getStartDate();
     }
+
+    @Override
+    public String getTargetTable(String type) {
+
+        if (type == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        DellEbiConfig config = getConfigByType(type);
+
+        return config.getTargetTable();
+    }
+
+    @Override
+    public Boolean getIsDeleted(String type) {
+
+        if (type == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        DellEbiConfig config = getConfigByType(type);
+
+        return config.getIsDeleted();
+    }
 }

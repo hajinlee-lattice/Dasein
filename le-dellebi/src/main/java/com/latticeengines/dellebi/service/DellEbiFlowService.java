@@ -22,8 +22,6 @@ public interface DellEbiFlowService {
 
     String getErrorOutputDir(DataFlowContext context);
 
-    void registerFailedFile(DataFlowContext context);
-
     boolean deleteFile(DataFlowContext context);
 
     FileType getFileType(DataFlowContext context);
@@ -37,5 +35,9 @@ public interface DellEbiFlowService {
     String getTargetColumns(DataFlowContext context);
 
     boolean runStoredProcedure(DataFlowContext context);
+
+    String getTargetTable(DataFlowContext context);
+
+    void registerFailedFile(DataFlowContext context, String err);
 
 }

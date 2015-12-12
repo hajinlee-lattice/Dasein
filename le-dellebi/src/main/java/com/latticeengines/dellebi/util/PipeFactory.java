@@ -13,13 +13,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunction;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunctionReplace;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunction;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunctionReplace;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubQuoteFunction;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubShipAddrFunction;
-import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubWarFunction;
+import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubGeneralFunction;
 
 public class PipeFactory {
 
@@ -30,20 +24,9 @@ public class PipeFactory {
         Pipe docPipe = null;
 
         switch (pipeName) {
-        case "order_detail_Pipe":
-            docPipe = createOdrDetialPipe(fields);
-            break;
-        case "order_summary_Pipe":
-            docPipe = createOdrSumPipe(fields);
-            break;
-        case "ship_to_addr_lattice_Pipe":
-            docPipe = createShipAddrPipe(fields);
-            break;
-        case "warranty_global_Pipe":
-            docPipe = createWarrantyPipe(fields);
-            break;
-        case "quote_trans_Pipe":
-            docPipe = createQuoteTransPipe(fields, exportedFields);
+
+        case "generic_item_Pipe":
+            docPipe = createGenericItemPipe(fields, exportedFields);
             break;
         default:
             log.error(pipeName + " is not registed!");
@@ -53,121 +36,28 @@ public class PipeFactory {
 
     }
 
-    private static Pipe createWarrantyPipe(String fields) {
-        Pipe docPipe;
-        Fields scrubArguments = new Fields("#ORDER_BUSINESS_UNIT_ID");
+    private static Pipe createGenericItemPipe(String fields, String exportedFields) {
 
+        log.info("Input fields: " + fields);
+        log.info("Exported fields: " + exportedFields);
+
+        Pipe docPipe;
         List<String> items = new ArrayList<String>(Arrays.asList(fields.split(",")));
+        int sizeOfFields = items.size();
+
+        Fields scrubArguments = new Fields(items.get(0));
+        items.remove(0);
+
         for (String s : items) {
             Fields scrubArgument = new Fields(s);
             scrubArguments = scrubArguments.append(scrubArgument);
         }
-
-        // There're 2 new fields should be added to output file:
-        // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
-                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
-
-        docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubWarFunction(outputScrubArguments),
-                Fields.RESULTS);
-        return docPipe;
-    }
-
-    private static Pipe createShipAddrPipe(String fields) {
-        Pipe docPipe;
-        Fields scrubArguments = new Fields("#ORD_NBR");
-
-        List<String> items = new ArrayList<String>(Arrays.asList(fields.split(",")));
-        for (String s : items) {
-            Fields scrubArgument = new Fields(s);
-            scrubArguments = scrubArguments.append(scrubArgument);
-        }
-
-        // There're 2 new fields should be added to output file:
-        // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
-                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
-
-        docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubShipAddrFunction(outputScrubArguments),
-                Fields.RESULTS);
-        return docPipe;
-    }
-
-    private static Pipe createOdrSumPipe(String fields) {
-        Pipe docPipe;
-        Fields scrubArguments = new Fields("#ORD_NBR");
-
-        List<String> items = new ArrayList<String>(Arrays.asList(fields.split(",")));
-        for (String s : items) {
-            Fields scrubArgument = new Fields(s);
-            scrubArguments = scrubArguments.append(scrubArgument);
-        }
-
-        // There're 3 new fields should be added to output file:
-        // PROCESSED_FLG is 0; STAGE_DT is current date;FileName is input file
-        // name.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
-                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
-
-        docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrSumFunction(outputScrubArguments),
-                Fields.RESULTS);
-
-        Fields replaceScrubArgument = new Fields("SRC_LCL_CHNL_CD", "REF_LCL_CHNL_CD", "CNCL_DT",
-                "INV_DT", "ORD_DT", "ORD_STAT_DT", "SHIP_DT", "EXCH_DT", "SHIP_BY_DT",
-                "PRF_OF_DLVR_DT", "ESTD_BUS_DLVR_DT");
-
-        docPipe = new Each(docPipe, replaceScrubArgument,
-                new ScrubOdrSumFunctionReplace(replaceScrubArgument), Fields.REPLACE);
-        return docPipe;
-    }
-
-    private static Pipe createOdrDetialPipe(String fields) {
-        Pipe docPipe;
-        Fields scrubArguments = new Fields("#ORD_NUM");
-
-        List<String> items = new ArrayList<String>(Arrays.asList(fields.split(",")));
-        for (String s : items) {
-            Fields scrubArgument = new Fields(s);
-            scrubArguments = scrubArguments.append(scrubArgument);
-        }
-
-        // There're 2 new fields should be added to output file:
-        // PROCESSED_FLG is 0; STAGE_DT is current date.
-        Fields outputScrubArguments = scrubArguments.append(new Fields("PROCESSED_FLG"))
-                .append(new Fields("STAGE_DT")).append(new Fields("FileName"));
-
-        docPipe = new Pipe("copy");
-        docPipe = new Each(docPipe, scrubArguments, new ScrubOdrDtlFunction(outputScrubArguments),
-                Fields.RESULTS);
-
-        Fields replaceScrubArgument = new Fields("SVC_TAG_ID", "SRC_BU_ID");
-
-        docPipe = new Each(docPipe, replaceScrubArgument,
-                new ScrubOdrDtlFunctionReplace(replaceScrubArgument), Fields.REPLACE);
-        return docPipe;
-    }
-
-    private static Pipe createQuoteTransPipe(String fields, String exportedQuoteFields) {
-
-        log.info("Create quote trans pipe!");
-        log.info("Quote fields: " + fields);
-
-        Pipe docPipe;
-        Fields scrubArguments = new Fields("#QTE_NUM_VAL");
-
-        List<String> items = new ArrayList<String>(Arrays.asList(fields.split(",")));
-        for (String s : items) {
-            Fields scrubArgument = new Fields(s);
-            scrubArguments = scrubArguments.append(scrubArgument);
-        }
-
-        Fields outputScrubArguments = new Fields("#QTE_NUM_VAL");
 
         List<String> exportedItems = new ArrayList<String>(
-                Arrays.asList(exportedQuoteFields.split(",")));
+                Arrays.asList(exportedFields.split(",")));
+
+        Fields outputScrubArguments = new Fields(exportedItems.get(0));
+        exportedItems.remove(0);
 
         for (String s : exportedItems) {
             Fields outputScrubrgument = new Fields(s);
@@ -175,9 +65,9 @@ public class PipeFactory {
         }
 
         docPipe = new Pipe("copy");
-        AssertSizeEquals equals = new AssertSizeEquals(111);
+        AssertSizeEquals equals = new AssertSizeEquals(sizeOfFields);
         docPipe = new Each(docPipe, AssertionLevel.VALID, equals);
-        docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments),
+        docPipe = new Each(docPipe, scrubArguments, new ScrubGeneralFunction(outputScrubArguments),
                 Fields.RESULTS);
         return docPipe;
     }

@@ -32,15 +32,21 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     private String smbInboxPath;
 
     @Value("${dellebi.datatarget.dbname}")
-    private String targetDB;
+    private String quoteTargetDB;
+
+    @Value("${dellebi.datatarget.stagefinal.dbname}")
+    private String stageFinalTargetDB;
+
+    private DataFlowContext context;
 
     public SmbFile getScanedFile() {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
+        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords","false");
         try {
             SmbFile smbDir = new SmbFile(smbInboxPath + "/", auth);
 
-            SmbFile[] files = smbDir.listFiles("tgt_*");
+            SmbFile[] files = smbDir.listFiles("*.zip");
 
             for (SmbFile zipFile : files) {
 
@@ -63,7 +69,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     @Override
     public DataFlowContext getContext() {
 
-        DataFlowContext context = new DataFlowContext();
+        context = new DataFlowContext();
 
         SmbFile scanedFile = getScanedFile();
 
@@ -71,7 +77,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             String txtFileName = null;
 
             String zipFileName = scanedFile.getName();
-            String fileType = getFileType(zipFileName).toString();
+            String fileType = getFileType(zipFileName).getType();
 
             DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
 
@@ -123,7 +129,12 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
     @Override
     public String getTargetDB() {
-        return targetDB;
+
+        String type = context.getProperty(DellEbiFlowService.FILE_TYPE, String.class);
+        if (type.equals(FileType.QUOTE.getType()))
+            return quoteTargetDB;
+        else
+            return stageFinalTargetDB;
     }
 
     protected boolean isValidFile(SmbFile file) {
@@ -135,9 +146,6 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
                 return false;
             }
 
-            if (!fileName.endsWith(".zip")) {
-                return false;
-            }
             if (isFailedFile(fileName)) {
                 return false;
             }
@@ -157,7 +165,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             }
 
         } catch (SmbException e) {
-            log.error("Can not delete smbFile, name=" + fileName, e);
+            log.error("Can not validate smbFile, name=" + fileName, e);
             return false;
         }
         return true;
@@ -167,7 +175,9 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
         String fileName = file.getName();
         Long dateLong1, dateLong2;
         FileType type = getFileType(fileName);
-        String typeName = type.toString();
+        if (type == null)
+            return false;
+        String typeName = type.getType();
 
         Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
 

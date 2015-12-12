@@ -80,7 +80,6 @@ public class ExportAndReportService {
 
     public boolean export(DataFlowContext context) {
 
-        String targetTable = targetRawTable;
         String sourceDir = dellEbiFlowService.getOutputDir(null);
         String successFile = dellEbiFlowService.getOutputDir(null) + "/_SUCCESS";
         String sqlStr = "exec " + quote_sp;
@@ -102,6 +101,8 @@ public class ExportAndReportService {
 
         log.info("Start export from HDFS files " + sourceDir);
 
+        String targetTable = dellEbiFlowService.getTargetTable(context);
+
         String targetJdbcDb = dellEbiFlowService.getTargetDB(context);
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
@@ -111,15 +112,15 @@ public class ExportAndReportService {
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
         targetColumns = dellEbiFlowService.getTargetColumns(context);
+        String optionalEnclosure = "\\\"";
 
         try {
             sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8,
-                    null, targetColumns);
+                    null, targetColumns, optionalEnclosure);
 
         } catch (Exception e) {
             errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg="
                     + e.getMessage();
-            dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, errorMsg);
             log.error("Export files " + sourceDir + " to SQL server failed", e);
         }
 
@@ -134,15 +135,10 @@ public class ExportAndReportService {
                     log.info("Begin to execute the Store Procedure= " + quote_sp);
 
                     dellEbiTargetJDBCTemplate.execute(sqlStr);
-                    dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Completed.getStatus());
-                    dellEbiExecutionLog.setEndDate(new Date());
-                    dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
-
                     log.info("Finished executing the Store Procedure= " + quote_sp);
                 }
             } catch (Exception e) {
                 errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
-                dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, errorMsg);
                 log.error(errorMsg, e);
             }
         }
@@ -158,6 +154,10 @@ public class ExportAndReportService {
                     if (result) {
                         report(context, "Dell EBI daily refresh (export) succeeded!", fileName,
                                 targetJdbcDb);
+                        dellEbiExecutionLog
+                                .setStatus(DellEbiExecutionLogStatus.Completed.getStatus());
+                        dellEbiExecutionLog.setEndDate(new Date());
+                        dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
                         return true;
                     } else {
                         errorMsg = "Can not delete smbFile=" + fileName;
@@ -175,7 +175,7 @@ public class ExportAndReportService {
         if (errorMsg != null) {
             report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg,
                     fileName, targetJdbcDb);
-            dellEbiFlowService.registerFailedFile(context);
+            dellEbiFlowService.registerFailedFile(context, errorMsg);
         }
         return false;
     }

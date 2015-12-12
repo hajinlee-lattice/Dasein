@@ -67,7 +67,27 @@ public abstract class BaseFileFlowService implements FileFlowService {
         }
 
         if (zipFileName.startsWith("tgt_warranty_global")) {
-            return FileType.WARRANTE;
+            return FileType.WARRANTY;
+        }
+
+        if (zipFileName.startsWith("tgt_lattice_mfg_ext")) {
+            return FileType.SKU_MANUFACTURER;
+        }
+
+        if (zipFileName.startsWith("tgt_itm_cls_code")) {
+            return FileType.SKU_ITM_CLS_CODE;
+        }
+
+        if (zipFileName.startsWith("tgt_all_chnl")) {
+            return FileType.CHANNEL;
+        }
+
+        if (zipFileName.startsWith("global_sku_lookup")) {
+            return FileType.SKU_GLOBAL;
+        }
+
+        if (zipFileName.startsWith("fiscal_day_calendar")) {
+            return FileType.CALENDAR;
         }
         return null;
     }
@@ -147,16 +167,15 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
         FileType type = getFileType(zipFileName);
         String typeName = type.toString();
-        String quoteHeaders = dellEbiConfigEntityMgr.getHeaders(typeName);
+        String headers = dellEbiConfigEntityMgr.getHeaders(typeName);
         while (entry != null) {
             txtFileName = entry.getName();
             String txtFilePath = txtDir + "/" + txtFileName;
             if (!entry.isDirectory()) {
                 FSDataOutputStream os = fs.create(new Path(txtFilePath));
                 try {
-                    if (zipFileName.startsWith("tgt_quote_trans_global")
-                            && !zipFileName.startsWith("tgt_quote_trans_global_1_")) {
-                        StreamUtils.copy((quoteHeaders + "\n").getBytes(), os);
+                    if (isNeededAddHeader(zipFileName)) {
+                        StreamUtils.copy((headers + "\n").getBytes(), os);
                     }
                     StreamUtils.copy(zipIn, os);
                 } finally {
@@ -171,6 +190,16 @@ public abstract class BaseFileFlowService implements FileFlowService {
         }
         zipIn.close();
         return txtFileName;
+    }
+
+    private Boolean isNeededAddHeader(String fileName) {
+
+        if (!fileName.contains("_1_"))
+            return true;
+        if (fileName.contains("global_sku_lookup"))
+            return true;
+
+        return false;
     }
 
     @Override

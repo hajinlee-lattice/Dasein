@@ -46,16 +46,13 @@ public class FlowDefinition {
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
 
-    @Value("${dellebi.ordersummaryfields}")
-    private String orderSummaryFields;
     @Value("${dellebi.orderdetailfields}")
     private String orderDetailFields;
     @Value("${dellebi.shiptoaddrfields}")
     private String shipToAddrFields;
     @Value("${dellebi.warrantyfields}")
     private String warrantyFields;
-    @Value("${dellebi.exportedordersummaryfields}")
-    private String exportedOrderSummaryFields;
+
     @Value("${dellebi.exportedorderdetailfields}")
     private String exportedOrderDetailFields;
     @Value("${dellebi.exportedshiptoaddrfields}")
@@ -77,108 +74,55 @@ public class FlowDefinition {
         return null;
     }
 
-    @SuppressWarnings("rawtypes")
     @Bean
     public FlowDef getOrderSumDailyFlow() {
-
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
-                dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
-                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
-
-        Pipe copyFilePipe = new Pipe("copy");
-        Pipe filePipe = null;
-        try {
-            filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields,
-                    exportedOrderSummaryFields);
-        } catch (Exception e) {
-            log.error("Failed to get order summary pipe!", e);
-        }
-
-        FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
-                .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName(FileType.ORDER_SUMMARY.getType());
-
-        return flowDef_fileType;
+        return getGenericItemDailyFlow(FileType.ORDER_SUMMARY.getType());
     }
 
-    @SuppressWarnings("rawtypes")
     @Bean
     public FlowDef getOrderDetailDailyFlow() {
-
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
-                dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
-                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
-
-        Pipe copyFilePipe = new Pipe("copy");
-        Pipe filePipe = null;
-        try {
-            filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields,
-                    exportedOrderDetailFields);
-        } catch (Exception e) {
-            log.error("Failed to get order detail pipe!", e);
-        }
-
-        FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
-                .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName(FileType.ORDER_DETAIL.getType());
-        return flowDef_fileType;
+        return getGenericItemDailyFlow(FileType.ORDER_DETAIL.getType());
     }
 
-    @SuppressWarnings("rawtypes")
-    @Bean
-    public FlowDef getShipDailyFlow() {
-
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
-                dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
-                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
-
-        Pipe copyFilePipe = new Pipe("copy");
-        Pipe filePipe = null;
-        try {
-            filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields,
-                    exportedShipToAddrFields);
-        } catch (Exception e) {
-            log.error("Failed to get ship to addr pipe!", e);
-        }
-
-        FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
-                .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName(FileType.SHIP.getType());
-        return flowDef_fileType;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Bean
-    public FlowDef getWarrantyDailyFlow() {
-
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
-                dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(true, ","),
-                dellEbiFlowService.getOutputDir(null), SinkMode.UPDATE);
-
-        Pipe copyFilePipe = new Pipe("copy");
-        Pipe filePipe = null;
-        try {
-            filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields,
-                    exportedWarrantyFields);
-        } catch (Exception e) {
-            log.error("Failed to get ship to addr pipe!", e);
-        }
-
-        FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
-                .addTailSink(filePipe, outTapFile);
-        flowDef_fileType.setName(FileType.WARRANTE.getType());
-        return flowDef_fileType;
-    }
-
-    @SuppressWarnings("rawtypes")
     @Bean
     public FlowDef getQuoteDailyFlow() {
+        return getGenericItemDailyFlow(FileType.QUOTE.getType());
+    }
 
-        log.info("Initial quote daily flow definition!");
+    @Bean
+    public FlowDef getSkuItemClassDailyFlow() {
+        return getGenericItemDailyFlow(FileType.SKU_ITM_CLS_CODE.getType());
+    }
+
+    @Bean
+    public FlowDef getSkuMfgDailyFlow() {
+        return getGenericItemDailyFlow(FileType.SKU_MANUFACTURER.getType());
+    }
+
+    @Bean
+    public FlowDef getSkuGlobalDailyFlow() {
+        return getGenericItemDailyFlow(FileType.SKU_GLOBAL.getType());
+    }
+
+    @Bean
+    public FlowDef getWarrantyDailyFlow() {
+        return getGenericItemDailyFlow(FileType.WARRANTY.getType());
+    }
+
+    @Bean
+    public FlowDef getCalendarDailyFlow() {
+        return getGenericItemDailyFlow(FileType.CALENDAR.getType());
+    }
+
+    @Bean
+    public FlowDef getChannelDailyFlow() {
+        return getGenericItemDailyFlow(FileType.CHANNEL.getType());
+    }
+
+    @SuppressWarnings("rawtypes")
+    public FlowDef getGenericItemDailyFlow(String type) {
+
+        log.info("Initial " + type + " flow definition!");
 
         Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
                 dellEbiFlowService.getTxtDir(null));
@@ -190,21 +134,20 @@ public class FlowDefinition {
         Pipe copyFilePipe = new Pipe("copy");
         Pipe filePipe = null;
 
-        String quoteFields = dellEbiConfigEntityMgr
-                .getInputFields(DellEbiConfigEntityMgr.DellEbi_Quote);
-        String exportedQuoteFields = dellEbiConfigEntityMgr
-                .getOutputFields(DellEbiConfigEntityMgr.DellEbi_Quote);
+        String inputFields = dellEbiConfigEntityMgr.getInputFields(type);
+        String exportedFields = dellEbiConfigEntityMgr.getOutputFields(type);
 
         try {
-            filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields, exportedQuoteFields);
+            filePipe = PipeFactory.getPipe("generic_item_Pipe", inputFields, exportedFields);
         } catch (Exception e) {
-            log.error("Failed to get quote data pipe!", e);
+            log.error("Failed to get " + type + "  pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
                 .addTailSink(filePipe, outTapFile);
         flowDef_fileType.addTrap(filePipe, failedRowsTapFile);
-        flowDef_fileType.setName(FileType.QUOTE.getType());
+        flowDef_fileType.setName(type);
+
         return flowDef_fileType;
     }
 }

@@ -15,15 +15,21 @@
        http://camel.apache.org/schema/spring/camel-spring.xsd">
 
 
+
     <bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow"
         depends-on="initialConfigs">
         <constructor-arg>
             <util:list list-class="java.util.ArrayList">
                 <ref bean="getOrderSumDailyFlow" />
                 <ref bean="getOrderDetailDailyFlow" />
-                <ref bean="getShipDailyFlow" />
                 <ref bean="getWarrantyDailyFlow" />
                 <ref bean="getQuoteDailyFlow" />
+                <ref bean="getSkuItemClassDailyFlow" />
+                <ref bean="getSkuMfgDailyFlow" />
+                <ref bean="getSkuGlobalDailyFlow" />
+                <ref bean="getWarrantyDailyFlow" />
+                <ref bean="getCalendarDailyFlow" />
+                <ref bean="getChannelDailyFlow" />
             </util:list>
         </constructor-arg>
     </bean>
