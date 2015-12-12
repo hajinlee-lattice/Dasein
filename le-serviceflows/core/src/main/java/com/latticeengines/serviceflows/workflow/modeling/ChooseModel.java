@@ -3,14 +3,18 @@ package com.latticeengines.serviceflows.workflow.modeling;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -22,11 +26,11 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 @Component("chooseModel")
 public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> {
 
-    private static final Log log = LogFactory.getLog(ChooseModel.class);
+    public static final long MINIMUM_POSITIVE_EVENTS = 300;
+    public static final double MINIMUM_ROC = 0.7;
 
+    private static final Log log = LogFactory.getLog(ChooseModel.class);
     private static final int MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES = 6 * 60;
-    private static final int MINIMUM_POSITIVE_EVENTS = 300;
-    private static final double MINIMUM_ROC = 0.7;
 
     private InternalResourceRestApiProxy proxy = null;
 
@@ -35,22 +39,29 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         log.info("Inside ChooseModel execute()");
 
         @SuppressWarnings("unchecked")
-        List<String> modelApplicationIds = JsonUtils.deserialize(executionContext.getString(MODEL_APP_IDS), List.class);
-        if (modelApplicationIds == null || modelApplicationIds.isEmpty()) {
+        Map<String, String> modelApplicationIdToEventColumn = JsonUtils.deserialize(
+                executionContext.getString(MODEL_APP_IDS), Map.class);
+        if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_28012);
         }
 
-        proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
-        List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries(modelApplicationIds);
-        String bestModelId = chooseBestModelId(modelSummaries);
+        if (proxy == null) {
+            proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
+        }
+        List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries(modelApplicationIdToEventColumn.keySet());
+        Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
+                modelApplicationIdToEventColumn);
 
         TargetMarket targetMarket = configuration.getTargetMarket();
-        targetMarket.setModelId(bestModelId);
+        targetMarket.setModelId(bestModelIdAndEventColumn.getKey());
+        targetMarket.setEventColumnName(bestModelIdAndEventColumn.getValue());
         proxy.updateTargetMarket(targetMarket, configuration.getCustomerSpace().toString());
     }
 
-    private String chooseBestModelId(List<ModelSummary> models) {
-        String chosenModelId = null;
+    @VisibleForTesting
+    Entry<String, String> chooseBestModelIdAndEventColumn(List<ModelSummary> models,
+            Map<String, String> modelApplicationIdToEventColumn) {
+        Entry<String, String> chosenModelIdAndEventColumn = null;
         List<ModelSummary> validModels = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
 
@@ -66,7 +77,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
             }
             if (model.getRocScore() < MINIMUM_ROC) {
                 isValid = false;
-                log.info(String.format("Model %s discarded; its ROC score %s is less than minimum %d.", model.getId(),
+                log.info(String.format("Model %s discarded; its ROC score %f is less than minimum %f.", model.getId(),
                         model.getRocScore(), MINIMUM_ROC));
             }
             if (isValid) {
@@ -74,6 +85,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
             }
         }
 
+        ModelSummary chosenModel = null;
         if (validModels.size() == 0) {
             log.warn("None of the models met the minimum criteria");
 
@@ -82,20 +94,26 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
                         configuration.getCustomerSpace().toString());
                 if (Strings.isNullOrEmpty(defaultTargetMarket.getModelId())) {
                     log.warn("No existing global model available so falling back to choosing the model with highest lift");
-                    chosenModelId = chooseModelWithHighestLift(models).getId();
+                    chosenModel = chooseModelWithHighestLift(models);
                 } else {
                     log.info("Using the global model from the default target market");
-                    chosenModelId = defaultTargetMarket.getModelId();
+                    chosenModelIdAndEventColumn = Maps.immutableEntry(defaultTargetMarket.getModelId(),
+                            defaultTargetMarket.getEventColumnName());
                 }
             } else {
-                chosenModelId = chooseModelWithHighestLift(models).getId();
+                chosenModel = chooseModelWithHighestLift(models);
             }
         } else {
-            chosenModelId = chooseModelWithHighestLift(validModels).getId();
+            chosenModel = chooseModelWithHighestLift(validModels);
         }
 
-        log.info(String.format("Chose best model %s from among:%s", chosenModelId, sb.toString()));
-        return chosenModelId;
+        if (chosenModelIdAndEventColumn == null) {
+            chosenModelIdAndEventColumn = Maps.immutableEntry(chosenModel.getId(),
+                    modelApplicationIdToEventColumn.get(chosenModel.getApplicationId()));
+        }
+        log.info(String.format("Chose best model:%s eventColumn: from among:%s", chosenModelIdAndEventColumn.getKey(),
+                chosenModelIdAndEventColumn.getValue(), sb.toString()));
+        return chosenModelIdAndEventColumn;
     }
 
     private ModelSummary chooseModelWithHighestLift(List<ModelSummary> models) {
@@ -111,7 +129,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         return chosenModel;
     }
 
-    private List<ModelSummary> waitForDownloadedModelSummaries(List<String> modelApplicationIds) {
+    private List<ModelSummary> waitForDownloadedModelSummaries(Set<String> modelApplicationIds) {
         List<ModelSummary> modelSummaries = new ArrayList<>();
         Set<String> foundModels = new HashSet<>();
 
@@ -153,6 +171,16 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         }
 
         return modelSummaries;
+    }
+
+    @VisibleForTesting
+    void setProxy(InternalResourceRestApiProxy proxy) {
+        this.proxy = proxy;
+    }
+
+    @VisibleForTesting
+    void setConfiguration(ChooseModelStepConfiguration configuration) {
+        this.configuration = configuration;
     }
 
 }

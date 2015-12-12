@@ -1,7 +1,9 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,18 +28,18 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
 
-        List<String> modelApplicationIds;
+        Map<String, String> modelApplicationIdToEventColumn;
         try {
-            modelApplicationIds = profileAndModel(eventTable);
+            modelApplicationIdToEventColumn = profileAndModel(eventTable);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28007, e, new String[] { eventTable.getName() });
         }
 
-        executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIds));
+        executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
     }
 
-    private List<String> profileAndModel(Table eventTable) throws Exception {
-        List<String> modelApplicationIds = new ArrayList<>();
+    private Map<String, String> profileAndModel(Table eventTable) throws Exception {
+        Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         ModelingServiceExecutor.Builder bldr = createModelingServiceExecutorBuilder(configuration, eventTable);
 
         List<String> excludedColumns = new ArrayList<>();
@@ -65,9 +67,9 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             modelExecutor.writeMetadataFile();
             modelExecutor.profile();
             String modelAppId = modelExecutor.model();
-            modelApplicationIds.add(modelAppId);
+            modelApplicationIdToEventColumn.put(modelAppId, eventCol);
         }
-        return modelApplicationIds;
+        return modelApplicationIdToEventColumn;
     }
 
 }
