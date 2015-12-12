@@ -1,6 +1,7 @@
 package com.latticeengines.security.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +21,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 
 
@@ -50,17 +54,24 @@ public class GASessionCacheUnitTestNG {
     public void testLoadAndRetrieveValid() throws ExecutionException {
         Session session = cache.retrieve(VALID_TOKEN);
         Assert.assertNotNull(session, "Should get session from first invocation.");
-        session = cache.retrieve(VALID_TOKEN);
-        Assert.assertNotNull(session, "Should get session from second invocation.");
 
-        // wait to expire
-        try {
-            Thread.sleep(cacheExpirationInSeconds * 1000L + 500L);
-        } catch (InterruptedException e) {
-            Assert.fail("Failed to wait for the session to expire", e);
-        }
-        session = cache.retrieve(VALID_TOKEN);
-        Assert.assertNotNull(session, "Should get session after cache expired.");
+        Assert.assertNotNull(session.getRights());
+        Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
+
+//        session = cache.retrieve(VALID_TOKEN);
+//        Assert.assertNotNull(session, "Should get session from second invocation.");
+//
+//        Assert.assertNotNull(session.getRights());
+//        Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
+
+//        // wait to expire
+//        try {
+//            Thread.sleep(cacheExpirationInSeconds * 1000L + 500L);
+//        } catch (InterruptedException e) {
+//            Assert.fail("Failed to wait for the session to expire", e);
+//        }
+//        session = cache.retrieve(VALID_TOKEN);
+//        Assert.assertNotNull(session, "Should get session after cache expired.");
     }
 
     @Test(groups = "unit", expectedExceptions = LedpException.class)
@@ -112,10 +123,14 @@ public class GASessionCacheUnitTestNG {
                     // first retrieve
                     Session session = cache.retrieve(token);
                     Assert.assertNotNull(session);
+                    Assert.assertNotNull(session.getRights());
+                    Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
 
                     // second retrieve
                     session = cache.retrieve(token);
                     Assert.assertNotNull(session);
+                    Assert.assertNotNull(session.getRights());
+                    Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
 
                     // enforce to expire
                     mockSessionMgr.logout(token);
@@ -169,7 +184,18 @@ public class GASessionCacheUnitTestNG {
         @Override
         public Session retrieve(Ticket ticket) {
             if (validTokens.contains(ticket.getData())) {
-                return new Session();
+                Session session =  new Session();
+                session.setEmailAddress("xx@lattice-engines.com");
+                Tenant tenant = new Tenant();
+                tenant.setId("tenantID");
+                session.setTenant(tenant);
+                if (ThreadLocalRandom.current().nextBoolean()) {
+                    List<GrantedRight> rights = AccessLevel.INTERNAL_ADMIN.getGrantedRights();
+                    session.setRights(GrantedRight.getAuthorities(rights));
+                } else {
+                    session.setRights(Collections.singletonList(AccessLevel.INTERNAL_USER.name()));
+                }
+                return session;
             } else {
                 throw new IllegalArgumentException("Invalid token");
             }

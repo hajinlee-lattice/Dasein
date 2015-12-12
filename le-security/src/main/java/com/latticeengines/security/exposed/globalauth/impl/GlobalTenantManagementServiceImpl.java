@@ -32,7 +32,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
     
     @Override
     @RestApiCall
-    synchronized public Boolean registerTenant(Tenant tenant) {
+    public synchronized Boolean registerTenant(Tenant tenant) {
         ITenantManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         
@@ -46,7 +46,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
 
     @Override
     @RestApiCall
-    synchronized public Boolean discardTenant(Tenant tenant) {
+    public synchronized Boolean discardTenant(Tenant tenant) {
         ITenantManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         

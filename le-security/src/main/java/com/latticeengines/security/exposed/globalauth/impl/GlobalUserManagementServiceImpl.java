@@ -63,7 +63,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean registerUser(User user, Credentials creds) {
+    public synchronized Boolean registerUser(User user, Credentials creds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
@@ -76,7 +76,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean grantRight(String right, String tenant, String username) {
+    public synchronized Boolean grantRight(String right, String tenant, String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
@@ -106,7 +106,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean revokeRight(String right, String tenant, String username) {
+    public synchronized Boolean revokeRight(String right, String tenant, String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
@@ -119,7 +119,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean forgotLatticeCredentials(String username) {
+    public synchronized Boolean forgotLatticeCredentials(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
 
@@ -146,7 +146,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
+    public synchronized Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
@@ -163,7 +163,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public String resetLatticeCredentials(String username) {
+    public synchronized String resetLatticeCredentials(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
@@ -206,7 +206,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    synchronized public Boolean deleteUser(String username) {
+    public synchronized Boolean deleteUser(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {

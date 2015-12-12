@@ -1,5 +1,6 @@
 package com.latticeengines.security.util;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -14,6 +15,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 
 public class GASessionCache {
@@ -30,11 +33,15 @@ public class GASessionCache {
                     public Session load(String token) throws Exception {
                         try {
                             Ticket ticket = new Ticket(token);
-                            return globalSessionMgr.retrieve(ticket);
+                            Session session = globalSessionMgr.retrieve(ticket);
+                            if (session.getRights() != null && !session.getRights().isEmpty()) {
+                                interpretGARights(session);
+                            }
+                            return session;
                         } catch (Exception e) {
-                            log.warn(String.format(
-                                    "Encountered an error when retrieving session %s from GA. " +
-                                            "Invalidate the cache.", token));
+                            log.warn(String.format("Encountered an error when retrieving session %s from GA: "
+                                    + e.getMessage()
+                                    + " Invalidate the cache.", token));
                             return null;
                         }
                     }
@@ -49,12 +56,35 @@ public class GASessionCache {
         }
     }
 
+    public void removeToken(String token) {
+        tokenExpirationCache.invalidate(token);
+    }
+
     void removeAll() {
         tokenExpirationCache.invalidateAll();
     }
 
-    public void removeToken(String token) {
-        tokenExpirationCache.invalidate(token);
+    private static void interpretGARights(Session session) {
+        List<String> GARights = session.getRights();
+        try {
+            AccessLevel level = AccessLevel.findAccessLevel(GARights);
+            session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+            session.setAccessLevel(level.name());
+        } catch (NullPointerException e) {
+            if (!GARights.isEmpty()) {
+                AccessLevel level = isInternalEmail(session.getEmailAddress()) ?
+                        AccessLevel.INTERNAL_USER : AccessLevel.EXTERNAL_USER;
+                session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+                session.setAccessLevel(level.name());
+            }
+            log.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead: %s",
+                    GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
+                    session.getAccessLevel(), e.getMessage()));
+        }
+    }
+
+    private static boolean isInternalEmail(String email) {
+        return email.toLowerCase().endsWith("lattice-engines.com");
     }
 
 }

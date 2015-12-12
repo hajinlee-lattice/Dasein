@@ -8,6 +8,7 @@ import javax.mail.Multipart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.EmailSettings;
@@ -25,14 +26,21 @@ public class EmailServiceImpl implements EmailService {
     @Autowired
     private EmailSettings emailsettings;
 
+    @Value("${security.email.enabled:true}")
+    private boolean emailEnabled;
+
     @Override
     public void sendSimpleEmail(String subject, Object content, String contentType, Collection<String> recipients) {
-        EmailUtils.sendSimpleEmail(subject, content, contentType, recipients, emailsettings);
+        if (emailEnabled) {
+            EmailUtils.sendSimpleEmail(subject, content, contentType, recipients, emailsettings);
+        }
     }
 
     @Override
     public void sendMultiPartEmail(String subject, Multipart content, Collection<String> recipients) {
-        EmailUtils.sendMultiPartEmail(subject, content, recipients, emailsettings);
+        if (emailEnabled) {
+            EmailUtils.sendMultiPartEmail(subject, content, recipients, emailsettings);
+        }
     }
 
     @Override

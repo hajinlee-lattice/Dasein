@@ -48,11 +48,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session retrieve(Ticket ticket){
-        Session session = sessionCache.retrieve(ticket.getData());
-        interpretGARights(session);
-        return session;
-    }
+    public Session retrieve(Ticket ticket){ return sessionCache.retrieve(ticket.getData()); }
 
     @Override
     public void logout(Ticket ticket) {

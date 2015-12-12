@@ -151,7 +151,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     public void testConcurrentRetrieve() throws InterruptedException, ExecutionException {
         sessionService.attach(ticket);
 
-        int numTestCases = 20;
+        int numTestCases = 25;
         ExecutorService executor = Executors.newFixedThreadPool(numTestCases);
         List<Future<Integer>> futures = new ArrayList<>();
         for (int i = 0; i < numTestCases; i++) {
@@ -168,7 +168,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
                 }
 
                 private void test() throws InterruptedException {
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < 20; i++) {
                         Ticket t2 = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
                         Session session = sessionService.retrieve(t2);
                         assertNotNull(session);
@@ -176,7 +176,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
                         assertNotNull(session.getTicket());
                         assertNotNull(session.getTenant());
                         // random delay
-                        Thread.sleep(ThreadLocalRandom.current().nextInt(1, 500));
+                        Thread.sleep(ThreadLocalRandom.current().nextInt(10, 50));
                     }
                 }
 
