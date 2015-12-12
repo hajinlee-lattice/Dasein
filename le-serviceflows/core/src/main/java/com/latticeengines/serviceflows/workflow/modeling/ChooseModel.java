@@ -51,6 +51,7 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries(modelApplicationIdToEventColumn.keySet());
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
+        executionContext.putString(SCORING_MODEL_ID, bestModelIdAndEventColumn.getKey());
 
         TargetMarket targetMarket = configuration.getTargetMarket();
         targetMarket.setModelId(bestModelIdAndEventColumn.getKey());

@@ -104,9 +104,6 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         eventTable.setName(matchTableName);
 
         addMetadata(eventTable, dbCreds);
-        String extractPath = eventTable.getExtracts().get(0).getPath();
-        extractPath = extractPath.substring(0, extractPath.lastIndexOf("/"));
-        eventTable.getExtracts().get(0).setPath(extractPath);
         url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), eventTable.getName());
         restTemplate.postForLocation(url, eventTable);

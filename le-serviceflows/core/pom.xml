@@ -12,6 +12,7 @@
         <le.dataflow.version>2.0.18-SNAPSHOT</le.dataflow.version>
         <le.domain.version>2.0.18-SNAPSHOT</le.domain.version>
         <le.workflow.version>2.0.18-SNAPSHOT</le.workflow.version>
+        <le.proxy.version>2.0.18-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
@@ -22,6 +23,13 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
