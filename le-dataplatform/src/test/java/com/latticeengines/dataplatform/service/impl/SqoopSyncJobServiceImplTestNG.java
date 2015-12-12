@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,6 +44,24 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
+
+    @Value("${dataplatform.test.dellebi.datatarget.host}")
+    private String targetJdbcHost;
+
+    @Value("${dataplatform.test.dellebi.datatarget.port}")
+    private String targetJdbcPort;
+
+    @Value("${dataplatform.test.dellebi.datatarget.dbname}")
+    private String targetJdbcDb;
+
+    @Value("${dataplatform.test.dellebi.datatarget.type}")
+    private String targetJdbcType;
+
+    @Value("${dataplatform.test.dellebi.datatarget.user}")
+    private String targetJdbcUser;
+
+    @Value("${dataplatform.test.dellebi.datatarget.password.encrypted}")
+    private String targetJdbcPassword;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -326,12 +345,6 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
     }
 
     private DbCreds getSQLServerCreds() {
-        String targetJdbcHost = "10.51.15.145";
-        String targetJdbcPort = "1433";
-        String targetJdbcDb = "DELL_EBI_STAGE_FINAL_USE_DEV";
-        String targetJdbcUser = "hadoop";
-        String targetJdbcPassword = "h@d00p";
-        String targetJdbcType = "SQLServer";
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
