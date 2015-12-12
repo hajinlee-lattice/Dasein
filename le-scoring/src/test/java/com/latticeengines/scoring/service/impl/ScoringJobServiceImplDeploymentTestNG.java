@@ -48,7 +48,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn("ModelingID");
-        AppSubmission submission = restTemplate.postForObject(scoringMicroserviceUrl + "/scoringJobs", scoringConfig,
+        AppSubmission submission = restTemplate.postForObject(scoringMicroserviceUrl + "/scoringjobs", scoringConfig,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = getApplicationId(submission.getApplicationIds().get(0));
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
