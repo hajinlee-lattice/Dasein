@@ -117,7 +117,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
 
     }
 
-    protected Table executeDataFlow() throws Exception {
+    protected Table executeDataFlow() {
         return executeDataFlow(new DataFlowParameters());
     }
 

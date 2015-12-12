@@ -22,31 +22,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.Table;
-
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -87,6 +62,31 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
+
+import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -235,6 +235,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node stopList(Node rhs, String lhsFieldName, String rhsFieldName) {
             return new Node(builder.addStopListFilter(identifier, rhs.identifier, lhsFieldName, rhsFieldName), builder);
+        }
+        public Node combine(Node rhs) {
+            return new Node(builder.addCombine(identifier, rhs.identifier), builder);
         }
 
         public Node merge(Node rhs) {
@@ -425,6 +428,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTableName), this);
     }
 
+    protected Table getSourceMetadata(String sourceName) {
+        DataFlowContext ctx = getDataFlowCtx();
+        @SuppressWarnings("unchecked")
+        Map<String, Table> sourceTables = ctx.getProperty("SOURCETABLES", Map.class);
+        return sourceTables.get(sourceName);
+    }
+
     private void validateTableForSource(Table sourceTable) {
         if (sourceTable.getName() == null) {
             throw new LedpException(LedpCode.LEDP_26009);
@@ -542,7 +552,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType) {
-        List<FieldMetadata> declaredFields = new ArrayList<>();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
         if (lhsPipesAndFields == null) {
@@ -551,37 +560,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (rhsPipesAndFields == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { rhs });
         }
-        Set<String> seenFields = new HashSet<>();
-
-        List<String> outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(lhsPipesAndFields.getValue()));
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsPipesAndFields.getValue());
-        for (String fieldName : outputFields) {
-            seenFields.add(fieldName);
-            declaredFields.add(nameToFieldMetadataMap.get(fieldName));
-        }
-
-        outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(rhsPipesAndFields.getValue()));
-        nameToFieldMetadataMap = getFieldMetadataMap(rhsPipesAndFields.getValue());
-        for (String fieldName : outputFields) {
-            String originalFieldName = fieldName;
-
-            if (seenFields.contains(fieldName)) {
-                fieldName = joinFieldName(rhs, fieldName);
-                if (seenFields.contains(fieldName)) {
-                    throw new RuntimeException(
-                            String.format(
-                                    "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
-                                    fieldName, originalFieldName));
-                }
-            }
-            seenFields.add(fieldName);
-            FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
-            FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
-                    origfm.getField(), origfm.getProperties());
-            declaredFields.add(fm);
-        }
+        List<FieldMetadata> declaredFields = combineFields(rhs, lhsPipesAndFields.getValue(), rhsPipesAndFields.getValue());
 
         BaseJoiner joiner = null;
 
@@ -607,6 +586,42 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 convertToFields(getFieldNames(declaredFields)), //
                 joiner);
         return register(join, declaredFields);
+    }
+
+    private List<FieldMetadata> combineFields(String rhsId, List<FieldMetadata> lhsFields, List<FieldMetadata> rhsFields) {
+        List<FieldMetadata> declaredFields = new ArrayList<>();
+        Set<String> seenFields = new HashSet<>();
+
+        List<String> outputFields = new ArrayList<>();
+        outputFields.addAll(getFieldNames(lhsFields));
+        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsFields);
+        for (String fieldName : outputFields) {
+            seenFields.add(fieldName);
+            declaredFields.add(nameToFieldMetadataMap.get(fieldName));
+        }
+
+        outputFields = new ArrayList<>();
+        outputFields.addAll(getFieldNames(rhsFields));
+        nameToFieldMetadataMap = getFieldMetadataMap(rhsFields);
+        for (String fieldName : outputFields) {
+            String originalFieldName = fieldName;
+
+            if (seenFields.contains(fieldName)) {
+                fieldName = joinFieldName(rhsId, fieldName);
+                if (seenFields.contains(fieldName)) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
+                                    fieldName, originalFieldName));
+                }
+            }
+            seenFields.add(fieldName);
+            FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
+            FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
+                    origfm.getField(), origfm.getProperties());
+            declaredFields.add(fm);
+        }
+        return declaredFields;
     }
 
     private static Class<?>[] getTypes(List<String> fieldNames, List<FieldMetadata> full) {
@@ -1047,6 +1062,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         newFm.add(pdHashFm);
 
         return register(each, newFm);
+    }
+
+    protected String addCombine(String lhs, String rhs) {
+        lhs = addRowId(lhs, "__rowid__");
+        rhs = addRowId(rhs, "__rowid__");
+        String last = addJoin(lhs, new FieldList("__rowid__"), rhs, new FieldList("__rowid__"), JoinType.OUTER);
+        return addDiscard(last, new FieldList("__rowid__", joinFieldName(rhs, "__rowid__")));
     }
 
     protected String addRowId(String prior, String targetFieldName) {

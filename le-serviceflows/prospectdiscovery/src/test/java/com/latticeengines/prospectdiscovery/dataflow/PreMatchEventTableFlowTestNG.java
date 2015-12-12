@@ -48,7 +48,7 @@ public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBa
 
     @Override
     protected String getIdColumnName(String tableName) {
-        if (tableName.equals("Stoplist")) {
+        if (tableName.equals("PublicDomain")) {
             return null;
         }
         return "Id";
@@ -58,7 +58,7 @@ public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBa
     protected String getLastModifiedColumnName(String tableName) {
         if (tableName.equals("Account")) {
             return "CreatedDate";
-        } else if (tableName.equals("Stoplist")) {
+        } else if (tableName.equals("PublicDomain")) {
             return null;
         }
         return "LastModifiedDate";
