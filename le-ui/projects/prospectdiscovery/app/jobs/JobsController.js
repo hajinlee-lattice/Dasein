@@ -10,46 +10,37 @@ angular.module('pd.jobs', [
     var stepsNameDictionary = { "importData": "load_data", "runDataFlow": "load_data",
             "loadHdfsTableToPDServer": "load_data", "match": "match_data", "createEventTableFromMatchResult": "match_data",
             "sample": "generate_insights", "profileAndModel": "create_model" };
-    var jobStirng = {"id":4,"name":null,"description":null,"startTimestamp":1449169759000,"endTimestamp":1449171104000,"jobStatus":"Completed","jobType":"fitModelWorkflow","user":null,"steps":[{"name":null,"description":null,"startTimestamp":1449169759000,"endTimestamp":1449170037000,"stepStatus":"Completed","jobStepType":"importData"},{"name":null,"description":null,"startTimestamp":1449170037000,"endTimestamp":1449170153000,"stepStatus":"Completed","jobStepType":"runDataFlow"},{"name":null,"description":null,"startTimestamp":1449170153000,"endTimestamp":1449170184000,"stepStatus":"Completed","jobStepType":"loadHdfsTableToPDServer"},{"name":null,"description":null,"startTimestamp":1449170184000,"endTimestamp":1449170375000,"stepStatus":"Completed","jobStepType":"match"},{"name":null,"description":null,"startTimestamp":1449170375000,"endTimestamp":1449170427000,"stepStatus":"Completed","jobStepType":"createEventTableFromMatchResult"},{"name":null,"description":null,"startTimestamp":1449170427000,"endTimestamp":1449170458000,"stepStatus":"Completed","jobStepType":"sample"},{"name":null,"description":null,"startTimestamp":1449170458000,"endTimestamp":1449171104000,"stepStatus":"Completed","jobStepType":"profileAndModel"}]};
-    // var jobStirng = {"id":4,"name":null,"description":null,"startTimestamp":1449169759000,"endTimestamp":1449171104000,"jobStatus":"Pending","jobType":"fitModelWorkflow","user":null,"steps":[]};
 
     this.GetAllJobs = function() {
         var deferred = $q.defer();
         var result;
         
-        /**
         $http({
             method: 'GET',
             url: '/pls/jobs'
         }).then(
             function onSuccess(response) {
-                // var jobs = response.data;
-                */
-        var jobs = [];
-        jobs.push(jobStirng);
-        result = {
-            success: true,
-            resultObj: null
-        };
-        
-        jobs = _.sortBy(jobs, 'startTimestamp');
-        result.resultObj = _.map(jobs, function(rawObj) {
-            return {
-                id: rawObj.id,
-                timestamp: rawObj.startTimestamp,
-                jobType: rawObj.jobType,
-                status: rawObj.jobStatus,
-                user: rawObj.user
-            };
-        });
-        deferred.resolve(result);
-        /**
+                var jobs = response.data;
+                result = {
+                    success: true,
+                    resultObj: null
+                };
+                
+                jobs = _.sortBy(jobs, 'startTimestamp');
+                result.resultObj = _.map(jobs, function(rawObj) {
+                    return {
+                        id: rawObj.id,
+                        timestamp: rawObj.startTimestamp,
+                        jobType: rawObj.jobType,
+                        status: rawObj.jobStatus,
+                        user: rawObj.user
+                    };
+                });
+                deferred.resolve(result);
             }, function onError(response) {
 
             }
         );
-        return deferred.promise;
-        */
         return deferred.promise;
     };
     
@@ -58,38 +49,34 @@ angular.module('pd.jobs', [
         var deferred = $q.defer();
         var result;
 
-      /**
         $http({
             method: 'GET',
             url: '/pls/jobs/' + jobId
         }).then(
-            function onSuccess(response) { */
-                // var jobInfo = response.data;
-        var jobInfo = jobStirng;
+            function onSuccess(response) {
+                var jobInfo = response.data;
+                var jobInfo = jobStirng;
 
-        result = {
-            success: true,
-            resultObj:
-                {
-                    id: jobInfo.id,
-                    user: jobInfo.user,
-                    jobType: jobInfo.jobType,
-                    jobStatus: jobInfo.jobStatus,
-                    stepRunning: getStepRunning(jobInfo),
-                    stepsCompleted: getStepsCompleted(jobInfo)
-                    // to add step endtimes
-                }
-        };
+                result = {
+                    success: true,
+                    resultObj:
+                        {
+                            id: jobInfo.id,
+                            user: jobInfo.user,
+                            jobType: jobInfo.jobType,
+                            jobStatus: jobInfo.jobStatus,
+                            stepRunning: getStepRunning(jobInfo),
+                            stepsCompleted: getStepsCompleted(jobInfo)
+                            // to add step endtimes
+                        }
+                };
 
-        deferred.resolve(result);
-        return deferred.promise;
-                /**
+                deferred.resolve(result);
             }, function onError(resposne) {
                 
             }
         );
-                return result;
-                */
+        return deferred.promise;
     };
     
     function getStepRunning(job) {
@@ -133,7 +120,6 @@ angular.module('pd.jobs', [
     $scope.showEmptyJobsMessage = false;
 
     function getAllJobs() {
-        console.log("getting all jobs");
         JobsService.GetAllJobs().then(function(result) {
             $scope.jobs = result.resultObj;
 
@@ -148,9 +134,8 @@ angular.module('pd.jobs', [
     var TIME_BETWEEN_JOB_LIST_REFRESH = 5 * 1000;
     var REFRESH_JOBS_LIST_ID;
     
-    // REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
+    REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
     
-    getAllJobs();
     $scope.$on("$destroy", function() {
         clearInterval(REFRESH_JOBS_LIST_ID);
         $scope.statuses = {};

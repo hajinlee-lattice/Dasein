@@ -1,36 +1,90 @@
 angular.module('pd.jobs.import.ready', [
 
 ])
-.controller('ImportReadyController', function($scope, $rootScope, $stateParams) {
+.controller('ImportReadyController', function($scope, $rootScope, $stateParams, ImportReadyService) {
     $scope.jobId = $stateParams.jobId;
     
-    $scope.completionTimes = { "load_data": "1449132082493", "match_data": "1449132082493",
-            "generate_insights": "1449132082493", "create_model": "1449132082493", "create_global_target_market": "1449132082493" };
-            
-    
-    $scope.tables = [
-        {
-            "name": "ACCOUNTS",
-            "items": {
-                "Accounts": "234,567",
-                "Matched": "180,123 (77)",
-                "1+ Contact": "53,219 (23)",
-                "Unique Accounts": "197,765"
+    ImportReadyService.getImportSummaryForJobId($scope.jobId).then(function(result) {
+        var importSummary = result.resultObj;
+        $scope.tables = [
+            {
+                "name": "ACCOUNTS",
+                "items": {
+                    "Accounts": importSummary.accounts.total,
+                    "Matched": importSummary.accounts.total * importSummary.accounts.match_rate,
+                    "1+ Contact": importSummary.accounts.with_contacts,
+                    "Unique Accounts": importSummary.accounts.unique
+                }
+            },{
+                "name": "OPPORTUNITIES",
+                "items": {
+                    "Opportunities": importSummary.opportunities.total,
+                    "Closed-Won": importSummary.opportunities.closed_won,
+                    "Closed": importSummary.opportunities.closed
+                }
+            },{
+                "name": "OTHER INFO",
+                "items": {
+                    "Contacts": importSummary.contacts.total,
+                    "Leads": importSummary.leads.total,
+                    "Data Range": importSummary.accounts.date_range.begin + " - " + importSummary.accounts.date_range.end
+                }
             }
-        },{
-            "name": "OPPORTUNITIES",
-            "items": {
-                "Opportunities": "17,890",
-                "Closed-Won": "1,234",
-                "Closed": "1,234"
-            }
-        },{
-            "name": "OTHER INFO",
-            "items": {
-                "Contacts": "167,890",
-                "Leads": "456,789",
-                "Data Range": "10/2013 - 10/2015"
-            }
+        ];
+    });
+})
+
+.service('ImportReadyService', function($http, $q, _) {
+    var importSummary = {
+        "accounts": {
+            "date_range":{
+                "begin":"10/01/2013",
+                "end":"11/01/2014"
+            },
+            "total": 1000000,
+            "match_rate": 0.05,
+            "with_contacts": 2000,
+            "unique": 300
+        },
+        "contacts": {
+            "total": 2000
+        },
+        "leads": {
+            "total": 3000
+        },
+        "opportunities": {
+            "total": 10000,
+            "closed_won": 2000,
+            "closed": 1000
         }
-    ];
+    };
+    
+    this.getImportSummaryForJobId = function(jobId) {
+        var deferred = $q.defer();
+        var result;
+        
+        /**
+        $http({
+            method: 'GET',
+            url: '/pls/importsummary'
+        }).then(
+            function onSuccess(response) {
+                var jobs = response.data;
+                result = {
+                    success: true,
+                    resultObj: null
+                };
+            }
+        )
+        */
+                
+        result = {
+            success: true,
+            resultObj: null
+        };
+        result.resultObj = importSummary;
+
+        deferred.resolve(result);
+        return deferred.promise;
+    };
 });

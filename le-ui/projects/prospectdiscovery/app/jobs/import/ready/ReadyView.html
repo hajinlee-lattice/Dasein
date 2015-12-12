@@ -38,18 +38,24 @@
         </div>
     </div>
     
-    <div class="pd-summary import-summary">
+    <div class="import-summary">
         <h5>Data Imported</h5>
-        <div class="container">
-            <ul class="row">
-                <li class="columns three gray-summary-list pd-summary-panel" ng-repeat="table in tables">
+        <div class="container row">
+
+            <div class="three columns" data-ng-repeat="table in tables">
+                <div class="summary-list">
+                    
                     <h3 class="summary-title">{{table.name}}</h3>
-                    <dl class="summary-list" ng-repeat="(key, value) in table.items">
-                        <dt>{{key}}</dt>
-                        <dd>{{value}}</dd>
+                    <dl>
+                        <span data-ng-repeat="(key, value) in table.items">
+                            <dt>{{key}}</dt>
+                            <dd>{{value}}</dd>
+                        </span>
                     </dl>
-                </li>
-            </ul>
+
+                </div><!-- End .summary-list -->
+            </div><!-- End .three.columns -->
+
         </div>
     </div>
 </div>
