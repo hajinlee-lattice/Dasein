@@ -45,7 +45,7 @@ public class GlobalSessionManagementServiceImpl
 
     @Override
     @RestApiCall
-    public Session retrieve(Ticket ticket) {
+    synchronized public Session retrieve(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
         }
@@ -69,7 +69,7 @@ public class GlobalSessionManagementServiceImpl
 
     @Override
     @RestApiCall
-    public Session attach(Ticket ticket) {
+    synchronized public Session attach(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
         }

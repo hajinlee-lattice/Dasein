@@ -2,6 +2,8 @@ package com.latticeengines.security.exposed.service.impl;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,29 +13,51 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.util.GASessionCache;
 
 @Component("sessionService")
 public class SessionServiceImpl implements SessionService {
 
     private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
+    private static final int CACHE_TIMEOUT_IN_SEC = 60; // compare to the session timeout in GA, 1 min is negligible
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private GlobalAuthenticationService globalAuthenticationService;
+
+    private GASessionCache sessionCache;
+
+    @PostConstruct
+    private void initializeSessionCache() {
+        sessionCache = new GASessionCache(globalSessionManagementService, CACHE_TIMEOUT_IN_SEC);
+    }
 
     @Override
     public Session attach(Ticket ticket){
         Session session = globalSessionManagementService.attach(ticket);
         interpretGARights(session);
+        // refresh cache upon attach, because the session object changed
+        sessionCache.removeToken(ticket.getData());
+        sessionCache.retrieve(ticket.getData());
         return session;
     }
 
     @Override
     public Session retrieve(Ticket ticket){
-        Session session = globalSessionManagementService.retrieve(ticket);
+        Session session = sessionCache.retrieve(ticket.getData());
         interpretGARights(session);
         return session;
+    }
+
+    @Override
+    public void logout(Ticket ticket) {
+        globalAuthenticationService.discard(ticket);
+        sessionCache.removeToken(ticket.getData());
     }
 
     private void interpretGARights(Session session) {

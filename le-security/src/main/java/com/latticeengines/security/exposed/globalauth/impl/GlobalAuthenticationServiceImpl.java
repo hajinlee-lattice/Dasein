@@ -27,7 +27,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    public Ticket authenticateUser(String user, String password) {
+    synchronized public Ticket authenticateUser(String user, String password) {
         AuthenticationService service;
         try {
             service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));
@@ -48,7 +48,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     @Override
     @RestApiCall
-    public boolean discard(Ticket ticket) {
+    synchronized public boolean discard(Ticket ticket) {
         AuthenticationService service;
         try {
             service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));

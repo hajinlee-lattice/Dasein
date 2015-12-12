@@ -11,7 +11,6 @@
         <component-name>skald</component-name>
         <le.common.version>2.0.18-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.18-SNAPSHOT</le.domain.version>
-        <guava.version>18.0</guava.version>
         <jpmml.version>2.0.0</jpmml.version>
         <le.camille.version>2.0.18-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>

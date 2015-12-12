@@ -8,12 +8,22 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -135,6 +145,52 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertTrue(valuesOut.isEmpty());
 
         makeSureUserDoesNotExist(testUsername);
+    }
+
+    @Test(groups = "functional")
+    public void testConcurrentRetrieve() throws InterruptedException, ExecutionException {
+        sessionService.attach(ticket);
+
+        int numTestCases = 20;
+        ExecutorService executor = Executors.newFixedThreadPool(numTestCases);
+        List<Future<Integer>> futures = new ArrayList<>();
+        for (int i = 0; i < numTestCases; i++) {
+            Future<Integer> future = executor.submit(new Callable<Integer>() {
+                @Override
+                public Integer call() throws InterruptedException {
+                    try {
+                        test();
+                        return 1;
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        return 0;
+                    }
+                }
+
+                private void test() throws InterruptedException {
+                    for (int i = 0; i < 5; i++) {
+                        Ticket t2 = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
+                        Session session = sessionService.retrieve(t2);
+                        assertNotNull(session);
+                        assertTrue(session.getRights().size() >= 4);
+                        assertNotNull(session.getTicket());
+                        assertNotNull(session.getTenant());
+                        // random delay
+                        Thread.sleep(ThreadLocalRandom.current().nextInt(1, 500));
+                    }
+                }
+
+            });
+            futures.add(future);
+        }
+
+        int successCases = 0;
+        for (Future<Integer> future: futures) {
+            successCases += future.get();
+        }
+
+        Assert.assertEquals(successCases, numTestCases,
+                String.format("Only %d out of %d test cases passed.", successCases, numTestCases));
     }
 
 }

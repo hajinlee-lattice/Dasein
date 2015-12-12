@@ -27,16 +27,10 @@ public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
     GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
-    private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
     TenantService tenantService;
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private InternalTestUserService internalTestUserService;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {

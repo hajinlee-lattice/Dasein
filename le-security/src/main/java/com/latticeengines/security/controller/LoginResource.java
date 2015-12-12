@@ -153,7 +153,7 @@ public class LoginResource {
     public SimpleBooleanResponse logout(HttpServletRequest request) {
         String token = request.getHeader(request.getHeader(Constants.AUTHORIZATION));
         if (StringUtils.isNotEmpty(token)) {
-            globalAuthenticationService.discard(new Ticket(token));
+            sessionService.logout(new Ticket(token));
         }
         return SimpleBooleanResponse.successResponse();
     }

@@ -7,4 +7,6 @@ public interface SessionService {
     Session attach(Ticket ticket);
 
     Session retrieve(Ticket ticket);
+
+    void logout(Ticket ticket);
 }
