@@ -30,9 +30,14 @@ public class MetadataConverter {
         supportedAvroTypes.add(Schema.Type.DOUBLE);
         supportedAvroTypes.add(Schema.Type.BOOLEAN);
     }
-
+    
     public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName) {
+        return readMetadataFromAvroFile(configuration, path, primaryKeyName, lastModifiedKeyName, false);
+    }
+
+    public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
+            String lastModifiedKeyName, boolean getDirectory) {
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
@@ -43,6 +48,10 @@ public class MetadataConverter {
                     extract.setExtractionTimestamp(fs.getFileStatus(new Path(match)).getModificationTime());
                 }
                 extract.setName("extract");
+                if (getDirectory && match.endsWith(".avro")) {
+                    // get the directory
+                    match = new Path(match).getParent().toString() + "/*.avro";
+                }
                 extract.setPath(match);
                 extracts.add(extract);
             }
