@@ -11,6 +11,7 @@
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:db-context.xml"/>
     <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:pls-persistence-context.xml"/>
     <import resource="classpath:pls-aspects-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:pls-yarn-config-context.xml"/>

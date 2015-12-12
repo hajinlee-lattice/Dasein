@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:jee="http://www.springframework.org/schema/jee" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context-4.0.xsd
+      http://www.springframework.org/schema/jee
+      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+      http://www.springframework.org/schema/security
+      http://www.springframework.org/schema/security/spring-security-4.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <bean id="dataSourceAccountMaster" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="${pls.accountmaster.datasource.url}" />
+        <property name="username" value="${pls.accountmaster.datasource.user}" />
+        <property name="password" value="${pls.accountmaster.datasource.password.encrypted}" />
+    </bean>
+
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactoryAccountMaster" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceAccountMaster" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.dataplatform, com.latticeengines.domain.exposed" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerAccountMaster" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryAccountMaster">
+        <qualifier value="accountMaster" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManagerAccountMaster" />
+
+    <!--  DAOs for AccountMaster database  -->
+    <bean id="companyDao" class="com.latticeengines.pls.dao.impl.CompanyDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryAccountMaster" />
+    </bean>
+
+    <bean id="contactDao" class="com.latticeengines.pls.dao.impl.ContactDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryAccountMaster" />
+    </bean>
+
+    <bean id="amAttributeDao" class="com.latticeengines.pls.dao.impl.AmAttributeDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryAccountMaster" />
+    </bean>
+
+</beans>
