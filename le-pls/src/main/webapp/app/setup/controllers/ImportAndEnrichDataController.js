@@ -18,8 +18,6 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
     $scope.loading = true;
     initImportDataArea();
-    window.setTimeout(initEnrichDataArea, 200);
-    initValidationDataArea();
 
     $scope.ofText = ResourceUtility.getString('SETUP_CONJUNCTION_OF');
     $scope.leadsText = ResourceUtility.getString('SETUP_LEADS');
@@ -49,13 +47,16 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             } else {
                 $scope.getImportCompleteTimeError = result.ResultErrors;
             }
-            getDataCompleted(SetupUtility.STEP_ENRICH_DATA);
+            initEnrichDataArea();
         });
     }
 
     function initEnrichDataArea() {
         var deployment = $scope.deployment;
-        if (deployment.Step === SetupUtility.STEP_ENRICH_DATA) {
+        if (deployment.Step === SetupUtility.STEP_IMPORT_DATA) {
+            $scope.showEnrichProgress = true;
+            startGetObjectsTimer(SetupUtility.STEP_ENRICH_DATA, SetupUtility.STATUS_IN_PROGRESS);
+        } else if (deployment.Step === SetupUtility.STEP_ENRICH_DATA) {
             if (deployment.Status === SetupUtility.STATUS_IN_PROGRESS) {
                 $scope.showEnrichProgress = true;
                 startGetObjectsTimer(deployment.Step, deployment.Status);
@@ -63,8 +64,9 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 handleEnrichComplete();
             } else if (deployment.Status === SetupUtility.STATUS_FAIL) {
                 $scope.showEnrichError = true;
+                getDataCompleted();
             }
-        } else if (deployment.Step !== SetupUtility.STEP_IMPORT_DATA) {
+        } else {
             handleEnrichComplete();
         }
     }
@@ -77,7 +79,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             } else {
                 $scope.getEnrichCompleteTimeError = result.ResultErrors;
             }
-            getDataCompleted(SetupUtility.STEP_IMPORT_DATA);
+            initValidationDataArea();
         });
     }
 
@@ -94,6 +96,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 $scope.missingData = false;
             }
         }
+        getDataCompleted();
     }
 
     function startGetObjectsTimer(step, status) {
@@ -117,14 +120,12 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                     return;
                 }
 
-                if (result.ResultObj.Jobs != null) {
-                    if (result.ResultObj.Jobs.length > 0) {
-                        if (step === SetupUtility.STEP_ENRICH_DATA) {
-                            $scope.enrichProgress = getEnrichProgress(result.ResultObj.Jobs);
-                        } else {
-                            $scope.tables = getTables(result.ResultObj.Jobs);
-                            $scope.getObjectsError = null;
-                        }
+                if (result.ResultObj != null) {
+                    if (step === SetupUtility.STEP_ENRICH_DATA) {
+                        $scope.enrichProgress = getEnrichProgress(result.ResultObj.Jobs);
+                    } else {
+                        $scope.tables = getTables(result.ResultObj.Jobs);
+                        $scope.getObjectsError = null;
                     }
                 } else if (inTimer) {
                     clearTimer(step);
@@ -144,7 +145,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             if (inTimer) {
                 $scope.gettingObjects = false;
             } else {
-                getDataCompleted(step);
+                getDataCompleted();
             }
         });
     }
@@ -168,10 +169,9 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         return true;
     }
 
-    function getDataCompleted(step) {
-        if ($scope.deployment.Step === step || step === SetupUtility.STEP_ENRICH_DATA) {
+    function getDataCompleted() {
+        if ($scope.loading) {
             $scope.loading = false;
-
             var flags = FeatureFlagService.Flags();
             if (FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE)) {
                 $scope.showClearDeploymentLink = true;
@@ -181,6 +181,10 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     }
 
     function getTables(jobs) {
+        if (jobs == null || jobs.length === 0) {
+            return null;
+        }
+
         var tables = [];
         for (var i = 0; i < jobs.length; i++) {
             var table = { name: jobs[i].TableName, info: "" };
@@ -198,6 +202,10 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
     }
 
     function getEnrichProgress(jobs) {
+        if (jobs == null || jobs.length === 0) {
+            return ResourceUtility.getString('SETUP_ENRICH_DATA_DEFAULT_PROGRESS_LABEL');
+        }
+
         var job = jobs[jobs.length - 1];
         if (job.ExtractedRows > 0 && job.TotalRows > 0) {
             var extractRows = $filter('number')(job.ExtractedRows);
@@ -432,7 +440,15 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         }
     }
 
-    $scope.clearDeploymentLinkClick = function($event) {
+    $scope.finishDeploymentBtnClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
+    };
+
+    $scope.clearDeploymentLinkClicked = function($event) {
         if ($event != null) {
             $event.preventDefault();
         }

@@ -44,8 +44,8 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
     private static final String importSfdcDataGroup = "LoadCRMDataForModeling";
     private static final String enrichDataGroup = "ModelBuild_PropDataMatch";
-    private static final String profileSummaryQuery = "Q_Unpivot_SFDC_User";
-    private static final String enrichmentSummaryQuery = "Q_Unpivot_SFDC_Contact";
+    private static final String profileSummaryQuery = "Profile_SummaryCounts";
+    private static final String enrichmentSummaryQuery = "Profile_SummaryCounts";
 
     private static final Log log = LogFactory.getLog(TenantDeploymentManagerImpl.class);
     private static Map<String, LaunchJobsResult> importSfdcDataJobs = new HashMap<String, LaunchJobsResult>();
@@ -98,32 +98,34 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
             throw new LedpException(LedpCode.LEDP_18057);
         }
 
-        CustomerSpace space = CustomerSpace.parse(tenantId);
-        String group = getGroupName(step);
-        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
-        long launchId = dataLoaderService.executeLoadGroup(space.getTenantId(), group, dlUrl);
-
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        DlGroupRunnable runnable = new DlGroupRunnable(dlUrl, launchId, dataLoaderService);
         Map<String, LaunchJobsResult> jobsMap = getBufferedJobsMap(step);
-        ProgressCallback progressCallback = new ProgressCallback(tenantId, jobsMap);
-        runnable.setProgressCallback(progressCallback);
-        CompletedCallback completedCallback = new CompletedCallback(tenantId, jobsMap);
-        runnable.setCompletedCallback(completedCallback);
-        executorService.execute(runnable);
-        executorService.shutdown();
-
         synchronized (jobsMap) {
-            if (!jobsMap.containsKey(tenantId)) {
-                jobsMap.put(tenantId, new LaunchJobsResult());
-            }
+            jobsMap.put(tenantId, new LaunchJobsResult());
         }
+        try {
+            CustomerSpace space = CustomerSpace.parse(tenantId);
+            String group = getGroupName(step);
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+            long launchId = dataLoaderService.executeLoadGroup(space.getTenantId(), group, dlUrl);
 
-        deployment.setCurrentLaunchId(launchId);
-        deployment.setStep(step);
-        deployment.setStatus(TenantDeploymentStatus.IN_PROGRESS);
-        deployment.setMessage(null);
-        tenantDeploymentService.updateTenantDeployment(deployment);
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            DlGroupRunnable runnable = new DlGroupRunnable(dlUrl, launchId, dataLoaderService);
+            ProgressCallback progressCallback = new ProgressCallback(tenantId, jobsMap);
+            runnable.setProgressCallback(progressCallback);
+            CompletedCallback completedCallback = new CompletedCallback(tenantId, jobsMap);
+            runnable.setCompletedCallback(completedCallback);
+            executorService.execute(runnable);
+            executorService.shutdown();
+
+            deployment.setCurrentLaunchId(launchId);
+            deployment.setStep(step);
+            deployment.setStatus(TenantDeploymentStatus.IN_PROGRESS);
+            deployment.setMessage(null);
+            tenantDeploymentService.updateTenantDeployment(deployment);
+        } catch (Exception e) {
+            jobsMap.remove(tenantId);
+            throw e;
+        }
     }
 
     @Override

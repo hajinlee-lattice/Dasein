@@ -45,7 +45,7 @@
             <div data-ng-if="showEnrichComplete">
                 <span class="complete-label"><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_ENRICH_COMPLETE_LABEL')}}</span>
                 <span data-ng-show="enrichCompleteTime != null" class="complete-time">{{enrichCompleteTime}}</span>
-                <span data-ng-show="enrichCompleteTime != null" class="link-area large">
+                <span data-ng-show="false" class="link-area large">
                     <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/enrichmentsummarycsv" filename="DataEnrichmentSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_ENRICH_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_ENRICHMENT_SUMMARY_CSV')}}</span></a>
                 </span>
                 <span data-ng-show="getEnrichCompleteTimeError != null" class="link-area"><i class="fa fa-exclamation-circle"></i>&nbsp;{{getEnrichCompleteTimeError}}</span>
@@ -67,8 +67,11 @@
                 <span class="link-area"><a href="#" data-ng-click="retryValidationDataClicked($event)">{{ResourceUtility.getString('SETUP_RERUN_VALIDATION_LABEL')}}</a></span>
             </div>
         </div>
-        <div class="clear-link">
-            <a href="#" id="clearDeploymentLink" data-ng-show="showClearDeploymentLink" data-ng-class="{'disabled': disableClearDeploymentLink}" data-ng-click="clearDeploymentLinkClick($event)">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_TITLE')}}</a>
+        <div class="step-footer">
+            <button id="finishDeploymentBtn" data-ng-if="showValidationComplete" class="btn btn-primary" type="button" data-ng-click="finishDeploymentBtnClicked($event)">{{ResourceUtility.getString('BUTTON_DONE_LABEL')}}</button>
+            <div class="clear-link">
+                <a href="#" id="clearDeploymentLink" data-ng-show="showClearDeploymentLink" data-ng-class="{'disabled': disableClearDeploymentLink}" data-ng-click="clearDeploymentLinkClicked($event)">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_TITLE')}}</a>
+            </div>
         </div>
     </div>
 </div>

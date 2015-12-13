@@ -67,11 +67,11 @@ public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testIsDeploymentCompleted() {
         TenantDeployment dep = new TenantDeployment();
-        dep.setStep(TenantDeploymentStep.PUBLISH_SCORES);
+        dep.setStep(TenantDeploymentStep.VALIDATE_METADATA);
         dep.setStatus(TenantDeploymentStatus.SUCCESS);
         Assert.assertTrue(tenantDeploymentService.isDeploymentCompleted(dep));
 
-        dep.setStep(TenantDeploymentStep.SCORE_LEADS);
+        dep.setStep(TenantDeploymentStep.ENRICH_DATA);
         dep.setStatus(TenantDeploymentStatus.SUCCESS);
         Assert.assertFalse(tenantDeploymentService.isDeploymentCompleted(dep));
     }

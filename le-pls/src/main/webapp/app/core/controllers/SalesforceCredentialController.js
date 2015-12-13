@@ -17,13 +17,17 @@ angular.module('mainApp.core.controllers.SalesforceCredentialController', [
             productionSaveButtonText: '@',
             productionSaveButtonClicked: '&',
             productionEditButtonText: '@',
+            productionImportButtonText: '@',
+            productionImportButtonClicked: '&',
             sandboxComplete: '=',
             sandboxError: '=',
             sandboxSaveInProgress: '=',
             sandboxCredentials: '=',
             sandboxSaveButtonText: '@',
             sandboxSaveButtonClicked: '&',
-            sandboxEditButtonText: '@'
+            sandboxEditButtonText: '@',
+            sandboxImportButtonText: '@',
+            sandboxImportButtonClicked: '&'
         },
         templateUrl: 'app/core/views/SalesforceCredentialTemplate.html'
     };

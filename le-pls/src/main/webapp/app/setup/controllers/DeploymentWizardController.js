@@ -19,7 +19,9 @@ angular.module('mainApp.setup.controllers.DeploymentWizardController', [
     $scope.publishTab = new Tab(ResourceUtility.getString('SETUP_DEPLOYMENT_WIZARD_NAV_PUBLISH_SCORES'), false, true);
     $scope.tabs = [$scope.importTab, $scope.buildTab, $scope.publishTab];
 
+    $scope.loading = true;
     TenantDeploymentService.GetTenantDeployment().then(function(result) {
+        $scope.loading = false;
         if (result.Success) {
             $scope.deployment = result.ResultObj;
             if ($scope.deployment == null || $scope.deployment.Step === SetupUtility.STEP_ENTER_CREDENTIALS) {

@@ -21,11 +21,12 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
             $scope.showDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE);
+            $scope.redirectToDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE);
         });
     }
 
     $scope.logoClicked = function ($event) {
-        if ($scope.showDeploymentWizard) {
+        if ($scope.redirectToDeploymentWizard) {
             $scope.deploymentWizardClicked($event);
         } else {
             $scope.modelListClicked($event);

@@ -34,7 +34,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         ACTIVATE_MODEL_PAGE: 'ActivateModelPage',
 
         SETUP_PAGE: 'SetupPage',
-        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage'
+        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
+        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage'
     };
     this.Flags = function(){ return flags; };
 
@@ -76,6 +77,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.SETUP_PAGE, false);
             SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
             SetFlag(flags.SYSTEM_SETUP_PAGE, false);
+            SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
+            SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();
@@ -116,6 +119,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
     }
 
 });

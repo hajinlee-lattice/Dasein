@@ -46,6 +46,10 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
     @Override
     public TenantDeployment createTenantDeployment(String tenantId, HttpServletRequest request) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+        }
+
         TenantDeployment tenantDeployment = new TenantDeployment();
         tenantDeployment.setTenantId(tenant.getPid());
         tenantDeployment.setStep(TenantDeploymentStep.ENTER_CREDENTIALS);
@@ -61,6 +65,10 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
     @Override
     public TenantDeployment getTenantDeployment(String tenantId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+        }
+
         return tenantDeploymentEntityMgr.findByTenantId(tenant.getPid());
     }
 
@@ -68,7 +76,6 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
     public void updateTenantDeployment(TenantDeployment tenantDeployment) {
         Long tenantId = tenantDeployment.getTenantId();
         TenantDeployment deploymentFromDb = tenantDeploymentEntityMgr.findByTenantId(tenantId);
-
         if (deploymentFromDb == null) {
             throw new LedpException(LedpCode.LEDP_18063, new String[] { tenantId.toString() });
         }
@@ -83,7 +90,7 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
 
     @Override
     public boolean isDeploymentCompleted(TenantDeployment tenantDeployment) {
-        if (tenantDeployment.getStep() == TenantDeploymentStep.PUBLISH_SCORES
+        if (tenantDeployment.getStep() == TenantDeploymentStep.VALIDATE_METADATA
                 && tenantDeployment.getStatus() == TenantDeploymentStatus.SUCCESS) {
             return true;
         } else {
@@ -93,6 +100,10 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
 
     public boolean deleteTenantDeployment(String tenantId) {
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+        }
+
         return tenantDeploymentEntityMgr.deleteByTenantId(tenant.getPid());
     }
 }

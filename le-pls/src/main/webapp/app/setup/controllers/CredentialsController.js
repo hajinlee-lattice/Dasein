@@ -38,6 +38,7 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
     $scope.ResourceUtility = ResourceUtility;
 
     var editText = ResourceUtility.getString('BUTTON_EDIT_LABEL');
+    var importText = ResourceUtility.getString('BUTTON_IMPORT_LABEL');
     var saveAndImportText = ResourceUtility.getString('SETUP_CREDENTIALS_SAVE_IMPORT_BUTTON');
     $scope.logoLeftAlign = true;
     $scope.crmProductionComplete = false;
@@ -45,11 +46,13 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
     $scope.crmProductionSaveInProgress = false;
     $scope.crmProductionSaveButtonText = saveAndImportText;
     $scope.crmProductionEditButtonText = editText;
+    $scope.crmProductionImportButtonText = importText;
     $scope.crmSandboxComplete = false;
     $scope.crmSandboxError = "";
     $scope.crmSandboxSaveInProgress = false;
     $scope.crmSandboxSaveButtonText = saveAndImportText;
     $scope.crmSandboxEditButtonText = editText;
+    $scope.crmSandboxImportButtonText = importText;
 
     $scope.loading = true;
     $scope.showError = false;
@@ -130,7 +133,7 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
                     $scope.crmProductionError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
                     $scope.crmProductionComplete = true;
-                    importSfdcData(true);
+                    $scope.crmProductionImportClicked();
                 } else {
                     $scope.crmProductionSaveInProgress = false;
                     $scope.crmProductionError = result.resultErrors;
@@ -154,7 +157,7 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
                     $scope.crmSandboxError = ResourceUtility.getString("SYSTEM_ERROR");
                 } else if (result.success === true) {
                     $scope.crmSandboxComplete = true;
-                    importSfdcData(false);
+                    $scope.crmSandboxImportClicked();
                 } else {
                     $scope.crmSandboxSaveInProgress = false;
                     $scope.crmSandboxError = result.resultErrors;
@@ -165,7 +168,20 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
         }
     };
 
+    $scope.crmProductionImportClicked = function () {
+        importSfdcData(true);
+    };
+
+    $scope.crmSandboxImportClicked = function () {
+        importSfdcData(false);
+    };
+
     function importSfdcData(isProduction) {
+        if (isProduction) {
+            $scope.crmProductionSaveInProgress = true;
+        } else {
+            $scope.crmSandboxSaveInProgress = true;
+        }
         TenantDeploymentService.ImportSfdcData().then(function (result){
             if (result.Success === true) {
                 $rootScope.$broadcast(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT);

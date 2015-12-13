@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.List;
+
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -23,10 +25,16 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
+import com.latticeengines.domain.exposed.pls.TenantDeployment;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.service.TenantDeploymentConstants;
+import com.latticeengines.pls.service.TenantDeploymentService;
 
 public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -44,6 +52,15 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private TenantConfigService configService;
+
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
+
+    @Autowired
+    private TenantDeploymentService tenantDeploymentService;
 
     @Autowired
     @Qualifier("propertiesFileFeatureFlagProvider")
@@ -157,6 +174,42 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         verifyFlagFalse(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName());
 
         camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    }
+
+    @Test(groups = "functional")
+    public void testDeploymentRelatedFeatureFlags() throws Exception {
+        FeatureFlagValueMap flags = configService.getFeatureFlags(PLSTenantId);
+        String flagId = PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName();
+        CRMTopology topology = configService.getTopology(PLSTenantId);
+        if (CRMTopology.SFDC.getName().equals(topology.getName())) {
+            verifyFlagBooleanAndDefault(flags, flagId, true);
+            boolean redirect = redirectDeploymentWizardPage(PLSTenantId);
+            verifyFlagBooleanAndDefault(flags, TenantDeploymentConstants.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, redirect);
+        } else {
+            verifyFlagBooleanAndDefault(flags, flagId, false);
+            verifyFlagBooleanAndDefault(flags, TenantDeploymentConstants.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
+        }
+    }
+
+    private boolean redirectDeploymentWizardPage(String tenantId) {
+        try {
+            TenantDeployment tenantDeployment = tenantDeploymentService.getTenantDeployment(tenantId);
+            if (tenantDeployment != null) {
+                return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
+            } else {
+                List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+                if (summaries != null) {
+                    for (ModelSummary summary : summaries) {
+                        if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void testOverwriteFlag(String flagId, Boolean value) {

@@ -33,6 +33,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -172,34 +173,44 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     private FeatureFlagValueMap overwriteDeploymentWizardFlag(FeatureFlagValueMap flags, String tenantId) {
         String flagId = PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName();
         if (flags.containsKey(flagId) && !flags.get(flagId)) {
-            return flags;
+            updateFlag(flags, TenantDeploymentConstants.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
         } else {
-            Boolean needToRedirect = needToRedirectDeploymentWizardPage(tenantId);
-            updateFlag(flags, flagId, needToRedirect);
-            return new FeatureFlagValueMap(flags);
+            boolean sfdcTopology = isSfdcTopology(tenantId);
+            updateFlag(flags, flagId, sfdcTopology);
+
+            boolean redirect = false;
+            if (sfdcTopology) {
+                redirect = needToRedirectDeploymentWizardPage(tenantId);
+            }
+            updateFlag(flags, TenantDeploymentConstants.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, redirect);
+        }
+        return new FeatureFlagValueMap(flags);
+    }
+
+    private boolean isSfdcTopology(String tenantId) {
+        try {
+            CRMTopology topology = getTopology(tenantId);
+            return (topology != null && CRMTopology.SFDC.getName().equals(topology.getName()));
+        } catch (Exception e) {
+            return false;
         }
     }
 
-    private Boolean needToRedirectDeploymentWizardPage(String tenantId) {
+    private boolean needToRedirectDeploymentWizardPage(String tenantId) {
         try {
-            CRMTopology topology = getTopology(tenantId);
-            if (topology != null && "SFDC".equals(topology.getName())) {
-                TenantDeployment tenantDeployment = tenantDeploymentService.getTenantDeployment(tenantId);
-                if (tenantDeployment != null) {
-                    return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
-                } else {
-                    List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-                    if (summaries != null) {
-                        for (ModelSummary summary : summaries) {
-                            if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
-                                return false;
-                            }
+            TenantDeployment tenantDeployment = tenantDeploymentService.getTenantDeployment(tenantId);
+            if (tenantDeployment != null) {
+                return !tenantDeploymentService.isDeploymentCompleted(tenantDeployment);
+            } else {
+                List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+                if (summaries != null) {
+                    for (ModelSummary summary : summaries) {
+                        if (modelSummaryService.modelIdinTenant(summary.getId(), tenantId)) {
+                            return false;
                         }
                     }
-                    return true;
                 }
-            } else {
-                return false;
+                return true;
             }
         } catch (Exception e) {
             return false;

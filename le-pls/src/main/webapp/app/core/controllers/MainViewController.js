@@ -135,7 +135,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     function createMainContentViewAndRefreshFeatures() {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
-            if (FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE)) {
+            if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
                 createDeploymentWizardView();
             } else {
                 createModelListView();
