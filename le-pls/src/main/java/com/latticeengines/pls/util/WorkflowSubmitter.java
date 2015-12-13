@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -31,6 +32,9 @@ public class WorkflowSubmitter {
 
     @Autowired
     private WorkflowProxy workflowProxy;
+    
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private TargetMarketService targetMarketService;
@@ -49,12 +53,17 @@ public class WorkflowSubmitter {
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
+    
+    @Value("${pls.accountmaster.path}")
+    private String accountMasterPath;
 
     public void submitFitWorkflow(TargetMarket targetMarket) {
         String customer = SecurityContextUtils.getTenant().getId();
         log.info(String.format("Submitting fit model workflow for target market %s and customer %s",
                 targetMarket.getName(), customer));
         try {
+            metadataProxy.resetTables(customer);
+            
             List<String> eventCols = new ArrayList<>();
             eventCols.add("Event_IsWon");
             eventCols.add("Event_StageIsClosedWon");
@@ -82,6 +91,9 @@ public class WorkflowSubmitter {
                     .matchClient(matchClientDocument.getMatchClient().name()) //
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                     .eventColumns(eventCols) //
+                    .uniqueKeyColumn("LatticeAccountID") //
+                    .sourceDir(accountMasterPath) //
+                    .registerScoredTable(true) //
                     .build();
 
             String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();

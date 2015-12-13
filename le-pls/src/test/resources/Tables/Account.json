@@ -103,7 +103,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingStreet",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "Street",
         "ApprovedUsage": [
           ""
         ],
@@ -140,7 +140,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingCity",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "City",
         "ApprovedUsage": [
           ""
         ],
@@ -177,7 +177,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingState",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "State",
         "ApprovedUsage": [
           ""
         ],
@@ -214,7 +214,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingPostalCode",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "PostalCode",
         "ApprovedUsage": [
           ""
         ],
@@ -251,7 +251,7 @@
         "StatisticalType": "",
         "PhysicalName": "BillingCountry",
         "DataQuality": "",
-        "SemanticType": "",
+        "SemanticType": "Country",
         "ApprovedUsage": [
           ""
         ],
@@ -726,6 +726,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1442544230000
+    "last_modified_ts": null
   }
 }

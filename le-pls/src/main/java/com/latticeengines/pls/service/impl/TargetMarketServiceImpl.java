@@ -16,7 +16,7 @@ public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;
-
+    
     @Override
     public void createTargetMarket(TargetMarket targetMarket) {
         TargetMarket targetMarketStored = targetMarketEntityMgr.findTargetMarketByName(targetMarket.getName());
@@ -49,14 +49,12 @@ public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Override
     public TargetMarket createDefaultTargetMarket() {
-        List<TargetMarket> targetMarkets = targetMarketEntityMgr.findAll();
+        TargetMarket defaultTargetMarket = targetMarketEntityMgr.findTargetMarketByName(TargetMarket.DEFAULT_NAME);
         
-        for (TargetMarket targetMarket : targetMarkets) {
-            if (targetMarket.getIsDefault()) {
-               throw new LedpException(LedpCode.LEDP_18070);
-            }
+        if (defaultTargetMarket == null) {
+            defaultTargetMarket = targetMarketEntityMgr.createDefaultTargetMarket();
         }
-        return targetMarketEntityMgr.createDefaultTargetMarket();
+        return defaultTargetMarket;
     }
     
 }

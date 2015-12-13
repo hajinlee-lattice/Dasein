@@ -113,7 +113,7 @@ public class InternalResource extends InternalResourceBase {
     private String adminApi;
 
     @Value("${pls.test.tenant.reg.json}")
-    private String testTenangRegJson;
+    private String testTenantRegJson;
 
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
@@ -211,11 +211,16 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
     public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
         checkHeader(request);
+        String productPrefix = request.getParameter("product");
+        
+        if (productPrefix != null && !testTenantRegJson.startsWith(productPrefix)) {
+            testTenantRegJson = productPrefix + "-" + testTenantRegJson;
+        }
         log.info("Cleaning up test tenants through internal API");
 
-        List<String> Ids = getTestTenantIds();
-        final String tenant1Id = Ids.get(0);
-        final String tenant2Id = Ids.get(1);
+        List<String> testTenantIds = getTestTenantIds();
+        final String tenant1Id = testTenantIds.get(0);
+        final String tenant2Id = testTenantIds.get(1);
 
         // ==================================================
         // Provision through tenant console if needed
@@ -302,7 +307,7 @@ public class InternalResource extends InternalResourceBase {
         }
 
         List<Tenant> testTenants = new ArrayList<>();
-        for (String tenantId : Ids) {
+        for (String tenantId : testTenantIds) {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName(tenant1Id);
@@ -379,7 +384,7 @@ public class InternalResource extends InternalResourceBase {
             String topologyToken = "${TOPOLOGY}";
             String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
             InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                    "com/latticeengines/pls/controller/internal/" + testTenangRegJson);
+                    "com/latticeengines/pls/controller/internal/" + testTenantRegJson);
             String payload = IOUtils.toString(ins);
             payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
             HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="

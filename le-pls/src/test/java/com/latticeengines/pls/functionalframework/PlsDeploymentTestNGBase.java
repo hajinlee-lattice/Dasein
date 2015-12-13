@@ -29,26 +29,36 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
                 : deployedHostPort;
     }
-
+    
     protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        setupTestEnvironment(null);
+    }
+
+    protected void setupTestEnvironment(String productPrefix) throws NoSuchAlgorithmException, KeyManagementException, IOException {
         turnOffSslChecking();
-        resetTenantsViaTenantConsole();
+        resetTenantsViaTenantConsole(productPrefix);
 
         setTestingTenants();
         loginTestingUsersToMainTenant();
         switchToSuperAdmin();
     }
 
-    protected void resetTenantsViaTenantConsole() throws IOException {
+    protected void resetTenantsViaTenantConsole(String productPrefix) throws IOException {
         if (resetByAdminApi) {
             addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
             magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+            String url = "/pls/internal/testtenants";
+            if (productPrefix != null) {
+                url += "?product=" + productPrefix;
+            } else {
+                url += "/";
+            }
             String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort()
-                    + "/pls/internal/testtenants/", "", String.class);
+                    + url, "", String.class);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
             Assert.assertTrue(json.get("Success").asBoolean());
         }
     }
-
+    
 }
