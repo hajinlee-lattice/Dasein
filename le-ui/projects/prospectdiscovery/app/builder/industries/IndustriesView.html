@@ -1,139 +1,45 @@
-<div class="container">
-    <div class="row">
-    	<div class="twelve columns interior-header">
-        	<h2>Industries</h2>
-        	<ul class="link-nav">
-        		<li><a href="#">Show All</a></li>
-        		<li><a href="#">Only Selected</a></li>
-        	</ul>
-        	<button type="button" class="button icon-button white-button"><span class="fa fa-ellipsis-h"></span></button>
-        </div>
+<div class="container pd-industry" ng-controller="BuilderCtrl">
+    <div class="row page-header">
+        <h4 class="columns two">Industries</h4>
+        <span class="columns ten">
+            <button type="button" class="button icon-button white-button">
+                <span class="fa fa-ellipsis-h"></span>
+            </button>
+        </span>
     </div>
-    <div class="row">
+    <div class="row builder-subheader">
+    	<ul class="columns twelve link-nav">
+    		<li><a href="#">Show All</a></li>
+    		<li><a href="#">Only Selected</a></li>
+    	</ul>
+    </div>
 
-        <div class="three columns">
+    <div class="row industry-list" ng-repeat="items in lists">
+
+        <div class="three columns list-item" ng-repeat="item in items">
         	<div class="tile">
         		<div class="row">
         			<div class="nine columns">
 	        			<input type="checkbox" id="tile1" />
-	        			<label for="tile1">Industry Category</label>
+	        			<label for="tile1">{{item.category}}</label>
         			</div>
         			<div class="three columns">
-        				0.9x $9,324,532
+        				{{item.lift}} {{item.revenue}}
         			</div>
         		</div>
         		<div class="row">
         			<div class="six columns">
         				<dl class="stats">
         					<dt>Available from Lattice</dt>
-        					<dd><a href="#">2,354,756</a></dd>
+        					<dd><a href="#">{{item.lattice}}</a></dd>
         				</dl>
         				<dl class="stats">
         					<dt>All in your database</dt>
-        					<dd><a href="#">154,232</a></dd>
+        					<dd><a href="#">{{item.database}}</a></dd>
         				</dl>
         				<dl class="stats">
         					<dt>Your customers</dt>
-        					<dd><a href="#">123</a></dd>
-        				</dl>
-        			</div>
-        			<div class="six columns">
-        				visualization
-        			</div>
-        		</div>
-        	</div><!-- End .tile -->
-        </div><!-- End .three.columns -->
-
-        <div class="three columns">
-        	<div class="tile">
-        		<div class="row">
-        			<div class="nine columns">
-	        			<input type="checkbox" id="tile2" />
-	        			<label for="tile2">Industry Category</label>
-        			</div>
-        			<div class="three columns">
-        				0.9x $9,324,532
-        			</div>
-        		</div>
-        		<div class="row">
-        			<div class="six columns">
-        				<dl class="stats">
-        					<dt>Available from Lattice</dt>
-        					<dd><a href="#">2,354,756</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>All in your database</dt>
-        					<dd><a href="#">154,232</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>Your customers</dt>
-        					<dd><a href="#">123</a></dd>
-        				</dl>
-        			</div>
-        			<div class="six columns">
-        				visualization
-        			</div>
-        		</div>
-        	</div><!-- End .tile -->
-        </div><!-- End .three.columns -->
-
-        <div class="three columns">
-        	<div class="tile">
-        		<div class="row">
-        			<div class="nine columns">
-	        			<input type="checkbox" id="tile3" />
-	        			<label for="tile3">Industry Category</label>
-        			</div>
-        			<div class="three columns">
-        				0.9x $9,324,532
-        			</div>
-        		</div>
-        		<div class="row">
-        			<div class="six columns">
-        				<dl class="stats">
-        					<dt>Available from Lattice</dt>
-        					<dd><a href="#">2,354,756</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>All in your database</dt>
-        					<dd><a href="#">154,232</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>Your customers</dt>
-        					<dd><a href="#">123</a></dd>
-        				</dl>
-        			</div>
-        			<div class="six columns">
-        				visualization
-        			</div>
-        		</div>
-        	</div><!-- End .tile -->
-        </div><!-- End .three.columns -->
-
-        <div class="three columns">
-        	<div class="tile">
-        		<div class="row">
-        			<div class="nine columns">
-	        			<input type="checkbox" id="tile4" />
-	        			<label for="tile4">Industry Category</label>
-        			</div>
-        			<div class="three columns">
-        				0.9x $9,324,532
-        			</div>
-        		</div>
-        		<div class="row">
-        			<div class="six columns">
-        				<dl class="stats">
-        					<dt>Available from Lattice</dt>
-        					<dd><a href="#">2,354,756</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>All in your database</dt>
-        					<dd><a href="#">154,232</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>Your customers</dt>
-        					<dd><a href="#">123</a></dd>
+        					<dd><a href="#">{{item.customers}}</a></dd>
         				</dl>
         			</div>
         			<div class="six columns">

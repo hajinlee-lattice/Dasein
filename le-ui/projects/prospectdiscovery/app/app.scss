@@ -1,10 +1,12 @@
 @import "header/HeaderStyles";
 @import "jobs/status/StatusStyles";
 @import "jobs/import/ready/ReadyStyles";
+@import "builder/BuilderStyles";
 @import "builder/industries/IndustriesStyles";
 @import "builder/locations/LocationsStyles";
 @import "markets/MarketsStyles";
 @import "markets/prospect/ProspectsStyles";
+@import "navigation/sidebar/SidebarStyles";
 @import "navigation/subnav/SubNavStyles";
 @import "navigation/table/TableStyles";
 @import "navigation/message/MessageStyles";
@@ -18,6 +20,14 @@ body {
     
     .container {
         max-width: 1280px;
+    }
+
+    .page-header {
+        padding-top: 25px;
+        padding-bottom: 10px;
+    }
+    .page-header span {
+        text-align: right;
     }
 }
 

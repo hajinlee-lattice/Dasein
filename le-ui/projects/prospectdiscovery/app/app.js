@@ -2,6 +2,7 @@
 var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
+    'ngAnimate',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
@@ -10,219 +11,16 @@ var mainApp = angular.module('mainApp', [
     'pd.login',
     'pd.navigation',
     'pd.header',
+    'pd.fingerprints',
     'pd.markets',
     'pd.builder',
     'pd.jobs'
 ])
 
-.run(['$rootScope', '$state', function($rootScope, $state) {
-    $rootScope.$on('$stateChangeStart', function(evt, to, params) {
-      if (to.redirectTo) {
-        evt.preventDefault();
-        $state.go(to.redirectTo, params)
-      }
-    });
-}])
-
-.config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise('/');
-
-    $stateProvider
-        .state('home', {
-            url: '/',
-            redirectTo: 'jobs.status'
-        })
-        .state('fingerprints', {
-            url: '/fingerprints',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "main": {
-                    templateUrl: './app/fingerprints/FingerprintsView.html'
-                }
-            }
-        })
-        .state('markets', {
-            url: '/markets',
-            redirectTo: 'markets.dashboard'
-        })
-        .state('markets.dashboard', {
-            url: '/dashboard',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    templateUrl: './app/navigation/navdash/NavDashView.html'
-                },
-                "main@": {
-                    templateUrl: './app/markets/dashboard/DashboardView.html'
-                }
-            }
-        })
-        .state('markets.list', {
-            url: '/status',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    template: ''
-                },
-                "main@": {
-                    templateUrl: './app/markets/MarketsView.html'
-                }
-            }
-        })
-        .state('builder', {
-            url: '/builder',
-            redirectTo: 'builder.industries',
-            views: {
-                "summary@": {
-                    templateUrl: './app/navigation/subnav/SubNavView.html'
-                }
-            }
-        })
-        .state('builder.industries', {
-            url: '/industries',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/BuilderView.html'
-                },
-                "main@": {
-                    templateUrl: './app/builder/industries/IndustriesView.html'
-                }
-            }
-        })
-        .state('builder.locations', {
-            url: '/locations',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/BuilderView.html'
-                },
-                "main@": {
-                    templateUrl: './app/builder/locations/LocationsView.html'
-                }
-            }
-        })
-        .state('builder.firmographics', {
-            url: '/firmographics',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/BuilderView.html'
-                },
-                "main@": {
-                    templateUrl: './app/builder/states/FirmographicsView.html'
-                }
-            }
-        })
-        .state('markets.prospect_schedule', {
-            url: '/prospect_schedule',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    template: ''
-                },
-                "main@": {
-                    templateUrl: './app/markets/prospect/ScheduleView.html'
-                }
-            }
-        })
-        .state('markets.prospect_list', {
-            url: '/prospect_list',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                "summary@": {
-                    template: ''
-                },
-                "main@": {
-                    templateUrl: './app/markets/prospect/ListView.html'
-                }
-            }
-        })
-        .state('jobs', {
-            url: '/jobs',
-            redirectTo: 'jobs.status'
-        })
-        .state('jobs.status', {
-            url: '/status',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "summary@": {
-                    templateUrl: './app/navigation/table/TableView.html'
-                },
-                "main@": {
-                    templateUrl: './app/jobs/status/StatusView.html'
-                }
-            }
-        })
-        .state('jobs.import', {
-            url: '/import'
-        })
-        .state('jobs.import.credentials', {
-            url: '/credentials',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "summary@": {
-                    templateUrl: './app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: './app/jobs/import/credentials/CredentialsView.html'
-                }
-            }
-        })
-        .state('jobs.import.file', {
-            url: '/file',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "summary@": {
-                    templateUrl: './app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: './app/jobs/import/file/FileView.html'
-                }
-            }
-        })
-        .state('jobs.import.processing', {
-            url: '/processing',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "summary@": {
-                    templateUrl: './app/navigation/message/MessageView.html'
-                },
-                "main@": {
-                    templateUrl: './app/jobs/import/processing/ProcessingView.html'
-                }
-            }
-        })
-        .state('jobs.import.ready', {
-            url: '/ready/:jobId',
-            views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/RootView.html'
-                },
-                 "summary@": {
-                    templateUrl: './app/navigation/table/TableView.html'
-                },
-                "main@": {
-                    templateUrl: './app/jobs/import/ready/ReadyView.html'
-                }
-            }
-        });
-}])
+/*
+    Routing moved to routes.js, go there for your routing needs.
+    Eventually modules will define their own routes.
+*/
 
 .config(['$httpProvider', function($httpProvider) {
     //initialize get if not there

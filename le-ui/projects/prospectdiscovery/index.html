@@ -26,7 +26,7 @@
         <div id="inner-wrap">
 
             <nav id="nav" class="primary-nav" role="navigation">
-                <div ui-view="navigation"></div>
+                <div ui-view="navigation"><ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include></div>
             </nav>
 
             <section id="main" role="main" class="main-content">
@@ -52,6 +52,7 @@
     <script src="/lib/js/angular/angular.js"></script>
     <script src="/lib/js/angular/angular-sanitize.js"></script>
     <script src="/lib/js/angular/angular-resource.js"></script>
+    <script src="/lib/js/angular/angular-animate.js"></script>
     <script src="/lib/js/angular-ui-router.js"></script>
     <!--
     <script src="/lib/js/crypto/core.js"></script>
@@ -92,6 +93,7 @@
 
     <!-- app specific -->
     <script src="app/app.js"></script>
+    <script src="app/routes.js"></script>
     <script src="app/utilities/BrowserStorageUtility.js"></script>
     <script src="app/utilities/ServiceErrorUtility.js"></script>
     <script src="app/utilities/NavUtility.js"></script>

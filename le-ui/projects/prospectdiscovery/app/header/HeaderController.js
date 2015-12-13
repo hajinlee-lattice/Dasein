@@ -1,21 +1,26 @@
 angular.module('pd.header', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.NavUtility',
-    'mainApp.core.services.FeatureFlagService'
+    //'mainApp.core.services.FeatureFlagService',
+    'mainApp.core.utilities.NavUtility'
 ])
 
-.controller('MainHeaderCtrl', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('MainHeaderCtrl', function (
+        $scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, 
+        LoginService/*, FeatureFlagService*/
+    ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
     console.log('ResourceUtility', $scope.ResourceUtility);
     var clientSession = BrowserStorageUtility.getClientSession();
+    
+    $scope.userDisplayName = clientSession.DisplayName;
 
+    /*
     if (clientSession != null) {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
-            $scope.userDisplayName = clientSession.DisplayName;
             $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
             $scope.showSystemSetup = FeatureFlagService.FlagIsEnabled(flags.SYSTEM_SETUP_PAGE);
             $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
@@ -23,6 +28,7 @@ angular.module('pd.header', [
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
         });
     }
+    */
 
     $(".dropdown > a").click(function(e){
         $(this).toggleClass("active");

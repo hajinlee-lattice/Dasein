@@ -1,0 +1,25 @@
+.builder-subheader {
+    ul.link-nav {
+        text-align: center;
+        margin-top: -2em;
+        height: 3em;
+
+        li {
+            display: inline-block;
+            margin: 0px 0.6em 0 0;
+            padding: 0 1em 0 0;
+
+            a:visited,
+            a:active {
+                color: #aaa;
+            }
+            a:hover {
+                color: #666;
+            }
+        }
+
+        li:first-of-type {
+            border-right: 1px solid #aaa;
+        }
+    }
+}

@@ -1,7 +1,7 @@
 .pd-summary-subnav {
     background: #003B67;
     height: 150px;
-    margin-bottom: 7em;
+    margin-bottom: 6em;
     position: relative;
 
     ul {
@@ -41,8 +41,8 @@
                 line-height: 2.1em;
                 vertical-align: middle;
                 font-size: 3em;
-                transition: transform 500ms ease, color 500ms linear;
-                transform: rotate3d(0,0,0,0deg);
+                transition: transform 500ms ease;
+                transform: rotate3d(0,0,0,0deg) translateZ(0px);
             }
 
             i::before {
@@ -63,7 +63,13 @@
                 line-height: 1.3em;
                 text-align: center;
                 pointer-events: none;
+                white-space: nowrap;
+                padding-bottom: .3em;
             }
+        }
+
+        li.active p {
+            border-bottom: 5px solid #F16A22;
         }
     }
 }

@@ -1,4 +1,4 @@
-angular.module('mainApp.fingerprints.controllers.FingerprintsController', [
+angular.module('pd.fingerprints', [
 
 ])
 
