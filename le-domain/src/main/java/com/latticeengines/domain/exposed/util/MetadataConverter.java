@@ -30,13 +30,13 @@ public class MetadataConverter {
         supportedAvroTypes.add(Schema.Type.DOUBLE);
         supportedAvroTypes.add(Schema.Type.BOOLEAN);
     }
-    
-    public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
+
+    public static Table getTable(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName) {
-        return readMetadataFromAvroFile(configuration, path, primaryKeyName, lastModifiedKeyName, false);
+        return MetadataConverter.getTable(configuration, path, primaryKeyName, lastModifiedKeyName, false);
     }
 
-    public static Table readMetadataFromAvroFile(Configuration configuration, String path, String primaryKeyName,
+    public static Table getTable(Configuration configuration, String path, String primaryKeyName,
             String lastModifiedKeyName, boolean getDirectory) {
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
@@ -56,14 +56,14 @@ public class MetadataConverter {
                 extracts.add(extract);
             }
 
-            Table table = convertToTable(schema, extracts, primaryKeyName, lastModifiedKeyName);
+            Table table = getTable(schema, extracts, primaryKeyName, lastModifiedKeyName);
             return table;
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse metadata for avro file located at %s", path), e);
         }
     }
 
-    public static Table convertToTable(Schema schema, List<Extract> extracts, String primaryKeyName,
+    public static Table getTable(Schema schema, List<Extract> extracts, String primaryKeyName,
             String lastModifiedKeyName) {
         try {
             Table table = new Table();
@@ -73,7 +73,7 @@ public class MetadataConverter {
             List<Schema.Field> fields = schema.getFields();
 
             for (Schema.Field field : fields) {
-                Attribute attr = convertToAttribute(field);
+                Attribute attr = getAttribute(field);
                 table.addAttribute(attr);
             }
 
@@ -110,7 +110,7 @@ public class MetadataConverter {
         }
     }
 
-    public static Attribute convertToAttribute(Schema.Field field) {
+    public static Attribute getAttribute(Schema.Field field) {
         try {
             Attribute attribute = new Attribute();
             attribute.setName(field.name());
@@ -119,7 +119,7 @@ public class MetadataConverter {
                 displayName = field.name();
             }
             attribute.setDisplayName(displayName);
-            String type = convertToType(field.schema());
+            String type = getType(field.schema());
             attribute.setPhysicalDataType(type);
             attribute.setLogicalDataType(field.getProp("logicalType"));
             if (field.getProp("scale") != null) {
@@ -151,7 +151,7 @@ public class MetadataConverter {
         }
     }
 
-    public static String convertToType(Schema schema) {
+    public static String getType(Schema schema) {
         String type = null;
         if (schema.getType() == Schema.Type.UNION) {
             // only support [supported-type null] unions.
@@ -169,14 +169,14 @@ public class MetadataConverter {
                 throw new RuntimeException(String.format(
                         "Avro union type must contain a null and a supported type but is %s", schema.getType()));
             }
-            type = convertToType(foundType);
+            type = getType(foundType);
         } else {
-            type = convertToType(schema.getType());
+            type = getType(schema.getType());
         }
         return type;
     }
 
-    public static String convertToType(Schema.Type type) {
+    public static String getType(Schema.Type type) {
         if (isSupportedAvroType(type)) {
             return type.toString().toLowerCase();
         }

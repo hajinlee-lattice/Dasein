@@ -100,7 +100,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
                     }
                 });
 
-        Table eventTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, avroFiles.get(0), null, null);
+        Table eventTable = MetadataConverter.getTable(yarnConfiguration, avroFiles.get(0), null, null);
         eventTable.setName(matchTableName);
 
         addMetadata(eventTable, dbCreds);

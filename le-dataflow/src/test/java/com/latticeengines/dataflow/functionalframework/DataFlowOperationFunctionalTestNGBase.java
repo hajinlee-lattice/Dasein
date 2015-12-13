@@ -64,8 +64,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
             String path = sourcePaths.get(key);
             String idColumn = null;
             String lastModifiedColumn = null;
-            sources.put(key,
-                    MetadataConverter.readMetadataFromAvroFile(configuration, path, idColumn, lastModifiedColumn, false));
+            sources.put(key, MetadataConverter.getTable(configuration, path, idColumn, lastModifiedColumn));
         }
         return sources;
     }

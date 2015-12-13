@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
-@ContextConfiguration(locations = {"classpath:serviceflows-prospectdiscovery-context.xml"})
+@ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
 public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
@@ -63,7 +63,8 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
     @Test(groups = "functional")
     public void testOnlyFitSent() {
         QuotaFlowParameters parameters = getStandardParameters();
-        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket().getDataFlowConfiguration();
+        TargetMarketDataFlowConfiguration dataFlowConfiguration = parameters.getTargetMarket()
+                .getDataFlowConfiguration();
         dataFlowConfiguration.set(TargetMarketDataFlowOptionName.IntentScoreThreshold, IntentScore.MAX.toString());
 
         Table result = executeDataFlow(parameters);
@@ -122,7 +123,7 @@ public class QuotaFlowInitialSendTestNG extends ServiceFlowsFunctionalTestNGBase
 
         List<GenericRecord> records = readOutput();
 
-        Map<String, Integer> histogram = histogram(records, QuotaFlow.LatticeAccountID);
+        Map<Object, Integer> histogram = histogram(records, QuotaFlow.LatticeAccountID);
 
         Assert.assertTrue(histogram.size() > 0);
         Assert.assertTrue(Iterables.all(histogram.values(), new Predicate<Integer>() {

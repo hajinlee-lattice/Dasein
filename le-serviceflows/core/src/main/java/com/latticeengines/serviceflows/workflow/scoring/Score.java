@@ -54,7 +54,7 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
                     }
                 });
 
-        Table eventTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration,
+        Table eventTable = MetadataConverter.getTable(yarnConfiguration,
                 avroFiles.get(0), null, null);
         eventTable.setName(tableName);
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s",

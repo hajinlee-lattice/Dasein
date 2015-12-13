@@ -134,8 +134,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
             String path = sourcePaths.get(key);
             String idColumn = getIdColumnName(key);
             String lastModifiedColumn = getLastModifiedColumnName(key);
-            sources.put(key,
-                    MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, path, idColumn, lastModifiedColumn));
+            sources.put(key, MetadataConverter.getTable(yarnConfiguration, path, idColumn, lastModifiedColumn));
         }
         return sources;
     }
@@ -183,7 +182,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     }
 
     protected Table getOutputSchema() {
-        return MetadataConverter.readMetadataFromAvroFile( //
+        return MetadataConverter.getTable( //
                 yarnConfiguration, getTargetDirectory() + "/*.avro", null, null);
     }
 
@@ -263,10 +262,10 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> Map<T, Integer> histogram(List<GenericRecord> records, String column) {
-        Map<T, Integer> results = new HashMap<>();
+    protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {
+        Map<Object, Integer> results = new HashMap<>();
         for (GenericRecord record : records) {
-            T value = (T) record.get(column);
+            Object value = record.get(column);
             Integer count = results.get(value);
             if (count == null) {
                 results.put(value, 1);

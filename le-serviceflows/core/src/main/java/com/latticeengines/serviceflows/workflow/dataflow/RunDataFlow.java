@@ -69,7 +69,7 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
         }
 
         for (String extraSourceName : configuration.getExtraSources().keySet()) {
-            Table extraSourceTable = MetadataConverter.readMetadataFromAvroFile(yarnConfiguration, configuration
+            Table extraSourceTable = MetadataConverter.getTable(yarnConfiguration, configuration
                     .getExtraSources().get(extraSourceName), null, null);
             extraSourceTable.setName(extraSourceName);
             // register the extra source table
