@@ -104,10 +104,10 @@ class DealSFDC(object):
             else:
                 log.info('This is the last page!')
                 next_page_is_enable=False
-            print next_page_is_enable
+            #print next_page_is_enable
         try:
             assert is_recommendationExist
-            log.info("Sync Data successfully")
+            log.info("All Recommendations exist")
         except AssertionError:
             log.error("Sync Data Failed")
         return num_recommendation
@@ -123,6 +123,43 @@ class DealSFDC(object):
             log.error("reset SFDC failed Error is: %s"%e.message)
         else:
             log.info("reset SFDC successed")
+    def CheckBSAndTPInRecommendation(self,playName):
+        TP_Result_List=[]
+        BS_Result_List=[]
+        log.info('Go to Lattice Recommondation page')
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='Lattice Recommendations']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='Lattice Recommendations']")
+        self.driver.wait_until_page_contains_element('Xpath=//div[@id="ext-gen11"]/div',self.timeout)
+        log.info('###This need the certificatino for iframe have been finished in QA environment###')
+        self.driver.wait_until_page_contains_element("Xpath=//a[text()='"+playName+"']",self.timeout)
+        self.driver.click_link("Xpath=//a[text()='"+playName+"']")
+        log.info('Go To recommendation dante detail page')
+        self.driver.wait_until_page_contains_element("Xpath=//a[span/text()='Talking Points']",self.timeout)
+        self.driver.click_link("Xpath=//a[span/text()='Talking Points']")
+        log.info('Go To Talking points tab')
+        time.sleep(5)
+        self.driver.select_frame('theIFrame')
+        try:
+            self.driver.wait_until_page_contains("No Recommendations Found",self.timeout)
+            log.info('No data be found')
+        except Exception,e:
+            log.info(e)
+            TP_Result_List=self.sf.GetTalkingPoints()
+        self.driver.unselect_frame()
+        self.driver.wait_until_page_contains_element("Xpath=//a[span/text()='Buying Signals']",self.timeout)
+        self.driver.click_link("Xpath=//a[span/text()='Buying Signals']")
+        log.info('Go To Buying Signals tab')
+        time.sleep(5)
+        self.driver.select_frame('theIFrame')
+        try:
+            self.driver.wait_until_page_contains("No Recommendations Found",self.timeout)
+            log.info('No data be found')
+        except Exception,e:
+            log.info(e)
+            BS_Result_List=self.sf.GetBuyingSignalsInfo()()
+        self.driver.unselect_frame()
+        log.info('completed')
+        #self.sf.GetTalkingPoints()
     def quit(self):
         self.sf.Close_browser()
 

@@ -19,6 +19,7 @@ class TestSteps(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		print 'this is set up method!'
+		#print SalePrismEnvironments.needSetupEnvironment
 		if SalePrismEnvironments.needSetupEnvironment:
 			try:
 				print 'set up started'
@@ -36,6 +37,7 @@ class TestSteps(unittest.TestCase):
 		playDealer.scorePlay(idOfPlay=playId)#do score
 		status=None
 		while status != 'Complete':#until score finish
+			#time.sleep(20)
 			status=playDealer.getStatusOfPlay(idOfPlay=playId)
 			print status
 			if status=="Error":
@@ -52,7 +54,7 @@ class TestSteps(unittest.TestCase):
 		time.sleep(10)
 		numberOf2800=len(DealDB.fetchResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%playId,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
 		log.info("numberOf2800 is %s"%numberOf2800)
-		#assert numberOf2800==numberOfRecommendations
+		assert numberOf2800==numberOfRecommendations
 		dlDealer=DataloaderDealer()
 		assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
 		sfdcDealer=DealSFDC()
@@ -61,7 +63,6 @@ class TestSteps(unittest.TestCase):
 		sfdcDealer.syncData()
 		sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
-
 	def DataFlowForAllTypeOfPlays(self):
 		playDealer=DealPlay()
 		numberOfRecommendations=0

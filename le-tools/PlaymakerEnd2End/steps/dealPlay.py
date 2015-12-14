@@ -15,11 +15,9 @@ import urllib2,ssl
 
 ssl._create_default_https_context=ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
-
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 from PlaymakerEnd2End.tools.DBHelper import DealDB
 log=SalePrismEnvironments.log
-
 class PlayTypes(object):
 	t_allTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback','List','RenewalList','AnalyticList']
 	t_listTypes=['List','RenewalList','AnalyticList']
@@ -65,7 +63,7 @@ class DealPlay(object):
 				if k == "AppConfig.System.DataLoaderTenantName":
 					value=tenant
 				if k== "AppConfig.System.EnableModelingService":
-					if useDataPlatform == "False":
+					if str(useDataPlatform).upper() == "FALSE":
 						value="FALSE"
 					else:
 						value="TRUE"
@@ -94,6 +92,8 @@ class DealPlay(object):
 		assert response.status_code==200
 		log.info("reset cache successfully")
 	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
+		if SalePrismEnvironments.needCleanUpTenantDB:
+			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')
 		time.sleep(1)
@@ -182,6 +182,7 @@ class DealPlay(object):
 		#launch play
 		launchPlaysUrl=SalePrismEnvironments.launchPlaysUrl
 		launchPlaysHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"application/json, text/javascript, */*; q=0.01","LEFormsTicket":self.aspAuth,"Content-Type":"application/json; charset=UTF-8","User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host,"Referer":"https://bodcdevvqap25.dev.lattice.local/20151113142130283_Application/salesprism.aspx"}
+		postJsonList=''
 		for jsonString in playLaunchJsonList:
 			if not jsonString.startswith("{"):
 				jsonString="{"+jsonString
@@ -257,7 +258,7 @@ class DealPlay(object):
 			log.error(e)
 		finally:
 			conn.close()
-	
+
 	def uploadFile(self,idOfPlay,playType,fileName=SalePrismEnvironments.SPUploadFileName):
 		realUrl=self.postFileUrl
 		realUrl=realUrl.replace('99',str(idOfPlay))
@@ -280,10 +281,9 @@ class DealPlay(object):
 		res = urllib2.urlopen(request).read()
 		dir(res)
 
-			
+
 if __name__=='__main__':
 	Play=DealPlay()
-	Play.uploadFile(idOfPlay=124,playType=PlayTypes.t_List)
 	#playDict=Play.createPlayByREST()
 	#PlayID=playDict.get("playId")
 	#Play.approvePlay(idOfPlay=PlayID)
