@@ -124,7 +124,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         restTemplate.setInterceptors(null);
         boolean caught = false;
         try {
-            AppSubmission submission = submitDataFlow(config);
+            submitDataFlow(config);
         } catch (Exception e) {
             caught = true;
         }
