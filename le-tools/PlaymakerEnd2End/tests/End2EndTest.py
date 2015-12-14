@@ -36,8 +36,15 @@ class TestSteps(unittest.TestCase):
 		playDealer.scorePlay(idOfPlay=playId)#do score
 		status=None
 		while status != 'Complete':#until score finish
-			time.sleep(20)
 			status=playDealer.getStatusOfPlay(idOfPlay=playId)
+			print status
+			if status=="Error":
+				log.error("SCORING FAILED!!!")
+				break
+			elif status =="Processing":
+				log.info("Score is running!")
+			time.sleep(10)
+		assert status=='Complete'
 		selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%playId
 		numberOfRecommendations=len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
 		log.info("This play generated %s recommendations "%numberOfRecommendations)
@@ -84,11 +91,17 @@ class TestSteps(unittest.TestCase):
 				if id==LatticeGeneratesId:
 					continue
 				status=playDealer.getStatusOfPlay(idOfPlay=id)
-				if status != 'Complete':#until score finish
+				if status == 'Processing':
 					allScoreFinished=False
+					log.info("Score is running!%s"%id)
+					continue
+				elif status=='Error':
+					allScoreFinished=False
+					log.error("One Score Failed,Play Id is %s"%id)
 					break
-				elif status=='Complete':
+				elif status =='Complete':
 					allScoreFinished=True
+					continue
 			if not allScoreFinished:
 				time.sleep(20)#wait for another round query
 		for id in playIdList:
