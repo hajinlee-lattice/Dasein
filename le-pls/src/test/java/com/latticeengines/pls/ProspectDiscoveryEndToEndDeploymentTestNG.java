@@ -6,6 +6,8 @@ import java.io.File;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,8 @@ import com.latticeengines.security.exposed.AccessLevel;
  *
  */
 public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+    
+    private static final Log log = LogFactory.getLog(ProspectDiscoveryEndToEndDeploymentTestNG.class);
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
@@ -100,16 +104,25 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
     private void deleteAndCreateTwoTenants() throws Exception {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        camille.delete(new Path(String.format("/Pods/%s/Contracts/DevelopTestPLSTenant1", podId)));
-        camille.delete(new Path(String.format("/Pods/%s/Contracts/DevelopTestPLSTenant2", podId)));
+        deleteFromCamille("/Pods/%s/Contracts/DevelopTestPLSTenant1");
+        deleteFromCamille("/Pods/%s/Contracts/DevelopTestPLSTenant2");
         turnOffSslChecking();
         setTestingTenants();
         for (Tenant tenant: testingTenants) {
             deleteTenantByRestCall(tenant.getId());
             createTenantByRestCall(tenant);
         }
+    }
+    
+    private void deleteFromCamille(String path) {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        try {
+            camille.delete(new Path(String.format(path, podId)));
+        } catch (Exception e) {
+            log.warn("Path " + path + " doesn't exist.");
+        }
+        
     }
 
     @Test(groups = "deployment")
