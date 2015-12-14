@@ -17,16 +17,7 @@ class SalePrismEnvironments(object):
     with open(rootPath+"\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
-    needSetupEnvironment=True
-    if str(paras.get("needSetUpEnvironment")).upper()=='FALSE':
-        needSetupEnvironment=False
-    elif str(paras.get("needSetUpEnvironment")).upper()=='TRUE':
-         needSetupEnvironment=True
-    needCleanUpTenantDB=True
-    if str(paras.get("needCleanUpTenantDB")).upper()=='FALSE':
-        needSetupEnvironment=False
-    elif str(paras.get("needCleanUpTenantDB")).upper()=='TRUE':
-         needSetupEnvironment=True
+    needCleanUpTenantDB=paras.get("needCleanUpTenantDB")
     withModelingOnDataPlatform=paras.get("withModelingOnDataPlatform")
     tenantName=paras.get('tenantName')
     host=paras.get('host')
@@ -38,6 +29,8 @@ class SalePrismEnvironments(object):
     SFDCUser=paras.get('SFDCUser')
     SFDCPWD=paras.get('SFDCPWD')
     SPUser=paras.get("SPUser")
+    SPUploadFileUrl="https://"+host+"/"+tenantName+"_Application/AJAXFileUpload.aspx"
+    SPUploadFileName=paras.get("SPUploadFileName")
     resetUrl=paras.get("resetUrl")
     SPPwd=paras.get("SPPwd")
     tenantUrl=paras.get("tenantUrl")

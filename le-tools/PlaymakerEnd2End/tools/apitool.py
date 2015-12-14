@@ -56,6 +56,32 @@ def getEndTimestamp(response):
     return int(json.loads(response)['endDatetime'])
 
 
+def getRecCount():
+    url = apiUrl + "/recommendationcount"
+    startTime = 0
+
+    tenant = 'TestGetRecCount'
+    key = getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\\SQL2012std;databaseName=ADEDTBDd720154nW280139n154')
+    testToken = 'bearer ' + getAccessToken(key, tenant)
+
+    headers = {'Authorization':testToken}
+    params = {'start':startTime, 'destination':'SFDC'}
+    request = requests.get(url, headers=headers, params=params)
+    print request.text
+
+def getRecommendations():
+    url = apiUrl + "/recommendations"
+    startTime = 0
+
+    tenant = 'TestGetRec'
+    key = getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.83\\SQL2012std;databaseName=ADEDTBDd720154nW280139n154')
+    testToken = 'bearer ' + getAccessToken(key, tenant)
+
+    headers = {'Authorization':testToken}
+    params = {'start':startTime, 'offset':'0', 'maximum':'1000', 'destination':'MAP'}
+    request = requests.get(url, headers=headers, params=params)
+    print request.text
+
 def getData(tenant, jdbcUrl):
     url = apiUrl + "/recommendations"
     startTime = 0
@@ -93,43 +119,22 @@ def getDataFromToken(token):
 
 def main():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest='command')
-
-    # getKey
-    parser_getKey = subparsers.add_parser('getKey', help='get one time key')
-    parser_getKey.add_argument('-db', '--Database', dest='database', action='store', required=True, help='database connection string')
-    parser_getKey.add_argument('-t', '--Tenant', dest='tenant', action='store', required=True, help='tenant id')
-
-    # getToken
-    parser_getToken = subparsers.add_parser('getToken', help='get token json')
-    parser_getToken.add_argument('-db', '--Database', dest='database', action='store', required=True, help='database connection string')
-    parser_getToken.add_argument('-t', '--Tenant', dest='tenant', action='store', required=True, help='tenant id')
-
-    # getData
-    parser_getData = subparsers.add_parser('getData', help='get data')
-    parser_getData.add_argument('-db', '--Database', dest='database', action='store', required=True, help='database connection string')
-    parser_getData.add_argument('-t', '--Tenant', dest='tenant', action='store', required=True, help='tenant id')
-
-    # getDataFromKey
-    parser_getDataFromKey = subparsers.add_parser('getDataFromKey', help='get data from one time key')
-    parser_getDataFromKey.add_argument('-k', '--Key', dest='key', action='store', required=True, help='one time key')
-    parser_getDataFromKey.add_argument('-t', '--Tenant', dest='tenant', action='store', required=True, help='tenant id')
-
-    # getDataFromToken
-    parser_getDataFromToken = subparsers.add_parser('getDataFromToken', help='data from token')
-    parser_getDataFromToken.add_argument('-tk', '--Token', dest='token', action='store', required=True, help='access token')
-
+    parser.add_argument('-func', '--function', dest='function_name', action='store', required=True, help='name of the function')
+    parser.add_argument('-t', '--tenant', dest='tenant', action='store', required=False, help='name of the tenant')
+    parser.add_argument('-db', '--database', dest='database', action='store', required=False, help='database connection string')
+    parser.add_argument('-k', '--key', dest='key', action='store', required=False, help='one time key')
+    parser.add_argument('-tk', '--token', dest='token', action='store', required=False, help='Access Token')
     args = parser.parse_args()
 
-    if args.command == 'getKey':
+    if args.function_name == 'getKey':
         getKey(args.tenant, args.database)
-    elif args.command == 'getToken':
+    elif args.function_name == 'getTokenJson':
         getTokenJson(args.tenant, args.database)
-    elif args.command == 'getData':
+    elif args.function_name == 'getData':
         getData(args.tenant, args.database)
-    elif args.command == 'getDataFromKey':
+    elif args.function_name == 'getDataFromKey':
         getDataFromKey(args.tenant, args.key)
-    elif args.command == 'getDataFromToken':
+    elif args.function_name == 'getDataFromToken':
         getDataFromToken(args.token)
     else:
         logging.error('No such function: ' + args.function_name)

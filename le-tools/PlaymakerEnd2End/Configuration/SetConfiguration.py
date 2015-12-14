@@ -3,11 +3,10 @@ __author__ = 'BWang'
 import argparse,json
 
 
-def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,driverType,withModelingOnDataPlatform="TRUE",needSetEnvironment="FALSE"):
+def updateConfigIni(tenantName,host,QueneName,SFDCPWD,playName,playType,SFDCUser,driverType,withModelingOnDataPlatform="TRUE"):
     with open(".\\PlaymakerEnd2End\\config.ini") as ini:
         jsonIni=json.load(ini)
         jsonIni['withModelingOnDataPlatform']=withModelingOnDataPlatform
-        jsonIni['needSetUpEnvironment']=needSetEnvironment
         jsonIni["tenantName"]=tenantName
         jsonIni["host"]=host
         jsonIni["QueneName"]=QueneName
@@ -35,6 +34,5 @@ if __name__ == "__main__":
     parser.add_argument('-pt', '--playType', dest = 'playType', action = 'store', required = False, help = 'which type of play you want to create')
     parser.add_argument('-dt', '--driverType', dest = 'driverType', action = 'store', required = False, help = 'which browser you want to use')
     parser.add_argument('-d', '--withModelingOnDataPlatform', dest = 'withModelingOnDataPlatform', action = 'store', required = False, help = 'whether need score with data platform')
-    parser.add_argument('-se', '--needSetupEnvironment', dest = 'needSetUpEnvironment', action = 'store', required = False, help = 'whether need SetUpEnvironment')
     args = parser.parse_args()
-    updateConfigIni(tenantName=args.tenantName,host=args.host,QueneName=args.queneName,SFDCUser=args.SFDCUser,SFDCPWD=args.SFDCPWD,playName=args.playName,playType=args.playType,driverType=args.driverType,withModelingOnDataPlatform=args.withModelingOnDataPlatform,needSetEnvironment=args.needSetUpEnvironment)
+    updateConfigIni(tenantName=args.tenantName,host=args.host,QueneName=args.queneName,SFDCUser=args.SFDCUser,SFDCPWD=args.SFDCPWD,playName=args.playName,playType=args.playType,driverType=args.driverType,withModelingOnDataPlatform=args.withModelingOnDataPlatform)

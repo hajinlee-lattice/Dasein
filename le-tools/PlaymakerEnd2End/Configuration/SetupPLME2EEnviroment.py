@@ -5,7 +5,7 @@ from PlaymakerEnd2End.steps.configureJAMS  import update247DB
 from PlaymakerEnd2End.steps.dealPlay  import DealPlay
 from PlaymakerEnd2End.steps.configureSFDC import DealSFDC
 class setUpEnvironments(object):
-    #needSetUp=Sa
+    haveSetUp=False
     @staticmethod
     def setUp():
         playDealer=DealPlay()

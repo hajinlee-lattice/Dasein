@@ -8,17 +8,22 @@ except ImportError:
 	import os
 	assert os.system('pip install -U pyodbc') ==0
 	import pyodbc
-import time
-import json
+import time,json,requests,csv,os
+from poster.encode import multipart_encode
+from poster.streaminghttp import register_openers
+import urllib2,ssl
 
-import requests
-
+ssl._create_default_https_context=ssl._create_unverified_context
 requests.packages.urllib3.disable_warnings()
+
 from PlaymakerEnd2End.Configuration.Properties import SalePrismEnvironments
 from PlaymakerEnd2End.tools.DBHelper import DealDB
 log=SalePrismEnvironments.log
+
 class PlayTypes(object):
-	t_allTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback']
+	t_allTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback','List','RenewalList','AnalyticList']
+	t_listTypes=['List','RenewalList','AnalyticList']
+	t_otherTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback']
 	t_AnalyticList='AnalyticList'
 	t_CSRepeatPurchase='CSRepeatPurchase'
 	t_CSFirstPurchase='CSFirstPurchase'
@@ -26,6 +31,7 @@ class PlayTypes(object):
 	t_List='List'
 	t_RuleBased='RuleBased'
 	t_Winback='Winback'
+	t_RenewalList="RenewalList"
 class StatusCode(object):
 	s_Created=1000
 	s_Launched=2800
@@ -44,6 +50,7 @@ class DealPlay(object):
 		assert self.aspNet!=None
 		self.aspAuth=cookieList[3].split("=")[1]
 		assert self.aspAuth!=None
+		self.postFileUrl=SalePrismEnvironments.SPUploadFileUrl+"?LEFormsTicket="+self.aspAuth+"&UploadManager=PlayAccountList&UploadAlgorithm=UploadAccountList&PlayID=99&SourceFileName=WestPhysicsWithProbability.csv"
 	def setPlaymakerConfigurationByRest(self,tenant=SalePrismEnvironments.tenantName,host=SalePrismEnvironments.host,useDataPlatform=SalePrismEnvironments.withModelingOnDataPlatform):
 		log.info("##########  playmaker system configuration start   ##########")
 		with open(SalePrismEnvironments.rootPath+'PlayMakerSysConfig.json') as jsonData:
@@ -58,7 +65,7 @@ class DealPlay(object):
 				if k == "AppConfig.System.DataLoaderTenantName":
 					value=tenant
 				if k== "AppConfig.System.EnableModelingService":
-					if str(useDataPlatform).upper() == "FALSE":
+					if useDataPlatform == "False":
 						value="FALSE"
 					else:
 						value="TRUE"
@@ -87,8 +94,6 @@ class DealPlay(object):
 		assert response.status_code==200
 		log.info("reset cache successfully")
 	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
-		if SalePrismEnvironments.needCleanUpTenantDB:
-			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')
 		time.sleep(1)
@@ -127,9 +132,15 @@ class DealPlay(object):
 		assert resJson['Success']==True
 		PlayID=json.loads(resJson["CompressedResult"])["Key"]
 		assert int(PlayID)>0
+		IsUnavailable=True
+		while IsUnavailable==True:
+			IsUnavailable=self.getStatusOfPlay(idOfPlay=PlayID,key="IsUnavailable")
 		log.info("Play created!")
 		log.info("Name of created Play is  "+playName)
 		playDict={"playName":playName,"playId":PlayID}
+		if playType in PlayTypes.t_listTypes:
+			log.info("Now Uploading FIle to Server")
+			self.uploadFile(idOfPlay=PlayID,playType=playType)
 		return playDict
 	def scorePlay(self,idOfPlay):
 		log.info("##########  Play Scoring start   ##########")
@@ -140,17 +151,20 @@ class DealPlay(object):
 
 	def approvePlay(self,idOfPlay):
 		approvePlayUrl=SalePrismEnvironments.approvePlayUrl.replace("99",str(idOfPlay))
-		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth,"User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36","Origin":"https://"+SalePrismEnvironments.host}
+		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Content-Type":"application/json","LEFormsTicket":self.aspAuth}
 		response=requests.post(approvePlayUrl,headers=approvePlayHeaders,verify=False)
+		resJson=json.loads(response.text)
+		print type(resJson['Success'])
+		assert resJson['Success']==True
 		assert response.status_code==200
 		log.info("##########  play approved! ready to launch   ##########")
-	def getStatusOfPlay(self,idOfPlay):
+	def getStatusOfPlay(self,idOfPlay,key='CombinedModelScoreStatusID'):
 		getStatusOfPlayUrl=SalePrismEnvironments.getStatusOfPlayUrl+str(idOfPlay)
 		getStatusOfPlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Accept":"*/*; q=0.01","LEFormsTicket":self.aspAuth}
 		response=requests.get(getStatusOfPlayUrl,headers=getStatusOfPlayHeaders,verify=False)
 		assert response.status_code==200
 		resultJson=json.loads(response.text)
-		status=json.loads(resultJson['CompressedResult'])['CombinedModelScoreStatusID']
+		status=json.loads(resultJson['CompressedResult'])[key]
 		return status
 	def launchPlay(self,nameOfPlayToLaunch=None,launchAllPlays=False):
 		if not launchAllPlays:
@@ -243,8 +257,33 @@ class DealPlay(object):
 			log.error(e)
 		finally:
 			conn.close()
+	
+	def uploadFile(self,idOfPlay,playType,fileName=SalePrismEnvironments.SPUploadFileName):
+		realUrl=self.postFileUrl
+		realUrl=realUrl.replace('99',str(idOfPlay))
+		if playType==PlayTypes.t_AnalyticList:
+			realUrl=realUrl.replace('UploadAccountAndProbabilityList','UploadAccountList')
+		realUrl=realUrl.replace("WestPhysicsWithProbability.csv",fileName)
+		length = os.path.getsize('.\\PlaymakerEnd2End\\'+fileName)
+		png_data = open('.\\PlaymakerEnd2End\\'+fileName, "rb")
+		request = urllib2.Request(realUrl, data=png_data)
+		request.add_header('Cookie', "_at_id.latticeengines.dantedevelopment.d1f3=7d10091f88e1cbaa.1448275356.4.1449471738.1448420905.50.108; _at_id.latticeengines.development.d1f3=57d9e67a4300bf40.1448254061.51.1449827799.1449822297.2374.39292; "+self.aspNet)
+		request.add_header('Content-Length', '%d' % length)
+		request.add_header('Content-Type', 'application/octet-stream')
+		request.add_header('Host', 'SalePrismEnvironments.host')
+		request.add_header('LEFormsTicket',self.aspAuth)
+		request.add_header('X-File-Name', fileName)
+		request.add_header('X-Mime-Type', fileName)
+		request.add_header('X-Requested-With', 'XMLHttpRequest')
+		request.add_header('Accept', '*/*')
+		request.add_header('Accept-Encoding', 'gzip, deflate')
+		res = urllib2.urlopen(request).read()
+		dir(res)
+
+			
 if __name__=='__main__':
 	Play=DealPlay()
+	Play.uploadFile(idOfPlay=124,playType=PlayTypes.t_List)
 	#playDict=Play.createPlayByREST()
 	#PlayID=playDict.get("playId")
 	#Play.approvePlay(idOfPlay=PlayID)
