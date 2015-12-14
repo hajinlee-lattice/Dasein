@@ -63,13 +63,13 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
     @Value("${dataplatform.test.dellebi.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional.platform")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromDB");
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "functional.platform")
     public void tearDown() throws Exception {
         Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
 
@@ -90,7 +90,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional.platform", enabled = true)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
@@ -286,7 +286,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional.platform", enabled = true)
     public void exportDataToSQLServerWithEnclosure() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
@@ -318,7 +318,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional.platform", enabled = true)
     public void exportDataToSQLServer() throws Exception {
         URL inputUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
