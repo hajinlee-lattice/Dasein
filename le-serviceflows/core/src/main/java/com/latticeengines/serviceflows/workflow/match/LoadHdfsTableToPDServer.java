@@ -43,8 +43,8 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
         String jdbcUrl = configuration.getDbUrl();
         String password = CipherUtils.decrypt(configuration.getDbPasswordEncrypted());
-        jdbcUrl = jdbcUrl.replaceAll("$$USER$$", configuration.getDbUser());
-        jdbcUrl = jdbcUrl.replaceAll("$$PASSWORD$$", password);
+        jdbcUrl = jdbcUrl.replaceAll("\\$\\$USER\\$\\$", configuration.getDbUser());
+        jdbcUrl = jdbcUrl.replaceAll("\\$\\$PASSWD\\$\\$", password);
         
         DbCreds.Builder credsBuilder = new DbCreds.Builder()
                 .dbType("SQLServer") // SQLServer is the only supported match dbtype
