@@ -180,10 +180,10 @@ class DealPlay(object):
 				realJson["LaunchPlayFlag"]=True
 				realJson["SettingsPopUpVisible"]=False
 				realJson["LaunchRuleAvailability"]="PlaysWithNewLeads"
-				realJson=json.loads("["+str(realJson)+"]")
-				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
-				assert response.status_code==200
-				log.info("play %s launched successfully"%jsonString)
+				if postJsonList=='':
+					postJsonList=json.dumps(realJson)
+				else:
+					postJsonList=postJsonList+','+json.dumps(realJson)
 			elif jsonString.find(nameOfPlayToLaunch) > 0:
 				realJson=json.loads(jsonString)
 				realJson["LaunchRuleDisplayName"]="Create CRM recommendations"
@@ -191,12 +191,14 @@ class DealPlay(object):
 				realJson["LaunchPlayFlag"]=True
 				realJson["SettingsPopUpVisible"]=False
 				realJson["LaunchRuleAvailability"]="PlaysWithNewLeads"
-				realJson=json.loads("["+json.dumps(realJson)+"]")
-				time_start_launch=time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())
-				response=requests.post(launchPlaysUrl,json=realJson,headers=launchPlaysHeaders,verify=False)
-				assert response.status_code==200
-				log.info("play %s launched successfully"%nameOfPlayToLaunch)
-				return time_start_launch+'.000'
+				postJsonList=json.dumps(realJson)
+		time_start_launch=time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime())
+		str_post=json.loads("["+postJsonList+"]")
+		#print str_post
+		response=requests.post(launchPlaysUrl,json=str_post,headers=launchPlaysHeaders,verify=False)
+		assert response.status_code==200
+		log.info("play %s launched successfully"%nameOfPlayToLaunch)
+		return time_start_launch+'.000'
 
 	def getLaunchStatus(self,idOfPlay):
 		getLaunchStatusUrl=SalePrismEnvironments.getLaunchStatusUrl+str(idOfPlay)

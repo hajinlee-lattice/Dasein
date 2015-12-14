@@ -27,9 +27,9 @@ class TestSteps(unittest.TestCase):
 			except Exception,e:
 				log.error('set up failed: '+str(e.message))
 				SalePrismEnvironments.needSetupEnvironment=True
-	def test_SimpleDataFlow(self):
+	def DataFlowForOnePlay(self,playType=PlayTypes.t_CSRepeatPurchase):
 		playDealer=DealPlay()
-		createPlayResult=playDealer.createPlayByREST()#create a play
+		createPlayResult=playDealer.createPlayByREST(playType=playType)#create a play
 		playId=createPlayResult["playId"]
 		playName=createPlayResult["playName"]
 		playDealer.approvePlay(idOfPlay=playId)#approve a play
@@ -55,7 +55,7 @@ class TestSteps(unittest.TestCase):
 		sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
 
-	def test_CreateAllTypeOfPlays(self):
+	def DataFlowForAllTypeOfPlays(self):
 		playDealer=DealPlay()
 		numberOfRecommendations=0
 		playIdList=[]
@@ -77,6 +77,7 @@ class TestSteps(unittest.TestCase):
 			playDealer.approvePlay(idOfPlay=playId)#approve a play
 			if playType !="LatticeGenerates":
 				playDealer.scorePlay(idOfPlay=playId)#do score
+		SalePrismEnvironments.needCleanUpTenantDB=True
 		allScoreFinished=False
 		while not allScoreFinished:#until score finish
 			for id in playIdList:
@@ -110,10 +111,20 @@ class TestSteps(unittest.TestCase):
 		sfdcDealer.resetSFDC()
 		sfdcDealer.syncData()
 		assert playNameList!=None
+		numberofpage=0
 		for name in playNameList:
-			sfdcDealer.checkRecommendations(name)
+			Num_page_Recommendation=sfdcDealer.checkRecommendations(name)
+			numberofpage=numberofpage+Num_page_Recommendation
 		sfdcDealer.quit()
-		SalePrismEnvironments.needCleanUpTenantDB=True
+		assert numberofpage==numberOfRecommendations
+
+	def test_PLMDataFlow(self):
+		if str(SalePrismEnvironments.playType).upper()=='ALL':
+			print 'call all type play test'
+			self.DataFlowForAllTypeOfPlays()
+		else:
+			print 'call one type play test'
+			self.DataFlowForOnePlay(playType=SalePrismEnvironments.playType)
 
 class EVModelingE2E(unittest.TestCase):
 	@classmethod
