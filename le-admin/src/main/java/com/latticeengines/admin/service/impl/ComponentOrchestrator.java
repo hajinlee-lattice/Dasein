@@ -1,6 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +14,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -27,6 +34,8 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -45,6 +54,9 @@ public class ComponentOrchestrator {
     @Value("${security.pd.app.hostport}")
     private String apiHostPort;
 
+    @Value("${pls.api.hostport}")
+    private String plsEndHost;
+
     private static Map<String, LatticeComponent> componentMap;
     private static BatonService batonService = new BatonServiceImpl();
 
@@ -53,6 +65,10 @@ public class ComponentOrchestrator {
     private static final int NUM_RETRIES = (int) (TIMEOUT / WAIT_INTERVAL);
 
     private static final Log log = LogFactory.getLog(ComponentOrchestrator.class);
+
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
+    protected RestTemplate restTemplate = new RestTemplate();
 
     public ComponentOrchestrator() {
     }
@@ -159,7 +175,20 @@ public class ComponentOrchestrator {
             // le-pls and le-admin uses the same encoding schema to be in synch
             log.info("The username is " + user.getUsername());
             String password = Base64Utils.encodeBase64WithDefaultTrim(user.getUsername());
-            emailService.sendPdNewExternalUserEmail(user, password, apiHostPort);
+
+            // reset temp password so that user will have to change it when
+            // login
+            addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+            restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Type", "application/json");
+            headers.add("Accept", "application/json");
+            HttpEntity<String> requestEntity = new HttpEntity<>(user.toString(), headers);
+
+            ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/restTempPassword",
+                    HttpMethod.PUT, requestEntity, String.class);
+
+            emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
         }
     }
 

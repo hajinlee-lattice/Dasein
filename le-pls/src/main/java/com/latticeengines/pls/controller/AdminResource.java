@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -42,7 +43,7 @@ public class AdminResource extends InternalResourceBase {
 
     @Autowired
     private TenantService tenantService;
-    
+
     @Autowired
     private UserService userService;
 
@@ -77,8 +78,8 @@ public class AdminResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Delete a tenant.")
     public Boolean deleteTenant(@PathVariable String tenantId,
-                                @RequestParam(value = "tenantName", required = false, defaultValue = " ") String tenantName,
-                                HttpServletRequest request) {
+            @RequestParam(value = "tenantName", required = false, defaultValue = " ") String tenantName,
+            HttpServletRequest request) {
         checkHeader(request);
         Tenant tenant = new Tenant();
         tenant.setName(tenantName);
@@ -86,11 +87,12 @@ public class AdminResource extends InternalResourceBase {
         tenantService.discardTenant(tenant);
         return true;
     }
-    
+
     @RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add a PLS admin user")
-    public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant, HttpServletRequest request) {
+    public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant,
+            HttpServletRequest request) {
         checkHeader(request);
         return userService.addAdminUser(userRegistrationWithTenant);
     }
@@ -98,25 +100,22 @@ public class AdminResource extends InternalResourceBase {
     @RequestMapping(value = "/users", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update users. Mainly for upgrade from old GrantedRights to new AccessLevel.")
-    public SimpleBooleanResponse updateUsers(
-            @RequestParam(value = "username") String username,
-            @RequestParam(value = "tenant") String tenantId,
-            @RequestBody UserUpdateData userUpdateData,
-            HttpServletRequest request
-    ) throws URIException {
+    public SimpleBooleanResponse updateUsers(@RequestParam(value = "username") String username,
+            @RequestParam(value = "tenant") String tenantId, @RequestBody UserUpdateData userUpdateData,
+            HttpServletRequest request) throws URIException {
         checkHeader(request);
 
         username = URIUtil.decode(username);
         tenantId = URIUtil.decode(tenantId);
 
-        if(userService.findByUsername(username) == null) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(
-                    String.format("User %s does not exist.", username)));
+        if (userService.findByUsername(username) == null) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(String.format(
+                    "User %s does not exist.", username)));
         }
 
-        if(tenantService.findByTenantId(tenantId) == null) {
-            return SimpleBooleanResponse.failedResponse(Collections.singletonList(
-                    String.format("Tenant %s does not exist.", tenantId)));
+        if (tenantService.findByTenantId(tenantId) == null) {
+            return SimpleBooleanResponse.failedResponse(Collections.singletonList(String.format(
+                    "Tenant %s does not exist.", tenantId)));
         }
 
         AccessLevel accessLevel = null;
@@ -136,10 +135,8 @@ public class AdminResource extends InternalResourceBase {
 
         if (accessLevel != null) {
             userService.assignAccessLevel(accessLevel, tenantId, username);
-            LOGGER.info(String.format(
-                    "User %s has been updated to %s for the tenant %s through the internal API",
-                    username, accessLevel.name(), tenantId
-            ));
+            LOGGER.info(String.format("User %s has been updated to %s for the tenant %s through the internal API",
+                    username, accessLevel.name(), tenantId));
         }
 
         if (oldPassword != null && newPassword != null) {
@@ -160,6 +157,21 @@ public class AdminResource extends InternalResourceBase {
         }
 
         return SimpleBooleanResponse.successResponse();
+    }
+
+    @RequestMapping(value = "/restTempPassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset temporary password")
+    public String restTempPassword(@RequestBody User user) {
+        String username = user.getUsername();
+        String tempPass = null;
+        try {
+            tempPass = globalUserManagementService.resetLatticeCredentials(username);
+        } catch (Exception e) {
+            LOGGER.error("Error resetting temporary password.");
+        }
+        LOGGER.info("Resetting temporary password successful.");
+        return tempPass;
     }
 
 }

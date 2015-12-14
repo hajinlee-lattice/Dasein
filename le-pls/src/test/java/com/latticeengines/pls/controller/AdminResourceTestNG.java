@@ -141,6 +141,23 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(exception);
     }
 
+    @Test(groups = "functional", dependsOnMethods = { "addAdminUser" })
+    public void testResetTempPassword() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
+        User existingUser = getUser();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(existingUser.toString(), headers);
+
+        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/restTempPassword",
+                HttpMethod.PUT, requestEntity, String.class);
+        assertNotNull(result.getBody());
+    }
+
     @Test(groups = "functional", dependsOnMethods = { "addAdminUserBadArgs" })
     public void addAdminUser() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
