@@ -41,11 +41,16 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
                 configuration.getCustomerSpace(), "PrematchFlow");
         Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
 
+        String jdbcUrl = configuration.getDbUrl();
+        String password = CipherUtils.decrypt(configuration.getDbPasswordEncrypted());
+        jdbcUrl = jdbcUrl.replaceAll("$$USER$$", configuration.getDbUser());
+        jdbcUrl = jdbcUrl.replaceAll("$$PASSWORD$$", password);
+        
         DbCreds.Builder credsBuilder = new DbCreds.Builder()
                 .dbType("SQLServer") // SQLServer is the only supported match dbtype
-                .jdbcUrl(configuration.getDbUrl()) //
+                .jdbcUrl(jdbcUrl) //
                 .user(configuration.getDbUser()) //
-                .password(CipherUtils.decrypt(configuration.getDbPasswordEncrypted()));
+                .password(password);
         DbCreds creds = new DbCreds(credsBuilder);
 
         createTable(prematchFlowTable, creds);

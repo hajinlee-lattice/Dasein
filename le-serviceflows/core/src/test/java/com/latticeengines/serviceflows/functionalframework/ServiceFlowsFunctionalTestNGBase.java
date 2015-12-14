@@ -261,7 +261,6 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 
-    @SuppressWarnings("unchecked")
     protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {
         Map<Object, Integer> results = new HashMap<>();
         for (GenericRecord record : records) {
