@@ -28,6 +28,7 @@
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
             <classifier>intf</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -35,6 +36,7 @@
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
