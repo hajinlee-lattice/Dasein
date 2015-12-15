@@ -98,9 +98,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
 
     @Test(groups = "deployment", timeOut = 360000)
     public void create() {
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
@@ -133,9 +133,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
     public void update() {
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
 
-        restTemplate.put(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, TARGET_MARKET);
+        restTemplate.put(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, TARGET_MARKET);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
@@ -144,9 +144,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
 
     @Test(groups = "deployment", timeOut = 360000)
     public void createDefault() {
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
     }
@@ -159,10 +159,10 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         KeyValue kv = new KeyValue();
         kv.setPayload("{ \"foo\":\"bar\" }");
         report.setJson(kv);
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
                 report, Void.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
 
         assertEquals(targetMarket.getReports().size(), 1);
@@ -170,7 +170,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         String reportName = targetMarket.getReports().get(0).getReportName();
         assertNotNull(reportName);
 
-        Report received = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
         assertEquals(received.getPurpose(), report.getPurpose());
         assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
@@ -184,10 +184,10 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         KeyValue kv = new KeyValue();
         kv.setPayload("{ \"baz\":\"qux\" }");
         report.setJson(kv);
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
                 report, Void.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
 
         assertEquals(targetMarket.getReports().size(), 1);
@@ -195,7 +195,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         String reportName = targetMarket.getReports().get(0).getReportName();
         assertNotNull(reportName);
 
-        Report received = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
         assertEquals(received.getPurpose(), report.getPurpose());
         assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
@@ -209,19 +209,19 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         kv.setPayload("{ \"baz\":\"qux\" }");
         report.setJson(kv);
 
-        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
                 report, Void.class);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertEquals(targetMarket.getReports().size(), 2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "addReport")
     public void delete() {
-        restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
+        restTemplate.delete(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
 
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
         assertNull(targetMarket);
     }
@@ -306,7 +306,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
     }
 
     private void resetDefaultTargetMarket(String customerSpace) {
-        Boolean success = restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/reset",
+        Boolean success = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/reset",
                 null, Boolean.class);
         assertTrue(success);
     }
