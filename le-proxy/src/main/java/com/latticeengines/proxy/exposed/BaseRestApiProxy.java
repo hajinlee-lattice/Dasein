@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +43,15 @@ public abstract class BaseRestApiProxy {
         log.info(String.format("Invoking %s by getting from url %s", method, url));
         try {
             return restTemplate.getForObject(url, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+        }
+    }
+
+    protected void delete (String method, String url) {
+        log.info(String.format("Invoking %s by deleting from url %s", method, url));
+        try {
+            restTemplate.delete(new URI(url));
         } catch (Exception e) {
             throw new RuntimeException(String.format("%s: Remote call failure", method), e);
         }

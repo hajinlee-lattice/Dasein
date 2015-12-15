@@ -4,21 +4,40 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.Constants;
 
 public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
 
@@ -26,6 +45,17 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
 
     @Autowired
     private RestApiProxy proxy;
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Value("${pls.microservice.rest.endpoint.hostport}")
+    private String microServiceHostPort;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    private RestTemplate microServiceRestTemplate = new RestTemplate();
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -136,6 +166,91 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertTrue(targetMarket.getIsDefault());
 
         waitForWorkflowCompletion(targetMarket.getApplicationId());
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void resetDefaultTargetMarket() throws Exception {
+        String tenantId = mainTestingTenant.getId();
+        CustomerSpace space = CustomerSpace.parse(tenantId);
+
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        microServiceRestTemplate.getInterceptors().add(addMagicAuthHeader);
+
+        assertEquals(metadataProxy.getImportTables(space.toString()).size(), 0);
+        assertEquals(metadataProxy.getTables(space.toString()).size(), 0);
+
+        provisionMetadataTables(mainTestingTenant);
+
+        List<Table> importTables = metadataProxy.getImportTables(space.toString());
+        assertEquals(importTables.size(), 5);
+        assertEquals(metadataProxy.getTables(space.toString()).size(), 0);
+
+        List<Table> tables = new ArrayList<>();
+        String dataTablesHdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
+        for (Table importTable : importTables) {
+            importTable.setTableType(TableType.DATATABLE);
+            DateTime date = new DateTime();
+            importTable.getLastModifiedKey().setLastModifiedTimestamp(date.getMillis());
+            tables.add(importTable);
+            String dataTableHdfsPath = String.format("%1$s/SFDC/%2$s/Extracts/sometimestamp/%2$s-timestamp.json",
+                    dataTablesHdfsPath, importTable.getName());
+            HdfsUtils.writeToFile(yarnConfiguration, dataTableHdfsPath, "somecontent");
+            assertTrue(HdfsUtils.fileExists(yarnConfiguration, dataTableHdfsPath));
+        }
+        updateTables(space.toString(), tables);
+        assertEquals(metadataProxy.getTables(space.toString()).size(), 5);
+
+        importTables = metadataProxy.getImportTables(space.toString());
+        resetDefaultTargetMarket(space.toString());
+        assertEquals(metadataProxy.getTables(space.toString()).size(), 0);
+        List<Table> newImportTables = metadataProxy.getImportTables(space.toString());
+        assertEquals(importTables.size(), newImportTables.size());
+        for (int i = 0; i < importTables.size(); i++) {
+            Table importTable = importTables.get(i);
+            for (int j = 0; j < newImportTables.size(); j++) {
+                Table newImportTable = newImportTables.get(j);
+                if (newImportTable.getName().equals(importTable.getName())) {
+                    assertEquals(importTable.getAttributes().size(), newImportTable.getAttributes().size());
+                    assertEquals(importTable.getPrimaryKey().getAttributesAsStr(), newImportTable.getPrimaryKey()
+                            .getAttributesAsStr());
+                    assertEquals(importTable.getLastModifiedKey().getAttributesAsStr(), newImportTable
+                            .getLastModifiedKey().getAttributesAsStr());
+                    assertTrue(importTable.getLastModifiedKey().getLastModifiedTimestamp() < newImportTable
+                            .getLastModifiedKey().getLastModifiedTimestamp());
+                    String dataTableHdfsPath = String.format(
+                            "%1$s/SFDC/%2$s/Extracts/sometimestamp/%2$s-timestamp.json", dataTablesHdfsPath,
+                            importTable.getName());
+                    assertFalse(HdfsUtils.fileExists(yarnConfiguration, dataTableHdfsPath));
+                }
+            }
+            metadataProxy.deleteImportTable(space.toString(), importTable.getName());
+        }
+    }
+
+    private void provisionMetadataTables(Tenant tenant) {
+        Boolean success = microServiceRestTemplate.postForObject(microServiceHostPort + "/metadata/admin/provision",
+                tenant, Boolean.class);
+        if (!success) {
+            throw new RuntimeException("Failed to provision metadata component");
+        }
+    }
+
+    private void updateTables(String customerSpace, List<Table> tables) {
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("customerSpace", customerSpace);
+
+        for (Table table : tables) {
+            uriVariables.put("tableName", table.getName());
+            microServiceRestTemplate.put(
+                    String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, customerSpace,
+                            table.getName()), table);
+        }
+    }
+
+    private void resetDefaultTargetMarket(String customerSpace) {
+        Boolean success = restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/reset",
+                null, Boolean.class);
+        assertTrue(success);
     }
 
     private WorkflowStatus waitForWorkflowCompletion(String applicationId) {

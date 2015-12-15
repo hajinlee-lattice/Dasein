@@ -18,4 +18,6 @@ public interface TargetMarketService {
 
     TargetMarket createDefaultTargetMarket();
 
+    Boolean resetDefaultTargetMarket();
+
 }

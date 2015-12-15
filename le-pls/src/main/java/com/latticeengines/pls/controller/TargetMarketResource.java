@@ -86,4 +86,12 @@ public class TargetMarketResource {
     public List<TargetMarket> findAll() {
         return targetMarketService.getAllTargetMarkets();
     }
+
+    @RequestMapping(value = "/default/reset", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset a default target market")
+    @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
+    public Boolean resetDefaultTargetMarket() {
+        return targetMarketService.resetDefaultTargetMarket();
+    }
 }

@@ -1,22 +1,42 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component("targetMarketService")
 public class TargetMarketServiceImpl implements TargetMarketService {
 
+    @SuppressWarnings("unused")
+    private Log log = LogFactory.getLog(TargetMarketService.class);
+
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;
-    
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Value("${pls.microservice.rest.endpoint.hostport}")
+    private String microserviceHostPort;
+
     @Override
     public void createTargetMarket(TargetMarket targetMarket) {
         TargetMarket targetMarketStored = targetMarketEntityMgr.findTargetMarketByName(targetMarket.getName());
@@ -50,11 +70,27 @@ public class TargetMarketServiceImpl implements TargetMarketService {
     @Override
     public TargetMarket createDefaultTargetMarket() {
         TargetMarket defaultTargetMarket = targetMarketEntityMgr.findTargetMarketByName(TargetMarket.DEFAULT_NAME);
-        
+
         if (defaultTargetMarket == null) {
             defaultTargetMarket = targetMarketEntityMgr.createDefaultTargetMarket();
         }
         return defaultTargetMarket;
     }
-    
+
+    @Override
+    public Boolean resetDefaultTargetMarket() {
+        CustomerSpace space = CustomerSpace.parse(SecurityContextUtils.getTenant().getId());
+        Boolean result = metadataProxy.resetTables(space.toString());
+        String dataTableHdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), space).toString();
+        try {
+            if (result.equals(Boolean.TRUE)) {
+                HdfsUtils.rmdir(yarnConfiguration, dataTableHdfsPath);
+                return true;
+            } else {
+                throw new Exception("Reset Metadata Failed!");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
