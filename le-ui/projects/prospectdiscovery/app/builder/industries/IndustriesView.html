@@ -1,17 +1,22 @@
 <div class="container pd-industry" ng-controller="BuilderCtrl">
     <div class="row page-header">
-        <h4 class="columns two">Industries</h4>
-        <span class="columns ten">
-            <button type="button" class="button icon-button white-button">
-                <span class="fa fa-ellipsis-h"></span>
-            </button>
-        </span>
-    </div>
-    <div class="row builder-subheader">
-    	<ul class="columns twelve link-nav">
-    		<li><a href="#">Show All</a></li>
-    		<li><a href="#">Only Selected</a></li>
-    	</ul>
+        <div class="twelve columns">
+
+            <h4 class="pull-left">Industries</h4>
+
+            <ul class="link-nav">
+                <li><a href="#" ui-sref-active="active">Show All</a></li>
+                <li class="divider">|</li>
+                <li><a href="#" ui-sref-active="active">Only Selected</a></li>
+            </ul>
+
+            <div class="pull-right">
+                <button type="button" class="button icon-button white-button">
+                    <span class="fa fa-ellipsis-h"></span>
+                </button>
+            </div>
+
+        </div>
     </div>
 
     <div class="row industry-list" ng-repeat="items in lists">

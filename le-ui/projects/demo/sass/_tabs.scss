@@ -27,7 +27,7 @@ Tabs
   right: 0;
   background: white;
   bottom: 0;
-  padding: 20px;
+  padding-top: 20px;
   border-top: 1px solid #ccc; 
   &:after {
     display: table;
@@ -46,4 +46,68 @@ Tabs
 }
 [type=radio]:checked ~ label ~ .content {
   z-index: 1;
+}
+
+
+
+/* 
+Toggle Switch Tabs
+==================================================== */
+
+.toggle-check {
+    & > label:first-of-type {
+        float: left;
+        margin-right: 7px;
+        margin-top: 3px;
+    }
+}
+input.toggle-switch:empty
+{
+    margin-left: -999px;
+}
+
+input.toggle-switch:empty ~ label
+{
+    position: relative;
+    float: left;
+    line-height: 1.6em;
+    text-indent: 4em;
+    margin: 0.2em 0;
+    cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input.toggle-switch:empty ~ label:before, 
+input.toggle-switch:empty ~ label:after
+{
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: ' ';
+    width: 3.6em;
+    background-color: #d0d0d0;
+    border-radius: 20px;
+    -webkit-transition: all 100ms ease-in;
+  transition: all 100ms ease-in;
+}
+
+input.toggle-switch:empty ~ label:after
+{
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    bottom: 0.1em;
+    margin-left: 3px;
+    background-color: #000;
+    border-radius: 100%;
+}
+
+input.toggle-switch:checked ~ label:after
+{
+    margin-left: 32px;
 }

@@ -1,46 +1,118 @@
-<div data-ng-controller="SubNavCtrl" class="summary blue-steel pd-summary-subnav">
-    <ul>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.industries">
-                <i class="fa fa-3x fa-bank" style="background:#467DBA;"></i>
-                <p>Industries</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.locations">
-                <i class="fa fa-3x fa-map-marker" style="background:#6FBE4A;"></i>
-                <p>Locations</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.firmographics">
-                <i class="fa fa-3x fa-bar-chart-o" style="background:#FFBD48;"></i>
-                <p>Firmographics</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.growthtrends">
-                <i class="fa fa-3x fa-line-chart" style="background:#F16A22;"></i>
-                <p>Growth Trends</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.technology">
-                <i class="fa fa-3x fa-connectdevelop" style="background:#D22027;"></i>
-                <p>Technology</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.webpresence">
-                <i class="fa fa-3x fa-comments-o" style="background:#7B4BB2;"></i>
-                <p>Web Presence</p>
-            </a>
-        </li>
-        <li ui-sref-active="active">
-            <a ui-sref="builder.other">
-                <i class="fa fa-3x fa-exclamation" style="background:#65B7E5;"></i>
-                <p>Other</p>
-            </a>
-        </li>
-    </ul>
+<div data-ng-controller="SubNavCtrl" class="summary blue-steel tmb-summary">
+
+    <div class="container">
+        <div class="row">
+            <div class="three columns">
+                <div class="stats black-summary-list">
+                    <dl>
+                        <dt>Lift Threshold</dt>
+                        <dd>2.4x at 75%</dd>
+                    </dl>
+                </div>
+            </div><!-- End .three.columns -->
+            <div class="three columns">
+                <div class="stats black-summary-list">
+                    <dl>
+                        <dt>Matching Companies</dt>
+                        <dd>24,635</dd>
+                    </dl>
+                </div>
+            </div><!-- End .three.columns -->
+            <div class="three columns">
+                <div class="stats black-summary-list">
+                    <dl>
+                        <dt>Matching Contacts</dt>
+                        <dd>34,665</dd>
+                    </dl>
+                    <a href="#" class="view-samples pull-right">Samples</a>
+                </div>
+            </div><!-- End .three.columns -->
+            <div class="three columns">
+                <div class="stats black-summary-list">
+                    <dl>
+                        <dt>Expected Revenue</dt>
+                        <dd>$12,345,678</dd>
+                    </dl>
+                </div>
+            </div><!-- End .three.columns -->          
+        </div><!-- End .row -->
+        <div class="row">
+            <div class="twelve columns">
+
+                <div class="carousel">
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.industries">
+                            <span class="fa fa-2x fa-bank saphire-bkg"></span>
+                            <div class="tmb-nav-title">Industries</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">5</span> of 123
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.locations">
+                            <span class="fa fa-2x fa-map-marker jade-bkg"></span>
+                            <div class="tmb-nav-title">Locations</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">0</span> of 52
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.firmographics">
+                            <span class="fa fa-2x fa-bar-chart-o gold-bkg"></span>
+                            <div class="tmb-nav-title">Firmographics</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">0</span> of 64
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.growthtrends">
+                            <span class="fa fa-2x fa-line-chart amber-bkg"></span>
+                            <div class="tmb-nav-title">Growth Trends</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">2</span> of 11
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.technology">
+                            <span class="fa fa-2x fa-connectdevelop ruby-bkg"></span>
+                            <div class="tmb-nav-title">Technology Profile</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">5</span> of 32
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.webpresence">
+                            <span class="fa fa-2x fa-comments-o amethyst-bkg"></span>
+                            <div class="tmb-nav-title">Web Presence</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">5</span> of 123
+                            </div>
+                        </a>
+                    </div>
+                    <div class="carousel-slide-container">
+                        <a ui-sref="builder.other">
+                            <span class="fa fa-2x fa-exclamation aqua-marine-bkg"></span>
+                            <div class="tmb-nav-title">Other Attributes</div>
+                            <div class="tmb-nav-meta">
+                                <span class="badge">5</span> of 123
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <script src="/demo/js/responsive-carousel.js"></script>
+                <script src="/demo/js/responsive-carousel.dynamic-containers.js"></script>
+                <script src="/demo/js/responsive-carousel.autoinit.js"></script>
+
+
+            </div><!-- End .twelve.columns -->
+        </div><!-- End .row -->
+    </div><!-- End .container -->
+
+    
 </div>

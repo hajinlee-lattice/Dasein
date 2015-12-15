@@ -19,22 +19,16 @@
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
 
-    <div id="outer-wrap">
-    <div id="inner-wrap">
+    <div id="mainView">
+        <div id="mainHeaderView"></div>
+        <div data-ng-view></div>
+    </div>
 
-        <div id="mainView">
-            <div id="mainHeaderView"></div>
-            <div data-ng-view></div>
+    <div class="container row footer" data-ng-show="showFooter">
+        <div class="columns four">
+            © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
         </div>
-
-        <div class="container row footer" data-ng-show="showFooter">
-            <div class="columns four">
-                © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-            </div>
-        </div>
-
-    </div><!-- End #inner-wrap -->
-    </div><!-- End #outer-wrap -->
+    </div>
 
 <!--
 This div will be added to the DOM if the browser is IE

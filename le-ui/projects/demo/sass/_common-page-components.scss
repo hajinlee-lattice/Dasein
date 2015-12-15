@@ -1,3 +1,23 @@
 .main-content {
 	margin-bottom: 8em;
 }
+
+.page-header {
+	text-align: center;
+}
+.link-nav {
+	display: inline-block;
+	margin-top: 10px;
+	li {
+		display: inline-block;
+		&.divider {
+			padding: 0 10px;
+		}
+		a {
+			color: $jet;
+			&.active {
+				color: $saphire;
+			}
+		} 
+	}
+}

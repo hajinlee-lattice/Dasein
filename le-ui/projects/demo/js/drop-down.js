@@ -16,8 +16,10 @@ $(function() {
 
 	// Toggle Collapsible Areas
 	$(".toggle > a").click(function(e){
-		$(this).parent().toggleClass("open");
 		e.preventDefault();
+
+		$(this).parent().toggleClass("open");
+		
 		if ($(".toggle > ul").is(':visible')) {
 			$(".toggle > a > span:last-child").removeClass("fa-angle-double-down");
 			$(".toggle > a > span:last-child").addClass("fa-angle-double-up");

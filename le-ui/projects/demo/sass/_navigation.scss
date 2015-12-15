@@ -5,7 +5,6 @@ Off Canvas Navigation
   position: relative;
   overflow: hidden;
   width: 100%;
-  height: 100%;
 }
 #inner-wrap {
   position: relative;
@@ -260,11 +259,11 @@ Primary Sidebar Nav Menu Styling
 
 .toggle {
   & > ul, & > div {
-    display: none !important;
+    display: none;
   }
   &.open {
     & > ul, & > div {
-      display: block !important;
+      display: block;
     }
   }
 }
@@ -281,6 +280,10 @@ Page Summary / Sub-Nav Headers
   &.blue-steel {
     background: url("../img/bkg-blue-steel.jpg") no-repeat center;
     background-size: cover;
+    color: #fff;
+    h1, h2, h3, h4 {
+      color: #fff;
+    }
   }
 }
 

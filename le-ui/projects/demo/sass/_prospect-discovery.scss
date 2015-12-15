@@ -13,3 +13,24 @@
 		}
 	}
 }
+
+.view-samples {
+	margin-top: -20px;
+	color: #fff;
+}
+
+.switch-tab {
+	display: none;
+	&.open {
+		display: block;
+	}
+}
+
+
+.tmb-summary {
+	margin-bottom: 120px;
+}
+.tmb-summary .carousel {
+	margin-bottom: -108px;
+    margin-top: 38px;
+}
