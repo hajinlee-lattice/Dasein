@@ -61,7 +61,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     private static Tenant tenantToAttach;
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "deployment.pd", enabled = false)
+    @BeforeClass(groups = "deployment.pd")
     public void setup() throws Exception {
         deleteAndCreateTwoTenants();
         setupTestEnvironment("pd");
