@@ -52,7 +52,13 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                 workflowConfig.getWorkflowName(), workflowConfig.toString()));
         appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext);
 
-        WorkflowExecutionId workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+        WorkflowExecutionId workflowId;
+        if (workflowConfig.isRestart()) {
+            log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
+            workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart());
+        } else {
+            workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+        }
         YarnAppWorkflowId yarnAppWorkflowId = new YarnAppWorkflowId(appId, workflowId);
         yarnAppWorkflowIdEntityMgr.create(yarnAppWorkflowId);
 

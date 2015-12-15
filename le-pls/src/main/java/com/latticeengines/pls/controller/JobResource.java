@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -66,5 +67,13 @@ public class JobResource {
     @PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public void cancel(@PathVariable String jobId) {
         workflowProxy.stopWorkflow(jobId);
+    }
+
+    @RequestMapping(value = "/{jobId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Restart a previous job")
+    @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    public AppSubmission restart(@PathVariable String jobId) {
+        return workflowProxy.restartWorkflowExecution(jobId);
     }
 }

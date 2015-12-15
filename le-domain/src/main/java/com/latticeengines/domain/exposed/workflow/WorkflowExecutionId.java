@@ -1,13 +1,23 @@
 package com.latticeengines.domain.exposed.workflow;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class WorkflowExecutionId {
 
+    @JsonProperty("executionId")
     private long executionId;
 
     public WorkflowExecutionId(long executionId) {
         this.executionId = executionId;
     }
 
+    @SuppressWarnings("unused")
+    private WorkflowExecutionId() {
+        // For Json serialization
+    }
+
+    @JsonIgnore
     public long getId() {
         return executionId;
     }

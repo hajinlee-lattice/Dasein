@@ -2,16 +2,21 @@ package com.latticeengines.network.exposed.workflowapi;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.PathVariable;
+
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 
 public interface WorkflowInterface {
 
     AppSubmission submitWorkflowExecution(WorkflowConfiguration config);
 
-    String getWorkflowId(String applicationId);
+    AppSubmission restartWorkflowExecution(@PathVariable String workflowId);
+
+    WorkflowExecutionId getWorkflowId(String applicationId);
 
     WorkflowStatus getWorkflowStatus(String workflowId);
 

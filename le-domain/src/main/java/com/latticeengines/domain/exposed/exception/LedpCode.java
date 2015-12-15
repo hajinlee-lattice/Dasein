@@ -304,6 +304,8 @@ public enum LedpCode {
     LEDP_28014("No result directory for modeling job {0}"), //
     LEDP_28015("Workflow yarn step {0} did not succeed:{1}."), //
     LEDP_28016("Could not find tenant with id:{0}"), //
+    LEDP_28017("Workflow execution to be restarted does not exist:{0}"), //
+    LEDP_28018("Workflow execution {0} cannot be restarted since in non-terminated state:{1}"), //
 
     // le-dellebi
     LEDP_29000("The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //

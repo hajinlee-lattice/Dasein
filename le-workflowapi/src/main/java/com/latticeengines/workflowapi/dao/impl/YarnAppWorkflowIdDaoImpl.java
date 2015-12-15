@@ -28,7 +28,7 @@ public class YarnAppWorkflowIdDaoImpl extends BaseDaoImpl<YarnAppWorkflowId> imp
         Query query = session.createQuery("from " + YarnAppWorkflowId.class.getSimpleName() + " Y where Y.yarnAppId=:anAppID");
         query.setString("anAppID", appId.toString());
         YarnAppWorkflowId yarnAppWorkflowId = (YarnAppWorkflowId) query.uniqueResult();
-        return yarnAppWorkflowId.getAsWorkflowId();
+        return yarnAppWorkflowId == null ? null : yarnAppWorkflowId.getAsWorkflowId();
     }
 
 }

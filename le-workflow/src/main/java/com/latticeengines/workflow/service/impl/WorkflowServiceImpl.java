@@ -2,7 +2,6 @@ package com.latticeengines.workflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +31,8 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -51,8 +52,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
     private static final String WORKFLOW_SERVICE_UUID = "WorkflowServiceUUID";
-    private static final EnumSet<BatchStatus> TERMINAL_BATCH_STATUS = EnumSet.of(BatchStatus.ABANDONED,
-            BatchStatus.COMPLETED, BatchStatus.FAILED, BatchStatus.STOPPED);
+    private static final String CUSTOMER_SPACE = "CustomerSpace";
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 60 * 24;
 
     @Autowired
@@ -90,6 +90,9 @@ public class WorkflowServiceImpl implements WorkflowService {
         JobParametersBuilder parmsBuilder = new JobParametersBuilder().addString(WORKFLOW_SERVICE_UUID, UUID
                 .randomUUID().toString());
         if (workflowConfiguration != null) {
+            if (workflowConfiguration.getCustomerSpace() != null) {
+                parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
+            }
             for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
                 parmsBuilder.addString(configurationClassName,
                         workflowConfiguration.getConfigRegistry().get(configurationClassName));
@@ -157,7 +160,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         try {
             jobOperator.stop(workflowId.getId());
         } catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
-            throw new LedpException(LedpCode.LEDP_28003, e, new String[] { getWorkflowName(workflowId) });
+            throw new LedpException(LedpCode.LEDP_28003, e, new String[] { String.valueOf(workflowId.getId()) });
         }
     }
 
@@ -169,6 +172,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflowStatus.setStartTime(jobExecution.getStartTime());
         workflowStatus.setEndTime(jobExecution.getEndTime());
         workflowStatus.setLastUpdated(jobExecution.getLastUpdated());
+        workflowStatus.setWorkflowName(getWorkflowName(workflowId));
+
+        String customerSpace = jobExecution.getJobParameters().getString(CUSTOMER_SPACE);
+        if (!Strings.isNullOrEmpty(customerSpace)) {
+            workflowStatus.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        }
 
         return workflowStatus;
     }
@@ -270,7 +279,7 @@ public class WorkflowServiceImpl implements WorkflowService {
             status = getStatus(workflowId);
             if (status == null) {
                 break;
-            } else if (TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
+            } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
                 break done;
             }
             Thread.sleep(1000);

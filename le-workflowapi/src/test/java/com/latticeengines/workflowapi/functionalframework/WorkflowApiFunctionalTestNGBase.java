@@ -96,10 +96,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, WORKFLOW_WAIT_TIME_IN_MILLIS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        String url = String.format("%s/workflowapi/workflows/yarnapps/id/%s", URLUtils.getRestAPIHostPort(microServiceHostPort), appId);
-        String workflowId = restTemplate.getForObject(url, String.class);
-
-        url = String.format("%s/workflowapi/workflows/status/%s", URLUtils.getRestAPIHostPort(microServiceHostPort), workflowId);
+        String url = String.format("%s/workflowapi/workflows/yarnapps/status/%s", URLUtils.getRestAPIHostPort(microServiceHostPort), appId);
         WorkflowStatus workflowStatus = restTemplate.getForObject(url, WorkflowStatus.class);
         assertEquals(workflowStatus.getStatus(), BatchStatus.COMPLETED);
     }

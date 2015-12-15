@@ -61,11 +61,36 @@ public class WorkflowResource implements WorkflowInterface {
                 .submitWorkFlow(workflowConfig) }));
     }
 
+    @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Restart a previous workflow execution")
+    @Override
+    public AppSubmission restartWorkflowExecution(@PathVariable String workflowId) {
+        WorkflowExecutionId workflowExecutionId = new WorkflowExecutionId(Long.valueOf(workflowId));
+        WorkflowStatus status = workflowService.getStatus(workflowExecutionId);
+
+        if (status == null) {
+            throw new LedpException(LedpCode.LEDP_28017, new String[] { String.valueOf(workflowId) });
+        } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
+            throw new LedpException(LedpCode.LEDP_28018, new String[] { String.valueOf(workflowId),
+                    status.getStatus().name() });
+        }
+
+        WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
+        workflowConfig.setWorkflowName(status.getWorkflowName());
+        workflowConfig.setRestart(true);
+        workflowConfig.setWorkflowIdToRestart(workflowExecutionId);
+        workflowConfig.setCustomerSpace(status.getCustomerSpace());
+
+        return new AppSubmission(Arrays.<ApplicationId> asList(new ApplicationId[] { workflowContainerService
+                .submitWorkFlow(workflowConfig) }));
+    }
+
     @RequestMapping(value = "/yarnapps/id/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get workflowId from the applicationId of a workflow execution in a Yarn container")
     @Override
-    public String getWorkflowId(@PathVariable String applicationId) {
+    public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId) {
         return getWorkflowIdFromAppId(applicationId);
     }
 
@@ -82,15 +107,13 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
     @Override
     public WorkflowStatus getWorkflowStatusFromApplicationId(@PathVariable String applicationId) {
-        String workflowId = getWorkflowIdFromAppId(applicationId);
-        return workflowService.getStatus(new WorkflowExecutionId(Long.valueOf(workflowId)));
+        WorkflowExecutionId workflowId = getWorkflowIdFromAppId(applicationId);
+        return workflowId == null ? null : workflowService.getStatus(workflowId);
     }
 
-    private String getWorkflowIdFromAppId(String applicationId) {
+    private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        WorkflowExecutionId workflowId = workflowContainerService.getWorkflowId(YarnUtils
-                .appIdFromString(applicationId));
-        return String.valueOf(workflowId.getId());
+        return workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
     }
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")

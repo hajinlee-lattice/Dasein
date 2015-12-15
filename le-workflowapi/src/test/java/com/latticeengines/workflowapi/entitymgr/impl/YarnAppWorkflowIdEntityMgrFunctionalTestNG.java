@@ -1,8 +1,10 @@
 package com.latticeengines.workflowapi.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
@@ -30,6 +32,16 @@ public class YarnAppWorkflowIdEntityMgrFunctionalTestNG extends WorkflowApiFunct
         } finally {
             yarnAppWorkflowIdEntityMgr.delete(yarnAppWorkflowId);
         }
+    }
+
+    public void testNullCase() {
+        TestApplicationId appId = new TestApplicationId();
+        appId.setId(5);
+        appId.setClusterTimestamp(123456L);
+        appId.build();
+
+        WorkflowExecutionId retrievedWorkflowId = yarnAppWorkflowIdEntityMgr.findWorkflowIdByApplicationId(appId);
+        assertNull(retrievedWorkflowId);
     }
 
 }

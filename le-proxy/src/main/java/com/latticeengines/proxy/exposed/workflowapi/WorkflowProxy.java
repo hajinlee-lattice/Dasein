@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -24,9 +25,15 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
     }
 
     @Override
-    public String getWorkflowId(String applicationId) {
+    public AppSubmission restartWorkflowExecution(String workflowId) {
+        String url = constructUrl("/job/{workflowId}/restart", workflowId);
+        return post("restartWorkflow", url, null, AppSubmission.class);
+    }
+
+    @Override
+    public WorkflowExecutionId getWorkflowId(String applicationId) {
         String url = constructUrl("/yarnapps/id/{applicationId}", applicationId);
-        return get("getWorkflowId", url, String.class);
+        return get("getWorkflowId", url, WorkflowExecutionId.class);
     }
 
     @Override
@@ -59,4 +66,5 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
         String url = constructUrl("/job/{workflowId}/stop", workflowId);
         post("stopWorkflow", url, null, Void.class);
     }
+
 }
