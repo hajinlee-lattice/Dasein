@@ -3,13 +3,12 @@ import os
 from pandas import Series
 import shutil
 
-import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
 from leframework.model.states.averageprobabilitygenerator import AverageProbabilityGenerator
 from leframework.model.states.bucketgenerator import BucketGenerator
-from leframework.model.states.calibrationgenerator import CalibrationGenerator
+from leframework.model.states.calibrationwidthgenerator import CalibrationWithWidthGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
@@ -55,7 +54,7 @@ class AggregationExecutor(Executor):
         stateMachine.addState(InitializeRevenue(), 22)  
         stateMachine.addState(RevenueStatistics(), 23)  
         stateMachine.addState(NormalizationGenerator(), 2)  
-        stateMachine.addState(CalibrationGenerator(), 5)
+        stateMachine.addState(CalibrationWithWidthGenerator(), 5)
         stateMachine.addState(AverageProbabilityGenerator(), 3)
         stateMachine.addState(BucketGenerator(), 4)
         stateMachine.addState(ColumnMetadataGenerator(), 6)
@@ -75,33 +74,6 @@ class AggregationExecutor(Executor):
         stateMachine.addState(EnhancedSummaryGenerator(), 20)
         stateMachine.addState(Finalize(), 21)
         return stateMachine
-
-    def retrieveMetadata(self, schema, depivoted):
-        metadata = dict()
-        realColNameToRecord = dict()
-
-        if os.path.isfile(schema):
-            with open(schema) as fp:
-                reader = avro.reader(fp)
-                for record in reader:
-                    colname = record["barecolumnname"]
-                    sqlcolname = ""
-                    record["hashValue"] = None
-                    if record["Dtype"] == "BND":
-                        sqlcolname = colname + "_Continuous"  if depivoted else colname
-                    elif depivoted:
-                        sqlcolname = colname + "_" + record["columnvalue"]
-                    else:
-                        sqlcolname = colname
-                        record["hashValue"] = record["columnvalue"]
-
-                    if colname in metadata:
-                        metadata[colname].append(record)
-                    else:
-                        metadata[colname] = [record]
-
-                    realColNameToRecord[sqlcolname] = [record]
-        return (metadata, realColNameToRecord)
 
     @overrides(Executor)
     def loadData(self):

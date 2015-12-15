@@ -2,6 +2,7 @@ import random
 
 from leframeworktest.modeltest.statestest.scoretargetbase import ScoreTargetBase
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
+from leframework.model.states.calibrationwidthgenerator import CalibrationWithWidthGenerator
 
 class CalibrationGeneratorTest(ScoreTargetBase):
 
@@ -31,4 +32,14 @@ class CalibrationGeneratorTest(ScoreTargetBase):
 
         probRange = generator.mediator.probRange
         for i in range(len(probRange)-1):
-            self.assertTrue(probRange[i] > probRange[i+1], "Probability conflict!")
+            self.assertTrue(probRange[i] > probRange[i+1], "Probability conflict!" + str(probRange[i]) + "   " + str(probRange[i+1]))
+            
+        # Test new calibrition algorithm    
+        generator = CalibrationWithWidthGenerator()
+        self.loadMediator(generator, scoreTarget)
+        generator.execute()
+
+        probRange = generator.mediator.probRange
+        for i in range(len(probRange)-1):
+            self.assertTrue(probRange[i] > probRange[i+1], "Probability conflict!" + str(probRange[i]) + "   " + str(probRange[i+1]))
+

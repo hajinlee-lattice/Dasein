@@ -1,4 +1,5 @@
 import os
+import fastavro as avro
 from abc import ABCMeta, abstractmethod
 
 class Executor(object):
@@ -35,3 +36,31 @@ class Executor(object):
     
     @abstractmethod
     def accept(self, filename): pass
+    
+    def retrieveMetadata(self, schema, depivoted):
+        metadata = dict()
+        realColNameToRecord = dict()
+        
+        if os.path.isfile(schema):
+            with open(schema) as fp:
+                reader = avro.reader(fp)
+                for record in reader:
+                    colname = record["barecolumnname"]
+                    sqlcolname = ""
+                    record["hashValue"] = None
+                    if record["Dtype"] == "BND":
+                        sqlcolname = colname + "_Continuous"  if depivoted else colname
+                    elif depivoted:
+                        sqlcolname = colname + "_" + record["columnvalue"]
+                    else:
+                        sqlcolname = colname
+                        record["hashValue"] = record["columnvalue"]
+                
+                    if colname in metadata:
+                        metadata[colname].append(record)
+                    else:
+                        metadata[colname] = [record]
+                
+                    realColNameToRecord[sqlcolname] = [record]
+        return (metadata, realColNameToRecord)
+    

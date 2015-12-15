@@ -2,7 +2,6 @@ import logging
 import os
 import shutil
 
-import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
@@ -75,34 +74,6 @@ class LearningExecutor(Executor):
         stateMachine.addState(Finalize(), 21)
         return stateMachine
 
-    def retrieveMetadata(self, schema, depivoted):
-        metadata = dict()
-        realColNameToRecord = dict()
-        
-        if os.path.isfile(schema):
-            with open(schema) as fp:
-                reader = avro.reader(fp)
-                for record in reader:
-                    colname = record["barecolumnname"]
-                    sqlcolname = ""
-                    record["hashValue"] = None
-                    if record["Dtype"] == "BND":
-                        sqlcolname = colname + "_Continuous"  if depivoted else colname
-                    elif depivoted:
-                        sqlcolname = colname + "_" + record["columnvalue"]
-                    else:
-                        sqlcolname = colname
-                        record["hashValue"] = record["columnvalue"]
-                
-                    if colname in metadata:
-                        metadata[colname].append(record)
-                    else:
-                        metadata[colname] = [record]
-                
-                    realColNameToRecord[sqlcolname] = [record]
-        return (metadata, realColNameToRecord)
-    
-            
     @overrides(Executor)
     def loadData(self):
         return True, True
