@@ -36,9 +36,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
-    @Autowired
-    private CrmCredentialService crmCredentialService;
-
     private Tenant tenant;
 
     @BeforeClass(groups = { "functional", "deployment" })

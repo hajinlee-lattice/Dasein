@@ -174,10 +174,8 @@ public class ComponentOrchestrator {
             }
             // le-pls and le-admin uses the same encoding schema to be in synch
             log.info("The username is " + user.getUsername());
-            String password = Base64Utils.encodeBase64WithDefaultTrim(user.getUsername());
 
-            // reset temp password so that user will have to change it when
-            // login
+            // reset temp password so that user will have to change it when login
             addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
             restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
             HttpHeaders headers = new HttpHeaders();

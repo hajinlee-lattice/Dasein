@@ -78,9 +78,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private TenantService tenantService;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")

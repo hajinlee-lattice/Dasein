@@ -22,9 +22,6 @@ public class TenantDeploymentEntityMgrTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantDeploymentEntityMgr tenantDeploymentEntityMgr;
 
-    @Autowired
-    private TenantService tenantService;
-
     private TenantDeployment deployment;
 
     @BeforeClass(groups = "functional")
