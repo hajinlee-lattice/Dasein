@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -100,8 +101,10 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
     private void deleteAndCreateTwoTenants() throws Exception {
-        deleteFromCamille(String.format("/Pods/%s/Contracts/%sPLSTenant1", contractId));
-        deleteFromCamille(String.format("/Pods/%s/Contracts/%sPLSTenant2", contractId));
+        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(),
+                contractId + "PLSTenant1").toString());
+        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(),
+                contractId + "PLSTenant2").toString());
         turnOffSslChecking();
         setTestingTenants();
         for (Tenant tenant: testingTenants) {
