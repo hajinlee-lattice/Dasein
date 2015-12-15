@@ -280,9 +280,11 @@ Page Summary / Sub-Nav Headers
   &.blue-steel {
     background: url("../img/bkg-blue-steel.jpg") no-repeat center;
     background-size: cover;
-    color: #fff;
     h1, h2, h3, h4 {
       color: #fff;
+      &.summary-title {
+        color: #222;
+      }
     }
   }
 }
