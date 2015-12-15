@@ -10,13 +10,13 @@
 
     <properties>
         <component-name>baton</component-name>
-        <le.domain.version>2.0.18-SNAPSHOT</le.domain.version>
+        <le.domain.version>2.0.19-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.18-SNAPSHOT</version>
+        <version>2.0.19-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
-            <version>2.0.18-SNAPSHOT</version>
+            <version>2.0.19-SNAPSHOT</version>
         </dependency>
 
         <dependency>
