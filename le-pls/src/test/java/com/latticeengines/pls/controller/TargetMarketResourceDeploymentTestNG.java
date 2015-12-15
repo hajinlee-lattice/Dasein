@@ -35,12 +35,11 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
 
-public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
@@ -49,6 +48,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
+
+    @Value("${pls.test.deployment.api}")
+    private String deployedHostPort;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -99,7 +101,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = "deployment", timeOut = 360000)
     public void create() {
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET,
+                TargetMarket.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
@@ -160,8 +163,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         KeyValue kv = new KeyValue();
         kv.setPayload("{ \"foo\":\"bar\" }");
         report.setJson(kv);
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
-                report, Void.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
@@ -171,7 +174,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         String reportName = targetMarket.getReports().get(0).getReportName();
         assertNotNull(reportName);
 
-        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
+                Report.class);
         assertEquals(received.getPurpose(), report.getPurpose());
         assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
@@ -185,8 +189,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         KeyValue kv = new KeyValue();
         kv.setPayload("{ \"baz\":\"qux\" }");
         report.setJson(kv);
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
-                report, Void.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
@@ -196,7 +200,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         String reportName = targetMarket.getReports().get(0).getReportName();
         assertNotNull(reportName);
 
-        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
+                Report.class);
         assertEquals(received.getPurpose(), report.getPurpose());
         assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
@@ -210,8 +215,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         kv.setPayload("{ \"baz\":\"qux\" }");
         report.setJson(kv);
 
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
-                report, Void.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TEST_TARGET_MARKET_NAME, TargetMarket.class);
@@ -307,8 +312,13 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void resetDefaultTargetMarket(String customerSpace) {
-        Boolean success = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/reset",
-                null, Boolean.class);
+        Boolean success = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + "default/reset", null, Boolean.class);
         assertTrue(success);
+    }
+
+    private String getDeployedRestAPIHostPort() {
+        return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
+                : deployedHostPort;
     }
 }
