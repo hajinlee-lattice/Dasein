@@ -35,11 +35,12 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
 
-public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
+public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
