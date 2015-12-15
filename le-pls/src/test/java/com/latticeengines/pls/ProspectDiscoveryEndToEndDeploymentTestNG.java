@@ -65,7 +65,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     private static Tenant tenantToAttach;
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment.pd", enabled = false)
     public void setup() throws Exception {
         deleteAndCreateTwoTenants();
         setupTestEnvironment("pd");
@@ -104,8 +104,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
     private void deleteAndCreateTwoTenants() throws Exception {
-        deleteFromCamille("/Pods/%s/Contracts/DevelopTestPLSTenant1");
-        deleteFromCamille("/Pods/%s/Contracts/DevelopTestPLSTenant2");
+        deleteFromCamille(String.format("/Pods/%s/Contracts/%sPLSTenant1", contractId));
+        deleteFromCamille(String.format("/Pods/%s/Contracts/%sPLSTenant2", contractId));
         turnOffSslChecking();
         setTestingTenants();
         for (Tenant tenant: testingTenants) {
@@ -125,7 +125,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment.pd")
     public void validateSfdcCreds() {
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
@@ -137,7 +137,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000ZhOVEA0");
     }
     
-    @Test(groups = "deployment", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
+    @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
     public void createDefaultTargetMarket() throws Exception {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
 
