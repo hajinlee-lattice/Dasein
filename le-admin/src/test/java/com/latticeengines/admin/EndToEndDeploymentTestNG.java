@@ -147,8 +147,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ================================================== BEGIN: Verify main
-     * test tenant ==================================================
+     * ==================================================
+     * BEGIN: Verify main test tenant
+     * ==================================================
      */
 
     // ==================================================
@@ -164,17 +165,17 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify tenant truly exists
     // ==================================================
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyJAMSMainTestTenantExists() throws Exception {
         verifyJAMSTenantExists();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyPLSMainTestTenantExists() throws Exception {
         verifyPLSTenantExists();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists();
     }
@@ -189,13 +190,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ================================================== END: Verify main test
-     * tenant ==================================================
+     * ==================================================
+     * END: Verify main test tenant
+     * ==================================================
      */
 
     /**
-     * ================================================== BEGIN: Tenant creation
-     * methods ==================================================
+     * ==================================================
+     * BEGIN: Tenant creation methods
+     * ==================================================
      */
 
     private void provisionEndToEndTestTenants() {
@@ -284,13 +287,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ================================================== END: Tenant creation
-     * methods ==================================================
+     * ==================================================
+     * END: Tenant creation methods
+     * ==================================================
      */
 
     /**
-     * ================================================== BEGIN: Tenant
-     * verification methods ==================================================
+     * ==================================================
+     * BEGIN: Tenant verification methods
+     * ==================================================
      */
     private void verifyZKState() {
         ExecutorService executor = Executors.newFixedThreadPool(6);
@@ -402,13 +407,15 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ================================================== END: Tenant
-     * verification methods ==================================================
+     * ==================================================
+     * END: Tenant verification methods
+     * ==================================================
      */
 
     /**
-     * ================================================== BEGIN: Tenant clean up
-     * methods ==================================================
+     * ==================================================
+     * BEGIN: Tenant clean up methods
+     * ==================================================
      */
     public void cleanup() throws Exception {
         try {
@@ -456,7 +463,8 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     }
 
     /**
-     * ================================================== END: Tenant clean up
-     * methods ==================================================
+     * ==================================================
+     * END: Tenant clean up methods
+     * ==================================================
      */
 }
