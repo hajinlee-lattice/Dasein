@@ -7,20 +7,26 @@ angular
             templateUrl: 'app/jobs/status/JobStatusRow.html',
             scope: {
                 job: '=',
-                statuses: '='
+                statuses: '=',
+                expanded: '='
             },
             controller: ['$scope', 'JobsService', function ($scope, JobsService) {
                 $scope.showStatusLink = false;
-                $scope.jobRowExpanded = $scope.statuses[$scope.job.id];
+                $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
                 $scope.jobCompleted = false;
                 $scope.statusLinkText;
                 $scope.statusLinkState;
                 $scope.jobId = $scope.job.id;
 
-                $scope.jobStepsRunningStates = { load_data: false, match_data: false,
-                        generate_insights: false, create_model: false, create_global_target_market: false };
-                $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
-                        generate_insights: false, create_model: false, create_global_target_market: false };
+                if (! $scope.jobRowExpanded) {
+                    $scope.jobStepsRunningStates = { load_data: false, match_data: false,
+                            generate_insights: false, create_model: false, create_global_target_market: false };
+                    $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
+                            generate_insights: false, create_model: false, create_global_target_market: false };
+                } else {
+                    $scope.jobStepsRunningStates = $scope.statuses[$scope.jobId].running;
+                    $scope.jobStepsCompletedStates = $scope.statuses[$scope.jobId].completed;
+                }
 
                 if ($scope.job.status == "Running") {
                     $scope.showStatusLink = true;
@@ -34,18 +40,29 @@ angular
                 
                 $scope.expandJobStatus = function() {
                     $scope.jobRowExpanded = true;
-                    $scope.statuses[$scope.jobId] = true;
-                    JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
-                        if (jobStatus.success) {
-                            if (jobStatus.resultObj.jobStatus == "Running") {
-                                periodicQueryJobStatus($scope.job.id);
-                            } else {
-                                updateStatesBasedOnJobStatus(jobStatus.resultObj);
+                    $scope.expanded[$scope.jobId] = true;
+
+                    if (! isCompleted()) {
+                        JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
+                            if (jobStatus.success) {
+                                if (jobStatus.resultObj.jobStatus == "Running") {
+                                    periodicQueryJobStatus($scope.job.id);
+                                } else {
+                                    updateStatesBasedOnJobStatus(jobStatus.resultObj);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 };
                 
+                function isCompleted() {
+                    for (var step in $scope.jobStepsCompletedStates) {
+                        if (! $scope.jobStepsCompletedStates[step]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
                 // need this to get the status of job that is expanded after refresh
                 if ($scope.jobRowExpanded) {
                     $scope.expandJobStatus();
@@ -53,7 +70,7 @@ angular
                 
                 $scope.unexpandJobStatus = function() {
                     $scope.jobRowExpanded = false;
-                    $scope.statuses[$scope.jobId] = false;
+                    $scope.expanded[$scope.jobId] = false;
                     cancelPeriodJobStatusQuery();
                 };
                 
@@ -75,11 +92,21 @@ angular
                         $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i].toLowerCase()] = false;
                     }
                     
+                    saveJobStatusInParentScope();
+                    
                     if (jobStatus.jobStatus == "Complete") {
                         $scope.jobCompleted = true;
                         $scope.showStatusLink = true;
                         $scope.statusLinkText = "View Report";
                     }
+                }
+                
+                function saveJobStatusInParentScope() {
+                    if (! $scope.statuses[$scope.jobId]) {
+                        $scope.statuses[$scope.jobId] = {};
+                    }
+                    $scope.statuses[$scope.jobId]["running"] = $scope.jobStepsRunningStates;
+                    $scope.statuses[$scope.jobId]["completed"] = $scope.jobStepsCompletedStates;
                 }
                 
                 function periodicQueryJobStatus(jobId) {

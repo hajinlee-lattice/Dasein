@@ -9,7 +9,7 @@ angular.module('pd.jobs', [
 
     var stepsNameDictionary = { "importData": "load_data", "runDataFlow": "load_data",
             "loadHdfsTableToPDServer": "load_data", "match": "match_data", "createEventTableFromMatchResult": "match_data",
-            "sample": "generate_insights", "profileAndModel": "create_model" };
+            "sample": "generate_insights", "profileAndModel": "create_model", "chooseModel": "create_model", "score": "create_global_target_market" };
 
     this.GetAllJobs = function() {
         var deferred = $q.defer();
@@ -55,7 +55,6 @@ angular.module('pd.jobs', [
         }).then(
             function onSuccess(response) {
                 var jobInfo = response.data;
-                var jobInfo = jobStirng;
 
                 result = {
                     success: true,
@@ -107,15 +106,13 @@ angular.module('pd.jobs', [
             }
         }
         
-        if (stepsCompleted.indexOf("create_model") > -1) {
-            stepsCompleted.push("create_global_target_market");
-        }
         return stepsCompleted;
     }
 })
 
 .controller('JobsCtrl', function($scope, $rootScope, $http, JobsService) {
     $scope.jobs;
+    $scope.expanded = {};
     $scope.statuses = {};
     $scope.showEmptyJobsMessage = false;
 
@@ -131,13 +128,14 @@ angular.module('pd.jobs', [
         });
     }
     
-    var TIME_BETWEEN_JOB_LIST_REFRESH = 5 * 1000;
+    var TIME_BETWEEN_JOB_LIST_REFRESH = 45 * 1000;
     var REFRESH_JOBS_LIST_ID;
     
     REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
     
     $scope.$on("$destroy", function() {
         clearInterval(REFRESH_JOBS_LIST_ID);
+        $scope.expanded = {};
         $scope.statuses = {};
     });
 });
