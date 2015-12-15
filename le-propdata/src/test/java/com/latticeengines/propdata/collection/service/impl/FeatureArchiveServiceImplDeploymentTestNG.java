@@ -14,7 +14,7 @@ import com.latticeengines.propdata.collection.service.CollectionJobContext;
 import com.latticeengines.propdata.collection.service.FeatureArchiveService;
 import com.latticeengines.propdata.collection.util.DateRange;
 
-public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
+public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase<FeatureArchiveProgress> {
 
     @Autowired
     FeatureArchiveService archiveService;

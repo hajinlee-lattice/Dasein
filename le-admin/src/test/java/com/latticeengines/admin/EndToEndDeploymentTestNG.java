@@ -419,7 +419,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         deleteVisiDBDLTenants();
         deleteBardJamesTenant();
-        // deletePLSTenants();
+        deletePLSTenants();
     }
 
     private void deletePLSTenants() {

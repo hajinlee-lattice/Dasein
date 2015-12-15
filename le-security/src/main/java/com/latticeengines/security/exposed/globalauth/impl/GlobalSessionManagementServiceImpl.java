@@ -7,7 +7,6 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -17,7 +16,6 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.globalauth.generated.sessionmgr.ISessionManagementService;
 import com.latticeengines.security.globalauth.generated.sessionmgr.ObjectFactory;
 import com.latticeengines.security.globalauth.generated.sessionmgr.SessionManagementService;
@@ -26,9 +24,6 @@ import com.latticeengines.security.globalauth.generated.sessionmgr.SessionManage
 public class GlobalSessionManagementServiceImpl
         extends GlobalAuthenticationServiceBaseImpl
         implements GlobalSessionManagementService {
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
 
     private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
 

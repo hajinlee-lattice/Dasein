@@ -14,7 +14,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.service.impl.ComponentOrchestrator;
 import com.latticeengines.admin.service.impl.TenantServiceImpl.ProductAndExternalAdminInfo;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
@@ -30,9 +29,6 @@ public class MetadataComponentDeploymentTestNG extends BatonAdapterDeploymentTes
 
     @Autowired
     private ComponentOrchestrator orchestrator;
-
-    @Autowired
-    private TenantService tenantService;
 
     @Autowired
     private PLSComponentDeploymentTestNG plsComponentTestNG;

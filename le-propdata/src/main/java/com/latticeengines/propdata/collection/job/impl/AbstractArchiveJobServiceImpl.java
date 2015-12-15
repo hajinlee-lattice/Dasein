@@ -3,6 +3,7 @@ package com.latticeengines.propdata.collection.job.impl;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.mortbay.log.Log;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -133,6 +134,7 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
             case NEW: context = archiveService.importFromDB(context);
             case DOWNLOADED: context = archiveService.transformRawData(context);
             case TRANSFORMED: context = archiveService.exportToDB(context);
+            default: Log.warn(String.format("Illegal starting status %s for progress %s", progress.getStatus(), progress.getRootOperationUID()));
         }
 
         progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());

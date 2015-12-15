@@ -13,8 +13,10 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 abstract public class PivotBuffer extends BaseOperation implements Buffer {
 
+    private static final long serialVersionUID = -5692917328708255965L;
     protected String pivotKeyField;
     protected String pivotValueField;
     protected Map<String, Integer> namePositionMap;

@@ -8,8 +8,10 @@ import com.latticeengines.dataflow.runtime.cascading.PivotBuffer;
 import cascading.operation.Buffer;
 import cascading.tuple.Fields;
 
+@SuppressWarnings("rawtypes")
 public class FeaturePivotBuffer extends PivotBuffer implements Buffer {
 
+    private static final long serialVersionUID = -1766121147776760904L;
     private static final String PIVOT_KEY = "Feature";
     private static final String PIVOT_VALUE = "Value";
 

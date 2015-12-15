@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.AccessLevel;
 
 /**
@@ -51,9 +50,6 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     @Value("${pls.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
-
-    @Autowired
-    private CrmCredentialZKService crmCredentialZKService;
     
     @Autowired
     private MetadataProxy metadataProxy;

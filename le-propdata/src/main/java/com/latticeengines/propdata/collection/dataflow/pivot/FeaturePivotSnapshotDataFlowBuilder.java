@@ -47,6 +47,7 @@ public class FeaturePivotSnapshotDataFlowBuilder extends PivotSnapshotDataFlowBu
         return metadatas;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected PivotBuffer getPivotBuffer() {
         List<FieldMetadata> fms = getFieldMetadatas();

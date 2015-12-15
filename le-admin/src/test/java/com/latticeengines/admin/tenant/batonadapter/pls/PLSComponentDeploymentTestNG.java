@@ -122,7 +122,6 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
             magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
             magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
         } catch (Exception e) {
-            System.out.println(e);
             log.error(e);
         }
     }

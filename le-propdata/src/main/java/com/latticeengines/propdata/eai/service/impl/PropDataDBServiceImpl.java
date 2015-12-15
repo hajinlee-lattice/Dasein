@@ -330,12 +330,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         Integer appId = propDataJobService.exportDataSync(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
                 creds, assignedQueue, customer, 1, null).getId();
 
-        Integer applicationId;
-        if (appId != null) {
-            applicationId = appId;
-        } else {
-            return responseContext;
-        }
+        Integer applicationId = appId;
 
         responseContext.setProperty(ImportExportKey.APPLICATION_ID.getKey(), applicationId);
         responseContext.setProperty(ImportExportKey.CUSTOMER.getKey(), customer);
