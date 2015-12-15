@@ -68,8 +68,19 @@ class ImputationStep(PipelineStep):
         calculateImputationValues = True
         if len(self.imputationValues) != 0:
             calculateImputationValues = False
- 
+            
+        print "Flag: " + str(calculateImputationValues)
+        print "==========================="
+        print "Columns in Imputation steps before PCA:" 
+        for col in outputFrame.columns.values:
+            print str(col)
+
         outputFrame, nullValues = self.generateTransformedBooleanColumns(dataFrame, calculateImputationValues)
+        
+        print "Columns in Imputation steps after PCA:" 
+        for col in outputFrame.columns.values:
+            print str(col)
+            
         outputFrame = self.imputeValues(outputFrame, nullValues, calculateImputationValues)
           
         return outputFrame
@@ -87,7 +98,7 @@ class ImputationStep(PipelineStep):
             if len(nullCol_transformed > 0):
                 nullCol_transformed = pd.DataFrame(nullCol_transformed)
                 nullCol_transformed.columns = ["Transformed_Boolean_" + str(nullCol_transformed.columns.values[i]) for i in range(len(nullCol_transformed.columns.values))]
-                outputFrame = pd.concat([outputFrame, nullCol_transformed], axis = 1)
+                outputFrame = pd.concat([outputFrame, nullCol_transformed], axis=1)
         return outputFrame, nullValues
         
     def generateIsNullColumns(self, dataFrame):
@@ -136,7 +147,7 @@ class ImputationStep(PipelineStep):
     def getPCAComponents(self, X):
         pca = PCA()
         pca.fit(X)
-        explainedVarianceRatio =  pca.explained_variance_ratio_
+        explainedVarianceRatio = pca.explained_variance_ratio_
         componentsMatrix = pca.components_
         X_transformed = pca.transform(X)
              
@@ -153,9 +164,9 @@ class ImputationStep(PipelineStep):
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
         indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
         numberOfColumns = min(indexOfMaxVariance, numberOfColumnsThreshold)
-        means = np.mean(inputScaled, axis = 0)
+        means = np.mean(inputScaled, axis=0)
   
-        return (scaling_array, np.mean(inputScaled, axis = 0), componentsMatrix[ : numberOfColumns, :])
+        return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumns, :])
         
     def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
@@ -185,7 +196,7 @@ class ImputationStep(PipelineStep):
         return expectedLabelValue
         
     def getTransformedMatrix(self, scalingArray, meanColumn, componentMatrix, originalMatrix):
-        transformedMatrix = np.ndarray(shape = (0, 0)) 
+        transformedMatrix = np.ndarray(shape=(0, 0)) 
           
         if (len(originalMatrix) > 0):
             scaledMatrix = np.multiply(originalMatrix, np.ones(originalMatrix.shape) * scalingArray.T)
@@ -203,7 +214,7 @@ class ImputationStep(PipelineStep):
         sp[numBins] = number
         return tuple(sp)
          
-    def meanValuePair(self, x,tupleSize=2):
+    def meanValuePair(self, x, tupleSize=2):
         def mean(k):  return sum([float(y[k]) for y in x]) / len(x) / 1.0
         if tupleSize > 1: return [mean(k) for k in range(tupleSize)]
         return [sum(x) / 1.0 / len(x)]
@@ -218,16 +229,16 @@ class ImputationStep(PipelineStep):
             if pd.isnull(x[i]) == False:
                 pairs.append([x[i], y[i]])
              
-        if numBins > len(pairs) -1 and len(pairs) != 0:
-            numBins = len(pairs)-1
+        if numBins > len(pairs) - 1 and len(pairs) != 0:
+            numBins = len(pairs) - 1
      
         indBins = self.createIndexSequence(len(pairs), numBins)
         def mvPair(k):
-            return self.meanValuePair([pairs[i] for i in range(indBins[k], indBins[k+1])])
-        return pd.Series([mvPair(b) for b in range(len(indBins)-1)])
+            return self.meanValuePair([pairs[i] for i in range(indBins[k], indBins[k + 1])])
+        return pd.Series([mvPair(b) for b in range(len(indBins) - 1)])
      
     def matchValue(self, yvalue, binPairs):
-        def absFn(x): return( x if x > 0 else (-x))
+        def absFn(x): return(x if x > 0 else (-x))
         def sgnFn(x):
             if x == 0:
                 return x
@@ -242,30 +253,31 @@ class ImputationStep(PipelineStep):
             return rd.randint(10, 1000)
              
         matches = [absFn(yvalue - p[1]) for p in binPairs]
-        ind = [i for i,x in enumerate(matches) if x == min(matches)][0]
+        ind = [i for i, x in enumerate(matches) if x == min(matches)][0]
         valuePair = binPairs[ind]
              
         splitValue = binPairs[1][0] - binPairs[0][0]
-        adjValue=0
+        adjValue = 0
         if valuePair == binPairs[0]:
             adjValue = -2.0 * splitValue
         if valuePair == binPairs[numBins - 1]:
             adjValue = 2.0 * splitValue
         return valuePair[0] + adjValue
-   
+  
+
 class EVModelStep(PipelineStep):
     model_ = None
     modelInputColumns_ = []
     scoreColumnName_ = None
     revenueColumnName_ = None
-    def __init__(self, model = None, modelInputColumns = None, revenueColumnName = None, scoreColumnName="Score"):
+    def __init__(self, model=None, modelInputColumns=None, revenueColumnName=None, scoreColumnName="Score"):
         self.model_ = model
         self.modelInputColumns_ = modelInputColumns
         self.scoreColumnName_ = scoreColumnName
         self.revenueColumnName_ = revenueColumnName
         self.setModelStep(True)
            
-    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
+    def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName="Score"):
          return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
        
     def transform(self, dataFrame):
