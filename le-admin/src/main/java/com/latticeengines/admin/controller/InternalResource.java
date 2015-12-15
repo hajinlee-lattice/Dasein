@@ -131,6 +131,7 @@ public class InternalResource extends InternalResourceBase {
         return true;
     }
 
+
     private boolean existingDefaultIsValid(String serverName, SelectableConfigurationField patch) {
         SerializableDocumentDirectory defaultDir = serviceService.getDefaultServiceConfig(serverName);
         String defaultOption = defaultDir.getNodeAtPath(patch.getNode()).getData();

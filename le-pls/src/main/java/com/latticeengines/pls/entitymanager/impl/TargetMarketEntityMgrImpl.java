@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,10 +13,12 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOption;
+import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
+import com.latticeengines.pls.dao.TargetMarketReportMapDao;
 import com.latticeengines.pls.dao.TargetMarketStatisticsDao;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -32,6 +35,9 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Autowired
     private TargetMarketStatisticsDao targetMarketStatisticsDao;
+
+    @Autowired
+    private TargetMarketReportMapDao targetMarketReportMapDao;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -57,6 +63,12 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
         if (targetMarket.getDataFlowConfiguration() != null) {
             for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
                 targetMarketDataflowOptionDao.create(option);
+            }
+        }
+
+        if (targetMarket.getReports() != null) {
+            for (TargetMarketReportMap reportMap : targetMarket.getReports()) {
+                targetMarketReportMapDao.create(reportMap);
             }
         }
     }
@@ -85,13 +97,18 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public TargetMarket findTargetMarketByName(String name) {
         TargetMarket market = targetMarketDao.findTargetMarketByName(name);
+        inflate(market);
         return market;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TargetMarket> getAllTargetMarkets() {
-        return targetMarketDao.findAll();
+        List<TargetMarket> markets = targetMarketDao.findAll();
+        for (TargetMarket market : markets) {
+            inflate(market);
+        }
+        return markets;
     }
 
     @Override
@@ -103,7 +120,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
         create(targetMarket);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TargetMarket> findAll() {
@@ -123,4 +140,10 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     }
 
+    private void inflate(TargetMarket market) {
+        if (market != null) {
+            Hibernate.initialize(market.getReports());
+            Hibernate.initialize(market.getDataFlowConfiguration());
+        }
+    }
 }

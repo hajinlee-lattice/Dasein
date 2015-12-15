@@ -1,18 +1,18 @@
 package com.latticeengines.db.exposed.dao.impl;
 
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import java.util.Date;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.orm.hibernate4.SessionFactoryUtils;
 
-import javax.persistence.Column;
-import javax.sql.DataSource;
-import java.lang.reflect.Field;
-import java.util.Date;
-import java.util.List;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
@@ -48,8 +48,9 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
      * associated instances if the association is mapped with
      * cascade="save-update"
      *
-     * @param entity - Parameters: object - a transient or detached instance
-     *               containing new or updated state
+     * @param entity
+     *            - Parameters: object - a transient or detached instance
+     *            containing new or updated state
      */
     @Override
     public void createOrUpdate(T entity) {
@@ -60,7 +61,8 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     /**
      * Find an entity by key
      *
-     * @param entity - entity.pid must NOT be null.
+     * @param entity
+     *            - entity.pid must NOT be null.
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -80,8 +82,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @SuppressWarnings("unchecked")
     public <F> T findByField(String fieldName, F fieldValue) {
         Session session = getSessionFactory().getCurrentSession();
-        String columnName = getColumnName(fieldName);
-        String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), columnName);
+        String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
         Query query = session.createQuery(queryStr);
         query.setParameter("value", fieldValue);
         List<T> results = query.list();
@@ -125,16 +126,6 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     protected DataSource getDataSource() {
         return SessionFactoryUtils.getDataSource(getSessionFactory());
-    }
-
-    private String getColumnName(String fieldName) {
-        try {
-            Field field = getEntityClass().getDeclaredField(fieldName);
-            Column annotation = field.getAnnotation(Column.class);
-            return annotation.name();
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException(String.format("No such field %s", e));
-        }
     }
 
     private void setAuditingFields(T entity) {

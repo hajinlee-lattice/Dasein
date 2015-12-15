@@ -51,6 +51,11 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     private void internalCreate(Report report) {
         initialize(report);
         KeyValue json = report.getJson();
+        if (json == null) {
+            json = new KeyValue();
+            json.setPayload("");
+            report.setJson(json);
+        }
         json.setTenantId(report.getTenantId());
         keyValueDao.create(json);
         getDao().create(report);
@@ -89,14 +94,14 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     public List<Report> getAll() {
         return super.findAll();
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void delete(Report report) {
         KeyValue kv = report.getJson();
         super.delete(report);
         keyValueDao.delete(kv);
-        
+
     }
 
 }

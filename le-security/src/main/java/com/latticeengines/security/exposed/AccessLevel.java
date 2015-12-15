@@ -27,7 +27,6 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
-            GrantedRight.CREATE_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
@@ -59,7 +58,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS //
-            )), SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
+            )), //
+    SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.EDIT_PLS_DATA, //
@@ -75,7 +75,6 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
-            GrantedRight.CREATE_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS //

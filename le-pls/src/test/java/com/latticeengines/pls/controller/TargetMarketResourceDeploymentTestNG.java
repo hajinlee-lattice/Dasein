@@ -4,7 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertFalse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,6 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
@@ -29,12 +28,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.pls.ReportPurpose;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
@@ -42,9 +42,6 @@ import com.latticeengines.security.exposed.Constants;
 public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
-
-    @Autowired
-    private RestApiProxy proxy;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -99,7 +96,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         switchToExternalAdmin();
     }
 
-    @Test(groups = "deployment", timeOut = 360000, enabled = false)
+    @Test(groups = "deployment", timeOut = 360000)
     public void create() {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET, TargetMarket.class);
 
@@ -130,12 +127,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS.booleanValue());
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount),
                 MAX_PROSPECTS_PER_ACCOUNT.intValue());
-
-        WorkflowStatus status = waitForWorkflowCompletion(targetMarket.getApplicationId());
-        assertEquals(status.getStatus(), BatchStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "create")
     public void update() {
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
 
@@ -148,24 +142,88 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "update", enabled = false)
-    public void delete() {
-        restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-        assertNull(targetMarket);
-    }
-
-    @Test(groups = "deployment", timeOut = 360000, enabled = false)
+    @Test(groups = "deployment", timeOut = 360000)
     public void createDefault() {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
 
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
+    }
 
-        waitForWorkflowCompletion(targetMarket.getApplicationId());
+    @Test(groups = "deployment", dependsOnMethods = "create")
+    public void registerReport() {
+        Report report = new Report();
+        report.setIsOutOfDate(true);
+        report.setPurpose(ReportPurpose.IMPORT_SUMMARY);
+        KeyValue kv = new KeyValue();
+        kv.setPayload("{ \"foo\":\"bar\" }");
+        report.setJson(kv);
+        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+                report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        assertEquals(targetMarket.getReports().size(), 1);
+        assertNull(targetMarket.getReports().get(0).getReport());
+        String reportName = targetMarket.getReports().get(0).getReportName();
+        assertNotNull(reportName);
+
+        Report received = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        assertEquals(received.getPurpose(), report.getPurpose());
+        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
+        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "registerReport")
+    public void replaceReport() {
+        Report report = new Report();
+        report.setIsOutOfDate(false);
+        report.setPurpose(ReportPurpose.IMPORT_SUMMARY);
+        KeyValue kv = new KeyValue();
+        kv.setPayload("{ \"baz\":\"qux\" }");
+        report.setJson(kv);
+        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+                report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        assertEquals(targetMarket.getReports().size(), 1);
+        assertNull(targetMarket.getReports().get(0).getReport());
+        String reportName = targetMarket.getReports().get(0).getReportName();
+        assertNotNull(reportName);
+
+        Report received = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports/" + reportName, Report.class);
+        assertEquals(received.getPurpose(), report.getPurpose());
+        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
+        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "replaceReport")
+    public void addReport() {
+        Report report = new Report();
+        report.setPurpose(ReportPurpose.MODEL_SUMMARY);
+        KeyValue kv = new KeyValue();
+        kv.setPayload("{ \"baz\":\"qux\" }");
+        report.setJson(kv);
+
+        restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME + "/reports",
+                report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertEquals(targetMarket.getReports().size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "addReport")
+    public void delete() {
+        restTemplate.delete(getRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertNull(targetMarket);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -251,19 +309,5 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         Boolean success = restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/reset",
                 null, Boolean.class);
         assertTrue(success);
-    }
-
-    private WorkflowStatus waitForWorkflowCompletion(String applicationId) {
-        while (true) {
-            WorkflowStatus status = proxy.getWorkflowStatusFromApplicationId(applicationId);
-            if (!status.getStatus().isRunning()) {
-                return status;
-            }
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 }

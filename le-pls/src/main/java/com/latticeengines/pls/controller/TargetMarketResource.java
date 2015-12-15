@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +12,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.network.exposed.pls.TargetMarketInterface;
+import com.latticeengines.pls.service.ReportService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.util.WorkflowSubmitter;
 import com.wordnik.swagger.annotations.Api;
@@ -21,10 +25,13 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/targetmarkets")
 @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
-public class TargetMarketResource {
+public class TargetMarketResource implements TargetMarketInterface {
 
     @Autowired
     private TargetMarketService targetMarketService;
+
+    @Autowired
+    private ReportService reportService;
 
     @Autowired
     private WorkflowSubmitter workflowSubmitter;
@@ -32,7 +39,7 @@ public class TargetMarketResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market")
-    @PreAuthorize("hasRole('Create_PLS_TargetMarkets')")
+    @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public void create(@RequestBody TargetMarket targetMarket) {
         if (targetMarketService.getTargetMarketByName(targetMarket.getName()) != null) {
             throw new RuntimeException(String.format("Target market %s already exists", targetMarket.getName()));
@@ -45,7 +52,7 @@ public class TargetMarketResource {
     @RequestMapping(value = "/default", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a default target market")
-    @PreAuthorize("hasRole('Create_PLS_TargetMarkets')")
+    @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public void createDefault() {
         TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
         workflowSubmitter.submitFitWorkflow(targetMarket);
@@ -81,8 +88,17 @@ public class TargetMarketResource {
         return targetMarketService.getTargetMarketByName(targetMarketName);
     }
 
+    @RequestMapping(value = "/{targetMarketName}/reports", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register a report")
+    @Secured({ "Edit_PLS_TargetMarkets", "Edit_PLS_Reports" })
+    public void registerReport(@PathVariable String targetMarketName, @RequestBody Report report) {
+        targetMarketService.registerReport(targetMarketName, report);
+    }
+
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
     public List<TargetMarket> findAll() {
         return targetMarketService.getAllTargetMarkets();
     }

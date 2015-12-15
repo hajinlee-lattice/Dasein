@@ -96,12 +96,14 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         copyStopListToHdfs();
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
+        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME,
+                DEMO_CUSTOMERSPACE.toString());
         if (defaultTargetMarket != null) {
             internalResourceProxy.deleteTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
         }
         internalResourceProxy.createDefaultTargetMarket(DEMO_CUSTOMERSPACE.toString());
-        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME, DEMO_CUSTOMERSPACE.toString());
+        defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME,
+                DEMO_CUSTOMERSPACE.toString());
     }
 
     protected FitModelWorkflowConfiguration generateFitModelWorkflowConfiguration() {
@@ -119,7 +121,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .microServiceHostPort(microServiceHostPort) //
                 .sourceType(SourceType.SALESFORCE) //
                 .extraSources(extraSources) //
-                .targetPath("/PrematchFlowRun") //
                 .matchDbUrl(
                         "jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;user=DLTransfer;password=free&NSE") //
                 .matchDbUser("DLTransfer") //
@@ -187,7 +188,7 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     }
 
     private void installServiceFlow() throws Exception {
-        String mavenHome = System.getProperty("MVN_HOME");
+        String mavenHome = System.getProperty("MVN_HOME", "/usr");
         String version = getVersionFromPomXmlFile();
         // Retrieve the service flow jar file from the maven repository
         String command = "%s/bin/mvn -DgroupId=com.latticeengines " + "-DartifactId=le-serviceflows-prospectdiscovery "

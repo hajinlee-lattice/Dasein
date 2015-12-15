@@ -1,19 +1,25 @@
 package com.latticeengines.pls.service.impl;
 
+import java.rmi.server.UID;
+import java.util.Iterator;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
+import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -29,13 +35,13 @@ public class TargetMarketServiceImpl implements TargetMarketService {
     private TargetMarketEntityMgr targetMarketEntityMgr;
 
     @Autowired
+    private ReportEntityMgr reportEntityMgr;
+
+    @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Value("${pls.microservice.rest.endpoint.hostport}")
-    private String microserviceHostPort;
 
     @Override
     public void createTargetMarket(TargetMarket targetMarket) {
@@ -75,6 +81,34 @@ public class TargetMarketServiceImpl implements TargetMarketService {
             defaultTargetMarket = targetMarketEntityMgr.createDefaultTargetMarket();
         }
         return defaultTargetMarket;
+    }
+
+    @Override
+    public void registerReport(String targetMarketName, Report report) {
+        TargetMarket targetMarket = getTargetMarketByName(targetMarketName);
+        if (targetMarket != null) {
+            report.setName(new UID().toString());
+            reportEntityMgr.createOrUpdate(report);
+
+            List<TargetMarketReportMap> reportMaps = targetMarket.getReports();
+            Iterator<TargetMarketReportMap> iterator = reportMaps.iterator();
+            while (iterator.hasNext()) {
+                TargetMarketReportMap existingReport = iterator.next();
+                if (existingReport.getReport().getPurpose().equals(report.getPurpose())) {
+                    iterator.remove();
+                } else {
+                    existingReport.setPid(null);
+                }
+            }
+
+            TargetMarketReportMap created = new TargetMarketReportMap();
+            created.setReport(report);
+            created.setTargetMarket(targetMarket);
+            reportMaps.add(created);
+            targetMarket.setReports(reportMaps);
+
+            updateTargetMarketByName(targetMarket, targetMarketName);
+        }
     }
 
     @Override

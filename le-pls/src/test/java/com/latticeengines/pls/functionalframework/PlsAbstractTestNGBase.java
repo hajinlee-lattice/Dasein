@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -46,7 +47,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -66,13 +66,15 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final Integer NUM_PROPSPECTS_DESIRED_1 = 200;
     protected static final Integer NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS = 10;
     protected static final IntentScore INTENT_SCORE_THRESHOLD = IntentScore.LOW;
-    protected static final Double FIT_SCORE_THRESHOLD =  0.3;
+    protected static final Double FIT_SCORE_THRESHOLD = 0.3;
     protected static final String MODEL_ID = "MODEL_ID";
     protected static final String EVENT_COLUMN_NAME = "EVENT_COLUMN_NAME";
     protected static final Boolean DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS = false;
     protected static final Boolean IS_DEFAULT = false;
-    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account", new ArrayList<Restriction>());
-    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact", new ArrayList<Restriction>());
+    protected static final Restriction ACCOUNT_FILTER = new ExistsRestriction(false, "account",
+            new ArrayList<Restriction>());
+    protected static final Restriction CONTACT_FILTER = new ExistsRestriction(false, "contact",
+            new ArrayList<Restriction>());
     protected static final Integer OFFSET = 1;
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
     protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;
@@ -85,6 +87,7 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final Integer MARKET_REVENUE = 100;
     protected static final Integer REVENUE = 200;
     protected static final Boolean IS_OUT_OF_DATE = false;
+    protected static final List<TargetMarketReportMap> TARGET_MARKET_REPORTS = new ArrayList<>();
 
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_2 = new ProspectDiscoveryOption();
@@ -93,8 +96,8 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final String STRING_VALUE = "VALUE";
     protected static final String STRING_VALUE_1 = "VALUE_1";
     protected static final String DOUBLE_VALUE = "2.5";
-    protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION =
-            new ProspectDiscoveryConfiguration(Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
+    protected static final ProspectDiscoveryConfiguration PROSPECT_DISCOVERY_CONFIGURATION = new ProspectDiscoveryConfiguration(
+            Arrays.asList(PROSPECT_DISCOVERY_OPTION_1, PROSPECT_DISCOVERY_OPTION_2));
 
     protected static HashMap<AccessLevel, UserDocument> testingUserSessions;
     protected static List<Tenant> testingTenants;
@@ -124,7 +127,7 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
                 UserDocument.class);
@@ -142,7 +145,7 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant, UserDocument.class);
     }
@@ -196,7 +199,9 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
         switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN);
     }
 
-    protected void switchToExternalUser() { switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER); }
+    protected void switchToExternalUser() {
+        switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER);
+    }
 
     protected void switchToTheSessionWithAccessLevel(AccessLevel level) {
         if (testingUserSessions == null || testingUserSessions.isEmpty()) {
@@ -220,9 +225,10 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
         return response.getBody();
     }
 
-    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload, Class<T> responseType) {
-        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT,
-                jsonRequestEntity(payload), responseType);
+    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload,
+            Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT, jsonRequestEntity(payload),
+                responseType);
         return response.getBody();
     }
 
@@ -234,21 +240,22 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     }
 
     protected static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
-                new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers(){
-                        return null;
-                    }
-                    public void checkClientTrusted( X509Certificate[] certs, String authType ){}
-                    public void checkServerTrusted( X509Certificate[] certs, String authType ){}
-                }
-        };
+        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        } };
         final SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
 
     protected abstract String getRestAPIHostPort();
-
 
 }

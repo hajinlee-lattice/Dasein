@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
-public class CalculateEventTableStatisticsTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class CreateImportSummaryTestNG extends ServiceFlowsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
@@ -35,7 +35,7 @@ public class CalculateEventTableStatisticsTestNG extends ServiceFlowsFunctionalT
 
     @Override
     protected String getFlowBeanName() {
-        return "calculateEventTableStatistics";
+        return "createImportSummary";
     }
 
     @Override

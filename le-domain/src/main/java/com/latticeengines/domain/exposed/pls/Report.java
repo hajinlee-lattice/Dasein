@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -45,11 +47,11 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
     private Long pid;
 
     @Column(name = "PURPOSE", nullable = false)
-    @JsonProperty("purpose")
-    private String purpose;
+    @Enumerated(EnumType.STRING)
+    private ReportPurpose purpose;
 
     @JsonIgnore
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
@@ -69,22 +71,22 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
     @Column(name = "CREATED", nullable = false)
     @JsonProperty("created")
     private Date created;
-    
+
     @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "FK_KEY_VALUE_ID", nullable = false)
     @JsonProperty("json")
     private KeyValue json;
-    
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
-    
-    public String getPurpose() {
+
+    public ReportPurpose getPurpose() {
         return purpose;
     }
 
-    public void setPurpose(String purpose) {
+    public void setPurpose(ReportPurpose purpose) {
         this.purpose = purpose;
     }
 
@@ -159,7 +161,7 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
             if (tenant != null) {
                 json.setTenantId(tenant.getPid());
             }
-            
+
             json.setOwnerType(Report.class.getSimpleName());
         }
     }

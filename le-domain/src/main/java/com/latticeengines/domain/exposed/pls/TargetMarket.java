@@ -59,6 +59,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     private List<TargetMarketDataFlowOption> rawDataFlowConfiguration = new ArrayList<>();
     private TargetMarketStatistics targetMarketStatistics;
     private String applicationId;
+    private List<TargetMarketReportMap> reports;
 
     @Column(name = "NAME", nullable = false)
     @Override
@@ -267,6 +268,18 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     @JsonProperty("is_default")
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
+    }
+
+    @JsonProperty("reports")
+    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "targetMarket", fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public List<TargetMarketReportMap> getReports() {
+        return this.reports;
+    }
+
+    @JsonProperty("reports")
+    public void setReports(List<TargetMarketReportMap> reports) {
+        this.reports = reports;
     }
 
     @Column(name = "OFFSET", nullable = false)

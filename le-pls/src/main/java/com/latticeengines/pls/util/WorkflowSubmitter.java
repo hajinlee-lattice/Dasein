@@ -32,7 +32,7 @@ public class WorkflowSubmitter {
 
     @Autowired
     private WorkflowProxy workflowProxy;
-    
+
     @Autowired
     private MetadataProxy metadataProxy;
 
@@ -53,7 +53,7 @@ public class WorkflowSubmitter {
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
-    
+
     @Value("${pls.accountmaster.path}")
     private String accountMasterPath;
 
@@ -63,7 +63,7 @@ public class WorkflowSubmitter {
                 targetMarket.getName(), customer));
         try {
             metadataProxy.resetTables(customer);
-            
+
             List<String> eventCols = new ArrayList<>();
             eventCols.add("Event_IsWon");
             eventCols.add("Event_StageIsClosedWon");
@@ -79,7 +79,6 @@ public class WorkflowSubmitter {
                     .customer(CustomerSpace.parse(customer)) //
                     .microServiceHostPort(microserviceHostPort) //
                     .sourceType(SourceType.SALESFORCE) //
-                    .targetPath("/FitModelRun") //
                     .extraSources(extraSources) //
                     .matchDbUrl(matchClientDocument.getUrl()) //
                     .matchDbUser(matchClientDocument.getUsername()) //

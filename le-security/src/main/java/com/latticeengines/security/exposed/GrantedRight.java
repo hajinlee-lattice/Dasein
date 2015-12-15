@@ -99,12 +99,6 @@ public enum GrantedRight implements GrantedAuthority {
             return "View_PLS_TargetMarkets";
         }
     }, //
-    CREATE_PLS_TARGETMARKETS {
-        @Override
-        public String getAuthority() {
-            return "Create_PLS_TargetMarkets";
-        }
-    }, //
     EDIT_PLS_TARGETMARKETS {
         @Override
         public String getAuthority() {

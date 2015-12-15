@@ -9,8 +9,26 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-@Component("calculateEventTableStatistics")
-public class CalculateEventTableStatistics extends TypesafeDataFlowBuilder<DataFlowParameters> {
+@Component("createImportSummary")
+public class CreateImportSummary extends TypesafeDataFlowBuilder<DataFlowParameters> {
+    public static final String TOTAL_ACCOUNTS = "TotalAccounts";
+    public static final String TOTAL_ACCOUNTS_WITH_CONTACTS = "TotalAccountsWithContacts";
+    public static final String TOTAL_ACCOUNTS_WITH_OPPORTUNITIES = "TotalAccountsWithOpportunities";
+    public static final String TOTAL_UNIQUE_ACCOUNTS = "TotalUniqueAccounts";
+    public static final String TOTAL_MATCHED_ACCOUNTS = "TotalMatchedAccounts";
+    public static final String ACCOUNT_DATE_RANGE_BEGIN = "AccountDateRangeBegin";
+    public static final String ACCOUNT_DATE_RANGE_END = "AccountDateRangeEnd";
+    public static final String TOTAL_CONTACTS = "TotalContacts";
+    public static final String CONTACT_DATE_RANGE_BEGIN = "ContactDateRangeBegin";
+    public static final String CONTACT_DATE_RANGE_END = "ContactDateRangeEnd";
+    public static final String LEAD_DATE_RANGE_BEGIN = "LeadDateRangeBegin";
+    public static final String LEAD_DATE_RANGE_END = "LeadDateRangeEnd";
+    public static final String TOTAL_OPPORTUNITIES = "TotalOpportunities";
+    public static final String TOTAL_LEADS = "TotalLeads";
+    public static final String TOTAL_CLOSED_OPPORTUNITIES = "TotalClosedOpportunities";
+    public static final String TOTAL_CLOSED_WON_OPPORTUNITIES = "TotalClosedWonOpportunities";
+    public static final String OPPORTUNITY_DATE_RANGE_BEGIN = "OpportunityDateRangeBegin";
+    public static final String OPPORTUNITY_DATE_RANGE_END = "OpportunityDateRangeEnd";
 
     @Override
     public Node construct(DataFlowParameters parameters) {
@@ -21,33 +39,34 @@ public class CalculateEventTableStatistics extends TypesafeDataFlowBuilder<DataF
         Node lead = addSource("Lead");
 
         // Account stats
-        Node output = addTotal("TotalAccounts", account);
-        output = addTotal("TotalAccountsWithContacts", eventTable, //
+        Node output = addTotal(TOTAL_ACCOUNTS, account);
+        output = addTotal(TOTAL_ACCOUNTS_WITH_CONTACTS, eventTable, //
                 "HasContacts", new FieldList("HasContacts"), output);
-        output = addTotal("TotalAccountsWithOpportunities", eventTable, //
+        output = addTotal(TOTAL_ACCOUNTS_WITH_OPPORTUNITIES, eventTable, //
                 "HasOpportunities", new FieldList("HasOpportunities"), output);
+        output = addTotal(TOTAL_MATCHED_ACCOUNTS, eventTable, "IsMatched", new FieldList("IsMatched"), output);
 
-        output = addTotal("TotalUniqueAccounts", eventTable, output);
+        output = addTotal(TOTAL_UNIQUE_ACCOUNTS, eventTable, output);
 
-        output = addDateRanges("AccountDateRangeBegin", "AccountDateRangeEnd", account, getSourceMetadata("Account"),
+        output = addDateRanges(ACCOUNT_DATE_RANGE_BEGIN, ACCOUNT_DATE_RANGE_END, account, getSourceMetadata("Account"),
                 output);
 
         // Contact stats
-        output = addTotal("TotalContacts", contact, output);
-        output = addDateRanges("ContactDateRangeBegin", "ContactDateRangeEnd", contact, getSourceMetadata("Contact"),
+        output = addTotal(TOTAL_CONTACTS, contact, output);
+        output = addDateRanges(CONTACT_DATE_RANGE_BEGIN, CONTACT_DATE_RANGE_END, contact, getSourceMetadata("Contact"),
                 output);
 
         // Lead stats
-        output = addTotal("TotalLeads", lead, output);
-        output = addDateRanges("LeadDateRangeBegin", "LeadDateRangeEnd", contact, getSourceMetadata("Lead"), output);
+        output = addTotal(TOTAL_LEADS, lead, output);
+        output = addDateRanges(LEAD_DATE_RANGE_BEGIN, LEAD_DATE_RANGE_END, contact, getSourceMetadata("Lead"), output);
 
         // Opportunity stats
-        output = addTotal("TotalOpportunities", opportunity, output);
-        output = addTotal("TotalClosedOpportunities", opportunity, "IsClosed", //
+        output = addTotal(TOTAL_OPPORTUNITIES, opportunity, output);
+        output = addTotal(TOTAL_CLOSED_OPPORTUNITIES, opportunity, "IsClosed", //
                 new FieldList("IsClosed"), output);
-        output = addTotal("TotalClosedWonOpportunities", opportunity, "StageName.equals(\"Closed Won\")",
+        output = addTotal(TOTAL_CLOSED_WON_OPPORTUNITIES, opportunity, "StageName.equals(\"Closed Won\")",
                 new FieldList("StageName"), output);
-        output = addDateRanges("OpportunityDateRangeBegin", "OpportunityDateRangeEnd", opportunity,
+        output = addDateRanges(OPPORTUNITY_DATE_RANGE_BEGIN, OPPORTUNITY_DATE_RANGE_END, opportunity,
                 getSourceMetadata("Opportunity"), output);
         return output;
     }

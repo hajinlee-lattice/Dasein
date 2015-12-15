@@ -84,7 +84,18 @@ public class AvroUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public static List<GenericRecord> getData(Configuration configuration, List<String> paths) {
+        try {
+            List<GenericRecord> records = new ArrayList<>();
+            for (String path : paths) {
+                records.addAll(AvroUtils.getData(configuration, new Path(path)));
+            }
+            return records;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static List<GenericRecord> getData(Configuration config, Path path) throws Exception {

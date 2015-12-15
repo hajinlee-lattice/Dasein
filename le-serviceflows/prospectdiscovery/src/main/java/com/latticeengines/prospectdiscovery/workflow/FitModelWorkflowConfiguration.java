@@ -8,8 +8,10 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTableConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.RunImportSummaryDataFlowConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.TargetMarketStepConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
-import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModelStepConfiguration;
@@ -26,11 +28,13 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private FitModelWorkflowConfiguration fitModel = new FitModelWorkflowConfiguration();
         private MicroserviceStepConfiguration microservice = new MicroserviceStepConfiguration();
         private ImportStepConfiguration importData = new ImportStepConfiguration();
-        private DataFlowStepConfiguration dataFlow = new DataFlowStepConfiguration();
+        private CreatePreMatchEventTableConfiguration preMatchDataFlow = new CreatePreMatchEventTableConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
+        private RunImportSummaryDataFlowConfiguration runImportSummaryDataFlow = new RunImportSummaryDataFlowConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private ChooseModelStepConfiguration chooseModel = new ChooseModelStepConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private TargetMarketStepConfiguration targetMarketConfiguration = new TargetMarketStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             fitModel.setCustomerSpace(customerSpace);
@@ -48,18 +52,14 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder targetPath(String targetPath) {
-            dataFlow.setTargetPath(targetPath);
-            return this;
-        }
-
         public Builder targetMarket(TargetMarket targetMarket) {
             chooseModel.setTargetMarket(targetMarket);
+            targetMarketConfiguration.setTargetMarket(targetMarket);
             return this;
         }
 
         public Builder extraSources(Map<String, String> extraSources) {
-            dataFlow.setExtraSources(extraSources);
+            preMatchDataFlow.setExtraSources(extraSources);
             return this;
         }
 
@@ -107,42 +107,46 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             chooseModel.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
-        
+
         public Builder uniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
             return this;
         }
-        
+
         public Builder sourceDir(String sourceDir) {
             score.setSourceDir(sourceDir);
             return this;
         }
-        
+
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
             return this;
         }
-        
+
         public Builder registerScoredTable(Boolean registerScoredTable) {
             score.setRegisterScoredTable(registerScoredTable);
             return this;
         }
-        
+
         public FitModelWorkflowConfiguration build() {
             importData.microserviceStepConfiguration(microservice);
-            dataFlow.microserviceStepConfiguration(microservice);
+            preMatchDataFlow.microserviceStepConfiguration(microservice);
             match.microserviceStepConfiguration(microservice);
+            runImportSummaryDataFlow.microserviceStepConfiguration(microservice);
             model.microserviceStepConfiguration(microservice);
             chooseModel.microserviceStepConfiguration(microservice);
             score.microserviceStepConfiguration(microservice);
+            targetMarketConfiguration.microserviceStepConfiguration(microservice);
 
             fitModel.add(microservice);
             fitModel.add(importData);
-            fitModel.add(dataFlow);
+            fitModel.add(preMatchDataFlow);
             fitModel.add(match);
+            fitModel.add(runImportSummaryDataFlow);
             fitModel.add(model);
             fitModel.add(chooseModel);
             fitModel.add(score);
+            fitModel.add(targetMarketConfiguration);
 
             return fitModel;
         }

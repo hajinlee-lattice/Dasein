@@ -11,7 +11,7 @@ export PROPDATA_PROPDIR=$PWD/../le-propdata/conf/env/dev
 export MONITOR_PROPDIR=$PWD/../le-monitor/conf/env/dev
 export WORKFLOWAPI_PROPDIR=$PWD/../le-workflowapi/conf/env/dev
 export PROXY_PROPDIR=$PWD/../le-proxy/conf/env/dev
-export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -XX:MaxPermSize=1024m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop -Djavax.net.ssl.trustStore=../le-pls/certificates/laca-ldap.dev.lattice.local.jks"
+export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -XX:MaxPermSize=1024m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop"
 
 pushd $JETTY_HOME
 echo "Running jetty..."

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
@@ -14,8 +13,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("runDataFlow")
-public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
+public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Log log = LogFactory.getLog(RunDataFlow.class);
 
@@ -36,9 +34,9 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
 
     private DataFlowConfiguration setupPreMatchTableDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
-        dataFlowConfig.setName("PrematchFlow");
+        dataFlowConfig.setName(configuration.getName());
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
-        dataFlowConfig.setDataFlowBeanName("preMatchEventTableFlow");
+        dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());
         dataFlowConfig.setDataSources(createDataFlowSources());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());
         return dataFlowConfig;
@@ -69,8 +67,8 @@ public class RunDataFlow extends BaseWorkflowStep<DataFlowStepConfiguration> {
         }
 
         for (String extraSourceName : configuration.getExtraSources().keySet()) {
-            Table extraSourceTable = MetadataConverter.getTable(yarnConfiguration, configuration
-                    .getExtraSources().get(extraSourceName), null, null);
+            Table extraSourceTable = MetadataConverter.getTable(yarnConfiguration,
+                    configuration.getExtraSources().get(extraSourceName), null, null);
             extraSourceTable.setName(extraSourceName);
             // register the extra source table
             url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),

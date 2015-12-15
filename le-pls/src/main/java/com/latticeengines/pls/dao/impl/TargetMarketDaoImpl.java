@@ -23,7 +23,7 @@ public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements Ta
     public TargetMarket findTargetMarketByName(String name) {
         Session session = getSessionFactory().getCurrentSession();
         Class<TargetMarket> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where NAME = :name", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where name = :name", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("name", name);
         List<TargetMarket> targetMarkets = query.list();
@@ -37,8 +37,9 @@ public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements Ta
     public boolean deleteTargetMarketByName(String name) {
         Session session = getSessionFactory().getCurrentSession();
         Class<TargetMarket> entityClz = getEntityClass();
-        String queryStr = String.format("delete from %s where NAME = :name", entityClz.getSimpleName());
+        String queryStr = String.format("delete from %s where name = :name", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setString("name", name);
         int numTargetMarketReturned = query.executeUpdate();
         if (numTargetMarketReturned == 1)
             return true;

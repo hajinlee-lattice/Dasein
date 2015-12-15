@@ -3,8 +3,13 @@ package com.latticeengines.pls.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.AssertJUnit.assertTrue;
+
+import java.util.List;
 
 import org.joda.time.DateTimeZone;
+import org.python.google.common.base.Predicate;
+import org.python.google.common.collect.Iterables;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -13,6 +18,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
+import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
@@ -34,6 +40,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         TARGET_MARKET.setIsDefault(IS_DEFAULT);
         TARGET_MARKET.setOffset(OFFSET);
         TARGET_MARKET.setSelectedIntent(SELECTED_INTENT);
+        TARGET_MARKET.setReports(TARGET_MARKET_REPORTS);
 
         TargetMarketDataFlowConfiguration configuration = TARGET_MARKET.getDataFlowConfiguration();
         configuration.setInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends,
@@ -68,7 +75,8 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(targetMarket);
         assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
         assertEquals(targetMarket.getDescription(), DESCRIPTION);
-        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(), CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
+        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(),
+                CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
         assertEquals(targetMarket.getModelId(), MODEL_ID);
         assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
@@ -77,6 +85,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
         assertEquals(targetMarket.getTargetMarketStatistics(), TARGET_MARKET_STATISTICS);
+        assertEquivalent(targetMarket.getReports(), TARGET_MARKET_REPORTS);
 
         TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),
@@ -121,5 +130,24 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         targetMarketEntityMgr.deleteTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
+    }
+
+    private void assertEquivalent(final List<TargetMarketReportMap> actual, final List<TargetMarketReportMap> expected) {
+        assertEquals(actual.size(), expected.size());
+        assertTrue(Iterables.all(actual, new Predicate<TargetMarketReportMap>() {
+            @Override
+            public boolean apply(final TargetMarketReportMap actualReportMap) {
+                return Iterables.any(expected, new Predicate<TargetMarketReportMap>() {
+
+                    @Override
+                    public boolean apply(TargetMarketReportMap expectedReportMap) {
+                        String expectedReportName = expectedReportMap.getReportName();
+                        String actualReportName = actualReportMap.getReportName();
+                        return expectedReportName != null && actualReportName != null
+                                && expectedReportName.equals(actualReportName);
+                    }
+                });
+            }
+        }));
     }
 }

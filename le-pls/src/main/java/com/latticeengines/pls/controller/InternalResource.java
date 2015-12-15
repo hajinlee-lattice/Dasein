@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -162,6 +163,17 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register a target market report")
+    public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
+            @PathVariable("tenantId") String tenantId, @RequestBody Report report, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        targetMarketService.registerReport(targetMarketName, report);
+    }
+
     @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by applicationId")
@@ -212,7 +224,7 @@ public class InternalResource extends InternalResourceBase {
     public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
         checkHeader(request);
         String productPrefix = request.getParameter("product");
-        
+
         if (productPrefix != null && !testTenantRegJson.startsWith(productPrefix)) {
             testTenantRegJson = productPrefix + "-" + testTenantRegJson;
         }

@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,8 +14,13 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String targetPath;
 
+    private Map<String, String> extraSources = new HashMap<>();
+
     @NotNull
-    private Map<String, String> extraSources = null;
+    private String beanName;
+
+    @NotNull
+    private String name;
 
     @JsonProperty("target_path")
     public String getTargetPath() {
@@ -34,5 +40,25 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("extra_sources")
     public void setExtraSources(Map<String, String> extraSources) {
         this.extraSources = extraSources;
+    }
+
+    @JsonProperty("bean_name")
+    public String getBeanName() {
+        return beanName;
+    }
+
+    @JsonProperty("bean_name")
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
+    }
+
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
+
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
     }
 }
