@@ -3,8 +3,8 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -148,10 +148,12 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
 
     @Test(groups = "deployment", timeOut = 360000)
     public void createDefault() {
+        TargetMarket targetMarket = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + "default", null, TargetMarket.class);
+        assertTrue(targetMarket.getIsDefault());
         restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TargetMarket.DEFAULT_NAME, TargetMarket.class);
+        targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default",
+                TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
     }
 

@@ -53,9 +53,18 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ResponseBody
     @ApiOperation(value = "Register a default target market")
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
-    public void createDefault() {
+    public TargetMarket createDefault() {
         TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
         workflowSubmitter.submitFitWorkflow(targetMarket);
+        return targetMarket;
+    }
+
+    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the default target market")
+    @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
+    public TargetMarket getDefault() {
+        return targetMarketService.getTargetMarketByName(TargetMarket.DEFAULT_NAME);
     }
 
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.DELETE, headers = "Accept=application/json")

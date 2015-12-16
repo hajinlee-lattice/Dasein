@@ -9,7 +9,7 @@ public interface TargetMarketInterface {
 
     void create(TargetMarket targetMarket);
 
-    void createDefault();
+    TargetMarket createDefault();
 
     void delete(String targetMarketName);
 
