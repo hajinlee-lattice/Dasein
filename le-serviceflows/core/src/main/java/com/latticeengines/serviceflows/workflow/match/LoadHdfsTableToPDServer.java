@@ -40,6 +40,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), "PrematchFlow");
         Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
+        prematchFlowTable.setName(prematchFlowTable.getName() + "_" + System.currentTimeMillis());
 
         String jdbcUrl = configuration.getDbUrl();
         String password = CipherUtils.decrypt(configuration.getDbPasswordEncrypted());

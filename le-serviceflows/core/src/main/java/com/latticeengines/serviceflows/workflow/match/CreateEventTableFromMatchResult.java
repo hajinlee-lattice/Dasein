@@ -33,6 +33,8 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateEventTableFromMatchResult.class);
+    // TODO needs to be replaced with the IsMatched column
+    private static final String IS_MATCHED_COLUMN = "BuiltWith_Pivoted_Source_IsMatched";
 
     @Override
     public void execute() {
@@ -47,9 +49,27 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
             eventTable = createEventTableFromMatchResult(matchCommandId, preMatchEventTable, dbCreds);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28005, e, new String[] { String.valueOf(matchCommandId) });
+        } finally {
+            try {
+                boolean deleted = deleteEventTableFromMatchDB(preMatchEventTable, dbCreds);
+                if (!deleted) {
+                    log.warn("Table " + preMatchEventTable.getName() + " was not dropped from the PD match db.");
+                }
+            } catch (Exception e) {
+                log.error(e);
+            }
         }
 
         executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
+    }
+
+    private boolean deleteEventTableFromMatchDB(Table preMatchEventTable, DbCreds dbCreds) throws Exception {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        try (Connection conn = DriverManager.getConnection(dbCreds.getJdbcUrl())) {
+            try (PreparedStatement pstmt = conn.prepareStatement("DROP TABLE " + preMatchEventTable.getName())) {
+                return pstmt.execute();
+            }
+        }
     }
 
     private Table createEventTableFromMatchResult(Long commandId, //
@@ -57,6 +77,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         Table table = preMatchEventTable;
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT Source_Id");
+        sb.append(", " + IS_MATCHED_COLUMN + " IsMatched");
         for (Attribute attr : table.getAttributes()) {
             sb.append(", Source_" + attr.getName() + " AS " + attr.getName()).append("\n");
         }
