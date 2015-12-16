@@ -80,15 +80,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         configuration.setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, MAX_PROSPECTS_PER_ACCOUNT);
 
-        TARGET_MARKET_STATISTICS.setExpectedLift(EXPECTED_LIFT);
-        TARGET_MARKET_STATISTICS.setIsOutOfDate(IS_OUT_OF_DATE);
-        TARGET_MARKET_STATISTICS.setMarketRevenue(MARKET_REVENUE);
-        TARGET_MARKET_STATISTICS.setNumAccounts(NUM_ACCOUNTS);
-        TARGET_MARKET_STATISTICS.setNumCompanies(NUM_COMPANIES);
-        TARGET_MARKET_STATISTICS.setNumCustomers(NUM_CUSTOMERS);
-        TARGET_MARKET_STATISTICS.setRevenue(REVENUE);
-        TARGET_MARKET.setTargetMarketStatistics(TARGET_MARKET_STATISTICS);
-
         setupUsers();
         cleanupTargetMarketDB();
     }
@@ -118,7 +109,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(targetMarket.getOffset(), OFFSET);
         assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
         assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
-        assertEquals(targetMarket.getTargetMarketStatistics(), TARGET_MARKET_STATISTICS);
 
         TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
         assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),

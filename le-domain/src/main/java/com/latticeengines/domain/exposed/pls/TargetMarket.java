@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -57,7 +56,6 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     private Restriction contactFilter;
     private Integer offset;
     private List<TargetMarketDataFlowOption> rawDataFlowConfiguration = new ArrayList<>();
-    private TargetMarketStatistics targetMarketStatistics;
     private String applicationId;
     private List<TargetMarketReportMap> reports;
 
@@ -290,19 +288,6 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     @JsonProperty("offset")
     public void setOffset(Integer offset) {
         this.offset = offset;
-    }
-
-    @JsonProperty("target_market_statistics")
-    @JoinColumn(name = "FK_PID", nullable = true)
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public TargetMarketStatistics getTargetMarketStatistics() {
-        return this.targetMarketStatistics;
-    }
-
-    @JsonProperty("target_market_statistics")
-    public void setTargetMarketStatistics(TargetMarketStatistics targetMarketStatistics) {
-        this.targetMarketStatistics = targetMarketStatistics;
     }
 
     @OneToMany(cascade = CascadeType.MERGE, mappedBy = "targetMarket", fetch = FetchType.EAGER)

@@ -14,12 +14,10 @@ import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOption;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
-import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
-import com.latticeengines.pls.dao.TargetMarketStatisticsDao;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -32,9 +30,6 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Autowired
     private TargetMarketDataFlowOptionDao targetMarketDataflowOptionDao;
-
-    @Autowired
-    private TargetMarketStatisticsDao targetMarketStatisticsDao;
 
     @Autowired
     private TargetMarketReportMapDao targetMarketReportMapDao;
@@ -52,12 +47,6 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     public void create(TargetMarket targetMarket) {
         targetMarket.setCreationTimestampObject(DateTime.now());
         initializeForDatabaseEntry(targetMarket);
-
-        TargetMarketStatistics targetMarketStatistics = targetMarket.getTargetMarketStatistics();
-        if (targetMarketStatistics != null) {
-            targetMarketStatistics.setPid(null);
-            targetMarketStatisticsDao.create(targetMarketStatistics);
-        }
 
         targetMarketDao.create(targetMarket);
         if (targetMarket.getDataFlowConfiguration() != null) {

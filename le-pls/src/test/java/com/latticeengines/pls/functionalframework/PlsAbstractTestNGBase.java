@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOptionName;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
-import com.latticeengines.domain.exposed.pls.TargetMarketStatistics;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -79,14 +78,6 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected static final List<String> SELECTED_INTENT = new ArrayList<>(Arrays.asList("Intent1", "Intent2"));
     protected static final Integer MAX_PROSPECTS_PER_ACCOUNT = 3;
 
-    protected static final TargetMarketStatistics TARGET_MARKET_STATISTICS = new TargetMarketStatistics();
-    protected static final Double EXPECTED_LIFT = 0.2D;
-    protected static final Integer NUM_COMPANIES = 45;
-    protected static final Integer NUM_CUSTOMERS = 55;
-    protected static final Integer NUM_ACCOUNTS = 45;
-    protected static final Integer MARKET_REVENUE = 100;
-    protected static final Integer REVENUE = 200;
-    protected static final Boolean IS_OUT_OF_DATE = false;
     protected static final List<TargetMarketReportMap> TARGET_MARKET_REPORTS = new ArrayList<>();
 
     protected static final ProspectDiscoveryOption PROSPECT_DISCOVERY_OPTION_1 = new ProspectDiscoveryOption();
