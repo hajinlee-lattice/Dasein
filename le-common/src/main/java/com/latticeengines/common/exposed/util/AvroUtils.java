@@ -86,6 +86,19 @@ public class AvroUtils {
         }
     }
 
+    public static List<GenericRecord> getDataFromGlob(Configuration configuration, List<String> paths) {
+        try {
+            List<GenericRecord> records = new ArrayList<>();
+            for (String path : paths) {
+                records.addAll(AvroUtils.getDataFromGlob(configuration, path));
+            }
+            return records;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     public static List<GenericRecord> getData(Configuration configuration, List<String> paths) {
         try {
             List<GenericRecord> records = new ArrayList<>();
