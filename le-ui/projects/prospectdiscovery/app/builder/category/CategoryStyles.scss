@@ -1,0 +1,61 @@
+.pd-industry {
+    .industry-list.row {
+        transition: all 500ms ease;
+        margin-bottom: 2em;
+        color: #000;
+    }
+
+    .industry-list.row.ng-enter  {
+        opacity: 0;
+    }
+
+    .industry-list.row.ng-enter-active {
+        opacity: 1;
+    }
+
+    .industry-list.row.ng-enter-stagger {
+        transition-delay: 250ms;
+        transition-duration: 0s;
+    }
+
+    div.list-item {
+        div.circle-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            text-align: center;
+            margin: 1.8em auto 0;
+
+            div.big-circle,
+            div.medium-circle,
+            div.small-circle {
+                display: inline-block;
+                position: absolute;
+                bottom: 0;
+                height: 100%;
+                width: 100%;
+                border: 2px solid #fff;
+                border-radius: 50%;
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                transform: translateX(-50%);
+            }
+
+            div.big-circle {
+            }
+
+            div.medium-circle {
+                background: #888888;
+                width: 70%;
+                height: 70%;
+            }
+
+            div.small-circle {
+                background: #464646;
+                width: 30%;
+                height: 30%;
+            }
+        }
+    }
+}

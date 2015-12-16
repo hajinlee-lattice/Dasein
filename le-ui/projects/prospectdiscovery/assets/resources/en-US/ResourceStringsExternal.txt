@@ -2,6 +2,7 @@ LOGIN_COPYRIGHT={0} ALL RIGHTS RESERVED. LATTICE.
 LOGIN_USERNAME=User Name
 LOGIN_PASSWORD=Password
 HEADER_LOGOUT=Sign Out
+HEADER_SETTINGS=Settings
 DEFAULT_LOGIN_ERROR_TEXT=The email address or password is not valid. Please re-enter your credentials.
 LOGIN_LABEL=Sign In
 HEADER_PRIVACY_POLICY=Privacy Policy

@@ -1,75 +1,32 @@
-.pd-summary-subnav {
-    background: #003B67;
-    height: 150px;
-    margin-bottom: 6em;
-    position: relative;
+.tmb-summary {
 
-    ul {
-        text-align: center;
-        margin: 0 auto;
-        position: absolute;
-        width: 100%;
-        bottom: -50px;
+    div.carousel-slide-container {
 
-        li {
-            display: inline-block;
-            background: white;
-            color: white;
-            margin: 0em 1.5em;
-            width: 8em;
-            height: 8em;
-            border-radius: 50%;
+        div.white-border {
             perspective: 100px;
-            perspective-origin: 50% 50%; 
+            perspective-origin: 50% 50%;
+            border-radius: 100%;
+            background: #fff;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto;
 
-            a {
-                color: white;
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                border-radius: 50%;
-                margin: 7px;
-            }
-
-            i {
-                width: 100%;
-                height: 100%;
-                background: #ccc;
-                border-radius: 50%;
-                line-height: 2.1em;
-                vertical-align: middle;
-                font-size: 3em;
+            span {
                 transition: transform 500ms ease;
                 transform: rotate3d(0,0,0,0deg) translateZ(0px);
-            }
-
-            i::before {
-                vertical-align: middle;
-            }
-
-            p {
-                display: block;
-                position: absolute;
-                left: 50%;
-                -webkit-transform: translateX(-50%);
-                -moz-transform: translateX(-50%);
-                -ms-transform: translateX(-50%);
-                transform: translateX(-50%);
-                margin: 0.8em auto 0;
-                font-size: 1.2em;
-                color: #000;
-                line-height: 1.3em;
-                text-align: center;
-                pointer-events: none;
-                white-space: nowrap;
-                padding-bottom: .3em;
+                border: none;
+                color: #fff;
+                border-radius: 100%;
+                width: 58px;
+                height: 58px;
+                padding-top: 16px;
+                margin: 6px;
             }
         }
-
+/*
         li.active p {
             border-bottom: 5px solid #F16A22;
         }
+        */
     }
 }

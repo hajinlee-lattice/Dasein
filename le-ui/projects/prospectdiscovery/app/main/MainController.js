@@ -3,7 +3,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
-    //'mainApp.core.services.FeatureFlagService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.markets.controllers.MarketsController',
     'mainApp.fingerprints.controllers.FingerprintsController',
 
@@ -13,7 +13,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
 .controller('MainViewController', function (
         $scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, 
-        TimestampIntervalUtility, NavUtility/*, FeatureFlagService*/, ConfigService) {
+        TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
         // redirect to login portal

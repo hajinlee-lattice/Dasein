@@ -1,9 +1,8 @@
 angular.module('pd.navigation.subnav', [])
 
 .controller('SubNavCtrl', function ($scope, $rootScope) {
-    this.init = function() {
-        this.lis = lis = $('.pd-summary-subnav ul li a');
-        
+    this.init = function() { 
+        this.lis = lis = $('div.carousel-slide-container div.white-border span');
         $(lis).on('mousedown', this.handleClick.bind(this));
     }
 
@@ -19,15 +18,15 @@ angular.module('pd.navigation.subnav', [])
     }
 
     this.handleClick = function(event) {
-        var target = event.target,
-            target = target.tagName == 'LI' ? target : target.parentNode;
+        var target = event.target;//,
+            //target = target.tagName == 'LI' ? target : target.parentNode;
 
         this.render(target, event);
     }
 
     this.render = function(li, event) {
         var lis = this.lis,
-            item = $('i',li)[0],
+            item = li,//$('div.carousel-slide-container a>span',li)[0],
             mouse = this.getMouseXY(li, event),
             dimensions = item.getClientRects()[0],
             center = {

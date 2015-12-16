@@ -56,7 +56,7 @@ angular
             })
             .state('builder', {
                 url: '/builder',
-                redirectTo: 'builder.industries',
+                redirectTo: "builder.category({AttrKey: 'Industry'})",
                 views: {
                     "navigation@": {
                         templateUrl: './app/navigation/sidebar/BuilderView.html'
@@ -66,14 +66,23 @@ angular
                     }
                 }
             })
-            .state('builder.industries', {
-                url: '/industries',
+            .state('builder.category', {
+                url: '/categories/:AttrKey',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/industries/IndustriesView.html'
+                        templateUrl: './app/builder/category/CategoryView.html'
                     }
                 }
             })
+            .state('builder.subcategory', {
+                url: '/subcategories/:ParentKey/:AttrKey',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/subcategory/SubCategoryView.html'
+                    }
+                }
+            })
+            /*
             .state('builder.locations', {
                 url: '/locations',
                 views: {
@@ -122,6 +131,7 @@ angular
                     }
                 }
             })
+            */
             .state('markets.prospect_schedule', {
                 url: '/prospect_schedule',
                 views: {

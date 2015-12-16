@@ -2,8 +2,7 @@
 @import "jobs/status/StatusStyles";
 @import "jobs/import/ready/ReadyStyles";
 @import "builder/BuilderStyles";
-@import "builder/industries/IndustriesStyles";
-@import "builder/locations/LocationsStyles";
+@import "builder/category/CategoryStyles";
 @import "markets/MarketsStyles";
 @import "markets/prospect/ProspectsStyles";
 @import "navigation/sidebar/SidebarStyles";
@@ -25,9 +24,13 @@ body {
     .page-header {
         padding-top: 25px;
         padding-bottom: 10px;
-    }
-    .page-header span {
-        text-align: right;
+        
+        h4 {
+            text-align: left;
+        }
+        span {
+            text-align: right;
+        }
     }
 }
 

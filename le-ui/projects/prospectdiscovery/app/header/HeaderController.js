@@ -1,13 +1,13 @@
 angular.module('pd.header', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    //'mainApp.core.services.FeatureFlagService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.core.utilities.NavUtility'
 ])
 
 .controller('MainHeaderCtrl', function (
         $scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, 
-        LoginService/*, FeatureFlagService*/
+        LoginService, FeatureFlagService
     ) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
@@ -17,7 +17,7 @@ angular.module('pd.header', [
     
     $scope.userDisplayName = clientSession.DisplayName;
 
-    /*
+    
     if (clientSession != null) {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
@@ -28,7 +28,7 @@ angular.module('pd.header', [
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
         });
     }
-    */
+    
 
     $(".dropdown > a").click(function(e){
         $(this).toggleClass("active");

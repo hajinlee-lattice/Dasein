@@ -9,34 +9,9 @@ angular.module('pd.builder', [
         
         $http({
             method: 'GET',
-            url: '/pls/amattributes?Key='+key
+            url: '/pls/amattributes?AttrKey='+key
         }).then(
             function onSuccess(response) {
-                var data = [
-                    {category: key + " Category",lift: "0.3x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "1.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.4x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "1.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "2.5x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "1.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.2x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "1.3x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.5x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "1.7x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.9x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"},
-                    {category: key + " Category",lift: "0.8x",revenue: "$9,324,532",lattice: "2,393,223",database: "154,232",customers: "123"}
-                ];
-
-                var chunks = 4;
-                
-                response.data = _.chain(data).groupBy(function(element, index) {
-                  return Math.floor(index / chunks);
-                }).toArray().value();
-
                 deferred.resolve(response);
             }, function onError(response) {
 
@@ -46,11 +21,57 @@ angular.module('pd.builder', [
         return deferred.promise;
     };
 })
-.controller('BuilderCtrl', function($scope, $rootScope, BuilderService) {
+.controller('BuilderCtrl', function($scope, $rootScope, $stateParams, BuilderService) {
     $scope.lists = [];
+    $scope.AttrKey = AttrKey = $stateParams.AttrKey;
 
-    BuilderService.GetCategories('Industry').then(function(result) {
-        $scope.lists = result.data;
-        console.log($scope.lists);
+    if (!AttrKey) {
+        return console.log('<!> No stateParams provided.');
+    }
+
+    // will fetch/format all attributes for given category
+    BuilderService.GetCategories(AttrKey).then(function(result) {
+        var data = result.data || [],
+            chunks = 3,
+            truncate_limit = 24, // truncate with ellipsis
+            total = $scope.total = data.length;
+
+        // FIXME - Fudging the numbers a bit for the demo...
+        data.forEach(function(item, index) {
+            item.total = Math.round(Math.random() * 20);
+            item.lift = (Math.random() * 3.0).toFixed(1) + 'x';
+
+            item.revenue = Math.round(Math.random() * 30000000);
+            
+            var nums = [
+                Math.round(Math.random() * 99999),
+                Math.round(Math.random() * 99999),
+                Math.round(Math.random() * 9999)
+            ];
+
+            nums.sort();
+            item.lattice = nums[0];
+            item.database = nums[1];
+            item.customers = nums[2];
+
+            item.database = item.database > item.lattice ? item.lattice >> 1 : item.database;
+            item.customers = item.customers > item.database ? item.database >> 1 : item.customers
+
+            item.mediump = ((item.database / item.lattice) * 100).toFixed(3);
+            item.smallp = ((item.customers / item.lattice) * 100).toFixed(3);
+
+            item.mediump = item.mediump < 16 ? 16 : item.mediump;
+            item.smallp = item.smallp < 10 ? 10 : item.smallp;
+        });
+
+        // Break the array up into rows of 3 each
+        data = _.chain(data).groupBy(function(element, index) {
+            return Math.floor(index / chunks);
+        }).toArray().value();
+
+        $scope.lists = data;
+        $scope.truncate_limit = truncate_limit;
+
+        console.log('builder category list:', $scope.lists);
     });
 });
