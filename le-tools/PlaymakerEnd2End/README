@@ -1,3 +1,9 @@
+Environment need prepare the this automation:
+1) Python 2.7.11 or 2.7.10
+2) pyodbc
+3) pyYAML
+4) robotframework-selenium2library
+
 what can this project do?finish playmaker end2end process
 details
 1.	configuration part
