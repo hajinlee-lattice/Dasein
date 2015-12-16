@@ -105,7 +105,7 @@ public class CreateImportSummary extends TypesafeDataFlowBuilder<DataFlowParamet
 
     private Node addDateRanges(String minDateColumn, String maxDateColumn, Node source, Table sourceMetadata,
             Node previous) {
-        String timestampField = sourceMetadata.getLastModifiedKey().getName();
+        String timestampField = sourceMetadata.getLastModifiedKey().getAttributes().get(0);
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation(timestampField, minDateColumn, Aggregation.AggregationType.MIN));
         previous = addAggregation(aggregations, source, previous);

@@ -42,10 +42,14 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
 
         List<String> paths = new ArrayList<>();
         for (Extract extract : table.getExtracts()) {
-            paths.add(extract.getPath());
+            String path = extract.getPath();
+            if (!path.endsWith("avro")) {
+                paths.add(path + "/*.avro");
+            }
+            
         }
 
-        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, paths);
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, paths);
         if (records.size() == 0) {
             throw new RuntimeException("Failed to calculate report summary - zero records in avro file.");
         }
@@ -63,9 +67,13 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         accounts.put("with_opportunities", (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_OPPORTUNITIES));
         accounts.put("unique", (Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS));
 
-        double matchRate = ((Double) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS))
-                / ((Double) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS));
-        accounts.put("match_rate", matchRate);
+        try {
+            double matchRate = ((Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS)).doubleValue()
+                    / ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS)).doubleValue();
+            accounts.put("match_rate", matchRate);
+        } catch (Exception e) {
+            accounts.put("match_rate", -1.0);
+        }
 
         // contacts
         ObjectNode contacts = json.putObject("contacts");
