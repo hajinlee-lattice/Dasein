@@ -158,10 +158,9 @@ class ImputationStep(PipelineStep):
   
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
         indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
-        numberOfColumns = min(indexOfMaxVariance, numberOfColumnsThreshold)
         means = np.mean(inputScaled, axis = 0)
   
-        return (scaling_array, np.mean(inputScaled, axis = 0), componentsMatrix[ : numberOfColumns, :])
+        return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
         
     def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame

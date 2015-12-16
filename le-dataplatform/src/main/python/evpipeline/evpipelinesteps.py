@@ -68,19 +68,8 @@ class ImputationStep(PipelineStep):
         calculateImputationValues = True
         if len(self.imputationValues) != 0:
             calculateImputationValues = False
-            
-        print "Flag: " + str(calculateImputationValues)
-        print "==========================="
-        print "Columns in Imputation steps before PCA:" 
-        for col in outputFrame.columns.values:
-            print str(col)
 
         outputFrame, nullValues = self.generateTransformedBooleanColumns(dataFrame, calculateImputationValues)
-        
-        print "Columns in Imputation steps after PCA:" 
-        for col in outputFrame.columns.values:
-            print str(col)
-            
         outputFrame = self.imputeValues(outputFrame, nullValues, calculateImputationValues)
           
         return outputFrame
@@ -163,10 +152,9 @@ class ImputationStep(PipelineStep):
   
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
         indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
-        numberOfColumns = min(indexOfMaxVariance, numberOfColumnsThreshold)
-        means = np.mean(inputScaled, axis=0)
+        means = np.mean(inputScaled, axis = 0)
   
-        return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumns, :])
+        return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
         
     def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
