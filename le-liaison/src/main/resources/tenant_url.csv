@@ -14,6 +14,7 @@ Qlik_Relaunch,https://data-pls2.prod.lattice.local/dataloader/
 2Checkout_LP_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Alteryx_PD,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Alteryx_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
+AWS_PD_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
 BazaarvoiceLP,https://data-pls.lattice-engines.com/Dataloader_PLS/
 ben_tenant_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 DataCloudForecast_PLS134,https://data-pls.lattice-engines.com/Dataloader_PLS/
@@ -39,6 +40,8 @@ LeadMD_PLS,https://data-pls.lattice-engines.com/Dataloader_PLS/
 LeanKit,https://data-pls.lattice-engines.com/Dataloader_PLS/
 LivePerson_PLS,https://data-pls.lattice-engines.com/Dataloader_PLS/
 LogRhythm_POC,https://data-pls.lattice-engines.com/Dataloader_PLS/
+lp_test1,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Malwarebytes_POC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 MapR_PLS132,https://data-pls.lattice-engines.com/Dataloader_PLS/
 McAfee_PLS_LargeVolumn,https://data-pls.lattice-engines.com/Dataloader_PLS/
 McAfee_PLS132,https://data-pls.lattice-engines.com/Dataloader_PLS/
