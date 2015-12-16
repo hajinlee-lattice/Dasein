@@ -48,7 +48,7 @@ def waitForLeadInputQueue(tenant,cycle_times=10,conn=PLSEnvironments.SQL_Scoring
     # Wait for the leads to be scored
     dlc = SessionRunner()
     connection_string = conn;
-    query = "select * from LeadInputQueue where LEDeployment_ID='%s'" % tenant;
+    query = "select * from LeadInputQueue where LEDeployment_ID='%s' order by LeadInputQueue_ID asc" % tenant;
     wait_cycle = 0
     print connection_string
     print query
@@ -64,6 +64,7 @@ def waitForLeadInputQueue(tenant,cycle_times=10,conn=PLSEnvironments.SQL_Scoring
                 print "Status: for %s is %s" % (result[2], res)
                 if res == 2:
                     print "Job succeeded!"
+                    assert None != result[-1], "there should be some issues about the Bard Scoring service %s" % PLSEnvironments.SQL_ScoringDaemon
                     return True;
         print "Sleeping for 180 seconds, hoping Status turns 2"
         wait_cycle += 1

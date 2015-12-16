@@ -246,7 +246,8 @@ class EloquaRequest():
         for k in contact_ids.keys():
             response = self.getContact(k);
             if len(response.text)>0:
-                result = json.loads(response.text);                
+                result = json.loads(response.text);
+                print result
                 results = {};
                 results["id"]=k;
                 results["email"]=result["emailAddress"];
@@ -265,6 +266,7 @@ class EloquaRequest():
                 score=field["value"]
                 continue
             elif field["id"]=="100208":
+                print field["value"]
                 score_date=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(float(field["value"]))) ;
                 continue
             if score_date != None and score != None:
@@ -419,14 +421,16 @@ class MarketoRequest():
             response=self.getLead(k);
             if response.status_code == 200:
                 results = json.loads(response.text)["result"];
+                print results
                 if len(results)>0:
                     result = results[0];
                     print "==>    %s    %s    %d    %s" % (k, result["email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
                     leads.append(result);
+            else:
+                print response.text
             
-        return leads;           
-            
-    
+        return leads;
+
     def getMarketoAccessToken(self):
         marketo_instance = "%s/identity/oauth/token?grant_type=client_credentials" % self.base_url;
         request_url = marketo_instance + "&client_id=" + self.clinet_id + "&client_secret=" + self.client_secret;
@@ -488,12 +492,15 @@ class SFDCRequest():
             response=self.getRecord(sobjects,k);            
             if response.status_code == 200:
                 result = json.loads(response.text);
+                print result
                 print "==>    %s    %s    %s    %s" % (k, result["Email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
                 result["id"]=result["Id"];
                 del result["Id"];
                 result["email"]=result["Email"];
                 del result["Email"];                 
                 records.append(result);
+            else:
+                print response.text
             
         return records;
     

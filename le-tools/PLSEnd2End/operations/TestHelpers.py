@@ -67,6 +67,7 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
             break
 
         returnDict = getLoadGroupStatus(dlc, tenant, load_group)
+        print returnDict
         if returnDict["Start"].strip() != "-":
             lg_start_datetime = datetime.strptime(returnDict["Start"], "%Y-%m-%d %H:%M:%S")
         if returnDict["Last Succeeded"].strip() != "Never":
