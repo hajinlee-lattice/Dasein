@@ -29,13 +29,13 @@ public class Company implements HasPid, Serializable {
     private String street;
     private String city;
     private String state;
-    private String region; 
-    private String country; 
+    private String region;
+    private String country;
     private String industry; 
-    private String subIndustry; 
-    private String revenueRange; 
-    private String employeesRange; 
-    private Long parentId; 
+    private String subIndustry;
+    private String revenueRange;
+    private String employeesRange;
+    private Long parentId;
     private Integer insideViewId;
 
     @Id
