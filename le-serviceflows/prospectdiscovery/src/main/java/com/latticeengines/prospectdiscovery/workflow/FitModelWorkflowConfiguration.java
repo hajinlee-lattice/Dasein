@@ -105,6 +105,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             chooseModel.setInternalResourceHostPort(internalResourceHostPort);
+            targetMarketConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

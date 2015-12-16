@@ -30,7 +30,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         ObjectNode json = buildJson(stats);
         Report report = createReport(json.toString());
 
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(configuration.getMicroServiceHostPort());
+        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         proxy.registerReport(configuration.getTargetMarket().getName(), report, //
                 configuration.getCustomerSpace().toString());
     }
