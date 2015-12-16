@@ -30,12 +30,13 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         ObjectNode json = buildJson(stats);
         Report report = createReport(json.toString());
 
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
+        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(
+                configuration.getInternalResourceHostPort());
         proxy.registerReport(configuration.getTargetMarket().getName(), report, //
                 configuration.getCustomerSpace().toString());
     }
 
-    private GenericRecord retrieveStats() {
+    public GenericRecord retrieveStats() {
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), "CreateImportSummary");
         Table table = restTemplate.getForObject(url, Table.class);
@@ -46,7 +47,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
             if (!path.endsWith("avro")) {
                 paths.add(path + "/*.avro");
             }
-            
+
         }
 
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, paths);
@@ -57,7 +58,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         return records.get(0);
     }
 
-    private ObjectNode buildJson(GenericRecord stats) {
+    public ObjectNode buildJson(GenericRecord stats) {
         ObjectNode json = new ObjectMapper().createObjectNode();
 
         // accounts
@@ -68,8 +69,8 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         accounts.put("unique", (Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS));
 
         try {
-            double matchRate = ((Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS)).doubleValue()
-                    / ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS)).doubleValue();
+            double matchRate = ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS)).doubleValue()
+                    / ((Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS)).doubleValue();
             accounts.put("match_rate", matchRate);
         } catch (Exception e) {
             accounts.put("match_rate", -1.0);
@@ -111,7 +112,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         return json;
     }
 
-    private Report createReport(String json) {
+    public Report createReport(String json) {
         Report report = new Report();
         KeyValue kv = new KeyValue();
         kv.setPayload(json);
