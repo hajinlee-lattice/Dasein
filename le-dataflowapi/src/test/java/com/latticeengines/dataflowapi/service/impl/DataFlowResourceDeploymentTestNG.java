@@ -52,7 +52,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
     public DataFlowResourceDeploymentTestNG() {
     }
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         String jarFile = ClassLoader.getSystemResource(
                 "com/latticeengines/dataflowapi/service/impl/le-serviceflows-prospectdiscovery.jar").getPath();
@@ -99,7 +99,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
 
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void submitDataFlow() throws Exception {
         DataFlowConfiguration config = getDataFlowConfiguration();
         AppSubmission submission = submitDataFlow(config);
@@ -118,7 +118,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
                 expectedLocation.append(config.getTargetPath()).toString());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testBadHeader() {
         DataFlowConfiguration config = getDataFlowConfiguration();
         restTemplate.setInterceptors(null);
