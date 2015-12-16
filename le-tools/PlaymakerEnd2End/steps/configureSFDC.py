@@ -68,7 +68,8 @@ class DealSFDC(object):
         self.driver.click_button("Xpath=//input[@value='Sync']")
         log.info('have set click button, wait for sync finished')
         time.sleep(5)
-        self.driver.page_should_contain("The Sync Data job was initiated successfully")
+        self.driver.wait_until_page_contains("The Sync Data job was initiated successfully",self.timeout)
+        #self.driver.page_should_contain("The Sync Data job was initiated successfully")
         time.sleep(20)
         log.info ('syc successfully!')
     def checkRecommendations(self,playName,numberOfRecommendations=0):

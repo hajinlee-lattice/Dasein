@@ -741,10 +741,10 @@
     "PlayWorkflowType": {
         "CreatedBy": 0,
         "CreationDate": "/Date(1449509603773-0500)/",
-        "DisplayName": "List",
+        "DisplayName": "Cross-Sell",
         "DomainID": -1,
-        "ExternalID": "ADefault",
-        "InternalID": 1,
+        "ExternalID": "Cross-Sell",
+        "InternalID": 2,
         "IsActive": true,
         "LastModificationDate": "/Date(1449509603773-0500)/",
         "LastModifiedBy": 0,

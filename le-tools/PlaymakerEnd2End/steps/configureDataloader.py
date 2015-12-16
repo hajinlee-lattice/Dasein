@@ -51,8 +51,15 @@ class DataloaderDealer(object):
 		assert timePoint!=None
 		sql="SELECT LaunchId,CreateTime FROM Launches where tenantid=(SELECT TenantId FROM Tenant where name='"+tenant+"'and status=1) and GroupName='Full_Dante_Data_Flow' and createtime>'"+timePoint+"'"
 		log.info('sql to query Launch ID is: '+sql)
-		result=DealDB.fetchResultOfSelect(SQL=sql,SERVER=SalePrismEnvironments.dataloaderDBUrl,DATABASE=SalePrismEnvironments.dataloaderDBName,UID=SalePrismEnvironments.dataloaderDBUser,PWD=SalePrismEnvironments.dataloaderDBPassword,fetchAll=False)
-		assert result!=None
+		time_wait_Launch=15
+		while time_wait_Launch>0:
+			log.info("Waiting for load group be launched")
+			time.sleep(60)
+			time_wait_Launch=time_wait_Launch-1
+			result=DealDB.fetchResultOfSelect(SQL=sql,SERVER=SalePrismEnvironments.dataloaderDBUrl,DATABASE=SalePrismEnvironments.dataloaderDBName,UID=SalePrismEnvironments.dataloaderDBUser,PWD=SalePrismEnvironments.dataloaderDBPassword,fetchAll=False)
+			if result!=None:
+				break
+		assert result!=None,log.error("Load group 'Full Dante Data Flow' can't be launched after launched 15 mins")
 		launchId=result[0]
 		assert launchId !=None
 		log.info("The running FULL_DANTE_DATA_FLOW ID is %s "%launchId)

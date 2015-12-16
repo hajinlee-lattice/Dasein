@@ -9,8 +9,8 @@ except ImportError:
 	assert os.system('pip install -U pyodbc') ==0
 	import pyodbc
 import time,json,requests,csv,os
-from poster.encode import multipart_encode
-from poster.streaminghttp import register_openers
+#from poster.encode import multipart_encode
+#from poster.streaminghttp import register_openers
 import urllib2,ssl
 
 ssl._create_default_https_context=ssl._create_unverified_context
