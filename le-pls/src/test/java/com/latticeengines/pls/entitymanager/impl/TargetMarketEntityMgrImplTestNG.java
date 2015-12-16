@@ -3,8 +3,10 @@ package com.latticeengines.pls.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTimeZone;
@@ -15,17 +17,35 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.pls.ReportPurpose;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
+import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
+import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TargetMarketService;
 
 public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
+    private static final String REPORT_PAYLOAD = "{ \"foo\":\"bar\" }";
+    private static final ReportPurpose REPORT_PURPOSE = ReportPurpose.IMPORT_SUMMARY;
+
     @Autowired
-    TargetMarketEntityMgr targetMarketEntityMgr;
+    private TargetMarketEntityMgr targetMarketEntityMgr;
+
+    @Autowired
+    private TargetMarketService targetMarketService;
+
+    @Autowired
+    private ReportEntityMgr reportEntityMgr;
+
+    @Autowired
+    private KeyValueEntityMgr keyValueEntityMgr;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
@@ -65,7 +85,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = { "functional" })
-    public void create_calledWithParameters_assertAllAttributesArePersisted() {
+    public void testCreate() {
         setupSecurityContext(mainTestingTenant);
         assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
 
@@ -100,8 +120,8 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 MAX_PROSPECTS_PER_ACCOUNT.intValue());
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "create_calledWithParameters_assertAllAttributesArePersisted" })
-    public void targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound() {
+    @Test(groups = { "functional" }, dependsOnMethods = { "testCreate" })
+    public void testNotVisibleInAlternateTenant() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
 
         TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
@@ -109,8 +129,8 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertNull(targetMarket);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "targetMarketCreatedInOneTenant_switchToAlternativeTenant_assertTargetMarketCannnotBeFound" })
-    public void update_calledWithParameters_assertTargetMarketIsUpdated() {
+    @Test(groups = { "functional" }, dependsOnMethods = { "testNotVisibleInAlternateTenant" })
+    public void testUpdate() {
         setupSecurityContext(mainTestingTenant);
 
         TARGET_MARKET.setPid(null);
@@ -122,14 +142,58 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
 
-    @Test(groups = { "functional" }, dependsOnMethods = { "update_calledWithParameters_assertTargetMarketIsUpdated" })
-    public void delete_calledWithParameters_assertTargetMarketIsDeleted() {
+    @Test(groups = { "functional" }, dependsOnMethods = { "testUpdate" })
+    public void testRegisterReport() {
+        Report report = new Report();
+        report.setIsOutOfDate(false);
+        report.setPurpose(REPORT_PURPOSE);
+        KeyValue kv = new KeyValue();
+        kv.setPayload(REPORT_PAYLOAD);
+        report.setJson(kv);
+
+        targetMarketService.registerReport(TEST_TARGET_MARKET_NAME, report);
+
+        TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
+
+        assertEquals(targetMarket.getReports().size(), 1);
+        String reportName = targetMarket.getReports().get(0).getReportName();
+        assertNotNull(reportName);
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testRegisterReport" })
+    public void testDelete() {
         setupSecurityContext(mainTestingTenant);
         TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
 
+        final List<Long> reportPids = new ArrayList<>();
+        final List<Long> keyValuePids = new ArrayList<>();
+
+        for (TargetMarketReportMap reportMap : targetMarket.getReports()) {
+            reportPids.add(reportMap.getReport().getPid());
+            keyValuePids.add(reportMap.getReport().getJson().getPid());
+        }
+
         targetMarketEntityMgr.deleteTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
+
+        // Ensure that the delete cascaded
+        List<Report> allReports = reportEntityMgr.findAll();
+        assertFalse(Iterables.any(allReports, new Predicate<Report>() {
+            @Override
+            public boolean apply(Report report) {
+                return reportPids.contains(report.getPid());
+            }
+        }));
+
+        List<KeyValue> allKeyValues = keyValueEntityMgr.findByTenantId(mainTestingTenant.getPid());
+        assertFalse(Iterables.any(allKeyValues, new Predicate<KeyValue>() {
+            @Override
+            public boolean apply(KeyValue keyValue) {
+                return keyValuePids.contains(keyValue.getPid());
+            }
+        }));
+
     }
 
     private void assertEquivalent(final List<TargetMarketReportMap> actual, final List<TargetMarketReportMap> expected) {

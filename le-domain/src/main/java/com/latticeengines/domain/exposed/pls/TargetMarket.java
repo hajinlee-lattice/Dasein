@@ -271,8 +271,7 @@ public class TargetMarket implements HasPid, HasName, HasTenant, HasTenantId, Ha
     }
 
     @JsonProperty("reports")
-    @OneToMany(cascade = CascadeType.MERGE, mappedBy = "targetMarket", fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "targetMarket", fetch = FetchType.LAZY)
     public List<TargetMarketReportMap> getReports() {
         return this.reports;
     }

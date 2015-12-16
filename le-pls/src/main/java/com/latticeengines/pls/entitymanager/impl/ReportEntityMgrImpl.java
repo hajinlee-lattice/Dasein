@@ -86,13 +86,17 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Report> findAll() {
-        return super.findAll();
+        List<Report> reports = super.findAll();
+        for (Report report : reports) {
+            HibernateUtils.inflateDetails(report.getJson());
+        }
+        return reports;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Report> getAll() {
-        return super.findAll();
+        return findAll();
     }
 
     @Override

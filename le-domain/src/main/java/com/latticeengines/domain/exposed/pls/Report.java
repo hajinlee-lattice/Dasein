@@ -72,8 +72,7 @@ public class Report implements HasPid, HasName, HasTenant, HasTenantId, HasAudit
     @JsonProperty("created")
     private Date created;
 
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OneToOne(cascade = { CascadeType.REMOVE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_KEY_VALUE_ID", nullable = false)
     @JsonProperty("json")
     private KeyValue json;

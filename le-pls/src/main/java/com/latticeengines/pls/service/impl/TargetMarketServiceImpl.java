@@ -85,6 +85,7 @@ public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Override
     public void registerReport(String targetMarketName, Report report) {
+
         TargetMarket targetMarket = getTargetMarketByName(targetMarketName);
         if (targetMarket != null) {
             report.setName(new UID().toString());
