@@ -25,14 +25,14 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     }
 
     private void runDataFlow() {
-        DataFlowConfiguration dataFlowConfig = setupPreMatchTableDataFlow();
+        DataFlowConfiguration dataFlowConfig = setupDataFlow();
         String url = configuration.getMicroServiceHostPort() + "/dataflowapi/dataflows/";
 
         AppSubmission submission = restTemplate.postForObject(url, dataFlowConfig, AppSubmission.class);
         waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
     }
 
-    private DataFlowConfiguration setupPreMatchTableDataFlow() {
+    private DataFlowConfiguration setupDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
         dataFlowConfig.setName(configuration.getName());
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
