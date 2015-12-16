@@ -28,7 +28,8 @@ class LP_020100_VDB_NewSpecs( StepBase ):
     template_type = appseq.getText( 'template_type' )
 
     newSpecsFileName = 'LP_' + template_type + '_NewSpecs_2.1.0_from_2.0.1.maude'
-    newSpecsFileName = os.path.join('..','resources',newSpecsFileName)
+    newSpecsFileName = os.path.join('..','..','resources',newSpecsFileName)
+    newSpecsFileName = os.path.join(os.path.dirname(__file__),newSpecsFileName)
 
     slnes = ''
 

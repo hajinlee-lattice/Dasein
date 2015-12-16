@@ -1,8 +1,9 @@
+#!/usr/bin/python
 
 #
-# $LastChangedBy: YTian $
-# $LastChangedDate: 2015-10-30 13:59:04 +0800 (Fri, 30 Oct 2015) $
-# $Rev: 70693 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 #
 
 import os, sys
@@ -10,7 +11,7 @@ import appsequence
 import lp020101
 
 PATCH_PATH = os.path.dirname(__file__)
-REVISION   = '$Rev: 70693 $'
+REVISION   = '$Rev$'
 
 print ''
 print 'PATH : {0}'.format( PATCH_PATH )

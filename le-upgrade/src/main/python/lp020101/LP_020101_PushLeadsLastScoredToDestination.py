@@ -94,7 +94,8 @@ class LP_020101_PushLeadsLastScoredToDestination(StepBase):
 
 # Add New Specs Into VisiDB
     newSpecsFileName = 'LP_' + type + '_NewSpecs_2.1.1_from_2.1.0.maude'
-    newSpecsFileName = os.path.join('..','resources',newSpecsFileName)
+    newSpecsFileName = os.path.join('..','..','resources',newSpecsFileName)
+    newSpecsFileName = os.path.join(os.path.dirname(__file__),newSpecsFileName)
 
     slnes = ''
 
