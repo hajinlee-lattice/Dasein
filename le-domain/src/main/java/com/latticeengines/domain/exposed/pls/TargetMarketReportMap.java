@@ -41,6 +41,7 @@ public class TargetMarketReportMap implements HasPid {
     @JsonIgnore
     @JoinColumn(name = "TARGET_MARKET_ID", nullable = false)
     @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public TargetMarket getTargetMarket() {
         return this.targetMarket;
     }
