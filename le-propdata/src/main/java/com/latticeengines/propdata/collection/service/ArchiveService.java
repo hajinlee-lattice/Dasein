@@ -2,21 +2,22 @@ package com.latticeengines.propdata.collection.service;
 
 import java.util.Date;
 
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.util.DateRange;
 
 public interface ArchiveService {
 
-    CollectionJobContext startNewProgress(Date startDate, Date endDate, String creator);
+    ArchiveProgress startNewProgress(Date startDate, Date endDate, String creator);
 
-    CollectionJobContext importFromDB(CollectionJobContext request);
+    ArchiveProgress importFromDB(ArchiveProgress request);
 
-    CollectionJobContext transformRawData(CollectionJobContext request);
+    ArchiveProgress transformRawData(ArchiveProgress progress);
 
-    CollectionJobContext exportToDB(CollectionJobContext request);
+    ArchiveProgress exportToDB(ArchiveProgress progress);
 
-    CollectionJobContext findJobToRetry();
+    ArchiveProgress findJobToRetry();
 
-    CollectionJobContext findRunningJob();
+    ArchiveProgress findRunningJob();
 
     DateRange determineNewJobDateRange();
 

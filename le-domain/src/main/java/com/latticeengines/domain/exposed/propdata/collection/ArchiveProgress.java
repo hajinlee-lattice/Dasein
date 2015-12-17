@@ -3,27 +3,31 @@ package com.latticeengines.domain.exposed.propdata.collection;
 import java.util.Date;
 import java.util.UUID;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.MappedSuperclass;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-@MappedSuperclass
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-abstract public class ArchiveProgressBase implements HasPid {
+@Entity
+@Access(AccessType.FIELD)
+@Table(name = "ArchiveProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
+public class ArchiveProgress implements HasPid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProgressID", unique = true, nullable = false)
     protected Long pid;
+
+    @Column(name = "SourceName", nullable = false)
+    protected String sourceName;
 
     @Column(name = "StartDate", nullable = false)
     protected Date startDate;
@@ -72,6 +76,10 @@ abstract public class ArchiveProgressBase implements HasPid {
     public void setPid(Long pid) {
         this.pid = pid;
     }
+
+    public String getSourceName() { return sourceName; }
+
+    public void setSourceName(String sourceName) { this.sourceName = sourceName; }
 
     public Date getStartDate() {
         return startDate;
@@ -146,10 +154,10 @@ abstract public class ArchiveProgressBase implements HasPid {
 
     public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
 
-    public static <T extends ArchiveProgressBase> T constructByDates(Date startDate, Date endDate, Class<T> tClass)
+    public static ArchiveProgress constructByDates(String sourceName, Date startDate, Date endDate)
             throws InstantiationException, IllegalAccessException {
-        T progress = tClass.newInstance();
-
+        ArchiveProgress progress = new ArchiveProgress();
+        progress.setSourceName(sourceName);
         progress.setStartDate(startDate);
         progress.setEndDate(endDate);
 
@@ -163,7 +171,6 @@ abstract public class ArchiveProgressBase implements HasPid {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this).append(pid).append(startDate).append(endDate).append(rootOperationUID)
-                .append(status).toString();
+        return String.format("%s [%s]", sourceName, rootOperationUID);
     }
 }

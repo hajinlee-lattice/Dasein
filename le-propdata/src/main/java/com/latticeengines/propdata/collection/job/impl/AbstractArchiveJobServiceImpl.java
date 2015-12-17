@@ -11,15 +11,14 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressBase;
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
 import com.latticeengines.propdata.collection.job.ArchiveJobService;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.service.CollectionJobContext;
+import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 
-public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBase> extends QuartzJobBean
-        implements ArchiveJobService {
+public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implements ArchiveJobService {
 
     private ArchiveService archiveService;
     private String jobSubmitter = "Quartz";
@@ -30,7 +29,7 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
 
     abstract ArchiveService getArchiveService();
     abstract Logger getLogger();
-    abstract Class<P> getProgressClass();
+    abstract CollectionSource getSource();
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -50,9 +49,36 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
 
     @Override
     public void archivePeriod(DateRange period) {
-        CollectionJobContext context = archiveService.startNewProgress(period.getStartDate(), period.getEndDate(),
+        ArchiveProgress progress = archiveService.startNewProgress(period.getStartDate(), period.getEndDate(),
                 jobSubmitter);
-        proceedProgress(context);
+        proceedProgress(progress);
+    }
+
+    @Override
+    public void retryJob(ArchiveProgress progress) {
+        Logger log = getLogger();
+        if (ArchiveProgressStatus.FAILED.equals(progress.getStatus())) {
+            log.info("Found a job to retry: " + progress);
+            ArchiveProgressStatus resumeStatus;
+            switch (progress.getStatusBeforeFailed()) {
+                case NEW:
+                case DOWNLOADING:
+                    resumeStatus = ArchiveProgressStatus.NEW;
+                    break;
+                case DOWNLOADED:
+                case TRANSFORMING:
+                    resumeStatus = ArchiveProgressStatus.DOWNLOADED;
+                    break;
+                case TRANSFORMED:
+                case UPLOADING:
+                    resumeStatus = ArchiveProgressStatus.TRANSFORMED;
+                    break;
+                default:
+                    resumeStatus = ArchiveProgressStatus.NEW;
+            }
+            progress.setStatus(resumeStatus);
+        }
+        proceedProgress(progress);
     }
 
     @Override
@@ -68,9 +94,8 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
     private boolean tryExecuteInternal() throws InterruptedException {
         Logger log = getLogger();
 
-        CollectionJobContext jobCtx = archiveService.findRunningJob();
-        if (!CollectionJobContext.NULL.equals(jobCtx)) {
-            P progress = jobCtx.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
+        ArchiveProgress progress = archiveService.findRunningJob();
+        if (progress != null) {
             log.info("There is a running " + progress);
 
             Date expireDate = new Date(System.currentTimeMillis() - jobExpirationMilliSeconds);
@@ -82,44 +107,21 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
             return false;
         }
 
-        jobCtx = archiveService.findJobToRetry();
-        if (CollectionJobContext.NULL.equals(jobCtx)) {
-            log.info("There is nothing to retry for " + getProgressClass().getSimpleName());
+        progress = archiveService.findJobToRetry();
+        if (progress == null) {
+            log.info("There is nothing to retry for archiving " + getSource().getSourceName());
             DateRange dateRange = archiveService.determineNewJobDateRange();
             log.info("Auto-determine date range to be: " + dateRange);
             if (dateRange.getDurationInMilliSec() >= TimeUnit.DAYS.toMillis(7)) {
-                jobCtx = archiveService.startNewProgress(dateRange.getStartDate(), dateRange.getEndDate(),
+                progress = archiveService.startNewProgress(dateRange.getStartDate(), dateRange.getEndDate(),
                         jobSubmitter);
-                proceedProgress(jobCtx);
+                proceedProgress(progress);
             } else {
-                log.info("It is less than a week since last run of " + getProgressClass().getSimpleName());
+                log.info("It is less than a week since last archive of " + getSource().getSourceName());
             }
             return true;
         } else {
-            P progress = jobCtx.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
-            log.info("Found a job to retry: " + progress);
-            if (ArchiveProgressStatus.FAILED.equals(progress.getStatus())) {
-                ArchiveProgressStatus resumeStatus;
-                switch (progress.getStatusBeforeFailed()) {
-                    case NEW:
-                    case DOWNLOADING:
-                        resumeStatus = ArchiveProgressStatus.NEW;
-                        break;
-                    case DOWNLOADED:
-                    case TRANSFORMING:
-                        resumeStatus = ArchiveProgressStatus.DOWNLOADED;
-                        break;
-                    case TRANSFORMED:
-                    case UPLOADING:
-                        resumeStatus = ArchiveProgressStatus.TRANSFORMED;
-                        break;
-                    default:
-                        resumeStatus = ArchiveProgressStatus.NEW;
-                }
-                progress.setStatus(resumeStatus);
-                jobCtx.setProperty(CollectionJobContext.PROGRESS_KEY, progress);
-            }
-            proceedProgress(jobCtx);
+            retryJob(progress);
         }
 
         Thread.sleep(10000L);
@@ -127,17 +129,15 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
         return false;
     }
 
-    private void proceedProgress(CollectionJobContext context) {
-        P progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
-
+    private void proceedProgress(ArchiveProgress progress) {
         switch (progress.getStatus()) {
-            case NEW: context = archiveService.importFromDB(context);
-            case DOWNLOADED: context = archiveService.transformRawData(context);
-            case TRANSFORMED: context = archiveService.exportToDB(context);
-            default: Log.warn(String.format("Illegal starting status %s for progress %s", progress.getStatus(), progress.getRootOperationUID()));
+            case NEW: progress = archiveService.importFromDB(progress);
+            case DOWNLOADED: progress = archiveService.transformRawData(progress);
+            case TRANSFORMED: progress = archiveService.exportToDB(progress);
+            default: Log.warn(String.format("Illegal starting status %s for progress %s",
+                    progress.getStatus(), progress.getRootOperationUID()));
         }
 
-        progress = context.getProperty(CollectionJobContext.PROGRESS_KEY, getProgressClass());
         if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
             logJobFailed(progress);
         } else {
@@ -149,15 +149,15 @@ public abstract class AbstractArchiveJobServiceImpl<P extends ArchiveProgressBas
         this.archiveService = archiveService;
     }
 
-    private void logJobSucceed(P progress) {
+    private void logJobSucceed(ArchiveProgress progress) {
         Logger log = getLogger();
-        log.info(getProgressClass().getSimpleName() + " finished for period " +
+        log.info("Archiving " + getSource().getSourceName() + " finished for period " +
                 new DateRange(progress.getStartDate(), progress.getEndDate()) +
                 " RootOperationUID=" + progress.getRootOperationUID());
     }
-    private void logJobFailed(P progress) {
+    private void logJobFailed(ArchiveProgress progress) {
         Logger log = getLogger();
-        log.error(getProgressClass().getSimpleName() + " failed for period " +
+        log.error("Archiving " + getSource().getSourceName() + " failed for period " +
                 new DateRange(progress.getStartDate(), progress.getEndDate()) +
                 " RootOperationUID=" + progress.getRootOperationUID());
     }

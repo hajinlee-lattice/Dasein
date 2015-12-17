@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.collection.job;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,6 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -24,14 +24,16 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-public class ArchiveJobRunner {
+public class CollectionAdminTool {
 
+    private static final String NS_COMMAND = "command";
     private static final String NS_SOURCE = "source";
     private static final String NS_START_DATE = "startDate";
     private static final String NS_END_DATE = "endDate";
     private static final String NS_SPLIT_MODE = "splitMode";
     private static final String NS_PERIOD_LENGTH = "periodLength";
     private static final String NS_NUM_PERIODS = "numPeriods";
+    private static final String NS_RETRY_UID = "retryProgressUID";
 
     private static final String MODE_NUM = "number";
     private static final String MODE_LEN = "length";
@@ -46,9 +48,18 @@ public class ArchiveJobRunner {
     private DateRange fullDateRange;
     private CollectionSource source;
     private List<DateRange> periods;
+    private ArchiveJobService jobService;
+    private ArchiveProgressEntityMgr entityMgr;
 
     static {
-        parser.description("Archive collection source in HDFS.");
+        parser.description("PropData Collection Admin Tool");
+
+        parser.addArgument("-c", "--command")
+                .dest(NS_COMMAND)
+                .required(true)
+                .type(String.class)
+                .choices(Command.allNames())
+                .help("commands");
 
         parser.addArgument("-s", "--source")
                 .dest(NS_SOURCE)
@@ -86,6 +97,12 @@ public class ArchiveJobRunner {
                 .setDefault(7)
                 .help("period lengths in days. required if the split mode is length. default is [7] days.");
 
+        parser.addArgument("-rid", "--retry-job-id")
+                .dest(NS_RETRY_UID)
+                .required(false)
+                .type(String.class)
+                .help("if this parameter is provided, retry the given progress");
+
         parser.addArgument("-n", "--num-periods")
                 .dest(NS_NUM_PERIODS)
                 .required(false)
@@ -94,19 +111,22 @@ public class ArchiveJobRunner {
                 .help("number of periods. required if the split mode is number. default is [1] period.");
     }
 
-    public ArchiveJobRunner(){ }
+    public CollectionAdminTool(){ }
 
     private void validateArguments(Namespace ns) {
         if (ns == null) {
             throw new IllegalArgumentException("Failed to parse input arguments.");
         }
 
+        source = CollectionSource.fromName(ns.getString(NS_SOURCE));
+
+        if (StringUtils.isNotEmpty(ns.getString(NS_RETRY_UID))) { return; }
+
         Date startDate = toStartOfTheDay(parseDateInput(ns.getString(NS_START_DATE)));
         Date endDate = toEndOfTheDay(parseDateInput(ns.getString(NS_END_DATE)));
         fullDateRange = new DateRange(startDate, endDate);
         System.out.println(fullDateRange);
 
-        source = CollectionSource.fromName(ns.getString(NS_SOURCE));
 
         if (ns.getString(NS_SPLIT_MODE).equals(MODE_LEN)) {
             int length = ns.getInt(NS_PERIOD_LENGTH);
@@ -160,67 +180,83 @@ public class ArchiveJobRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        ArchiveJobRunner runner = new ArchiveJobRunner();
+        CollectionAdminTool runner = new CollectionAdminTool();
         runner.run(args);
     }
 
+    @SuppressWarnings("unchecked")
     private void run(String[] args) throws Exception {
         try {
             Namespace ns = parser.parseArgs(args);
 
             validateArguments(ns);
 
-            System.out.println("\n\n========================================");
-            System.out.println("Archiving Collection Source: " + source.getName());
-            System.out.println("========================================\n");
+            ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-collection-context.xml");
+            jobService = (ArchiveJobService) ac.getBean(source.getArchiveJobBean());
+            jobService.setAutowiredArchiveService();
+            jobService.setJobSubmitter(JOB_SUBMITTER);
+            entityMgr = (ArchiveProgressEntityMgr) ac.getBean(source.getEntityMgrBean());
 
-            System.out.println("Source to archive: " + source.getName());
-            System.out.println("Full date range to archive: " + fullDateRange);
-            System.out.println("Split into " + periods.size() + " periods: ");
-
-            int digits = String.valueOf(periods.size()).length();
-            int i = 0;
-            for (DateRange period : periods) {
-                System.out.println(String.format("  Period %" + digits + "d: %s", ++i, period.toString()));
+            if (Command.ARCHIVE.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
+                executeArchiveCommand(ns);
             }
 
             promptContinue();
-
-            System.out.println("Start archiving " + source.getName() + " ... ");
-            try (ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext(
-                    "propdata-collection-context.xml")) {
-                ArchiveJobService jobService = (ArchiveJobService) ac.getBean(source.getArchiveJobBean());
-                jobService.setAutowiredArchiveService();
-                jobService.setJobSubmitter(JOB_SUBMITTER);
-
-                i = 0;
-                long totalStartTime = System.currentTimeMillis();
-                for (DateRange period : periods) {
-                    long startTime = System.currentTimeMillis();
-                    System.out.println("Archiving data for (" + (++i) + "/" + periods.size() + ") period " + period
-                            + " (check propdata.log and progress table for detailed progress.) ...");
-                    System.out.println("");
-
-                    try {
-                        jobService.archivePeriod(period);
-                        System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
-                                + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
-                    } catch (Exception e) {
-                        System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
-                                + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
-                    }
-                }
-            }
-
             System.out.println("\n\n========================================\n");
-
-            promptExit();
+            System.exit(0);
 
         } catch (ArgumentParserException|IllegalArgumentException e) {
             handleException(e);
         }
     }
 
+    private void executeArchiveCommand(Namespace ns) {
+        System.out.println("\n\n========================================");
+        System.out.println("Archiving Collection Source: " + source.getName());
+        System.out.println("========================================\n");
+
+        System.out.println("Source to archive: " + source.getName());
+
+        if (StringUtils.isEmpty(ns.getString(NS_RETRY_UID))) {
+            executeArchiveByRanges();
+        } else {
+            executeArchiveByRetry(ns.getString(NS_RETRY_UID));
+        }
+    }
+
+    private void executeArchiveByRetry(String uid) {
+        System.out.println("Retry progress: " + uid);
+        jobService.retryJob(entityMgr.findProgressByRootOperationUid(uid));
+    }
+
+    private void executeArchiveByRanges() {
+        System.out.println("Full date range to archive: " + fullDateRange);
+        System.out.println("Split into " + periods.size() + " periods: ");
+
+        int digits = String.valueOf(periods.size()).length();
+        int i = 0;
+        for (DateRange period : periods) {
+            System.out.println(String.format("  Period %" + digits + "d: %s", ++i, period.toString()));
+        }
+
+        System.out.println("Start archiving " + source.getName() + " ... ");
+        long totalStartTime = System.currentTimeMillis();
+        for (DateRange period : periods) {
+            long startTime = System.currentTimeMillis();
+            System.out.println("Archiving data for (" + (++i) + "/" + periods.size() + ") period " + period
+                    + " (check propdata.log and progress table for detailed progress.) ...");
+            System.out.println("");
+
+            try {
+                jobService.archivePeriod(period);
+                System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
+                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+            } catch (Exception e) {
+                System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
+                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+            }
+        }
+    }
 
     private void promptContinue() {
         // prompt for continue
@@ -239,31 +275,27 @@ public class ArchiveJobRunner {
         }
     }
 
-    private void promptExit() throws IOException {
-        System.out.println("Press enter to exit.");
-        try (Scanner scanner = new Scanner(System.in)) { 
-            scanner.nextLine();
-        }
-        System.exit(0);
-    }
-
 
     enum CollectionSource {
-        FEATURE("Feature", "featureArchiveJobService");
+        FEATURE("Feature", "featureArchiveJobService", "featureArchiveProgressEngityMgr");
 
         private static Map<String, CollectionSource> nameMap;
 
-        private String name;
-        private String archiveJobBean;
+        private final String name;
+        private final String archiveJobBean;
+        private final String entityMgrBean;
 
-        CollectionSource(String name, String archiveJobBean) {
+        CollectionSource(String name, String archiveJobBean, String entityMgrBean) {
             this.name = name;
             this.archiveJobBean = archiveJobBean;
+            this.entityMgrBean = entityMgrBean;
         }
 
         String getName() { return this.name; }
 
         String getArchiveJobBean() { return this.archiveJobBean; }
+
+        String getEntityMgrBean() { return this.entityMgrBean; }
 
         static {
             nameMap = new HashMap<>();
@@ -279,6 +311,38 @@ public class ArchiveJobRunner {
         }
 
         static CollectionSource fromName(String name) {
+            return nameMap.get(name);
+        }
+
+    }
+
+
+    enum Command {
+        ARCHIVE("archive");
+
+        private static Map<String, Command> nameMap;
+        private final String name;
+
+        Command(String name) {
+            this.name = name;
+        }
+
+        String getName() { return this.name; }
+
+        static {
+            nameMap = new HashMap<>();
+            for (Command cmd: Command.values()) {
+                nameMap.put(cmd.getName(), cmd);
+            }
+        }
+
+        static String[] allNames() {
+            Set<String> names = nameMap.keySet();
+            String[] nameArray = new String[names.size()];
+            return names.toArray(nameArray);
+        }
+
+        static Command fromName(String name) {
             return nameMap.get(name);
         }
 

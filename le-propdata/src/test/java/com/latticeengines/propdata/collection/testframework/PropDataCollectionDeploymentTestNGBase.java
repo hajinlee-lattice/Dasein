@@ -7,6 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public abstract class PropDataCollectionDeploymentTestNGBase extends PropDataCollectionAbstractTestNGBase {
 
     @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplateSrc")
-    protected JdbcTemplate jdbcTemplateSrc;
+    @Qualifier(value = "propDataCollectionJdbcTemplate")
+    protected JdbcTemplate jdbcTemplate;
 }

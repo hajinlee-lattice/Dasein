@@ -3,11 +3,15 @@ package com.latticeengines.propdata.collection.dao;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
+import com.latticeengines.propdata.collection.source.Source;
 
-public interface ArchiveProgressDao<T> extends BaseDao<T> {
+public interface ArchiveProgressDao extends BaseDao<ArchiveProgress> {
 
-    T findByRootOperationUid(String uid);
+    ArchiveProgress findByRootOperationUid(String uid);
 
-    List<T> findFailedProgresses();
+    List<ArchiveProgress> findFailedProgresses(Source source);
+
+    List<ArchiveProgress> findAllOfSource(Source source);
 
 }

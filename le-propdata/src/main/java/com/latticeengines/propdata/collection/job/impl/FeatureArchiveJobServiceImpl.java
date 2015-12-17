@@ -8,14 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.FeatureArchiveProgress;
 import com.latticeengines.propdata.collection.job.ArchiveJobService;
 import com.latticeengines.propdata.collection.service.FeatureArchiveService;
+import com.latticeengines.propdata.collection.source.CollectionSource;
 
 @DisallowConcurrentExecution
 @Component("featureArchiveJobService")
-public class FeatureArchiveJobServiceImpl extends AbstractArchiveJobServiceImpl<FeatureArchiveProgress>
-        implements ArchiveJobService {
+public class FeatureArchiveJobServiceImpl extends AbstractArchiveJobServiceImpl implements ArchiveJobService {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -31,7 +30,7 @@ public class FeatureArchiveJobServiceImpl extends AbstractArchiveJobServiceImpl<
             try {
                 super.executeInternal(context);
             } catch (Exception e) {
-                log.error(getProgressClass().getSimpleName() + "Failed.", e);
+                log.error("Archiving " + getSource().getSourceName() + "Failed.", e);
                 throw new JobExecutionException(e);
             }
         }
@@ -44,13 +43,15 @@ public class FeatureArchiveJobServiceImpl extends AbstractArchiveJobServiceImpl<
     Logger getLogger() { return log; }
 
     @Override
-    Class<FeatureArchiveProgress> getProgressClass() { return FeatureArchiveProgress.class; }
+    CollectionSource getSource() { return CollectionSource.FEATURE; }
 
     // set job data as map
+    @SuppressWarnings("unused")
     public void setFeatureArchiveService(FeatureArchiveService featureArchiveService) {
         this.featureArchiveService = featureArchiveService;
     }
 
+    @SuppressWarnings("unused")
     public void setQuartzEnabled(boolean quartzEnabled) { this.quartzEnabled = quartzEnabled; }
 
 }

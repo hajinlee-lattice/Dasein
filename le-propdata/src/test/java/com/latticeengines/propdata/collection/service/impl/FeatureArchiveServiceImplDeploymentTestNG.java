@@ -4,23 +4,19 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.FeatureArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.FeatureArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.CollectionJobContext;
 import com.latticeengines.propdata.collection.service.FeatureArchiveService;
-import com.latticeengines.propdata.collection.util.DateRange;
 
-public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase<FeatureArchiveProgress> {
+@Component
+public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
 
     @Autowired
     FeatureArchiveService archiveService;
 
     @Autowired
-    FeatureArchiveProgressEntityMgr progressEntityMgr;
+    ArchiveProgressEntityMgr progressEntityMgr;
 
     @Override
     FeatureArchiveService getArchiveService() {
@@ -28,7 +24,7 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
     }
 
     @Override
-    ArchiveProgressEntityMgr<FeatureArchiveProgress> getProgressEntityMgr() { return progressEntityMgr; }
+    ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
     Date[] getDates() {
@@ -46,17 +42,17 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
         return dates;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress", enabled = false)
-    public void testEmptyInput() {
-        Date[] dates = getEmptyDataDates();
-
-        CollectionJobContext context = createNewProgress(dates[0], dates[1]);
-        context = importFromDB(context);
-        context = transformRawData(context);
-        exportToDB(context);
-
-        cleanupProgressTables();
-    }
+//    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress", enabled = false)
+//    public void testEmptyInput() {
+//        Date[] dates = getEmptyDataDates();
+//
+//        CollectionJobContext context = createNewProgress(dates[0], dates[1]);
+//        context = importFromDB(context);
+//        context = transformRawData(context);
+//        exportToDB(context);
+//
+//        cleanupProgressTables();
+//    }
 
     @Override
     String destTableName() { return "Feature_MostRecent"; }
@@ -67,20 +63,20 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
     @Override
     String[] uniqueColumns() { return new String[]{"URL", "Feature"}; }
 
-    // not every kind of progress need this, we only need to test this on one kind
-    @Override
-    protected void testAutoDetermineDateRange() {
-        DateRange range = archiveService.determineNewJobDateRange();
-        System.out.println(range);
-
-        Date cutDate = dates[1];
-        Assert.assertTrue(range.getStartDate().before(cutDate),
-                "the auto determined range should start before " + cutDate
-                        + ". But it is " + range.getStartDate());
-        Assert.assertTrue(range.getEndDate().after(cutDate),
-                "the auto determined range should end after " + cutDate
-                        + ". But it is " + range.getStartDate());
-    }
+//    // not every kind of progress need this, we only need to test this on one kind
+//    @Override
+//    protected void testAutoDetermineDateRange() {
+//        DateRange range = archiveService.determineNewJobDateRange();
+//        System.out.println(range);
+//
+//        Date cutDate = dates[1];
+//        Assert.assertTrue(range.getStartDate().before(cutDate),
+//                "the auto determined range should start before " + cutDate
+//                        + ". But it is " + range.getStartDate());
+//        Assert.assertTrue(range.getEndDate().after(cutDate),
+//                "the auto determined range should end after " + cutDate
+//                        + ". But it is " + range.getStartDate());
+//    }
 
     private Date[] getEmptyDataDates() {
         Date[] dates = new Date[2];

@@ -2,24 +2,26 @@ package com.latticeengines.propdata.collection.entitymanager;
 
 import java.util.Date;
 
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.propdata.collection.source.Source;
 
-public interface ArchiveProgressEntityMgr<T> {
+public interface ArchiveProgressEntityMgr {
 
-    T insertNewProgress(Date startDate, Date endDate, String creator) throws InstantiationException, IllegalAccessException;
+    ArchiveProgress createProgress(ArchiveProgress progress);
 
-    T updateProgress(T progress);
+    ArchiveProgress updateProgress(ArchiveProgress progress);
 
-    T updateStatus(T progress, ArchiveProgressStatus status);
+    ArchiveProgress updateStatus(ArchiveProgress progress, ArchiveProgressStatus status);
 
     void deleteProgressByRootOperationUid(String rootOperationUid);
 
-    T findProgressByRootOperationUid(String rootOperationUid);
+    ArchiveProgress findProgressByRootOperationUid(String rootOperationUid);
 
-    Class<T> getProgressClass();
+    ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator);
 
-    T findEarliestFailureUnderMaxRetry();
+    ArchiveProgress findEarliestFailureUnderMaxRetry(Source source);
 
-    T findProgressNotInFinalState();
+    ArchiveProgress findProgressNotInFinalState(Source source);
 
 }

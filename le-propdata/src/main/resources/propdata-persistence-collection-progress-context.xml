@@ -30,9 +30,7 @@
     </bean>
     <tx:annotation-driven transaction-manager="transactionManagerPropDataCollectionProgress" />
 
-
-
-    <bean id="featureArchiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.FeatureArchiveProgressDaoImpl">
+    <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataCollectionProgress" />
     </bean>
 

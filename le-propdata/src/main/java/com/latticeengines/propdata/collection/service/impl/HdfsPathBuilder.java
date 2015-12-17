@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.propdata.collection.source.Source;
 
 @Component("hdfsPathBuilder")
 public class HdfsPathBuilder {
 
     private static final String rawDataFlowType = "Raw";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSSz");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -22,35 +23,36 @@ public class HdfsPathBuilder {
     @Value("${propdata.hdfs.pod.id:Default}")
     private String podId;
 
-    Path constructSourceDir(String sourceName) {
+    Path constructSourceDir(Source source) {
+        String sourceName = source.getSourceName();
         sourceName = sourceName.endsWith("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : sourceName;
         return new Path("/Pods").append(podId).append("Services").append("PropData")
                 .append("Sources").append(sourceName);
     }
 
-    Path constructRawDataFlowDir(String sourceName) {
-        Path baseDir = constructSourceDir(sourceName);
-        return baseDir.append("DataFlows").append(rawDataFlowType);
+    Path constructRawDataFlowDir(Source source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append(rawDataFlowType);
     }
 
-    Path constructRawDataFlowSnapshotDir(String sourceName) {
-        Path baseDir = constructSourceDir(sourceName);
-        return baseDir.append("DataFlows").append("Snapshot");
+    Path constructRawDataFlowSnapshotDir(Source source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append("Snapshot");
     }
 
-    Path constructRawDataFlowIncrementalDir(String sourceName, Date startDate, Date endDate) {
-        Path baseDir = constructRawDataFlowDir(sourceName);
-        return baseDir.append(dateFormat.format(startDate) + "-" + dateFormat.format(endDate));
-    }
-
-    Path constructWorkFlowDir(String sourceName, String flowName) {
-        Path baseDir = constructSourceDir(sourceName);
+    Path constructWorkFlowDir(Source source, String flowName) {
+        Path baseDir = constructSourceDir(source);
         return baseDir.append("WorkFlows").append(flowName);
     }
 
-    Path constructSchemaDir(String sourceName) {
-        Path baseDir = constructSourceDir(sourceName);
-        return baseDir.append("DataFlows").append("Schema");
+    Path constructSchemaDir(Source source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append("Schema");
+    }
+
+    Path constructRawDataFlowIncrementalDir(Source source, Date archiveDate) {
+        Path baseDir = constructRawDataFlowDir(source);
+        return baseDir.append(dateFormat.format(archiveDate));
     }
 
     void changeHdfsPodId(String podId) { this.podId = podId; }
