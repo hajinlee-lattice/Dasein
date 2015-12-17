@@ -181,6 +181,7 @@ input[type="search"] {
 .custom[type="checkbox"]:checked + label:before {
   content: '';
   position: absolute;
+  background: #fff;
   left:0; 
   top: 3px;
   width: 24px; 

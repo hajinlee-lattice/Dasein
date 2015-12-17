@@ -8,6 +8,9 @@
  .carousel {
 	width: 100%;
 	position: relative;
+	@include media("<medium") {
+		width: 85%;
+	}
 }
 .carousel .carousel-item {
 	display: none;
@@ -31,7 +34,7 @@
 }
 .carousel-nav {
   position: absolute;
-  bottom: 0;
+  top: 52px;
   z-index: 4;
   width: 100%;
 }
@@ -40,8 +43,7 @@
   font-size: .8em;
   background: #fff;
   color: #333;
-  opacity: .8;
-  padding: .5em;
+  opacity: .9;
   position: absolute;
   bottom: 0;
   font-weight: bold;
