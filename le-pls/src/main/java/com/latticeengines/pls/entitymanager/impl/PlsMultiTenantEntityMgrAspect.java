@@ -18,33 +18,83 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.*(..))")
-    public void modelSummaryMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
+    public void findModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.*(..))")
-    public void segmentMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.find*(..))")
+    public void findSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.*(..))")
-    public void targetMarketMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.find*(..))")
+    public void findTargetMarket(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.*(..))")
-    public void quotaMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.find*(..))")
+    public void findQuota(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ProspectDiscoveryOptionEntityMgrImpl.*(..))")
-    public void prospectDiscoveryOptionMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ProspectDiscoveryOptionEntityMgrImpl.find*(..))")
+    public void findProspectDiscoveryOption(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ReportEntityMgrImpl.*(..))")
-    public void reportMethods(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.update*(..))")
+    public void updateModelSummary(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.update*(..))")
+    public void updateSegment(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.update*(..))")
+    public void updateTargetMarket(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.update*(..))")
+    public void updateQuota(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ProspectDiscoveryOptionEntityMgrImpl.update*(..))")
+    public void updateProspectDiscoveryOption(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.delete*(..))")
+    public void deleteModelSummary(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.delete*(..))")
+    public void deleteSegment(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.TargetMarketEntityMgrImpl.delete*(..))")
+    public void deleteTargetMarket(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.QuotaEntityMgrImpl.delete*(..))")
+    public void deleteQuota(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ProspectDiscoveryOptionEntityMgrImpl.delete*(..))")
+    public void deleteProspectDiscoveryOption(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ReportEntityMgrImpl.find*(..))")
+    public void findReport(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
