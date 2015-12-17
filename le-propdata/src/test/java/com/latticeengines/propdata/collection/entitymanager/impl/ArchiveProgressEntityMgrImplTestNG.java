@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 @Component
@@ -20,7 +21,7 @@ public class ArchiveProgressEntityMgrImplTestNG extends PropDataCollectionFuncti
     @Test(groups = "functional")
     public void testInsertNew() throws IOException {
         ArchiveProgress progress =
-                progressEntityMgr.insertNewProgress("TestSource", new Date(), new Date(), "FunctionalTest");
+                progressEntityMgr.insertNewProgress(CollectionSource.FEATURE, new Date(), new Date(), "FunctionalTest");
         progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
 
     }

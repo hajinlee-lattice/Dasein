@@ -274,7 +274,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         }
         try {
             collectionDataFlowService.executeMergeRawSnapshotData(
-                    source.getSourceName(),
+                    source,
                     incrementalDataDirInHdfs(progress),
                     getMergeDataFlowQualifier()
             );

@@ -13,6 +13,7 @@ import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
@@ -37,40 +38,41 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     private String cascadingPlatform;
 
     @Override
-    public void executeMergeRawSnapshotData(String sourceName, String rawDir, String mergeDataFlowQualifier) {
+    public void executeMergeRawSnapshotData(Source source, String rawDir, String mergeDataFlowQualifier) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW;
 
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(sourceName, flowName).toString();
-        String snapshotPath = hdfsPathBuilder.constructRawDataFlowSnapshotDir(sourceName).toString();
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).toString();
+        String snapshotPath = hdfsPathBuilder.constructRawDataFlowSnapshotDir(source).toString();
 
         Map<String, String> sources = new HashMap<>();
         sources.put(CollectionDataFlowKeys.RAW_AVRO_SOURCE, rawDir + "/*.avro");
         sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotPath + "/*.avro");
 
-        DataFlowContext ctx = commonContext(sourceName, sources);
+        DataFlowContext ctx = commonContext(source, sources);
         ctx.setProperty("TARGETPATH", targetPath + "/Output");
-        ctx.setProperty("FLOWNAME", sourceName + "-" + flowName);
+        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, mergeDataFlowQualifier);
     }
 
 
     @Override
-    public void executePivotSnapshotData(String sourceName, String snapshotDir, String pivotDataFlowQualifier) {
+    public void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier) {
         String flowName = CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW;
 
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(sourceName, flowName).toString();
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).toString();
         String snapshotPath = snapshotDir;
 
         Map<String, String> sources = new HashMap<>();
         sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotPath + "/*.avro");
 
-        DataFlowContext ctx = commonContext(sourceName, sources);
+        DataFlowContext ctx = commonContext(source, sources);
         ctx.setProperty("TARGETPATH", targetPath + "/Output");
-        ctx.setProperty("FLOWNAME", sourceName + "-" + flowName);
+        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, pivotDataFlowQualifier);
     }
 
-    private DataFlowContext commonContext(String sourceName, Map<String, String> sources) {
+    private DataFlowContext commonContext(Source source, Map<String, String> sources) {
+        String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         if ("mr".equalsIgnoreCase(cascadingPlatform)) {
             ctx.setProperty("ENGINE", "MR");

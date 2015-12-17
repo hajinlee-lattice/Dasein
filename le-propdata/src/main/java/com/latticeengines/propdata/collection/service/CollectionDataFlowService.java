@@ -1,9 +1,11 @@
 package com.latticeengines.propdata.collection.service;
 
+import com.latticeengines.propdata.collection.source.Source;
+
 public interface CollectionDataFlowService {
 
-    void executeMergeRawSnapshotData(String sourceName, String rawDir, String mergeDataFlowQualifier);
+    void executeMergeRawSnapshotData(Source source, String rawDir, String mergeDataFlowQualifier);
 
-    void executePivotSnapshotData(String sourceName, String snapshotDir, String pivotDataFlowQualifier);
+    void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier);
 
 }

@@ -46,7 +46,7 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
 //    public void testEmptyInput() {
 //        Date[] dates = getEmptyDataDates();
 //
-//        CollectionJobContext context = createNewProgress(dates[0], dates[1]);
+//        ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
 //        context = importFromDB(context);
 //        context = transformRawData(context);
 //        exportToDB(context);
