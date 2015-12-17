@@ -225,7 +225,11 @@ Badges
     white-space: nowrap;
     vertical-align: middle;
     background-color: #e7e7e7;
-    &.badge-success {
+    &.badge-green {
     	background-color: #71bc51;
+    }
+    &.badge-blue {
+    	background-color: #3989c4;
+    	color: #fff;
     }
 }
