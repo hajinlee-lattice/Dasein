@@ -1,20 +1,36 @@
 .pd-industry {
-    .industry-list.row {
-        transition: all 500ms ease;
+    -webkit-perspective: 2000px;
+    -moz-perspective: 2000px;
+    -ms-perspective: 2000px;
+    perspective: 2000px;
+
+    .industry-list {
         margin-bottom: 2em;
         color: #000;
+        -webkit-backface-visibility: hidden;
+        -moz-backface-visibility: hidden;
+        -ms-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-transition: all 1 300ms ease;
+        -moz-transition: all 300ms ease;
+        -ms-transition: all 300ms ease;
+        transition: all 300ms ease;
+        -webkit-transform-origin: 50% 50%;
+        -moz-transform-origin: 50% 50%;
+        -ms-transform-origin: 50% 50%;
+        transform-origin: 50% 50%;
     }
 
-    .industry-list.row.ng-enter  {
-        opacity: 0;
+    .industry-list.ng-enter  {
+        transform: rotateX(180deg);
     }
 
-    .industry-list.row.ng-enter-active {
-        opacity: 1;
+    .industry-list.ng-enter-active {
+        transform: rotateX(0deg);
     }
 
-    .industry-list.row.ng-enter-stagger {
-        transition-delay: 250ms;
+    .industry-list.ng-enter-stagger {
+        transition-delay: 150ms;
         transition-duration: 0s;
     }
 

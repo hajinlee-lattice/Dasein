@@ -56,7 +56,7 @@ angular
             })
             .state('builder', {
                 url: '/builder',
-                redirectTo: "builder.category({AttrKey: 'Industry'})",
+                redirectTo: "builder.category({AttrKey: 'Industry', ParentValue: ''})",
                 views: {
                     "navigation@": {
                         templateUrl: './app/navigation/sidebar/BuilderView.html'
@@ -67,13 +67,14 @@ angular
                 }
             })
             .state('builder.category', {
-                url: '/categories/:AttrKey',
+                url: '/categories/:AttrKey/:ParentKey/:ParentValue',
                 views: {
                     "main@": {
                         templateUrl: './app/builder/category/CategoryView.html'
                     }
                 }
             })
+            /*
             .state('builder.subcategory', {
                 url: '/subcategories/:ParentKey/:AttrKey',
                 views: {
@@ -82,7 +83,6 @@ angular
                     }
                 }
             })
-            /*
             .state('builder.locations', {
                 url: '/locations',
                 views: {
