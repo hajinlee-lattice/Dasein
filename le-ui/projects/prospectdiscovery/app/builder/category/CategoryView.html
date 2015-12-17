@@ -29,63 +29,65 @@
 
         <div class="four columns list-item{{ item.selected ? ' selected' : '' }}" ng-repeat="(col, item) in items">
         	<div class="tile">
-        		<div class="row">
-        			<div class="nine columns attr-select-container">
-	        			<input 
-                            type="checkbox" 
-                            id="attr-checkbox_{{ row }}_{{ col }}" 
-                            class="attr-checkbox"
-                            ng-model="item.selected"
-                            ng-change="handleTileSelection($event);"
-                        />
-	        			<label for="attr-checkbox_{{ row }}_{{ col }}" class="attr-label">
-                            {{ item.AttrValue | limitTo: truncate_limit }}{{item.AttrValue.length > truncate_limit ? '&hellip;' : ''}}
-                            &nbsp;(<a ui-sref="builder">{{ item.total || "5" }}</a>)
-                        </label>
-        			</div>
-        			<div class="three columns" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
-        				{{ item.lift || "1.9x" }} ${{ item.revenue | number:0 }}
-        			</div>
-        		</div>
-        		<div class="row" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
-        			<div class="six columns">
-        				<dl class="stats">
-        					<dt>Available from Lattice</dt>
-        					<dd><a href="#">{{ item.lattice_companies | number:0 }}</a></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>All in your database</dt>
-        					<dd><a href="#">
-                                {{ item.their_companies | number:0 }}&nbsp;
-                            </a><span class="smaller">
-                                ({{ item.mediump | number:1 }}%)
-                            </span></dd>
-        				</dl>
-        				<dl class="stats">
-        					<dt>Your customers</dt>
-        					<dd><a href="#">
-                                {{ item.customers | number:0 }}&nbsp;
-                            </a><span class="smaller">
-                                ({{ item.smallp_of_theirs | number:1 }}%)
-                            </span></dd>
-        				</dl>
-        			</div>
-                    <div class="six columns">
-                        <div class="circle-container">
-                            <div 
-                                class="big-circle saphire-bkg">
+                <div class="container">
+            		<div class="row">
+            			<div class="nine columns">
+    	        			<input 
+                                type="checkbox" 
+                                id="attr-checkbox_{{ row }}_{{ col }}" 
+                                class="attr-checkbox custom"
+                                ng-model="item.selected"
+                                ng-change="handleTileSelection($event);"
+                            />
+    	        			<label for="attr-checkbox_{{ row }}_{{ col }}" class="attr-label">
+                                {{ item.AttrValue | limitTo: truncate_limit }}{{item.AttrValue.length > truncate_limit ? '&hellip;' : ''}}
+                                &nbsp;(<span class="blue-text"> {{ item.total || "5" }} </span>)
+                            </label>
+            			</div>
+            			<div class="three columns text-right" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
+            				<h3 class="lift">{{ item.lift || "1.9x" }}</h3><span class="success-text">${{ item.revenue | number:0 }}</span>
+            			</div>
+            		</div><!-- End .row -->
+            		<div class="row" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
+            			<div class="six columns">
+            				<dl class="stats">
+            					<dt>Available from Lattice</dt>
+            					<dd class="blue-text">{{ item.lattice_companies | number:0 }}</dd>
+            				</dl>
+            				<dl class="stats">
+            					<dt>All in your database</dt>
+            					<dd class="in-database">
+                                    {{ item.their_companies | number:0 }}&nbsp;
+                                <span class="smaller">
+                                    ({{ item.mediump | number:1 }}%)
+                                </span></dd>
+            				</dl>
+            				<dl class="stats">
+            					<dt>Your customers</dt>
+            					<dd class="your-customers">
+                                    {{ item.customers | number:0 }}&nbsp;
+                                <span class="smaller">
+                                    ({{ item.smallp_of_theirs | number:1 }}%)
+                                </span></dd>
+            				</dl>
+            			</div>
+                        <div class="six columns">
+                            <div class="circle-container">
+                                <div 
+                                    class="big-circle saphire-bkg">
+                                </div>
+                                <div 
+                                    class="medium-circle gun-metal-bkg"
+                                    style="width:{{ item.mediump }}%;height:{{ item.mediump }}%;">
+                                </div>
+                                <div 
+                                    class="small-circle jet-bkg"
+                                    style="width:{{ item.smallp }}%;height:{{ item.smallp }}%;">
+                                </div>
                             </div>
-                            <div 
-                                class="medium-circle gun-metal-bkg"
-                                style="width:{{ item.mediump }}%;height:{{ item.mediump }}%;">
-                            </div>
-                            <div 
-                                class="small-circle jet-bkg"
-                                style="width:{{ item.smallp }}%;height:{{ item.smallp }}%;">
-                            </div>
-                        </div>
-        			</div>
-        		</div>
+            			</div>
+            		</div><!-- End .row -->
+                </div><!-- End .container -->
         	</div><!-- End .tile -->
         </div><!-- End .three.columns -->
 

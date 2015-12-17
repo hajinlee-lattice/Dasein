@@ -3,6 +3,16 @@
 	padding: 0.75em;
 	&:hover {
 		background: #e7e7e7;
+		cursor: pointer;
+	}
+	label {
+		font-size: 20px;
+	}
+	.lift {
+		color: $dark-gray;
+		font-size: 40px;
+		line-height: 40px;
+		margin: 0;
 	}
 	label:hover, input[type=checkbox]:hover {
 		cursor: pointer;
@@ -15,5 +25,11 @@
 	}
 	.stats dd {
 		font-size: 1.25em;
+		&.in-database {
+			color: $gun-metal;
+		}
+		&.your-customers {
+			color: $onyx;
+		}
 	}
 }
