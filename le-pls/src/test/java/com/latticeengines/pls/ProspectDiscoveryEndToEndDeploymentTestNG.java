@@ -1,14 +1,18 @@
 package com.latticeengines.pls;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -24,6 +28,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
+import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -136,6 +141,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000ZhOVEA0");
     }
     
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
     public void createDefaultTargetMarket() throws Exception {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
@@ -144,12 +150,26 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
 
-        //waitForWorkflowCompletion(targetMarket.getApplicationId());
+        WorkflowStatus status = waitForWorkflowCompletion(targetMarket.getApplicationId());
+        assertEquals(status.getStatus().name(), BatchStatus.COMPLETED.name());
+        
+        List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports",
+                List.class);
+        
+        assertTrue(reports.size() > 0);
+        for (Object r : reports) {
+            Map<String, String> map = (Map<String, String>) r;
+            Report report = restTemplate.getForObject(String.format("%s/pls/reports/%s", getRestAPIHostPort(), map.get("name")), Report.class);
+            System.out.println(String.format("Report %s with payload:\n", report.getPurpose(), report.getJson().getPayload()));
+        }
     }
 
     private WorkflowStatus waitForWorkflowCompletion(String applicationId) {
         while (true) {
             WorkflowStatus status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
+            if (status == null) {
+                continue;
+            }
             if (!status.getStatus().isRunning()) {
                 return status;
             }
