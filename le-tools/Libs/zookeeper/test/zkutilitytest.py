@@ -4,7 +4,7 @@ Created on Dec 1, 2015
 @author: smeng
 '''
 import unittest
-from zookeeper.zkutility import ZookeeperUtility
+from Libs.zookeeper.zkutility import ZookeeperUtility
 
 
 class Test(unittest.TestCase):
