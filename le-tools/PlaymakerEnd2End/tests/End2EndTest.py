@@ -189,11 +189,59 @@ class EVModelingE2E(unittest.TestCase):
 			except Exception,e:
 				log.error('set up failed: '+str(e.message))
 				SalePrismEnvironments.needSetupEnvironment=True
+	def test_Play_With_Model(self):
+		playDealer=DealPlay()
+		createPlayResult=playDealer.createPlayByREST(playType=PlayTypes.t_CSRepeatPurchase,UseEVModel=True)#create a play
+		playId=createPlayResult["playId"]
+		playName=createPlayResult["playName"]
+		selectSQL="SELECT  Scoring_Method,Modeling_Method  FROM Play where Play_ID=%s"%playId
+		score_model_method=DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True)
+		log.info("score method is: %s And Model method is: %s "% (score_model_method[0][0],score_model_method[0][1]))
+		assert score_model_method[0][0]==3,log.error('the score method with EV modeling should be 3 but actually is:%s' % score_model_method[0][0])
+		assert score_model_method[0][1]==1,log.error('the Model method with EV modeling should be 1 but actually is:%s' % score_model_method[0][0])
+		#assert 1==2
+		playDealer.approvePlay(idOfPlay=playId)#approve a play
+		playDealer.scorePlay(idOfPlay=playId)#do score
+		status=None
+		while status != 'Complete':#until score finish
+			#time.sleep(20)
+			status=playDealer.getStatusOfPlay(idOfPlay=playId)
+			print status
+			if status=="Error":
+				log.error("SCORING FAILED!!!")
+				break
+			elif status =="Processing":
+				log.info("Score is running!")
+			time.sleep(10)
+		assert status=='Complete'
+		selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%playId
+		numberOfRecommendations=len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
+		log.info("This play generated %s recommendations "%numberOfRecommendations)
+		playLaunchTime=playDealer.launchPlay(nameOfPlayToLaunch=playName)#launch play
+		time.sleep(10)
+		numberOf2800=len(DealDB.fetchResultOfSelect(SQL="SELECT  PreLead_ID  FROM PreLead where Status=2800 and Play_ID=%s"%playId,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
+		log.info("numberOf2800 is %s"%numberOf2800)
+		assert numberOf2800==numberOfRecommendations
+		dlDealer=DataloaderDealer()
+		assert dlDealer.isDanteGroupFinishSuccessfully(timePoint=playLaunchTime)
+		sfdcDealer=DealSFDC()
+		sfdcDealer.loginSF()
+		sfdcDealer.resetSFDC()
+		sfdcDealer.syncData()
+		Num_page_Recommendation=sfdcDealer.checkRecommendations(playName)
+		sfdcDealer.quit()
+		assert Num_page_Recommendation==numberOfRecommendations,log.error("number recommendation in page is not right, it should be %s, but actually is %s" %(str(numberOfRecommendations),str(Num_page_Recommendation)))
 	def test_Play_Without_EVModel(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST(playType=PlayTypes.t_CSRepeatPurchase,UseEVModel=False)#create a play
 		playId=createPlayResult["playId"]
 		playName=createPlayResult["playName"]
+		selectSQL="SELECT  Scoring_Method,Modeling_Method  FROM Play where Play_ID=%s"%playId
+		score_model_method=DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True)
+		log.info("score method is: %s And Model method is: %s "% (score_model_method[0][0],score_model_method[0][1]))
+		assert score_model_method[0][0]==2,log.error('the score method with EV modeling should be 3 but actually is:%s' % score_model_method[0][0])
+		assert score_model_method[0][1]==0,log.error('the Model method with EV modeling should be 1 but actually is:%s' % score_model_method[0][0])
+		#assert 1==2
 		playDealer.approvePlay(idOfPlay=playId)#approve a play
 		playDealer.scorePlay(idOfPlay=playId)#do score
 		status=None

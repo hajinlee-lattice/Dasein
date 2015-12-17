@@ -140,7 +140,10 @@ class DealPlay(object):
 		playDict={"playName":playName,"playId":PlayID}
 		if playType in PlayTypes.t_listTypes:
 			log.info("Now Uploading FIle to Server")
-			self.uploadFile(idOfPlay=PlayID,playType=playType)
+			res=self.uploadFile(idOfPlay=PlayID,playType=playType)
+			#time.sleep(10)
+			#self.scorePlay(idOfPlay=PlayID)
+			#assert response.status_code==200
 		return playDict
 	def scorePlay(self,idOfPlay):
 		log.info("##########  Play Scoring start   ##########")
@@ -154,7 +157,7 @@ class DealPlay(object):
 		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Content-Type":"application/json","LEFormsTicket":self.aspAuth}
 		response=requests.post(approvePlayUrl,headers=approvePlayHeaders,verify=False)
 		resJson=json.loads(response.text)
-		print type(resJson['Success'])
+		#print type(resJson['Success'])
 		assert resJson['Success']==True
 		assert response.status_code==200
 		log.info("##########  play approved! ready to launch   ##########")
@@ -220,6 +223,7 @@ class DealPlay(object):
 		getLaunchStatusHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"LEFormsTicket":self.aspAuth,"Origin":"https://"+SalePrismEnvironments.host}
 		response=requests.get(getLaunchStatusUrl,headers=getLaunchStatusHeaders,verify=False)
 		temp=json.loads(json.loads(response.text)['CompressedResult'])['Value']
+		#log.info(temp)
 		assert temp!=None
 		return temp["LaunchStatus"]
 
@@ -274,12 +278,13 @@ class DealPlay(object):
 		request.add_header('Host', 'SalePrismEnvironments.host')
 		request.add_header('LEFormsTicket',self.aspAuth)
 		request.add_header('X-File-Name', fileName)
-		request.add_header('X-Mime-Type', fileName)
+		request.add_header('X-Mime-Type', 'application/vnd.ms-excel')
 		request.add_header('X-Requested-With', 'XMLHttpRequest')
 		request.add_header('Accept', '*/*')
 		request.add_header('Accept-Encoding', 'gzip, deflate')
 		res = urllib2.urlopen(request).read()
 		dir(res)
+		return res
 
 
 if __name__=='__main__':
