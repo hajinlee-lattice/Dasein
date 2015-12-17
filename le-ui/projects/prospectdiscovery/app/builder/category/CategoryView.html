@@ -25,23 +25,29 @@
         </span>
     </div>
 
-    <div class="row industry-list" ng-repeat="items in lists">
+    <div class="row industry-list" ng-repeat="(row, items) in lists">
 
-        <div class="four columns list-item" ng-repeat="item in items">
-        	<div class="tile" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
+        <div class="four columns list-item{{ item.selected ? ' selected' : '' }}" ng-repeat="(col, item) in items">
+        	<div class="tile">
         		<div class="row">
-        			<div class="nine columns">
-	        			<input type="checkbox" id="tile1" />
-	        			<label for="tile1">
+        			<div class="nine columns attr-select-container">
+	        			<input 
+                            type="checkbox" 
+                            id="attr-checkbox_{{ row }}_{{ col }}" 
+                            class="attr-checkbox"
+                            ng-model="item.selected"
+                            ng-change="handleTileSelection($event);"
+                        />
+	        			<label for="attr-checkbox_{{ row }}_{{ col }}" class="attr-label">
                             {{ item.AttrValue | limitTo: truncate_limit }}{{item.AttrValue.length > truncate_limit ? '&hellip;' : ''}}
                             &nbsp;(<a ui-sref="builder">{{ item.total || "5" }}</a>)
                         </label>
         			</div>
-        			<div class="three columns">
+        			<div class="three columns" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
         				{{ item.lift || "1.9x" }} ${{ item.revenue | number:0 }}
         			</div>
         		</div>
-        		<div class="row">
+        		<div class="row" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
         			<div class="six columns">
         				<dl class="stats">
         					<dt>Available from Lattice</dt>

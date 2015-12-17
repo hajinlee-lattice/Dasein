@@ -1,8 +1,6 @@
 .pd-industry {
-    -webkit-perspective: 2000px;
-    -moz-perspective: 2000px;
-    -ms-perspective: 2000px;
-    perspective: 2000px;
+    perspective: 7000px;
+    perspective-origin: 50% 0%;
 
     .industry-list {
         margin-bottom: 2em;
@@ -11,14 +9,8 @@
         -moz-backface-visibility: hidden;
         -ms-backface-visibility: hidden;
         backface-visibility: hidden;
-        -webkit-transition: all 1 300ms ease;
-        -moz-transition: all 300ms ease;
-        -ms-transition: all 300ms ease;
-        transition: all 300ms ease;
-        -webkit-transform-origin: 50% 50%;
-        -moz-transform-origin: 50% 50%;
-        -ms-transform-origin: 50% 50%;
-        transform-origin: 50% 50%;
+        transition: all 400ms ease;
+        transform-origin: 50% 0%;
     }
 
     .industry-list.ng-enter  {
@@ -30,17 +22,37 @@
     }
 
     .industry-list.ng-enter-stagger {
-        transition-delay: 150ms;
+        transition-delay: 100ms;
         transition-duration: 0s;
     }
 
     div.list-item {
+        pointer: hand;
+        
+        .attr-select-container {
+            position: relative;
+            
+            input {
+                
+            }
+
+            label {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding-left: 1.5em;
+                margin: 0;
+            }
+        }
+
         div.circle-container {
             position: relative;
             width: 120px;
             height: 120px;
             text-align: center;
-            margin: 1.8em auto 0;
+            margin: 0.75em auto 0;
 
             div.big-circle,
             div.medium-circle,
