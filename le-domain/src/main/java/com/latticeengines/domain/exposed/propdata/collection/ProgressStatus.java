@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.collection;
 
-public enum ArchiveProgressStatus {
+public enum ProgressStatus {
     FAILED,
     NEW,
     DOWNLOADING,

@@ -11,9 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.dao.ArchiveProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.source.Source;
 
 @Component("archiveProgressEntityMgr")
 public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
@@ -42,7 +43,7 @@ public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
 
     @Override
     @Transactional(value = "propDataCollectionProgress")
-    public ArchiveProgress updateStatus(ArchiveProgress progress, ArchiveProgressStatus status) {
+    public ArchiveProgress updateStatus(ArchiveProgress progress, ProgressStatus status) {
         progress.setStatus(status);
         return updateProgress(progress);
     }
@@ -62,9 +63,9 @@ public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
 
     @Override
     @Transactional(value = "propDataCollectionProgress", readOnly = true)
-    public ArchiveProgress insertNewProgress(String sourceName, Date startDate, Date endDate, String creator) {
+    public ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator) {
         try {
-            ArchiveProgress newProgress = ArchiveProgress.constructByDates(sourceName, startDate, endDate);
+            ArchiveProgress newProgress = ArchiveProgress.constructByDates(source.getSourceName(), startDate, endDate);
             newProgress.setCreatedBy(creator);
             progressDao.create(newProgress);
             return newProgress;
@@ -75,8 +76,8 @@ public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
 
     @Override
     @Transactional(value = "propDataCollectionProgress", readOnly = true)
-    public ArchiveProgress findEarliestFailureUnderMaxRetry(String sourceName) {
-        List<ArchiveProgress> progresses = progressDao.findFailedProgresses(sourceName);
+    public ArchiveProgress findEarliestFailureUnderMaxRetry(Source source) {
+        List<ArchiveProgress> progresses = progressDao.findFailedProgresses(source);
         for (ArchiveProgress progress: progresses) {
             if (progress.getNumRetries() < MAX_RETRIES) {
                 return progress;
@@ -87,10 +88,10 @@ public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
 
     @Override
     @Transactional(value = "propDataCollectionProgress", readOnly = true)
-    public ArchiveProgress findProgressNotInFinalState(String sourceName) {
-        Set<ArchiveProgressStatus> finalStatus =
-                new HashSet<>(Arrays.asList(ArchiveProgressStatus.UPLOADED, ArchiveProgressStatus.FAILED));
-        List<ArchiveProgress> progresses = progressDao.findAllOfSource(sourceName);
+    public ArchiveProgress findProgressNotInFinalState(Source source) {
+        Set<ProgressStatus> finalStatus =
+                new HashSet<>(Arrays.asList(ProgressStatus.UPLOADED, ProgressStatus.FAILED));
+        List<ArchiveProgress> progresses = progressDao.findAllOfSource(source);
         for (ArchiveProgress progress: progresses) {
             if (!finalStatus.contains(progress.getStatus())) {
                 return progress;

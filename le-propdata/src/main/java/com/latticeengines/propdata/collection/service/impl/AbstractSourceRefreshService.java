@@ -21,7 +21,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
@@ -83,15 +83,15 @@ public abstract class AbstractSourceRefreshService {
     }
 
     protected boolean checkProgressStatus(ArchiveProgress progress,
-                                        ArchiveProgressStatus expectedStatus,
-                                          ArchiveProgressStatus inProgress) {
+                                        ProgressStatus expectedStatus,
+                                          ProgressStatus inProgress) {
         if (progress == null) { return false; }
 
         if (inProgress.equals(progress.getStatus())) {
             return false;
         }
 
-        if (ArchiveProgressStatus.FAILED.equals(progress.getStatus()) && (
+        if (ProgressStatus.FAILED.equals(progress.getStatus()) && (
                 inProgress.equals(progress.getStatusBeforeFailed()) ||
                         expectedStatus.equals(progress.getStatusBeforeFailed())
         ) ) {
@@ -109,7 +109,7 @@ public abstract class AbstractSourceRefreshService {
     }
 
     protected void logIfRetrying(ArchiveProgress progress) {
-        if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
+        if (progress.getStatus().equals(ProgressStatus.FAILED)) {
             int numRetries = progress.getNumRetries() + 1;
             progress.setNumRetries(numRetries);
             LoggingUtils.logInfo(log, progress, String.format("Retry [%d] from [%s].",
@@ -246,7 +246,7 @@ public abstract class AbstractSourceRefreshService {
         LoggingUtils.logError(log, progress, errorMsg, e);
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
-        entityMgr.updateStatus(progress, ArchiveProgressStatus.FAILED);
+        entityMgr.updateStatus(progress, ProgressStatus.FAILED);
     }
 
     protected String getDestTableName() { return source.getTableName(); }

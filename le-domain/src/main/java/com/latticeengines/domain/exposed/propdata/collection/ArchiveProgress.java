@@ -43,7 +43,7 @@ public class ArchiveProgress implements HasPid {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
-    protected ArchiveProgressStatus status;
+    protected ProgressStatus status;
 
     @Column(name = "LatestStatusUpdate", nullable = false)
     protected Date latestStatusUpdate;
@@ -59,7 +59,7 @@ public class ArchiveProgress implements HasPid {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "StatusBeforeFailed")
-    protected ArchiveProgressStatus statusBeforeFailed;
+    protected ProgressStatus statusBeforeFailed;
 
     @Column(name = "ErrorMessage")
     protected String errorMessage;
@@ -113,11 +113,11 @@ public class ArchiveProgress implements HasPid {
         this.rowsUploadedToSql = rowsUploadedToSql;
     }
 
-    public ArchiveProgressStatus getStatus() {
+    public ProgressStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ArchiveProgressStatus status) {
+    public void setStatus(ProgressStatus status) {
         this.status = status;
         setLatestStatusUpdate(new Date());
     }
@@ -142,9 +142,9 @@ public class ArchiveProgress implements HasPid {
 
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
 
-    public ArchiveProgressStatus getStatusBeforeFailed() { return statusBeforeFailed; }
+    public ProgressStatus getStatusBeforeFailed() { return statusBeforeFailed; }
 
-    public void setStatusBeforeFailed(ArchiveProgressStatus statusBeforeFailed) { this.statusBeforeFailed = statusBeforeFailed; }
+    public void setStatusBeforeFailed(ProgressStatus statusBeforeFailed) { this.statusBeforeFailed = statusBeforeFailed; }
 
     public String getErrorMessage() { return errorMessage; }
 
@@ -164,7 +164,7 @@ public class ArchiveProgress implements HasPid {
         progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
         progress.setRowsDownloadedToHdfs(0);
         progress.setRowsUploadedToSql(0);
-        progress.setStatus(ArchiveProgressStatus.NEW);
+        progress.setStatus(ProgressStatus.NEW);
 
         return progress;
     }

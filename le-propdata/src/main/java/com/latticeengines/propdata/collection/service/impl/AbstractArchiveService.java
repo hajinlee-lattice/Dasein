@@ -17,7 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
@@ -98,14 +98,14 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     @Override
     public ArchiveProgress importFromDB(ArchiveProgress progress) {
         // check request context
-        if (!checkProgressStatus(progress, ArchiveProgressStatus.NEW, ArchiveProgressStatus.DOWNLOADING)) {
+        if (!checkProgressStatus(progress, ProgressStatus.NEW, ProgressStatus.DOWNLOADING)) {
             return progress;
         }
 
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        entityMgr.updateStatus(progress, ArchiveProgressStatus.DOWNLOADING);
+        entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADING);
         LoggingUtils.logInfo(log, progress, "Start downloading ...");
 
         // download incremental raw data and dest table snapshot
@@ -119,20 +119,20 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         LoggingUtils.logInfoWithDuration(log, progress, "Downloaded.", startTime);
         progress.setNumRetries(0);
-        return entityMgr.updateStatus(progress, ArchiveProgressStatus.DOWNLOADED);
+        return entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADED);
     }
 
     @Override
     public ArchiveProgress transformRawData(ArchiveProgress progress) {
         // check request context
-        if (!checkProgressStatus(progress, ArchiveProgressStatus.DOWNLOADED, ArchiveProgressStatus.TRANSFORMING)) {
+        if (!checkProgressStatus(progress, ProgressStatus.DOWNLOADED, ProgressStatus.TRANSFORMING)) {
             return progress;
         }
 
         // update status
         long startTime = System.currentTimeMillis();
         logIfRetrying(progress);
-        entityMgr.updateStatus(progress, ArchiveProgressStatus.TRANSFORMING);
+        entityMgr.updateStatus(progress, ProgressStatus.TRANSFORMING);
         LoggingUtils.logInfo(log, progress, "Start transforming ...");
 
         // merge raw and snapshot, then output most recent records
@@ -142,27 +142,27 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         LoggingUtils.logInfoWithDuration(log, progress, "Transformed.", startTime);
         progress.setNumRetries(0);
-        return entityMgr.updateStatus(progress, ArchiveProgressStatus.TRANSFORMED);
+        return entityMgr.updateStatus(progress, ProgressStatus.TRANSFORMED);
     }
 
 
     @Override
     public ArchiveProgress exportToDB(ArchiveProgress progress) {
         // check request context
-        if (!checkProgressStatus(progress, ArchiveProgressStatus.TRANSFORMED, ArchiveProgressStatus.UPLOADING)) {
+        if (!checkProgressStatus(progress, ProgressStatus.TRANSFORMED, ProgressStatus.UPLOADING)) {
             return progress;
         }
 
         // update status
         long startTime = System.currentTimeMillis();
         logIfRetrying(progress);
-        entityMgr.updateStatus(progress, ArchiveProgressStatus.UPLOADING);
+        entityMgr.updateStatus(progress, ProgressStatus.UPLOADING);
         LoggingUtils.logInfo(log, progress, "Start uploading ...");
 
         if (progress.getRowsDownloadedToHdfs() <= 0) {
             LoggingUtils.logInfoWithDuration(log, progress, "Uploaded.", startTime);
             progress.setNumRetries(0);
-            return entityMgr.updateStatus(progress, ArchiveProgressStatus.UPLOADED);
+            return entityMgr.updateStatus(progress, ProgressStatus.UPLOADED);
         }
 
         // upload source
@@ -175,7 +175,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         // finish
         LoggingUtils.logInfoWithDuration(log, progress, "Uploaded.", startTime);
         progress.setNumRetries(0);
-        return entityMgr.updateStatus(progress, ArchiveProgressStatus.UPLOADED);
+        return entityMgr.updateStatus(progress, ProgressStatus.UPLOADED);
     }
 
     @Override

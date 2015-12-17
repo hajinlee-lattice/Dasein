@@ -12,7 +12,7 @@ import org.slf4j.MarkerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.job.ArchiveJobService;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
@@ -57,24 +57,24 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
     @Override
     public void retryJob(ArchiveProgress progress) {
         Logger log = getLogger();
-        if (ArchiveProgressStatus.FAILED.equals(progress.getStatus())) {
+        if (ProgressStatus.FAILED.equals(progress.getStatus())) {
             log.info("Found a job to retry: " + progress);
-            ArchiveProgressStatus resumeStatus;
+            ProgressStatus resumeStatus;
             switch (progress.getStatusBeforeFailed()) {
                 case NEW:
                 case DOWNLOADING:
-                    resumeStatus = ArchiveProgressStatus.NEW;
+                    resumeStatus = ProgressStatus.NEW;
                     break;
                 case DOWNLOADED:
                 case TRANSFORMING:
-                    resumeStatus = ArchiveProgressStatus.DOWNLOADED;
+                    resumeStatus = ProgressStatus.DOWNLOADED;
                     break;
                 case TRANSFORMED:
                 case UPLOADING:
-                    resumeStatus = ArchiveProgressStatus.TRANSFORMED;
+                    resumeStatus = ProgressStatus.TRANSFORMED;
                     break;
                 default:
-                    resumeStatus = ArchiveProgressStatus.NEW;
+                    resumeStatus = ProgressStatus.NEW;
             }
             progress.setStatus(resumeStatus);
         }
@@ -138,7 +138,7 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
                     progress.getStatus(), progress.getRootOperationUID()));
         }
 
-        if (progress.getStatus().equals(ArchiveProgressStatus.FAILED)) {
+        if (progress.getStatus().equals(ProgressStatus.FAILED)) {
             logJobFailed(progress);
         } else {
             logJobSucceed(progress);

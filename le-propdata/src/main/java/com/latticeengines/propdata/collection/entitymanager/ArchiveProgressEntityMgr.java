@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.entitymanager;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.source.Source;
 
 public interface ArchiveProgressEntityMgr {
@@ -12,7 +12,7 @@ public interface ArchiveProgressEntityMgr {
 
     ArchiveProgress updateProgress(ArchiveProgress progress);
 
-    ArchiveProgress updateStatus(ArchiveProgress progress, ArchiveProgressStatus status);
+    ArchiveProgress updateStatus(ArchiveProgress progress, ProgressStatus status);
 
     void deleteProgressByRootOperationUid(String rootOperationUid);
 

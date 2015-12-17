@@ -15,7 +15,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
@@ -98,10 +98,10 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     protected ArchiveProgress importFromDB(ArchiveProgress progress) {
         ArchiveProgress response = archiveService.importFromDB(progress);
 
-        Assert.assertEquals(response.getStatus(), ArchiveProgressStatus.DOWNLOADED);
+        Assert.assertEquals(response.getStatus(), ProgressStatus.DOWNLOADED);
 
         ArchiveProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
-        Assert.assertEquals(progressInDb.getStatus(), ArchiveProgressStatus.DOWNLOADED);
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.DOWNLOADED);
 
         return response;
     }
@@ -109,10 +109,10 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     protected ArchiveProgress transformRawData(ArchiveProgress progress) {
         ArchiveProgress response = archiveService.transformRawData(progress);
 
-        Assert.assertEquals(response.getStatus(), ArchiveProgressStatus.TRANSFORMED);
+        Assert.assertEquals(response.getStatus(), ProgressStatus.TRANSFORMED);
 
         ArchiveProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
-        Assert.assertEquals(progressInDb.getStatus(), ArchiveProgressStatus.TRANSFORMED);
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.TRANSFORMED);
 
         return response;
     }
@@ -120,10 +120,10 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     protected ArchiveProgress exportToDB(ArchiveProgress progress) {
         ArchiveProgress response = archiveService.exportToDB(progress);
 
-        Assert.assertEquals(response.getStatus(), ArchiveProgressStatus.UPLOADED);
+        Assert.assertEquals(response.getStatus(), ProgressStatus.UPLOADED);
 
         ArchiveProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
-        Assert.assertEquals(progressInDb.getStatus(), ArchiveProgressStatus.UPLOADED);
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.UPLOADED);
 
         verifyUniqueness();
 
