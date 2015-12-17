@@ -7,11 +7,12 @@ angular.module('pd.jobs', [
 
 .service('JobsService', function($http, $q, _) {
 
-    var stepsNameDictionary = { "importData": "load_data", "runDataFlow": "load_data",
-            "loadHdfsTableToPDServer": "load_data", "match": "match_data", "createEventTableFromMatchResult": "match_data",
-            "sample": "generate_insights", "profileAndModel": "create_model", "chooseModel": "create_model", "score": "create_global_target_market" };
+    var stepsNameDictionary = { "markReportOutOfDate": "load_data", "importData": "load_data", "createPreMatchEventTable": "match_data",
+            "match": "match_data", "createEventTableFromMatchResult": "generate_insights", "runImportSummaryDataFlow": "generate_insights",
+            "registerImportSummaryReport": "generate_insights", "sample": "generate_insights", "profileAndModel": "create_model",
+            "chooseModel": "create_model", "score": "create_global_target_market" };
 
-    this.GetAllJobs = function() {
+    this.getAllJobs = function() {
         var deferred = $q.defer();
         var result;
         
@@ -78,13 +79,27 @@ angular.module('pd.jobs', [
         return deferred.promise;
     };
     
+    this.cancelJob = function(jobId) {
+        $http({
+            method: 'GET',
+            url: '/pls/jobs/' + jobId +'/cancel'
+        }).then(
+            function onSuccess(response) {
+                
+            }, function onError(response) {
+                
+            }
+        );
+    }
+    
     function getStepRunning(job) {
         if (job.jobStatus != "Running") {
             return null;
         }
         
         for (var i = 0; i < job.steps.length; i++) {
-            if (job.steps[i].stepStatus == "Running") {
+            var stepRunning = stepsNameDictionary[job.steps[i].jobStepType];
+            if (stepRunning && job.steps[i].stepStatus == "Running") {
                 return stepsNameDictionary[job.steps[i].jobStepType];
             }
         }
@@ -95,12 +110,12 @@ angular.module('pd.jobs', [
         if (job.steps == null) {
             return [];
         }
-
+        
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
                 var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType];
-                if (stepsCompleted.indexOf(stepCompleted) == -1) {
+                if (stepCompleted && stepsCompleted.indexOf(stepCompleted) == -1) {
                     stepsCompleted.push(stepCompleted);
                 }
             }
@@ -117,7 +132,7 @@ angular.module('pd.jobs', [
     $scope.showEmptyJobsMessage = false;
 
     function getAllJobs() {
-        JobsService.GetAllJobs().then(function(result) {
+        JobsService.getAllJobs().then(function(result) {
             $scope.jobs = result.resultObj;
 
             if ($scope.jobs == null || $scope.jobs.length == 0) {
@@ -131,6 +146,7 @@ angular.module('pd.jobs', [
     var TIME_BETWEEN_JOB_LIST_REFRESH = 45 * 1000;
     var REFRESH_JOBS_LIST_ID;
     
+    getAllJobs();
     REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
     
     $scope.$on("$destroy", function() {

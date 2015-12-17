@@ -8,8 +8,14 @@
     left: 60px;
     font-size: 22px;
 }
-.import-summary h5 {
-    padding-bottom: 20px;
+.import-summary {
+    h5 {
+        padding-bottom: 20px;
+    }
+    
+    div.three {
+        background: black;
+    }
 }
 .summary-desc {
     clear: both;

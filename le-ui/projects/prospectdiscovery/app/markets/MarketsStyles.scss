@@ -1,15 +1,23 @@
 .target-market-header {
     padding: 2em 0 1em;
 
-    h4 {
+    h5 {
         margin-top: 5px;
+        margin-bottom: 10px;
     }
 
     div {
-        text-align: right;
-
-        a {
-            margin-left: 5px;
+        color: black;
+        .display {
+            font-size: 11px;
+            margin-top: 5px;
+            text-align: bottom;
+        }
+        .buttons {
+            a {
+                margin-left: 15px;
+            }
+            text-align: right;
         }
     }
     

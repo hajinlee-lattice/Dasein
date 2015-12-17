@@ -10,15 +10,22 @@ angular
                 statuses: '=',
                 expanded: '='
             },
-            controller: ['$scope', 'JobsService', function ($scope, JobsService) {
+            controller: ['$scope', '$state', 'JobsService', function ($scope, $state, JobsService) {
                 $scope.showStatusLink = false;
                 $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
                 $scope.jobCompleted = false;
                 $scope.statusLinkText;
-                $scope.statusLinkState;
                 $scope.jobId = $scope.job.id;
-
-                if (! $scope.jobRowExpanded) {
+                
+                $scope.statusLinkClicked = function(jobId) {
+                    if ($scope.job.status == "Completed") {
+                        $state.go("jobs.import.ready", { 'jobId': jobId });
+                    } else if ($scope.job.status == "Running") {
+                        JobsService.cancelJob(jobId);
+                    }
+                }
+                
+                if (! $scope.jobRowExpanded || $scope.statuses[$scope.jobId] == null) {
                     $scope.jobStepsRunningStates = { load_data: false, match_data: false,
                             generate_insights: false, create_model: false, create_global_target_market: false };
                     $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
@@ -35,7 +42,6 @@ angular
                     $scope.showStatusLink = true;
                     $scope.jobCompleted = true;
                     $scope.statusLinkText = "View Report";
-                    $scope.statusLinkState = "jobs.import.ready";
                 }
                 
                 $scope.expandJobStatus = function() {
@@ -46,6 +52,7 @@ angular
                         JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
                             if (jobStatus.success) {
                                 if (jobStatus.resultObj.jobStatus == "Running") {
+                                    queryJobStatusAndSetStatesVariables($scope.job.id);
                                     periodicQueryJobStatus($scope.job.id);
                                 } else {
                                     updateStatesBasedOnJobStatus(jobStatus.resultObj);
@@ -83,15 +90,14 @@ angular
                 }
 
                 function updateStatesBasedOnJobStatus(jobStatus) {
-                    if (jobStatus.jobStatus == "Running") {
-                        $scope.jobStepsRunningStates[jobStatus.stepRunning.toLowerCase()] = true;
-                    }
-
                     for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
-                        $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i].toLowerCase()] = true;
-                        $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i].toLowerCase()] = false;
+                        $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                     }
                     
+                    if (jobStatus.jobStatus == "Running") {
+                        $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
+                        $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
+                    }
                     saveJobStatusInParentScope();
                     
                     if (jobStatus.jobStatus == "Complete") {
@@ -110,10 +116,13 @@ angular
                 }
                 
                 function periodicQueryJobStatus(jobId) {
-                    periodicQueryId = setInterval(queryJobStatusAndSetStatesVariables(jobId), TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS);
+                    periodicQueryId = setInterval(function() {
+                            queryJobStatusAndSetStatesVariables(jobId);
+                        }, TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS);
                 }
                 
                 function queryJobStatusAndSetStatesVariables(jobId) {
+                    console.log("querying job status for individual job");
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
                             if (response.resultObj.jobStatus == "Complete") {
@@ -123,6 +132,10 @@ angular
                         }
                     });
                 }
+
+                $scope.$on("$destroy", function() {
+                    cancelPeriodJobStatusQuery();
+                });
             }]
         };
     }

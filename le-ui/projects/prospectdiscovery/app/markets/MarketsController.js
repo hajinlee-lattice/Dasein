@@ -3,11 +3,18 @@ angular
         'pd.markets.dashboard'
     ])
     .controller('MarketsCtrl', function($scope, $rootScope, MarketsService) {
-        $scope.targetMarkets;
+        $scope.marketNameToAttributes = {};
 
         MarketsService.getAllTargetMarkets().then(function(targetMarkets) {
-            $scope.targetMarkets = targetMarkets;
-            console.log(targetMarkets);
+            for (var i = 0; i < targetMarkets; i++) {
+                var marketAttributes = {};
+                var targetMarket = targetMarkets[i];
+                var targetMarketName = targetMarket.name;
+                
+                marketAttributes["created"] = targetMarket.creation_timestamp;
+                // TODO: get the other attributes page needs
+                $scope.marketNameToAttributes[targetMarketName] = marketAttributes;
+            }
         });
     }
 );
