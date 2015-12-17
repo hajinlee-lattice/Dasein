@@ -3,38 +3,34 @@ package com.latticeengines.propdata.collection.job.impl;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.mortbay.log.Log;
+import org.apache.commons.logging.Log;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.Marker;
-import org.slf4j.MarkerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.propdata.collection.job.ArchiveJobService;
+import com.latticeengines.propdata.collection.job.RefreshJobService;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 
-public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implements ArchiveJobService {
+public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJobBean implements RefreshJobService {
 
     private ArchiveService archiveService;
-    private String jobSubmitter = "Quartz";
+    protected String jobSubmitter = "Quartz";
 
     private static final int jobExpirationHours = 48; // expire a job after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
-    private static final Marker fatal = MarkerFactory.getMarker("FATAL");
 
     abstract ArchiveService getArchiveService();
-    abstract Logger getLogger();
+    abstract Log getLog();
     abstract CollectionSource getSource();
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         int t;
-        Logger log = getLogger();
+        Log log = getLog();
         for (t = 0; t < 100; t++) {
             try {
                 if (tryExecuteInternal()) break;
@@ -43,7 +39,7 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
             }
         }
         if (t == 100) {
-            log.error(fatal, String.format("A single job executed has retried %d times!", t));
+            log.fatal(String.format("A single job executed has retried %d times!", t));
         }
     }
 
@@ -56,7 +52,7 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
 
     @Override
     public void retryJob(ArchiveProgress progress) {
-        Logger log = getLogger();
+        Log log = getLog();
         if (ProgressStatus.FAILED.equals(progress.getStatus())) {
             log.info("Found a job to retry: " + progress);
             ProgressStatus resumeStatus;
@@ -92,7 +88,7 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
     }
 
     private boolean tryExecuteInternal() throws InterruptedException {
-        Logger log = getLogger();
+        Log log = getLog();
 
         ArchiveProgress progress = archiveService.findRunningJob();
         if (progress != null) {
@@ -101,7 +97,7 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
             Date expireDate = new Date(System.currentTimeMillis() - jobExpirationMilliSeconds);
             Date lastUpdated = progress.getLatestStatusUpdate();
             if (lastUpdated.before(expireDate)) {
-                log.error(fatal, String.format(
+                log.fatal(String.format(
                         "This progress has been hanging for more than %d hours: %s", jobExpirationHours, progress));
             }
             return false;
@@ -129,12 +125,12 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
         return false;
     }
 
-    private void proceedProgress(ArchiveProgress progress) {
+    protected void proceedProgress(ArchiveProgress progress) {
         switch (progress.getStatus()) {
             case NEW: progress = archiveService.importFromDB(progress);
             case DOWNLOADED: progress = archiveService.transformRawData(progress);
             case TRANSFORMED: progress = archiveService.exportToDB(progress);
-            default: Log.warn(String.format("Illegal starting status %s for progress %s",
+            default: getLog().warn(String.format("Illegal starting status %s for progress %s",
                     progress.getStatus(), progress.getRootOperationUID()));
         }
 
@@ -150,14 +146,14 @@ public abstract class AbstractArchiveJobServiceImpl extends QuartzJobBean implem
     }
 
     private void logJobSucceed(ArchiveProgress progress) {
-        Logger log = getLogger();
-        log.info("Archiving " + getSource().getSourceName() + " finished for period " +
+        Log log = getLog();
+        log.info("Refreshing " + getSource().getSourceName() + " finished for period " +
                 new DateRange(progress.getStartDate(), progress.getEndDate()) +
                 " RootOperationUID=" + progress.getRootOperationUID());
     }
     private void logJobFailed(ArchiveProgress progress) {
-        Logger log = getLogger();
-        log.error("Archiving " + getSource().getSourceName() + " failed for period " +
+        Log log = getLog();
+        log.error("Refreshing " + getSource().getSourceName() + " failed for period " +
                 new DateRange(progress.getStartDate(), progress.getEndDate()) +
                 " RootOperationUID=" + progress.getRootOperationUID());
     }

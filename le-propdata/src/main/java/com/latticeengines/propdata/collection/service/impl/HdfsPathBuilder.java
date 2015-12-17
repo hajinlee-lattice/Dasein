@@ -14,7 +14,7 @@ import com.latticeengines.propdata.collection.source.Source;
 public class HdfsPathBuilder {
 
     private static final String rawDataFlowType = "Raw";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSSz");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

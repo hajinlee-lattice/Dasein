@@ -30,6 +30,7 @@ public class CollectionAdminTool {
     private static final String NS_SOURCE = "source";
     private static final String NS_START_DATE = "startDate";
     private static final String NS_END_DATE = "endDate";
+    private static final String NS_PIVOT_DATE = "startDate";
     private static final String NS_SPLIT_MODE = "splitMode";
     private static final String NS_PERIOD_LENGTH = "periodLength";
     private static final String NS_NUM_PERIODS = "numPeriods";
@@ -46,9 +47,10 @@ public class CollectionAdminTool {
     private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("archive");
 
     private DateRange fullDateRange;
-    private CollectionSource source;
+    private Source source;
     private List<DateRange> periods;
-    private ArchiveJobService jobService;
+    private Date pivotDate;
+    private RefreshJobService jobService;
     private ArchiveProgressEntityMgr entityMgr;
 
     static {
@@ -65,18 +67,24 @@ public class CollectionAdminTool {
                 .dest(NS_SOURCE)
                 .required(true)
                 .type(String.class)
-                .choices(CollectionSource.allNames())
+                .choices(Source.allNames())
                 .help("collection source");
+
+        parser.addArgument("-pd", "--pivot-date")
+                .dest(NS_PIVOT_DATE)
+                .required(false)
+                .type(String.class)
+                .help("start date (inclusive) in yyyy-MM-dd, and after 1900-01-01.");
 
         parser.addArgument("-sd", "--start-date")
                 .dest(NS_START_DATE)
-                .required(true)
+                .required(false)
                 .type(String.class)
                 .help("start date (inclusive) in yyyy-MM-dd, and after 1900-01-01.");
 
         parser.addArgument("-ed", "--end-date")
                 .dest(NS_END_DATE)
-                .required(true)
+                .required(false)
                 .type(String.class)
                 .help("end date (exclusive) in yyyy-MM-dd, and after start date.");
 
@@ -118,15 +126,13 @@ public class CollectionAdminTool {
             throw new IllegalArgumentException("Failed to parse input arguments.");
         }
 
-        source = CollectionSource.fromName(ns.getString(NS_SOURCE));
+        source = Source.fromName(ns.getString(NS_SOURCE));
 
         if (StringUtils.isNotEmpty(ns.getString(NS_RETRY_UID))) { return; }
 
         Date startDate = toStartOfTheDay(parseDateInput(ns.getString(NS_START_DATE)));
         Date endDate = toEndOfTheDay(parseDateInput(ns.getString(NS_END_DATE)));
         fullDateRange = new DateRange(startDate, endDate);
-        System.out.println(fullDateRange);
-
 
         if (ns.getString(NS_SPLIT_MODE).equals(MODE_LEN)) {
             int length = ns.getInt(NS_PERIOD_LENGTH);
@@ -136,6 +142,12 @@ public class CollectionAdminTool {
         if (ns.getString(NS_SPLIT_MODE).equals(MODE_NUM)) {
             int num = ns.getInt(NS_NUM_PERIODS);
             periods = fullDateRange.splitByNumOfPeriods(num);
+        }
+
+        if (StringUtils.isNotEmpty(ns.getString(NS_PIVOT_DATE))) {
+            pivotDate = parseDateInput(ns.getString(NS_START_DATE));
+        } else {
+            pivotDate = new Date(System.currentTimeMillis());
         }
     }
 
@@ -192,17 +204,19 @@ public class CollectionAdminTool {
             validateArguments(ns);
 
             ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-collection-context.xml");
-            jobService = (ArchiveJobService) ac.getBean(source.getArchiveJobBean());
+            jobService = (RefreshJobService) ac.getBean(source.getArchiveJobBean());
             jobService.setAutowiredArchiveService();
             jobService.setJobSubmitter(JOB_SUBMITTER);
-            entityMgr = (ArchiveProgressEntityMgr) ac.getBean(source.getEntityMgrBean());
+            entityMgr = (ArchiveProgressEntityMgr) ac.getBean("archiveProgressEntityMgr");
 
             if (Command.ARCHIVE.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
                 executeArchiveCommand(ns);
+            } else if (Command.PIVOT.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
+                executePivotCommand();
             }
 
-            promptContinue();
             System.out.println("\n\n========================================\n");
+            promptContinue();
             System.exit(0);
 
         } catch (ArgumentParserException|IllegalArgumentException e) {
@@ -210,11 +224,20 @@ public class CollectionAdminTool {
         }
     }
 
+    private void executePivotCommand() {
+        System.out.println("\n\n========================================");
+        System.out.println("Pivoting Collection Source: " + source.getName());
+        System.out.println("========================================\n");
+
+        System.out.println("Source to pivot: " + source.getName());
+        jobService.pivotData(pivotDate);
+    }
+
     private void executeArchiveCommand(Namespace ns) {
         System.out.println("\n\n========================================");
         System.out.println("Archiving Collection Source: " + source.getName());
         System.out.println("========================================\n");
-
+        System.out.println(fullDateRange);
         System.out.println("Source to archive: " + source.getName());
 
         if (StringUtils.isEmpty(ns.getString(NS_RETRY_UID))) {
@@ -276,30 +299,26 @@ public class CollectionAdminTool {
     }
 
 
-    enum CollectionSource {
-        FEATURE("Feature", "featureArchiveJobService", "featureArchiveProgressEngityMgr");
+    enum Source {
+        FEATURE("Feature", "featureRefreshJobService");
 
-        private static Map<String, CollectionSource> nameMap;
+        private static Map<String, Source> nameMap;
 
         private final String name;
         private final String archiveJobBean;
-        private final String entityMgrBean;
 
-        CollectionSource(String name, String archiveJobBean, String entityMgrBean) {
+        Source(String name, String archiveJobBean) {
             this.name = name;
             this.archiveJobBean = archiveJobBean;
-            this.entityMgrBean = entityMgrBean;
         }
 
         String getName() { return this.name; }
 
         String getArchiveJobBean() { return this.archiveJobBean; }
 
-        String getEntityMgrBean() { return this.entityMgrBean; }
-
         static {
             nameMap = new HashMap<>();
-            for (CollectionSource source: CollectionSource.values()) {
+            for (Source source: Source.values()) {
                 nameMap.put(source.getName(), source);
             }
         }
@@ -310,15 +329,15 @@ public class CollectionAdminTool {
             return names.toArray(nameArray);
         }
 
-        static CollectionSource fromName(String name) {
+        static Source fromName(String name) {
             return nameMap.get(name);
         }
 
     }
 
-
     enum Command {
-        ARCHIVE("archive");
+        ARCHIVE("archive"),
+        PIVOT("pivot");
 
         private static Map<String, Command> nameMap;
         private final String name;

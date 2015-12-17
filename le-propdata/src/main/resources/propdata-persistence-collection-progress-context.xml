@@ -34,5 +34,9 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataCollectionProgress" />
     </bean>
 
+    <bean id="pivotProgressDao" class="com.latticeengines.propdata.collection.dao.impl.PivotProgressDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataCollectionProgress" />
+    </bean>
+
 
 </beans>

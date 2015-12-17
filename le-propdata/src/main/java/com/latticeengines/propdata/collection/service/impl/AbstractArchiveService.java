@@ -7,12 +7,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
-import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -20,20 +15,18 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
-public abstract class AbstractArchiveService extends AbstractSourceRefreshService implements ArchiveService {
+public abstract class AbstractArchiveService extends AbstractSourceRefreshService<ArchiveProgress> implements ArchiveService {
 
     private Log log;
     private ArchiveProgressEntityMgr entityMgr;
     private CollectionSource source;
 
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
-
-    abstract Log getLogger();
 
     abstract CollectionSource getSource();
 
@@ -48,37 +41,6 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     abstract String getSrcTableTimestampColumn();
 
     abstract String createIndexForStageTableSql();
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    protected Configuration yarnConfiguration;
-
-    @Autowired
-    protected CollectionDataFlowService collectionDataFlowService;
-
-    @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplate")
-    protected JdbcTemplate jdbcTemplate;
-
-    @Value("${propdata.collection.host}")
-    private String dbHost;
-
-    @Value("${propdata.collection.port}")
-    private int dbPort;
-
-    @Value("${propdata.collection.db}")
-    private String db;
-
-    @Value("${propdata.collection.user}")
-    private String dbUser;
-
-    @Value("${propdata.collection.password.encrypted}")
-    private String dbPassword;
-
-    @Value("${propdata.collection.sqoop.mapper.number}")
-    private int numMappers;
 
     @PostConstruct
     private void setEntityMgrs() {
@@ -166,11 +128,17 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         }
 
         // upload source
+        long uploadStartTime = System.currentTimeMillis();
         String sourceDir = snapshotDirInHdfs();
         String destTable = source.getTableName();
-        if (!uploadAvroToDestTable(progress, sourceDir, destTable, createIndexForStageTableSql())) {
+        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable, createIndexForStageTableSql())) {
             return progress;
         }
+
+        long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable, Long.class);
+        progress.setRowsUploadedToSql(rowsUploaded);
+        LoggingUtils.logInfoWithDuration(getLogger(),
+                progress, "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
 
         // finish
         LoggingUtils.logInfoWithDuration(log, progress, "Uploaded.", startTime);
@@ -192,7 +160,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     public DateRange determineNewJobDateRange() {
         Date latestInSrc, latestInDest;
         try {
-            latestInSrc = jdbcTemplate.queryForObject(
+            latestInSrc = jdbcTemplateCollectionDB.queryForObject(
                     "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getSourceTableName()
                             + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
         } catch (EmptyResultDataAccessException e) {
@@ -200,7 +168,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         }
 
         try {
-            latestInDest = jdbcTemplate.queryForObject(
+            latestInDest = jdbcTemplateCollectionDB.queryForObject(
                     "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getDestTableName()
                             + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
         } catch (EmptyResultDataAccessException e) {
@@ -233,13 +201,13 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
                 progress.getStartDate(), progress.getEndDate());
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
-        if (!importCollectionDBBySqoop(getSourceTableName(), targetDir, customer, getSrcTableSplitColumn(),
+        if (!importFromCollectionDB(getSourceTableName(), targetDir, customer, getSrcTableSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
-        long rowsDownloaded = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + getSourceTableName()
+        long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + getSourceTableName()
                 + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
@@ -256,7 +224,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         String customer = getSqoopCustomerName(progress) + "-downloadSnapshotData" ;
 
-        if (!importCollectionDBBySqoop(getDestTableName(), targetDir, customer,
+        if (!importFromCollectionDB(getDestTableName(), targetDir, customer,
                 getDestTableSplitColumn(), null, progress)) {
             updateStatusToFailed(progress, "Failed to import snapshot data from DB.", null);
             return false;
@@ -302,6 +270,10 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return false;
         }
         return true;
+    }
+
+    private String mergeWorkflowDirInHdfs() {
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW).toString();
     }
 
 }

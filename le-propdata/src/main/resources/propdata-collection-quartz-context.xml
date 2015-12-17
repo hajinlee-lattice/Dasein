@@ -7,28 +7,29 @@
 
     <import resource="classpath:propdata-collection-context.xml"/>
 
-    <bean name="featureArchiveJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <bean name="featureRefreshJobService" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="durability" value="true" />
         <property name="jobClass"
-            value="com.latticeengines.propdata.collection.job.impl.FeatureArchiveJobServiceImpl" />
+            value="com.latticeengines.propdata.collection.job.impl.FeatureRefreshJobService" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="featureArchiveService" value-ref="featureArchiveService" />
+                <entry key="archiveService" value-ref="featureArchiveService" />
+                <entry key="pivotService" value-ref="featurePivotService" />
                 <entry key="quartzEnabled" value="true" />
             </map>
         </property>
     </bean>
 
     <!-- Cron Trigger, run every 8 hour, start from 4am -->
-    <bean id="featureArchiveCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="featureArchiveJob" />
+    <bean id="featureRefreshCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="featureRefreshJobService" />
         <property name="cronExpression" value="${propdata.collection.feature.archive.schedule:false}" />
     </bean>
 
     <bean id="propDataQuartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <ref bean="featureArchiveCronTrigger" />
+                <ref bean="featureRefreshCronTrigger" />
             </list>
         </property>
     </bean>

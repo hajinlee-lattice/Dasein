@@ -17,8 +17,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "ArchiveProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
-public class ArchiveProgress implements Progress {
+@Table(name = "PivotProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
+public class PivotProgress implements Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProgressID", unique = true, nullable = false)
@@ -27,17 +27,11 @@ public class ArchiveProgress implements Progress {
     @Column(name = "SourceName", nullable = false)
     protected String sourceName;
 
-    @Column(name = "StartDate", nullable = false)
-    protected Date startDate;
+    @Column(name = "PivotDate", nullable = false)
+    protected Date pivotDate;
 
-    @Column(name = "EndDate", nullable = false)
-    protected Date endDate;
-
-    @Column(name = "RowsDownloadedToHDFS", nullable = false)
-    protected long rowsDownloadedToHdfs;
-
-    @Column(name = "RowsUploadedToSQL", nullable = false)
-    protected long rowsUploadedToSql;
+    @Column(name = "RowsGenerated", nullable = false)
+    protected long rowsGenerated;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
@@ -80,36 +74,20 @@ public class ArchiveProgress implements Progress {
 
     public void setSourceName(String sourceName) { this.sourceName = sourceName; }
 
-    public Date getStartDate() {
-        return startDate;
+    public Date getPivotDate() {
+        return pivotDate;
     }
 
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public void setPivotDate(Date pivotDate) {
+        this.pivotDate = pivotDate;
     }
 
-    public Date getEndDate() {
-        return endDate;
+    public long getRowsGenerated() {
+        return rowsGenerated;
     }
 
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public long getRowsDownloadedToHdfs() {
-        return rowsDownloadedToHdfs;
-    }
-
-    public void setRowsDownloadedToHdfs(long rowsDownloadedToHdfs) {
-        this.rowsDownloadedToHdfs = rowsDownloadedToHdfs;
-    }
-
-    public long getRowsUploadedToSql() {
-        return rowsUploadedToSql;
-    }
-
-    public void setRowsUploadedToSql(long rowsUploadedToSql) {
-        this.rowsUploadedToSql = rowsUploadedToSql;
+    public void setRowsGenerated(long rowsGenerated) {
+        this.rowsGenerated = rowsGenerated;
     }
 
     @Override
@@ -161,16 +139,14 @@ public class ArchiveProgress implements Progress {
     @Override
     public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
 
-    public static ArchiveProgress constructByDates(String sourceName, Date startDate, Date endDate)
+    public static PivotProgress constructByDate(String sourceName, Date pivotDate)
             throws InstantiationException, IllegalAccessException {
-        ArchiveProgress progress = new ArchiveProgress();
+        PivotProgress progress = new PivotProgress();
         progress.setSourceName(sourceName);
-        progress.setStartDate(startDate);
-        progress.setEndDate(endDate);
+        progress.setPivotDate(pivotDate);
 
         progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setRowsDownloadedToHdfs(0);
-        progress.setRowsUploadedToSql(0);
+        progress.setRowsGenerated(0);
         progress.setStatus(ProgressStatus.NEW);
 
         return progress;
@@ -178,6 +154,6 @@ public class ArchiveProgress implements Progress {
 
     @Override
     public String toString() {
-        return String.format("ArchiveProgress %s [%s]", sourceName, rootOperationUID);
+        return String.format("PivotProgress %s [%s]", sourceName, rootOperationUID);
     }
 }

@@ -4,22 +4,29 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.FeatureArchiveService;
+import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.util.DateRange;
 
 @Component
 public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
 
     @Autowired
-    FeatureArchiveService archiveService;
+    @Qualifier(value = "featureArchiveService")
+    ArchiveService archiveService;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Override
-    FeatureArchiveService getArchiveService() {
+    ArchiveService getArchiveService() {
         return archiveService;
     }
 
@@ -42,41 +49,38 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
         return dates;
     }
 
-//    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress", enabled = false)
-//    public void testEmptyInput() {
-//        Date[] dates = getEmptyDataDates();
-//
-//        ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
-//        context = importFromDB(context);
-//        context = transformRawData(context);
-//        exportToDB(context);
-//
-//        cleanupProgressTables();
-//    }
+    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress", enabled = false)
+    public void testEmptyInput() {
+        Date[] dates = getEmptyDataDates();
+
+        ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
+        progress = importFromDB(progress);
+        progress = transformRawData(progress);
+        exportToDB(progress);
+
+        cleanupProgressTables();
+    }
 
     @Override
-    String destTableName() { return "Feature_MostRecent"; }
-
-    @Override
-    String sourceName() { return "Feature"; }
+    CollectionSource getSource() { return CollectionSource.FEATURE; }
 
     @Override
     String[] uniqueColumns() { return new String[]{"URL", "Feature"}; }
 
-//    // not every kind of progress need this, we only need to test this on one kind
-//    @Override
-//    protected void testAutoDetermineDateRange() {
-//        DateRange range = archiveService.determineNewJobDateRange();
-//        System.out.println(range);
-//
-//        Date cutDate = dates[1];
-//        Assert.assertTrue(range.getStartDate().before(cutDate),
-//                "the auto determined range should start before " + cutDate
-//                        + ". But it is " + range.getStartDate());
-//        Assert.assertTrue(range.getEndDate().after(cutDate),
-//                "the auto determined range should end after " + cutDate
-//                        + ". But it is " + range.getStartDate());
-//    }
+    // not every kind of progress need this, we only need to test this on one kind
+    @Override
+    protected void testAutoDetermineDateRange() {
+        DateRange range = archiveService.determineNewJobDateRange();
+        System.out.println(range);
+
+        Date cutDate = dates[1];
+        Assert.assertTrue(range.getStartDate().before(cutDate),
+                "the auto determined range should start before " + cutDate
+                        + ". But it is " + range.getStartDate());
+        Assert.assertTrue(range.getEndDate().after(cutDate),
+                "the auto determined range should end after " + cutDate
+                        + ". But it is " + range.getStartDate());
+    }
 
     private Date[] getEmptyDataDates() {
         Date[] dates = new Date[2];

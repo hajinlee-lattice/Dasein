@@ -8,5 +8,7 @@ public enum ProgressStatus {
     TRANSFORMING,
     TRANSFORMED,
     UPLOADING,
-    UPLOADED
+    UPLOADED,
+    PIVOTING,
+    PIVOTED
 }

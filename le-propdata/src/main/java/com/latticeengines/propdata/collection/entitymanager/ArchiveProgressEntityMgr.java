@@ -3,20 +3,9 @@ package com.latticeengines.propdata.collection.entitymanager;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.source.Source;
 
-public interface ArchiveProgressEntityMgr {
-
-    ArchiveProgress createProgress(ArchiveProgress progress);
-
-    ArchiveProgress updateProgress(ArchiveProgress progress);
-
-    ArchiveProgress updateStatus(ArchiveProgress progress, ProgressStatus status);
-
-    void deleteProgressByRootOperationUid(String rootOperationUid);
-
-    ArchiveProgress findProgressByRootOperationUid(String rootOperationUid);
+public interface ArchiveProgressEntityMgr extends ProgressEntityMgr<ArchiveProgress> {
 
     ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator);
 

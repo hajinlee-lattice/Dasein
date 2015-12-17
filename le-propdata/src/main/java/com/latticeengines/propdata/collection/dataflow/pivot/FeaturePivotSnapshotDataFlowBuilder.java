@@ -20,7 +20,7 @@ import cascading.tuple.Fields;
 public class FeaturePivotSnapshotDataFlowBuilder extends PivotSnapshotDataFlowBuilder {
 
     @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplateDest")
+    @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateDest;
 
     @Override

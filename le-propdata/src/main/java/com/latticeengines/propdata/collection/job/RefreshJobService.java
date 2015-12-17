@@ -1,9 +1,11 @@
 package com.latticeengines.propdata.collection.job;
 
+import java.util.Date;
+
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.util.DateRange;
 
-public interface ArchiveJobService {
+public interface RefreshJobService {
 
     void archivePeriod(DateRange period);
 
@@ -13,4 +15,5 @@ public interface ArchiveJobService {
 
     void retryJob(ArchiveProgress progress);
 
+    void pivotData(Date pivotDate);
 }

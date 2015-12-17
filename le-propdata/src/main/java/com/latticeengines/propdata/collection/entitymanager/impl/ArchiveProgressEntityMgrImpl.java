@@ -17,7 +17,8 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.source.Source;
 
 @Component("archiveProgressEntityMgr")
-public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
+public class ArchiveProgressEntityMgrImpl
+        extends AbstractProgressEntityMgr<ArchiveProgress> implements ArchiveProgressEntityMgr {
 
     @Autowired
     ArchiveProgressDao progressDao;
@@ -25,44 +26,10 @@ public class ArchiveProgressEntityMgrImpl implements ArchiveProgressEntityMgr {
     private static final int MAX_RETRIES = 3;
 
     @Override
-    @Transactional(value = "propDataCollectionProgress")
-    public ArchiveProgress createProgress(ArchiveProgress progress) {
-        progress.setPid(null);
-        progressDao.create(progress);
-        return progressDao.findByRootOperationUid(progress.getRootOperationUID());
-    }
+    protected ArchiveProgressDao getProgressDao() { return progressDao; }
 
     @Override
     @Transactional(value = "propDataCollectionProgress")
-    public void deleteProgressByRootOperationUid(String rootOperationUid) {
-        ArchiveProgress progress = progressDao.findByRootOperationUid(rootOperationUid);
-        if (progress != null) {
-            progressDao.delete(progress);
-        }
-    }
-
-    @Override
-    @Transactional(value = "propDataCollectionProgress")
-    public ArchiveProgress updateStatus(ArchiveProgress progress, ProgressStatus status) {
-        progress.setStatus(status);
-        return updateProgress(progress);
-    }
-
-    @Override
-    @Transactional(value = "propDataCollectionProgress")
-    public ArchiveProgress updateProgress(ArchiveProgress progress) {
-        progressDao.update(progress);
-        return progress;
-    }
-
-    @Override
-    @Transactional(value = "propDataCollectionProgress", readOnly = true)
-    public ArchiveProgress findProgressByRootOperationUid(String rootOperationUid) {
-        return progressDao.findByRootOperationUid(rootOperationUid);
-    }
-
-    @Override
-    @Transactional(value = "propDataCollectionProgress", readOnly = true)
     public ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator) {
         try {
             ArchiveProgress newProgress = ArchiveProgress.constructByDates(source.getSourceName(), startDate, endDate);

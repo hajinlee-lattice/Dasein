@@ -8,5 +8,7 @@ public abstract class PropDataCollectionDeploymentTestNGBase extends PropDataCol
 
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
-    protected JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplateCollectionDB;
+
+    protected static final String progressCreator = "DeploymentTest";
 }

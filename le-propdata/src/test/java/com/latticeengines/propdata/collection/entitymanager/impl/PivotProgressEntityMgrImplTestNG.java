@@ -8,23 +8,22 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
+import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
-
 @Component
-public class ArchiveProgressEntityMgrImplTestNG extends PropDataCollectionFunctionalTestNGBase {
+public class PivotProgressEntityMgrImplTestNG extends PropDataCollectionFunctionalTestNGBase {
 
     @Autowired
-    private ArchiveProgressEntityMgr progressEntityMgr;
+    private PivotProgressEntityMgr progressEntityMgr;
 
     @Test(groups = "functional")
     public void testInsertNew() throws IOException {
-        ArchiveProgress progress =
-                progressEntityMgr.insertNewProgress(CollectionSource.FEATURE, new Date(), new Date(), "FunctionalTest");
+        PivotProgress progress =
+                progressEntityMgr.insertNewProgress(PivotedSource.FEATURE_PIVOTED, new Date(), "FunctionalTest");
         Assert.assertNotNull(progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID()));
         progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         Assert.assertNull(progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID()));

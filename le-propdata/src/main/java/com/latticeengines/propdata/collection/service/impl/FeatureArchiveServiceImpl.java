@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.FeatureArchiveService;
+import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 
 @Component("featureArchiveService")
-public class FeatureArchiveServiceImpl extends AbstractArchiveService implements FeatureArchiveService {
+public class FeatureArchiveServiceImpl extends AbstractArchiveService implements ArchiveService {
 
     Log log = LogFactory.getLog(this.getClass());
 

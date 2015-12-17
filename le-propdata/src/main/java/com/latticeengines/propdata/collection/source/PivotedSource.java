@@ -3,24 +3,24 @@ package com.latticeengines.propdata.collection.source;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum AggregatedSource implements Source {
+public enum PivotedSource implements Source {
 
-    FEATURE("FeaturePivoted", "Feature_Pivoted_Source", CollectionSource.FEATURE);
+    FEATURE_PIVOTED("FeaturePivoted", "Feature_Pivoted_Source", CollectionSource.FEATURE);
 
     private final String sourceName;
     private final String tableName;
     private final Source baseSource;
 
-    private static Map<String, AggregatedSource> sourceNameMap;
+    private static Map<String, PivotedSource> sourceNameMap;
 
     static {
         sourceNameMap = new HashMap<>();
-        for (AggregatedSource source: AggregatedSource.values()) {
+        for (PivotedSource source: PivotedSource.values()) {
             sourceNameMap.put(source.sourceName, source);
         }
     }
 
-    AggregatedSource(String sourceName, String tableName, Source baseSource) {
+    PivotedSource(String sourceName, String tableName, Source baseSource) {
         this.sourceName = sourceName;
         this.tableName = tableName;
         this.baseSource = baseSource;
@@ -34,7 +34,7 @@ public enum AggregatedSource implements Source {
 
     public Source getBaseSource() { return baseSource; }
 
-    public static AggregatedSource fromSourceName(String sourceName) {
+    public static PivotedSource fromSourceName(String sourceName) {
         return sourceNameMap.get(sourceName);
     }
 }
