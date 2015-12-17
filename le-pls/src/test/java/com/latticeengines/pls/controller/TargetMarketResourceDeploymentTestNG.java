@@ -90,7 +90,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         switchToExternalAdmin();
     }
 
-    @Test(groups = "deployment", timeOut = 360000)
+    @Test(groups = "deployment", timeOut = 360000, enabled = false)
     public void create() {
         restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET,
                 TargetMarket.class);
@@ -123,7 +123,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
                 MAX_PROSPECTS_PER_ACCOUNT.intValue());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "create")
+    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
     public void update() {
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
 
@@ -136,7 +136,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
     }
 
-    @Test(groups = "deployment", timeOut = 360000)
+    @Test(groups = "deployment", timeOut = 360000, enabled = false)
     public void createDefault() {
         TargetMarket targetMarket = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + "default", null, TargetMarket.class);
@@ -147,7 +147,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertTrue(targetMarket.getIsDefault());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "create")
+    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
     public void registerReport() {
         Report report = new Report();
         report.setIsOutOfDate(true);
@@ -173,7 +173,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "registerReport")
+    @Test(groups = "deployment", dependsOnMethods = "registerReport", enabled = false)
     public void replaceReport() {
         Report report = new Report();
         report.setIsOutOfDate(false);
@@ -199,7 +199,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "replaceReport")
+    @Test(groups = "deployment", dependsOnMethods = "replaceReport", enabled = false)
     public void addReport() {
         Report report = new Report();
         report.setPurpose(ReportPurpose.MODEL_SUMMARY);
@@ -215,7 +215,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(targetMarket.getReports().size(), 2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "addReport")
+    @Test(groups = "deployment", dependsOnMethods = "addReport", enabled = false)
     public void delete() {
         restTemplate.delete(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
 
@@ -224,7 +224,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertNull(targetMarket);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void resetDefaultTargetMarket() throws Exception {
         String tenantId = mainTestingTenant.getId();
         CustomerSpace space = CustomerSpace.parse(tenantId);

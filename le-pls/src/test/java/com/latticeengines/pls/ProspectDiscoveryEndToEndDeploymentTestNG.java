@@ -38,10 +38,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
-/**
- * @author rgonzalez
- *
- */
 public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     
     private static final Log log = LogFactory.getLog(ProspectDiscoveryEndToEndDeploymentTestNG.class);
