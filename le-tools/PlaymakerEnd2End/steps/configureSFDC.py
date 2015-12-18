@@ -10,7 +10,7 @@ class DealSFDC(object):
     def __init__(self):
         self.sf=DantePageHelper(sales_force_url=SalePrismEnvironments.SFurl,salesforce_user=SalePrismEnvironments.SFDCUser,salefore_pwd=SalePrismEnvironments.SFDCPWD,browertype=SalePrismEnvironments.driverType)
         self.driver=self.sf.sele_instance
-        self.timeout='120s'
+        self.timeout='200s'
     def loginSF(self,user=SalePrismEnvironments.SFDCUser,pwd=SalePrismEnvironments.SFDCPWD):
         self.sf.LogInSaleForcePage()
         log.info("salesforce login successfully")

@@ -246,7 +246,7 @@ class DealPlay(object):
 		conn=None
 		try:
 			conn = pyodbc.connect(DRIVER=Driver,SERVER=Server,DATABASE=Database,UID=User,PWD=Password)
-			updateSql="update Play set IsActive=0"
+			updateSql="update Play set IsActive=0 where Play_ID>28"
 			cur=conn.cursor()
 			assert cur != None
 			cur.execute(updateSql)
