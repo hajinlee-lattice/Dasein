@@ -124,7 +124,7 @@ angular
         console.log($stateParams, $scope);
 
         CategoryModel.getList($stateParams).then(function(list) {
-            var chunks = 3;
+            var chunks = 100;
 
             $scope.total = list.length;
 

@@ -8,9 +8,7 @@ $(function() {
 
 });
 function checkBrowserWidth(){
-    if (window.matchMedia("(min-width: 1024px)").matches) {
-        $("body").addClass("open-nav");
-    } else {
+    if (window.matchMedia("(max-width: 1366px)").matches) {
         $("body").removeClass("open-nav");
     }
 }

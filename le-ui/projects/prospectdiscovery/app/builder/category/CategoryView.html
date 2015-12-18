@@ -34,13 +34,12 @@
         </span>
     </div>
 
-        <div 
-            class="four columns list-item{{ item.selected ? ' selected' : '' }}" 
-            ng-repeat="(col, item) in list | filter:SearchByName | orderBy: SortOrder"
-        >
-        	<div class="tile{{ FilterChecked ? ' filter-checked' : '' }}">
-                <div class="container">
-            		<div class="row">
+
+
+    <div class="row">
+        <div class="twelve columns tile-list">
+            <div class="tile{{ FilterChecked ? ' filter-checked' : '' }} list-item{{ item.selected ? ' selected' : '' }}" ng-repeat="(col, item) in list | filter:SearchByName | orderBy: SortOrder">
+            		<div class="tile-head">
             			<div class="nine columns">
     	        			<input 
                                 type="checkbox" 
@@ -57,9 +56,9 @@
             			<div class="three columns text-right" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
             				<h3 class="lift">{{ item.lift || "1.9x" }}</h3><span class="success-text">${{ item.revenue | number:0 }}</span>
             			</div>
-            		</div><!-- End .row -->
-            		<div class="row" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
-            			<div class="six columns">
+            		</div><!-- End .tile-head -->
+            		<div class="tile-meta" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
+            			<div class="stats-container pull-left">
             				<dl class="stats">
             					<dt>Available from Lattice</dt>
             					<dd class="blue-text">{{ item.lattice_companies | number:0 }}</dd>
@@ -81,24 +80,26 @@
                                 </span></dd>
             				</dl>
             			</div>
-                        <div class="six columns">
-                            <div class="circle-container">
-                                <div 
-                                    class="big-circle saphire-bkg">
-                                </div>
-                                <div 
-                                    class="medium-circle gun-metal-bkg"
-                                    style="width:{{ item.mediump }}%;height:{{ item.mediump }}%;">
-                                </div>
-                                <div 
-                                    class="small-circle jet-bkg"
-                                    style="width:{{ item.smallp }}%;height:{{ item.smallp }}%;">
-                                </div>
+                        <div class="circle-container pull-right">
+                            <div 
+                                class="big-circle saphire-bkg">
                             </div>
-            			</div>
-            		</div><!-- End .row -->
-                </div><!-- End .container -->
-        	</div><!-- End .tile -->
-        </div><!-- End .three.columns -->
+                            <div 
+                                class="medium-circle gun-metal-bkg"
+                                style="width:{{ item.mediump }}%;height:{{ item.mediump }}%;">
+                            </div>
+                            <div 
+                                class="small-circle jet-bkg"
+                                style="width:{{ item.smallp }}%;height:{{ item.smallp }}%;">
+                            </div>
+                        </div>
+            		</div><!-- End .tile-meta -->
+
+
+
+            	</div><!-- End .tile -->
+            </div><!-- End .tile-list -->
+        </div><!-- End .twelve.columns -->
+    </div><!-- End .row -->
 
 </div>

@@ -113,19 +113,26 @@
 
  .carousel-slide-container {
 	float: left;
+	width: 100%;
 	@include media(">small") {
-		width: 100%;
+		width: 33%;
 		&:first-of-type {
 			margin-left: 0;
 		}
 	}
 	@include media(">medium") {
-		width: 20%;
+		width: 21%;
 		&:first-of-type {
 			margin-left: 9%;
 		}
 	}
 	@include media(">large") {
+		width: 18%;
+		&:first-of-type {
+			margin-left: 5%;
+		}
+	}
+	@include media(">xlarge") {
 		width: 15%;
 		&:first-of-type {
 			margin-left: 5%;

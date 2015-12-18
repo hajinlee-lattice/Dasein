@@ -1,6 +1,39 @@
+.tile-list {
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex; 
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	-webkit-justify-content: space-between;
+	justify-content: space-between;
+	-webkit-align-content: space-around;
+  	align-content:         space-around;
+}
+.tile-head {
+	&:after {
+		display: table;
+		content: "";
+		clear: both;
+	}
+	.pull-left {
+		width: 70%;
+	}
+}
 .tile {
 	border: #d0d0d0 solid 1px;
 	padding: 0.75em;
+	margin-bottom: 5px !important; /* Remove the important when production.css is deprecated */
+	width: 100%;
+	height: 300px;
+	flex: 0 1 auto;
+	@include media(">medium") {
+		width: 49%;
+	}
+	@include media(">large") {
+		width: 33%;
+	}
 	&:hover {
 		background: #e7e7e7;
 		cursor: pointer;
