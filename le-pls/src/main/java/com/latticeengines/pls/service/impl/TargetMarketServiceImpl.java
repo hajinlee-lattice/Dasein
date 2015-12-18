@@ -59,13 +59,13 @@ public class TargetMarketServiceImpl implements TargetMarketService {
     }
 
     @Override
-    public TargetMarket getTargetMarketByName(String name) {
+    public TargetMarket findTargetMarketByName(String name) {
         return targetMarketEntityMgr.findTargetMarketByName(name);
     }
 
     @Override
-    public List<TargetMarket> getAllTargetMarkets() {
-        return targetMarketEntityMgr.getAllTargetMarkets();
+    public List<TargetMarket> findAllTargetMarkets() {
+        return targetMarketEntityMgr.findAllTargetMarkets();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class TargetMarketServiceImpl implements TargetMarketService {
     @Override
     public void registerReport(String targetMarketName, Report report) {
 
-        TargetMarket targetMarket = getTargetMarketByName(targetMarketName);
+        TargetMarket targetMarket = findTargetMarketByName(targetMarketName);
         if (targetMarket != null) {
             report.setName(new UID().toString());
             reportEntityMgr.createOrUpdate(report);

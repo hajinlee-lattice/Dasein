@@ -41,7 +41,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ApiOperation(value = "Register a target market")
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public void create(@RequestBody TargetMarket targetMarket) {
-        if (targetMarketService.getTargetMarketByName(targetMarket.getName()) != null) {
+        if (targetMarketService.findTargetMarketByName(targetMarket.getName()) != null) {
             throw new RuntimeException(String.format("Target market %s already exists", targetMarket.getName()));
         }
 
@@ -64,7 +64,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ApiOperation(value = "Retrieve the default target market")
     @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
     public TargetMarket getDefault() {
-        return targetMarketService.getTargetMarketByName(TargetMarket.DEFAULT_NAME);
+        return targetMarketService.findTargetMarketByName(TargetMarket.DEFAULT_NAME);
     }
 
     @RequestMapping(value = "/{targetMarketName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -80,7 +80,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ApiOperation(value = "Update a target market")
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public void update(@PathVariable String targetMarketName, @RequestBody TargetMarket targetMarket) {
-        TargetMarket existing = targetMarketService.getTargetMarketByName(targetMarket.getName());
+        TargetMarket existing = targetMarketService.findTargetMarketByName(targetMarket.getName());
 
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
 
@@ -94,7 +94,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ApiOperation(value = "Get a target market by a name")
     @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
     public TargetMarket find(@PathVariable String targetMarketName) {
-        return targetMarketService.getTargetMarketByName(targetMarketName);
+        return targetMarketService.findTargetMarketByName(targetMarketName);
     }
 
     @RequestMapping(value = "/{targetMarketName}/reports", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -109,7 +109,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @ResponseBody
     @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
     public List<TargetMarket> findAll() {
-        return targetMarketService.getAllTargetMarkets();
+        return targetMarketService.findAllTargetMarkets();
     }
 
     @RequestMapping(value = "/default/reset", method = RequestMethod.POST, headers = "Accept=application/json")

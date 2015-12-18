@@ -11,7 +11,7 @@ public interface TargetMarketEntityMgr extends BaseEntityMgr<TargetMarket> {
 
     TargetMarket findTargetMarketByName(String name);
 
-    List<TargetMarket> getAllTargetMarkets();
+    List<TargetMarket> findAllTargetMarkets();
     
     void updateTargetMarketByName(TargetMarket targetMarket, String name);
 

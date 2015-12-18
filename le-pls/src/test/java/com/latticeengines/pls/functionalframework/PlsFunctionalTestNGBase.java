@@ -3,6 +3,7 @@ package com.latticeengines.pls.functionalframework;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -332,7 +333,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     protected void cleanupTargetMarketDB() {
         setupSecurityContext(mainTestingTenant);
-        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.getAllTargetMarkets();
+        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.findAllTargetMarkets();
         for (TargetMarket targetMarket : targetMarkets) {
             if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
                 this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());

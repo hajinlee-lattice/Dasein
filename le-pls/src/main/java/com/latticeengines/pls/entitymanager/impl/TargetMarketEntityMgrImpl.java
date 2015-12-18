@@ -92,7 +92,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<TargetMarket> getAllTargetMarkets() {
+    public List<TargetMarket> findAllTargetMarkets() {
         List<TargetMarket> markets = targetMarketDao.findAll();
         for (TargetMarket market : markets) {
             inflate(market);

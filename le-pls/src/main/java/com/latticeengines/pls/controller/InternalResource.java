@@ -131,13 +131,13 @@ public class InternalResource extends InternalResourceBase {
 
     @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get target market by name")
+    @ApiOperation(value = "Find target market by name")
     public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
-        return targetMarketService.getTargetMarketByName(targetMarketName);
+        return targetMarketService.findTargetMarketByName(targetMarketName);
     }
 
     @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")

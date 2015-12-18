@@ -118,8 +118,17 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         assertNull(targetMarket);
     }
-
+    
     @Test(groups = { "functional" }, dependsOnMethods = { "testNotVisibleInAlternateTenant" })
+    public void testFindAllInAlternativeTenantReturnsEmpty() {
+        setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
+
+        List<TargetMarket> targetMarkets = targetMarketEntityMgr.findAllTargetMarkets();
+
+        assertTrue(targetMarkets.isEmpty());
+    }
+
+    @Test(groups = { "functional" }, dependsOnMethods = { "testFindAllInAlternativeTenantReturnsEmpty" })
     public void testUpdate() {
         setupSecurityContext(mainTestingTenant);
 

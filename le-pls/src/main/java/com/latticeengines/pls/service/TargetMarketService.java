@@ -11,9 +11,9 @@ public interface TargetMarketService {
 
     void deleteTargetMarketByName(String name);
 
-    TargetMarket getTargetMarketByName(String name);
+    TargetMarket findTargetMarketByName(String name);
 
-    List<TargetMarket> getAllTargetMarkets();
+    List<TargetMarket> findAllTargetMarkets();
 
     void updateTargetMarketByName(TargetMarket targetMarket, String name);
 
