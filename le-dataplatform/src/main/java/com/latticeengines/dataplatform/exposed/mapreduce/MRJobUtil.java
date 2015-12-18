@@ -22,12 +22,12 @@ public class MRJobUtil {
          List<String> jarFilePaths = getPlatformShadedJarPathList(yarnConfiguration);
          return commaJoiner.join(jarFilePaths);
     }
-    
+
     public static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration) {
         try {
             return HdfsUtils.getFilesForDir(yarnConfiguration, "/app/dataplatform/lib", ".*.jar$");
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_00002);
+            throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
 

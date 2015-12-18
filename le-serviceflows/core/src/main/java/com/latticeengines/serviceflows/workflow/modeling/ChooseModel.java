@@ -53,7 +53,8 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
                 modelApplicationIdToEventColumn);
         executionContext.putString(SCORING_MODEL_ID, bestModelIdAndEventColumn.getKey());
 
-        TargetMarket targetMarket = configuration.getTargetMarket();
+        TargetMarket targetMarket = proxy.findTargetMarketByName(configuration.getTargetMarket().getName(),
+                configuration.getCustomerSpace().toString());
         targetMarket.setModelId(bestModelIdAndEventColumn.getKey());
         targetMarket.setEventColumnName(bestModelIdAndEventColumn.getValue());
         proxy.updateTargetMarket(targetMarket, configuration.getCustomerSpace().toString());
