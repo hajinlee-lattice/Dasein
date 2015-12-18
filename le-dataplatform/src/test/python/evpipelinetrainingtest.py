@@ -47,8 +47,8 @@ class EVPipelineTrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
-                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
-                self.assertTrue(isinstance(pipeline.getPipeline()[4], EVModelStep), "No post score step.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[4].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[5], EVModelStep), "No post score step.")
             os.rename(fileName, "./results/" + entry["Key"])
 
         self.createCSVFromModel("modeldriver-evpipeline.json", "./results/scoreinputfile.txt")

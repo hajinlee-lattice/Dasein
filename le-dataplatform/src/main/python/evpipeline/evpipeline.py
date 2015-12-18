@@ -3,6 +3,7 @@ from evpipelinesteps import ColumnTypeConversionStep
 from evpipelinesteps import EVModelStep
 from pipelinefwk import ModelStep
 from evpipelinesteps import EnumeratedColumnTransformStep
+from evpipelinesteps import RevenueColumnTransformStep
 from evpipelinesteps import ImputationStep
 from pipelinefwk import Pipeline
 from collections import OrderedDict  
@@ -32,7 +33,7 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
+    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), RevenueColumnTransformStep(OrderedDict(continuousColumns)), ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
     pipeline = Pipeline(steps)
       
     scoringSteps = steps + [ModelStep(), EVModelStep()]

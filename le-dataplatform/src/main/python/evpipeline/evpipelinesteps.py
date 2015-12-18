@@ -3,6 +3,7 @@ import math
 import numpy as np
 import pandas as pd
 import random as rd
+import re
   
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
@@ -152,7 +153,7 @@ class ImputationStep(PipelineStep):
   
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
         indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
-        means = np.mean(inputScaled, axis = 0)
+        means = np.mean(inputScaled, axis=0)
   
         return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
         
@@ -252,7 +253,49 @@ class ImputationStep(PipelineStep):
             adjValue = 2.0 * splitValue
         return valuePair[0] + adjValue
   
+class RevenueColumnTransformStep(PipelineStep):
+    enumMappings_ = OrderedDict()
 
+    def __init__(self, enumMappings):
+         self.enumMappings_ = enumMappings
+         
+    def transform(self, dataFrame):
+        if len(self.enumMappings_) == 0:
+            return dataFrame
+        for column in self.enumMappings_:
+                if column not in dataFrame:
+                    continue
+                if re.match("Product_.*_Revenue$|Product_.*_RevenueRollingSum6$|Product_.*_Units$", column):
+                    self.logRevenueColumnWithBooleanPositiveSimple(dataFrame, column)
+                if re.match("Product_.*_RevenueMomentum3$", column):
+                    self.logRevenueColumnWithBooleanNegativeSimple(dataFrame, column)
+                    
+        return dataFrame
+    
+    def logRevenueColumnWithBooleanPositiveSimple(self, dataFrame, column):
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x <= 0 or x == None else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x :  math.log(1.0 + x))
+        dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
+    
+    def logRevenueColumnWithBooleanNegativeSimple(self, dataFrame, column):
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x == 0 or x == None else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.log(1.0 + x) if x >= 0 else -math.log(1.0 - x))
+        dataFrame[column] = dataFrame[column].apply(lambda x : x if x != 0 else np.NaN)
+    
+    def logRevenueColumnWithBooleanPositive(self, dataFrame, column):
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x <= 0 or x == None else x)
+        dataFrame['Trx_Boolean_Positive_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
+        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x :  math.log(1.0 + x))
+    
+    def logRevenueColumnWithBooleanNegative(self, dataFrame, column):
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.NaN if x == 0 or x == None else x)
+        dataFrame['Trx_Boolean_Negative_' + column] = dataFrame[column].apply(lambda x : 1 if np.isnan(x) else 0)
+        dataFrame[column] = dataFrame[column].apply(lambda x : 0 if np.isnan(x) else x)
+        dataFrame[column] = dataFrame[column].apply(lambda x : np.log(1.0 + x) if x >= 0 else -math.log(1.0 - x))
+        
 class EVModelStep(PipelineStep):
     model_ = None
     modelInputColumns_ = []
