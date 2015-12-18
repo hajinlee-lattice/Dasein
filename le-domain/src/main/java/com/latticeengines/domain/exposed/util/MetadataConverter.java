@@ -10,6 +10,7 @@ import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -88,6 +89,7 @@ public class MetadataConverter {
                 PrimaryKey primaryKey = new PrimaryKey();
                 primaryKey.setName(primaryKeyName);
                 primaryKey.addAttribute(primaryKeyName);
+                primaryKey.setDisplayName(primaryKeyName);
                 table.setPrimaryKey(primaryKey);
             }
 
@@ -101,6 +103,8 @@ public class MetadataConverter {
                 LastModifiedKey lastModifiedKey = new LastModifiedKey();
                 lastModifiedKey.setName(lastModifiedKeyName);
                 lastModifiedKey.addAttribute(lastModifiedKeyName);
+                lastModifiedKey.setDisplayName(lastModifiedKeyName);
+                lastModifiedKey.setLastModifiedTimestamp(DateTime.now().getMillis());
                 table.setLastModifiedKey(lastModifiedKey);
             }
 
