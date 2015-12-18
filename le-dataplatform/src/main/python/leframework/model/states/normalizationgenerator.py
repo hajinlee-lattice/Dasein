@@ -14,22 +14,22 @@ class NormalizationGenerator(State, JsonGenBase):
         mediator = self.mediator
         schema = mediator.schema
         score = mediator.allDataPreTransform[schema["reserved"]["score"]]
-        revenue = mediator.data[schema["reserved"]["predictedrevenue"]]
         self.mediator.probabilityMappingData = []
         self.mediator.revenueMappingData = []
  
         if mediator.revenueColumn is not None:
-            revenueMappingData = self.buildMappingFunctionData(revenue, True)
-            self.mediator.revenueMappingData = revenueMappingData 
+            revenue = mediator.data[mediator.schema["reserved"]["expectedrevenue"]]
+            revenueMappingData = self.buildMappingFunctionData(revenue)
+            self.mediator.revenueMappingData = revenueMappingData
              
         if score is not None:
-            mappingData = self.buildMappingFunctionData(score, False)
+            mappingData = self.buildMappingFunctionData(score)
             self.mediator.probabilityMappingData = mappingData
         else:
             self.logger.info("Scores are not provided. Normalization buckets cannot be generated.")
  
     # score list contains probabilities (probability model) or revenue (revenue model) values
-    def buildMappingFunctionData(self, scoreList, isRevenueModel):
+    def buildMappingFunctionData(self, scoreList):
         bins = self.createIndexSequence(len(scoreList), min((len(scoreList)-1), 100))
          
         if len(bins) > 1:
@@ -69,8 +69,8 @@ class NormalizationGenerator(State, JsonGenBase):
      
     @overrides(JsonGenBase)
     def getJsonProperty(self):
-        normalizationBuckets = {"Probability" + self.getKey() : self.mediator.probabilityMappingData}
+        normalizationBuckets = {"Probability" : self.mediator.probabilityMappingData}
          
         if self.mediator.revenueColumn is not None:
-            normalizationBuckets["Revenue" + self.getKey()] = self.mediator.revenueMappingData          
+            normalizationBuckets["ExpectedRevenue"] = self.mediator.revenueMappingData          
         return normalizationBuckets 

@@ -46,10 +46,6 @@ def trainRegressionClf(trainingData, testData, schema, modelDir, algorithmProper
     X_train = regressionTraining[schema["features"]]
     Y_train = regressionTraining[parser.revenueColumn]
     Y_train = Y_train.apply(lambda x : math.log(x + 1))
-    
-    print "Columns in training:" 
-    for col in schema["features"]:
-        print str(col)
 
     estimators = int(algorithmProperties.get("n_estimators", 100))
     clf = ensemble.RandomForestRegressor( n_estimators=estimators,
