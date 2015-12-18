@@ -1,28 +1,52 @@
-.pd-industry {
+.pd-builder-attributes {
     perspective: 7000px;
     perspective-origin: 50% 0%;
+    min-height: 1024px;
 
-    .industry-list {
+    .list-item {
         margin-bottom: 2em;
         color: #000;
         -webkit-backface-visibility: hidden;
         -moz-backface-visibility: hidden;
         -ms-backface-visibility: hidden;
         backface-visibility: hidden;
-        transition: all 400ms ease;
+        transition: all 300ms ease;
         transform-origin: 50% 0%;
+        
+        .tile {
+            min-height: 230px;
+            background: #e7e7e7;
+            transition: background 150ms ease;
+        }
+
+        .tile.filter-checked {
+            display: none;
+        }
     }
 
-    .industry-list.ng-enter  {
+    .list-item.selected {
+        .tile {
+            background: #fff;
+        }
+        .tile.filter-checked {
+            display: block;
+        }
+    }
+
+    .list-item:nth-child(3n-1) {
+        margin-left: 0;
+    }
+
+    .list-item.ng-enter  {
         transform: rotateX(180deg);
     }
 
-    .industry-list.ng-enter-active {
+    .list-item.ng-enter-active {
         transform: rotateX(0deg);
     }
 
-    .industry-list.ng-enter-stagger {
-        transition-delay: 100ms;
+    .list-item.ng-enter-stagger {
+        transition-delay: 50ms;
         transition-duration: 0s;
     }
 

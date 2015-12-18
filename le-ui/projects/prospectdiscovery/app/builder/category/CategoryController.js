@@ -1,6 +1,5 @@
 angular
     .module('pd.builder.category', [
-
     ])
     .service('CategoryModel', function($rootScope, $q, _, CategoryService) {
         var CategoryModel = this;
@@ -17,7 +16,9 @@ angular
             }
             
             if (list) {
-                deferred.resolve(list);
+                setTimeout(function() {
+                    deferred.resolve(list);
+                },1);
             } else {
                 CategoryService.get(args).then(function(list) {
                     var list = list || [];
@@ -114,7 +115,7 @@ angular
         $scope.AttrKey = AttrKey = $stateParams.AttrKey;
         $scope.ParentKey = $stateParams.ParentKey;
         $scope.ParentValue = $stateParams.ParentValue;
-        $scope.truncate_limit = 24;
+        $scope.truncate_limit = 28;
 
         if (!AttrKey) {
             return console.log('<!> No stateParams provided.');
@@ -122,22 +123,32 @@ angular
 
         console.log($stateParams, $scope);
 
-        CategoryModel.getList($stateParams).then(function(lists) {
+        CategoryModel.getList($stateParams).then(function(list) {
             var chunks = 3;
 
-            $scope.total = lists.length;
+            $scope.total = list.length;
 
+            /*
             // Break the array up into rows of 3 each
-            var lists = _.chain(lists).groupBy(function(element, index) {
+            var list = _.chain(list).groupBy(function(element, index) {
                 return Math.floor(index / chunks);
             }).toArray().value();
+            */
 
-            $scope.lists = lists;
+            $scope.list = list;
         });
 
         $scope.handleTileSelection = function() {
-            console.log('handleTileSelection', $scope.lists);
-            return false;
+            var Industry = CategoryModel.MasterList.Industry ||  [];
+            var Locations = CategoryModel.MasterList.Locations ||  [];
+            var EmployeesRange = CategoryModel.MasterList.EmployeesRange ||  [];
+            var list = Industry.concat(Locations,EmployeesRange);
+
+            var SelectedList = list.filter(function(item) {
+                return item.selected;
+            });
+
+            $rootScope.$broadcast('Builder-Sidebar-List', SelectedList);
         }
     }
 );

@@ -1,6 +1,6 @@
 <div data-ng-controller="SubNavCtrl" class="summary blue-steel tmb-summary">
 
-    <div class="container">
+    <div class="container" ng-controller="SubNavSummaryCtrl">
         <div class="row">
             <div class="three columns">
                 <div class="stats black-summary-list">
@@ -14,7 +14,7 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Matching Companies</dt>
-                        <dd>24,635</dd>
+                        <dd>{{ CompaniesTotal | number: 0 }}</dd>
                     </dl>
                 </div>
             </div><!-- End .three.columns -->
@@ -31,7 +31,7 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Expected Revenue</dt>
-                        <dd>$12,345,678</dd>
+                        <dd>${{ RevenueTotal | number: 0 }}</dd>
                     </dl>
                 </div>
             </div><!-- End .three.columns -->          

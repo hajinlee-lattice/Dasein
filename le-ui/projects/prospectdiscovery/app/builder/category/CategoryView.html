@@ -1,4 +1,4 @@
-<div class="container pd-industry" ng-controller="CategoryCtrl">
+<div class="container pd-builder-attributes" ng-controller="CategoryCtrl">
     <div class="row page-header">
         <h4 class="columns six">
             <span ng-if="!ParentValue">{{AttrKey}}</span> 
@@ -15,20 +15,30 @@
             <span class="smaller" ng-if="total">({{total}})</span>
         </h4>
         <span class="columns six">
-            <button type="button" class="button icon-button white-button">
-                <span class="fa fa-filter"></span>
+            <input 
+                type="text" 
+                class="form-control" 
+                ng-model="SearchByName.AttrValue"
+                ng-show="ShowSearch" 
+            />
+            <button type="button" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                <span class="fa fa-search"></span>
             </button>
-            <button type="button" class="button icon-button white-button">
-                <span class="fa fa-sort-amount-desc"></span>
+            <button type="button" class="button icon-button white-button" ng-click="FilterChecked = !FilterChecked" ng-init="FilterChecked = false;">
+                <span class="fa fa-check-square{{ FilterChecked ? '' : '-o' }}"></span>
+            </button>
+            <button type="button" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'AttrValue' ? '-AttrValue' : 'AttrValue')" ng-init="SortOrder = 'AttrValue';">
+                <span class="fa fa-sort-alpha-{{ SortOrder == 'AttrValue' ? 'asc' : 'desc' }}"></span>
             </button>
             <a ui-sref="jobs.import.credentials"><button class="button orange-button">Save Attributes</button></a>
         </span>
     </div>
 
-    <div class="row industry-list" ng-repeat="(row, items) in lists">
-
-        <div class="four columns list-item{{ item.selected ? ' selected' : '' }}" ng-repeat="(col, item) in items">
-        	<div class="tile">
+        <div 
+            class="four columns list-item{{ item.selected ? ' selected' : '' }}" 
+            ng-repeat="(col, item) in list | filter:SearchByName | orderBy: SortOrder"
+        >
+        	<div class="tile{{ FilterChecked ? ' filter-checked' : '' }}">
                 <div class="container">
             		<div class="row">
             			<div class="nine columns">
@@ -91,5 +101,4 @@
         	</div><!-- End .tile -->
         </div><!-- End .three.columns -->
 
-    </div><!-- End .row -->
 </div>

@@ -4,16 +4,23 @@
 	</a>
 	<h3>Create Target Market</h3>
 </div>
-<ul class="menu progress-menu">
+<ul class="menu progress-menu" ng-controller="BuilderSidebarCtrl">
     <li role="presentation" ui-sref-active="active">
-        <a href="#"><span class="fa fa-circle-thin"></span>Select Attributes <span class="badge badge-blue pull-right">5</span></a>
+        <a href="#"><span class="fa fa-circle-thin"></span>Select Attributes <span class="badge badge-blue pull-right">{{ TotalAttributes }}</span></a>
         <ul>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
-            <li><a href="#"><span class="fa fa-bank blue-text"></span> Industry 1</a></li>
+            <li ng-repeat="item in Industry">
+                <a href="#"><span class="fa fa-bank blue-text"></span> {{ item.AttrValue }}</a>
+            </li>
+        </ul>
+        <ul>
+            <li ng-repeat="item in State">
+                <a href="#"><span class="fa fa-map-marker jade-text"></span> {{ item.AttrValue }}</a>
+            </li>
+        </ul>
+        <ul>
+            <li ng-repeat="item in EmployeesRange">
+                <a href="#"><span class="fa fa-bar-chart-o gold-text"></span> {{ item.AttrValue }}</a>
+            </li>
         </ul>
     </li>
     <li role="presentation" ui-sref-active="active">
