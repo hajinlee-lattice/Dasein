@@ -61,6 +61,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <schema name="Timestamp_PushToDante_Stage" />
           </schemas>
           <specs>
+            <spec name="Alexa_MonthsSinceOnline" />
             <spec name="Alias_AllLeadID" />
             <spec name="Alias_AllLeadTable" />
             <spec name="Alias_CompanyName_LowerCase" />
@@ -78,7 +79,6 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="AppData_Lead_OptyConnections" />
             <spec name="Const_ClientDomain" />
             <spec name="Const_DantePlayDisplayName" />
-            <spec name="Const_DaysFromLeadCreationDate" />
             <spec name="Const_DaysOfDataForModeling" />
             <spec name="Const_DaysPriorToOptyConv" />
             <spec name="Dante_RankForLead" />
@@ -175,6 +175,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <schema name="Timestamp_PushToDante_Stage" />
           </schemas>
           <specs>
+            <spec name="Alexa_MonthsSinceOnline" />
             <spec name="Alias_AllLeadID" />
             <spec name="Alias_AllLeadTable" />
             <spec name="Alias_CompanyName_LowerCase" />
@@ -182,6 +183,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="Alias_Domain_LowerCase" />
             <spec name="Alias_FirstName_LowerCase" />
             <spec name="Alias_ID_Lead" />
+            <spec name="Alias_Industry_LowerCase" />
             <spec name="Alias_LastName_LowerCase" />
             <spec name="Alias_ModifiedDate_Lead" />
             <spec name="Alias_Phone" />
@@ -201,6 +203,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="DS_Domain_IsThisClient" />
             <spec name="DS_Domain_Length" />
             <spec name="DS_FirstName_SameAs_LastName" />
+            <spec name="DS_Industry_Group" />
             <spec name="DS_PD_Alexa_RelatedLinks_Count" />
             <spec name="DS_PD_FundingStage_Ordered" />
             <spec name="DS_PD_JobsTrendString_Ordered" />
@@ -212,6 +215,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="DS_Title_IsManager" />
             <spec name="DS_Title_IsSenior" />
             <spec name="DS_Title_IsTechRelated" />
+            <spec name="DS_Title_IsUnusual" />
             <spec name="DS_Title_IsVPAbove" />
             <spec name="DS_Title_Length" />
             <spec name="DS_Title_Level" />
@@ -283,6 +287,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <schema name="Timestamp_PushToDante_Stage" />
           </schemas>
           <specs>
+            <spec name="Alexa_MonthsSinceOnline" />
             <spec name="Alias_AllLeadID" />
             <spec name="Alias_AllLeadTable" />
             <spec name="Alias_CompanyName_LowerCase" />
@@ -300,7 +305,6 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="AppData_Lead_OptyConnections" />
             <spec name="Const_ClientDomain" />
             <spec name="Const_DantePlayDisplayName" />
-            <spec name="Const_DaysFromLeadCreationDate" />
             <spec name="Const_DaysOfDataForModeling" />
             <spec name="Const_DaysPriorToOptyConv" />
             <spec name="Const_MaxNumberOfLeadsToDownload" />
@@ -354,7 +358,6 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="Opty_IsCreatedAfterLead_ELQ" />
             <spec name="Opty_IsWon" />
             <spec name="P1_Event" />
-            <spec name="RankForOlderLead" />
             <spec name="SelectedForDante" />
             <spec name="SelectedForModeling_ELQ" />
             <spec name="Time_OfMostRecentMatchToPD" />
@@ -380,6 +383,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <schema name="Timestamp_PushToDante_Stage" />
           </schemas>
           <specs>
+            <spec name="Alexa_MonthsSinceOnline" />
             <spec name="Alias_AllLeadID" />
             <spec name="Alias_AllLeadTable" />
             <spec name="Alias_CompanyName_LowerCase" />
@@ -483,6 +487,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <schema name="Timestamp_PushToDante_Stage" />
           </schemas>
           <specs>
+            <spec name="Alexa_MonthsSinceOnline" />
             <spec name="Alias_AllLeadID" />
             <spec name="Alias_AllLeadTable" />
             <spec name="Alias_CompanyName_LowerCase" />
@@ -571,6 +576,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
             <spec name="SFDC_Lead_CountIDForDomain" />
             <spec name="SFDC_Lead_CountIDForDomain_ZeroAllowed" />
             <spec name="SFDC_Lead_MinOptyCreatedDate_Lead" />
+            <spec name="SFDC_LeadSource" />
             <spec name="SFDC_Phone" />
             <spec name="SFDC_State" />
             <spec name="SFDC_Title" />
