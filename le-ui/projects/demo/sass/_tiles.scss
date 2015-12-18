@@ -21,12 +21,14 @@
 		width: 70%;
 	}
 }
-.tile {
+.list-item {
 	border: #d0d0d0 solid 1px;
 	padding: 0.75em;
 	margin-bottom: 5px !important; /* Remove the important when production.css is deprecated */
 	width: 100%;
-	height: 300px;
+	background: #e7e7e7;
+	transition: background 150ms ease;
+	height: 240px;
 	flex: 0 1 auto;
 	@include media(">medium") {
 		width: 49%;
@@ -34,9 +36,22 @@
 	@include media(">large") {
 		width: 33%;
 	}
+	&.filter-checked {
+		display: none;
+	}
+	&.selected {
+		background: #fff;
+		&.filter-checked {
+			display: block;
+		}
+	}
 	&:hover {
-		background: #e7e7e7;
 		cursor: pointer;
+	}
+	.tile {
+		min-height: auto !important;
+		background: none !important;
+		transition: none !important;
 	}
 	label {
 		font-size: 20px;

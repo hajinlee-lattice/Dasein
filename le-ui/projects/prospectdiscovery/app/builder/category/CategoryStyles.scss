@@ -12,12 +12,6 @@
         backface-visibility: hidden;
         transition: all 300ms ease;
         transform-origin: 50% 0%;
-        
-        .tile {
-            min-height: 230px;
-            background: #e7e7e7;
-            transition: background 150ms ease;
-        }
 
         .tile.filter-checked {
             display: none;
@@ -25,9 +19,6 @@
     }
 
     .list-item.selected {
-        .tile {
-            background: #fff;
-        }
         .tile.filter-checked {
             display: block;
         }

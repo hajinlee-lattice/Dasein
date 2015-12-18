@@ -38,9 +38,11 @@
 
     <div class="row">
         <div class="twelve columns tile-list">
-            <div class="tile{{ FilterChecked ? ' filter-checked' : '' }} list-item{{ item.selected ? ' selected' : '' }}" ng-repeat="(col, item) in list | filter:SearchByName | orderBy: SortOrder">
+
+            <div class="list-item{{ item.selected ? ' selected' : '' }} {{ FilterChecked ? ' filter-checked' : '' }}" ng-repeat="(col, item) in list | filter:SearchByName | orderBy: SortOrder">
+                <div class="tile">
             		<div class="tile-head">
-            			<div class="nine columns">
+            			<div class="pull-left">
     	        			<input 
                                 type="checkbox" 
                                 id="attr-checkbox_{{ row }}_{{ col }}" 
@@ -53,7 +55,7 @@
                                 &nbsp;(<span class="blue-text"> {{ item.total || "5" }} </span>)
                             </label>
             			</div>
-            			<div class="three columns text-right" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
+            			<div class="text-right pull-right" ui-sref="builder.category({ParentKey: '{{ AttrKey }}', ParentValue: '{{ item.AttrValue }}' , AttrKey: 'SubIndustry'})">
             				<h3 class="lift">{{ item.lift || "1.9x" }}</h3><span class="success-text">${{ item.revenue | number:0 }}</span>
             			</div>
             		</div><!-- End .tile-head -->
@@ -94,11 +96,9 @@
                             </div>
                         </div>
             		</div><!-- End .tile-meta -->
+                </div><!-- End .tile -->
+            </div><!-- End .list-item -->
 
-
-
-            	</div><!-- End .tile -->
-            </div><!-- End .tile-list -->
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->
 
