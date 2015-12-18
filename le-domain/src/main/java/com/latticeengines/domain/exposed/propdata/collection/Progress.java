@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.propdata.collection;
 
+import java.util.Date;
+
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 public interface Progress extends HasPid{
@@ -21,5 +23,7 @@ public interface Progress extends HasPid{
     int getNumRetries();
 
     void setNumRetries(int numRetries);
+
+    Date getCreateTime();
 
 }

@@ -12,6 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
@@ -37,7 +38,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
 
     @BeforeMethod(groups = "deployment")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTest");
+        hdfsPathBuilder.changeHdfsPodId("DeploymentTestArchiveService");
         archiveService = getArchiveService();
         progressEntityMgr = getProgressEntityMgr();
         dates = getDates();
@@ -50,6 +51,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     @Test(groups = "deployment")
     public void testWholeProgress() {
         truncateDestTable();
+        purgeRawData();
 
         ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
         progress = importFromDB(progress);
@@ -64,6 +66,17 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
         exportToDB(progress);
 
         cleanupProgressTables();
+    }
+
+    private void purgeRawData() {
+        try {
+            String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+            if (HdfsUtils.fileExists(yarnConfiguration, rawDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, rawDir);
+            }
+        } catch (Exception e) {
+            Assert.fail("Failed to purge raw data.", e);
+        }
     }
 
     private void truncateDestTable() {

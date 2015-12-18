@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
@@ -38,35 +39,43 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     private String cascadingPlatform;
 
     @Override
-    public void executeMergeRawSnapshotData(Source source, String rawDir, String mergeDataFlowQualifier) {
+    public void executeMergeRawSnapshotData(Source source, String mergeDataFlowQualifier, String uid) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW;
 
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).toString();
-        String snapshotPath = hdfsPathBuilder.constructRawDataFlowSnapshotDir(source).toString();
-
         Map<String, String> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.RAW_AVRO_SOURCE, rawDir + "/*.avro");
-        sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotPath + "/*.avro");
+
+        String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+        try {
+            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+                    dir = dir.substring(dir.lastIndexOf("/") + 1);
+                    sources.put(dir, rawDir + "/" + dir + "/*.avro");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
+        }
+
+        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
         DataFlowContext ctx = commonContext(source, sources);
-        ctx.setProperty("TARGETPATH", targetPath + "/Output");
+        ctx.setProperty("TARGETPATH", outputDir);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, mergeDataFlowQualifier);
     }
 
 
     @Override
-    public void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier) {
+    public void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier, String uid) {
         String flowName = CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW;
 
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).toString();
-        String snapshotPath = snapshotDir;
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
         Map<String, String> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotPath + "/*.avro");
+        sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotDir + "/*.avro");
 
         DataFlowContext ctx = commonContext(source, sources);
-        ctx.setProperty("TARGETPATH", targetPath + "/Output");
+        ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, pivotDataFlowQualifier);
     }

@@ -23,37 +23,48 @@ public class HdfsPathBuilder {
     @Value("${propdata.hdfs.pod.id:Default}")
     private String podId;
 
-    Path constructSourceDir(Source source) {
+    public Path constructPodDir() {
+        return new Path("/Pods").append(podId);
+    }
+
+    public Path constructSourceDir(Source source) {
         String sourceName = source.getSourceName();
         sourceName = sourceName.endsWith("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : sourceName;
         return new Path("/Pods").append(podId).append("Services").append("PropData")
                 .append("Sources").append(sourceName);
     }
 
-    Path constructRawDataFlowDir(Source source) {
+    public Path constructRawDir(Source source) {
         Path baseDir = constructSourceDir(source);
         return baseDir.append(rawDataFlowType);
     }
 
-    Path constructRawDataFlowSnapshotDir(Source source) {
+    public Path constructSnapshotDir(Source source, String version) {
         Path baseDir = constructSourceDir(source);
-        return baseDir.append("Snapshot");
+        return baseDir.append("Snapshot").append(version);
     }
 
-    Path constructWorkFlowDir(Source source, String flowName) {
+    public Path constructWorkFlowDir(Source source, String flowName) {
         Path baseDir = constructSourceDir(source);
         return baseDir.append("WorkFlows").append(flowName);
     }
 
-    Path constructSchemaDir(Source source) {
+    public Path constructSchemaFile(Source source, String version) {
         Path baseDir = constructSourceDir(source);
-        return baseDir.append("Schema");
+        String avscFile = source.getSourceName() + ".avsc";
+        return baseDir.append("Schema").append(version).append(avscFile);
+
     }
 
-    Path constructRawDataFlowIncrementalDir(Source source, Date archiveDate) {
-        Path baseDir = constructRawDataFlowDir(source);
+    public Path constructVersionFile(Source source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append("_CURRENT_VERSION");
+    }
+
+    public Path constructRawIncrementalDir(Source source, Date archiveDate) {
+        Path baseDir = constructRawDir(source);
         return baseDir.append(dateFormat.format(archiveDate));
     }
 
-    void changeHdfsPodId(String podId) { this.podId = podId; }
+    public void changeHdfsPodId(String podId) { this.podId = podId; }
 }

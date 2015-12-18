@@ -140,6 +140,7 @@ public class ArchiveProgress implements Progress {
 
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
+    @Override
     public Date getCreateTime() { return createTime; }
 
     public void setCreateTime(Date createTime) { this.createTime = createTime; }

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.job;
+package com.latticeengines.propdata.job;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +16,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -24,7 +27,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-public class CollectionAdminTool {
+public class PropDataAdminTool {
 
     private static final String NS_COMMAND = "command";
     private static final String NS_SOURCE = "source";
@@ -52,6 +55,7 @@ public class CollectionAdminTool {
     private Date pivotDate;
     private RefreshJobService jobService;
     private ArchiveProgressEntityMgr entityMgr;
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     static {
         parser.description("PropData Collection Admin Tool");
@@ -119,7 +123,7 @@ public class CollectionAdminTool {
                 .help("number of periods. required if the split mode is number. default is [1] period.");
     }
 
-    public CollectionAdminTool(){ }
+    public PropDataAdminTool(){ }
 
     private void validateArguments(Namespace ns) {
         if (ns == null) {
@@ -192,7 +196,7 @@ public class CollectionAdminTool {
     }
 
     public static void main(String[] args) throws Exception {
-        CollectionAdminTool runner = new CollectionAdminTool();
+        PropDataAdminTool runner = new PropDataAdminTool();
         runner.run(args);
     }
 
@@ -203,11 +207,11 @@ public class CollectionAdminTool {
 
             validateArguments(ns);
 
-            ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-collection-context.xml");
+            ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-job-context.xml");
             jobService = (RefreshJobService) ac.getBean(source.getArchiveJobBean());
-            jobService.setAutowiredArchiveService();
             jobService.setJobSubmitter(JOB_SUBMITTER);
             entityMgr = (ArchiveProgressEntityMgr) ac.getBean("archiveProgressEntityMgr");
+            hdfsSourceEntityMgr = (HdfsSourceEntityMgr) ac.getBean("hdfsSourceEntityMgr");
 
             if (Command.ARCHIVE.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
                 executeArchiveCommand(ns);
@@ -230,7 +234,7 @@ public class CollectionAdminTool {
         System.out.println("========================================\n");
 
         System.out.println("Source to pivot: " + source.getName());
-        jobService.pivotData(pivotDate);
+        jobService.pivotData(pivotDate, hdfsSourceEntityMgr.getCurrentVersion(source.getCollectionSource()));
     }
 
     private void executeArchiveCommand(Namespace ns) {
@@ -271,7 +275,7 @@ public class CollectionAdminTool {
             System.out.println("");
 
             try {
-                jobService.archivePeriod(period);
+                jobService.archivePeriod(period, i != periods.size());
                 System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
                         + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
             } catch (Exception e) {
@@ -300,21 +304,27 @@ public class CollectionAdminTool {
 
 
     enum Source {
-        FEATURE("Feature", "featureRefreshJobService");
+        FEATURE("Feature", "featureRefreshJobService", CollectionSource.FEATURE, PivotedSource.FEATURE_PIVOTED);
 
         private static Map<String, Source> nameMap;
 
         private final String name;
         private final String archiveJobBean;
+        private final CollectionSource collectionSource;
+        private final PivotedSource pivotedSource;
 
-        Source(String name, String archiveJobBean) {
+        Source(String name, String archiveJobBean, CollectionSource collectionSource, PivotedSource pivotedSource) {
             this.name = name;
             this.archiveJobBean = archiveJobBean;
+            this.collectionSource = collectionSource;
+            this.pivotedSource = pivotedSource;
+
         }
 
         String getName() { return this.name; }
-
         String getArchiveJobBean() { return this.archiveJobBean; }
+        CollectionSource getCollectionSource() { return this.collectionSource; }
+        PivotedSource getPivotedSource() { return this.pivotedSource; }
 
         static {
             nameMap = new HashMap<>();

@@ -1,8 +1,10 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
@@ -20,6 +22,7 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.Source;
@@ -45,6 +48,9 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
 
     @Autowired
     protected CollectionDataFlowService collectionDataFlowService;
+
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
@@ -103,8 +109,8 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
     }
 
 
-    protected String snapshotDirInHdfs() {
-        return hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSource()).toString();
+    protected String snapshotDirInHdfs(P progress) {
+        return hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
     }
 
     protected boolean cleanupHdfsDir(String targetDir, P progress) {
@@ -119,15 +125,20 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         return true;
     }
 
-    protected void extractSchema() throws Exception {
-        String avscFile = getSource().getSourceName() + ".avsc";
-        String schemaDir = hdfsPathBuilder.constructSchemaDir(getSource()).toString();
-        String avscPath =  schemaDir + "/" + avscFile;
+    protected String getVersionString(P progress) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat.format(progress.getCreateTime());
+    }
+
+    protected void extractSchema(P progress) throws Exception {
+        String version = getVersionString(progress);
+        String avscPath =  hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
 
-        String avroDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSource()).toString();
+        String avroDir = hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
         List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
         if (files.size() > 0) {
             String avroPath = files.get(0);

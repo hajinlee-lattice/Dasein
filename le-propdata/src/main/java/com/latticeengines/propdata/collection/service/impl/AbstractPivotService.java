@@ -42,9 +42,11 @@ public abstract class AbstractPivotService
     }
 
     @Override
-    public PivotProgress startNewProgress(Date pivotDate, String creator) {
+    public PivotProgress startNewProgress(Date pivotDate, String baseSourceVersion, String creator) {
         PivotProgress progress = entityMgr.insertNewProgress(source, pivotDate, creator);
+        progress.setBaseSourceVersion(baseSourceVersion);
         LoggingUtils.logInfo(log, progress, "Started a new progress with pivotDate=" + pivotDate);
+        entityMgr.updateStatus(progress, ProgressStatus.NEW);
         return progress;
     }
 
@@ -76,9 +78,9 @@ public abstract class AbstractPivotService
     @Override
     public PivotProgress exportToDB(PivotProgress progress) {
         // check request context
-//        if (!checkProgressStatus(progress, ProgressStatus.PIVOTED, ProgressStatus.UPLOADING)) {
-//            return progress;
-//        }
+        if (!checkProgressStatus(progress, ProgressStatus.PIVOTED, ProgressStatus.UPLOADING)) {
+            return progress;
+        }
 
         // update status
         long startTime = System.currentTimeMillis();
@@ -88,7 +90,7 @@ public abstract class AbstractPivotService
 
         // upload source
         long uploadStartTime = System.currentTimeMillis();
-        String sourceDir = snapshotDirInHdfs();
+        String sourceDir = snapshotDirInHdfs(progress);
         String destTable = source.getTableName();
         System.out.println(sourceDir);
         if (!uploadAvroToCollectionDB(progress, sourceDir, destTable, createIndexForStageTableSql())) {
@@ -112,7 +114,7 @@ public abstract class AbstractPivotService
     }
 
     private boolean pivotInternal(PivotProgress progress) {
-        String targetDir = pivotWorkflowDirInHdfs();
+        String targetDir = pivotWorkflowDirInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
@@ -120,8 +122,9 @@ public abstract class AbstractPivotService
         try {
             collectionDataFlowService.executePivotSnapshotData(
                     source,
-                    baseSourceDirInHdfs(),
-                    getPivotDataFlowQualifier()
+                    baseSourceDirInHdfs(progress),
+                    getPivotDataFlowQualifier(),
+                    progress.getRootOperationUID()
             );
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform raw data.", e);
@@ -130,8 +133,8 @@ public abstract class AbstractPivotService
 
         // copy result to snapshot
         try {
-            String snapshotDir = snapshotDirInHdfs();
-            String srcDir = pivotWorkflowDirInHdfs() + "/Output";
+            String snapshotDir = snapshotDirInHdfs(progress);
+            String srcDir = pivotWorkflowDirInHdfs(progress);
             HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
             HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
         } catch (Exception e) {
@@ -139,9 +142,27 @@ public abstract class AbstractPivotService
             return false;
         }
 
+        // delete intermediate data
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            }
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to delete intermediate data.", e);
+            return false;
+        }
+
+        // update current version
+        try {
+            hdfsSourceEntityMgr.setCurrentVersion(source, getVersionString(progress));
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
+            return false;
+        }
+
         // extract schema
         try {
-            extractSchema();
+            extractSchema(progress);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
@@ -149,12 +170,16 @@ public abstract class AbstractPivotService
         return true;
     }
 
-    private String pivotWorkflowDirInHdfs() {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW).toString();
+    private String pivotWorkflowDirInHdfs(PivotProgress progress) {
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW)
+                .append(progress.getRootOperationUID()).toString();
     }
 
-    private String baseSourceDirInHdfs() {
-        return hdfsPathBuilder.constructRawDataFlowSnapshotDir(getSource().getBaseSource()).toString();
+    private String baseSourceDirInHdfs(PivotProgress pivotProgress) {
+        return hdfsPathBuilder.constructSnapshotDir(
+                getSource().getBaseSource(),
+                pivotProgress.getBaseSourceVersion()
+        ).toString();
     }
 
 }

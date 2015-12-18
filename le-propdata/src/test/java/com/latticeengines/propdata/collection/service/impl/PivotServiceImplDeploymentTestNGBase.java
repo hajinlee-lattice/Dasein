@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,22 +26,19 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
     PivotedSource source;
     Source baseSource;
     Collection<PivotProgress> progresses = new HashSet<>();
-    String baseSourceSplitColumn;
+    String baseSourceVersion = "current";
 
     abstract PivotService getPivotService();
     abstract PivotProgressEntityMgr getProgressEntityMgr();
     abstract PivotedSource getSource();
-    abstract String getBaseSourceSplitColumn();
-    abstract String testingBaseSourceTable();
 
     @BeforeMethod(groups = "deployment")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTest");
+        hdfsPathBuilder.changeHdfsPodId("DeploymentTestPivotService");
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
         baseSource = source.getBaseSource();
-        baseSourceSplitColumn = getBaseSourceSplitColumn();
     }
 
     @AfterMethod(groups = "deployment")
@@ -49,7 +47,7 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
     @Test(groups = "deployment")
     public void testWholeProgress() {
         truncateDestTable();
-        downloadSnapshot();
+        uploadBaseAvro();
 
         PivotProgress progress = createNewProgress(new Date());
         progress = pivotData(progress);
@@ -66,21 +64,21 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
 
-    private void downloadSnapshot() {
-        String targetDir = hdfsPathBuilder.constructRawDataFlowSnapshotDir(baseSource).toString();
+    private void uploadBaseAvro() {
+        InputStream baseAvroStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro").toString();
         try {
-            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
-                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetPath);
             }
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        importFromCollectionDB(testingBaseSourceTable(), targetDir, "PropData-FunctionalTest",
-                baseSourceSplitColumn, null);
     }
 
     protected PivotProgress createNewProgress(Date pivotDate) {
-        PivotProgress progress = pivotService.startNewProgress(pivotDate, progressCreator);
+        PivotProgress progress = pivotService.startNewProgress(pivotDate, baseSourceVersion, progressCreator);
         Assert.assertNotNull(progress, "Should have a progress in the job context.");
         Long pid = progress.getPid();
         Assert.assertNotNull(pid, "The new progress should have a pid assigned.");

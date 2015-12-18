@@ -8,4 +8,4 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 java -cp /etc/hadoop/conf.empty:$HADOOP_CONF:$TEZ_CONF:$JAVA_HOME/lib/tools.jar:lib/*:propdata.jar:. \
 	-Dlog4j.configuration=file:`pwd`/log4j.properties \
-	com.latticeengines.propdata.collection.job.CollectionAdminTool ${@:1}
+	com.latticeengines.propdata.collection.job.PropDataAdminTool ${@:1}

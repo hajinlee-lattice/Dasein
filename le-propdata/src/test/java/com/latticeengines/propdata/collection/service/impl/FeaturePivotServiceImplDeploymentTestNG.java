@@ -29,10 +29,4 @@ public class FeaturePivotServiceImplDeploymentTestNG extends PivotServiceImplDep
     @Override
     PivotedSource getSource() { return PivotedSource.FEATURE_PIVOTED; }
 
-    @Override
-    String getBaseSourceSplitColumn() { return "LE_Last_Upload_Date"; }
-
-    @Override
-    String testingBaseSourceTable() { return "Feature_MostRecent_test"; }
-
 }

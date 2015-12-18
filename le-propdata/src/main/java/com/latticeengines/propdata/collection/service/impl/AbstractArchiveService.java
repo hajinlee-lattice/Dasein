@@ -75,10 +75,6 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return progress;
         }
 
-        if (progress.getRowsDownloadedToHdfs() > 0 && !importSnapshotDestData(progress)) {
-            return progress;
-        }
-
         LoggingUtils.logInfoWithDuration(log, progress, "Downloaded.", startTime);
         progress.setNumRetries(0);
         return entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADED);
@@ -129,7 +125,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         // upload source
         long uploadStartTime = System.currentTimeMillis();
-        String sourceDir = snapshotDirInHdfs();
+        String sourceDir = snapshotDirInHdfs(progress);
         String destTable = source.getTableName();
         if (!uploadAvroToCollectionDB(progress, sourceDir, destTable, createIndexForStageTableSql())) {
             return progress;
@@ -179,7 +175,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     }
 
     private String incrementalDataDirInHdfs(ArchiveProgress progress) {
-        Path incrementalDataDir = hdfsPathBuilder.constructRawDataFlowIncrementalDir(source, progress.getEndDate());
+        Path incrementalDataDir = hdfsPathBuilder.constructRawIncrementalDir(source, progress.getEndDate());
         return incrementalDataDir.toString();
     }
 
@@ -214,28 +210,9 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         return true;
     }
 
-
-    private boolean importSnapshotDestData(ArchiveProgress progress) {
-        String targetDir = snapshotDirInHdfs();
-        if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
-            return false;
-        }
-
-        String customer = getSqoopCustomerName(progress) + "-downloadSnapshotData" ;
-
-        if (!importFromCollectionDB(getDestTableName(), targetDir, customer,
-                getDestTableSplitColumn(), null, progress)) {
-            updateStatusToFailed(progress, "Failed to import snapshot data from DB.", null);
-            return false;
-        }
-
-        return true;
-    }
-
     private boolean transformRawDataInternal(ArchiveProgress progress) {
         // dedupe
-        String targetDir = mergeWorkflowDirInHdfs();
+        String targetDir = workflowDirInHdfs(progress);
         if (!cleanupHdfsDir(targetDir, progress)) {
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
@@ -243,8 +220,8 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         try {
             collectionDataFlowService.executeMergeRawSnapshotData(
                     source,
-                    incrementalDataDirInHdfs(progress),
-                    getMergeDataFlowQualifier()
+                    getMergeDataFlowQualifier(),
+                    progress.getRootOperationUID()
             );
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform raw data.", e);
@@ -253,8 +230,8 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         // copy deduped result to snapshot
         try {
-            String snapshotDir = snapshotDirInHdfs();
-            String srcDir = mergeWorkflowDirInHdfs() + "/Output";
+            String snapshotDir = snapshotDirInHdfs(progress);
+            String srcDir = workflowDirInHdfs(progress);
             HdfsUtils.rmdir(yarnConfiguration, snapshotDir);
             HdfsUtils.copyFiles(yarnConfiguration, srcDir, snapshotDir);
         } catch (Exception e) {
@@ -262,9 +239,27 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return false;
         }
 
+        // delete intermediate data
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetDir);
+            }
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to delete intermediate data.", e);
+            return false;
+        }
+
+        // update current version
+        try {
+            hdfsSourceEntityMgr.setCurrentVersion(source, getVersionString(progress));
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
+            return false;
+        }
+
         // extract schema
         try {
-            extractSchema();
+            extractSchema(progress);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to extract schema of " + source.getSourceName() + " avsc.", e);
             return false;
@@ -272,8 +267,9 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         return true;
     }
 
-    private String mergeWorkflowDirInHdfs() {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW).toString();
+    private String workflowDirInHdfs(ArchiveProgress progress) {
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW)
+                .append(progress.getRootOperationUID()).toString();
     }
 
 }

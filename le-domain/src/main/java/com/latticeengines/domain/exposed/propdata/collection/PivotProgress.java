@@ -30,6 +30,9 @@ public class PivotProgress implements Progress {
     @Column(name = "PivotDate", nullable = false)
     protected Date pivotDate;
 
+    @Column(name = "BaseSourceVersion", nullable = false)
+    protected String baseSourceVersion;
+
     @Column(name = "RowsGenerated", nullable = false)
     protected long rowsGenerated;
 
@@ -82,6 +85,14 @@ public class PivotProgress implements Progress {
         this.pivotDate = pivotDate;
     }
 
+    public String getBaseSourceVersion() {
+        return baseSourceVersion;
+    }
+
+    public void setBaseSourceVersion(String baseSourceVersion) {
+        this.baseSourceVersion = baseSourceVersion;
+    }
+
     public long getRowsGenerated() {
         return rowsGenerated;
     }
@@ -118,6 +129,7 @@ public class PivotProgress implements Progress {
 
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
+    @Override
     public Date getCreateTime() { return createTime; }
 
     public void setCreateTime(Date createTime) { this.createTime = createTime; }

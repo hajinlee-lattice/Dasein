@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
 
 public interface PivotService {
 
-    PivotProgress startNewProgress(Date pivotDate, String creator);
+    PivotProgress startNewProgress(Date pivotDate, String baseSourceVersion, String creator);
 
     PivotProgress pivot(PivotProgress progress);
 

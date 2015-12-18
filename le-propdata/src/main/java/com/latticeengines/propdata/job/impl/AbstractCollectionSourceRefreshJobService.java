@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.job.impl;
+package com.latticeengines.propdata.job.impl;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -6,29 +6,36 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.propdata.collection.job.RefreshJobService;
+import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.util.DateRange;
+import com.latticeengines.propdata.job.RefreshJobService;
 
 public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJobBean implements RefreshJobService {
 
-    private ArchiveService archiveService;
     protected String jobSubmitter = "Quartz";
 
     private static final int jobExpirationHours = 48; // expire a job after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
 
     abstract ArchiveService getArchiveService();
+    abstract ArchiveProgressEntityMgr getArchiveProgressEntityMgr();
     abstract Log getLog();
     abstract CollectionSource getSource();
 
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        System.out.println(getArchiveService());
         int t;
         Log log = getLog();
         for (t = 0; t < 100; t++) {
@@ -37,6 +44,11 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
             } catch (Exception e) {
                 log.error("An archive job failed.");
             }
+            try {
+                Thread.sleep(10000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
         }
         if (t == 100) {
             log.fatal(String.format("A single job executed has retried %d times!", t));
@@ -44,10 +56,15 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
     }
 
     @Override
-    public void archivePeriod(DateRange period) {
-        ArchiveProgress progress = archiveService.startNewProgress(period.getStartDate(), period.getEndDate(),
+    public void archivePeriod(DateRange period, boolean downloadOnly) {
+        ArchiveProgress progress = getArchiveService().startNewProgress(period.getStartDate(), period.getEndDate(),
                 jobSubmitter);
-        proceedProgress(progress);
+        if (!downloadOnly) {
+            proceedProgress(progress);
+        } else {
+            getArchiveService().importFromDB(progress);
+            getArchiveProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADED);
+        }
     }
 
     @Override
@@ -82,15 +99,10 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
         this.jobSubmitter = jobSubmitter;
     }
 
-    @Override
-    public void setAutowiredArchiveService() {
-        setArchiveService(getArchiveService());
-    }
-
     private boolean tryExecuteInternal() throws InterruptedException {
         Log log = getLog();
 
-        ArchiveProgress progress = archiveService.findRunningJob();
+        ArchiveProgress progress = getArchiveService().findRunningJob();
         if (progress != null) {
             log.info("There is a running " + progress);
 
@@ -103,13 +115,13 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
             return false;
         }
 
-        progress = archiveService.findJobToRetry();
+        progress = getArchiveService().findJobToRetry();
         if (progress == null) {
             log.info("There is nothing to retry for archiving " + getSource().getSourceName());
-            DateRange dateRange = archiveService.determineNewJobDateRange();
+            DateRange dateRange = getArchiveService().determineNewJobDateRange();
             log.info("Auto-determine date range to be: " + dateRange);
             if (dateRange.getDurationInMilliSec() >= TimeUnit.DAYS.toMillis(7)) {
-                progress = archiveService.startNewProgress(dateRange.getStartDate(), dateRange.getEndDate(),
+                progress = getArchiveService().startNewProgress(dateRange.getStartDate(), dateRange.getEndDate(),
                         jobSubmitter);
                 proceedProgress(progress);
             } else {
@@ -127,9 +139,9 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
 
     protected void proceedProgress(ArchiveProgress progress) {
         switch (progress.getStatus()) {
-            case NEW: progress = archiveService.importFromDB(progress);
-            case DOWNLOADED: progress = archiveService.transformRawData(progress);
-            case TRANSFORMED: progress = archiveService.exportToDB(progress);
+            case NEW: progress = getArchiveService().importFromDB(progress);
+            case DOWNLOADED: progress = getArchiveService().transformRawData(progress);
+            case TRANSFORMED: progress = getArchiveService().exportToDB(progress);
             default: getLog().warn(String.format("Illegal starting status %s for progress %s",
                     progress.getStatus(), progress.getRootOperationUID()));
         }
@@ -139,10 +151,6 @@ public abstract class AbstractCollectionSourceRefreshJobService extends QuartzJo
         } else {
             logJobSucceed(progress);
         }
-    }
-
-    public void setArchiveService(ArchiveService archiveService) {
-        this.archiveService = archiveService;
     }
 
     private void logJobSucceed(ArchiveProgress progress) {
