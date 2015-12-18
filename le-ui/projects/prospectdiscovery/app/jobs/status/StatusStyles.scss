@@ -26,7 +26,7 @@
     font-size: 15px;
     position: relative;
     height: 60px;
-    width: 198px;
+    width: 196px;
     margin-top: 10px;
 }
 .breadcrumb div:first-child:before {
@@ -36,11 +36,8 @@
     display: table-cell;
     vertical-align: middle;
 }
-.chevron-content.chevron-content-text {
-    padding-left: 30px;
-}
-.chevron-content.chevron-content-text:first-child {
-    // padding-left: 0px;
+span.chevron-content.chevron-content-text {
+    padding-left: 30px !important;
 }
 .jobs-table-content {
     font-size: 125%;
