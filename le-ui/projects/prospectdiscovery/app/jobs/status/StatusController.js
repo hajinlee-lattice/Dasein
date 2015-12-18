@@ -11,19 +11,14 @@ angular
                 expanded: '='
             },
             controller: ['$scope', '$state', 'JobsService', function ($scope, $state, JobsService) {
-                $scope.showStatusLink = false;
+                $scope.jobRunning = false;
                 $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
                 $scope.jobCompleted = false;
-                $scope.statusLinkText;
                 $scope.jobId = $scope.job.id;
                 
-                $scope.statusLinkClicked = function(jobId) {
-                    if ($scope.job.status == "Completed") {
-                        $state.go("jobs.import.ready", { 'jobId': jobId });
-                    } else if ($scope.job.status == "Running") {
-                        JobsService.cancelJob(jobId);
-                    }
-                }
+                $scope.cancelJob = function(jobId) {
+                    JobsService.cancelJob(jobId);
+                };
                 
                 if (! $scope.jobRowExpanded || $scope.statuses[$scope.jobId] == null) {
                     $scope.jobStepsRunningStates = { load_data: false, match_data: false,
@@ -36,12 +31,9 @@ angular
                 }
 
                 if ($scope.job.status == "Running") {
-                    $scope.showStatusLink = true;
-                    $scope.statusLinkText = "Cancel Job";
+                    $scope.jobRunning = true;
                 } else if ($scope.job.status == "Completed") {
-                    $scope.showStatusLink = true;
                     $scope.jobCompleted = true;
-                    $scope.statusLinkText = "View Report";
                 }
                 
                 $scope.expandJobStatus = function() {
@@ -101,9 +93,8 @@ angular
                     saveJobStatusInParentScope();
                     
                     if (jobStatus.jobStatus == "Complete") {
+                        $scope.jobRunning = false;
                         $scope.jobCompleted = true;
-                        $scope.showStatusLink = true;
-                        $scope.statusLinkText = "View Report";
                     }
                 }
                 

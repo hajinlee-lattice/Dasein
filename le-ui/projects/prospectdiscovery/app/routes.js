@@ -123,6 +123,14 @@ angular
                     }
                 }
             })
+            .state('builder.prospects', {
+                url: '/prospects_settings',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/prospects/ProspectsSettingsView.html'
+                    }
+                }
+            })
             .state('builder.other', {
                 url: '/other',
                 views: {
@@ -169,6 +177,17 @@ angular
                     }
                 }
             })
+            .state('jobs.status.ready', {
+                url: '/ready/:jobId',
+                views: {
+                    "summary@": {
+                        templateUrl: './app/navigation/table/TableView.html'
+                    },
+                    "main@": {
+                        templateUrl: './app/jobs/import/ready/ReadyView.html'
+                    }
+                }
+            })
             .state('jobs.import', {
                 url: '/import'
             })
@@ -202,17 +221,6 @@ angular
                     },
                     "main@": {
                         templateUrl: './app/jobs/import/processing/ProcessingView.html'
-                    }
-                }
-            })
-            .state('jobs.import.ready', {
-                url: '/ready/:jobId',
-                views: {
-                    "summary@": {
-                        templateUrl: './app/navigation/table/TableView.html'
-                    },
-                    "main@": {
-                        templateUrl: './app/jobs/import/ready/ReadyView.html'
                     }
                 }
             });
