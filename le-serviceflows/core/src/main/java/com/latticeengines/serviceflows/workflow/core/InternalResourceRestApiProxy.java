@@ -25,9 +25,10 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         return internalResourceHostPort;
     }
 
-    public void createDefaultTargetMarket(String tenantId) {
+    public TargetMarket createDefaultTargetMarket(String tenantId) {
         try {
-            restTemplate.postForObject(constructUrl("pls/internal/targetmarkets/default", tenantId), null, Void.class);
+            return restTemplate.postForObject(constructUrl("pls/internal/targetmarkets/default", tenantId), null,
+                    TargetMarket.class);
         } catch (Exception e) {
             throw new RuntimeException("createDefaultTargetMarket: Remote call failure", e);
         }
