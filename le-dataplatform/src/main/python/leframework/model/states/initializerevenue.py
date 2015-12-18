@@ -25,4 +25,4 @@ class InitializeRevenue(State):
         dataRevenueSeries = pd.Series(dataRevenues, index=mediator.data.index)
         mediator.data[mediator.schema["reserved"]["predictedrevenue"]].update(dataRevenueSeries)
         mediator.data[mediator.schema["reserved"]["predictedrevenue"]] = mediator.data[mediator.schema["reserved"]["predictedrevenue"]].apply(lambda x : math.exp(x) - 1.0)
-        
+        mediator.data[mediator.schema["reserved"]["expectedrevenue"]] = mediator.data[mediator.schema["reserved"]["predictedrevenue"]] * mediator.data[mediator.schema["reserved"]["score"]] 
