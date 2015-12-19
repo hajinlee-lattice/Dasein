@@ -37,9 +37,14 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
 .controller('CredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, ConfigService, TenantDeploymentService, CredentialsService) {
     $scope.ResourceUtility = ResourceUtility;
 
+    $scope.loading = true;
+    $scope.showError = false;
+    $scope.errorMessage = "";
+
     var editText = ResourceUtility.getString('BUTTON_EDIT_LABEL');
     var importText = ResourceUtility.getString('BUTTON_IMPORT_LABEL');
     var saveAndImportText = ResourceUtility.getString('SETUP_CREDENTIALS_SAVE_IMPORT_BUTTON');
+    $scope.sfdcGuideName = ResourceUtility.getString('SETUP_CREDENTIALS_SF_CONFIGURATION_GUIDE_LABEL');
     $scope.logoLeftAlign = true;
     $scope.crmProductionComplete = false;
     $scope.crmProductionError = "";
@@ -53,10 +58,6 @@ angular.module('mainApp.setup.controllers.CredentialsController', [
     $scope.crmSandboxSaveButtonText = saveAndImportText;
     $scope.crmSandboxEditButtonText = editText;
     $scope.crmSandboxImportButtonText = importText;
-
-    $scope.loading = true;
-    $scope.showError = false;
-    $scope.errorMessage = "";
 
     function Credentials (url, securitytoken, orgid, password, username, company) {
         this.Url = url || null;

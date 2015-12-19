@@ -305,13 +305,9 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
         link.addClass("disabled");
         var step = link.attr("step");
-        var fileName = link.attr("filename");
-        var progressMsg = ResourceUtility.getString('SETUP_RUN_QUERY_START_LABEL', [fileName]);
-        updateStatusLabelInProgress(step, progressMsg);
-        TenantDeploymentService.RunQuery(step, link.attr("filename")).then(function (result) {
+        updateStatusLabelInProgress(step, ResourceUtility.getString('SETUP_RUN_QUERY_PROGRESS_LABEL'));
+        TenantDeploymentService.RunQuery(step).then(function (result) {
             if (result.Success === true) {
-                updateStatusLabelInProgress(step, ResourceUtility.getString('SETUP_RUN_QUERY_PROGRESS_LABEL', [fileName]));
-
                 startGetQueryStatusTimer(link, result.ResultObj);
             } else {
                 link.removeClass("disabled");
@@ -333,7 +329,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
             return;
         }
 
-        TenantDeploymentService.GetQueryStatus(queryHandle, link.attr("filename")).then(function (result) {
+        TenantDeploymentService.GetQueryStatus(queryHandle).then(function (result) {
             if (result.Success === true) {
                 var obj = result.ResultObj;
                 if (obj.Status === 3) {
@@ -341,10 +337,14 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
 
                     $http.get(link.attr("url") + "/" + queryHandle).then(function (response) {
                         link.removeClass("disabled");
+                        if (step === SetupUtility.STEP_IMPORT_DATA) {
+                            $scope.importInfo = null;
+                        } else if (step === SetupUtility.STEP_ENRICH_DATA) {
+                            $scope.enrichInfo = null;
+                        }
 
                         var file = new Blob([response.data], { type: link.attr("filetype") });
                         saveAs(file, link.attr("filename"));
-                        updateStatusLabelSuccess(step, ResourceUtility.getString('SETUP_DOWNLOAD_QUERY_DATA_SUCCESS', [link.attr("filename")]));
                     }, function (response) {
                         SessionService.HandleResponseErrors(response.data, response.status);
                         link.removeClass("disabled");
@@ -353,7 +353,7 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
                 } else if (obj.Status > 3) {
                     clearTimer(step);
                     link.removeClass("disabled");
-                    updateStatusLabelFail(step, ResourceUtility.getString('SETUP_RUN_QUERY_ERROR', [link.attr("filename")]));
+                    updateStatusLabelFail(step, ResourceUtility.getString('SETUP_RUN_QUERY_ERROR'));
                 }
             } else {
                 clearTimer(step);

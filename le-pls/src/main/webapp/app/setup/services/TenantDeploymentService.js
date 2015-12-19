@@ -303,7 +303,7 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
         return deferred.promise;
     };
 
-    this.RunQuery = function (step, fileName) {
+    this.RunQuery = function (step) {
         var deferred = $q.defer();
 
         $http({
@@ -323,7 +323,7 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
                 result.Success = true;
                 result.ResultObj = data.Result;
             } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_RUN_QUERY_START_ERROR', [fileName]);
+                result.ResultErrors = ResourceUtility.getString('SETUP_RUN_QUERY_START_ERROR');
             }
             deferred.resolve(result);
         })
@@ -331,7 +331,7 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_RUN_QUERY_START_ERROR', [fileName])
+                ResultErrors: ResourceUtility.getString('SETUP_RUN_QUERY_START_ERROR')
             };
             deferred.resolve(result);
         });
@@ -339,7 +339,7 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
         return deferred.promise;
     };
 
-    this.GetQueryStatus = function (queryHandle, fileName) {
+    this.GetQueryStatus = function (queryHandle) {
         var deferred = $q.defer();
 
         $http({
@@ -359,14 +359,14 @@ angular.module('mainApp.setup.services.TenantDeploymentService', [
                 result.Success = true;
                 result.ResultObj = data.Result;
             } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_GET_QUERY_STATUS_ERROR', [fileName]);
+                result.ResultErrors = ResourceUtility.getString('SETUP_GET_QUERY_STATUS_ERROR');
             }
             deferred.resolve(result);
         })
         .error(function (data, status, headers, config) {
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_GET_QUERY_STATUS_ERROR', [fileName])
+                ResultErrors: ResourceUtility.getString('SETUP_GET_QUERY_STATUS_ERROR')
             };
             deferred.resolve(result);
         });

@@ -26,7 +26,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     }
 
     $scope.logoClicked = function ($event) {
-        if ($scope.redirectToDeploymentWizard) {
+        if ($scope.redirectToDeploymentWizard && $('#finishDeploymentBtn:visible').length === 0) {
             $scope.deploymentWizardClicked($event);
         } else {
             $scope.modelListClicked($event);
