@@ -35,11 +35,12 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
 
-public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBase {
+public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
@@ -49,8 +50,8 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
     @Value("${pls.microservice.rest.endpoint.hostport}")
     private String microServiceHostPort;
 
-    @Value("${pls.test.deployment.api}")
-    private String deployedHostPort;
+    @Autowired
+    private TargetMarketEntityMgr targetMarketEntityMgr;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -80,8 +81,10 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         configuration.setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, MAX_PROSPECTS_PER_ACCOUNT);
 
-        setupUsers();
+        setupTestEnvironment();
+        setupSecurityContext(mainTestingTenant);
         cleanupTargetMarketDB();
+        switchToExternalAdmin();
     }
 
     @BeforeMethod(groups = "deployment")
@@ -90,142 +93,20 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         switchToExternalAdmin();
     }
 
-    @Test(groups = "deployment", timeOut = 360000, enabled = false)
-    public void create() {
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET,
-                TargetMarket.class);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-        assertNotNull(targetMarket);
-        assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
-        assertEquals(targetMarket.getDescription(), DESCRIPTION);
-        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(),
-                CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
-        assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
-        assertEquals(targetMarket.getModelId(), MODEL_ID);
-        assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
-        assertEquals(targetMarket.getIsDefault(), IS_DEFAULT);
-        assertEquals(targetMarket.getOffset(), OFFSET);
-        assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
-        assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
-
-        TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
-        assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),
-                NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS.intValue());
-        assertEquals(configuration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold),
-                INTENT_SCORE_THRESHOLD.toString());
-        assertEquals(configuration.getDouble(TargetMarketDataFlowOptionName.FitScoreThreshold),
-                FIT_SCORE_THRESHOLD.doubleValue());
-        assertEquals(configuration.getBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts),
-                DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS.booleanValue());
-        assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount),
-                MAX_PROSPECTS_PER_ACCOUNT.intValue());
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
-    public void update() {
-        TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
-
-        restTemplate.put(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, TARGET_MARKET);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-        assertNotNull(targetMarket);
-        assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
-        assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
-    }
-
-    @Test(groups = "deployment", timeOut = 360000, enabled = false)
-    public void createDefault() {
+    @Test(groups = "deployment")
+    public void testCreateDefault() {
         TargetMarket targetMarket = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + "default", null, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Void.class);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null,
+                TargetMarket.class);
         targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default",
                 TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "create", enabled = false)
-    public void registerReport() {
-        Report report = new Report();
-        report.setIsOutOfDate(true);
-        report.setPurpose(ReportPurpose.IMPORT_SUMMARY);
-        KeyValue kv = new KeyValue();
-        kv.setPayload("{ \"foo\":\"bar\" }");
-        report.setJson(kv);
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
-                + "/reports", report, Void.class);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-
-        assertEquals(targetMarket.getReports().size(), 1);
-        assertNull(targetMarket.getReports().get(0).getReport());
-        String reportName = targetMarket.getReports().get(0).getReportName();
-        assertNotNull(reportName);
-
-        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
-                Report.class);
-        assertEquals(received.getPurpose(), report.getPurpose());
-        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
-        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "registerReport", enabled = false)
-    public void replaceReport() {
-        Report report = new Report();
-        report.setIsOutOfDate(false);
-        report.setPurpose(ReportPurpose.IMPORT_SUMMARY);
-        KeyValue kv = new KeyValue();
-        kv.setPayload("{ \"baz\":\"qux\" }");
-        report.setJson(kv);
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
-                + "/reports", report, Void.class);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-
-        assertEquals(targetMarket.getReports().size(), 1);
-        assertNull(targetMarket.getReports().get(0).getReport());
-        String reportName = targetMarket.getReports().get(0).getReportName();
-        assertNotNull(reportName);
-
-        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
-                Report.class);
-        assertEquals(received.getPurpose(), report.getPurpose());
-        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
-        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "replaceReport", enabled = false)
-    public void addReport() {
-        Report report = new Report();
-        report.setPurpose(ReportPurpose.MODEL_SUMMARY);
-        KeyValue kv = new KeyValue();
-        kv.setPayload("{ \"baz\":\"qux\" }");
-        report.setJson(kv);
-
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
-                + "/reports", report, Void.class);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-        assertEquals(targetMarket.getReports().size(), 2);
-    }
-
-    @Test(groups = "deployment", dependsOnMethods = "addReport", enabled = false)
-    public void delete() {
-        restTemplate.delete(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
-
-        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
-                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
-        assertNull(targetMarket);
-    }
-
-    @Test(groups = "deployment", enabled = false)
-    public void resetDefaultTargetMarket() throws Exception {
+    @Test(groups = "deployment", dependsOnMethods = "testCreateDefault")
+    public void testResetDefaultTargetMarket() throws Exception {
         String tenantId = mainTestingTenant.getId();
         CustomerSpace space = CustomerSpace.parse(tenantId);
 
@@ -257,7 +138,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         assertEquals(metadataProxy.getTables(space.toString()).size(), 5);
 
         importTables = metadataProxy.getImportTables(space.toString());
-        resetDefaultTargetMarket(space.toString());
+        resetDefaultMarketId(space.toString());
         assertEquals(metadataProxy.getTables(space.toString()).size(), 0);
         List<Table> newImportTables = metadataProxy.getImportTables(space.toString());
         assertEquals(importTables.size(), newImportTables.size());
@@ -303,14 +184,154 @@ public class TargetMarketResourceDeploymentTestNG extends PlsFunctionalTestNGBas
         }
     }
 
-    private void resetDefaultTargetMarket(String customerSpace) {
+    private void resetDefaultMarketId(String customerSpace) {
         Boolean success = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + "default/reset", null, Boolean.class);
         assertTrue(success);
     }
 
-    private String getDeployedRestAPIHostPort() {
-        return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
-                : deployedHostPort;
+    @Test(groups = "deployment")
+    public void testCreate() {
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL, TARGET_MARKET,
+                TargetMarket.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertNotNull(targetMarket);
+        assertEquals(targetMarket.getName(), TEST_TARGET_MARKET_NAME);
+        assertEquals(targetMarket.getDescription(), DESCRIPTION);
+        assertEquals(targetMarket.getCreationTimestampObject().getDayOfYear(),
+                CREATION_DATE.toDateTime(DateTimeZone.UTC).getDayOfYear());
+        assertEquals(targetMarket.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED);
+        assertEquals(targetMarket.getModelId(), MODEL_ID);
+        assertEquals(targetMarket.getEventColumnName(), EVENT_COLUMN_NAME);
+        assertEquals(targetMarket.getIsDefault(), IS_DEFAULT);
+        assertEquals(targetMarket.getOffset(), OFFSET);
+        assertEquals(targetMarket.getAccountFilterString(), JsonUtils.serialize(ACCOUNT_FILTER));
+        assertEquals(targetMarket.getContactFilterString(), JsonUtils.serialize(CONTACT_FILTER));
+
+        TargetMarketDataFlowConfiguration configuration = targetMarket.getDataFlowConfiguration();
+        assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.NumDaysBetweenIntentProspecResends),
+                NUM_DAYS_BETWEEN_INTENT_PROSPECT_RESENDS.intValue());
+        assertEquals(configuration.getString(TargetMarketDataFlowOptionName.IntentScoreThreshold),
+                INTENT_SCORE_THRESHOLD.toString());
+        assertEquals(configuration.getDouble(TargetMarketDataFlowOptionName.FitScoreThreshold),
+                FIT_SCORE_THRESHOLD.doubleValue());
+        assertEquals(configuration.getBoolean(TargetMarketDataFlowOptionName.DeliverProspectsFromExistingAccounts),
+                DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS.booleanValue());
+        assertEquals(configuration.getInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount),
+                MAX_PROSPECTS_PER_ACCOUNT.intValue());
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCreate")
+    public void testUpdate() {
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        targetMarket.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
+
+        restTemplate.put(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, targetMarket);
+
+        TargetMarket received = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertNotNull(received);
+        assertEquals(received.getName(), TEST_TARGET_MARKET_NAME);
+        assertEquals(received.getNumProspectsDesired(), NUM_PROPSPECTS_DESIRED_1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testUpdate")
+    public void testRegisterReport() {
+        Report report = createReport(ReportPurpose.IMPORT_SUMMARY, "{ \"foo\":\"bar\" }", false);
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        assertEquals(targetMarket.getReports().size(), 1);
+        String reportName = targetMarket.getReports().get(0).getReportName();
+        assertNotNull(reportName);
+
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
+                Report.class);
+        assertEquals(received.getPurpose(), report.getPurpose());
+        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
+        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testRegisterReport")
+    public void testReplaceReport() {
+        Report report = createReport(ReportPurpose.IMPORT_SUMMARY, "{ \"baz\":\"qux\" }", false);
+
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        assertEquals(targetMarket.getReports().size(), 1);
+        String reportName = targetMarket.getReports().get(0).getReportName();
+        assertNotNull(reportName);
+
+        Report received = restTemplate.getForObject(getDeployedRestAPIHostPort() + "/pls/reports/" + reportName,
+                Report.class);
+        assertEquals(received.getPurpose(), report.getPurpose());
+        assertEquals(received.getIsOutOfDate(), report.getIsOutOfDate());
+        assertEquals(received.getJson().getPayload(), report.getJson().getPayload());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testReplaceReport")
+    public void testAddReport() {
+        Report report = createReport(ReportPurpose.MODEL_SUMMARY, "{ \"baz\":\"qux\" }", false);
+
+        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME
+                + "/reports", report, Void.class);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertEquals(targetMarket.getReports().size(), 2);
+    }
+
+    private Report createReport(ReportPurpose purpose, String json, boolean outOfDate) {
+        Report report = new Report();
+        report.setPurpose(purpose);
+        report.setIsOutOfDate(outOfDate);
+        KeyValue kv = new KeyValue();
+        kv.setPayload(json);
+        report.setJson(kv);
+        return report;
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testAddReport")
+    public void testUpdateRetainsReports() {
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        targetMarket.setModelId("model_12345");
+        restTemplate.put(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME, targetMarket);
+
+        TargetMarket received = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+
+        assertFalse(received.getReports().isEmpty());
+        assertEquals(received.getReports().size(), targetMarket.getReports().size());
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateRetainsReports")
+    public void testDelete() {
+        restTemplate.delete(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + TEST_TARGET_MARKET_NAME);
+
+        TargetMarket targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
+                + TEST_TARGET_MARKET_NAME, TargetMarket.class);
+        assertNull(targetMarket);
+    }
+
+    protected void cleanupTargetMarketDB() {
+        setupSecurityContext(mainTestingTenant);
+        List<TargetMarket> targetMarkets = targetMarketEntityMgr.findAllTargetMarkets();
+        for (TargetMarket targetMarket : targetMarkets) {
+            if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
+                targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
+            }
+        }
+    }
+
 }

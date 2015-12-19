@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
+import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -36,6 +37,9 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private ReportEntityMgr reportEntityMgr;
 
     @Override
     public BaseDao<TargetMarket> getDao() {
@@ -57,6 +61,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
 
         if (targetMarket.getReports() != null) {
             for (TargetMarketReportMap reportMap : targetMarket.getReports()) {
+                reportEntityMgr.createOrUpdate(reportMap.getReport());
                 targetMarketReportMapDao.create(reportMap);
             }
         }
@@ -113,7 +118,11 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TargetMarket> findAll() {
-        return super.findAll();
+        List<TargetMarket> all = super.findAll();
+        for (TargetMarket market : all) {
+            inflate(market);
+        }
+        return all;
     }
 
     private void initializeForDatabaseEntry(TargetMarket targetMarket) {
@@ -122,17 +131,35 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
         targetMarket.setTenantId(tenant.getPid());
         targetMarket.setPid(null);
 
-        for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
-            option.setPid(null);
-            option.setTargetMarket(targetMarket);
+        if (targetMarket.getRawDataFlowConfiguration() != null) {
+            for (TargetMarketDataFlowOption option : targetMarket.getRawDataFlowConfiguration()) {
+                option.setPid(null);
+                option.setTargetMarket(targetMarket);
+            }
         }
 
+        if (targetMarket.getReports() != null) {
+            for (TargetMarketReportMap map : targetMarket.getReports()) {
+                map.setPid(null);
+                map.setTargetMarket(targetMarket);
+                if (map.getReport() != null) {
+                    map.getReport().setPid(null);
+                    if (map.getReport().getJson() != null) {
+                        map.getReport().getJson().setPid(null);
+                    }
+                }
+            }
+        }
     }
 
     private void inflate(TargetMarket market) {
         if (market != null) {
             Hibernate.initialize(market.getReports());
             Hibernate.initialize(market.getDataFlowConfiguration());
+            for (TargetMarketReportMap map : market.getReports()) {
+                Hibernate.initialize(map.getReport());
+                Hibernate.initialize(map.getReport().getJson());
+            }
         }
     }
 }

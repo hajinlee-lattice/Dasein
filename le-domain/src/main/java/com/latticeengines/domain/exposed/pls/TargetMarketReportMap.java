@@ -57,14 +57,12 @@ public class TargetMarketReportMap implements HasPid {
         this.pid = pid;
     }
 
-    @JsonIgnore
     @JoinColumn(name = "REPORT_ID", nullable = false)
     @OneToOne(cascade = CascadeType.REMOVE)
     public Report getReport() {
         return this.report;
     }
 
-    @JsonIgnore
     public void setReport(Report report) {
         this.report = report;
         if (report != null) {

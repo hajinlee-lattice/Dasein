@@ -190,6 +190,9 @@ public class ModelingServiceImpl implements ModelingService {
 
         Model m = setupProfileModel(dataProfileConfig);
         List<String> featureList = getFeatureList(dataProfileConfig, m);
+        if (featureList.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_15016);
+        }
 
         m.setDataFormat("avro");
         m.setTargetsList(dataProfileConfig.getTargets());

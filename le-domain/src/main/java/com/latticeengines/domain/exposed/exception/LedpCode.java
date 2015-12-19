@@ -65,6 +65,7 @@ public enum LedpCode {
     LEDP_15013("Failed to validate SamplingConfiguration."), //
     LEDP_15014("Failed to copy metadata diagnostics file for customer: {0} from Hdfs path: {1} to: {2}."), //
     LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
+    LEDP_15016("Cannot model with an empty feature list."), //
 
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
@@ -309,7 +310,8 @@ public enum LedpCode {
     LEDP_28018("Workflow execution {0} cannot be restarted since in non-terminated state:{1}"), //
 
     // le-dellebi
-    LEDP_29000("The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //
+    LEDP_29000(
+            "The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //
     LEDP_29001("Must define one type to retrieve."), //
     LEDP_29002("The input parameter {0} is null."), //
     LEDP_29003("The file {0} is not recorded in the Execution_Log table.");

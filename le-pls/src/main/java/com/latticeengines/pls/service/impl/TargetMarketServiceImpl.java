@@ -85,31 +85,30 @@ public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Override
     public void registerReport(String targetMarketName, Report report) {
-
         TargetMarket targetMarket = findTargetMarketByName(targetMarketName);
-        if (targetMarket != null) {
-            report.setName(new UID().toString());
-            reportEntityMgr.createOrUpdate(report);
 
-            List<TargetMarketReportMap> reportMaps = targetMarket.getReports();
-            Iterator<TargetMarketReportMap> iterator = reportMaps.iterator();
-            while (iterator.hasNext()) {
-                TargetMarketReportMap existingReport = iterator.next();
-                if (existingReport.getReport().getPurpose().equals(report.getPurpose())) {
-                    iterator.remove();
-                } else {
-                    existingReport.setPid(null);
-                }
-            }
-
-            TargetMarketReportMap created = new TargetMarketReportMap();
-            created.setReport(report);
-            created.setTargetMarket(targetMarket);
-            reportMaps.add(created);
-            targetMarket.setReports(reportMaps);
-
-            updateTargetMarketByName(targetMarket, targetMarketName);
+        if (targetMarket == null) {
+            throw new RuntimeException(String.format("No such target market with name %s", targetMarketName));
         }
+
+        report.setName(new UID().toString());
+
+        List<TargetMarketReportMap> reportMaps = targetMarket.getReports();
+        Iterator<TargetMarketReportMap> iterator = reportMaps.iterator();
+        while (iterator.hasNext()) {
+            TargetMarketReportMap existingReport = iterator.next();
+            if (existingReport.getReport().getPurpose().equals(report.getPurpose())) {
+                iterator.remove();
+            }
+        }
+
+        TargetMarketReportMap created = new TargetMarketReportMap();
+        created.setReport(report);
+        created.setTargetMarket(targetMarket);
+        reportMaps.add(created);
+        targetMarket.setReports(reportMaps);
+
+        updateTargetMarketByName(targetMarket, targetMarketName);
     }
 
     @Override
