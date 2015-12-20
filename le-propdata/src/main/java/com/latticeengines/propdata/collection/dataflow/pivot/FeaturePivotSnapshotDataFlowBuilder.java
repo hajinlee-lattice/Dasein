@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.runtime.cascading.PivotBuffer;
+import com.latticeengines.propdata.collection.dataflow.buffer.FeaturePivotBuffer;
 
 import cascading.tuple.Fields;
 

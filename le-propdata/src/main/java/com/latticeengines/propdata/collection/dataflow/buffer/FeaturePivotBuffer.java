@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.dataflow.pivot;
+package com.latticeengines.propdata.collection.dataflow.buffer;
 
 import java.util.List;
 import java.util.Map;

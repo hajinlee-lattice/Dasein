@@ -78,8 +78,6 @@
                             <finalName>propdata</finalName>
                             <descriptors>
                                 <descriptor>${basedir}/src/assembly/prod.xml</descriptor>
-                                <descriptor>${basedir}/src/assembly/qa.xml</descriptor>
-                                <descriptor>${basedir}/src/assembly/dev.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </plugin>
@@ -260,6 +258,11 @@
             <artifactId>le-network</artifactId>
             <version>${le.network.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.databricks</groupId>
+            <artifactId>spark-avro_2.10</artifactId>
+            <version>2.0.1</version>
         </dependency>
     </dependencies>
 

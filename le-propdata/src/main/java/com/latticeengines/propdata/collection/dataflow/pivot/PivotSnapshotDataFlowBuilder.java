@@ -16,7 +16,7 @@ public abstract class PivotSnapshotDataFlowBuilder extends CascadingDataFlowBuil
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         setDataFlowCtx(dataFlowCtx);
-        addSource(SNAPSHOT_SOURCE, sources.get(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE));
+        addSource(SNAPSHOT_SOURCE, sources.get(CollectionDataFlowKeys.SNAPSHOT_SOURCE));
         return addGroupByAndBuffer(SNAPSHOT_SOURCE, getGroupbyFields(), getPivotBuffer(), getFieldMetadatas());
     }
 

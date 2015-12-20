@@ -8,4 +8,6 @@ public interface CollectionDataFlowService {
 
     void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier, String uid);
 
+    void executeJoin(String lhsPath, String rhsPath, String outputDir, String dataflowBean);
+
 }

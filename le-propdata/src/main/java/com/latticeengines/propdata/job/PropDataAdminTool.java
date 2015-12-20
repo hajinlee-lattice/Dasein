@@ -17,6 +17,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
@@ -56,6 +57,7 @@ public class PropDataAdminTool {
     private RefreshJobService jobService;
     private ArchiveProgressEntityMgr entityMgr;
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+    private CollectionDataFlowService dataFlowService;
 
     static {
         parser.description("PropData Collection Admin Tool");
@@ -128,6 +130,10 @@ public class PropDataAdminTool {
     private void validateArguments(Namespace ns) {
         if (ns == null) {
             throw new IllegalArgumentException("Failed to parse input arguments.");
+        }
+
+        if (Command.MATCH.getName().equals(ns.get(NS_COMMAND))) {
+            return;
         }
 
         source = Source.fromName(ns.getString(NS_SOURCE));
@@ -208,15 +214,23 @@ public class PropDataAdminTool {
             validateArguments(ns);
 
             ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-job-context.xml");
-            jobService = (RefreshJobService) ac.getBean(source.getArchiveJobBean());
-            jobService.setJobSubmitter(JOB_SUBMITTER);
-            entityMgr = (ArchiveProgressEntityMgr) ac.getBean("archiveProgressEntityMgr");
-            hdfsSourceEntityMgr = (HdfsSourceEntityMgr) ac.getBean("hdfsSourceEntityMgr");
+            if (Command.MATCH.getName().equals(ns.get(NS_COMMAND))) {
+                dataFlowService = (CollectionDataFlowService) ac.getBean("collectionDataFlowService");
+                String lhsPath = "/user/ysong/TestDomain/*.avro";
+                String rsPath = "/Pods/Production/Services/PropData/Sources/FeaturePivoted/Snapshot/*.avro";
+                String outputDir = "/user/ysong/PropDataMatch";
+                dataFlowService.executeJoin(lhsPath, rsPath, outputDir, "domainJoinDataFlowBuilder");
+            } else {
+                jobService = (RefreshJobService) ac.getBean(source.getArchiveJobBean());
+                jobService.setJobSubmitter(JOB_SUBMITTER);
+                entityMgr = (ArchiveProgressEntityMgr) ac.getBean("archiveProgressEntityMgr");
+                hdfsSourceEntityMgr = (HdfsSourceEntityMgr) ac.getBean("hdfsSourceEntityMgr");
 
-            if (Command.ARCHIVE.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
-                executeArchiveCommand(ns);
-            } else if (Command.PIVOT.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
-                executePivotCommand();
+                if (Command.ARCHIVE.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
+                    executeArchiveCommand(ns);
+                } else if (Command.PIVOT.getName().equalsIgnoreCase(ns.getString(NS_COMMAND))) {
+                    executePivotCommand();
+                }
             }
 
             System.out.println("\n\n========================================\n");
@@ -347,7 +361,8 @@ public class PropDataAdminTool {
 
     enum Command {
         ARCHIVE("archive"),
-        PIVOT("pivot");
+        PIVOT("pivot"),
+        MATCH("match");
 
         private static Map<String, Command> nameMap;
         private final String name;
@@ -374,6 +389,11 @@ public class PropDataAdminTool {
         static Command fromName(String name) {
             return nameMap.get(name);
         }
+
+    }
+
+    private void executeMatch(String uid) {
+        System.out.println("Join");
 
     }
 }

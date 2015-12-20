@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +22,31 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
+
+import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -62,31 +88,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
-
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -155,21 +156,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 FieldList argumentsFieldList, FieldList declaredFieldList) {
             return new Node(builder.addGroupByAndExpand(identifier, groupByFieldList, expandField, //
                     expandFormats, argumentsFieldList, declaredFieldList), builder);
-        }
-
-        public static Node groupByAndFirst(Node[] priors, Fields groupByFields, Fields sortFields) {
-            if (priors.length == 0) {
-                throw new IllegalArgumentException("priors must have a non-zero length");
-            }
-            CascadingDataFlowBuilder builder = priors[0].builder;
-
-            List<String> priorIdentifiers = new ArrayList<>();
-            for (Node n : priors) {
-                priorIdentifiers.add(n.identifier);
-            }
-            return new Node(
-                    builder.addGroupByAndFirst((String[]) priorIdentifiers.toArray(), groupByFields, sortFields),
-                    builder);
         }
 
         public Node sort(String field) {
@@ -474,34 +460,43 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
     }
 
+    protected String addSource(String sourceName, String sourcePath, List<FieldMetadata> fields) {
+        return addSource(sourceName, sourcePath, true, fields);
+    }
+
     protected String addSource(String sourceName, String sourcePath) {
-        return addSource(sourceName, sourcePath, true);
+        return addSource(sourceName, sourcePath, true, null);
     }
 
     protected String addSource(String sourceName, String sourcePath, boolean regex) {
+        return addSource(sourceName, sourcePath, regex, null);
+    }
+
+    private String addSource(String sourceName, String sourcePath, boolean regex, List<FieldMetadata> fields) {
         Tap<?, ?, ?> tap = createTap(sourcePath);
 
         taps.put(sourceName, tap);
 
         Configuration config = getConfig();
-        Schema sourceSchema = null;
-        if (regex) {
-            try {
-                sourcePath = getSchemaPath(config, sourcePath);
+        if (fields == null) {
+            Schema sourceSchema = null;
+            if (regex) {
+                try {
+                    sourcePath = getSchemaPath(config, sourcePath);
+                    sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
+                } catch (Exception e) {
+                    throw new LedpException(LedpCode.LEDP_00002, e);
+                }
+            } else {
                 sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_00002, e);
             }
-        } else {
-            sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
-        }
 
-        List<FieldMetadata> fields = new ArrayList<>(sourceSchema.getFields().size());
-
-        for (Field field : sourceSchema.getFields()) {
-            Type avroType = field.schema().getTypes().get(0).getType();
-            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
-            fields.add(fm);
+            fields = new ArrayList<>(sourceSchema.getFields().size());
+            for (Field field : sourceSchema.getFields()) {
+                Type avroType = field.schema().getTypes().get(0).getType();
+                FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+                fields.add(fm);
+            }
         }
 
         return register(new Pipe(sourceName), fields, sourceName);
@@ -858,7 +853,35 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(groupby, pm.getValue());
     }
 
-    protected String addGroupByAndFirst(String[] priors, Fields groupByFields, Fields sortFields) {
+    protected String addGroupByAndBuffer(String[] priors, FieldList groupByFields, Buffer buffer,
+                                         List<FieldMetadata> fieldMetadatas, boolean stringCaseInsensitve) {
+        Pipe[] pipes = new Pipe[priors.length];
+        for (int i = 0; i < priors.length; i++) {
+            String prior = priors[i];
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+            if (pm == null) {
+                throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
+            }
+            pipes[i] = pm.getKey();
+        }
+
+        Fields fields = new Fields(groupByFields.getFields());
+        if (stringCaseInsensitve) {
+            List<String> groupByKeys = Arrays.asList(groupByFields.getFields());
+            for (FieldMetadata metadata : fieldMetadatas) {
+                if (groupByKeys.contains(metadata.getFieldName()) && String.class.equals(metadata.getJavaType())) {
+                    fields.setComparator(metadata.getFieldName(), String.CASE_INSENSITIVE_ORDER);
+                }
+            }
+        }
+
+        Pipe groupby = new GroupBy(pipes, fields);
+        groupby = new Every(groupby, buffer, Fields.RESULTS);
+
+        return register(groupby, fieldMetadatas);
+    }
+
+    protected String addMerge(String[] priors) {
         Pipe[] pipes = new Pipe[priors.length];
         List<FieldMetadata> fm = new ArrayList<>();
         for (int i = 0; i < priors.length; i++) {
@@ -871,9 +894,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             fm = pm.getValue();
         }
 
-        Pipe groupby = new GroupBy(pipes, groupByFields, sortFields);
-        Pipe first = new Every(groupby, new First(), Fields.ARGS);
-        return register(first, fm);
+        Pipe groupby = new Merge(pipes);
+        return register(groupby, fm);
     }
 
     protected String addFilter(String prior, String expression, FieldList filterFieldList) {
@@ -909,6 +931,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 getTypes(fieldsToApply.getFieldsAsList(), pm.getValue()));
 
         return addFunction(prior, function, fieldsToApply, targetField, outputFields);
+    }
+
+    protected String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
+        return addFunction(prior, function, fieldsToApply, targetField, null);
     }
 
     private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField,

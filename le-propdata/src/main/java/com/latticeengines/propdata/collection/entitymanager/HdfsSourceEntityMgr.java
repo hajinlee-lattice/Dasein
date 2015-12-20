@@ -8,4 +8,6 @@ public interface HdfsSourceEntityMgr {
 
     void setCurrentVersion(Source source, String version);
 
+    String getCurrentSnapshotDir(Source source);
+
 }

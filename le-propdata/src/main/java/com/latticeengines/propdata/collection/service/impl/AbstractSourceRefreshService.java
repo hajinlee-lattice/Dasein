@@ -192,13 +192,13 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
             dropJdbcTableIfExists(stageTableName);
             jdbcTemplateCollectionDB.execute("SELECT TOP 0 * INTO " + stageTableName + " FROM " + destTable);
 
-            jdbcTemplateCollectionDB.execute(indexCreationSql);
-
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
             DbCreds creds = new DbCreds(builder);
             sqoopService.exportDataSync(stageTableName, avroDir, creds, assignedQueue,
                     customer + "-upload-" + destTable, numMappers, null);
+
+            jdbcTemplateCollectionDB.execute(indexCreationSql);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
             return false;

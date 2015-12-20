@@ -48,4 +48,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String getCurrentSnapshotDir(Source source) {
+        String version = getCurrentVersion(source);
+        return hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+    }
+
 }

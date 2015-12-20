@@ -17,17 +17,17 @@ import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-@Component
+@Component("collectionDataFlowService")
 public class CollectionDataFlowServiceImpl implements CollectionDataFlowService {
 
     @Autowired
-    private DataTransformationService dataTransformationService;
+    protected DataTransformationService dataTransformationService;
 
     @Autowired
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
+    protected HdfsPathBuilder hdfsPathBuilder;
 
     @Value("${propdata.collection.use.default.job.properties:true}")
     private boolean useDefaultProperties;
@@ -36,7 +36,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     private int reduceTasks;
 
     @Value("${propdata.collection.cascading.platform:tez}")
-    private String cascadingPlatform;
+    protected String cascadingPlatform;
 
     @Override
     public void executeMergeRawSnapshotData(Source source, String mergeDataFlowQualifier, String uid) {
@@ -72,12 +72,35 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
         Map<String, String> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.DEST_SNAPSHOT_SOURCE, snapshotDir + "/*.avro");
+        sources.put(CollectionDataFlowKeys.SNAPSHOT_SOURCE, snapshotDir + "/*.avro");
 
         DataFlowContext ctx = commonContext(source, sources);
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, pivotDataFlowQualifier);
+    }
+
+    @Override
+    public void executeJoin(String lhsPath, String rhsPath, String outputDir, String dataflowBean) {
+        String flowName = "TestingJoinDataFlow";
+        Map<String, String> sources = new HashMap<>();
+        sources.put("Source1", lhsPath);
+        sources.put("Source2", rhsPath);
+        DataFlowContext ctx = new DataFlowContext();
+        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("CUSTOMER", "PropDataMatchTest");
+        ctx.setProperty("RECORDNAME", "PropDataMatchTest");
+        ctx.setProperty("TARGETTABLENAME", "PropDataMatchTest");
+
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("JOBPROPERTIES", getJobProperties());
+
+        ctx.setProperty("TARGETPATH", outputDir);
+        ctx.setProperty("FLOWNAME", flowName);
+        dataTransformationService.executeNamedTransformation(ctx, dataflowBean);
     }
 
     private DataFlowContext commonContext(Source source, Map<String, String> sources) {
@@ -100,7 +123,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         return ctx;
     }
 
-    private Properties getJobProperties() {
+    protected Properties getJobProperties() {
         Properties jobProperties = new Properties();
         if (!useDefaultProperties) {
             jobProperties.put("mapred.reduce.tasks", String.valueOf(reduceTasks));

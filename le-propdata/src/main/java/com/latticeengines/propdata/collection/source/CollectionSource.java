@@ -5,6 +5,7 @@ import java.util.Map;
 
 public enum CollectionSource implements Source {
 
+    BUILTWITH("BuiltWith", "BuiltWith_MostRecent"),
     FEATURE("Feature", "Feature_MostRecent");
 
     private final String sourceName;

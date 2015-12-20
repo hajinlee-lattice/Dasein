@@ -36,8 +36,6 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
     abstract String getSrcTableSplitColumn();
 
-    abstract String getDestTableSplitColumn();
-
     abstract String getSrcTableTimestampColumn();
 
     abstract String createIndexForStageTableSql();
