@@ -123,10 +123,11 @@ public class SqoopJobServiceImpl {
         }
 
         List<String> cmds = new ArrayList<>();
+        String connectionUrl = metadataService.getJdbcConnectionUrl(creds);
         cmds.add("import");
         cmds.add("-Dmapreduce.job.queuename=" + queue);
         cmds.add("--connect");
-        cmds.add(metadataService.getJdbcConnectionUrl(creds));
+        cmds.add(connectionUrl);
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
 
@@ -137,6 +138,7 @@ public class SqoopJobServiceImpl {
             cmds.add("--query");
             cmds.add(query);
         }
+        cmds.add("--relaxed-isolation");
         cmds.add("--as-avrodatafile");
         cmds.add("--compress");
         cmds.add("--mapreduce-job-name");
