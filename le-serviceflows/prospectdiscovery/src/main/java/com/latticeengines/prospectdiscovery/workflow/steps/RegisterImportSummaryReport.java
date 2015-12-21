@@ -68,12 +68,13 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         accounts.put("with_opportunities", (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_OPPORTUNITIES));
         accounts.put("unique", (Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS));
 
-        try {
-            double matchRate = ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS)).doubleValue()
-                    / ((Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS)).doubleValue();
-            accounts.put("match_rate", matchRate);
-        } catch (Exception e) {
-            accounts.put("match_rate", -1.0);
+        long eventTableMatched = ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS));
+        long eventTableTotal = ((Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS));
+
+        if (eventTableMatched == 0 || eventTableTotal == 0) {
+            accounts.put("match_rate", 0.0);
+        } else {
+            accounts.put("match_rate", (double) eventTableMatched / (double) eventTableTotal);
         }
 
         // contacts
