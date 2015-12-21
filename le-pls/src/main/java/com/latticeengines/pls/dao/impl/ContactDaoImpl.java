@@ -108,7 +108,11 @@ public class ContactDaoImpl extends BaseDaoImpl<Contact> implements ContactDao {
     private void addRestriction(Criteria criteria, String key, String value, boolean convertLong) {
         String[] values = value.split("#");
         if (values.length == 1) {
-            criteria.add(Restrictions.eq(key, value));
+            if (convertLong) {
+                criteria.add(Restrictions.eq(key, new Long(value)));
+            } else {
+                criteria.add(Restrictions.eq(key, value));
+            }
         } else {
             Disjunction disj = Restrictions.disjunction();
             for (int i = 0; i < values.length; i++) {
