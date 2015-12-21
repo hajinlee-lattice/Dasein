@@ -1,0 +1,204 @@
+package com.latticeengines.propdata.collection.service.impl;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
+import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
+import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
+import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.PivotService;
+import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
+
+
+@Component
+public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTestNGBase {
+
+    @Autowired
+    private ProgressOrchestrator orchestrator;
+
+    @Autowired
+    private ArchiveProgressEntityMgr archiveProgressEntityMgr;
+
+    @Autowired
+    private PivotProgressEntityMgr pivotProgressEntityMgr;
+
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    @Qualifier("testArchiveService")
+    private ArchiveService archiveService;
+
+    @Autowired
+    @Qualifier("testPivotService")
+    private PivotService pivotService;
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        removeTestProgresses();
+        scanOnlyTestingSources();
+    }
+
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        removeTestProgresses();
+    }
+
+    @Test(groups = "functional")
+    public void testArchiveProgress() {
+        CollectionSource testSource = CollectionSource.TEST_COLLECTION;
+
+        ArchiveProgress progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNull(progress, "Should have no progress to proceed at beginning.");
+
+        // create a new progress 1
+        ArchiveProgress progress1 =
+                archiveProgressEntityMgr.insertNewProgress(testSource, new Date(), new Date(), "PropDataFunctionalTest");
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the new progress.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change 1 to a running state
+        progress1.setStatus(ProgressStatus.TRANSFORMING);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNull(progress, "Should not find the running job.");
+
+        // change 1 to intermediate step
+        progress1.setStatus(ProgressStatus.TRANSFORMED);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the job.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // create a second new progress 2
+        ArchiveProgress progress2 =
+                archiveProgressEntityMgr.insertNewProgress(testSource, new Date(), new Date(), "PropDataFunctionalTest");
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the progress 1.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change 1 to running
+        progress1.setStatus(ProgressStatus.UPLOADING);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNull(progress, "Should not find the new job.");
+
+        // change 1 to finished
+        progress1.setStatus(ProgressStatus.FINISHED);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the second new progress.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress2.getRootOperationUID());
+
+        // change 1 to failed with no retry
+        progress1.setStatus(ProgressStatus.FAILED);
+        progress1.setStatusBeforeFailed(ProgressStatus.UPLOADING);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should ignore the failed progress.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress2.getRootOperationUID());
+
+        // change 2 to finished
+        progress2.setStatus(ProgressStatus.FINISHED);
+        archiveProgressEntityMgr.updateProgress(progress2);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the failed progress.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change 1 to failed with too many retries
+        progress1.setNumRetries(3);
+        archiveProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findArchiveProgressToProceed(testSource);
+        Assert.assertNull(progress, "Should ignore failed with too many retries.");
+
+        archiveProgressEntityMgr.deleteProgressByRootOperationUid(progress1.getRootOperationUID());
+        archiveProgressEntityMgr.deleteProgressByRootOperationUid(progress2.getRootOperationUID());
+    }
+
+    @Test(groups = "functional")
+    public void testPivotProgress() {
+        CollectionSource testSource1 = CollectionSource.TEST_COLLECTION;
+        PivotedSource testSource = PivotedSource.TEST_PIVOTED;
+
+        // auto start 1
+        String version1 = "version1";
+        hdfsSourceEntityMgr.setCurrentVersion(testSource1, version1);
+        PivotProgress progress1 = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNotNull(progress1, "Should automatically start a new progress.");
+        Assert.assertEquals(progress1.getBaseSourceVersion(), version1);
+
+        // change 1 to running state
+        progress1.setStatus(ProgressStatus.PIVOTING);
+        pivotProgressEntityMgr.updateProgress(progress1);
+        PivotProgress progress = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNull(progress, "Should not find the running job.");
+
+        // change 1 to intermediate state
+        progress1.setStatus(ProgressStatus.PIVOTED);
+        pivotProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find the running job.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change base version
+        String version2 = "version2";
+        hdfsSourceEntityMgr.setCurrentVersion(testSource1, version2);
+        progress = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should find still the progress 1.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change 1 to failed
+        progress.setStatus(ProgressStatus.FAILED);
+        pivotProgressEntityMgr.updateProgress(progress);
+        Assert.assertNotNull(progress, "Should find the running job.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress1.getRootOperationUID());
+
+        // change 1 to failed too many
+        progress.setStatus(ProgressStatus.FAILED);
+        progress.setNumRetries(3);
+        pivotProgressEntityMgr.updateProgress(progress);
+        PivotProgress progress2 = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNotNull(progress2, "Should automatically pick up the new version.");
+        Assert.assertEquals(progress2.getBaseSourceVersion(), version2, "Should pick up the new version.");
+
+        // change 1 to finished
+        progress1.setStatus(ProgressStatus.FINISHED);
+        pivotProgressEntityMgr.updateProgress(progress1);
+        progress = orchestrator.findPivotProgressToProceed(testSource);
+        Assert.assertNotNull(progress, "Should automatically pick up the new version.");
+        Assert.assertEquals(progress.getRootOperationUID(), progress2.getRootOperationUID());
+
+        pivotProgressEntityMgr.deleteProgressByRootOperationUid(progress1.getRootOperationUID());
+        pivotProgressEntityMgr.deleteProgressByRootOperationUid(progress2.getRootOperationUID());
+    }
+
+    private void removeTestProgresses() {
+        archiveProgressEntityMgr.deleteAllProgressesOfSource(CollectionSource.TEST_COLLECTION);
+        pivotProgressEntityMgr.deleteAllProgressesOfSource(PivotedSource.TEST_PIVOTED);
+    }
+
+    private void scanOnlyTestingSources () {
+        Map<CollectionSource, ArchiveService> archiveServiceMap = new HashMap<>();
+        Map<PivotedSource, PivotService> pivotServiceMap = new HashMap<>();
+        archiveServiceMap.put(CollectionSource.TEST_COLLECTION, archiveService);
+        pivotServiceMap.put(PivotedSource.TEST_PIVOTED, pivotService);
+        orchestrator.setServiceMaps(archiveServiceMap, pivotServiceMap);
+    }
+
+}

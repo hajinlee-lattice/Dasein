@@ -6,4 +6,6 @@ public interface Source {
 
     String getTableName();
 
+    String getRefreshServiceBean();
+
 }

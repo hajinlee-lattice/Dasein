@@ -9,8 +9,8 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 
-@Component("builtWithArchiveService")
-public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implements ArchiveService {
+@Component("testArchiveService")
+public class TestArchiveServiceImpl extends AbstractArchiveService implements ArchiveService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -18,7 +18,7 @@ public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implemen
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Override
-    public CollectionSource getSource() { return CollectionSource.BUILT_WITH; }
+    public CollectionSource getSource() { return CollectionSource.TEST_COLLECTION; }
 
     @Override
     ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
@@ -27,19 +27,17 @@ public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implemen
     Log getLogger() { return log; }
 
     @Override
-    String getSourceTableName() { return "BuiltWith"; }
+    String getSourceTableName() { return "Nope"; }
 
     @Override
-    String getMergeDataFlowQualifier() { return "builtWithMergeRawDataFlowBuilder"; }
+    String getMergeDataFlowQualifier() { return "nope"; }
 
     @Override
-    String getSrcTableSplitColumn() { return "LE_Last_Upload_Date"; }
+    String getSrcTableSplitColumn() { return "nope"; }
 
     @Override
-    String getSrcTableTimestampColumn() { return "LE_Last_Upload_Date"; }
+    String getSrcTableTimestampColumn() { return "nope"; }
 
     @Override
-    String createIndexForStageTableSql() {
-        return "CREATE CLUSTERED INDEX IX_URLFeature ON [BuiltWith_MostRecent_stage] ([Domain], [Technology_Name])";
-    }
+    String createIndexForStageTableSql() { return "nope"; }
 }

@@ -33,10 +33,24 @@ public abstract class ProgressDaoImplBase<P extends Progress>
     public List<P> findFailedProgresses(Source source) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format(
-                "from %s where SourceName = %s and Status = 'FAILED' order by LatestStatusUpdate asc",
-                sourceName, getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where SourceName = :sourceName and Status = 'FAILED' order by LatestStatusUpdate asc",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setString("sourceName", sourceName);
+        return (List<P>) query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<P> findUnfinishedProgresses(Source source) {
+        String sourceName = source.getSourceName();
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("from %s where SourceName = :sourceName " +
+                "and Status != 'FINISHED' and Status != 'FAILED' " +
+                "order by CreateTime asc",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setString("sourceName", sourceName);
         return (List<P>) query.list();
     }
 
@@ -45,9 +59,10 @@ public abstract class ProgressDaoImplBase<P extends Progress>
     public List<P> findAllOfSource(Source source) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where SourceName = %s order by LatestStatusUpdate asc",
-                sourceName, getEntityClass().getSimpleName());
+        String queryStr = String.format("from %s where SourceName = :sourceName",
+                getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
+        query.setString("sourceName", sourceName);
         return (List<P>) query.list();
     }
 

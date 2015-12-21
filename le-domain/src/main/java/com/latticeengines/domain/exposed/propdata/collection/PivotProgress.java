@@ -121,6 +121,7 @@ public class PivotProgress implements Progress {
         this.rootOperationUID = rootOperationUID;
     }
 
+    @Override
     public Date getLatestStatusUpdate() { return latestStatusUpdate; }
 
     private void setLatestStatusUpdate(Date latestStatusUpdate) { this.latestStatusUpdate = latestStatusUpdate; }

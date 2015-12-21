@@ -27,7 +27,6 @@ import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
-import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;

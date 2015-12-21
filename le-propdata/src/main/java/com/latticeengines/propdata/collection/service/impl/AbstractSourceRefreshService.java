@@ -74,6 +74,14 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
     @Value("${propdata.collection.sqoop.mapper.number}")
     private int numMappers;
 
+    protected P findRunningJob() {
+        return getProgressEntityMgr().findRunningProgress(getSource());
+    }
+
+    protected P findJobToRetry() {
+        return getProgressEntityMgr().findEarliestFailureUnderMaxRetry(getSource());
+    }
+
     protected boolean checkProgressStatus(P progress, ProgressStatus expectedStatus, ProgressStatus inProgress) {
         if (progress == null) { return false; }
 
@@ -235,6 +243,12 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.FAILED);
+    }
+
+    protected P finishProgress(P progress) {
+        progress.setNumRetries(0);
+        LoggingUtils.logInfo(getLogger(), progress, "Finished.");
+        return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
     }
 
     protected String getDestTableName() { return getSource().getTableName(); }

@@ -40,6 +40,8 @@ public abstract class MergeDomainBasedRawDataFlowBuilder extends CascadingDataFl
             FieldMetadata metadata = fms.get(i);
             fieldNames[i] = metadata.getFieldName();
         }
+        
+        @SuppressWarnings("rawtypes")
         Buffer buffer = new MostRecentBuffer(timestampField(), new Fields(fieldNames));
 
         return addGroupByAndBuffer(sourceNames, new FieldList(uniqueFields()), buffer, fms, true);

@@ -51,7 +51,8 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
 
         PivotProgress progress = createNewProgress(new Date());
         progress = pivotData(progress);
-        exportToDB(progress);
+        progress = exportToDB(progress);
+        finish(progress);
 
         verifyResultTable(progress);
 
@@ -104,6 +105,17 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
 
         PivotProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.UPLOADED);
+
+        return response;
+    }
+
+    protected PivotProgress finish(PivotProgress progress) {
+        PivotProgress response = pivotService.finish(progress);
+
+        Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
+
+        PivotProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return response;
     }

@@ -21,6 +21,7 @@ public class FunctionDataFlowBuilder extends CascadingDataFlowBuilder {
         String source = addSource("Source", sources.get("Source"),
                 Collections.singletonList(new FieldMetadata("Domain", String.class)));
 
+        @SuppressWarnings("rawtypes")
         Function function = new DomainCleanupFunction("Domain");
         return addFunction(source, function, new FieldList("Domain"), new FieldMetadata("Domain", String.class));
     }

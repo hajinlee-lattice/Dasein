@@ -46,7 +46,7 @@ public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceI
     }
 
     @Override
-    CollectionSource getSource() { return CollectionSource.BUILTWITH; }
+    CollectionSource getSource() { return CollectionSource.BUILT_WITH; }
 
     @Override
     String[] uniqueColumns() { return new String[]{"Domain", "Technology_Name"}; }

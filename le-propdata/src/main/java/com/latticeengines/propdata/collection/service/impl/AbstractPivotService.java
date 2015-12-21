@@ -5,12 +5,14 @@ import java.util.Date;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.PivotService;
@@ -34,6 +36,9 @@ public abstract class AbstractPivotService
 
     abstract String createIndexForStageTableSql();
 
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
     @PostConstruct
     private void setEntityMgrs() {
         source = getSource();
@@ -50,6 +55,13 @@ public abstract class AbstractPivotService
         return progress;
     }
 
+    @Override
+    public PivotProgress startNewProgressIfOutDated(String creator) {
+        String baseCurrentVersion = hdfsSourceEntityMgr.getCurrentVersion(source.getBaseSource());
+        PivotProgress oldProgress = entityMgr.findProgressByBaseVersion(source, baseCurrentVersion);
+        if (oldProgress != null) { return null; } // already updated
+        return startNewProgress(new Date(), baseCurrentVersion, creator);
+    }
 
     @Override
     public PivotProgress pivot(PivotProgress progress) {
@@ -110,7 +122,22 @@ public abstract class AbstractPivotService
 
     @Override
     public ArchiveProgress findRunningJobOnBaseSource() {
-        return getBaseSourceArchiveProgressEntityMgr().findProgressNotInFinalState(source.getBaseSource());
+        return getBaseSourceArchiveProgressEntityMgr().findRunningProgress(source.getBaseSource());
+    }
+
+    @Override
+    public PivotProgress findJobToRetry() { return super.findJobToRetry(); }
+
+    @Override
+    public PivotProgress findRunningJob() {
+        return super.findRunningJob();
+    }
+
+    @Override
+    public PivotProgress finish(PivotProgress progress) {
+        log.info(String.format("Pivoting %s successful, generated Rows=%d",
+                progress.getSourceName(), progress.getRowsGenerated()));
+        return finishProgress(progress);
     }
 
     private boolean pivotInternal(PivotProgress progress) {
@@ -171,7 +198,7 @@ public abstract class AbstractPivotService
     }
 
     private String pivotWorkflowDirInHdfs(PivotProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.PIVOT_FLOW)
                 .append(progress.getRootOperationUID()).toString();
     }
 

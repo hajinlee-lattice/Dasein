@@ -15,6 +15,8 @@ public interface ArchiveService {
 
     ArchiveProgress exportToDB(ArchiveProgress progress);
 
+    ArchiveProgress finish(ArchiveProgress progress);
+
     ArchiveProgress findJobToRetry();
 
     ArchiveProgress findRunningJob();

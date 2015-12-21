@@ -26,4 +26,6 @@ public interface Progress extends HasPid{
 
     Date getCreateTime();
 
+    Date getLatestStatusUpdate();
+
 }

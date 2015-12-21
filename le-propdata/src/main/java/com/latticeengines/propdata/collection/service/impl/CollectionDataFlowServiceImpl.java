@@ -40,7 +40,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Override
     public void executeMergeRawSnapshotData(Source source, String mergeDataFlowQualifier, String uid) {
-        String flowName = CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW;
+        String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
 
         Map<String, String> sources = new HashMap<>();
 
@@ -67,7 +67,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Override
     public void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier, String uid) {
-        String flowName = CollectionDataFlowKeys.PIVOT_SNAPSHOT_FLOW;
+        String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
 
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 

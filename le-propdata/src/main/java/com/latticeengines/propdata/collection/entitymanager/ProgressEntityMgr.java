@@ -13,6 +13,10 @@ public interface ProgressEntityMgr<P> {
 
     P findProgressByRootOperationUid(String rootOperationUid);
 
-    P findProgressNotInFinalState(Source source);
+    P findEarliestFailureUnderMaxRetry(Source source);
+
+    P findRunningProgress(Source source);
+
+    void deleteAllProgressesOfSource(Source source);
 
 }

@@ -56,14 +56,16 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
         ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
         progress = importFromDB(progress);
         progress = transformRawData(progress);
-        exportToDB(progress);
+        progress = exportToDB(progress);
+        finish(progress);
 
         testAutoDetermineDateRange();
 
         progress = createNewProgress(dates[1], dates[2]);
         progress = importFromDB(progress);
         progress = transformRawData(progress);
-        exportToDB(progress);
+        progress = exportToDB(progress);
+        finish(progress);
 
         cleanupProgressTables();
     }
@@ -127,6 +129,17 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.UPLOADED);
 
         verifyUniqueness();
+
+        return response;
+    }
+
+    protected ArchiveProgress finish(ArchiveProgress progress) {
+        ArchiveProgress response = archiveService.finish(progress);
+
+        Assert.assertEquals(response.getStatus(), ProgressStatus.FINISHED);
+
+        ArchiveProgress progressInDb = progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
+        Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return response;
     }

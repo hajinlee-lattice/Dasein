@@ -1,15 +1,35 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
+import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.Source;
 
 public abstract class AbstractProgressEntityMgr<P extends Progress> implements ProgressEntityMgr<P> {
 
     protected abstract ProgressDao<P> getProgressDao();
+    protected abstract Log getLog();
+    private static Set<Source> testSources = new HashSet<>();
+    private static final int MAX_RETRIES = 2;
+
+    static {
+        testSources.addAll(Arrays.asList(
+                (Source) CollectionSource.TEST_COLLECTION,
+                PivotedSource.TEST_PIVOTED
+        ));
+    }
+
 
     @Override
     @Transactional(value = "propDataCollectionProgress")
@@ -39,5 +59,42 @@ public abstract class AbstractProgressEntityMgr<P extends Progress> implements P
     public P findProgressByRootOperationUid(String rootOperationUid) {
         return getProgressDao().findByRootOperationUid(rootOperationUid);
     }
+
+
+    @Override
+    @Transactional(value = "propDataCollectionProgress", readOnly = true)
+    public P findEarliestFailureUnderMaxRetry(Source source) {
+        List<P> progresses = getProgressDao().findFailedProgresses(source);
+        for (P progress: progresses) {
+            if (progress.getNumRetries() < MAX_RETRIES) {
+                return progress;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(value = "propDataCollectionProgress")
+    public void deleteAllProgressesOfSource(Source source) {
+        // only allow this method for testing sources
+        if (testSources.contains(source)) {
+            List<P> progresses = getProgressDao().findAllOfSource(source);
+            for (P progress : progresses) {
+                getProgressDao().delete(progress);
+            }
+        }
+    }
+
+    @Override
+    @Transactional(value = "propDataCollectionProgress", readOnly = true)
+    public P findRunningProgress(Source source) {
+        List<P> progresses = getProgressDao().findUnfinishedProgresses(source);
+        if (!progresses.isEmpty()) {
+            return progresses.get(0);
+        } else {
+            return null;
+        }
+    }
+
 
 }

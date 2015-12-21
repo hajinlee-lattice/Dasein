@@ -9,8 +9,4 @@ public interface ArchiveProgressEntityMgr extends ProgressEntityMgr<ArchiveProgr
 
     ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator);
 
-    ArchiveProgress findEarliestFailureUnderMaxRetry(Source source);
-
-    ArchiveProgress findProgressNotInFinalState(Source source);
-
 }

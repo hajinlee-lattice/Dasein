@@ -11,6 +11,8 @@ public interface ProgressDao<P> extends BaseDao<P> {
 
     List<P> findFailedProgresses(Source source);
 
+    List<P> findUnfinishedProgresses(Source source);
+
     List<P> findAllOfSource(Source source);
 
 }

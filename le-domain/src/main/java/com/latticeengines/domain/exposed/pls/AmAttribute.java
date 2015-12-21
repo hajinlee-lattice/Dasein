@@ -16,15 +16,17 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 
 @Entity
 @Table(name = "AccountMaster_Attributes")
 public class AmAttribute implements HasPid, Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 4126956984040990825L;
     private Long pid;
     private String attrKey;
     private String attrValue;

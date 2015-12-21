@@ -33,6 +33,10 @@ public class LimitOperation extends Operation {
      * Limit with bug fix to avoid divide by zero error.
      */
     public static class Limit extends BaseOperation<Limit.Context> implements Filter<Limit.Context> {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 8605489102615190113L;
         private long limit = 0;
 
         public static class Context {
@@ -67,6 +71,7 @@ public class LimitOperation extends Operation {
             return limit;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public void prepare(FlowProcess flowProcess, OperationCall<Context> operationCall) {
             super.prepare(flowProcess, operationCall);
@@ -89,6 +94,7 @@ public class LimitOperation extends Operation {
             context.limit += taskNum < remainingLimit ? 1 : 0;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public boolean isRemove(FlowProcess flowProcess, FilterCall<Context> filterCall) {
             return filterCall.getContext().increment();

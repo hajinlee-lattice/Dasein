@@ -20,6 +20,10 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 @Table(name = "AccountMaster_Contacts")
 public class Contact implements HasId<String>, HasPid, Serializable {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5828315692148383419L;
     private Long pid;
     private String id;
 

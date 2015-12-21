@@ -15,9 +15,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
@@ -28,6 +31,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+@SuppressWarnings("unused")
 public class PropDataAdminTool {
 
     private static final String NS_COMMAND = "command";
@@ -54,7 +58,7 @@ public class PropDataAdminTool {
     private Source source;
     private List<DateRange> periods;
     private Date pivotDate;
-    private RefreshJobService jobService;
+    private ArchiveService jobService;
     private ArchiveProgressEntityMgr entityMgr;
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
     private CollectionDataFlowService dataFlowService;
@@ -206,7 +210,7 @@ public class PropDataAdminTool {
         runner.run(args);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "resource" })
     private void run(String[] args) throws Exception {
         try {
             Namespace ns = parser.parseArgs(args);
@@ -221,8 +225,7 @@ public class PropDataAdminTool {
                 String outputDir = "/user/ysong/PropDataMatch";
                 dataFlowService.executeJoin(lhsPath, rsPath, outputDir, "domainJoinDataFlowBuilder");
             } else {
-                jobService = (RefreshJobService) ac.getBean(source.getArchiveJobBean());
-                jobService.setJobSubmitter(JOB_SUBMITTER);
+                jobService = (ArchiveService) ac.getBean(source.getArchiveServiceBean());
                 entityMgr = (ArchiveProgressEntityMgr) ac.getBean("archiveProgressEntityMgr");
                 hdfsSourceEntityMgr = (HdfsSourceEntityMgr) ac.getBean("hdfsSourceEntityMgr");
 
@@ -243,12 +246,12 @@ public class PropDataAdminTool {
     }
 
     private void executePivotCommand() {
-        System.out.println("\n\n========================================");
-        System.out.println("Pivoting Collection Source: " + source.getName());
-        System.out.println("========================================\n");
-
-        System.out.println("Source to pivot: " + source.getName());
-        jobService.pivotData(pivotDate, hdfsSourceEntityMgr.getCurrentVersion(source.getCollectionSource()));
+//        System.out.println("\n\n========================================");
+//        System.out.println("Pivoting Collection Source: " + source.getName());
+//        System.out.println("========================================\n");
+//
+//        System.out.println("Source to pivot: " + source.getName());
+//        jobService.pivotData(pivotDate, hdfsSourceEntityMgr.getCurrentVersion(source.getCollectionSource()));
     }
 
     private void executeArchiveCommand(Namespace ns) {
@@ -267,7 +270,7 @@ public class PropDataAdminTool {
 
     private void executeArchiveByRetry(String uid) {
         System.out.println("Retry progress: " + uid);
-        jobService.retryJob(entityMgr.findProgressByRootOperationUid(uid));
+        // jobService.retryJob(entityMgr.findProgressByRootOperationUid(uid));
     }
 
     private void executeArchiveByRanges() {
@@ -289,7 +292,13 @@ public class PropDataAdminTool {
             System.out.println("");
 
             try {
-                jobService.archivePeriod(period, i != periods.size());
+                ArchiveProgress progress = jobService.startNewProgress(period.getStartDate(), period.getEndDate(), JOB_SUBMITTER);
+                progress = jobService.importFromDB(progress);
+                if (i == periods.size()) {
+                    progress = jobService.transformRawData(progress);
+                    progress = jobService.exportToDB(progress);
+                    jobService.finish(progress);
+                }
                 System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
                         + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
             } catch (Exception e) {
@@ -318,25 +327,25 @@ public class PropDataAdminTool {
 
 
     enum Source {
-        FEATURE("Feature", "featureRefreshJobService", CollectionSource.FEATURE, PivotedSource.FEATURE_PIVOTED);
+        FEATURE("Feature", "featureArchiveService", CollectionSource.FEATURE, PivotedSource.FEATURE_PIVOTED);
 
         private static Map<String, Source> nameMap;
 
         private final String name;
-        private final String archiveJobBean;
+        private final String archiveServiceBean;
         private final CollectionSource collectionSource;
         private final PivotedSource pivotedSource;
 
         Source(String name, String archiveJobBean, CollectionSource collectionSource, PivotedSource pivotedSource) {
             this.name = name;
-            this.archiveJobBean = archiveJobBean;
+            this.archiveServiceBean = archiveJobBean;
             this.collectionSource = collectionSource;
             this.pivotedSource = pivotedSource;
 
         }
 
         String getName() { return this.name; }
-        String getArchiveJobBean() { return this.archiveJobBean; }
+        String getArchiveServiceBean() { return this.archiveServiceBean; }
         CollectionSource getCollectionSource() { return this.collectionSource; }
         PivotedSource getPivotedSource() { return this.pivotedSource; }
 

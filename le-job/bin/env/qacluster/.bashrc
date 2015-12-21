@@ -19,6 +19,7 @@ export JAVA_HOME=/usr/java/default
 export DPQUARTZ_ENABLED=enabled
 export DPDL_QUARTZ_ENABLED=enabled
 export PROPDATA_MADISON_QUARTZ_ENABLED=enabled
+export PROPDATA_COLLECTION_QUARTZ_ENABLED=disabled
 export SCORING_MGR_QUARTZ_ENABLED=enabled
 export DELLEBI_QUARTZ_ENABLED=enabled
 export MODEL_DL_QUARTZ_ENABLED=enabled

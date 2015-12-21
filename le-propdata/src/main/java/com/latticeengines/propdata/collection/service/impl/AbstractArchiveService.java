@@ -141,16 +141,6 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     }
 
     @Override
-    public ArchiveProgress findJobToRetry() {
-        return entityMgr.findEarliestFailureUnderMaxRetry(source);
-    }
-
-    @Override
-    public ArchiveProgress findRunningJob() {
-        return entityMgr.findProgressNotInFinalState(source);
-    }
-
-    @Override
     public DateRange determineNewJobDateRange() {
         Date latestInSrc, latestInDest;
         try {
@@ -171,6 +161,15 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
         return new DateRange(latestInDest, latestInSrc);
     }
+
+    @Override
+    public ArchiveProgress findJobToRetry() { return super.findJobToRetry(); }
+
+    @Override
+    public ArchiveProgress findRunningJob() { return super.findRunningJob(); }
+
+    @Override
+    public ArchiveProgress finish(ArchiveProgress progress) { return finishProgress(progress); }
 
     private String incrementalDataDirInHdfs(ArchiveProgress progress) {
         Path incrementalDataDir = hdfsPathBuilder.constructRawIncrementalDir(source, progress.getEndDate());
@@ -266,7 +265,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     }
 
     private String workflowDirInHdfs(ArchiveProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_SNAPSHOT_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_FLOW)
                 .append(progress.getRootOperationUID()).toString();
     }
 

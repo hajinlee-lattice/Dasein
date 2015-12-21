@@ -12,6 +12,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class MostRecentBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = -5692917328708255966L;

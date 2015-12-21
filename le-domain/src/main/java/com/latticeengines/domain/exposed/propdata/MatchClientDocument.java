@@ -13,6 +13,7 @@ public class MatchClientDocument {
     private MatchClient matchClient;
 
     // json constructor
+    @SuppressWarnings("unused")
     private MatchClientDocument(){ }
 
     public MatchClientDocument(MatchClient matchClient) {

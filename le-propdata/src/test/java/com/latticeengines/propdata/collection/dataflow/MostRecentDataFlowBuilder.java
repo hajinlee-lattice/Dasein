@@ -37,6 +37,7 @@ public class MostRecentDataFlowBuilder extends CascadingDataFlowBuilder {
             fieldNames[i] = metadata.getFieldName();
         }
 
+        @SuppressWarnings("rawtypes")
         Buffer buffer = new MostRecentBuffer("Timestamp", new Fields(fieldNames));
 
         return addGroupByAndBuffer(sourceNames, new FieldList("Domain"), buffer, fms, true);

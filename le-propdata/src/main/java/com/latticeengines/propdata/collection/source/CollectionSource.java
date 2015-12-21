@@ -5,11 +5,13 @@ import java.util.Map;
 
 public enum CollectionSource implements Source {
 
-    BUILTWITH("BuiltWith", "BuiltWith_MostRecent"),
-    FEATURE("Feature", "Feature_MostRecent");
+    BUILT_WITH("BuiltWith", "BuiltWith_MostRecent", "builtWithArchiveService"),
+    FEATURE("Feature", "Feature_MostRecent", "featureArchiveService"),
+    TEST_COLLECTION("TestCollection", "TestCollection", "testArchiveService");
 
     private final String sourceName;
     private final String tableName;
+    private final String serviceBean;
 
     private static Map<String, CollectionSource> sourceNameMap;
 
@@ -20,9 +22,10 @@ public enum CollectionSource implements Source {
         }
     }
 
-    CollectionSource(String sourceName, String tableName) {
+    CollectionSource(String sourceName, String tableName, String serviceBean) {
         this.sourceName = sourceName;
         this.tableName = tableName;
+        this.serviceBean = serviceBean;
     }
 
     @Override
@@ -30,6 +33,9 @@ public enum CollectionSource implements Source {
 
     @Override
     public String getTableName() { return tableName; }
+
+    @Override
+    public String getRefreshServiceBean() { return serviceBean; }
 
     public static CollectionSource fromSourceName(String sourceName) {
         return sourceNameMap.get(sourceName);

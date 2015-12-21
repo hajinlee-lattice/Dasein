@@ -66,6 +66,7 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
                 customer + "-upload-" + destTable, numMappers, null);
     }
 
+    @SuppressWarnings("unused")
     private void dropJdbcTableIfExists(String tableName) {
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
