@@ -13,20 +13,22 @@ var Config = function() {
 
         return {
             specs: [
-                specBasePath + '/mainflow_spec.js',
-                specBasePath + '/modellist_spec.js',
-                specBasePath + '/modeldetail_spec.js',
-                specBasePath + '/predictors_spec.js',
-                specBasePath + '/thresholdexplorer_spec.js',
-                specBasePath + '/leadsample_spec.js',
-                specBasePath + '/admininfo_spec.js',
-                specBasePath + '/usermgmt_spec.js',
-                specBasePath + '/activatemodel_spec.js',
-                specBasePath + '/systemsetup_spec.js',
-                specBasePath + '/passwordchange_spec.js',
-                specBasePath + '/multitenant_spec.js',
-                specBasePath + '/internaladmin_spec.js',
-                specBasePath + '/managefields_spec.js'
+                //specBasePath + '/mainflow_spec.js',
+                //specBasePath + '/modellist_spec.js',
+                //specBasePath + '/modeldetail_spec.js',
+                //specBasePath + '/predictors_spec.js',
+                //specBasePath + '/thresholdexplorer_spec.js',
+                //specBasePath + '/leadsample_spec.js',
+                //specBasePath + '/admininfo_spec.js',
+                //specBasePath + '/usermgmt_spec.js',
+                //specBasePath + '/activatemodel_spec.js',
+                //specBasePath + '/systemsetup_spec.js',
+                //specBasePath + '/passwordchange_spec.js',
+                //specBasePath + '/multitenant_spec.js',
+                //specBasePath + '/internaladmin_spec.js',
+                //specBasePath + '/managefields_spec.js'
+
+                specBasePath + '/systemsetup_spec.js'
             ],
 
             params: {
