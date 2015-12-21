@@ -34,6 +34,7 @@ class DealSFDC(object):
             log.info( 'disconnect completed')
             #self.driver.click_element("Xpath=//input[@value='Disconnect']")
         self.driver.wait_until_page_contains_element("Xpath=//a[text()='Authenticate Now']",self.timeout)
+        self.driver.wait_until_element_is_visible("Xpath=//a[text()='Authenticate Now']",self.timeout)
         log.info( 'click auth link')
         self.driver.click_link("Xpath=//a[text()='Authenticate Now']")
         self.driver.wait_until_page_contains_element("Xpath=//label[text()='Customer ID:']//parent::div//child::input",self.timeout)

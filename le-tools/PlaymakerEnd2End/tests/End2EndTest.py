@@ -26,8 +26,8 @@ class TestSteps(unittest.TestCase):
 				setUpEnvironments.setUp()
 				SalePrismEnvironments.needSetupEnvironment=False
 			except Exception,e:
-				log.error('set up failed: '+str(e.message))
 				SalePrismEnvironments.needSetupEnvironment=True
+				assert False,log.error('set up failed: '+str(e.message))
 	def DataFlowForOnePlay(self,playType=PlayTypes.t_CSRepeatPurchase):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST(playType=playType)#create a play
@@ -187,9 +187,9 @@ class EVModelingE2E(unittest.TestCase):
 				setUpEnvironments.setUp()
 				SalePrismEnvironments.needSetupEnvironment=False
 			except Exception,e:
-				log.error('set up failed: '+str(e.message))
 				SalePrismEnvironments.needSetupEnvironment=True
-	def test_Play_With_Model(self):
+				assert False,log.error('set up failed: '+str(e.message))
+	def atest_Play_With_Model(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST(playType=PlayTypes.t_CSRepeatPurchase,UseEVModel=True)#create a play
 		playId=createPlayResult["playId"]
