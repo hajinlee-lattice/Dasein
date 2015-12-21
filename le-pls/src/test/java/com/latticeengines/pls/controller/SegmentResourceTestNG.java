@@ -49,12 +49,12 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(response.isSuccess());
     }
 
-    @Test(groups = { "functional", "deployment" }, enabled = false)
+    @Test(groups = { "functional", "deployment" })
     public void createSegmentNoEditPlsModelsRight() {
         switchToExternalUser();
     }
 
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" }, enabled = false)
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" })
     public void getSegmentByName() {
         Segment segment = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/EMEA", Segment.class);
         assertNotNull(segment);
@@ -62,13 +62,13 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" }, enabled = false)
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" })
     public void getSegments() {
         List segments = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/", List.class);
         assertEquals(segments.size(), 1);
     }
 
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getSegmentByName" }, enabled = false)
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getSegmentByName" })
     public void update() {
         Segment segment = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/EMEA", Segment.class);
         segment.setPriority(2);
