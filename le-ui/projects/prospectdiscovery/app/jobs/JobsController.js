@@ -128,7 +128,7 @@ angular.module('pd.jobs', [
         }
         
         for (var i = 0; i < job.steps.length; i++) {
-            var stepRunning = stepsNameDictionary[job.steps[i].jobStepType];
+            var stepRunning = stepsNameDictionary[job.steps[i].jobStepType.trim()];
             if (stepRunning && job.steps[i].stepStatus == "Running") {
                 return stepsNameDictionary[job.steps[i].jobStepType];
             }
@@ -144,7 +144,7 @@ angular.module('pd.jobs', [
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
-                var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType];
+                var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType.trim()];
                 if (stepCompleted) {
                     stepsCompleted.push(stepCompleted);
                 }
