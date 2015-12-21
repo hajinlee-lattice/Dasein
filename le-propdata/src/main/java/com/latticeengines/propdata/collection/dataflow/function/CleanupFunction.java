@@ -12,7 +12,10 @@ import cascading.tuple.TupleEntry;
 abstract public class CleanupFunction extends BaseOperation implements Function
 {
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1529935996686552118L;
     private boolean removeNull;
 
     public CleanupFunction(Fields fieldDeclaration, boolean removeNull) {
