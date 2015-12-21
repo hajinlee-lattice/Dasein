@@ -67,8 +67,9 @@ public class CompanyResourceTestNG extends PlsFunctionalTestNGBase {
         System.out.println("Final company count is " + count);
         assertNotNull(companies);
         assertEquals(companies.size(), 16);
-        assertTrue(count.longValue() > 16);
+        assertTrue(count > 16);
         for (int index = 0; index < 16; index++) {
+            @SuppressWarnings("unchecked")
             Map<String, String> map = (Map) companies.get(index);
 
             String industry = map.get("Industry");

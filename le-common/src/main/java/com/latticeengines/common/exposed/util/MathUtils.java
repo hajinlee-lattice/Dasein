@@ -24,10 +24,12 @@ public class MathUtils {
         return max;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> T min(T... vals) {
         return min(Arrays.asList(vals));
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends Comparable<T>> T max(T... vals) {
         return max(Arrays.asList(vals));
     }

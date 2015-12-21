@@ -66,9 +66,10 @@ public class ContactResourceTestNG extends PlsFunctionalTestNGBase {
         Long count = restTemplate.getForObject(countUrl, Long.class);
         assertNotNull(contacts);
         assertTrue(contacts.size() == 4);
-        assertTrue(count.longValue() == 4);
+        assertTrue(count == 4);
 
         for (int index = 0; index < contacts.size(); index++) {
+            @SuppressWarnings("unchecked")
             Map<String, String> map = (Map) contacts.get(index);
             assertEquals(map.get("JobType"), "Marketing");
         }
