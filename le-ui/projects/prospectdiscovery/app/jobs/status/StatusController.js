@@ -15,6 +15,7 @@ angular
                 $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
                 $scope.jobCompleted = false;
                 $scope.jobId = $scope.job.id;
+                $scope.stepsCompletedTimes;
                 
                 $scope.cancelJob = function(jobId) {
                     JobsService.cancelJob(jobId);
@@ -22,12 +23,13 @@ angular
                 
                 if (! $scope.jobRowExpanded || $scope.statuses[$scope.jobId] == null) {
                     $scope.jobStepsRunningStates = { load_data: false, match_data: false,
-                            generate_insights: false, create_model: false, create_global_target_market: false };
+                            generate_insights: false, create_global_model: false, create_global_target_market: false };
                     $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
-                            generate_insights: false, create_model: false, create_global_target_market: false };
+                            generate_insights: false, create_global_model: false, create_global_target_market: false };
                 } else {
                     $scope.jobStepsRunningStates = $scope.statuses[$scope.jobId].running;
                     $scope.jobStepsCompletedStates = $scope.statuses[$scope.jobId].completed;
+                    $scope.stepsCompletedTimes = $scope.statuses[$scope.jobId].completedTimes;
                 }
 
                 if ($scope.job.status == "Running") {
@@ -43,11 +45,9 @@ angular
                     if (! isCompleted()) {
                         JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
                             if (jobStatus.success) {
+                                updateStatesBasedOnJobStatus(jobStatus.resultObj);
                                 if (jobStatus.resultObj.jobStatus == "Running") {
-                                    queryJobStatusAndSetStatesVariables($scope.job.id);
                                     periodicQueryJobStatus($scope.job.id);
-                                } else {
-                                    updateStatesBasedOnJobStatus(jobStatus.resultObj);
                                 }
                             }
                         });
@@ -90,6 +90,7 @@ angular
                         $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
                         $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
                     }
+                    $scope.stepsCompletedTimes = jobStatus.completedTimes;
                     saveJobStatusInParentScope();
                     
                     if (jobStatus.jobStatus == "Complete") {
@@ -104,6 +105,7 @@ angular
                     }
                     $scope.statuses[$scope.jobId]["running"] = $scope.jobStepsRunningStates;
                     $scope.statuses[$scope.jobId]["completed"] = $scope.jobStepsCompletedStates;
+                    $scope.statuses[$scope.jobId]["completedTimes"] = $scope.stepsCompletedTimes;
                 }
                 
                 function periodicQueryJobStatus(jobId) {

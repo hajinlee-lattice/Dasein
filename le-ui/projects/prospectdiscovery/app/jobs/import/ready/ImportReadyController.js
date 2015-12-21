@@ -1,33 +1,62 @@
 angular.module('pd.jobs.import.ready', [
-
+    'pd.jobs'
 ])
-.controller('ImportReadyController', function($scope, $rootScope, $stateParams, ImportReadyService) {
+.controller('ImportReadyController', function($scope, $rootScope, $stateParams, JobsService, ImportReadyService) {
     $scope.jobId = $stateParams.jobId;
+
+    $scope.jobType;
+    $scope.jobStartTimestamp;
+    $scope.user;
+    
+    JobsService.getJobStatus($scope.jobId).then(function(result) {
+        var jobStatus = result.resultObj;
+        $scope.jobType = jobStatus.user;
+        $scope.jobStartTimestamp = jobStatus.startTimestamp;
+        $scope.user = jobStatus.user;
+    });
     
     ImportReadyService.getImportSummaryForJobId($scope.jobId).then(function(result) {
-        var importSummary = result.resultObj;
+        var importSummary = result.resultObj.json.Payload;
+        if (importSummary.indexOf("NaN") > -1) {
+            importSummary = importSummary.replace("NaN", null);
+        }
+        importSummary = $.parseJSON(importSummary);
+        var matchRate, withContactRate;
+        var numMatched;
+        if (! importSummary.accounts.match_rate) {
+            matchRate = "-";
+            numMatched = "-";
+        } else {
+            matchRate = Math.round(importSummary.accounts.match_rate * 100) + "%";
+            numMatched = Math.round(importSummary.accounts.match_rate * importSummary.accounts.total);
+        }
+        
+        var startDate = new Date(importSummary.date_range.begin);
+        var endDate = new Date(importSummary.date_range.end);
         $scope.tables = [
             {
                 "name": "ACCOUNTS",
                 "items": {
                     "Accounts": importSummary.accounts.total,
-                    "Matched": importSummary.accounts.total * importSummary.accounts.match_rate,
-                    "1+ Contact": importSummary.accounts.with_contacts,
+                    "Matched": numMatched + "(" + matchRate + ")",
+                    "1+ Contact": importSummary.accounts.with_contacts + "(" +
+                        Math.round(importSummary.accounts.with_contacts / importSummary.accounts.total * 100) + "%)",
                     "Unique Accounts": importSummary.accounts.unique
                 }
             },{
                 "name": "OPPORTUNITIES",
                 "items": {
-                    "Opportunities": importSummary.opportunities.total,
-                    "Closed-Won": importSummary.opportunities.closed_won,
-                    "Closed": importSummary.opportunities.closed
+                    "Opportunities": importSummary.accounts.with_opportunities,
+                    "Closed-Won": importSummary.leads.closed_won,
+                    "Closed": importSummary.leads.closed
                 }
             },{
                 "name": "OTHER INFO",
                 "items": {
                     "Contacts": importSummary.contacts.total,
                     "Leads": importSummary.leads.total,
-                    "Data Range": importSummary.accounts.date_range.begin + " - " + importSummary.accounts.date_range.end
+                    "Data Range": startDate.getMonth() + "/" + startDate.getFullYear() + " - "
+                        + endDate.getMonth() + "/" + endDate.getFullYear()
                 }
             }
         ];
@@ -61,30 +90,38 @@ angular.module('pd.jobs.import.ready', [
     
     this.getImportSummaryForJobId = function(jobId) {
         var deferred = $q.defer();
-        var result;
-        
-        /**
-        $http({
-            method: 'GET',
-            url: '/pls/importsummary'
-        }).then(
-            function onSuccess(response) {
-                var jobs = response.data;
-                result = {
-                    success: true,
-                    resultObj: null
-                };
-            }
-        )
-        */
-                
-        result = {
+        var result = {
             success: true,
             resultObj: null
-        };
-        result.resultObj = importSummary;
+        }
+        
+        $http({
+            method: 'GET',
+            url: '/pls/targetmarkets/default'
+        }).then(
+            function onSuccess(response) {
+                var targetmarket = response.data;
+                var reportName;
+                if (targetmarket.reports.length == 1) {
+                    reportName = targetmarket.reports[0].report_name;
 
-        deferred.resolve(result);
+                    $http({
+                        method: 'Get',
+                        url: '/pls/reports/' + reportName
+                    }).then(
+                       function onSuccess(response) {
+                           result.resultObj = response.data;
+                           deferred.resolve(result);
+                       }, function onError(response) {
+                           
+                       }
+                    )
+                }
+            }, function onError(response) {
+                
+            }
+        )
+
         return deferred.promise;
     };
 });

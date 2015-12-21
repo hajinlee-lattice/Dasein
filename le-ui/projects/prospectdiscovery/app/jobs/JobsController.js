@@ -8,9 +8,10 @@ angular.module('pd.jobs', [
 .service('JobsService', function($http, $q, _) {
 
     var stepsNameDictionary = { "markReportOutOfDate": "load_data", "importData": "load_data", "createPreMatchEventTable": "match_data",
-            "match": "match_data", "createEventTableFromMatchResult": "generate_insights", "runImportSummaryDataFlow": "generate_insights",
-            "registerImportSummaryReport": "generate_insights", "sample": "generate_insights", "profileAndModel": "create_model",
-            "chooseModel": "create_model", "score": "create_global_target_market" };
+            "loadHdfsTableToPDServer": "match_data", "match": "match_data", "createEventTableFromMatchResult": "generate_insights", "runImportSummaryDataFlow": "generate_insights",
+            "registerImportSummaryReport": "generate_insights", "sample": "generate_insights", "profileAndModel": "create_global_model",
+            "chooseModel": "create_global_model", "score": "create_global_target_market" };
+    var numStepsInGroup = { "load_data": 1, "match_data": 1, "generate_insights": 1, "create_global_model": 1, "create_global_target_market": 1 };
 
     this.getAllJobs = function() {
         var deferred = $q.defer();
@@ -56,6 +57,8 @@ angular.module('pd.jobs', [
         }).then(
             function onSuccess(response) {
                 var jobInfo = response.data;
+                var stepRunning = getStepRunning(jobInfo);
+                var stepsCompleted = getStepsCompleted(jobInfo);
 
                 result = {
                     success: true,
@@ -65,9 +68,9 @@ angular.module('pd.jobs', [
                             user: jobInfo.user,
                             jobType: jobInfo.jobType,
                             jobStatus: jobInfo.jobStatus,
-                            stepRunning: getStepRunning(jobInfo),
-                            stepsCompleted: getStepsCompleted(jobInfo)
-                            // to add step endtimes
+                            stepRunning: stepRunning,
+                            stepsCompleted: stepsCompleted,
+                            completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted)
                         }
                 };
 
@@ -79,6 +82,33 @@ angular.module('pd.jobs', [
         return deferred.promise;
     };
     
+    function getCompletedStepTimes(job, runningStep, completedSteps) {
+        var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
+                "create_global_market": null, "create_global_target_market": null };
+        var currStepIndex = 0;
+        if (runningStep != "load_data" && completedSteps.indexOf("load_data") > -1) {
+            currStepIndex += numStepsInGroup.load_data;
+            completedTimes.load_data = job.steps[currStepIndex - 1].endTimestamp;
+        }
+        if (runningStep != "match_data" && completedSteps.indexOf("match_data") > -1) {
+            currStepIndex += numStepsInGroup.match_data;
+            completedTimes.match_data = job.steps[currStepIndex - 1].endTimestamp;
+        }
+        if (runningStep != "generate_insights" && completedSteps.indexOf("generate_insights") > -1) {
+            currStepIndex += numStepsInGroup.generate_insights;
+            completedTimes.generate_insights = job.steps[currStepIndex - 1].endTimestamp;
+        }
+        if (runningStep != "create_global_model" && completedSteps.indexOf("create_global_model") > -1) {
+            currStepIndex += numStepsInGroup.create_global_model;
+            completedTimes.create_global_model = job.steps[currStepIndex - 1].endTimestamp;
+        }
+        if (runningStep != "create_global_target_market" && completedSteps.indexOf("create_global_target_market") > -1) {
+            currStepIndex += numStepsInGroup.create_global_target_market;
+            completedTimes.create_global_target_market = job.steps[currStepIndex - 1].endTimestamp;
+        }
+        return completedTimes;
+    }
+
     this.cancelJob = function(jobId) {
         $http({
             method: 'GET',
@@ -115,7 +145,7 @@ angular.module('pd.jobs', [
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
                 var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType];
-                if (stepCompleted && stepsCompleted.indexOf(stepCompleted) == -1) {
+                if (stepCompleted) {
                     stepsCompleted.push(stepCompleted);
                 }
             }

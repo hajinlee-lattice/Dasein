@@ -14,7 +14,7 @@
     }
     
     div.three {
-        background: black;
+        background: gray;
     }
 }
 .summary-desc {
@@ -75,8 +75,7 @@
     border-radius: 0px
 }
 .summary-desc .flat div, .summary-desc .flat div:after {
-    background: #e7e7e7;
-    color: black;
+    background: #f1f1f1;
     transition: all 0.5s;
 }
 .summary-desc .flat div .icon {
@@ -99,11 +98,12 @@
 .completion-times span {
     display: inline-block;
     font-weight: lighter;
-    font-size: 0.8em;
+    font-size: 0.5em;
+    color: black;
 }
 .completion-times span:not(:first-child) {
-    margin-left: 100px;
+    margin-left: 120px;
 }
 .completion-times span:first-child {
-    padding-left: 30px
+    padding-left: 35px
 }
