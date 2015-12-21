@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
+import com.latticeengines.propdata.collection.service.ZkConfigurationService;
 import com.latticeengines.propdata.collection.source.CollectionSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 
@@ -30,6 +31,9 @@ public class ProgressOrchestrator {
 
     @Autowired
     private ApplicationContext ac;
+
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
 
     private Log log = LogFactory.getLog(this.getClass());
     private Map<CollectionSource, ArchiveService> archiveServiceMap = new HashMap<>();
@@ -68,7 +72,9 @@ public class ProgressOrchestrator {
 
         for (CollectionSource source: archiveServiceMap.keySet()) {
             try {
-                submitProgress(findArchiveProgressToProceed(source));
+                if (zkConfigurationService.refreshJobEnabled(source)) {
+                    submitProgress(findArchiveProgressToProceed(source));
+                }
             } catch (Exception e) {
                 log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
             }
@@ -76,7 +82,9 @@ public class ProgressOrchestrator {
 
         for (PivotedSource source: pivotServiceMap.keySet()) {
             try {
-                submitProgress(findPivotProgressToProceed(source));
+                if (zkConfigurationService.refreshJobEnabled(source)) {
+                    submitProgress(findPivotProgressToProceed(source));
+                }
             } catch (Exception e) {
                 log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
             }
@@ -91,6 +99,19 @@ public class ProgressOrchestrator {
                 @Override
                 public void run() {
                     executor.proceedProgress(progress);
+                }
+            });
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private void submitProgressTest(String sourceName) {
+        final RefreshJobExecutor executor = executorMap.get(sourceName);
+        if (executor != null) {
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    executor.proceedProgress(null);
                 }
             });
         }

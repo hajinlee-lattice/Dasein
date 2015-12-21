@@ -11,6 +11,7 @@
                 <value>file:${DATAPLATFORM_PROPDIR:.}/dataplatform.properties</value>
                 <value>file:${DATAFLOW_PROPDIR:.}/dataflow.properties</value>
                 <value>file:${DB_PROPDIR:.}/db.properties</value>
+                <value>file:${CAMILLE_PROPDIR:.}/camille.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

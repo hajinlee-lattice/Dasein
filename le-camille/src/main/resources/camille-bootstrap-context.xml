@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <bean id="camilleEnvironment" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.camille.exposed.CamilleEnvironment" />
+        <property name="targetMethod" value="start" />
+        <property name="arguments">
+            <list>
+                <value>BOOTSTRAP</value>
+                <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
+                    <constructor-arg value="${camille.zk.pod.id:Default}" />
+                    <constructor-arg value="${camille.zk.connectionString:localhost:2181}" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+
+</beans>

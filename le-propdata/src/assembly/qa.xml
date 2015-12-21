@@ -46,5 +46,10 @@
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
+        <file>
+            <source>../le-camille/conf/env/prodcluster/camille.properties</source>
+            <outputDirectory>.</outputDirectory>
+            <filtered>true</filtered>
+        </file>
     </files>
 </assembly>
