@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -45,12 +46,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_TABLE", //
-                         uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
-@Filters({
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
-@Filter(name = "typeFilter", condition = "TYPE = :typeFilterId")
-}
-)
+uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
+@Filters({ //
+        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+        @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
@@ -66,11 +65,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private LastModifiedKey lastModifiedKey;
     private TableType tableType;
     private Integer tableTypeCode;
-    
+
     public Table() {
         setTableTypeCode(TableType.DATATABLE.getCode());
     }
-    
+
     public Table(TableType tableType) {
         setTableTypeCode(tableType.getCode());
     }
@@ -269,14 +268,14 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             lastModifiedKey.setTable(this);
         }
     }
-    
+
     @Transient
     public ModelingMetadata getModelingMetadata() {
         ModelingMetadata metadata = new ModelingMetadata();
         List<AttributeMetadata> attrMetadata = new ArrayList<>();
         for (Attribute attr : getAttributes()) {
             AttributeMetadata attrMetadatum = new AttributeMetadata();
-            
+
             attrMetadatum.setColumnName(attr.getName());
             attrMetadatum.setDisplayName(attr.getDisplayName());
             attrMetadatum.setApprovedUsage(attr.getApprovedUsage());
@@ -285,12 +284,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             attrMetadatum.setTags(attr.getTags());
             attrMetadatum.setDisplayDiscretizationStrategy(attr.getDisplayDiscretizationStrategy());
             attrMetadatum.setFundamentalType(attr.getFundamentalType());
-            attrMetadatum.setExtensions(Arrays.<KV>asList(new KV[] { //
+            attrMetadatum.setExtensions(Arrays.<KV> asList(new KV[] { //
                     new KV("Category", attr.getCategory()), //
-                    new KV("DataType", attr.getDataType()) }));
+                            new KV("DataType", attr.getDataType()) }));
             attrMetadatum.setDataQuality(attr.getDataQuality());
             attrMetadatum.setDataSource(attr.getDataSource());
-            
+
             attrMetadata.add(attrMetadatum);
         }
         metadata.setAttributeMetadata(attrMetadata);
@@ -325,6 +324,36 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Transient
+    @JsonProperty("extracts_directory")
+    public String getExtractsDirectory() {
+        if (extracts.size() == 0) {
+            return null;
+        }
+
+        String parentDir = null;
+        for (Extract extract : extracts) {
+            Path path = new Path(extract.getPath());
+            String extractParentDir = path.parent().toString();
+
+            if (parentDir != null && !parentDir.equals(extractParentDir)) {
+                throw new RuntimeException(
+                        String.format(
+                                "Extracts must all be in the same directory.  Found extract at path %s while others are in directory %s",
+                                extract.getPath(), parentDir));
+            }
+            parentDir = extractParentDir;
+        }
+
+        return parentDir;
+    }
+
+    @JsonProperty("extracts_directory")
+    @Deprecated
+    public void setExtractsDirectory(String s) {
+        // pass
     }
 
 }

@@ -15,19 +15,25 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 public class RunImportSummaryDataFlow extends RunDataFlow<RunImportSummaryDataFlowConfiguration> {
 
     private static final Log log = LogFactory.getLog(RunImportSummaryDataFlow.class);
+
+    private Table getEventTable() {
+        String eventTableJson = executionContext.getString(EVENT_TABLE);
+        Table eventTable = JsonUtils.deserialize(eventTableJson, Table.class);
+        return eventTable;
+    }
+
     @Override
     public void execute() {
         log.info("Inside RunImportSummaryDataFlow execute()");
 
-        String eventTableJson = executionContext.getString(EVENT_TABLE);
-        Table eventTable = JsonUtils.deserialize(eventTableJson, Table.class);
+        Table eventTable = getEventTable();
 
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), "EventTable");
         restTemplate.delete(url);
-        
+
         Map<String, String> extraSources = new HashMap<>();
-        extraSources.put("EventTable", eventTable.getExtracts().get(0).getPath());
+        extraSources.put("EventTable", eventTable.getExtractsDirectory());
         configuration.setExtraSources(extraSources);
         super.execute();
     }

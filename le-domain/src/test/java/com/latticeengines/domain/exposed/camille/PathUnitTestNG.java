@@ -121,7 +121,7 @@ public class PathUnitTestNG {
         Path local = path.local(new Path("/a/b"));
         Assert.assertEquals(local.toString(), "/c/d");
     }
-    
+
     @Test(groups = "unit")
     public void testStartsWith() {
         Path path = new Path("/a/b/c/d");
@@ -129,7 +129,7 @@ public class PathUnitTestNG {
         Assert.assertFalse(path.startsWith(new Path("/a/b/c/d/e")));
         Assert.assertFalse(path.startsWith(new Path("/foo/bar")));
     }
- 
+
     @Test(groups = "unit")
     public void testRootPath() {
         Path path = new Path("/");
@@ -140,7 +140,7 @@ public class PathUnitTestNG {
         Assert.assertEquals(new Path("/a/b/c").local(new Path("/")).toString(), "/a/b/c");
         Assert.assertEquals(new Path("/").getSuffix(), "");
     }
-    
+
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testParentForRootPathIsInvalid() {
         Path p = new Path("/");
