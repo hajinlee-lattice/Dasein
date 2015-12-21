@@ -55,6 +55,9 @@
                 <security.properties.path>
                     ../le-security/conf/env/buildmachine
                 </security.properties.path>
+                <camille.properties.path>
+                    ../le-camille/conf/env/buildmachine
+                </camille.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -94,6 +97,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/devcluster
                 </proxy.properties.path>
+                <camille.properties.path>
+                    ../le-camille/conf/env/devcluster
+                </camille.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -132,6 +138,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/qacluster
                 </proxy.properties.path>
+                <camille.properties.path>
+                    ../le-camille/conf/env/qacluster
+                </camille.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -170,6 +179,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/prodcluster
                 </proxy.properties.path>
+                <camille.properties.path>
+                    ../le-camille/conf/env/prodcluster
+                </camille.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -236,6 +248,9 @@
                                 </source>
                                 <source>
                                     <location>${proxy.properties.path}/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>${camille.properties.path}/camille.properties</location>
                                 </source>
                             </sources>
                         </mapping>
