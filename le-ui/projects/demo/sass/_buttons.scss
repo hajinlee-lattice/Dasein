@@ -1,5 +1,5 @@
 button.button, a.button {
-	display: block;
+	display: inline-block;
     padding: 0.8em;
     margin-bottom: 0;
     font-family: 'ProximaNova-Regular',Arial,sans-serif;
@@ -74,6 +74,9 @@ button.button, a.button {
         &.icon-button {
         	padding: 0.75em 1.5em;
         }
+        &.dropdown-toggle {
+            padding: 0.8em;
+        }
     }
 }
 
@@ -93,3 +96,68 @@ input::-moz-focus-inner {
   border: 0;
   padding: 0;
 }
+
+
+
+.button-group,
+.button-group-vertical {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+.button-group > .button,
+.button-group-vertical > .button {
+  position: relative;
+  float: left;
+}
+.button-group > .button:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+  border-radius: 0;
+}
+.button-group > .button:first-child {
+  margin-left: 0;
+}
+.button-group > .button:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.button-group > .button:last-child:not(:first-child),
+.button-group > .dropdown-toggle:not(:first-child) {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+.button-group > .button-group {
+  float: left;
+}
+.button-group > .button-group:not(:first-child):not(:last-child) > .button {
+  border-radius: 0;
+}
+.button-group > .button-group:first-child:not(:last-child) > .button:last-child,
+.button-group > .button-group:first-child:not(:last-child) > .dropdown-toggle {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.button-group > .button-group:last-child:not(:first-child) > .button:first-child {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+.button-group .dropdown-toggle:active,
+.button-group.open .dropdown-toggle {
+  outline: 0;
+}
+.button-group > .button + .dropdown-toggle {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.button-group > .button-lg + .dropdown-toggle {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.button-group.open .dropdown-toggle {
+  -webkit-box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+.button-group.open .dropdown-toggle.button-link {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+

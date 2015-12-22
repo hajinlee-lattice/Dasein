@@ -1,29 +1,41 @@
 <div class="container">
-    <div class="row target-market-header">
-        <h4 class="columns six">Most Recent New Opportunities</h4>
-        
-        <div class="columns six">
-            <select class="button white-button markets-header-select">
-                <option>Last Quarter</option>
-            </select>
-            <select class="button white-button markets-header-select">
-                <option>All Target Markets</option>
-            </select>
-            <a ui-sref="markets.builder">
-                <button type="button" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></button>
-            </a>
-        </div>
-    </div>
-    <div class="row target-market-prospect-table">
+
+
+
+    <div class="table-header">
+        <div class="row">
+            <div class="twelve columns">
+                <h2>Most Recent New Opportunities</h2>
+            </div>
+        </div><!-- End .row -->
+        <div class="row">
+            <div class="six columns meta">
+                <small>Displaying 1-8 of 12</small>
+            </div>
+            <div class="six columns text-right">
+                <select class="select">
+                    <option>Last Quarter</option>
+                </select>
+                <select class="select">
+                    <option>All Target Markets</option>
+                </select>
+                <a ui-sref="markets.builder" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></a>
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
+    <div class="row">
         <div class="columns twelve">
             <table class="responsive">
-                <tbody>
+                <thead>
                     <tr>
                         <th>Customer Name</th>
                         <th>Opportunity Name</th>
                         <th>Stage</th>
                         <th>Date</th>
                     </tr>
+                </thead>
+                <tbody>
                     <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
                         <td>{{targetMarket.name}}</td>
                         <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
@@ -72,19 +84,31 @@
             </table>
         </div>
     </div>
-    <div class="row target-market-header">
-        <h4 class="columns twelve">Most Recent New Opportunities</h4>
-    </div>
+
+
+
+
+
+    <div class="table-header">
+        <div class="row">
+            <div class="twelve columns">
+                <h2>Most Recent New Opportunities</h2>
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
     <div class="row target-market-prospect-table">
         <div class="columns twelve">
             <table class="responsive">
-                <tbody>
+                <thead>
                     <tr>
                         <th>Customer Name</th>
                         <th>Opportunity Name</th>
                         <th>Stage</th>
                         <th>Date</th>
                     </tr>
+                </thead>
+                <tbody>
                     <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
                         <td>{{targetMarket.name}}</td>
                         <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
@@ -133,4 +157,11 @@
             </table>
         </div>
     </div>
+
 </div>
+
+<script>
+    $( document ).ready(function() {
+    $(".select").selectpicker();
+  });
+</script>

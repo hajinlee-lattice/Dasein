@@ -1,105 +1,115 @@
 <div class="container">
-<div class="row target-market-header">
-    <h4 class="columns three">Prospect Schedule</h4>
-    
-    <div class="columns nine">
-        <a ui-sref="markets.builder">
-            <button type="button" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></button>
-        </a>
-    </div>
-</div>
-<div class="row target-market-table">
-    <div class="columns twelve">
-        <table class="responsive">
-            <tbody>
-                <tr>
-                    <th>Target Market</th>
-                    <th>Type</th>
-                    <th>Active</th>
-                    <th>Fit</th>
-                    <th>Intent</th>
-                    <th>Lift</th>
-                    <th>Delivery Method</th>
-                    <th>Prspects Allocated</th>
-                    <th>Delivered</th>
-                    <th>Next</th>
-                </tr>
-                <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
-                    <td>{{targetMarket.name}}</td>
-                    <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numAccounts}}</td>
-                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.revenue}}</td>                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.revenue}}</td>                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
-                    <td>${{targetMarket.targetMarketStatistics.revenue}}</td>
-                </tr>
 
-                <!-- fake data for testing purposes -->
-                <tr>
-                    <td>Global Target Market</td>
-                    <td>Contact</td>
-                    <td>Yes</td>
-                    <td>75</td>
-                    <td>Low</td>
-                    <td>2.3x</td>
-                    <td>File</td>
-                    <td>3,000</td>
-                    <td>3,000</td>
-                    <td>10/10/2015</td>
-                </tr>
-                <tr>
-                    <td>Target Market 1</td>
-                    <td>Contact</td>
-                    <td>Yes</td>
-                    <td>75</td>
-                    <td>Medium</td>
-                    <td>2.3x</td>
-                    <td>SalesForce</td>
-                    <td>3,000</td>
-                    <td>3,000</td>
-                    <td>10/10/2015</td>
-                </tr>
-                <tr>
-                    <td>Target Market 2</td>
-                    <td>Contact</td>
-                    <td>Yes</td>
-                    <td>75</td>
-                    <td>High</td>
-                    <td>2.3x</td>
-                    <td>File</td>
-                    <td>3,000</td>
-                    <td>3,000</td>
-                    <td>10/10/2015</td>
-                </tr>
-                <tr>
-                    <td>Target Market 3</td>
-                    <td>Contact</td>
-                    <td>Yes</td>
-                    <td>75</td>
-                    <td>Low</td>
-                    <td>2.3x</td>
-                    <td>File</td>
-                    <td>3,000</td>
-                    <td>3,000</td>
-                    <td>10/10/2015</td>
-                </tr>
-                <tr>
-                    <td>Target Market 4</td>
-                    <td>Contact</td>
-                    <td>Yes</td>
-                    <td>75</td>
-                    <td>Low</td>
-                    <td>2.3x</td>
-                    <td>File</td>
-                    <td>3,000</td>
-                    <td>3,000</td>
-                    <td>10/10/2015</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="table-header">
+        <div class="row">
+            <div class="twelve columns">
+                <h2>Prospect Schedule</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="six columns meta">
+                <small>Displaying 1-8 of 12</small>
+            </div>
+            <div class="six columns text-right">
+                <a ui-sref="markets.builder" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></a>
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
+    <div class="row">
+        <div class="columns twelve">
+            <table class="responsive">
+                <thead>
+                    <tr>
+                        <th>Target Market</th>
+                        <th>Type</th>
+                        <th>Active</th>
+                        <th>Fit</th>
+                        <th>Intent</th>
+                        <th>Lift</th>
+                        <th>Delivery Method</th>
+                        <th>Prspects Allocated</th>
+                        <th>Delivered</th>
+                        <th>Next</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-ng-repeat="targetMarket in targetMarkets" data-ng-hide={{targetMarket.isOutOfDate}}>
+                        <td>{{targetMarket.name}}</td>
+                        <td>{{targetMarket.creationTimestamp | date: "yyyy-MM-dd"}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.expectedLift}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCompanies}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.marketRevenue}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numAccounts}}</td>
+                        <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.revenue}}</td>                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.revenue}}</td>                    <td>{{targetMarket.targetMarketStatistics.numCustomers}}</td>
+                        <td>${{targetMarket.targetMarketStatistics.revenue}}</td>
+                    </tr>
+
+                    <!-- fake data for testing purposes -->
+                    <tr>
+                        <td>Global Target Market</td>
+                        <td>Contact</td>
+                        <td>Yes</td>
+                        <td>75</td>
+                        <td>Low</td>
+                        <td>2.3x</td>
+                        <td>File</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                        <td>10/10/2015</td>
+                    </tr>
+                    <tr>
+                        <td>Target Market 1</td>
+                        <td>Contact</td>
+                        <td>Yes</td>
+                        <td>75</td>
+                        <td>Medium</td>
+                        <td>2.3x</td>
+                        <td>SalesForce</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                        <td>10/10/2015</td>
+                    </tr>
+                    <tr>
+                        <td>Target Market 2</td>
+                        <td>Contact</td>
+                        <td>Yes</td>
+                        <td>75</td>
+                        <td>High</td>
+                        <td>2.3x</td>
+                        <td>File</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                        <td>10/10/2015</td>
+                    </tr>
+                    <tr>
+                        <td>Target Market 3</td>
+                        <td>Contact</td>
+                        <td>Yes</td>
+                        <td>75</td>
+                        <td>Low</td>
+                        <td>2.3x</td>
+                        <td>File</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                        <td>10/10/2015</td>
+                    </tr>
+                    <tr>
+                        <td>Target Market 4</td>
+                        <td>Contact</td>
+                        <td>Yes</td>
+                        <td>75</td>
+                        <td>Low</td>
+                        <td>2.3x</td>
+                        <td>File</td>
+                        <td>3,000</td>
+                        <td>3,000</td>
+                        <td>10/10/2015</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 </div>
