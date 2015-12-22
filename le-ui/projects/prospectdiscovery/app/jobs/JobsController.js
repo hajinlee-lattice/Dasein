@@ -68,6 +68,7 @@ angular.module('pd.jobs', [
                             user: jobInfo.user,
                             jobType: jobInfo.jobType,
                             jobStatus: jobInfo.jobStatus,
+                            startTimestamp: jobInfo.startTimestamp,
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
                             completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted)
@@ -84,7 +85,7 @@ angular.module('pd.jobs', [
     
     function getCompletedStepTimes(job, runningStep, completedSteps) {
         var completedTimes = { "load_data": null, "match_data": null, "generate_insights": null,
-                "create_global_market": null, "create_global_target_market": null };
+                "create_global_model": null, "create_global_target_market": null };
         var currStepIndex = 0;
         if (runningStep != "load_data" && completedSteps.indexOf("load_data") > -1) {
             currStepIndex += numStepsInGroup.load_data;
@@ -160,6 +161,7 @@ angular.module('pd.jobs', [
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.showEmptyJobsMessage = false;
+    $scope.showJobSuccessMessage = true;
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -184,4 +186,8 @@ angular.module('pd.jobs', [
         $scope.expanded = {};
         $scope.statuses = {};
     });
+    
+    $scope.closeJobSuccessMessage = function() {
+        $scope.showJobSuccessMessage = false;
+    };
 });

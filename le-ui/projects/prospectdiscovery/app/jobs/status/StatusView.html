@@ -1,4 +1,8 @@
 <div data-ng-controller="JobsCtrl" class="container">
+    <div data-ng-show="showJobSuccessMessage" class="job-success-message">
+        <div>Success! Data has been imported.<a href="#"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
+        <span>Analytics are now available.</span>
+    </div>
     
     <div class="table-header">
         <div class="row">
@@ -30,7 +34,7 @@
                 <span class="columns three">User</span>
             </div>
             <div class="jobs-table-content">
-                <div data-job-status-row data-ng-repeat="job in jobs" job="job" statuses="statuses" expanded="expanded"></div>
+                <div data-job-status-row data-ng-repeat="job in jobs" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage"></div>
                 <div data-ng-show="showEmptyJobsMessage">
                     There are no jobs to show at the moment
                 </div>

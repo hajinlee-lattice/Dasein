@@ -5,6 +5,24 @@
     font-size: 125%;
     color: white;
 }
+.job-success-message {
+    background: rgb(113, 188, 81);
+    margin-top: 50px;
+    padding: 15px 10px 15px 40px;
+    color: white !important;
+    
+    div {
+        color: white;
+        font-size: 20px;
+        position: relative;
+        
+        i {
+            position: absolute;
+            right: 25px;
+            top: 16px;
+        }
+    }
+}
 
 .chevron-row {
     text-align: center;
@@ -38,12 +56,22 @@
 }
 span.chevron-content.chevron-content-text {
     padding-left: 30px !important;
+    font-size: 14px;
 }
 .jobs-table-content {
-    font-size: 125%;
+    color: black;
+    font-size: 15px;
     
     div.clearfix {
         padding-left: 25px;
+        
+        .Completed {
+            color: rgb(113, 188, 81);
+        }
+        
+        .Failed, .Cancelled {
+            color: rgb(233, 33, 45);
+        }
     }
 }
 
@@ -96,7 +124,5 @@ span.chevron-content.chevron-content-text {
 .expanded-true {
     background: #f1f1f1;
     margin-bottom: 3px;
-}
-.expanded-true {
     border-bottom: solid 3px #f1f1f1;
 }

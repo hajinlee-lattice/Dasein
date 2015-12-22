@@ -7,6 +7,7 @@
     bottom: 0px;
     left: 60px;
     font-size: 22px;
+    color: black;
 }
 .import-summary {
     h5 {
@@ -20,6 +21,7 @@
 .summary-desc {
     clear: both;
     padding-top: 15px;
+    color: black;
 }
 .summary-desc .breadcrumb {
     /*centering*/
@@ -91,19 +93,18 @@
     background: white;
     margin-top: 30px;
 }
-.completion-times {
+.ready-view-completion-times {
     text-align: justify;
     padding-left: 20px;
 }
-.completion-times span {
+.ready-view-completion-times span {
     display: inline-block;
     font-weight: lighter;
-    font-size: 0.5em;
-    color: black;
+    font-size: 0.6em;
 }
-.completion-times span:not(:first-child) {
+.ready-view-completion-times span:not(:first-child) {
     margin-left: 120px;
 }
-.completion-times span:first-child {
+.ready-view-completion-times span:first-child {
     padding-left: 35px
 }

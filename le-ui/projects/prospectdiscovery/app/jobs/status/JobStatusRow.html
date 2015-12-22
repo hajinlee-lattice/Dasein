@@ -2,7 +2,7 @@
     <div class="clearfix">
         <span class="columns three">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three">{{job.jobType}}</span>
-        <span class="columns three">{{job.status}}
+        <span class="columns three {{job.status}}">{{job.status}}
             <span data-ng-show="jobCompleted"> [<a ui-sref="jobs.status.ready({jobId: jobId})">View Report</a>]</span>
             <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>
         </span>

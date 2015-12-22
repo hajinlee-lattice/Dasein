@@ -3,10 +3,10 @@
         <a ui-sref="jobs.status">
             <button class="button icon-button white-button"><span class="fa fa-chevron-left"></span></button>
         </a>
-        <div>Job Status</div>
+        <div>Jobs > Job Status</div>
     </div>
     <div class="summary-desc">
-        Loadfile import started on 11/18/2015 at 9:06 PM by superuser.
+        {{jobType}} import started on {{jobStartDate}} at {{jobStartTime}} by {{user || "unknown"}}.
         <div class="breadcrumb flat">
             <div>
                 <span class="chevron-content chevron-content-text">Load Data</span>
@@ -29,12 +29,12 @@
                 <span class="chevron-content icon"><i class="fa fa-check"></i></span>
             </div>
         </div>
-        <div class="completion-times">
-            <span>{{ completionTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
-            <span>{{ completionTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
-            <span>{{ completionTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
-            <span>{{ completionTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</span>
-            <span>{{ completionTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+        <div class="ready-view-completion-times">
+            <span>{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
         </div>
     </div>
     

@@ -8,7 +8,8 @@ angular
             scope: {
                 job: '=',
                 statuses: '=',
-                expanded: '='
+                expanded: '=',
+                showJobSuccessMessage: '='
             },
             controller: ['$scope', '$state', 'JobsService', function ($scope, $state, JobsService) {
                 $scope.jobRunning = false;
@@ -16,6 +17,7 @@ angular
                 $scope.jobCompleted = false;
                 $scope.jobId = $scope.job.id;
                 $scope.stepsCompletedTimes;
+                $scope.showJobSuccessMessage;
                 
                 $scope.cancelJob = function(jobId) {
                     JobsService.cancelJob(jobId);
@@ -115,11 +117,11 @@ angular
                 }
                 
                 function queryJobStatusAndSetStatesVariables(jobId) {
-                    console.log("querying job status for individual job");
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
                             if (response.resultObj.jobStatus == "Complete") {
                                 cancelPeriodJobStatusQuery();
+                                $scope.showJobSuccessMessage = true;
                             }
                             updateStatesBasedOnJobStatus(response.resultObj);
                         }
