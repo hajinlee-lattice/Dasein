@@ -1,18 +1,26 @@
 <div data-ng-controller="JobsCtrl" class="container">
-    <div class="target-market-header">
-        <div class="title">Jobs</div>
+    
+    <div class="table-header">
         <div class="row">
-            <div class="display columns three">Displaying 1 - 5 of 12</div>
-            <div class="columns nine">
-                <a ui-sref="jobs.status"><span class="fa fa-search"></span></a>
-                <a ui-sref="jobs.status"><span class="fa fa-filter"></span></a>
-                <a ui-sref="jobs.status"><span class="fa fa-sort-amount-desc"></span></a>
-                <a ui-sref="jobs.status"><span class="fa fa-th"></span></a>
-                <a ui-sref="jobs.status"><span class="fa fa-list-ul"></span></a>
-                <a ui-sref="jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
+            <div class="twelve columns">
+                <h2>Jobs</h2>
             </div>
         </div>
-    </div>
+        <div class="row">
+            <div class="six columns meta">
+                <small>Displaying 1-8 of 12</small>
+            </div>
+            <div class="six columns text-right">
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-search"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-filter"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-th"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-list-ul"></span></a>
+                <a ui-sref="jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
             <div class="panel-heading custom-heading">
