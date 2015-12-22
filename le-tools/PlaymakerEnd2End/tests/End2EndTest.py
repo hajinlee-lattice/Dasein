@@ -111,13 +111,14 @@ class TestSteps(unittest.TestCase):
 					break
 				else:
 					time.sleep(20)#wait for another round query
+		assert allScoreFinished,log.error('Score Failed because not all play be scored successfully!')
 		for id in playIdList:
 			selectSQL="SELECT  PreLead_ID  FROM PreLead where Status=1000 and Play_ID=%s"%id
 			numberOfRecommendations=numberOfRecommendations+len(DealDB.fetchResultOfSelect(SQL=selectSQL,SERVER=SalePrismEnvironments.tenantDBUrl,DATABASE=SalePrismEnvironments.tenantName,UID=SalePrismEnvironments.tenantDBUser,PWD=SalePrismEnvironments.tenantDBPassword,fetchAll=True))
 		log.info("This play generated %s recommendations "% str(numberOfRecommendations))
 		playLaunchTime=playDealer.launchPlay(launchAllPlays=True)#launch all play
 		LaunchPlayFinished=False
-		print '================='
+		#print '================='
 		while not LaunchPlayFinished:
 			print 'start wait launch'
 			LaunchedStatus=True
@@ -126,7 +127,7 @@ class TestSteps(unittest.TestCase):
 				if id==LatticeGeneratesId:
 					continue
 				status=playDealer.getLaunchStatus(idOfPlay=id)
-				if status == 'Processing':
+				if status == 'Running':
 					LaunchPlayFinished=False
 					log.info("Launch is running!%s"%id)
 					continue
@@ -138,12 +139,16 @@ class TestSteps(unittest.TestCase):
 				elif status =='Complete':
 					LaunchPlayFinished=True
 					continue
+				else:
+					LaunchPlayFinished=False
+					LaunchedStatus=False
+					log.info("Launch of Play '%s' is not start correctly! The return status is '%s'!"% (str(id),str(status)))
 			if not LaunchPlayFinished:
 				if not LaunchedStatus:
 					break
 				else:
 					time.sleep(10)#wait for another round query
-		#time.sleep(10)
+		assert LaunchPlayFinished, log.error('Not All plays be launched successfully!')
 		numberOf2800=0
 		numberOf2500=0
 		for playId in playIdList:
@@ -252,7 +257,7 @@ class EVModelingE2E(unittest.TestCase):
 			if status=="Error":
 				log.error("SCORING FAILED!!!")
 				break
-			elif status =="Processing":
+			elif status =="Processing" :
 				log.info("Score is running!")
 			time.sleep(10)
 		assert status=='Complete'
