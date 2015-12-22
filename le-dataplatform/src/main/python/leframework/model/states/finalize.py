@@ -43,7 +43,7 @@ class Finalize(State):
         numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
         
     def writeRevenueStatisticsText(self, mediator):
-        if (mediator.revenueColumn != None):
+        if (mediator.revenueColumn is not None and mediator.revenueStatistics is not None):
             numpy.savetxt(mediator.modelLocalDir + mediator.name + "_revenue_statistics.txt", mediator.revenueStatistics, delimiter=",", fmt="%s")
         
         

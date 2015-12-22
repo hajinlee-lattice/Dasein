@@ -7,6 +7,8 @@ import pandas as pd
 
 import math
 from numpy import percentile
+import numpy as np
+
 '''
 INPUT DATA:
 revenueTest
@@ -34,6 +36,9 @@ class RevenueStatistics(State):
         if mediator.revenueColumn == None:
             return
         predictedRevenue = mediator.data[mediator.schema["reserved"]["predictedrevenue"]].as_matrix()
+        if np.all(predictedRevenue==0):
+            mediator.revenueStatistics = None
+            return
         predictedEvent = mediator.data[mediator.schema["reserved"]["score"]].as_matrix()
         realizedRevenue = mediator.data[mediator.revenueColumn].fillna(value=0).as_matrix()
         

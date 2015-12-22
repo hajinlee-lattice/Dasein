@@ -22,6 +22,8 @@ class InitializeRevenue(State):
         # Get revenue and Update Data
 #         dataRevenues = ScoringUtil.(mediator, mediator.data, self.logger)
         dataRevenues = mediator.clf.predict_regression(mediator.data[mediator.schema["features"]])
+        if dataRevenues == None:
+            return
         dataRevenueSeries = pd.Series(dataRevenues, index=mediator.data.index)
         mediator.data[mediator.schema["reserved"]["predictedrevenue"]].update(dataRevenueSeries)
         mediator.data[mediator.schema["reserved"]["predictedrevenue"]] = mediator.data[mediator.schema["reserved"]["predictedrevenue"]].apply(lambda x : math.exp(x) - 1.0)

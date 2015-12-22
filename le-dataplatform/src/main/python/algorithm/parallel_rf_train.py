@@ -43,10 +43,12 @@ def trainRegressionClf(trainingData, testData, schema, modelDir, algorithmProper
         return None
     
     regressionTraining = trainingData[trainingData[parser.revenueColumn] > 0]
+    if regressionTraining.shape[0] == 0:
+        return None
     X_train = regressionTraining[schema["features"]]
     Y_train = regressionTraining[parser.revenueColumn]
     Y_train = Y_train.apply(lambda x : math.log(x + 1))
-
+    
     estimators = int(algorithmProperties.get("n_estimators", 100))
     clf = ensemble.RandomForestRegressor( n_estimators=estimators,
                                           min_samples_split=int(algorithmProperties.get("min_samples_split", 25)),
