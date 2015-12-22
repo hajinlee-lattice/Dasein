@@ -60,7 +60,7 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
     }
 
     private void truncateDestTable() {
-        String tableName = source.getTableName();
+        String tableName = source.getSqlTableName();
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
@@ -128,9 +128,9 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
 
     protected void verifyResultTable(PivotProgress progress) {
         int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT COUNT(*) FROM [" + source.getTableName() + "]", Integer.class);
+                "SELECT COUNT(*) FROM [" + source.getSqlTableName() + "]", Integer.class);
         Assert.assertTrue(rowsInPivotedTable > 0,
-                String.format("Only %d results in %s.", rowsInPivotedTable, source.getTableName()));
+                String.format("Only %d results in %s.", rowsInPivotedTable, source.getSqlTableName()));
         Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGenerated());
     }
 }

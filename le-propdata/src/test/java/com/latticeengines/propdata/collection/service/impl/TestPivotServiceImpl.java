@@ -5,6 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
@@ -34,8 +36,9 @@ public class TestPivotServiceImpl extends AbstractPivotService implements PivotS
     Log getLogger() { return log; }
 
     @Override
-    String getPivotDataFlowQualifier() { return ""; }
+    DataFlowBuilder.FieldList getGroupByFields() { return null; }
 
     @Override
-    String createIndexForStageTableSql() { return ""; }
+    PivotMapper getPivotMapper() { return null; }
+
 }

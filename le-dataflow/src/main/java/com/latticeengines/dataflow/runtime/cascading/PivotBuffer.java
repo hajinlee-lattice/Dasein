@@ -1,9 +1,15 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotResult;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -14,27 +20,21 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-abstract public class PivotBuffer extends BaseOperation implements Buffer {
+public class PivotBuffer extends BaseOperation implements Buffer {
 
     private static final long serialVersionUID = -5692917328708255965L;
-    protected String pivotKeyField;
-    protected String pivotValueField;
+
     protected Map<String, Integer> namePositionMap;
-    protected List<Class> fieldFormats;
-    protected Map<String, String> valueColumnMap;
+    private PivotMapper pivotMapper;
 
     protected PivotBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public PivotBuffer(String pivotKeyField, String pivotValueField, List<Class> fieldFormats,
-                       Map<String, String> valueColumnMap, Fields fieldDeclaration) {
+    public PivotBuffer(PivotMapper pivotMapper, Fields fieldDeclaration) {
         this(fieldDeclaration);
-        this.pivotKeyField = pivotKeyField;
-        this.pivotValueField = pivotValueField;
-        this.valueColumnMap = valueColumnMap;
-        this.fieldFormats = fieldFormats;
+        this.pivotMapper = pivotMapper;
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
@@ -55,10 +55,7 @@ abstract public class PivotBuffer extends BaseOperation implements Buffer {
         setupTupleForGroup(result, group);
 
         Iterator<TupleEntry> arguments = bufferCall.getArgumentsIterator();
-        while (arguments.hasNext()) {
-            TupleEntry argument = arguments.next();
-            setupTupleForArgument(result, argument);
-        }
+        setupTupleForArgument(result, arguments);
 
         bufferCall.getOutputCollector().add(result);
     }
@@ -76,18 +73,39 @@ abstract public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    private void setupTupleForArgument(Tuple result, TupleEntry tupleEntry) {
-        Object value = tupleEntry.getObject(pivotValueField);
-        String key = tupleEntry.getString(pivotKeyField);
-        String fieldName = valueColumnMap.get(key);
-        Integer loc = namePositionMap.get(fieldName.toLowerCase());
-        if (loc != null && loc >= 0) {
-            result.set(loc, parseArgumentValue(value, fieldFormats.get(loc)));
-        } else {
-            System.out.println("Warning: can not find pivot value [" + value + "]");
+    private void setupTupleForArgument(Tuple result, Iterator<TupleEntry> argumentsInGroup) {
+        populateDefault(result);
+
+        List<PivotResult> pivotResults = new ArrayList<>();
+        while (argumentsInGroup.hasNext()) {
+            TupleEntry arguments = argumentsInGroup.next();
+            PivotResult pivotResult = pivotMapper.pivot(arguments);
+            if (pivotResult != null) {
+                pivotResults.add(pivotResult);
+            }
+        }
+
+        Collections.sort(pivotResults, new Comparator<PivotResult>() {
+            @Override
+            public int compare(PivotResult o1, PivotResult o2) {
+                return Integer.compare(o1.getPriority(), o2.getPriority());
+            }
+        });
+
+        for (PivotResult pivotResult: pivotResults) {
+            Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
+            result.set(loc, pivotResult.getValue());
         }
     }
 
-    abstract protected Object parseArgumentValue(Object value, Class type);
+    private void populateDefault(Tuple result) {
+        for (Map.Entry<String, Object> entry: pivotMapper.getDefaultValues().entrySet()) {
+            String column = entry.getKey();
+            Integer loc = namePositionMap.get(column.toLowerCase());
+            if (loc != null && loc >= 0) {
+                result.set(loc, entry.getValue());
+            }
+        }
+    }
 
 }

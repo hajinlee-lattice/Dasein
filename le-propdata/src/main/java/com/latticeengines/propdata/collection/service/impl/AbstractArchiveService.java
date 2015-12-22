@@ -124,8 +124,8 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         // upload source
         long uploadStartTime = System.currentTimeMillis();
         String sourceDir = snapshotDirInHdfs(progress);
-        String destTable = source.getTableName();
-        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable, createIndexForStageTableSql())) {
+        String destTable = source.getSqlTableName();
+        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable)) {
             return progress;
         }
 
@@ -267,6 +267,13 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     private String workflowDirInHdfs(ArchiveProgress progress) {
         return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_FLOW)
                 .append(progress.getRootOperationUID()).toString();
+    }
+
+    @Override
+    protected String createStageTableSql() {
+        String sql = super.createStageTableSql();
+        sql += " \n" + createIndexForStageTableSql();
+        return sql;
     }
 
 }

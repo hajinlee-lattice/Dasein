@@ -40,6 +40,6 @@ public class FeatureArchiveServiceImpl extends AbstractArchiveService implements
 
     @Override
     String createIndexForStageTableSql() {
-        return "CREATE CLUSTERED INDEX IX_URLFeature ON [Feature_MostRecent_stage] ([URL], [Feature])";
+        return "CREATE CLUSTERED INDEX IX_URLFeature ON [" + getStageTableName() + "] ([URL], [Feature])";
     }
 }

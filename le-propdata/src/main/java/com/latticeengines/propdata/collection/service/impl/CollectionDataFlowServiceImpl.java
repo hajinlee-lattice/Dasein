@@ -10,11 +10,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -58,7 +64,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
-        DataFlowContext ctx = commonContext(source, sources);
+        DataFlowContext ctx = commonContextDeprecated(source, sources);
         ctx.setProperty("TARGETPATH", outputDir);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, mergeDataFlowQualifier);
@@ -66,18 +72,26 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
 
     @Override
-    public void executePivotSnapshotData(Source source, String snapshotDir, String pivotDataFlowQualifier, String uid) {
+    public void executePivotData(PivotedSource source, String snapshotDir, DataFlowBuilder.FieldList groupByFields,
+                                 PivotMapper pivotMapper, String uid) {
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
-
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
-        Map<String, String> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.SNAPSHOT_SOURCE, snapshotDir + "/*.avro");
+
+        Table baseSource = TableUtils.createTable(source.getBaseSource().getSqlTableName(), snapshotDir + "/*.avro");
+        Map<String, Table> sources = new HashMap<>();
+        sources.put(CollectionDataFlowKeys.SNAPSHOT_SOURCE, baseSource);
 
         DataFlowContext ctx = commonContext(source, sources);
+
+        PivotDataFlowParameters parameters = new PivotDataFlowParameters();
+        parameters.setPivotMapper(pivotMapper);
+        parameters.setGroupbyFields(groupByFields);
+        ctx.setProperty("PARAMETERS", parameters);
+
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, pivotDataFlowQualifier);
+        dataTransformationService.executeNamedTransformation(ctx, "pivotBaseSource");
     }
 
     @Override
@@ -103,7 +117,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         dataTransformationService.executeNamedTransformation(ctx, dataflowBean);
     }
 
-    private DataFlowContext commonContext(Source source, Map<String, String> sources) {
+    private DataFlowContext commonContextDeprecated(Source source, Map<String, String> sources) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         if ("mr".equalsIgnoreCase(cascadingPlatform)) {
@@ -112,6 +126,26 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
             ctx.setProperty("ENGINE", "TEZ");
         }
         ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("CUSTOMER", sourceName);
+        ctx.setProperty("RECORDNAME", sourceName);
+        ctx.setProperty("TARGETTABLENAME", sourceName);
+
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("JOBPROPERTIES", getJobProperties());
+        return ctx;
+    }
+
+    private DataFlowContext commonContext(Source source, Map<String, Table> sources) {
+        String sourceName = source.getSourceName();
+        DataFlowContext ctx = new DataFlowContext();
+        if ("mr".equalsIgnoreCase(cascadingPlatform)) {
+            ctx.setProperty("ENGINE", "MR");
+        } else {
+            ctx.setProperty("ENGINE", "TEZ");
+        }
+        ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", sourceName);
         ctx.setProperty("RECORDNAME", sourceName);
         ctx.setProperty("TARGETTABLENAME", sourceName);

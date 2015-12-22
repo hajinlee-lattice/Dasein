@@ -28,7 +28,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
 
     @Autowired
     private DataTransformationService dataTransformationService;
-    private Configuration configuration = new Configuration();
+    protected Configuration configuration = new Configuration();
 
     @BeforeMethod(groups = "functional")
     public void setup() throws Exception {
@@ -74,6 +74,7 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         sources.put("Lead", "/tmp/avro/Lead.avro");
         sources.put("Opportunity", "/tmp/avro/Opportunity.avro");
         sources.put("Contact", "/tmp/avro/Contact.avro");
+        sources.put("Feature", "/tmp/avro/Feature.avro");
         return sources;
     }
 

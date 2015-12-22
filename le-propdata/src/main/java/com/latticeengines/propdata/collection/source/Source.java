@@ -4,7 +4,7 @@ public interface Source {
 
     String getSourceName();
 
-    String getTableName();
+    String getSqlTableName();
 
     String getRefreshServiceBean();
 

@@ -31,7 +31,9 @@ import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.A
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
@@ -172,6 +174,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node filter(String expression, FieldList filterFieldList) {
             return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
+        }
+
+        public Node pivot(FieldList groupyByFields, PivotMapper pivotMapper) {
+            return new Node(builder.register(new PivotOperation(identifier, groupyByFields, pivotMapper, builder)), builder);
         }
 
         public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {

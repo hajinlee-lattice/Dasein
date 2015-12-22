@@ -33,7 +33,7 @@ public enum PivotedSource implements Source {
     public String getSourceName() { return sourceName; }
 
     @Override
-    public String getTableName() { return tableName; }
+    public String getSqlTableName() { return tableName; }
 
     @Override
     public String getRefreshServiceBean() { return refreshBean; }

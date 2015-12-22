@@ -82,7 +82,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     }
 
     private void truncateDestTable() {
-        String tableName = source.getTableName();
+        String tableName = source.getSqlTableName();
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
@@ -152,7 +152,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
 
     protected void verifyUniqueness() {
         int maxMultiplicity = jdbcTemplateCollectionDB.queryForObject("SELECT TOP 1 COUNT(*) FROM "
-                + source.getTableName() + " GROUP BY " + StringUtils.join(uniqueColumns(), ",")
+                + source.getSqlTableName() + " GROUP BY " + StringUtils.join(uniqueColumns(), ",")
                 + " ORDER BY COUNT(*) DESC", Integer.class);
         Assert.assertEquals(maxMultiplicity, 1, "Each unique key should have one record.");
     }

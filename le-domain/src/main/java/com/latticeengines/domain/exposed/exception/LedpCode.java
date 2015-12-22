@@ -279,6 +279,7 @@ public enum LedpCode {
     LEDP_26012("Table {0} has no extracts."), //
     LEDP_26013("Table {0} has no last modified key."), //
     LEDP_26014("Table {0} last modified key has no attributes."), //
+    LEDP_26015("PivotMapper failed to convert value {0} of class {1} into class {2}."), //
 
     // le-swlib
     LEDP_27000("Software library cannot be initialized."), //

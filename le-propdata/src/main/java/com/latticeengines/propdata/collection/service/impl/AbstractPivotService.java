@@ -8,6 +8,8 @@ import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
@@ -32,9 +34,9 @@ public abstract class AbstractPivotService
 
     abstract PivotedSource getSource();
 
-    abstract String getPivotDataFlowQualifier();
+    abstract DataFlowBuilder.FieldList getGroupByFields();
 
-    abstract String createIndexForStageTableSql();
+    abstract PivotMapper getPivotMapper();
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -103,9 +105,9 @@ public abstract class AbstractPivotService
         // upload source
         long uploadStartTime = System.currentTimeMillis();
         String sourceDir = snapshotDirInHdfs(progress);
-        String destTable = source.getTableName();
+        String destTable = source.getSqlTableName();
         System.out.println(sourceDir);
-        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable, createIndexForStageTableSql())) {
+        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable)) {
             return progress;
         }
 
@@ -147,10 +149,11 @@ public abstract class AbstractPivotService
             return false;
         }
         try {
-            collectionDataFlowService.executePivotSnapshotData(
+            collectionDataFlowService.executePivotData(
                     source,
                     baseSourceDirInHdfs(progress),
-                    getPivotDataFlowQualifier(),
+                    getGroupByFields(),
+                    getPivotMapper(),
                     progress.getRootOperationUID()
             );
         } catch (Exception e) {

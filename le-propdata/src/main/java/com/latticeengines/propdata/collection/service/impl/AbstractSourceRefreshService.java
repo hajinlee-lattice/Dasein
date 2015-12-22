@@ -71,7 +71,7 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
     @Value("${propdata.collection.password.encrypted}")
     private String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number}")
+    @Value("${propdata.collection.sqoop.mapper.number:8}")
     private int numMappers;
 
     protected P findRunningJob() {
@@ -185,11 +185,7 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         return getSource().getSourceName() + "[" + progress.getRootOperationUID() + "]";
     }
 
-    protected boolean uploadAvroToCollectionDB(P progress,
-                                               String avroDir,
-                                               String destTable,
-                                               String indexCreationSql
-                                          ) {
+    protected boolean uploadAvroToCollectionDB(P progress, String avroDir, String destTable) {
         String stageTableName = destTable + "_stage";
         String bakTableName = destTable + "_bak";
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
@@ -198,15 +194,13 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         try {
             LoggingUtils.logInfo(getLogger(), progress, "Create a clean stage table " + stageTableName);
             dropJdbcTableIfExists(stageTableName);
-            jdbcTemplateCollectionDB.execute("SELECT TOP 0 * INTO " + stageTableName + " FROM " + destTable);
+            jdbcTemplateCollectionDB.execute(createStageTableSql());
 
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
             DbCreds creds = new DbCreds(builder);
             sqoopService.exportDataSync(stageTableName, avroDir, creds, assignedQueue,
                     customer + "-upload-" + destTable, numMappers, null);
-
-            jdbcTemplateCollectionDB.execute(indexCreationSql);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
             return false;
@@ -251,6 +245,12 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
     }
 
-    protected String getDestTableName() { return getSource().getTableName(); }
+    protected String getDestTableName() { return getSource().getSqlTableName(); }
+
+    protected String getStageTableName() { return getSource().getSqlTableName() + "_stage"; }
+
+    protected String createStageTableSql() {
+        return "SELECT TOP 0 * INTO " + getStageTableName() + " FROM " + getDestTableName();
+    }
 
 }
