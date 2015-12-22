@@ -322,7 +322,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   }
   @return rgba($color, $amnt);
 }
-.select {
+.custom-select {
   width: 220px \0; /*IE9 and below*/
 
   // The selectpicker button
@@ -374,7 +374,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   }
 }
 
-.select.form-control {
+.custom-select.form-control {
   margin-bottom: 0;
   padding: 0;
   border: none;
@@ -389,7 +389,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 }
 
 // The selectpicker components
-.select.button-group {
+.custom-select.button-group {
   &:not(.input-group-btn),
   &[class*="col-"] {
     float: none;
@@ -555,7 +555,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   }
 
   &.show-tick .dropdown-menu li {
-    &.selected a span.check-mark {
+    &.custom-selected a span.check-mark {
       position: absolute;
       display: inline-block;
       right: 15px;
@@ -568,7 +568,7 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
   }
 }
 
-.select.show-menu-arrow {
+.custom-select.show-menu-arrow {
   &.open > .dropdown-toggle {
     z-index: ($zindex-select-dropdown + 1);
   }
