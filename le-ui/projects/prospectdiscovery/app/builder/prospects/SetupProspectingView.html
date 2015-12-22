@@ -1,0 +1,73 @@
+<div>
+    <div class="summary blue-steel">
+        <h3>Enable Prospecting to Start Receiving Contacts</h3>
+    </div>
+
+    <div class="prospecting-settings setup-page">
+        <h5>Setup Prospecting</h5>
+        
+        <div class="input-section">
+            <div class="input-title">Enable Prospecting Flow</div>
+            <div class="toggle-check">
+              <label for="prod-sand-check">Yes</label>
+              <input type="checkbox" name="prod-sand-check" id="prod-sand-check" class="toggle-switch" />
+              <label for="prod-sand-check">No</label>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-title">Desired Amount of Prospects (Quota)</div>
+            <textarea cols="100">2,000</textarea>   <span>5,000 Maximum</span>
+        </div>
+        
+        <div class="input-section">
+            <div class="input-title">Frequency</div>
+            <select class="form-control">
+                <option>Quarterly</option>
+                <option>Monthly</option>
+                <option>Semi-Annually</option>
+                <option>Annally</option>
+            </select>
+        </div>
+
+        <div class="input-section">
+            <div class="input-title">Delivery Method</div>
+            <select class="form-control">
+                <option>Download a portable list file (only option available until v2)</option>
+                <option>Via Email</option>
+            </select>
+        </div>
+        
+        <div class="input-section checkboxes">
+            <div>
+                <input type="checkbox" id="box1" class="attr-checkbox custom">
+                    <label for="box1" class="attr-label">
+                        No more than 3 contacts per company
+                    </label>
+            </div>
+            <div>
+                <input type="checkbox" id="box2" class="attr-checkbox custom">
+                    <label for="box2" class="attr-label">
+                        Don’t show me the same contacts within 3 months (regardless of intent)
+                    </label>
+            </div>
+            <div>
+                <input type="checkbox" id="box3" class="attr-checkbox custom">
+                    <label for="box3" class="attr-label">
+                        Don’t ever show me the same contact
+                    </label>
+            </div>
+            <div>
+                <input type="checkbox" id="box4" class="attr-checkbox custom">
+                    <label for="box4" class="attr-label">
+                        Don’t ever show me a new contact at an existing company
+                    </label>
+            </div>
+        </div>
+        
+        <div>
+            <a ui-sref="#"><button type="button" class="button orange-button">Save</button></a>
+            <a ui-sref="#"><button type="button" class="button blue-button">Generate List Now</button></a>
+        </div>
+    </div>
+</div>

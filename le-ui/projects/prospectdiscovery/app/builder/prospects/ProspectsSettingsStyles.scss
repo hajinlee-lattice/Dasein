@@ -1,0 +1,98 @@
+.prospecting-settings {
+    margin: 50px 0px 0px 100px;
+    
+    > .filter {
+        font-size: 14px;
+        color: black;
+        margin-top: 50px;
+        
+        span.columns.one {
+            text-align: center;
+            background: #e7e7e7;
+            margin-top: 10px;
+        }
+        
+        .filter {
+            color: #bbbbbb;
+        }
+        
+        textarea {
+            margin-top: 5px;
+            border: 1px solid #cccccc;
+        }
+    }
+    
+    > .fit-model {
+        color: black;
+        border: 1px solid #efefef;
+        text-align: center;
+        padding: 75px;
+        margin-top: 15px;
+    }
+    
+    h5 {
+        margin-bottom: 15px;
+    }
+    
+    form {
+        font-size: 12px;
+        padding-top: 20px;
+        color: black;
+        
+        span {
+            color: #888888;
+        }
+        
+        label {
+            padding-top: 5px;
+        }
+    }
+    
+    .input-section {
+        margin-top: 15px;
+        
+        .input-title {
+            font-size: 12px;
+            color: black;
+        }
+        
+        select {
+            font-size: 11px;
+            color: black;
+        }
+        
+        span {
+            font-size: 11px;
+            color: black;
+        }
+    }
+    
+    .input-section.checkboxes {
+        color: black;
+        font-size: 11px;
+
+        div {
+            padding-top: 5px;
+            
+            label {
+                padding-top: 7px;
+            }
+        }
+    }
+    
+    button {
+        margin-top: 30px;
+        font-size: 12px;
+    }
+}
+
+.summary.blue-steel {
+    h3 {
+        margin-bottom: 15px;
+    }
+
+    a button {
+        padding: 0.75em 2em;
+        font-size: 11px;
+    }
+}

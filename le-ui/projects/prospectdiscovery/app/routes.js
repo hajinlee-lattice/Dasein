@@ -60,9 +60,6 @@ angular
                 views: {
                     "navigation@": {
                         templateUrl: './app/navigation/sidebar/BuilderView.html'
-                    },
-                    "summary@": {
-                        templateUrl: './app/navigation/subnav/SubNavView.html'
                     }
                 }
             })
@@ -71,6 +68,41 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/category/CategoryView.html'
+                    },
+                    "summary@": {
+                        templateUrl: './app/navigation/subnav/SubNavView.html'
+                    }
+                }
+            })
+            .state('builder.filtercontacts', {
+                url: '/filter_contacts',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/prospects/FilterContactsView.html'
+                    }
+                }
+            })
+            .state('builder.fitmodel', {
+                url: '/fit_model',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/prospects/BuildFitModelView.html'
+                    }
+                }
+            })
+            .state('builder.intentmodel', {
+                url: '/intent_model',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/prospects/BuildIntentModelView.html'
+                    }
+                }
+            })
+            .state('builder.setup', {
+                url: '/setup',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/prospects/SetupProspectingView.html'
                     }
                 }
             })
@@ -120,14 +152,6 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/webpresence/WebPresenceView.html'
-                    }
-                }
-            })
-            .state('builder.prospects', {
-                url: '/prospects_settings',
-                views: {
-                    "main@": {
-                        templateUrl: './app/builder/prospects/ProspectsSettingsView.html'
                     }
                 }
             })
