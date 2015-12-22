@@ -136,6 +136,7 @@ angular
             */
 
             $scope.list = list;
+            $scope.handleTileSelection();
         });
 
         $scope.handleTileSelection = function() {

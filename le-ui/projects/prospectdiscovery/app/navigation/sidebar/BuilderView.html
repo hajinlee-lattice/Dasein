@@ -6,44 +6,48 @@
 </div>
 <ul class="menu progress-menu" ng-controller="BuilderSidebarCtrl">
     <li role="presentation" ui-sref-active="active">
-        <a href="#"><span class="fa fa-circle-thin"></span>Select Attributes <span class="badge badge-blue pull-right">{{ TotalAttributes }}</span></a>
+        <a ui-sref="builder.category({AttrKey: 'Industry'})"><span class="fa fa-circle-thin"></span>Select Attributes<span class="badge badge-blue pull-right">{{ TotalAttributes }}</span></a>
+        <span class="pd-sidebar-accordion-list">
+            <ul>
+                <li ng-repeat="item in Industry">
+                    <a href="#"><span class="fa fa-bank blue-text"></span> {{ item.AttrValue }}</a>
+                </li>
+            </ul>
+            <ul>
+                <li ng-repeat="item in State">
+                    <a href="#"><span class="fa fa-map-marker jade-text"></span> {{ item.AttrValue }}</a>
+                </li>
+            </ul>
+            <ul>
+                <li ng-repeat="item in EmployeesRange">
+                    <a href="#"><span class="fa fa-bar-chart-o gold-text"></span> {{ item.AttrValue }}</a>
+                </li>
+            </ul>
+        </span>
+    </li>
+    <li role="presentation" ui-sref-active="active">
+        <a ui-sref="builder.intent({AttrKey: 'Industry'})"><span class="fa fa-circle-thin"></span>Select Intent Topics<span class="badge badge-blue pull-right">{{ TotalIntent || "0" }}</span></a>
         <ul>
-            <li ng-repeat="item in Industry">
-                <a href="#"><span class="fa fa-bank blue-text"></span> {{ item.AttrValue }}</a>
-            </li>
-        </ul>
-        <ul>
-            <li ng-repeat="item in State">
-                <a href="#"><span class="fa fa-map-marker jade-text"></span> {{ item.AttrValue }}</a>
-            </li>
-        </ul>
-        <ul>
-            <li ng-repeat="item in EmployeesRange">
-                <a href="#"><span class="fa fa-bar-chart-o gold-text"></span> {{ item.AttrValue }}</a>
-            </li>
         </ul>
     </li>
     <li role="presentation" ui-sref-active="active">
-	    <a href="#"><span class="fa fa-circle-thin"></span>Model Status</a>
-	    <div>
-	        <p class="smaller"><span class="orange-text">Model has not been created yet.</span> Continue adding attributes until you are ready to build a model. This launches a 10-20 minute job so choose accordingly.</p>
-	        <button type="button" class="button orange-button">Build Model</button>
-	    </div>
-	</li>
-	<li role="presentation" ui-sref-active="active">
-	    <a ui-sref="builder.filtercontacts"><span class="fa fa-circle-thin"></span>Prospecting Settings</a>
-	    <div>
-	        <ul class="smaller unordered-list">
-	            <li>Contact Filters</li>
-	            <li>Fit Model Settings</li>
-	            <li>Intent Model Settings</li>
-	            <li>Prospecting Settings</li>
-	        </ul>
-	        <p class="smaller"><span class="orange-text">Create model first.</span> Once you have created a model, check the deployment settings and enable prospecting or generate lists at your convenience.</p>
-	        <div class="prospecting-settings-actions">
-		        <button type="button" class="button" disabled>Enable</button>
-		        <button type="button" class="button" disabled>Generate List</button>
-	        </div>
-	    </div>
-	</li>
+        <a ui-sref="builder.filtercontacts"><span class="fa fa-circle-thin"></span>Filter the Contacts</a>
+        <ul>
+        </ul>
+    </li>
+    <li role="presentation" ui-sref-active="active">
+        <a ui-sref="builder.fitmodel"><span class="fa fa-circle-thin"></span>Build the Fit Model</a>
+        <ul>
+        </ul>
+    </li>
+    <li role="presentation" ui-sref-active="active">
+        <a ui-sref="builder.intentmodel"><span class="fa fa-circle-thin"></span>Build the Intent Model</a>
+        <ul>
+        </ul>
+    </li>
+    <li role="presentation" ui-sref-active="active">
+        <a ui-sref="builder.setup"><span class="fa fa-circle-thin"></span>Setup Prospecting</a>
+        <ul>
+        </ul>
+    </li>
 </ul>

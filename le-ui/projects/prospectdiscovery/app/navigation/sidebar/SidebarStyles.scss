@@ -40,4 +40,10 @@
         width: 1.4em;
         text-align: center;
     }
+
+    .pd-sidebar-accordion-list {
+        max-height: 10em;
+        overflow: auto;
+
+    }
 }

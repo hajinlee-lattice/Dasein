@@ -60,6 +60,9 @@ angular
                 views: {
                     "navigation@": {
                         templateUrl: './app/navigation/sidebar/BuilderView.html'
+                    },
+                    "summary@": {
+                        templateUrl: './app/navigation/subnav/SubNavView.html'
                     }
                 }
             })
@@ -68,9 +71,14 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/category/CategoryView.html'
-                    },
-                    "summary@": {
-                        templateUrl: './app/navigation/subnav/SubNavView.html'
+                    }
+                }
+            })
+            .state('builder.intent', {
+                url: '/intent/:AttrKey/:ParentKey/:ParentValue',
+                views: {
+                    "main@": {
+                        templateUrl: './app/builder/category/CategoryView.html'
                     }
                 }
             })
@@ -79,6 +87,9 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/prospects/FilterContactsView.html'
+                    },
+                    "summary@": {
+                        template: ''
                     }
                 }
             })
@@ -87,6 +98,9 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/prospects/BuildFitModelView.html'
+                    },
+                    "summary@": {
+                        template: ''
                     }
                 }
             })
@@ -95,6 +109,9 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/prospects/BuildIntentModelView.html'
+                    },
+                    "summary@": {
+                        template: ''
                     }
                 }
             })
@@ -103,6 +120,9 @@ angular
                 views: {
                     "main@": {
                         templateUrl: './app/builder/prospects/SetupProspectingView.html'
+                    },
+                    "summary@": {
+                        template: ''
                     }
                 }
             })
