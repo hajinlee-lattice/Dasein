@@ -1,9 +1,15 @@
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 
+from data_profile import getKurtosisAndSkewness
+
+import numpy as np
+
 class ProfilingTest(ProfilingTestBase):
 
     def testExecuteProfiling(self):
+        self.assertSkewNessAndKurtosisWithNullData()
+
         from launcher import Launcher
         profilinglauncher = Launcher("model-dataprofile.json")
         profilinglauncher.execute(False, postProcessClf=False)
@@ -14,6 +20,17 @@ class ProfilingTest(ProfilingTestBase):
 
         # Check if Skew and Kurtosis are being calculated and added to the Profile.
         self.assertSkewnessAndKurtosis(results)
+
+    # Kurtosis and Skewness should be none if columnData is empty
+    def assertSkewNessAndKurtosisWithNullData(self):
+        try:
+            fake_train_Y = np.random.binomial(n=1, p=0.5, size=0)
+            skewness, kurtosis = getKurtosisAndSkewness(fake_train_Y)
+
+            self.assertTrue(skewness is None)
+            self.assertTrue(kurtosis is None)
+        except Exception:
+            raise Exception('Skewness, Kurtosis Function should return None for bad data')
 
     def assertSkewnessAndKurtosis(self, results):
         metadataDict = dict(results[0])

@@ -21,5 +21,9 @@ class EnhancedSummaryGenerator(State):
         self.result["BottomSample"] = self.mediator.bottomsample
         self.result["EventTableProvenance"] = self.mediator.eventtableprovenance
 
+        if "cross_validation" in self.mediator.algorithmProperties:
+            self.result["CrossValidatedMeanOfModelAccuracy"] = self.mediator.crossValidatedModelMean
+            self.result["CrossValidatedStdOfModelAccuracy"] = self.mediator.crossValidatedModelStd
+
         # Add Result to Mediator
         self.mediator.enhancedsummary = self.result
