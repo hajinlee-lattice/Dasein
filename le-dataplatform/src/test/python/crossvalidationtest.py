@@ -46,7 +46,7 @@ class CrossValidationTest(TrainingTestBase):
                                           verbose=0)
         clf.fit(fake_train_X, fake_train_Y)
 
-        crossValidationGenerator = CrossValidationStatistics()
+        crossValidationGenerator = CrossValidationGenerator()
         mean, std = crossValidationGenerator.getMeanAndStdOfClf(clf, fake_train_X, fake_train_Y, numberOfFolds = 3)
 
         expectedMean = 0.5
@@ -59,7 +59,7 @@ class CrossValidationTest(TrainingTestBase):
     # Check if error are caught in the functions.Induce an error by sending null classifiers and null data
     def atestCatchInducedError(self):
 
-        enhancedSummaryGenerator = CrossValidationStatistics()
+        enhancedSummaryGenerator = CrossValidationGenerator()
         mean, std = enhancedSummaryGenerator.getMeanAndStdOfClf(classifier= None, features = None, targets= None, numberOfFolds = 3)
 
         self.assertTrue(mean is None)

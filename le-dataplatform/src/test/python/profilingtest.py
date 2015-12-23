@@ -1,8 +1,6 @@
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 
-from data_profile import getKurtosisAndSkewness
-
 import numpy as np
 
 class ProfilingTest(ProfilingTestBase):
@@ -25,7 +23,8 @@ class ProfilingTest(ProfilingTestBase):
     def assertSkewNessAndKurtosisWithNullData(self):
         try:
             fake_train_Y = np.random.binomial(n=1, p=0.5, size=0)
-            skewness, kurtosis = getKurtosisAndSkewness(fake_train_Y)
+            execfile("data_profile.py", globals())
+            skewness, kurtosis = globals()["getKurtosisAndSkewness"](fake_train_Y)
 
             self.assertTrue(skewness is None)
             self.assertTrue(kurtosis is None)
