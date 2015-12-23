@@ -43,6 +43,8 @@ def _parallel_predict_proba(models, X):
     return proba
 
 def _parallel_predict_regression(models, X):
+    if models is None or len(models) == 0:
+        return np.zeros(X.shape[0])
     regression = models[0].predict(X)
     for i in (range(1, len(models))):
         preds = models[i].predict(X)
