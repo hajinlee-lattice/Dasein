@@ -228,7 +228,8 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
 
     private void swapTableNamesInDestDB(P progress, String srcTable, String destTable) {
         dropJdbcTableIfExists(destTable);
-        jdbcTemplateCollectionDB.execute("EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
+        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
+                + srcTable + "') AND type in (N'U')) EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
         LoggingUtils.logInfo(getLogger(), progress, String.format("Rename %s to %s.", srcTable, destTable));
     }
 
