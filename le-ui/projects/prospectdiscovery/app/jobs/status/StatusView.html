@@ -15,9 +15,14 @@
                 <small>Displaying 1-8 of 12</small>
             </div>
             <div class="six columns text-right">
-                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-search"></span></a>
+                <input type="text" class="form-control" ng-model="SearchByName.jobType" ng-show="ShowSearch" />
+                <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                    <span class="fa fa-search"></span>
+                </a>
                 <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-filter"></span></a>
-                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-sort-amount-desc"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
+                    <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
+                </a>
                 <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-th"></span></a>
                 <a ui-sref="jobs.status" class="button icon-button white-button"><span class="fa fa-list-ul"></span></a>
                 <a ui-sref="jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
@@ -34,7 +39,7 @@
                 <span class="columns three">User</span>
             </div>
             <div class="jobs-table-content">
-                <div data-job-status-row data-ng-repeat="job in jobs" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage"></div>
+                <div data-job-status-row data-ng-repeat="job in jobs | filter:SearchByName | orderBy: SortOrder" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage"></div>
                 <div data-ng-show="showEmptyJobsMessage">
                     There are no jobs to show at the moment
                 </div>
