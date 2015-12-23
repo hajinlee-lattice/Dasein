@@ -36,12 +36,12 @@ public class MatchCommandServiceImplDeploymentTestNG extends PropDataApiDeployme
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();
 
-    @BeforeMethod(groups = "api.deployment")
+    @BeforeMethod(groups = "match")
     public void beforeMethod() {
         jdbcTemplate.setDataSource(dataSource);
     }
 
-    @Test(groups = "api.deployment", dataProvider = "matchDataProvider", threadPoolSize = 3)
+    @Test(groups = "match", dataProvider = "matchDataProvider", threadPoolSize = 3)
     public void testMatch(String sourceTable, String destTables, String contractId, MatchVerifier verifier) {
         MatchClientContextHolder.setMatchClient(getMatchClient()); // set match client for current thread.
 
