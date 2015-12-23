@@ -78,7 +78,7 @@ public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestN
                 SourceCredentialType.PRODUCTION);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testVerifyCrmCredentialInSandbox() {
         crmCredentialZKService.removeCredentials("sfdc", customer, true);
         CrmCredential crmCredential = new CrmCredential();
