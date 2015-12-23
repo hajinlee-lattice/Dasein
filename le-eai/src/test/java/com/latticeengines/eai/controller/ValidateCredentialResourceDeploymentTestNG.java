@@ -48,7 +48,7 @@ public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTes
     }
 
     // test sandboxRestTemplate restTemplate;
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testValidSandboxCredential() throws Exception {
         CrmCredential cred = new CrmCredential();
         cred.setUserName("tsanghavi@lattice-engines.com.sandbox2");
