@@ -6,6 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -30,15 +32,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
 
     abstract CollectionSource getSource();
 
-    abstract String getSourceTableName();
-
-    abstract String getMergeDataFlowQualifier();
-
     abstract String getSrcTableSplitColumn();
-
-    abstract String getSrcTableTimestampColumn();
-
-    abstract String createIndexForStageTableSql();
 
     @PostConstruct
     private void setEntityMgrs() {
@@ -145,16 +139,16 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         Date latestInSrc, latestInDest;
         try {
             latestInSrc = jdbcTemplateCollectionDB.queryForObject(
-                    "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getSourceTableName()
-                            + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
+                    "SELECT TOP 1 " + getSource().getTimestampField() + " FROM " + getSource().getCollectedTable()
+                            + " ORDER BY " + getSource().getTimestampField() + " DESC", Date.class);
         } catch (EmptyResultDataAccessException e) {
             latestInSrc = new Date(System.currentTimeMillis());
         }
 
         try {
             latestInDest = jdbcTemplateCollectionDB.queryForObject(
-                    "SELECT TOP 1 " + getSrcTableTimestampColumn() + " FROM " + getDestTableName()
-                            + " ORDER BY " + getSrcTableTimestampColumn() + " DESC", Date.class);
+                    "SELECT TOP 1 " + getSource().getTimestampField() + " FROM " + getDestTableName()
+                            + " ORDER BY " + getSource().getTimestampField() + " DESC", Date.class);
         } catch (EmptyResultDataAccessException e) {
             latestInDest = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3650));
         }
@@ -190,18 +184,19 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return false;
         }
 
-        String whereClause = constructWhereClauseByDates(getSrcTableTimestampColumn(),
+        String whereClause = constructWhereClauseByDates(getSource().getTimestampField(),
                 progress.getStartDate(), progress.getEndDate());
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
-        if (!importFromCollectionDB(getSourceTableName(), targetDir, customer, getSrcTableSplitColumn(),
+        if (!importFromCollectionDB(getSource().getCollectedTable(), targetDir, customer, getSrcTableSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
-        long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + getSourceTableName()
-                + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
+        long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
+                + getSource().getCollectedTable() + " WHERE "
+                + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
         return true;
@@ -268,7 +263,9 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
     @Override
     protected String createStageTableSql() {
         String sql = super.createStageTableSql();
-        sql += " \n" + createIndexForStageTableSql();
+        sql += " \n CREATE CLUSTERED INDEX IX_PKS ON [" + getStageTableName() + "] ( [";
+        sql += StringUtils.join(getSource().getPrimaryKey(), "], [");
+        sql += "] )";
         return sql;
     }
 

@@ -27,19 +27,5 @@ public class FeatureArchiveServiceImpl extends AbstractArchiveService implements
     Log getLogger() { return log; }
 
     @Override
-    String getSourceTableName() { return "Feature"; }
-
-    @Override
-    String getMergeDataFlowQualifier() { return "featureMergeRawDataFlowBuilder"; }
-
-    @Override
-    String getSrcTableSplitColumn() { return "LE_Last_Upload_Date"; }
-
-    @Override
-    String getSrcTableTimestampColumn() { return "LE_Last_Upload_Date"; }
-
-    @Override
-    String createIndexForStageTableSql() {
-        return "CREATE CLUSTERED INDEX IX_URLFeature ON [" + getStageTableName() + "] ([URL], [Feature])";
-    }
+    String getSrcTableSplitColumn() { return getSource().getTimestampField(); }
 }

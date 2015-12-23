@@ -27,19 +27,5 @@ public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implemen
     Log getLogger() { return log; }
 
     @Override
-    String getSourceTableName() { return "BuiltWith"; }
-
-    @Override
-    String getMergeDataFlowQualifier() { return "builtWithMergeRawDataFlowBuilder"; }
-
-    @Override
-    String getSrcTableSplitColumn() { return "LE_Last_Upload_Date"; }
-
-    @Override
-    String getSrcTableTimestampColumn() { return "LE_Last_Upload_Date"; }
-
-    @Override
-    String createIndexForStageTableSql() {
-        return "CREATE CLUSTERED INDEX IX_URLFeature ON [BuiltWith_MostRecent_stage] ([Domain], [Technology_Name])";
-    }
+    String getSrcTableSplitColumn() { return getSource().getTimestampField(); }
 }

@@ -12,7 +12,7 @@ public enum CollectionSource implements Source, DomainBased {
             "BuiltWith_MostRecent",
             "BuiltWith",
             "builtWithArchiveService",
-            "Doman",
+            "Domain",
             "LE_Last_Upload_Date",
             new String[]{"Domain", "Technology_Name"}
     ),

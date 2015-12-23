@@ -27,17 +27,5 @@ public class TestArchiveServiceImpl extends AbstractArchiveService implements Ar
     Log getLogger() { return log; }
 
     @Override
-    String getSourceTableName() { return "Nope"; }
-
-    @Override
-    String getMergeDataFlowQualifier() { return "nope"; }
-
-    @Override
     String getSrcTableSplitColumn() { return "nope"; }
-
-    @Override
-    String getSrcTableTimestampColumn() { return "nope"; }
-
-    @Override
-    String createIndexForStageTableSql() { return "nope"; }
 }
