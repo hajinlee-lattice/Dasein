@@ -214,12 +214,12 @@ class DantePageHelper(object):
             else:
                 self.sele_instance.unselect_checkbox(show_score_id)
         elif (D_Type=='Account'):
-            #lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:BaseURL__c'
-            #default_Tab_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:DefaultTab__c'
-            #hasSalesPrism_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:HasSalesPrism__c'
-            lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__BaseURL__c'
-            default_Tab_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__DefaultTab__c'
-            hasSalesPrism_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__HasSalesPrism__c'
+            lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:BaseURL__c'
+            default_Tab_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:DefaultTab__c'
+            hasSalesPrism_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:HasSalesPrism__c'
+            #lattice_url_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__BaseURL__c'
+            #default_Tab_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__DefaultTab__c'
+            #hasSalesPrism_id='CS_Edit:CS_Form:thePageBlock:thePageBlockSection:LBI__HasSalesPrism__c'
             self.sele_instance.wait_until_page_contains_element(lattice_url_id,self.Timeout)
             self.sele_instance.input_text(default_Tab_id,defaultTab)
             if hasSalesPrism:
