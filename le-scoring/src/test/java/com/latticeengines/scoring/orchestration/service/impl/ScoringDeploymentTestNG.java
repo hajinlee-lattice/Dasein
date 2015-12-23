@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -136,6 +137,9 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         // get the information from scoring result table
         ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr.findByScoringCommandAndStep(
                 scoringCommand, ScoringCommandStep.EXPORT_DATA);
+        Assert.assertNotNull(scoringCommandState,
+                "Could not find a command state at step " + ScoringCommandStep.EXPORT_DATA
+                        + " for scoring command id=" + scoringCommand.getId());
         scoringCommandResult = scoringCommandResultEntityMgr.findByKey(scoringCommandState.getLeadOutputQueuePid());
         if (scoringCommandResult == null || scoringCommandResult.getStatus() == ScoringCommandStatus.NEW) {
             List<ScoringCommandLog> scoringCommandLogs = scoringCommandLogEntityMgr.findAll();
