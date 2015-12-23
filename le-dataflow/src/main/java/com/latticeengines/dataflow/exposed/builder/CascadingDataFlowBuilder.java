@@ -28,12 +28,14 @@ import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
 import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
@@ -138,15 +140,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, new FirstNBuffer(count)), builder);
         }
 
-        public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, new FirstNBuffer(
-                    count), descending), builder);
+        public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count,
+                                    boolean descending, boolean caseInsensitive) {
+            return groupByAndBuffer(groupByFieldList, sortFieldList, new FirstNBuffer(count),
+                    descending, caseInsensitive);
         }
 
         public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
                 boolean descending) {
+            return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
+        }
+
+        public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
+                                     boolean descending, boolean caseInsensitive) {
             return new Node(
-                    builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer, descending),
+                    builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer,
+                            descending, caseInsensitive),
                     builder);
         }
 
@@ -176,8 +185,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
         }
 
-        public Node pivot(FieldList groupyByFields, PivotMapper pivotMapper) {
-            return new Node(builder.register(new PivotOperation(identifier, groupyByFields, pivotMapper, builder)), builder);
+        public Node pivot(FieldList groupyByFields, PivotStrategyImpl pivotStrategy) {
+            return new Node(builder.register(new PivotOperation(identifier, groupyByFields, pivotStrategy, builder)), builder);
         }
 
         public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
@@ -189,6 +198,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addFunction(identifier, expression, fieldsToApply, targetField, outputFields),
                     builder);
         }
+
+        public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
+            return new Node(builder.addFunction(identifier, function, fieldsToApply, targetField), builder);
+        }
+
 
         public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
             return new Node(builder.addMD5(identifier, fieldsToApply, targetFieldName), builder);
@@ -238,6 +252,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node limit(int count) {
             return new Node(builder.register(new LimitOperation(identifier, count, builder)), builder);
+        }
+
+        public Node addTimestamp(String timestampField) {
+            return new Node(builder.register(
+                    new AddFieldOperation(identifier, new AddTimestampStrategy(timestampField), builder)), builder);
         }
 
         public List<FieldMetadata> getSchema() {
@@ -418,6 +437,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         toRegister = new Pipe(sourceTableName, toRegister);
 
         return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTableName), this);
+    }
+
+    protected Node mergeNodes(Node[] nodes) {
+        String[] ids = new String[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            ids[i] = nodes[i].getIdentifier();
+        }
+        return new Node(this.register(new MergeOperation(ids, this)), this);
     }
 
     protected Table getSourceMetadata(String sourceName) {
@@ -846,14 +873,23 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     protected String addGroupByAndBuffer(String prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
-            boolean descending) {
+            boolean descending, boolean caseInsensitive) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe groupby = null;
-        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()), new Fields(sortFields.getFields()),
-                descending);
+
+        Fields fields = new Fields(groupByFields.getFields());
+        if (caseInsensitive) {
+            List<String> groupByKeys = Arrays.asList(groupByFields.getFields());
+            for (FieldMetadata metadata : pm.getValue()) {
+                if (groupByKeys.contains(metadata.getFieldName()) && String.class.equals(metadata.getJavaType())) {
+                    fields.setComparator(metadata.getFieldName(), String.CASE_INSENSITIVE_ORDER);
+                }
+            }
+        }
+
+        Pipe groupby = new GroupBy(pm.getKey(), fields, new Fields(sortFields.getFields()), descending);
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         return register(groupby, pm.getValue());
@@ -885,23 +921,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         return register(groupby, fieldMetadatas);
-    }
-
-    protected String addMerge(String[] priors) {
-        Pipe[] pipes = new Pipe[priors.length];
-        List<FieldMetadata> fm = new ArrayList<>();
-        for (int i = 0; i < priors.length; i++) {
-            String prior = priors[i];
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-            if (pm == null) {
-                throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-            }
-            pipes[i] = pm.getKey();
-            fm = pm.getValue();
-        }
-
-        Pipe groupby = new Merge(pipes);
-        return register(groupby, fm);
     }
 
     protected String addFilter(String prior, String expression, FieldList filterFieldList) {

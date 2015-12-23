@@ -11,15 +11,19 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.propdata.collection.dataflow.merge.MergeDataFlowParameters;
 import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -35,6 +39,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
 
+    @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
     @Value("${propdata.collection.use.default.job.properties:true}")
     private boolean useDefaultProperties;
 
@@ -45,51 +52,52 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected String cascadingPlatform;
 
     @Override
-    public void executeMergeRawSnapshotData(Source source, String mergeDataFlowQualifier, String uid) {
+    public void executeMergeRawSnapshotData(CollectionSource source, String uid) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
 
-        Map<String, String> sources = new HashMap<>();
-
+        Map<String, Table> sources = new HashMap<>();
         String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
         try {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
                     dir = dir.substring(dir.lastIndexOf("/") + 1);
-                    sources.put(dir, rawDir + "/" + dir + "/*.avro");
+                    Table table = TableUtils.createTable(source.getSourceName(), rawDir + "/" + dir + "/*.avro");
+                    sources.put(dir, table);
                 }
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
         }
 
-        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
+        MergeDataFlowParameters parameters = new MergeDataFlowParameters();
+        parameters.setDomainField(source.getDomainField());
+        parameters.setTimestampField(source.getTimestampField());
+        parameters.setPrimaryKeys(source.getPrimaryKey());
+        parameters.setSourceTables(sources.keySet().toArray(new String[sources.size()]));
 
-        DataFlowContext ctx = commonContextDeprecated(source, sources);
-        ctx.setProperty("TARGETPATH", outputDir);
+        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
+        DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, mergeDataFlowQualifier);
+        dataTransformationService.executeNamedTransformation(ctx, "mergeRawFlow");
     }
 
-
     @Override
-    public void executePivotData(PivotedSource source, String snapshotDir, DataFlowBuilder.FieldList groupByFields,
-                                 PivotMapper pivotMapper, String uid) {
+    public void executePivotData(PivotedSource source, String baseVersion, DataFlowBuilder.FieldList groupByFields,
+                                 PivotStrategyImpl pivotStrategy, String uid) {
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
 
-        Table baseSource = TableUtils.createTable(source.getBaseSource().getSqlTableName(), snapshotDir + "/*.avro");
+        Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(source.getBaseSource(), baseVersion);
         Map<String, Table> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.SNAPSHOT_SOURCE, baseSource);
-
-        DataFlowContext ctx = commonContext(source, sources);
+        sources.put(baseTable.getName(), baseTable);
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
-        parameters.setPivotMapper(pivotMapper);
+        parameters.setPivotStrategy(pivotStrategy);
         parameters.setGroupbyFields(groupByFields);
-        ctx.setProperty("PARAMETERS", parameters);
+        parameters.setBaseTableName(baseTable.getName());
 
-        ctx.setProperty("TARGETPATH", targetPath);
+        DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "pivotBaseSource");
     }
@@ -117,7 +125,10 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         dataTransformationService.executeNamedTransformation(ctx, dataflowBean);
     }
 
-    private DataFlowContext commonContextDeprecated(Source source, Map<String, String> sources) {
+    private DataFlowContext dataFlowContext(Source source,
+                                            Map<String, Table> sources,
+                                            DataFlowParameters parameters,
+                                            String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         if ("mr".equalsIgnoreCase(cascadingPlatform)) {
@@ -125,30 +136,13 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         } else {
             ctx.setProperty("ENGINE", "TEZ");
         }
-        ctx.setProperty("SOURCES", sources);
-        ctx.setProperty("CUSTOMER", sourceName);
-        ctx.setProperty("RECORDNAME", sourceName);
-        ctx.setProperty("TARGETTABLENAME", sourceName);
 
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("JOBPROPERTIES", getJobProperties());
-        return ctx;
-    }
-
-    private DataFlowContext commonContext(Source source, Map<String, Table> sources) {
-        String sourceName = source.getSourceName();
-        DataFlowContext ctx = new DataFlowContext();
-        if ("mr".equalsIgnoreCase(cascadingPlatform)) {
-            ctx.setProperty("ENGINE", "MR");
-        } else {
-            ctx.setProperty("ENGINE", "TEZ");
-        }
+        ctx.setProperty("PARAMETERS", parameters);
         ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", sourceName);
         ctx.setProperty("RECORDNAME", sourceName);
         ctx.setProperty("TARGETTABLENAME", sourceName);
+        ctx.setProperty("TARGETPATH", outputDir);
 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("CHECKPOINT", false);

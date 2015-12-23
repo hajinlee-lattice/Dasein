@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -215,11 +215,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return false;
         }
         try {
-            collectionDataFlowService.executeMergeRawSnapshotData(
-                    source,
-                    getMergeDataFlowQualifier(),
-                    progress.getRootOperationUID()
-            );
+            collectionDataFlowService.executeMergeRawSnapshotData(source, progress.getRootOperationUID());
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform raw data.", e);
             return false;

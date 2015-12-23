@@ -1,10 +1,10 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
 
 abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
@@ -27,13 +27,14 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
     CollectionSource source;
     Calendar calendar = GregorianCalendar.getInstance();
     Date[] dates;
-    Collection<ArchiveProgress> progresses = new HashSet<>();
+    Set<ArchiveProgress> progresses = new HashSet<>();
 
     abstract ArchiveService getArchiveService();
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
     abstract CollectionSource getSource();
     abstract String[] uniqueColumns();
     // the test will first archive data between date[0] and date[1], the refresh by data between date[1] and date[2]
+    // there should be no data after date[2], so that verifyMostRecent() works
     abstract Date[] getDates();
 
     @BeforeMethod(groups = "deployment")
@@ -67,6 +68,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
         progress = exportToDB(progress);
         finish(progress);
 
+        verifyMostRecent();
         cleanupProgressTables();
     }
 
@@ -155,5 +157,16 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
                 + source.getSqlTableName() + " GROUP BY " + StringUtils.join(uniqueColumns(), ",")
                 + " ORDER BY COUNT(*) DESC", Integer.class);
         Assert.assertEquals(maxMultiplicity, 1, "Each unique key should have one record.");
+    }
+
+    protected void verifyMostRecent() {
+        String sql = "SELECT COUNT(*) FROM " + source.getSqlTableName() + " lhs \n"
+                + "INNER JOIN " + source.getCollectedTable() + " rhs\n ON ";
+        for (String key: source.getPrimaryKey()) {
+            sql += "lhs.[" + key + "] = rhs.[" + key + "]\n AND ";
+        }
+        sql += "lhs.[" + source.getTimestampField() + "] < rhs.[" + source.getTimestampField() + "]";
+        int outdatedRows = jdbcTemplateCollectionDB.queryForObject(sql, Integer.class);
+        Assert.assertEquals(outdatedRows, 0, "There are " + outdatedRows + " rows outdated.");
     }
 }

@@ -17,8 +17,18 @@ public class MergeOperation extends Operation {
         Pipe merged = new Merge(lhsPipe, rhsPipe);
         // NOTE: This works around what appears to be a cascading bug in merge
         // "Union of steps have x fewer elements than parent assembly"
-        GroupBy groupby = new GroupBy(merged, Fields.NONE);
-        this.pipe = groupby;
+        this.pipe = new GroupBy(merged, Fields.NONE);
         this.metadata = getMetadata(lhs);
+    }
+
+    public MergeOperation(String[] seeds, CascadingDataFlowBuilder builder) {
+        super(builder);
+        Pipe[] pipes = new Pipe[seeds.length];
+        for (int i = 0; i <  seeds.length; i++) {
+            pipes[i] = getPipe(seeds[i]);
+        }
+        Pipe merged = new Merge(pipes);
+        this.pipe = new GroupBy(merged, Fields.NONE);
+        this.metadata = getMetadata(seeds[0]);
     }
 }

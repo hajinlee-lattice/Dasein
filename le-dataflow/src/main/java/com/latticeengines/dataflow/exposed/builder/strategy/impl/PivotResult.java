@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.exposed.builder.pivot;
+package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
 public class PivotResult {
 

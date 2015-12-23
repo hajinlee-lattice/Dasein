@@ -14,11 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 
 @Component("featurePivotService")
 public class FeaturePivotServiceImpl extends AbstractPivotService implements PivotService {
@@ -49,7 +49,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
     }
 
     @Override
-    PivotMapper getPivotMapper() {
+    PivotStrategyImpl getPivotMapper() {
         List<Map<String, Object>> results = jdbcTemplateCollectionDB.queryForList(
                 "SELECT [Feature], [Result_Column_Type] FROM [FeatureManagement_FeaturePivot]");
 
@@ -73,7 +73,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
             }
         }
 
-        return new PivotMapper(keyColumn, valueColumn, pivotedKeys, String.class, null, null,
+        return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, String.class, null, null,
                 resultColumnClassMap, defaultValues, 1);
     }
 
@@ -92,7 +92,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
             columns.add("[" + feature + "] " + type + " NULL");
         }
         sql += StringUtils.join(columns, ", \n");
-        sql += " ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] \n";
+        sql += ",\n [" + getSource().getTimestampField() + "] [DateTime] NOT NULL) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] \n";
 
         sql += "CREATE CLUSTERED INDEX IX_URLFeature ON [Feature_Pivoted_Source_stage] ([URL])";
 

@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 

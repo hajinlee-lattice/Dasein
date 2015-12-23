@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
 import com.latticeengines.propdata.collection.dao.PivotProgressDao;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 
 @Component("pivotProgressDao")
 public class PivotProgressDaoImpl extends ProgressDaoImplBase<PivotProgress>

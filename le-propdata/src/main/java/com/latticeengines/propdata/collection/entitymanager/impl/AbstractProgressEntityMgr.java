@@ -12,8 +12,8 @@ import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.CollectionSource;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
 
 public abstract class AbstractProgressEntityMgr<P extends Progress> implements ProgressEntityMgr<P> {

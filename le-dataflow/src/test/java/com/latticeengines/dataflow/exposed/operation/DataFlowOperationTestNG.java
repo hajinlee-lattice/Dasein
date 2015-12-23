@@ -22,7 +22,7 @@ import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
@@ -111,7 +111,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotMapper mapper = PivotMapper.pivotToClassWithDefaultValue(
+                PivotStrategyImpl mapper = PivotStrategyImpl.pivotToClassWithDefaultValue(
                         "Feature", "Value", features, Integer.class, 0);
                 return feature.pivot(new FieldList("Domain"), mapper);
             }
@@ -156,7 +156,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 columns.put("k1_low", "k1");
                 columns.put("k1_high", "k1");
 
-                PivotMapper mapper = new PivotMapper(
+                PivotStrategyImpl mapper = new PivotStrategyImpl(
                         "Feature",
                         "Value",
                         features,
@@ -185,6 +185,66 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Assert.assertEquals(record.get("f3"), 2);
                 Assert.assertEquals(record.get("k1"), 3);
             }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
+
+    @Test(groups = "functional")
+    public void testSwapTimestamp() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+        prepareSimplePivotData(avroDir, fileName);
+
+        Long before = System.currentTimeMillis();
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                return feature.addTimestamp("Timestamp");
+            }
+        });
+
+        Long after = System.currentTimeMillis();
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record: output) {
+            Long timestamp = (Long) record.get("Timestamp");
+            Assert.assertNotNull(timestamp);
+            Assert.assertTrue(timestamp > before);
+            Assert.assertTrue(timestamp < after);
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
+
+    @Test(groups = "functional")
+    public void testAddTimestamp() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+        prepareSimplePivotData(avroDir, fileName);
+
+        Long before = System.currentTimeMillis();
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                return feature.addTimestamp("New_Timestamp");
+            }
+        });
+
+        Long after = System.currentTimeMillis();
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record: output) {
+            Long timestamp = (Long) record.get("New_Timestamp");
+            Assert.assertNotNull(timestamp);
+            Assert.assertTrue(timestamp > before);
+            Assert.assertTrue(timestamp < after);
         }
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);

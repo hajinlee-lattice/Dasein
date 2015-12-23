@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 
 @Component("testPivotService")
 public class TestPivotServiceImpl extends AbstractPivotService implements PivotService {
@@ -39,6 +39,6 @@ public class TestPivotServiceImpl extends AbstractPivotService implements PivotS
     DataFlowBuilder.FieldList getGroupByFields() { return null; }
 
     @Override
-    PivotMapper getPivotMapper() { return null; }
+    PivotStrategyImpl getPivotMapper() { return null; }
 
 }

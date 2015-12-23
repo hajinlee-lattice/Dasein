@@ -1,8 +1,7 @@
-package com.latticeengines.dataflow.exposed.builder.pivot;
+package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
 import static com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.FieldMetadata;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,12 +17,13 @@ import org.apache.commons.lang.StringUtils;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import cascading.tuple.TupleEntry;
 
-public class PivotMapper implements Serializable {
+public class PivotStrategyImpl implements PivotStrategy {
 
     private static final long serialVersionUID = -3184163691094094584L;
     public static final int DEFAULT_PRIORITY = 0;
@@ -34,30 +34,30 @@ public class PivotMapper implements Serializable {
     protected final ImmutableMap<String, String> columnMap;
     protected final ImmutableMap<String, Class<?>> resultColumnClassMap; // class of each result column
     protected final ImmutableMap<String, Integer> priorityMap; // higher priority overwrites lower priority
-    protected final ImmutableMap<String, Object> defaultValues;
+    protected final Map<String, Object> defaultValues;
 
     private int defaultPriority = DEFAULT_PRIORITY;
     private Class<?> defaultValueClass = String.class;
 
-    public static PivotMapper pivotToClassWithDefaultValue(String keyColumn, String valueColumn, Set<String> pivotedKeys,
-                                                           Class<?> valueClass, Object defaultValue) {
-        return new PivotMapper(keyColumn, valueColumn, pivotedKeys, valueClass, null, null, null, defaultValue, null);
+    public static PivotStrategyImpl pivotToClassWithDefaultValue(String keyColumn, String valueColumn, Set<String> pivotedKeys,
+                                                                 Class<?> valueClass, Object defaultValue) {
+        return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, valueClass, null, null, null, defaultValue, null);
     }
 
-    public static PivotMapper pivotToClass(String keyColumn, String valueColumn, Set<String> pivotedKeys,
-                                           Class<?> valueClass) {
-        return new PivotMapper(keyColumn, valueColumn, pivotedKeys, valueClass, null, null, null, null, null);
+    public static PivotStrategyImpl pivotToClass(String keyColumn, String valueColumn, Set<String> pivotedKeys,
+                                                 Class<?> valueClass) {
+        return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, valueClass, null, null, null, null, null);
     }
 
-    public PivotMapper(String keyColumn,
-            String valueColumn,
-            Set<String> pivotedKeys,
-            Class<?> defaultValueClass,
-            Map<String, String> columnMap,
-            Map<String, Integer> priorityMap,
-            Map<String, Class<?>> resultColumnClassMap,
-            Object defaultValue,
-            Integer defaultPriority) {
+    public PivotStrategyImpl(String keyColumn,
+                             String valueColumn,
+                             Set<String> pivotedKeys,
+                             Class<?> defaultValueClass,
+                             Map<String, String> columnMap,
+                             Map<String, Integer> priorityMap,
+                             Map<String, Class<?>> resultColumnClassMap,
+                             Object defaultValue,
+                             Integer defaultPriority) {
         if (pivotedKeys == null || pivotedKeys.isEmpty()) {
             throw new IllegalArgumentException("Pivot keys is an empty set.");
         }
@@ -83,20 +83,20 @@ public class PivotMapper implements Serializable {
         this.columnMap = ImmutableMap.copyOf(constructColumnMap(columnMap));
         this.resultColumnClassMap = ImmutableMap.copyOf(constructResultColumnClassMap(resultColumnClassMap));
         this.priorityMap = ImmutableMap.copyOf(constructPriorityMap(priorityMap));
-        this.defaultValues = ImmutableMap.copyOf(constructDefaultValues(defaultValues));
+        this.defaultValues = constructDefaultValues(defaultValues);
 
         checkColumnCollision();
     }
 
-    public PivotMapper(String keyColumn,
-            String valueColumn,
-            Set<String> pivotedKeys,
-            Class<?> defaultValueClass,
-            Map<String, String> columnMap,
-            Map<String, Integer> priorityMap,
-            Map<String, Class<?>> resultColumnClassMap,
-            Map<String, Object> defaultValues,
-            Integer defaultPriority) {
+    public PivotStrategyImpl(String keyColumn,
+                             String valueColumn,
+                             Set<String> pivotedKeys,
+                             Class<?> defaultValueClass,
+                             Map<String, String> columnMap,
+                             Map<String, Integer> priorityMap,
+                             Map<String, Class<?>> resultColumnClassMap,
+                             Map<String, Object> defaultValues,
+                             Integer defaultPriority) {
         if (StringUtils.isEmpty(keyColumn)) {
             throw new IllegalArgumentException("Key column name cannot be empty.");
         }
@@ -118,7 +118,7 @@ public class PivotMapper implements Serializable {
         this.columnMap = ImmutableMap.copyOf(constructColumnMap(columnMap));
         this.resultColumnClassMap = ImmutableMap.copyOf(constructResultColumnClassMap(resultColumnClassMap));
         this.priorityMap = ImmutableMap.copyOf(constructPriorityMap(priorityMap));
-        this.defaultValues = ImmutableMap.copyOf(constructDefaultValues(defaultValues));
+        this.defaultValues = constructDefaultValues(defaultValues);
 
         checkColumnCollision();
     }
@@ -195,8 +195,10 @@ public class PivotMapper implements Serializable {
         }
     }
 
+    @Override
     public Map<String, Object> getDefaultValues() { return defaultValues; }
 
+    @Override
     public List<FieldMetadata> getFieldMetadataList() {
         List<FieldMetadata> fieldMetadataList = new ArrayList<>();
         Set<String> columnsVisited = new HashSet<>();
@@ -217,14 +219,16 @@ public class PivotMapper implements Serializable {
         return fieldMetadataList;
     }
 
-    public Set<String> getResultColumnsLowerCase() {
+    @Override
+    public Set<String> getResultColumns() {
         Set<String> columns = new HashSet<>();
         for (String key: pivotedKeys) {
-            columns.add(columnMap.get(key).toLowerCase());
+            columns.add(columnMap.get(key));
         }
         return columns;
     }
 
+    @Override
     public PivotResult pivot(TupleEntry arguments) {
         String key = arguments.getString(keyColumn);
         if (StringUtils.isEmpty(key) || !columnMap.containsKey(key)) { return null; }

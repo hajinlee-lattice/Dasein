@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotMapper;
-import com.latticeengines.dataflow.exposed.builder.pivot.PivotResult;
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -25,16 +25,16 @@ public class PivotBuffer extends BaseOperation implements Buffer {
     private static final long serialVersionUID = -5692917328708255965L;
 
     protected Map<String, Integer> namePositionMap;
-    private PivotMapper pivotMapper;
+    private PivotStrategy pivotStrategy;
 
     protected PivotBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
         this.namePositionMap = getPositionMap(fieldDeclaration);
     }
 
-    public PivotBuffer(PivotMapper pivotMapper, Fields fieldDeclaration) {
+    public PivotBuffer(PivotStrategy pivotStrategy, Fields fieldDeclaration) {
         this(fieldDeclaration);
-        this.pivotMapper = pivotMapper;
+        this.pivotStrategy = pivotStrategy;
     }
 
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
@@ -79,7 +79,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         List<PivotResult> pivotResults = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            PivotResult pivotResult = pivotMapper.pivot(arguments);
+            PivotResult pivotResult = pivotStrategy.pivot(arguments);
             if (pivotResult != null) {
                 pivotResults.add(pivotResult);
             }
@@ -99,7 +99,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
     }
 
     private void populateDefault(Tuple result) {
-        for (Map.Entry<String, Object> entry: pivotMapper.getDefaultValues().entrySet()) {
+        for (Map.Entry<String, Object> entry: pivotStrategy.getDefaultValues().entrySet()) {
             String column = entry.getKey();
             Integer loc = namePositionMap.get(column.toLowerCase());
             if (loc != null && loc >= 0) {

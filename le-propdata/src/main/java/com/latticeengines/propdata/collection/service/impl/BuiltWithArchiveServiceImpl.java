@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
 
 @Component("builtWithArchiveService")
 public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implements ArchiveService {

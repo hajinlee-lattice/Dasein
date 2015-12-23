@@ -1,4 +1,4 @@
-package com.latticeengines.dataflow.exposed.builder.pivot;
+package com.latticeengines.dataflow.exposed.builder.strategy;
 
 import static com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.FieldMetadata;
 
@@ -13,12 +13,15 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class PivotMapperUnitTestNG {
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
+
+public class PivotStrategyUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "pivotToClassData")
     public void testPivotToClass(Class<?> targetClass) {
         Set<String> keys = new HashSet<>(Arrays.asList("a", "b"));
-        PivotMapper pivot = PivotMapper.pivotToClass("key", "value", keys, targetClass);
+        PivotStrategyImpl pivot = PivotStrategyImpl.pivotToClass("key", "value", keys, targetClass);
         List<FieldMetadata> fieldMetadataList = pivot.getFieldMetadataList();
         for (FieldMetadata metadata: fieldMetadataList) {
             Assert.assertTrue(keys.contains(metadata.getFieldName()));
@@ -40,7 +43,7 @@ public class PivotMapperUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "notNullData", expectedExceptions = IllegalArgumentException.class)
     public void testNotNull(String key, String value, Set<String> keys) {
-        PivotMapper.pivotToClass(key, value, keys, Integer.class);
+        PivotStrategyImpl.pivotToClass(key, value, keys, Integer.class);
     }
 
     @DataProvider(name = "notNullData")
@@ -65,22 +68,22 @@ public class PivotMapperUnitTestNG {
 
         Map<String, Integer> pMap = new HashMap<>();
         pMap.put("c", 1);
-        PivotMapper pivot = new PivotMapper("key", "value", keys, Integer.class, cMap, pMap, null, null, null);
+        PivotStrategyImpl pivot = new PivotStrategyImpl("key", "value", keys, Integer.class, cMap, pMap, null, null, null);
         Assert.assertNotNull(pivot);
         PivotResult result = pivot.pivot("c");
         Assert.assertEquals(result.getPriority(), 1);
 
-        new PivotMapper("key", "value", keys, Integer.class,
+        new PivotStrategyImpl("key", "value", keys, Integer.class,
                 cMap, null, null, null, null);
     }
 
     @Test(groups = "unit")
     public void testPivot() {
         Set<String> keys = new HashSet<>(Arrays.asList("a", "b", "c"));
-        PivotMapper pivot = PivotMapper.pivotToClass("key", "value", keys, Integer.class);
+        PivotStrategyImpl pivot = PivotStrategyImpl.pivotToClass("key", "value", keys, Integer.class);
         PivotResult result = pivot.pivot("a");
         Assert.assertEquals(result.getColumnName(), "a");
-        Assert.assertEquals(result.getPriority(), PivotMapper.DEFAULT_PRIORITY);
+        Assert.assertEquals(result.getPriority(), PivotStrategyImpl.DEFAULT_PRIORITY);
         Assert.assertNull(pivot.pivot("nope"));
     }
 

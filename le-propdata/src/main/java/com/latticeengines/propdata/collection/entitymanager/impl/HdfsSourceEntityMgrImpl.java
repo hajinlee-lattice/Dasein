@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.util.TableUtils;
 
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
@@ -53,6 +55,12 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public String getCurrentSnapshotDir(Source source) {
         String version = getCurrentVersion(source);
         return hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+    }
+
+    @Override
+    public Table getTableAtVersion(Source source, String version) {
+        String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        return TableUtils.createTable(source.getSqlTableName(), path + "/*.avro");
     }
 
 }

@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 

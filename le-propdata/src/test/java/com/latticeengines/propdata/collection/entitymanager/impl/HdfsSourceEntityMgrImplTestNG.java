@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.collection.source.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 

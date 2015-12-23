@@ -20,9 +20,8 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
-import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
-import com.latticeengines.propdata.collection.source.CollectionSource;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -333,20 +332,20 @@ public class PropDataAdminTool {
 
         private final String name;
         private final String archiveServiceBean;
-        private final CollectionSource collectionSource;
+        private final CollectionSource collectionSourceSource;
         private final PivotedSource pivotedSource;
 
-        Source(String name, String archiveJobBean, CollectionSource collectionSource, PivotedSource pivotedSource) {
+        Source(String name, String archiveJobBean, CollectionSource collectionSourceSource, PivotedSource pivotedSource) {
             this.name = name;
             this.archiveServiceBean = archiveJobBean;
-            this.collectionSource = collectionSource;
+            this.collectionSourceSource = collectionSourceSource;
             this.pivotedSource = pivotedSource;
 
         }
 
         String getName() { return this.name; }
         String getArchiveServiceBean() { return this.archiveServiceBean; }
-        CollectionSource getCollectionSource() { return this.collectionSource; }
+        CollectionSource getCollectionSourceSource() { return this.collectionSourceSource; }
         PivotedSource getPivotedSource() { return this.pivotedSource; }
 
         static {
