@@ -92,9 +92,10 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
             columns.add("[" + feature + "] " + type + " NULL");
         }
         sql += StringUtils.join(columns, ", \n");
-        sql += ",\n [" + getSource().getTimestampField() + "] [DateTime] NOT NULL) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] \n";
-
-        sql += "CREATE CLUSTERED INDEX IX_URLFeature ON [Feature_Pivoted_Source_stage] ([URL])";
+        sql += ",\n [" + getSource().getTimestampField() + "] [DateTime] NOT NULL) " +
+                "ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] \n";
+        sql += "CREATE CLUSTERED INDEX IX_URLFeature ON [Feature_Pivoted_Source_stage] ([URL]) \n";
+        sql += "CREATE CLUSTERED INDEX IX_TIME ON [Feature_Pivoted_Source_stage] ([Timestamp])";
 
         return sql;
     }

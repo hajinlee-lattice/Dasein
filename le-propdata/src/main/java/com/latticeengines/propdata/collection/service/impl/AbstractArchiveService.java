@@ -265,7 +265,9 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         String sql = super.createStageTableSql();
         sql += " \n CREATE CLUSTERED INDEX IX_PKS ON [" + getStageTableName() + "] ( [";
         sql += StringUtils.join(getSource().getPrimaryKey(), "], [");
-        sql += "] )";
+        sql += "] ) \n";
+        sql += " CREATE INDEX IX_TIME ON [" + getStageTableName() + "] ( [";
+        sql += getSource().getTimestampField() + "] )";
         return sql;
     }
 
