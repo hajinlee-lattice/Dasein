@@ -36,9 +36,13 @@ class LPCheckVersion( StepBase ):
       exp_version = appseq.getConnectionMgr().getNamedExpression( 'Version' )
       defn = exp_version.Object().definition()
       c = re.search( 'LatticeFunctionExpressionConstant\(\"PLS (.*?) Template:\".*LatticeFunctionExpressionConstant\(\"(.*?)\"', defn )
+      d = re.search( 'LatticeFunctionExpressionConstant\(\"play(.*?) Template:\".*LatticeFunctionExpressionConstant\(\"(.*?)\"', defn )
       if c:
         type = c.group(1)
         version = c.group(2)
+      elif d:
+        type = d.group(1)
+        version = d.group(2)
       else:
         type = 'Nonstandard type'
         version = 'Nonstandard version'
@@ -65,6 +69,9 @@ class LPCheckVersion( StepBase ):
       else:
         ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step2', 'targetQueries')
 
+      appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
+      appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
+      appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
       try:
         appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
         appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
