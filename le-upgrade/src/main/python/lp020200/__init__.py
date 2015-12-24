@@ -15,3 +15,5 @@ from .LP_020200_DL_PushToScoringDB import LP_020200_DL_PushToScoringDB
 from .LP_020200_DL_PushToLeadDestination import LP_020200_DL_PushToLeadDestination
 from .LP_020200_DL_POC_Model import LP_020200_DL_POC_Model
 from .LP_020200_VDB_ModifiedSpec import LP_020200_VDB_ModifiedSpec
+from .LP_020200_VDB_ModifiedColumns import LP_020200_VDB_ModifiedColumns
+from .LP_020200_NewSpecs import LP_020200_NewSpecs
