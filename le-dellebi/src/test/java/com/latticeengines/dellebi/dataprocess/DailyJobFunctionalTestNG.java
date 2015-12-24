@@ -41,8 +41,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
-@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml",
-        "classpath:dellebi-context.xml" })
+@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml", "classpath:dellebi-context.xml" })
 public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     static final Log log = LogFactory.getLog(DailyJobFunctionalTestNG.class);
@@ -114,10 +113,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
             exportAndReportService.export(context);
 
             Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)),
-                    true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf,
-                    dellEbiFlowService.getTxtDir(null) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);
@@ -134,8 +131,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional", dataProvider = "startDateFileDataProvider")
-    public void testStartDate(String file, String sourceType, Boolean isSetStartDate)
-            throws Exception {
+    public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
 
         if (sourceType.equals("SMB")) {
@@ -162,10 +158,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
             exportAndReportService.export(context);
 
             Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)),
-                    true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf,
-                    dellEbiFlowService.getTxtDir(null) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);
@@ -182,17 +176,14 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     public static Object[][] getValidateNameData() {
         return new Object[][] {
 
-                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
+/*                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
                 { "./src/test/resources/fiscal_day_calendar_1_20151125_200027.zip", "SMB", false },
                 { "./src/test/resources/global_sku_lookup_1_20151007_035025.zip", "SMB", false },
                 { "./src/test/resources/tgt_all_chnl_hier_1_20151125_201055.zip", "SMB", false },
-                { "./src/test/resources/tgt_itm_cls_code_lattice_ext_1_20151129_020123.zip", "SMB",
-                        false },
-                { "./src/test/resources/tgt_lat_order_summary_global_1_20151126_201516.zip", "SMB",
-                        false },
-                { "./src/test/resources/tgt_lattice_mfg_ext_1_20151109_020120.zip", "SMB", false },
-                { "./src/test/resources/tgt_order_detail_global_1_20151127_235435.zip", "SMB",
-                        false },
+                { "./src/test/resources/tgt_itm_cls_code_lattice_ext_1_20151129_020123.zip", "SMB", false },*/
+                { "./src/test/resources/tgt_lat_order_summary_global_1_20151126_201516.zip", "SMB", false },
+                { "./src/test/resources/tgt_lattice_mfg_ext_1_20151216_020122.zip", "SMB", false },
+                { "./src/test/resources/tgt_order_detail_global_1_20151127_235435.zip", "SMB", false },
                 { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", false },
                 { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true }
 
@@ -201,8 +192,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     @DataProvider(name = "startDateFileDataProvider")
     public static Object[][] getStartDateNameData() {
-        return new Object[][] {
-                { "./src/test/resources/tgt_quote_trans_global_5_2015.zip", "SMB", true }, };
+        return new Object[][] { { "./src/test/resources/tgt_quote_trans_global_5_2015.zip", "SMB", true }, };
     }
 
     private void smbPut(String remoteUrl, String localFile) throws Exception {
@@ -221,7 +211,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     private void smbClean(String remoteUrl) throws Exception {
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
-        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords","false");
+        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
         try {
             SmbFile remoteFile = new SmbFile(remoteUrl + '/', auth);
             SmbFile[] smbFiles = remoteFile.listFiles();
@@ -306,8 +296,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         return fileName;
     }
 
-    private void processSmbFileModifiedDate(String fileName, Boolean isSetStartDate)
-            throws Exception {
+    private void processSmbFileModifiedDate(String fileName, Boolean isSetStartDate) throws Exception {
 
         if (isSetStartDate == false)
             return;

@@ -50,8 +50,7 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
             String fieldName = this.fieldDeclaration.get(i).toString();
             switch (fieldName) {
             case "QUOTE_CREATE_DATE":
-                String quoteCreationDate = convertDatetimeToDate(
-                        argument.getString("QUOTE_CREATE_DATE"));
+                String quoteCreationDate = convertDatetimeToDate(argument.getString("QUOTE_CREATE_DATE"));
                 result.add(quoteCreationDate);
                 break;
             case "STAGE_DT":
@@ -91,12 +90,7 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
                 break;
 
             default:
-                String fieldValue = argument.getString(fieldName);
-                if (fieldValue.contains(",")) {
-                    result.add('"' + argument.getString(fieldName) + '"');
-                } else {
-                    result.add(argument.getString(fieldName));
-                }
+                result.add(argument.getString(fieldName));
             }
         }
 
@@ -111,7 +105,7 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
 
         return s;
     }
-    
+
     private String convertDatetimeToString() {
         SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         Date date = new Date();

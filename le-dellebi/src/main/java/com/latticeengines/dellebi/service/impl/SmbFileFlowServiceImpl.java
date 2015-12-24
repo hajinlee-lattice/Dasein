@@ -42,7 +42,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     public SmbFile getScanedFile() {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
-        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords","false");
+        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
         try {
             SmbFile smbDir = new SmbFile(smbInboxPath + "/", auth);
 
@@ -92,8 +92,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
                 context.setProperty(DellEbiFlowService.LOG_ENTRY, dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
-                context.setProperty(DellEbiFlowService.FILE_SOURCE,
-                        DellEbiFlowService.FILE_SOURCE_SMB);
+                context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_SMB);
                 context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
 
                 return context;
@@ -112,16 +111,20 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     public boolean deleteFile(String fileName) {
 
         try {
-            log.info("Deleting smbFile, name=" + fileName);
+            log.info("Moving smbFile, name=" + fileName + " to Processed_Zipped folder");
             NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
-            SmbFile smbFile = new SmbFile(smbInboxPath + "/" + fileName, auth);
-            if (smbFile.canWrite()) {
-                smbFile.delete();
+            SmbFile smbFileFrom = new SmbFile(smbInboxPath + "/" + fileName, auth);
+            SmbFile smbFileTo = new SmbFile(smbInboxPath + "/Processed_Zipped/" + fileName, auth);
+            if (smbFileFrom.canWrite()) {
+                if (smbFileTo.exists()) {
+                    smbFileTo.delete();
+                }
+                smbFileFrom.renameTo(smbFileTo);
             }
             return true;
 
         } catch (Exception ex) {
-            log.error("Can not delete smbFile, name=" + fileName, ex);
+            log.error("Can not move smbFile, name=" + fileName, ex);
             return false;
         }
 
@@ -199,8 +202,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
     protected boolean isProcessedFile(SmbFile file) {
         String filename = file.getName();
-        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr
-                .getEntryByFile(filename);
+        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(filename);
 
         if (dellEbiExecutionLog == null) {
             return false;

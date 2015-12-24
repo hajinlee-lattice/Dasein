@@ -1,5 +1,6 @@
 package com.latticeengines.dellebi.util;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,13 +90,11 @@ public class ExportAndReportService {
         Configuration conf = new Configuration();
         try {
             if (!HdfsUtils.fileExists(conf, successFile)) {
-                log.info("The successFile: " + successFile
-                        + " does not exist in output, skip the data export");
+                log.info("The successFile: " + successFile + " does not exist in output, skip the data export");
                 return false;
             }
         } catch (Exception ex) {
-            log.error("The successFile: " + successFile + " does not exist in output! errorMsg="
-                    + ex.toString());
+            log.error("The successFile: " + successFile + " does not exist in output! errorMsg=" + ex.toString());
             return false;
         }
 
@@ -105,22 +104,25 @@ public class ExportAndReportService {
 
         String targetJdbcDb = dellEbiFlowService.getTargetDB(context);
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
-                .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         String errorMsg = null;
         String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
 
         targetColumns = dellEbiFlowService.getTargetColumns(context);
-        String optionalEnclosure = "\\\"";
+        String optionalEnclosurePara = "--fields-terminated-by";
+        String optionalEnclosureValue = "\t";
+        List<String> options = new ArrayList<>();
+        options.add(optionalEnclosurePara);
+        options.add(optionalEnclosureValue);
 
         try {
-            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8,
-                    null, targetColumns, optionalEnclosure);
+            sqoopSyncJobService.exportDataSync(targetTable, sourceDir, creds, queue, customer, 8, null, targetColumns,
+                    options);
 
         } catch (Exception e) {
-            errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg="
-                    + e.getMessage();
+            errorMsg = "Export files " + sourceDir + " to SQL server failed! errorMsg=" + e.getMessage();
             log.error("Export files " + sourceDir + " to SQL server failed", e);
         }
 
@@ -147,15 +149,12 @@ public class ExportAndReportService {
         ;
         if (errorMsg == null) {
             try {
-                List<String> files = HdfsUtils.getFilesByGlob(conf,
-                        dellEbiFlowService.getTxtDir(null) + "/*.txt");
+                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {
-                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName,
-                                targetJdbcDb);
-                        dellEbiExecutionLog
-                                .setStatus(DellEbiExecutionLogStatus.Completed.getStatus());
+                        report(context, "Dell EBI daily refresh (export) succeeded!", fileName, targetJdbcDb);
+                        dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Completed.getStatus());
                         dellEbiExecutionLog.setEndDate(new Date());
                         dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
                         return true;
@@ -173,15 +172,13 @@ public class ExportAndReportService {
         }
 
         if (errorMsg != null) {
-            report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg,
-                    fileName, targetJdbcDb);
+            report(context, "Dell EBI daily refresh (export) failed! errorMsg=" + errorMsg, fileName, targetJdbcDb);
             dellEbiFlowService.registerFailedFile(context, errorMsg);
         }
         return false;
     }
 
-    private void report(DataFlowContext requestContext, String msg, String fileName,
-            String targetJdbcDb) {
+    private void report(DataFlowContext requestContext, String msg, String fileName, String targetJdbcDb) {
         String totalTime = getTotalTime(requestContext);
         mailSender.sendEmail(mailReceiveList, msg + " File=" + fileName,
                 "\nEnv = " + dellebiEnv + "\nTotalTime = " + totalTime + "\nDB = " + targetJdbcDb);
