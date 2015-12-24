@@ -9,6 +9,7 @@ from liaison import *
 
 from .Applicability import Applicability
 from .StepBase      import StepBase
+import traceback
 
 class AppSequence( object ):
 
@@ -105,17 +106,22 @@ class AppSequence( object ):
       if not self._checkOnly and applyUpgrade:
 
         print 'Applying Upgrade',
-
-        for step in sequence_applicable:
-          success = step.apply( self )
-          if not success:
-            applicability[step.getName()] = 'UNEXPECTED FAILURE'
-            allStepsSuccessful = False
-            break
-          print '.',
-        self._lg_mgr.commit()
-        print 'Done'
-
+        try:
+          for step in sequence_applicable:
+            success = step.apply( self )
+            if not success:
+              applicability[step.getName()] = 'UNEXPECTED FAILURE'
+              allStepsSuccessful = False
+              break
+            print '.',
+          self._lg_mgr.commit()
+          print 'Done'
+        except Exception, exception:
+          print 'Unexpected Failure during upgrade'
+          print "\nException arguments:", exception.args
+          print "\nException message:", exception
+          print "\nTraceback:"
+          traceback.print_exc()
       else:
         allStepsSuccessful = False
         print 'Continuing'

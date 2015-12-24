@@ -20,9 +20,9 @@ print ''
 (checkOnly, tenantFileName, resultsFileName) = appsequence.AppArgs.get(sys.argv)
 
 sequence = []
-sequence.append( appsequence.LPCheckVersion('2.1.0') )
+sequence.append( appsequence.LPCheckVersion('2.1.1') )
 sequence.append( lp020102.LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot() )
-#sequence.append( appsequence.LPSetVersion('2.1.2') )
+sequence.append( appsequence.LPSetVersion('2.1.2') )
 
 app = appsequence.AppSequence( tenantFileName, resultsFileName, sequence, checkOnly )
 app.execute()

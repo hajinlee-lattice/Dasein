@@ -10,6 +10,7 @@ import re
 import appsequence
 import liaison
 import os
+import traceback
 
 
 class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
@@ -39,6 +40,7 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
 
     lgm = appseq.getLoadGroupMgr()
     type = appseq.getText('template_type')
+    conn_mgr = appseq.getConnectionMgr()
 
 # Set Specs for Q_Unpivot_* Queries DL Load Group ExtractAnalyticAttributesIntoSourceTable
     pltd = lgm.getLoadGroup('ExtractAnalyticAttributesIntoSourceTable')
@@ -592,6 +594,8 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
 
     lgm.setLoadGroupFunctionality( 'ExtractAnalyticAttributesIntoSourceTable', step_xml )
 
+
+
 # Add PredictionAccuracy Report into visiDB
 # add new specs as following:
     #1. PredictionAccuracyReport
@@ -611,7 +615,48 @@ class LP_020102_PredictionAccuracyReportAndSetSpecsForQ_Unpivot(StepBase):
 
     conn_mgr = appseq.getConnectionMgr()
     conn_mgr.setSpec( 'New Specs', slnes )
+
+    #Remove the unnecessary columns in unpivot queries.
+    try:
+      if type in ('MKTO', 'ELQ'):
+        query = conn_mgr.getQuery("Q_Unpivot_By_SFDC_Lead_ID_PLS_Scoring_Incremental")
+        query.removeColumn('ModelingID')
+        query.removeColumn('Email')
+        query.removeColumn('CreationDate')
+        query.removeColumn('Company')
+        query.removeColumn('LastName')
+        query.removeColumn('FirstName')
+        conn_mgr.setQuery(query)
+
+        query = conn_mgr.getQuery("Q_Unpivot_By_SFDC_Contact_ID_PLS_Scoring_Incremental")
+        query.removeColumn('ModelingID')
+        query.removeColumn('Email')
+        query.removeColumn('CreationDate')
+        query.removeColumn('Company')
+        query.removeColumn('LastName')
+        query.removeColumn('FirstName')
+        conn_mgr.setQuery(query)
+
+      elif type == 'SFDC':
+        query = conn_mgr.getQuery("Q_Unpivot_By_SFDC_Lead_Contact_ID_PLS_Scoring_Incremental")
+        query.removeColumn('ModelingID')
+        query.removeColumn('Email')
+        query.removeColumn('CreationDate')
+        query.removeColumn('Company')
+        query.removeColumn('LastName')
+        query.removeColumn('FirstName')
+        conn_mgr.setQuery(query)
+
+    except Exception, exception:
+          print 'Unexpected Failure during upgrade'
+          print "\nException arguments:", exception.args
+          print "\nException message:", exception
+          print "\nTraceback:"
+          traceback.print_exc()
+
     success = True
+
+    print 'Success:' + str(success)
 
     return success
 

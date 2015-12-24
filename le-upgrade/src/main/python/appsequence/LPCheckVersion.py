@@ -7,6 +7,7 @@
 
 import re
 import requests
+from lxml import etree
 
 from liaison import *
 
@@ -63,47 +64,83 @@ class LPCheckVersion( StepBase ):
     if version < 2.1:
       if not lgm.hasLoadGroup('PushToLeadDestination_Step1'):
         return Applicability.cannotApplyFail
-
       if type in ('MKTO', 'ELQ'):
         ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step1', 'lssbardouts')
       else:
         ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushToLeadDestination_Step2', 'targetQueries')
-
-      appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
-      appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
-      appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
-      try:
-        appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type) )
-        appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type) )
-        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
-      except ValueError:
-        print "Get the score/scoreDate Field failed"
+    elif version < '2.1.2':
+      if not lgm.hasLoadGroup('PushLeadsInDanteToDestination'):
         return Applicability.cannotApplyFail
+      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushLeadsInDanteToDestination', 'targetQueries')
+    else :
+      if not lgm.hasLoadGroup('PushLeadsLastScoredToDestination'):
+        return Applicability.cannotApplyFail
+      ptld_lbo_xml = lgm.getLoadGroupFunctionality('PushLeadsLastScoredToDestination', 'targetQueries')
+
+    try:
+      if type in ('ELQ', 'MKTO'):
+        appseq.setText( 'score_field', self.parseScoreField(ptld_lbo_xml, type, version) )
+        appseq.setText( 'score_date_field', self.parseScoreDateField(ptld_lbo_xml, type, version) )
+        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+      else:
+        appseq.setText( 'sfdc_lead_score_field', self.parseScoreField(ptld_lbo_xml, type+'Lead', version) )
+        appseq.setText( 'sfdc_lead_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Lead', version) )
+        appseq.setText( 'sfdc_contact_score_field', self.parseScoreField(ptld_lbo_xml, type+'Contact', version) )
+        appseq.setText( 'sfdc_contact_score_date_field', self.parseScoreDateField(ptld_lbo_xml, type+'Contact', version) )
+        appseq.setText( 'customer_id', self.parseCustomerId(ptld_lbo_xml, appseq) )
+
+    except ValueError:
+      print "Get the score/scoreDate Field failed"
+      return Applicability.cannotApplyFail
 
     if version == self._template_version:
       return Applicability.canApply
 
     return Applicability.cannotApplyFail
 
-  def parseScoreField(selfs, str, type):
-    if type == 'MKTO':
-      s = re.search('<cm scn=\"Score\" tcn=\"(.*?)\"/>', str)
-    elif type == 'ELQ':
-      s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
+  def getSFDCContactFromTargetQuery(self, str):
+    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Contact_Score\".*?</targetQuery>', str)
+    return s.group(1)
+
+  def getSFDCLeadFromTargetQuery(self, str):
+    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Lead_Score\".*?</targetQuery>', str)
+    return s.group(1)
+
+  def parseScoreField(self, str, type, version):
+    if version < 2.1:
+      if type == 'MKTO':
+        s = re.search('<cm scn=\"Score\" tcn=\"(.*?)\"/>', str)
+      elif type == 'ELQ':
+        s = re.search('<cm scn=\"C_Lattice_Predictive_Score1\" tcn=\"(.*?)\"/>', str)
+      elif type == 'SFDCLead':
+        s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCLeadFromTargetQuery(str))
+      elif type == 'SFDCContact':
+        s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
     else:
-      s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', str)
+      if type == 'MKTO':
+        s = re.search('queryColumnName=\"Score\" fsColumnName=\"(.*?)\"', str)
+      elif type == 'ELQ':
+        s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', str)
+      elif type == 'SFDCLead':
+        s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCLeadFromTargetQuery(str))
+      elif type == 'SFDCContact':
+        s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
 
     if not s:
       raise ValueError( 'Get the Score Field failed' )
     return s.group(1)
 
-  def parseScoreDateField(self, str, type):
+
+
+  def parseScoreDateField(self, str, type, version):
     if type == 'MKTO':
-      s = re.search('<cm scn=\"Score_Date_Time\" tcn=\"(.*?)\"/>', str)
+      s = re.search('queryColumnName=\"Score_Date_Time\" fsColumnName=\"(.*?)\"', str)
     elif type == 'ELQ':
-      s = re.search('<cm scn=\"C_Lattice_LastScoreDate1\" tcn=\"(.*?)\"/>', str)
-    else:
       s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', str)
+    elif type == 'SFDCLead':
+      s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', self.getSFDCLeadFromTargetQuery(str))
+    elif type == 'SFDCLead':
+      s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
 
     if not s:
       raise ValueError( 'Get the ScoreDate Field failed' )
