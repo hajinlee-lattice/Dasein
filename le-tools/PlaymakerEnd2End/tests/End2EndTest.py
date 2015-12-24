@@ -39,7 +39,7 @@ class TestSteps(unittest.TestCase):
 		while status != 'Complete':#until score finish
 			#time.sleep(20)
 			status=playDealer.getStatusOfPlay(idOfPlay=playId)
-			print status
+			#print status
 			if status=="Error":
 				log.error("SCORING FAILED!!!")
 				break
@@ -194,7 +194,7 @@ class EVModelingE2E(unittest.TestCase):
 			except Exception,e:
 				SalePrismEnvironments.needSetupEnvironment=True
 				assert False,log.error('set up failed: '+str(e.message))
-	def atest_Play_With_Model(self):
+	def test_Play_With_Model(self):
 		playDealer=DealPlay()
 		createPlayResult=playDealer.createPlayByREST(playType=PlayTypes.t_CSRepeatPurchase,UseEVModel=True)#create a play
 		playId=createPlayResult["playId"]
