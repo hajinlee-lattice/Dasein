@@ -32,10 +32,10 @@ public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGB
     @Autowired
     private VdbMetadataService vdbMetadataService;
 
-    private static final String categories[] = VdbMetadataConstants.CATEGORY_OPTIONS;
-    private static final String approvedUsages[] = VdbMetadataConstants.APPROVED_USAGE_OPTIONS;
-    private static final String fundamentalTypes[] = VdbMetadataConstants.FUNDAMENTAL_TYPE_OPTIONS;
-    private static final String statisticalTypes[] = VdbMetadataConstants.STATISTICAL_TYPE_OPTIONS;
+    private static final String[] categories = VdbMetadataConstants.CATEGORY_OPTIONS;
+    private static final String[] approvedUsages = VdbMetadataConstants.APPROVED_USAGE_OPTIONS;
+    private static final String[] fundamentalTypes = VdbMetadataConstants.FUNDAMENTAL_TYPE_OPTIONS;
+    private static final String[] statisticalTypes = VdbMetadataConstants.STATISTICAL_TYPE_OPTIONS;
 
     private static final Integer maxUpdatesCount = 5;
 

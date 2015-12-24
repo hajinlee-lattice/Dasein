@@ -141,7 +141,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
             store.connect(receivingHost, EXTERNAL_USER_EMAIL, password);
             Folder folder = store.getFolder("INBOX");
             folder.open(Folder.READ_WRITE);
-            Message messages[] = folder.getMessages();
+            Message[] messages = folder.getMessages();
 
             for (Message message : messages) {
                 if (!message.getSubject().equalsIgnoreCase(EMAIL_SUBJECT)) { continue; }
