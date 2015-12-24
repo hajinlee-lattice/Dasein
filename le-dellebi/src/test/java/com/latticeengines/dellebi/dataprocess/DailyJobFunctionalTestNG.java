@@ -176,11 +176,11 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     public static Object[][] getValidateNameData() {
         return new Object[][] {
 
-/*                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
+                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
                 { "./src/test/resources/fiscal_day_calendar_1_20151125_200027.zip", "SMB", false },
                 { "./src/test/resources/global_sku_lookup_1_20151007_035025.zip", "SMB", false },
                 { "./src/test/resources/tgt_all_chnl_hier_1_20151125_201055.zip", "SMB", false },
-                { "./src/test/resources/tgt_itm_cls_code_lattice_ext_1_20151129_020123.zip", "SMB", false },*/
+                { "./src/test/resources/tgt_itm_cls_code_lattice_ext_1_20151129_020123.zip", "SMB", false },
                 { "./src/test/resources/tgt_lat_order_summary_global_1_20151126_201516.zip", "SMB", false },
                 { "./src/test/resources/tgt_lattice_mfg_ext_1_20151216_020122.zip", "SMB", false },
                 { "./src/test/resources/tgt_order_detail_global_1_20151127_235435.zip", "SMB", false },
