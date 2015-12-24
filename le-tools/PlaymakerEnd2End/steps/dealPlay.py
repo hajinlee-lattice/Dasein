@@ -153,7 +153,7 @@ class DealPlay(object):
 		assert response.status_code==200
 
 	def approvePlay(self,idOfPlay):
-		approvePlayUrl=SalePrismEnvironments.approvePlayUrl.replace("99",str(idOfPlay))
+		approvePlayUrl=SalePrismEnvironments.approvePlayUrl.replace("playID_temp_99",str(idOfPlay))
 		approvePlayHeaders={"Cookie":self.aspNet,"Host":SalePrismEnvironments.host,"Content-Type":"application/json","LEFormsTicket":self.aspAuth}
 		response=requests.post(approvePlayUrl,headers=approvePlayHeaders,verify=False)
 		resJson=json.loads(response.text)

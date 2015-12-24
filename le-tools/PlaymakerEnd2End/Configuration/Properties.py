@@ -57,7 +57,7 @@ class SalePrismEnvironments(object):
     resetCachePostXML=paras.get("resetCachePostXML")
     savePlayUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/SavePlayDetailsReturnStatus"
     scorePlayUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/RequestCombinedModelScore?playID="
-    approvePlayUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/MarkApproved?playID=99&approve=true"
+    approvePlayUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/MarkApproved?playID=playID_temp_99&approve=true"
     getStatusOfPlayUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPlayStatus?playID="
     getLaunchStatusUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPlayDetailsWithHeader?playID="
     getPortfililPlaysUrl="https://"+host+"/"+tenantName+"_Application/WebPlayServiceHost.svc/GetPortfolioPlays?queryName=AllPortfolioPlays"
