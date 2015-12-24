@@ -452,6 +452,7 @@ SETUP_CREDENTIALS_SF_CONFIGURATION_GUIDE_LABEL=Salesforce Configuration Guide
 SETUP_CREDENTIALS_SAVE_IMPORT_BUTTON=Save & Import Data
 SETUP_IMPORTING_DATA_LABEL=Importing Salesforce Data
 SETUP_IMPORT_COMPLETE_LABEL=Import Complete:
+SETUP_FORMAT_DATE_ERROR=Invalid Date
 SETUP_DATA_PROFILE_SUMMARY_CSV=Data Profile Summary (.CSV)
 SETUP_ERROR_IMPORTING_DATA_LABEL=Error importing Salesforce data
 SETUP_IMPORT_DATA_ERROR=We are unable to import Salesforece data at this time.

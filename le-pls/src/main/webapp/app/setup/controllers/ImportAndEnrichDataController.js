@@ -43,7 +43,11 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         $scope.showImportComplete = true;
         TenantDeploymentService.GetImportSfdcDataCompleteTime().then(function (result) {
             if (result.Success === true) {
-                $scope.importCompleteTime = DateTimeFormatUtility.FormatDateTime(result.ResultObj, "mm/dd/yy hh:MM:ss TT");
+                try {
+                    $scope.importCompleteTime = DateTimeFormatUtility.FormatDateTime(result.ResultObj, "mm/dd/yy hh:MM:ss TT");
+                } catch (e) {
+                    $scope.importCompleteTime = ResourceUtility.getString('SETUP_FORMAT_DATE_ERROR');
+                }
             } else {
                 $scope.getImportCompleteTimeError = result.ResultErrors;
             }
@@ -75,7 +79,11 @@ angular.module('mainApp.setup.controllers.ImportAndEnrichDataController', [
         $scope.showEnrichComplete = true;
         TenantDeploymentService.GetEnrichDataCompleteTime().then(function (result) {
             if (result.Success === true) {
-                $scope.enrichCompleteTime = DateTimeFormatUtility.FormatDateTime(result.ResultObj, "mm/dd/yy hh:MM:ss TT");
+                try {
+                    $scope.enrichCompleteTime = DateTimeFormatUtility.FormatDateTime(result.ResultObj, "mm/dd/yy hh:MM:ss TT");
+                } catch (e) {
+                    $scope.enrichCompleteTime = ResourceUtility.getString('SETUP_FORMAT_DATE_ERROR');
+                }
             } else {
                 $scope.getEnrichCompleteTimeError = result.ResultErrors;
             }
