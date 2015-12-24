@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -92,8 +93,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     @Test(groups = "functional.platform", enabled = true)
     public void importDataForFile() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String url = String.format("jdbc:relique:csv:%s", inputUrl.getPath());
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -250,15 +251,14 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
-        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile",
-                new HdfsFilenameFilter() {
+        List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "/tmp/dataFromFile", new HdfsFilenameFilter() {
 
-                    @Override
-                    public boolean accept(String fileName) {
-                        return fileName.endsWith(".avro");
-                    }
+            @Override
+            public boolean accept(String fileName) {
+                return fileName.endsWith(".avro");
+            }
 
-                });
+        });
 
         assertEquals(files.size(), 1);
 
@@ -288,8 +288,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     @Test(groups = "functional.platform", enabled = true)
     public void exportDataToSQLServerWithEnclosure() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_WARRANTY_GLOBAL";
         String sourceDir = "/tmp/Warranty_Dell.txt";
         String targetColumns = "ORDER_BUSINESS_UNIT_ID,LOCAL_CHANNEL,SERVICE_TAG_ID,ORDER_NUMBER,"
@@ -297,10 +297,13 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 + "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM,BRAND_DESC,SERVICE_LEVEL_CODE,CUSTOMER_NUMBER,"
                 + "SERVICE_CONTRACT_CUSTOMER_NUMBER,PRODUCT_LINE_PARENT,PRODUCT_LINE_DESC,PRODUCT_LINE,"
                 + "SERVICE_CONTRACT_STATUS_DESC,SOURCE_SYSTEM_UPDATE_DATE,REGION_CODE";
-        String optionalEnclosure = "\\\"";
+        String optionalEnclosurePara = "--optionally-enclosed-by";
+        String optionalEnclosureValue = "\\\"";
+        List<String> options = new ArrayList<>();
+        options.add(optionalEnclosurePara);
+        options.add(optionalEnclosureValue);
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt",
-                "/tmp");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt", "/tmp");
 
         ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
                 sourceDir, //
@@ -310,7 +313,39 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 1, //
                 null, //
                 targetColumns, //
-                optionalEnclosure);
+                options);
+
+        log.info(String.format("Waiting for appId %s", appId));
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+    }
+
+    @Test(groups = "functional.platform", enabled = true)
+    public void exportDataToSQLServerWithDelimiter() throws Exception {
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+
+        String targetTable = "STG_SKU_MANUFACTURER";
+        String sourceDir = "/tmp/SKU_Mfg_Dell_Delimiter.txt";
+        String targetColumns = "MFG_NAME,SUBCLASS_DESC,ITM_SHRT_DESC,MFG_PART_NUM";
+        String optionalEnclosurePara = "--fields-terminated-by";
+        String optionalEnclosureValue = "|~|";
+        List<String> options = new ArrayList<>();
+        options.add(optionalEnclosurePara);
+        options.add(optionalEnclosureValue);
+
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell_Delimiter.txt", "/tmp");
+
+        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
+                sourceDir, //
+                getSQLServerCreds(), //
+                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
+                "DellEbi_SKU_Mfg", //
+                1, //
+                null, //
+                targetColumns, //
+                options);
 
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -320,14 +355,13 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     @Test(groups = "functional.platform", enabled = true)
     public void exportDataToSQLServer() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
+        URL inputUrl = ClassLoader
+                .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell.txt";
         String targetColumns = "MFG_NAME,SUBCLASS_DESC,ITM_SHRT_DESC,MFG_PART_NUM";
 
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt",
-                "/tmp");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt", "/tmp");
 
         ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
                 sourceDir, //
@@ -347,8 +381,8 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
     private DbCreds getSQLServerCreds() {
 
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
-                .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
+                .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
         return creds;
     }

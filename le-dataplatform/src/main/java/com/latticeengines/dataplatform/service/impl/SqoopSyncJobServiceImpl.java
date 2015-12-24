@@ -55,15 +55,16 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, String columnsToInclude) {
+    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude) {
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        return importDataForQuery(query, targetDir, creds, queue, customer, splitCols, columnsToInclude, numDefaultMappers, null);
+        return importDataForQuery(query, targetDir, creds, queue, customer, splitCols, columnsToInclude,
+                numDefaultMappers, null);
     }
 
     @Override
-    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
+    public ApplicationId importDataForQuery(String query, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
         return importData(null, //
                 query, //
                 targetDir, //
@@ -75,23 +76,25 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 numMappers, //
                 props);
     }
+
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
         return importData(table, //
-                           null, //
-                           targetDir, //
-                           creds, //
-                           queue, //
-                           customer, //
-                           splitCols, //
-                           columnsToInclude, //
-                           numMappers, //
-                           props);
+                null, //
+                targetDir, //
+                creds, //
+                queue, //
+                customer, //
+                splitCols, //
+                columnsToInclude, //
+                numMappers, //
+                props);
     }
+
     @Override
-    public ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
+    public ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude, int numMappers, Properties props) {
 
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
@@ -161,8 +164,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId exportData(
-            String table, //
+    public ApplicationId exportData(String table, //
             String sourceDir, DbCreds creds, String queue, String customer, int numMappers,
             String javaColumnTypeMappings) {
 
@@ -206,7 +208,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
         ApplicationId appId = super.importData(table, //
-                null,//
+                null, //
                 targetDir, //
                 creds, //
                 queue, //
@@ -225,9 +227,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds,
-            String queue, String customer, List<String> splitCols, String columnsToInclude, String whereCondition,
-            int numMappers) {
+    public ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers) {
         long time1 = System.currentTimeMillis();
         final String jobName = jobNameService.createJobName(customer, "sqoop-import");
 
@@ -282,9 +283,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue,
-            String customer, int numMappers, String javaColumnTypeMappings, String exportColumns,
-            String optionalEnclosure) {
+    public ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings, String exportColumns, List<String> otherOptions) {
         String jobName = jobNameService.createJobName(customer, "sqoop-export");
         return super.exportData(table, //
                 sourceDir, //
@@ -297,7 +297,7 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 metadataService, //
                 hadoopConfiguration, //
                 true, //
-                optionalEnclosure);
+                otherOptions);
     }
 
 }

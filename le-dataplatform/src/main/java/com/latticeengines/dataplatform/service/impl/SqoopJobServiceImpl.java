@@ -43,7 +43,7 @@ public class SqoopJobServiceImpl {
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
             boolean sync, //
-            String optionalEnclosure) {
+            List<String> otherOptions) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapreduce.job.queuename=" + queue);
@@ -70,9 +70,10 @@ public class SqoopJobServiceImpl {
             cmds.add("--columns");
             cmds.add(exportColumns);
         }
-        if (optionalEnclosure != null) {
-            cmds.add("--optionally-enclosed-by");
-            cmds.add(optionalEnclosure);
+        if (otherOptions != null) {
+            for (String option : otherOptions) {
+                cmds.add(option);
+            }
         }
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
@@ -206,7 +207,8 @@ public class SqoopJobServiceImpl {
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // yarnConfiguration.set(MRJobConfig.MR_AM_COMMAND_OPTS,
-        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+        // "-Xdebug -Xnoagent -Djava.compiler=NONE
+        // -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);

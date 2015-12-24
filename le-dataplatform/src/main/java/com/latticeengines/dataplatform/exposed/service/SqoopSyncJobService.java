@@ -18,28 +18,31 @@ public interface SqoopSyncJobService {
     ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
-    ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue,
-            String customer, List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
+    ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
 
     ApplicationId importDataSync(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
-    ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds, String queue, String customer,
-                                 List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers);
+    ApplicationId importDataSyncWithWhereCondition(String table, String targetDir, DbCreds creds, String queue,
+            String customer, List<String> splitCols, String columnsToInclude, String whereCondition, int numMappers);
 
     ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer);
 
-    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers);
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers);
 
-    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings);
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings);
 
-    ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings);
+    ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
+            int numMappers, String javaColumnTypeMappings);
 
     ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
             int numMappers, String javaColumnTypeMappings, String exportColumns);
 
     ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
-            int numMappers, String javaColumnTypeMappings, String exportColumns, String optionalEnclosure);
+            int numMappers, String javaColumnTypeMappings, String exportColumns, List<String> otherOptions);
 
     void eval(String sql, String assignedQueue, String jobName, DbCreds creds);
 
