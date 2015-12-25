@@ -109,7 +109,7 @@ def downloadSpecsAndConfig(tenantName, fileNameBase):
   elif type == 'SFDC':
     lg_mgr.createDataProvider('<dataProvider name="SFDC_DataProvider" autoMatch="False" connectionString="URL=https://login.salesforce.com/services/Soap/u/27.0;User=;Password=;SecurityToken=;Version=27.0;Timeout=100;RetryTimesForTimeout=3;SleepTimeBeforeRetry=60;BatchSize=2000;" dbType="1002" usedFor="31" e="False" />')
 
-  if type in ( 'ELQ', 'MKTO' 'SFDC'):
+  if type in ( 'ELQ', 'MKTO', 'SFDC'):
     lg_mgr.createDataProvider('<dataProvider name="SQL_DanteDB_DataProvider" autoMatch="False" connectionString="ServerName=;Database=;User=;Password=;Authentication=SQL Server Authentication;Schema=dbo;BatchSize=2000" dbType="2" usedFor="1" e="False" />')
     lg_mgr.createDataProvider('<dataProvider name="SQL_LeadScoring" autoMatch="False" connectionString="ServerName=BODCPRODVSQL229;Authentication=SQL Server Authentication;User=dataloader_prod;Password=L@ttice2;Database=LeadScoringDB;Schema=dbo;DateTimeOffsetOption=UtcDateTime;Timeout=3600;RetryTimesForTimeout=10;SleepTimeBeforeRetry=60;BatchSize=2000;" dbType="2" usedFor="10" e="False" />')
     lg_mgr.createDataProvider('<dataProvider name="SQL_LoadGroupsMeta" autoMatch="False" connectionString="ServerName=;Database=;User=;Password=;Authentication=SQL Server Authentication;Schema=dbo;BatchSize=2000" dbType="2" usedFor="10" e="False" />')
