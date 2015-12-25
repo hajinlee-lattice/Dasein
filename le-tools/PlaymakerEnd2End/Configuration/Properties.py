@@ -17,6 +17,11 @@ class SalePrismEnvironments(object):
     with open(rootPath+"\config.ini") as configFile:
         paras = json.load(configFile)
     # properties definition in config.ini
+    useEVModeling=False
+    if str(paras.get("useEVModeling")).upper()=='FALSE':
+        useEVModeling=False
+    elif str(paras.get("useEVModeling")).upper()=='TRUE':
+        useEVModeling=True
     needSetupEnvironment=True
     #print str(paras.get("needSetUpEnvironment")).upper()
     if str(paras.get("needSetUpEnvironment")).upper()=='FALSE':

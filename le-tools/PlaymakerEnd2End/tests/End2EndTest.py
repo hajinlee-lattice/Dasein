@@ -14,23 +14,10 @@ from PlaymakerEnd2End.tools.DBHelper import DealDB
 from PlaymakerEnd2End.steps.dealPlay import PlayTypes
 from PlaymakerEnd2End.Configuration.SetupPLME2EEnviroment import setUpEnvironments
 log=SalePrismEnvironments.log
-
-class TestSteps(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
-		print 'this is set up method!'
-		#print SalePrismEnvironments.needSetupEnvironment
-		if SalePrismEnvironments.needSetupEnvironment:
-			try:
-				print 'set up started'
-				setUpEnvironments.setUp()
-				SalePrismEnvironments.needSetupEnvironment=False
-			except Exception,e:
-				SalePrismEnvironments.needSetupEnvironment=True
-				assert False,log.error('set up failed: '+str(e.message))
-	def DataFlowForOnePlay(self,playType=PlayTypes.t_CSRepeatPurchase):
+class FullDataFlow(object):
+	def DataFlowForOnePlay(self,playType=PlayTypes.t_CSRepeatPurchase,with_EV=False):
 		playDealer=DealPlay()
-		createPlayResult=playDealer.createPlayByREST(playType=playType)#create a play
+		createPlayResult=playDealer.createPlayByREST(playType=playType,UseEVModel=with_EV)#create a play
 		playId=createPlayResult["playId"]
 		playName=createPlayResult["playName"]
 		playDealer.approvePlay(idOfPlay=playId)#approve a play
@@ -63,18 +50,20 @@ class TestSteps(unittest.TestCase):
 		sfdcDealer.syncData()
 		sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
-	def DataFlowForAllTypeOfPlays(self):
+	def DataFlowForAllTypeOfPlays(self,playList=PlayTypes.t_allTypes,with_EV=False):
 		playDealer=DealPlay()
 		numberOfRecommendations=0
 		playIdList=[]
 		playNameList=[]
-		playDealer.cleanUpPlaysAndPreleads()
-		SalePrismEnvironments.needCleanUpTenantDB=False
+		temp_cleanPlay=SalePrismEnvironments.needCleanUpTenantDB
+		if temp_cleanPlay:
+			playDealer.cleanUpPlaysAndPreleads()
+			SalePrismEnvironments.needCleanUpTenantDB=False
 		LatticeGeneratesId=None
 		#create all play and do score
 		#for playType in PlayTypes.t_allTypes:
-		for playType in PlayTypes.t_otherTypes:
-			createPlayResult=playDealer.createPlayByREST(playType=playType)#create a play
+		for playType in playList:
+			createPlayResult=playDealer.createPlayByREST(playType=playType,UseEVModel=with_EV)#create a play
 			playId=createPlayResult["playId"]
 			assert playId!=None
 			if playType == "LatticeGenerates":
@@ -86,7 +75,8 @@ class TestSteps(unittest.TestCase):
 			playDealer.approvePlay(idOfPlay=playId)#approve a play
 			if playType !="LatticeGenerates":
 				playDealer.scorePlay(idOfPlay=playId)#do score
-		SalePrismEnvironments.needCleanUpTenantDB=True
+		if temp_cleanPlay:
+			SalePrismEnvironments.needCleanUpTenantDB=True
 		allScoreFinished=False
 		while not allScoreFinished:#until score finish
 			scoreStatus=True
@@ -173,14 +163,44 @@ class TestSteps(unittest.TestCase):
 			numberofpage=numberofpage+Num_page_Recommendation
 		sfdcDealer.quit()
 		assert numberofpage==numberOf2800
-
+class TestSteps(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		print 'this is set up method!'
+		#print SalePrismEnvironments.needSetupEnvironment
+		if SalePrismEnvironments.needSetupEnvironment:
+			try:
+				print 'set up started'
+				setUpEnvironments.setUp()
+				SalePrismEnvironments.needSetupEnvironment=False
+			except Exception,e:
+				SalePrismEnvironments.needSetupEnvironment=True
+				assert False,log.error('set up failed: '+str(e.message))
+	"""
+	"""
 	def test_PLMDataFlow(self):
+		play_DataFlow=FullDataFlow()
 		if str(SalePrismEnvironments.playType).upper()=='ALL':
 			print 'call all type play test'
-			self.DataFlowForAllTypeOfPlays()
+			play_DataFlow.DataFlowForAllTypeOfPlays(playList=PlayTypes.t_otherTypes)
 		else:
 			print 'call one type play test'
-			self.DataFlowForOnePlay(playType=SalePrismEnvironments.playType)
+			play_DataFlow.DataFlowForOnePlay(playType=SalePrismEnvironments.playType)
+
+	def test_Play_EVModeling(self):
+		play_DataFlow=FullDataFlow()
+		if str(SalePrismEnvironments.playType).upper()=='ALL':
+			print 'call all type play test'
+			if SalePrismEnvironments.useEVModeling:
+				play_DataFlow.DataFlowForAllTypeOfPlays(playList=PlayTypes.t_all_EV,with_EV=True)
+			else:
+				play_DataFlow.DataFlowForAllTypeOfPlays(playList=PlayTypes.t_all_EV,with_EV=False)
+		else:
+			print 'call one type play test'
+			if SalePrismEnvironments.useEVModeling:
+				play_DataFlow.DataFlowForOnePlay(playType=SalePrismEnvironments.playType,with_EV=True)
+			else:
+				play_DataFlow.DataFlowForOnePlay(playType=SalePrismEnvironments.playType,with_EV=False)
 
 class EVModelingE2E(unittest.TestCase):
 	@classmethod
@@ -278,6 +298,8 @@ class EVModelingE2E(unittest.TestCase):
 		Num_page_Recommendation=sfdcDealer.checkRecommendations(playName)
 		sfdcDealer.quit()
 		assert Num_page_Recommendation==numberOfRecommendations,log.error("number recommendation in page is not right, it should be %s, but actually is %s" %(str(numberOfRecommendations),str(Num_page_Recommendation)))
+	def test_1(self):
+		print 'test'
 
 
 if __name__ == '__main__':

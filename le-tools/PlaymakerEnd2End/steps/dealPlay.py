@@ -22,6 +22,7 @@ class PlayTypes(object):
 	t_allTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback','List','RenewalList','AnalyticList']
 	t_listTypes=['List','RenewalList','AnalyticList']
 	t_otherTypes=['CSRepeatPurchase','CSFirstPurchase','LatticeGenerates','RuleBased','Winback']
+	t_all_EV=['CSRepeatPurchase','CSFirstPurchase','Winback']
 	t_AnalyticList='AnalyticList'
 	t_CSRepeatPurchase='CSRepeatPurchase'
 	t_CSFirstPurchase='CSFirstPurchase'
@@ -93,6 +94,7 @@ class DealPlay(object):
 		log.info("reset cache successfully")
 	def createPlayByREST(self,UseEVModel=False,playType=SalePrismEnvironments.playType):
 		if SalePrismEnvironments.needCleanUpTenantDB:
+			log.info("#########need clean existed plays########")
 			self.cleanUpPlaysAndPreleads()
 		log.info("##########  play creation starts   ##########")
 		playName=playType+repr(time.time()).replace('.','')
