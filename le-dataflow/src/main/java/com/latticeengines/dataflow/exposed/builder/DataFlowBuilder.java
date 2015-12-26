@@ -199,6 +199,7 @@ public abstract class DataFlowBuilder {
             MIN, //
             SUM(new FieldMetadata(Type.DOUBLE, Double.class, null, null)), //
             COUNT(new FieldMetadata(Type.LONG, Long.class, null, null)), //
+            AVG(new FieldMetadata(Type.DOUBLE, Double.class, null, null)), //
             FIRST, //
             LAST;
 
@@ -337,11 +338,13 @@ public abstract class DataFlowBuilder {
         public static FieldList ALL = new FieldList(KindOfFields.ALL);
         public static FieldList RESULTS = new FieldList(KindOfFields.RESULTS);
         public static FieldList GROUP = new FieldList(KindOfFields.GROUP);
+        public static FieldList NONE = new FieldList(KindOfFields.NONE);
 
         public enum KindOfFields {
             ALL, //
             RESULTS, //
-            GROUP
+            GROUP, //
+            NONE
         }
 
         private List<String> fields;
