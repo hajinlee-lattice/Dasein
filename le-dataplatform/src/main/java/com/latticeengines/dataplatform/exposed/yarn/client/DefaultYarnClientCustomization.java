@@ -19,6 +19,8 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
+import com.google.common.annotations.VisibleForTesting;
+
 public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
@@ -114,6 +116,29 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public String getContainerLauncherContextFile(Properties properties) {
         return "/default/dataplatform-default-appmaster-context.xml";
     }
+    
+    
+    @VisibleForTesting
+    String getXmxSetting(Properties containerProperties) {
+        int minAllocationInMb = yarnConfiguration.getInt("yarn.scheduler.minimum-allocation-mb", -1);
+        
+        if (containerProperties != null) {
+            String requestedMemoryStr = containerProperties.getProperty(ContainerProperty.MEMORY.name());
+            
+            if (requestedMemoryStr != null) {
+                int requestedMemory = Integer.parseInt(requestedMemoryStr);
+                if (requestedMemory > minAllocationInMb) {
+                    minAllocationInMb = requestedMemory;
+                }
+            }
+        }
+        
+        // -Xmx is just a heap setting, so must set the heap max value to be less than the total requested/allocated memory.
+        // This will ensure that garbage collection kicks in and reduces the memory utilization. If we still run into an
+        // OOM error, then that means the requested memory is really less than what can be handled.
+        String xmx = minAllocationInMb > 0 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
+        return xmx;
+    }
 
     @Override
     public List<String> getCommands(Properties containerProperties) {
@@ -131,6 +156,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 //"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                getXmxSetting(containerProperties),
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
