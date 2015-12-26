@@ -45,7 +45,7 @@ public class MetadataConverterUnitTestNG {
         String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/mixedExtracts");
         boolean thrown = false;
         try {
-            Table table = MetadataConverter.getTable(configuration, path);
+            MetadataConverter.getTable(configuration, path);
         } catch (Exception e) {
             thrown = true;
         }

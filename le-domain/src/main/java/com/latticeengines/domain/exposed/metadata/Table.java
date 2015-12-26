@@ -23,6 +23,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -35,7 +36,6 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -335,16 +335,22 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
         String parentDir = null;
         for (Extract extract : extracts) {
-            Path path = new Path(extract.getPath());
-            String extractParentDir = path.parent().toString();
-
-            if (parentDir != null && !parentDir.equals(extractParentDir)) {
+            String[] tokens = StringUtils.split(extract.getPath(), "/");
+            
+            StringBuilder extractParentDir = new StringBuilder("");
+            if (tokens[tokens.length-1].endsWith(".avro")) {
+                for (int i = 0; i < tokens.length - 1; i++) {
+                    extractParentDir.append("/").append(tokens[i]);
+                }
+            }
+            if (parentDir != null && ! parentDir.equals(extractParentDir.toString())) {
                 throw new RuntimeException(
                         String.format(
                                 "Extracts must all be in the same directory.  Found extract at path %s while others are in directory %s",
                                 extract.getPath(), parentDir));
             }
-            parentDir = extractParentDir;
+            
+            parentDir = extractParentDir.toString();
         }
 
         return parentDir;
