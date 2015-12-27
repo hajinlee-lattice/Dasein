@@ -156,7 +156,8 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         for (Object r : reports) {
             Map<String, String> map = (Map<String, String>) r;
             Report report = restTemplate.getForObject(String.format("%s/pls/reports/%s", getRestAPIHostPort(), map.get("name")), Report.class);
-            System.out.println(String.format("Report %s with payload:\n", report.getPurpose(), report.getJson().getPayload()));
+            String reportContent = new String(report.getJson().getPayload());
+            System.out.println(String.format("Report %s with payload:\n", report.getPurpose(), reportContent));
         }
     }
 
