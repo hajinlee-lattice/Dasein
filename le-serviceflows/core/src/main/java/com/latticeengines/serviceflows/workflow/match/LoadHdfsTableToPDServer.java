@@ -95,7 +95,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
                 }
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_28004, e, new String[]{table.getName()});
+            throw new LedpException(LedpCode.LEDP_28004, e, new String[] { table.getName() });
         }
     }
 
