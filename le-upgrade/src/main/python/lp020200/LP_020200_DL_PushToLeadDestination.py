@@ -230,13 +230,13 @@ class LP_020200_DL_PushToLeadDestination(StepBase):
 
     lgm.setLoadGroupFunctionality('PushToLeadDestination_TimeStamp', step2xml)
 
-    psdb_ngs_xml = lgm.getLoadGroupFunctionality('PushLeadsLastScoredToDestination','extractQueries')
-    psdb_ngs = etree.fromstring( psdb_ngs_xml )
-    for eq in psdb_ngs:
+    plsd_eq_xml = lgm.getLoadGroupFunctionality('PushLeadsLastScoredToDestination','extractQueries')
+    plsd_eq = etree.fromstring( plsd_eq_xml )
+    for eq in plsd_eq:
       if eq.get('queryAlias') == 'Q_Timestamp_PushToDestination_LastScored':
-        psdb_ngs.remove( eq )
+        plsd_eq.remove( eq )
 
-    lgm.setLoadGroupFunctionality( 'PushLeadsLastScoredToDestination', etree.tostring(psdb_ngs) )
+    lgm.setLoadGroupFunctionality( 'PushLeadsLastScoredToDestination', etree.tostring(plsd_eq) )
 
     ptld = etree.fromstring(lgm.getLoadGroup('PushToLeadDestination').encode('ascii', 'xmlcharrefreplace'))
 
