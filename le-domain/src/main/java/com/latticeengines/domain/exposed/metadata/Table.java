@@ -336,18 +336,14 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         String parentDir = null;
         for (Extract extract : extracts) {
             String[] tokens = StringUtils.split(extract.getPath(), "/");
-            
+            if (tokens == null) {
+                return null;
+            }
             StringBuilder extractParentDir = new StringBuilder("");
             if (tokens[tokens.length-1].endsWith(".avro")) {
                 for (int i = 0; i < tokens.length - 1; i++) {
                     extractParentDir.append("/").append(tokens[i]);
                 }
-            }
-            if (parentDir != null && ! parentDir.equals(extractParentDir.toString())) {
-                throw new RuntimeException(
-                        String.format(
-                                "Extracts must all be in the same directory.  Found extract at path %s while others are in directory %s",
-                                extract.getPath(), parentDir));
             }
             
             parentDir = extractParentDir.toString();
