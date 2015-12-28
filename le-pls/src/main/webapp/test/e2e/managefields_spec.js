@@ -33,7 +33,7 @@ describe('manage fields tests', function () {
         loginPage.loginAsSuperAdmin();
 
         //==================================================
-        // Filter Fields
+        // Build Model
         //==================================================
         userDropdown.toggleDropdown();
         browser.waitForAngular();
