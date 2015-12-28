@@ -90,8 +90,11 @@ HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
 HADOOP_CONF=--lib=/etc/hadoop/conf
 SQOOP_HOME=/usr/hdp/current/sqoop-server
 JAVA_HOME=/usr/java/default
+TEZ_CONF=/etc/tez/conf
+TEZ_CONF_DIR=/etc/tez/conf
 
-JAVA_OPTIONS=(-Xms1g -Xmx22g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty:/etc/tez/conf)
+JAVA_OPTIONS=(-Xms1g -Xmx22g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true)
+JAVA_OPTIONS+=(-Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty:/etc/tez/conf)
 JAVA_OPTIONS+=(-DJOB_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-DCAMILLE_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-DDATAPLATFORM_PROPDIR=/etc/ledp)

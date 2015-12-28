@@ -14,6 +14,8 @@ export JETTY_ARGS=jetty.host=0.0.0.0
 export HADOOP_HOME=/usr/hdp/current/hadoop-client
 export HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
 export HADOOP_CONF=/etc/hadoop/conf
+export TEZ_CONF=/etc/tez/conf
+export TEZ_CONF_DIR=/etc/tez/conf
 export SQOOP_HOME=/usr/hdp/current/sqoop-server
 export JAVA_HOME=/usr/java/default
 export DPQUARTZ_ENABLED=enabled
