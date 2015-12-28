@@ -65,14 +65,13 @@ class LP_020200_DL_BulkDiagnostic(StepBase):
       c = re.search(' f=\"(.*?)\".* f=\"(.*?)\"', diag_rdss_xml)
       diag_rdss_xml = diag_rdss_xml.replace(c.group(1),
                                             '@datediff(now, month(6)) AND ( __CONTACT_SCORE_DATE_FIELD__ &lt; '
-                                            '#Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_FIELD__ = null )')
+                                            '#Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_DATE_FIELD__ = null )')
       diag_rdss_xml = diag_rdss_xml.replace('__CONTACT_SCORE_DATE_FIELD__', sfdcContactScoreDateField)
-      diag_rdss_xml = diag_rdss_xml.replace('__CONTACT_SCORE_FIELD__', sfdcContactScoreField)
+
       diag_rdss_xml = diag_rdss_xml.replace(c.group(2), '@datediff(now, month(6)) AND ( __LEAD_SCORE_DATE_FIELD__ &lt; '
-                                                        '#Diagnostic_RescoreThreshold_Lead OR __LEAD_SCORE_FIELD__ '
+                                                        '#Diagnostic_RescoreThreshold_Lead OR __LEAD_SCORE_DATE_FIELD__ '
                                                         '= null )')
       diag_rdss_xml = diag_rdss_xml.replace('__LEAD_SCORE_DATE_FIELD__', sfdcLeadScoreDateField)
-      diag_rdss_xml = diag_rdss_xml.replace('__LEAD_SCORE_FIELD__', sfdcLeadScoreField)
 
     lgm.setLoadGroupFunctionality('Diagnostic_LoadLeads_Bulk', diag_rdss_xml)
 
