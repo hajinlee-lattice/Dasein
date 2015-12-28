@@ -71,7 +71,7 @@ public class Contact implements HasId<String>, HasPid, Serializable {
         return firstName;
     }
 
-    @JsonProperty("firstName")
+    @JsonProperty("FirstName")
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
