@@ -58,22 +58,21 @@ class LP_020200_DL_BulkDiagnostic(StepBase):
                              ' f="@datediff(now, month(6)) AND (__SCORE_DATE_FIELD__ &lt; '
                              '#Diagnostic_RescoreThreshold OR __SCORE_FIELD__ = 0 )"',
                              diag_rdss_xml)
-      diag_rdss_xml.replace('__SCORE_DATE_FIELD__', scoreDateField)
-      diag_rdss_xml.replace('__SCORE_FIELD__', scoreField)
+      diag_rdss_xml = diag_rdss_xml.replace('__SCORE_DATE_FIELD__', scoreDateField)
+      diag_rdss_xml = diag_rdss_xml.replace('__SCORE_FIELD__', scoreField)
 
     elif type == 'SFDC':
-      diag_rdss_xml = re.sub(r'<rds n=\"SFDC_Contact_Validation\".*f=\"@.*?\"',
-                             ' f="@datediff(now, month(6)) AND ( __CONTACT_SCORE_DATE_FIELD__ &lt; '
-                             '#Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_FIELD__ = null )"',
-                             diag_rdss_xml)
-      diag_rdss_xml.replace('__CONTACT_SCORE_DATE_FIELD__', sfdcContactScoreDateField)
-      diag_rdss_xml.replace('__CONTACT_SCORE_FIELD__', sfdcContactScoreField)
-      diag_rdss_xml = re.sub(r'<rds n=\"SFDC_Lead_Validation\".*f=\"@.*?\"',
-                             ' f="@datediff(now, month(6)) AND ( __LEAD_SCORE_DATE_FIELD__ &lt; '
-                             '#Diagnostic_RescoreThreshold_Contact OR __LEAD_SCORE_FIELD__ = null )"',
-                             diag_rdss_xml)
-      diag_rdss_xml.replace('__LEAD_SCORE_DATE_FIELD__', sfdcLeadScoreDateField)
-      diag_rdss_xml.replace('__LEAD_SCORE_FIELD__', sfdcLeadScoreField)
+      c = re.search(' f=\"(.*?)\".* f=\"(.*?)\"', diag_rdss_xml)
+      diag_rdss_xml = diag_rdss_xml.replace(c.group(1),
+                                            '@datediff(now, month(6)) AND ( __CONTACT_SCORE_DATE_FIELD__ &lt; '
+                                            '#Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_FIELD__ = null )')
+      diag_rdss_xml = diag_rdss_xml.replace('__CONTACT_SCORE_DATE_FIELD__', sfdcContactScoreDateField)
+      diag_rdss_xml = diag_rdss_xml.replace('__CONTACT_SCORE_FIELD__', sfdcContactScoreField)
+      diag_rdss_xml = diag_rdss_xml.replace(c.group(2), '@datediff(now, month(6)) AND ( __LEAD_SCORE_DATE_FIELD__ &lt; '
+                                                        '#Diagnostic_RescoreThreshold_Contact OR __LEAD_SCORE_FIELD__ '
+                                                        '= null )')
+      diag_rdss_xml = diag_rdss_xml.replace('__LEAD_SCORE_DATE_FIELD__', sfdcLeadScoreDateField)
+      diag_rdss_xml = diag_rdss_xml.replace('__LEAD_SCORE_FIELD__', sfdcLeadScoreField)
 
     lgm.setLoadGroupFunctionality('Diagnostic_LoadLeads_Bulk', diag_rdss_xml)
 
