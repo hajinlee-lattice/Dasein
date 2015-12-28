@@ -947,19 +947,13 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroupFunctionality('Model', ngsxml_POC_SFDC3)
 
     # Create POC LG for All MKTO, ELQ and SFDC
-    POC_Score = lgm.getLoadGroup('BulkScoring_PushToScoringDB')
-    step1 = etree.fromstring(POC_Score.encode('ascii', 'xmlcharrefreplace'))
-    step1.set('name', 'Score_ConfiguredDateRange')
-    step1.set('alias', 'Score_ConfiguredDateRange')
-    step1.set('path', 'Services')
-    lgm.setLoadGroup(etree.tostring(step1))
+    lgm.createLoadGroup('Score_ConfiguredDateRange', 'Services', 'BulkScoring_PushToScoringDB', True, True)
+    ngsxml1 = '<ngs><ng n="BulkScoring_PushToScoringDB"/></ngs>'
+    lgm.setLoadGroupFunctionality('Score_ConfiguredDateRange', ngsxml1)
 
-    POC_Score = lgm.getLoadGroup('PushToLeadDestination')
-    step2 = etree.fromstring(POC_Score.encode('ascii', 'xmlcharrefreplace'))
-    step2.set('name', 'Upload_LatestScoredLeadsToCustomer')
-    step2.set('alias', 'Upload_LatestScoredLeadsToCustomer')
-    step2.set('path', 'Services')
-    lgm.setLoadGroup(etree.tostring(step2))
+    lgm.createLoadGroup('Upload_LatestScoredLeadsToCustomer', 'Services', 'Upload_LatestScoredLeadsToCustomer', True, True)
+    ngsxml2 = '<ngs><ng n="PushToLeadDestination"/></ngs>'
+    lgm.setLoadGroupFunctionality('Upload_LatestScoredLeadsToCustomer', ngsxml2)
 
     success = True
 
