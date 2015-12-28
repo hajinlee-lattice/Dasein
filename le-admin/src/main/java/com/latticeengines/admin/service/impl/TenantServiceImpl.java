@@ -226,9 +226,11 @@ public class TenantServiceImpl implements TenantService {
             try {
                 if (camille.exists(tenantServiceStatePath)) {
                     newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+                } else {
+                    newState = null;
                 }
             } catch (Exception e) {
-                // ignore
+                throw new RuntimeException(String.format("Error getting the newState of the Service: %s", serviceName));
             }
             if (newState != null) {
                 // null means the tenant was provisioned without this component
