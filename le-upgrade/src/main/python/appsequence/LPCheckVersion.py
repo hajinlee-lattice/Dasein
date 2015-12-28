@@ -99,11 +99,11 @@ class LPCheckVersion( StepBase ):
     return Applicability.cannotApplyFail
 
   def getSFDCContactFromTargetQuery(self, str):
-    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Contact_Score\".*?</targetQuery>', str)
+    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Contact_Score\"(.*?)</targetQuery>', str)
     return s.group(1)
 
   def getSFDCLeadFromTargetQuery(self, str):
-    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Lead_Score\".*?</targetQuery>', str)
+    s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Lead_Score\"(.*?)</targetQuery>', str)
     return s.group(1)
 
   def parseScoreField(self, str, type, version):
@@ -139,7 +139,7 @@ class LPCheckVersion( StepBase ):
       s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', str)
     elif type == 'SFDCLead':
       s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', self.getSFDCLeadFromTargetQuery(str))
-    elif type == 'SFDCLead':
+    elif type == 'SFDCContact':
       s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
 
     if not s:
