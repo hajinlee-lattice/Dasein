@@ -230,91 +230,13 @@ class LP_020200_DL_PushToLeadDestination(StepBase):
 
     lgm.setLoadGroupFunctionality('PushToLeadDestination_TimeStamp', step2xml)
 
-    lgm.createLoadGroup('PushLeadsLastScoredToDestination', 'OperationalProcess\Standard',
-                        'PushLeadsLastScoredToDestination', True, False)
+    psdb_ngs_xml = lgm.getLoadGroupFunctionality('PushLeadsLastScoredToDestination','extractQueries')
+    psdb_ngs = etree.fromstring( psdb_ngs_xml )
+    for eq in psdb_ngs:
+      if eq.get('queryAlias') == 'Q_Timestamp_PushToDestination_LastScored':
+        psdb_ngs.remove( eq )
 
-    step3xml = ''
-    if type == 'MKTO':
-      step3xml = '''<targetQueries>
-        <targetQuery w="Workspace" t="2" name="Q_LeadScoreForLeadDestination_Query" alias="Q_LeadScoreForLeadDestination_Query" isc="False" threshold="10000" fsTableName="LeadRecord" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="4" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="MARKETO" destDataProvider="Marketo_DataProvider" cto="0">
-          <schemas />
-          <specs />
-          <fsColumnMappings>
-            <fsColumnMapping queryColumnName="MKTO_LeadRecord_ID" fsColumnName="Id" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="Score_Date_Time" fsColumnName="latticeforleads__Last_Score_Date__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="Score" fsColumnName="latticeforleads__Score__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-          </fsColumnMappings>
-          <excludeColumns>
-            <ec c="MKTO_LeadRecord_ID" />
-            <ec c="Score_Date_Time" />
-            <ec c="Score" />
-          </excludeColumns>
-          <validationQueries />
-          <constantRows />
-          <kcs>
-            <kc n="Id" />
-          </kcs>
-          <fut dn="" d="" n="" iet="False" iets="False" t="1" />
-        </targetQuery>
-      </targetQueries>'''
-
-    elif type == 'ELQ':
-      step3xml = '''<targetQueries>
-        <targetQuery w="Workspace" t="2" name="Q_ELQ_Contact_Score" alias="Q_ELQ_Contact_Score" isc="False" threshold="10000" fsTableName="Contact" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="4" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="ELOQUA BULK" destDataProvider="Eloqua_Bulk_DataProvider" cto="0">
-          <schemas />
-          <specs />
-          <fsColumnMappings>
-            <fsColumnMapping queryColumnName="ContactID" fsColumnName="ContactID" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="C_Lattice_LastScoreDate1" fsColumnName="C_Lattice_LastScoreDate1" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="C_Lattice_Predictive_Score1" fsColumnName="C_Lattice_Predictive_Score1" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-          </fsColumnMappings>
-          <excludeColumns />
-          <validationQueries />
-          <constantRows />
-          <kcs>
-            <kc n="ContactID" />
-          </kcs>
-          <fut dn="" d="" n="" iet="False" iets="False" t="1" />
-        </targetQuery>
-      </targetQueries>'''
-
-    else:
-      step3xml = '''<targetQueries>
-        <targetQuery w="Workspace" t="2" name="Q_SFDC_Contact_Score" alias="Q_SFDC_Contact_Score" isc="False" threshold="10000" fsTableName="Contact" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="4" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="SFDC" destDataProvider="SFDC_DataProvider" cto="0">
-          <schemas />
-          <specs />
-          <fsColumnMappings>
-            <fsColumnMapping queryColumnName="C_Lattice_Predictive_Score1" fsColumnName="latticeforleads__Score__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="C_Lattice_LastScoreDate1" fsColumnName="latticeforleads__Last_Score_Date__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="SFDC_Lead_Contact_ID" fsColumnName="Id" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-          </fsColumnMappings>
-          <excludeColumns />
-          <validationQueries />
-          <constantRows />
-          <kcs>
-            <kc n="Id" />
-          </kcs>
-          <fut dn="" d="" n="" iet="False" iets="False" t="1" />
-        </targetQuery>
-        <targetQuery w="Workspace" t="2" name="Q_SFDC_Lead_Score" alias="Q_SFDC_Lead_Score" isc="False" threshold="10000" fsTableName="Lead" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="4" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="SFDC" destDataProvider="SFDC_DataProvider" cto="0">
-          <schemas />
-          <specs />
-          <fsColumnMappings>
-            <fsColumnMapping queryColumnName="C_Lattice_Predictive_Score1" fsColumnName="latticeforleads__Score__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="C_Lattice_LastScoreDate1" fsColumnName="latticeforleads__Last_Score_Date__c" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-            <fsColumnMapping queryColumnName="SFDC_Lead_Contact_ID" fsColumnName="Id" formatter="" type="0" ignoreType="0" ignoreOptions="0" formatColumnName="False" charsToFormat="" />
-          </fsColumnMappings>
-          <excludeColumns />
-          <validationQueries />
-          <constantRows />
-          <kcs>
-            <kc n="Id" />
-          </kcs>
-          <fut dn="" d="" n="" iet="False" iets="False" t="1" />
-        </targetQuery>
-      </targetQueries>'''
-
-    lgm.setLoadGroupFunctionality('PushLeadsLastScoredToDestination', step3xml)
+    lgm.setLoadGroupFunctionality( 'PushLeadsLastScoredToDestination', etree.tostring(psdb_ngs) )
 
     ptld = etree.fromstring(lgm.getLoadGroup('PushToLeadDestination').encode('ascii', 'xmlcharrefreplace'))
 
