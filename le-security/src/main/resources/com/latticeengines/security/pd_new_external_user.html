@@ -81,17 +81,29 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                 <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                        <p style="margin: 20px;">Hi {{firstname}} {{lastname}},</p>
-                                        <p style="margin: 20px;">{{tenantmsg}}</p>
-                                        <p style="margin: 20px;">Use the following credentials to access the application: </p>
-                                        <p style="margin: 20px;"><strong>Username:</strong> {{username}}<br/>
-                                        <strong>Temporary Password:</strong> {{password}}</p>
-                                        <p style="margin: 20px;">You can change your password at any time by selecting "Update Password" in the settings menu.</p>
+                                        <p style="margin: 20px;">Hi {{firstname}},</p>
+                                            <p style="margin: 20px; background: #d3d3d3;">You can log into the application with the following: <br/><br/>Username: {{username}}<br/>
+                                            Temporary Password: {{password}}</p>
+                                        <p style="margin: 20px;">To get started, you’ll need to prepare the following:</p>
+                                        <ul style="margin: 20px;">
+                                            <li>If you want to import your SFDC data, you will need to provide the correct login credentials and security token. You can get this information from your Salesforce Administrator. If you don’t have an API user you can reuse, here are the <a href="http://www.salesforce.com/">guidelines</a> to create a new one. Once the connection is established Lattice will keep your data in sync with Salesforce.</li>
+                                            <li>If you want to import a file instead or your data is not in SFDC, you will need to prepare a separate data file and ensure it is in the correct format by following those guidelines.</li>
+                                        </ul>
                                     </td>
                                 </tr>
                                 <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px; text-align: center;" valign="top">
-                                        <a href="{{url}}" class="btn-primary" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background: #e96339; margin: 0; padding: 0; border-color: #e96339; border-style: solid; border-width: 10px 20px;">SIGN IN TO LATTICE</a>
+                                        <a href="{{url}}" class="btn-primary" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; color: #FFF; text-decoration: none; line-height: 2; font-weight: bold; text-align: center; cursor: pointer; display: inline-block; border-radius: 5px; text-transform: capitalize; background: #e96339; margin: 0; padding: 0; border-color: #e96339; border-style: solid; border-width: 10px 20px;">GET STARTED</a>
+                                    </td>
+                                </tr>
+                                <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                    <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px; text-align: left;" valign="top">
+                                        <p style="margin: 20px;">Contact <a href="mailto:support@lattice-engines.com">support@lattice-engines.com</a> at any time.<br>Thanks!</p>
+                                    </td>
+                                </tr>
+                                <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
+                                    <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; vertical-align: top; margin: 0; padding: 0 0 20px; text-align: left;" valign="top">
+                                        <p style="margin: 20px;">The Lattice Team</p>
                                     </td>
                                 </tr>
                             </table>
