@@ -36,7 +36,7 @@ public abstract class AbstractPivotService
 
     abstract DataFlowBuilder.FieldList getGroupByFields();
 
-    abstract PivotStrategyImpl getPivotMapper();
+    abstract PivotStrategyImpl getPivotStrategy();
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
@@ -153,7 +153,7 @@ public abstract class AbstractPivotService
                     source,
                     progress.getBaseSourceVersion(),
                     getGroupByFields(),
-                    getPivotMapper(),
+                    getPivotStrategy(),
                     progress.getRootOperationUID()
             );
         } catch (Exception e) {

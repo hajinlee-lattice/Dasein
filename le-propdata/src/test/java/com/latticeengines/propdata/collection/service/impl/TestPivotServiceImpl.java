@@ -39,6 +39,6 @@ public class TestPivotServiceImpl extends AbstractPivotService implements PivotS
     DataFlowBuilder.FieldList getGroupByFields() { return null; }
 
     @Override
-    PivotStrategyImpl getPivotMapper() { return null; }
+    PivotStrategyImpl getPivotStrategy() { return null; }
 
 }

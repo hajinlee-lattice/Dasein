@@ -49,9 +49,9 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
     }
 
     @Override
-    PivotStrategyImpl getPivotMapper() {
+    PivotStrategyImpl getPivotStrategy() {
         List<Map<String, Object>> results = jdbcTemplateCollectionDB.queryForList(
-                "SELECT [Feature], [Result_Column_Type] FROM [FeatureManagement_FeaturePivot]");
+                "SELECT [Feature], [ColumnType] FROM [FeaturePivotMapping]");
 
         String keyColumn = "Feature";
         String valueColumn = "Value";
@@ -62,7 +62,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
 
         for (Map<String, Object> result: results) {
             String feature = (String) result.get("Feature");
-            String type = (String) result.get("Result_Column_Type");
+            String type = (String) result.get("ColumnType");
             pivotedKeys.add(feature);
             if ("INT".equalsIgnoreCase(type)) {
                 resultColumnClassMap.put(feature, Integer.class);
@@ -80,7 +80,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
     @Override
     protected String createStageTableSql() {
         List<Map<String, Object>> results = jdbcTemplateCollectionDB.queryForList(
-                "SELECT [Feature], [Result_Column_Type] FROM [FeatureManagement_FeaturePivot]");
+                "SELECT [Feature], [ColumnType] FROM [FeaturePivotMapping]");
 
         String sql = "CREATE TABLE [" + getStageTableName() +" ] ( \n";
         sql += "[URL] NVARCHAR(500) NOT NULL, \n";
@@ -88,7 +88,7 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
         List<String> columns = new ArrayList<>();
         for (Map<String, Object> result: results) {
             String feature = (String) result.get("Feature");
-            String type = (String) result.get("Result_Column_Type");
+            String type = (String) result.get("ColumnType");
             columns.add("[" + feature + "] " + type + " NULL");
         }
         sql += StringUtils.join(columns, ", \n");

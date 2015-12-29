@@ -221,7 +221,6 @@ public class PropDataAdminTool {
         runner.run(args);
     }
 
-    @SuppressWarnings({ "resource" })
     private void run(String[] args) throws Exception {
         try {
             Namespace ns = parser.parseArgs(args);
@@ -266,6 +265,8 @@ public class PropDataAdminTool {
         System.out.println(fullDateRange);
         System.out.println("Source to archive: " + propDataSource.getName());
         executeArchiveByRanges(archiveService);
+        
+        ac.close();
     }
 
     private void executeArchiveByRanges(ArchiveService archiveService) {
