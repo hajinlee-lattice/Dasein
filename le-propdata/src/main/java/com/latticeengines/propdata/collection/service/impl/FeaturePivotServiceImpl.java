@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
@@ -18,7 +19,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyIm
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 
 @Component("featurePivotService")
 public class FeaturePivotServiceImpl extends AbstractPivotService implements PivotService {
@@ -31,8 +32,12 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
     @Autowired
     PivotProgressEntityMgr progressEntityMgr;
 
+    @Autowired
+    @Qualifier(value = "featurePivotedSource")
+    PivotedSource source;
+
     @Override
-    public PivotedSource getSource() { return PivotedSource.FEATURE_PIVOTED; }
+    public PivotedSource getSource() { return source; }
 
     @Override
     PivotProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }

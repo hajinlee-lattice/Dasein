@@ -21,9 +21,10 @@ import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParame
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.DomainBasedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -52,7 +53,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected String cascadingPlatform;
 
     @Override
-    public void executeMergeRawSnapshotData(CollectionSource source, String uid) {
+    public void executeMergeRawSnapshotData(CollectedSource source, String uid) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
 
         Map<String, Table> sources = new HashMap<>();
@@ -70,7 +71,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         }
 
         MergeDataFlowParameters parameters = new MergeDataFlowParameters();
-        parameters.setDomainField(source.getDomainField());
+        parameters.setDomainField(((DomainBasedSource) source).getDomainField());
         parameters.setTimestampField(source.getTimestampField());
         parameters.setPrimaryKeys(source.getPrimaryKey());
         parameters.setSourceTables(sources.keySet().toArray(new String[sources.size()]));
@@ -100,29 +101,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "pivotBaseSource");
-    }
-
-    @Override
-    public void executeJoin(String lhsPath, String rhsPath, String outputDir, String dataflowBean) {
-        String flowName = "TestingJoinDataFlow";
-        Map<String, String> sources = new HashMap<>();
-        sources.put("Source1", lhsPath);
-        sources.put("Source2", rhsPath);
-        DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("ENGINE", "TEZ");
-        ctx.setProperty("SOURCES", sources);
-        ctx.setProperty("CUSTOMER", "PropDataMatchTest");
-        ctx.setProperty("RECORDNAME", "PropDataMatchTest");
-        ctx.setProperty("TARGETTABLENAME", "PropDataMatchTest");
-
-        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("JOBPROPERTIES", getJobProperties());
-
-        ctx.setProperty("TARGETPATH", outputDir);
-        ctx.setProperty("FLOWNAME", flowName);
-        dataTransformationService.executeNamedTransformation(ctx, dataflowBean);
     }
 
     private DataFlowContext dataFlowContext(Source source,

@@ -17,21 +17,21 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
 
 abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
 
     ArchiveService archiveService;
     ArchiveProgressEntityMgr progressEntityMgr;
-    CollectionSource source;
+    CollectedSource source;
     Calendar calendar = GregorianCalendar.getInstance();
     Date[] dates;
     Set<ArchiveProgress> progresses = new HashSet<>();
 
     abstract ArchiveService getArchiveService();
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
-    abstract CollectionSource getSource();
+    abstract CollectedSource getSource();
     abstract String[] uniqueColumns();
     // the test will first archive data between date[0] and date[1], the refresh by data between date[1] and date[2]
     // there should be no data after date[2], so that verifyMostRecent() works
@@ -161,7 +161,7 @@ abstract public class ArchiveServiceImplDeploymentTestNGBase extends PropDataCol
 
     protected void verifyMostRecent() {
         String sql = "SELECT COUNT(*) FROM " + source.getSqlTableName() + " lhs \n"
-                + "INNER JOIN " + source.getCollectedTable() + " rhs\n ON ";
+                + "INNER JOIN " + source.getCollectedTableName() + " rhs\n ON ";
         for (String key: source.getPrimaryKey()) {
             sql += "lhs.[" + key + "] = rhs.[" + key + "]\n AND ";
         }

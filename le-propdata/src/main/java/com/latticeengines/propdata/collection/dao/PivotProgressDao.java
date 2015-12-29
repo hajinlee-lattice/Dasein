@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.collection.dao;
 
 import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 
 public interface PivotProgressDao extends ProgressDao<PivotProgress> {
 

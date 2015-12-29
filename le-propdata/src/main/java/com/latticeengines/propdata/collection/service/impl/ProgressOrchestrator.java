@@ -2,6 +2,7 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,8 +24,8 @@ import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.ZkConfigurationService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 
 @Component("progressOrchestrator")
 public class ProgressOrchestrator {
@@ -35,8 +36,14 @@ public class ProgressOrchestrator {
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
+    @Autowired
+    List<CollectedSource> collectedSourceList;
+
+    @Autowired
+    List<PivotedSource> pivotedSourceList;
+
     private Log log = LogFactory.getLog(this.getClass());
-    private Map<CollectionSource, ArchiveService> archiveServiceMap = new HashMap<>();
+    private Map<CollectedSource, ArchiveService> archiveServiceMap = new HashMap<>();
     private Map<PivotedSource, PivotService> pivotServiceMap = new HashMap<>();
     private static final int jobExpirationHours = 48; // expire a job after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
@@ -45,24 +52,19 @@ public class ProgressOrchestrator {
 
     @PostConstruct
     private void constructMaps() {
-        for (CollectionSource source: CollectionSource.values()) {
-            if (!CollectionSource.TEST_COLLECTION.equals(source)) {
-                ArchiveService service = (ArchiveService) ac.getBean(source.getRefreshServiceBean());
-                if (service != null) {
-                    archiveServiceMap.put(source, service);
-                    executorMap.put(source.getSourceName(), new CollectionRefreshExecutor(service));
-                }
+        for (CollectedSource source: collectedSourceList) {
+            ArchiveService service = (ArchiveService) ac.getBean(source.getRefreshServiceBean());
+            if (service != null) {
+                archiveServiceMap.put(source, service);
+                executorMap.put(source.getSourceName(), new CollectionRefreshExecutor(service));
             }
         }
 
-        for (PivotedSource source: PivotedSource.values()) {
-            if (!PivotedSource.TEST_PIVOTED.equals(source)) {
-                PivotService service = (PivotService) ac.getBean(source.getRefreshServiceBean());
-
-                if (service != null) {
-                    pivotServiceMap.put(source, service);
-                    executorMap.put(source.getSourceName(), new PivotedRefreshExecutor(service));
-                }
+        for (PivotedSource source: pivotedSourceList) {
+            PivotService service = (PivotService) ac.getBean(source.getRefreshServiceBean());
+            if (service != null) {
+                pivotServiceMap.put(source, service);
+                executorMap.put(source.getSourceName(), new PivotedRefreshExecutor(service));
             }
         }
     }
@@ -70,7 +72,7 @@ public class ProgressOrchestrator {
     public synchronized void executeRefresh() {
         executorService = Executors.newFixedThreadPool(executorMap.size());
 
-        for (CollectionSource source: archiveServiceMap.keySet()) {
+        for (CollectedSource source: archiveServiceMap.keySet()) {
             try {
                 if (zkConfigurationService.refreshJobEnabled(source)) {
                     submitProgress(findArchiveProgressToProceed(source));
@@ -118,7 +120,7 @@ public class ProgressOrchestrator {
     }
 
     @SuppressWarnings("unchecked")
-    ArchiveProgress findArchiveProgressToProceed(CollectionSource source) {
+    ArchiveProgress findArchiveProgressToProceed(CollectedSource source) {
         ArchiveService archiveService = archiveServiceMap.get(source);
         return (ArchiveProgress) findProgressToProceedForSource((AbstractSourceRefreshService<Progress>) archiveService);
     }
@@ -170,7 +172,7 @@ public class ProgressOrchestrator {
         }
     }
 
-    void setServiceMaps(Map<CollectionSource, ArchiveService> archiveServiceMap,
+    void setServiceMaps(Map<CollectedSource, ArchiveService> archiveServiceMap,
                         Map<PivotedSource, PivotService> pivotServiceMap) {
         this.archiveServiceMap = archiveServiceMap;
         this.pivotServiceMap = pivotServiceMap;

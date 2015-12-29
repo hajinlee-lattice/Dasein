@@ -17,9 +17,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.Source;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -279,6 +276,8 @@ public class PropDataAdminTool {
             System.out.println(String.format("  Period %" + digits + "d: %s", ++i, period.toString()));
         }
 
+        promptContinue();
+
         System.out.println("Start archiving " + propDataSource.getName() + " ... ");
         long totalStartTime = System.currentTimeMillis();
         for (DateRange period : periods) {
@@ -322,25 +321,22 @@ public class PropDataAdminTool {
     }
 
     enum PropDataSource {
-        FEATURE("Feature", "featureArchiveService", CollectionSource.FEATURE),
-        FEATURE_PIVOTED("FeaturePivoted", "featurePivotService", PivotedSource.FEATURE_PIVOTED);
+        FEATURE("Feature", "featureArchiveService"),
+        BUILTWITH("BuiltWith", "builtWithArchiveService");
 
         private static Map<String, PropDataSource> nameMap;
 
         private final String name;
         private final String serviceBean;
-        private final Source source;
 
-        PropDataSource(String name, String archiveJobBean, Source source) {
+        PropDataSource(String name, String archiveJobBean) {
             this.name = name;
             this.serviceBean = archiveJobBean;
-            this.source = source;
 
         }
 
         String getName() { return this.name; }
         String getServiceBean() { return this.serviceBean; }
-        Source getSource() { return this.source; }
 
         static {
             nameMap = new HashMap<>();

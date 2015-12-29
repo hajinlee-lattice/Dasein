@@ -12,6 +12,6 @@ public interface Source extends Serializable {
 
     String[] getPrimaryKey();
 
-    String getTimestampField(); // every source needs to be timestamped
+    String getTimestampField();
 
 }

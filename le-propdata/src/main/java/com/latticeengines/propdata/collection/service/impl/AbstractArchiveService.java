@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,19 +17,21 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.DomainBasedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
-public abstract class AbstractArchiveService extends AbstractSourceRefreshService<ArchiveProgress> implements ArchiveService {
+public abstract class AbstractArchiveService
+        extends AbstractSourceRefreshService<ArchiveProgress> implements ArchiveService {
 
     private Log log;
     private ArchiveProgressEntityMgr entityMgr;
-    private CollectionSource source;
+    private CollectedSource source;
 
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
 
-    abstract CollectionSource getSource();
+    abstract CollectedSource getSource();
 
     abstract String getSrcTableSplitColumn();
 
@@ -139,7 +140,7 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
         Date latestInSrc, latestInDest;
         try {
             latestInSrc = jdbcTemplateCollectionDB.queryForObject(
-                    "SELECT TOP 1 " + getSource().getTimestampField() + " FROM " + getSource().getCollectedTable()
+                    "SELECT TOP 1 " + getSource().getTimestampField() + " FROM " + getSource().getCollectedTableName()
                             + " ORDER BY " + getSource().getTimestampField() + " DESC", Date.class);
         } catch (EmptyResultDataAccessException e) {
             latestInSrc = new Date(System.currentTimeMillis());
@@ -188,14 +189,14 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
                 progress.getStartDate(), progress.getEndDate());
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
-        if (!importFromCollectionDB(getSource().getCollectedTable(), targetDir, customer, getSrcTableSplitColumn(),
+        if (!importFromCollectionDB(getSource().getCollectedTableName(), targetDir, customer, getSrcTableSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
         long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
-                + getSource().getCollectedTable() + " WHERE "
+                + getSource().getCollectedTableName() + " WHERE "
                 + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
@@ -210,7 +211,11 @@ public abstract class AbstractArchiveService extends AbstractSourceRefreshServic
             return false;
         }
         try {
-            collectionDataFlowService.executeMergeRawSnapshotData(source, progress.getRootOperationUID());
+            if (source instanceof DomainBasedSource) {
+                collectionDataFlowService.executeMergeRawSnapshotData(source, progress.getRootOperationUID());
+            } else {
+                throw new UnsupportedOperationException("Can only handle domain based collection source.");
+            }
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform raw data.", e);
             return false;

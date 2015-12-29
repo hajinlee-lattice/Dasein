@@ -18,7 +18,7 @@ import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
 public abstract class AbstractPivotService

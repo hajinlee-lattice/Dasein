@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.util.DateRange;
 
 @Component
@@ -21,6 +21,10 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
     @Autowired
     @Qualifier(value = "featureArchiveService")
     ArchiveService archiveService;
+
+    @Autowired
+    @Qualifier(value = "featureSource")
+    CollectedSource source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
@@ -62,7 +66,7 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
     }
 
     @Override
-    CollectionSource getSource() { return CollectionSource.FEATURE; }
+    CollectedSource getSource() { return source; }
 
     @Override
     String[] uniqueColumns() { return new String[]{"URL", "Feature"}; }

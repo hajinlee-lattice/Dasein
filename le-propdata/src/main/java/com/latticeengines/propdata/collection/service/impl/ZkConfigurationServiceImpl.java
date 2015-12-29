@@ -1,8 +1,11 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.zookeeper.ZooDefs;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.Camille;
@@ -10,8 +13,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.propdata.collection.service.ZkConfigurationService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
 
 @Component
@@ -23,19 +24,15 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private static final String SOURCES = "Sources";
     private static final String JOB_ENABLED = "JobEnabled";
 
+    @Autowired
+    List<Source> sources;
+
     @PostConstruct
     private void postConstruct() throws Exception {
         camille = CamilleEnvironment.getCamille();
         podId = CamilleEnvironment.getPodId();
 
-        for (CollectionSource source: CollectionSource.values()) {
-            Path flagPath = jobFlagPath(source);
-            if (!camille.exists(flagPath)) {
-                camille.create(flagPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            }
-        }
-
-        for (PivotedSource source: PivotedSource.values()) {
+        for (Source source: sources) {
             Path flagPath = jobFlagPath(source);
             if (!camille.exists(flagPath)) {
                 camille.create(flagPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);

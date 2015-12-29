@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
 
 @Component
 public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
@@ -17,6 +17,10 @@ public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceI
     @Autowired
     @Qualifier(value = "builtWithArchiveService")
     ArchiveService archiveService;
+
+    @Autowired
+    @Qualifier(value = "builtWithSource")
+    CollectedSource source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
@@ -46,7 +50,7 @@ public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceI
     }
 
     @Override
-    CollectionSource getSource() { return CollectionSource.BUILT_WITH; }
+    CollectedSource getSource() { return source; }
 
     @Override
     String[] uniqueColumns() { return new String[]{"Domain", "Technology_Name"}; }

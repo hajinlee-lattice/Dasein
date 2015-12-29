@@ -1,35 +1,22 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
 
 public abstract class AbstractProgressEntityMgr<P extends Progress> implements ProgressEntityMgr<P> {
 
     protected abstract ProgressDao<P> getProgressDao();
     protected abstract Log getLog();
-    private static Set<Source> testSources = new HashSet<>();
     private static final int MAX_RETRIES = 2;
-
-    static {
-        testSources.addAll(Arrays.asList(
-                (Source) CollectionSource.TEST_COLLECTION,
-                PivotedSource.TEST_PIVOTED
-        ));
-    }
-
 
     @Override
     @Transactional(value = "propDataCollectionProgress")
@@ -74,14 +61,12 @@ public abstract class AbstractProgressEntityMgr<P extends Progress> implements P
     }
 
     @Override
+    @VisibleForTesting
     @Transactional(value = "propDataCollectionProgress")
     public void deleteAllProgressesOfSource(Source source) {
-        // only allow this method for testing sources
-        if (testSources.contains(source)) {
-            List<P> progresses = getProgressDao().findAllOfSource(source);
-            for (P progress : progresses) {
-                getProgressDao().delete(progress);
-            }
+        List<P> progresses = getProgressDao().findAllOfSource(source);
+        for (P progress : progresses) {
+            getProgressDao().delete(progress);
         }
     }
 

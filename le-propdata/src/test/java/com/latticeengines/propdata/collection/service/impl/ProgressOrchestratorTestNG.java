@@ -20,8 +20,8 @@ import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.impl.PivotedSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
@@ -48,6 +48,14 @@ public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTest
     @Qualifier("testPivotService")
     private PivotService pivotService;
 
+    @Autowired
+    @Qualifier(value = "testCollectedSource")
+    CollectedSource collectedSource;
+
+    @Autowired
+    @Qualifier(value = "testPivotedSource")
+    PivotedSource pivotedSource;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         removeTestProgresses();
@@ -61,7 +69,7 @@ public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTest
 
     @Test(groups = "functional")
     public void testArchiveProgress() {
-        CollectionSource testSource = CollectionSource.TEST_COLLECTION;
+        CollectedSource testSource = collectedSource;
 
         ArchiveProgress progress = orchestrator.findArchiveProgressToProceed(testSource);
         Assert.assertNull(progress, "Should have no progress to proceed at beginning.");
@@ -133,8 +141,8 @@ public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTest
 
     @Test(groups = "functional")
     public void testPivotProgress() {
-        CollectionSource testSource1 = CollectionSource.TEST_COLLECTION;
-        PivotedSource testSource = PivotedSource.TEST_PIVOTED;
+        PivotedSource testSource = pivotedSource;
+        CollectedSource testSource1 = collectedSource;
 
         // auto start 1
         String version1 = "version1";
@@ -189,15 +197,15 @@ public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTest
     }
 
     private void removeTestProgresses() {
-        archiveProgressEntityMgr.deleteAllProgressesOfSource(CollectionSource.TEST_COLLECTION);
-        pivotProgressEntityMgr.deleteAllProgressesOfSource(PivotedSource.TEST_PIVOTED);
+        archiveProgressEntityMgr.deleteAllProgressesOfSource(collectedSource);
+        pivotProgressEntityMgr.deleteAllProgressesOfSource(pivotedSource);
     }
 
     private void scanOnlyTestingSources () {
-        Map<CollectionSource, ArchiveService> archiveServiceMap = new HashMap<>();
+        Map<CollectedSource, ArchiveService> archiveServiceMap = new HashMap<>();
         Map<PivotedSource, PivotService> pivotServiceMap = new HashMap<>();
-        archiveServiceMap.put(CollectionSource.TEST_COLLECTION, archiveService);
-        pivotServiceMap.put(PivotedSource.TEST_PIVOTED, pivotService);
+        archiveServiceMap.put(collectedSource, archiveService);
+        pivotServiceMap.put(pivotedSource, pivotService);
         orchestrator.setServiceMaps(archiveServiceMap, pivotServiceMap);
     }
 

@@ -3,6 +3,7 @@ package com.latticeengines.propdata.collection.entitymanager.impl;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -11,8 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.collection.source.impl.CollectionSource;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
@@ -22,7 +22,9 @@ public class HdfsSourceEntityMgrImplTestNG extends PropDataCollectionFunctionalT
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    private final Source testSource = CollectionSource.FEATURE;
+    @Autowired
+    @Qualifier(value = "featureSource")
+    CollectedSource testSource;
 
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
