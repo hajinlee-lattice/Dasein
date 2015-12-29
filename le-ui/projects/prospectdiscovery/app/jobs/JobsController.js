@@ -161,7 +161,7 @@ angular.module('pd.jobs', [
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.showEmptyJobsMessage = false;
-    $scope.showJobSuccessMessage = true;
+    $scope.showJobSuccessMessage = false;
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {

@@ -1,18 +1,17 @@
 <div class="expanded-{{jobRowExpanded}}">
     <div class="clearfix">
-        <span class="columns three">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns three">{{job.jobType}}</span>
-        <span class="columns three {{job.status}}">{{job.status}}
+        <span class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span class="columns four">{{job.jobType}}</span>
+        <span class="columns four {{job.status}}">{{job.status}}
             <span data-ng-show="jobCompleted"> [<a ui-sref="jobs.status.ready({jobId: jobId})">View Report</a>]</span>
             <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>
-        </span>
-        <span class="columns three">{{job.user}}
-        <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
-            <span><i class="fa fa-angle-double-down fa-lg"></i></span>
-        </a>
-        <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
-            <span><i class="fa fa-angle-double-up fa-lg"></i></span>
-        </a>
+
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
+                <span><i class="fa fa-angle-double-down fa-lg"></i></span>
+            </a>
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
+                <span><i class="fa fa-angle-double-up fa-lg"></i></span>
+            </a>
         </span>
     </div>
     <div class="chevron-row" data-ng-show="jobRowExpanded">

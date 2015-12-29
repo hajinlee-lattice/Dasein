@@ -33,10 +33,9 @@
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
             <div class="panel-heading custom-heading">
-                <span class="columns three">Timestamp</span>
-                <span class="columns three">Job Type</span>
-                <span class="columns three">Status</span>
-                <span class="columns three">User</span>
+                <span class="columns four">Timestamp</span>
+                <span class="columns four">Job Type</span>
+                <span class="columns four">Status</span>
             </div>
             <div class="jobs-table-content">
                 <div data-job-status-row data-ng-repeat="job in jobs | filter:SearchByName | orderBy: SortOrder" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage"></div>
