@@ -169,6 +169,7 @@ public enum LedpCode {
     LEDP_18073("Failed to synchronize modeling and scoring, error: {0}."), //
     LEDP_18074("Tenant {0} is not found."), //
     LEDP_18075("Failed to parse attribute query {0}."), //
+    LEDP_18076("Default target market already has a fit model workflow in progress."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
