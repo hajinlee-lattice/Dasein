@@ -11,18 +11,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
 
 @Component("featurePivotService")
-public class FeaturePivotServiceImpl extends AbstractPivotService implements PivotService {
+public class FeaturePivotService extends AbstractPivotService implements PivotService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -30,20 +30,16 @@ public class FeaturePivotServiceImpl extends AbstractPivotService implements Piv
     ArchiveProgressEntityMgr archiveProgressEntityMgr;
 
     @Autowired
-    PivotProgressEntityMgr progressEntityMgr;
+    RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    @Qualifier(value = "featurePivotedSource")
-    PivotedSource source;
+    FeaturePivoted source;
 
     @Override
     public PivotedSource getSource() { return source; }
 
     @Override
-    PivotProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
-
-    @Override
-    ArchiveProgressEntityMgr getBaseSourceArchiveProgressEntityMgr() { return archiveProgressEntityMgr; }
+    RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
     Log getLogger() { return log; }

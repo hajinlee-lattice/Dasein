@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <!-- DAOs for PropData -->
+    <bean id="propDataBulk" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="jdbc:sqlserver://${propdata.bulk.host}:${propdata.bulk.port};databaseName=${propdata.bulk.db};" />
+        <property name="username" value="${propdata.collection.user}" />
+        <property name="password" value="${propdata.collection.password.encrypted}" />
+    </bean>
+
+    <bean id="sessionFactoryPropDataBulk" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="propDataBulk" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.collection" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+    <bean id="transactionManagerPropDataBulk" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+          p:sessionFactory-ref="sessionFactoryPropDataBulk">
+        <qualifier value="propDataCollection" />
+    </bean>
+    <tx:annotation-driven transaction-manager="transactionManagerPropDataBulk" />
+
+    <bean id="propDataBulkJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="propDataBulk" />
+
+</beans>

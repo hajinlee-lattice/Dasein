@@ -9,7 +9,5 @@ public enum ProgressStatus {
     TRANSFORMED,
     UPLOADING,
     UPLOADED,
-    PIVOTING,
-    PIVOTED,
     FINISHED
 }

@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.collection.source.ServingSource;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.util.TableUtils;
 
@@ -60,7 +61,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Override
     public Table getTableAtVersion(Source source, String version) {
         String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-        return TableUtils.createTable(source.getSqlTableName(), path + "/*.avro");
+        if (source instanceof ServingSource) {
+            return TableUtils.createTable(((ServingSource) source).getSqlTableName(), path + "/*.avro");
+        } else {
+            return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
+        }
     }
 
 }

@@ -1,17 +1,19 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.impl.TestCollectedSource;
 
-@Component("builtWithArchiveService")
-public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implements ArchiveService {
+@Component("testArchiveService")
+public class TestArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -19,8 +21,7 @@ public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implemen
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    @Qualifier(value = "builtWithSource")
-    CollectedSource source;
+    TestCollectedSource source;
 
     @Override
     public CollectedSource getSource() { return source; }
@@ -32,5 +33,8 @@ public class BuiltWithArchiveServiceImpl extends AbstractArchiveService implemen
     Log getLogger() { return log; }
 
     @Override
-    String getSrcTableSplitColumn() { return getSource().getTimestampField(); }
+    protected Date getLatestTimestampArchived() {
+        return new Date();
+    }
+
 }

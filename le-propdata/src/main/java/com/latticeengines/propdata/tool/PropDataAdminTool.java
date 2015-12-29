@@ -16,7 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.BulkArchiveService;
+import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.util.DateRange;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 
@@ -34,12 +35,16 @@ public class PropDataAdminTool {
     private static final String NS_SOURCE = "source";
     private static final String NS_START_DATE = "startDate";
     private static final String NS_END_DATE = "endDate";
+    private static final String NS_RAW_TYPE = "rawType";
     private static final String NS_SPLIT_MODE = "splitMode";
     private static final String NS_PERIOD_LENGTH = "periodLength";
     private static final String NS_NUM_PERIODS = "numPeriods";
 
     private static final String MODE_NUM = "number";
     private static final String MODE_LEN = "length";
+
+    private static final String RAW_TYPE_BULK = "bulk";
+    private static final String RAW_TYPE_COLLECTED = "collected";
 
     private static final String NS_PIVOT_DATE = "pivotDate";
     private static final String NS_PIVOT_VERSION = "baseVersion";
@@ -52,7 +57,7 @@ public class PropDataAdminTool {
     private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("archive");
 
     private Command command;
-    private PropDataSource propDataSource;
+    private SourceToBeArchived sourceToBeArchived;
 
     private DateRange fullDateRange;
     private List<DateRange> periods;
@@ -62,30 +67,30 @@ public class PropDataAdminTool {
     static {
         parser.description("PropData Admin Tool");
 
+        Subparsers subparsers = parser.addSubparsers().help("valid commands").dest(NS_COMMAND);
+        addArchiveArgs(subparsers.addParser(Command.ARCHIVE.getName()).help("archive a collection source"));
+        addRefreshArgs(subparsers.addParser(Command.REFRESH.getName()).help("pivot a base source"));
+    }
+
+    private static void addArchiveArgs(Subparser parser) {
         parser.addArgument("-s", "--source")
                 .dest(NS_SOURCE)
                 .required(true)
                 .type(String.class)
-                .choices(PropDataSource.allNames())
-                .help("collection source");
+                .choices(SourceToBeArchived.allNames())
+                .help("source to archive");
 
-        Subparsers subparsers = parser.addSubparsers().help("valid commands").dest(NS_COMMAND);
-        addArchiveArgs(subparsers.addParser(Command.ARCHIVE.getName()).help("archive a collection source"));
-        addPivotArgs(subparsers.addParser(Command.PIVOT.getName()).help("pivot a base source"));
-    }
-
-    private static void addArchiveArgs(Subparser parser) {
         parser.addArgument("-sd", "--start-date")
                 .dest(NS_START_DATE)
-                .required(true)
+                .required(false)
                 .type(String.class)
-                .help("start date (inclusive) in yyyy-MM-dd, and after 1900-01-01.");
+                .help("start date (inclusive) in yyyy-MM-dd, and after 1900-01-01. (for collected source)");
 
         parser.addArgument("-ed", "--end-date")
                 .dest(NS_END_DATE)
-                .required(true)
+                .required(false)
                 .type(String.class)
-                .help("end date (exclusive) in yyyy-MM-dd, and after start date.");
+                .help("end date (exclusive) in yyyy-MM-dd, and after start date. (for collected source)");
 
         parser.addArgument("-m", "--split-mode")
                 .dest(NS_SPLIT_MODE)
@@ -95,24 +100,24 @@ public class PropDataAdminTool {
                 .setDefault(MODE_LEN)
                 .help("mode of splitting date ranges, default is [length]: " +
                         "length = by the length of one period in days; " +
-                        "number = by the number of periods.");
+                        "number = by the number of periods. (for collected source)");
 
         parser.addArgument("-l", "--period-length")
                 .dest(NS_PERIOD_LENGTH)
                 .required(false)
                 .type(Integer.class)
                 .setDefault(7)
-                .help("period lengths in days. required if the split mode is length. default is [7] days.");
+                .help("period lengths in days. required if the split mode is length. default is [7] days. (for collected source)");
 
         parser.addArgument("-n", "--num-periods")
                 .dest(NS_NUM_PERIODS)
                 .required(false)
                 .type(Integer.class)
                 .setDefault(1)
-                .help("number of periods. required if the split mode is number. default is [1] period.");
+                .help("number of periods. required if the split mode is number. default is [1] period. (for collected source)");
     }
 
-    private static void addPivotArgs(Subparser parser) {
+    private static void addRefreshArgs(Subparser parser) {
         parser.addArgument("-pd", "--pivot-date")
                 .dest(NS_PIVOT_DATE)
                 .required(false)
@@ -134,14 +139,9 @@ public class PropDataAdminTool {
         }
 
         command = Command.fromName(ns.getString(NS_COMMAND));
-        propDataSource = PropDataSource.fromName(ns.getString(NS_SOURCE));
-
         switch (command) {
             case ARCHIVE:
                 validateAndTransformArchiveArgs(ns);
-                break;
-            case PIVOT:
-                validateAndTransformPivotArgs(ns);
                 break;
             default:
         }
@@ -149,29 +149,24 @@ public class PropDataAdminTool {
     }
 
     private void validateAndTransformArchiveArgs(Namespace ns) {
-        Date startDate = toStartOfTheDay(parseDateInput(ns.getString(NS_START_DATE)));
-        Date endDate = toEndOfTheDay(parseDateInput(ns.getString(NS_END_DATE)));
-        fullDateRange = new DateRange(startDate, endDate);
+        sourceToBeArchived = SourceToBeArchived.fromName(ns.getString(NS_SOURCE));
 
-        if (ns.getString(NS_SPLIT_MODE).equals(MODE_LEN)) {
-            int length = ns.getInt(NS_PERIOD_LENGTH);
-            periods = fullDateRange.splitByDaysPerPeriod(length);
-        }
+        if (sourceToBeArchived.getSourceType().equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
+            Date startDate = toStartOfTheDay(parseDateInput(ns.getString(NS_START_DATE)));
+            Date endDate = toEndOfTheDay(parseDateInput(ns.getString(NS_END_DATE)));
+            fullDateRange = new DateRange(startDate, endDate);
 
-        if (ns.getString(NS_SPLIT_MODE).equals(MODE_NUM)) {
-            int num = ns.getInt(NS_NUM_PERIODS);
-            periods = fullDateRange.splitByNumOfPeriods(num);
-        }
-    }
+            if (ns.getString(NS_SPLIT_MODE).equals(MODE_LEN)) {
+                int length = ns.getInt(NS_PERIOD_LENGTH);
+                periods = fullDateRange.splitByDaysPerPeriod(length);
+            }
 
-    private void validateAndTransformPivotArgs(Namespace ns) {
-        if (StringUtils.isNotEmpty(ns.getString(NS_PIVOT_DATE))) {
-            pivotDate = parseDateInput(ns.getString(NS_PIVOT_DATE));
-        } else {
-            pivotDate = new Date(System.currentTimeMillis());
+            if (ns.getString(NS_SPLIT_MODE).equals(MODE_NUM)) {
+                int num = ns.getInt(NS_NUM_PERIODS);
+                periods = fullDateRange.splitByNumOfPeriods(num);
+            }
         }
     }
-
 
     private Date parseDateInput(String input) {
         if (!datePattern.matcher(input).matches()) {
@@ -228,8 +223,8 @@ public class PropDataAdminTool {
                 case ARCHIVE:
                     executeArchiveCommand(ns);
                     break;
-                case PIVOT:
-                    executePivotCommand();
+                case REFRESH:
+                    executeRefreshCommand();
                     break;
                 default:
             }
@@ -243,7 +238,7 @@ public class PropDataAdminTool {
         }
     }
 
-    private void executePivotCommand() {
+    private void executeRefreshCommand() {
 //        System.out.println("\n\n========================================");
 //        System.out.println("Pivoting Collection Source: " + source.getName());
 //        System.out.println("========================================\n");
@@ -254,19 +249,29 @@ public class PropDataAdminTool {
 
     private void executeArchiveCommand(Namespace ns) {
         ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-job-context.xml");
-        ArchiveService archiveService = (ArchiveService) ac.getBean(propDataSource.getServiceBean());
 
-        System.out.println("\n\n========================================");
-        System.out.println("Archiving Collection Source: " + propDataSource.getName());
-        System.out.println("========================================\n");
-        System.out.println(fullDateRange);
-        System.out.println("Source to archive: " + propDataSource.getName());
-        executeArchiveByRanges(archiveService);
+        if (ns.getString(NS_RAW_TYPE).equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
+            CollectedArchiveService collectedArchiveService = (CollectedArchiveService) ac.getBean(sourceToBeArchived.getServiceBean());
+
+            System.out.println("\n\n========================================");
+            System.out.println("Archiving Collection Source: " + sourceToBeArchived.getName());
+            System.out.println("========================================\n");
+            System.out.println(fullDateRange);
+            executeArchiveByRanges(collectedArchiveService);
+        } else {
+            BulkArchiveService archiveService = (BulkArchiveService) ac.getBean(sourceToBeArchived.getServiceBean());
+
+            System.out.println("\n\n========================================");
+            System.out.println("Archiving Bulk Source: " + sourceToBeArchived.getName());
+            System.out.println("========================================\n");
+
+            executeArchiveBulk(archiveService);
+        }
         
         ac.close();
     }
 
-    private void executeArchiveByRanges(ArchiveService archiveService) {
+    private void executeArchiveByRanges(CollectedArchiveService collectedArchiveService) {
         System.out.println("Full date range to archive: " + fullDateRange);
         System.out.println("Split into " + periods.size() + " periods: ");
 
@@ -278,7 +283,7 @@ public class PropDataAdminTool {
 
         promptContinue();
 
-        System.out.println("Start archiving " + propDataSource.getName() + " ... ");
+        System.out.println("Start archiving " + sourceToBeArchived.getName() + " ... ");
         long totalStartTime = System.currentTimeMillis();
         for (DateRange period : periods) {
             long startTime = System.currentTimeMillis();
@@ -287,19 +292,28 @@ public class PropDataAdminTool {
             System.out.println("");
 
             try {
-                ArchiveProgress progress = archiveService.startNewProgress(period.getStartDate(), period.getEndDate(), JOB_SUBMITTER);
-                progress = archiveService.importFromDB(progress);
-                if (i == periods.size()) {
-                    progress = archiveService.transformRawData(progress);
-                    progress = archiveService.exportToDB(progress);
-                }
-                archiveService.finish(progress);
+                ArchiveProgress progress = collectedArchiveService.startNewProgress(period.getStartDate(), period.getEndDate(), JOB_SUBMITTER);
+                progress = collectedArchiveService.importFromDB(progress);
+                collectedArchiveService.finish(progress);
                 System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
                         + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
             } catch (Exception e) {
                 System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
                         + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
             }
+        }
+    }
+
+    private void executeArchiveBulk(BulkArchiveService archiveService) {
+        System.out.println("Start archiving " + sourceToBeArchived.getName() + " ... ");
+        long startTime = System.currentTimeMillis();
+        try {
+            ArchiveProgress progress = archiveService.startNewProgress(JOB_SUBMITTER);
+            progress = archiveService.importFromDB(progress);
+            archiveService.finish(progress);
+            System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
+        } catch (Exception e) {
+            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime));
         }
     }
 
@@ -320,28 +334,30 @@ public class PropDataAdminTool {
         }
     }
 
-    enum PropDataSource {
-        FEATURE("Feature", "featureArchiveService"),
-        BUILTWITH("BuiltWith", "builtWithArchiveService");
+    enum SourceToBeArchived {
+        FEATURE("Feature", "featureArchiveService", RAW_TYPE_COLLECTED),
+        BUILTWITH("BuiltWith", "builtWithArchiveService", RAW_TYPE_COLLECTED),
+        HGDATACUSTOMERS("HGDataCustomers", "hgDataCustomersArchiveService", RAW_TYPE_BULK);
 
-        private static Map<String, PropDataSource> nameMap;
+        private static Map<String, SourceToBeArchived> nameMap;
 
         private final String name;
         private final String serviceBean;
-
-        PropDataSource(String name, String archiveJobBean) {
+        private final String sourceType;
+        SourceToBeArchived(String name, String archiveJobBean, String sourceType) {
             this.name = name;
             this.serviceBean = archiveJobBean;
-
+            this.sourceType = sourceType;
         }
 
         String getName() { return this.name; }
         String getServiceBean() { return this.serviceBean; }
+        String getSourceType() { return this.sourceType; }
 
         static {
             nameMap = new HashMap<>();
-            for (PropDataSource propDataSource : PropDataSource.values()) {
-                nameMap.put(propDataSource.getName(), propDataSource);
+            for (SourceToBeArchived sourceToBeArchived : SourceToBeArchived.values()) {
+                nameMap.put(sourceToBeArchived.getName(), sourceToBeArchived);
             }
         }
 
@@ -351,7 +367,7 @@ public class PropDataAdminTool {
             return names.toArray(nameArray);
         }
 
-        static PropDataSource fromName(String name) {
+        static SourceToBeArchived fromName(String name) {
             return nameMap.get(name);
         }
 
@@ -359,7 +375,7 @@ public class PropDataAdminTool {
 
     enum Command {
         ARCHIVE("archive"),
-        PIVOT("pivot");
+        REFRESH("REFRESH");
 
         private static Map<String, Command> nameMap;
         private final String name;

@@ -6,4 +6,6 @@ public interface RefreshJobExecutor {
 
     void proceedProgress(Progress progress);
 
+    void print();
+
 }

@@ -12,6 +12,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.impl.HdfsPathBuilder;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -50,8 +51,15 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
     private SqoopSyncJobService sqoopService;
 
     @Autowired
+    protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
+
+    @Autowired
+    @Qualifier(value = "propDataBulkJdbcTemplate")
+    protected JdbcTemplate jdbcTemplateBulkDB;
 
     protected void uploadAvroToCollectionDB(String avroDir, String destTable) {
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();

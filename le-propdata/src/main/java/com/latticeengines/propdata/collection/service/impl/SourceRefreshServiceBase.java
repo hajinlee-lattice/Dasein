@@ -1,13 +1,11 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.avro.Schema;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
@@ -29,7 +27,7 @@ import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-public abstract class AbstractSourceRefreshService<P extends Progress> {
+public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     abstract ProgressEntityMgr<P> getProgressEntityMgr();
 
@@ -38,7 +36,7 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
     abstract Source getSource();
 
     @Autowired
-    private SqoopSyncJobService sqoopService;
+    protected SqoopSyncJobService sqoopService;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
@@ -56,29 +54,33 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
+    @Autowired
+    @Qualifier(value = "propDataBulkJdbcTemplate")
+    protected JdbcTemplate jdbcTemplateBulkDB;
+
     @Value("${propdata.collection.host}")
-    private String dbHost;
+    protected String dbHost;
 
     @Value("${propdata.collection.port}")
-    private int dbPort;
+    protected int dbPort;
 
     @Value("${propdata.collection.db}")
-    private String db;
+    protected String db;
 
     @Value("${propdata.collection.user}")
-    private String dbUser;
+    protected String dbUser;
 
     @Value("${propdata.collection.password.encrypted}")
-    private String dbPassword;
+    protected String dbPassword;
 
     @Value("${propdata.collection.sqoop.mapper.number:8}")
-    private int numMappers;
+    protected int numMappers;
 
-    protected P findRunningJob() {
+    public P findRunningJob() {
         return getProgressEntityMgr().findRunningProgress(getSource());
     }
 
-    protected P findJobToRetry() {
+    public P findJobToRetry() {
         return getProgressEntityMgr().findEarliestFailureUnderMaxRetry(getSource());
     }
 
@@ -133,7 +135,7 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         return true;
     }
 
-    protected String getVersionString(P progress) {
+    public String getVersionString(P progress) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(progress.getCreateTime());
@@ -185,53 +187,7 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         return getSource().getSourceName() + "[" + progress.getRootOperationUID() + "]";
     }
 
-    protected boolean uploadAvroToCollectionDB(P progress, String avroDir, String destTable) {
-        String stageTableName = destTable + "_stage";
-        String bakTableName = destTable + "_bak";
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        String customer = getSqoopCustomerName(progress);
 
-        try {
-            LoggingUtils.logInfo(getLogger(), progress, "Create a clean stage table " + stageTableName);
-            dropJdbcTableIfExists(stageTableName);
-            jdbcTemplateCollectionDB.execute(createStageTableSql());
-
-            DbCreds.Builder builder = new DbCreds.Builder();
-            builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-            DbCreds creds = new DbCreds(builder);
-            sqoopService.exportDataSync(stageTableName, avroDir, creds, assignedQueue,
-                    customer + "-upload-" + destTable, numMappers, null);
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
-            return false;
-        } finally {
-            FileUtils.deleteQuietly(new File(stageTableName+".java"));
-        }
-
-        try {
-            swapTableNamesInDestDB(progress, destTable, bakTableName);
-            swapTableNamesInDestDB(progress, stageTableName, destTable);
-        } catch (Exception e) {
-            updateStatusToFailed(progress, "Failed to swap stage and dest tables for " + destTable, e);
-            swapTableNamesInDestDB(progress, bakTableName, destTable);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private void dropJdbcTableIfExists(String tableName) {
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) DROP TABLE " + tableName);
-    }
-
-    private void swapTableNamesInDestDB(P progress, String srcTable, String destTable) {
-        dropJdbcTableIfExists(destTable);
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + srcTable + "') AND type in (N'U')) EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
-        LoggingUtils.logInfo(getLogger(), progress, String.format("Rename %s to %s.", srcTable, destTable));
-    }
 
     protected void updateStatusToFailed(P progress, String errorMsg, Exception e) {
         LoggingUtils.logError(getLogger(), progress, errorMsg, e);
@@ -244,14 +200,6 @@ public abstract class AbstractSourceRefreshService<P extends Progress> {
         progress.setNumRetries(0);
         LoggingUtils.logInfo(getLogger(), progress, "Finished.");
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
-    }
-
-    protected String getDestTableName() { return getSource().getSqlTableName(); }
-
-    protected String getStageTableName() { return getSource().getSqlTableName() + "_stage"; }
-
-    protected String createStageTableSql() {
-        return "SELECT TOP 0 * INTO " + getStageTableName() + " FROM " + getDestTableName();
     }
 
 }

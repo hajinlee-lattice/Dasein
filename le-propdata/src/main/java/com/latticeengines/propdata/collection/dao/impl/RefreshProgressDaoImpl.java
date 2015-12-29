@@ -6,22 +6,22 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
-import com.latticeengines.propdata.collection.dao.PivotProgressDao;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.propdata.collection.dao.RefreshProgressDao;
+import com.latticeengines.propdata.collection.source.ServingSource;
 
-@Component("pivotProgressDao")
-public class PivotProgressDaoImpl extends ProgressDaoImplBase<PivotProgress>
-        implements PivotProgressDao {
+@Component("refreshProgressDao")
+public class RefreshProgressDaoImpl extends ProgressDaoImplBase<RefreshProgress>
+        implements RefreshProgressDao {
 
     @Override
-    protected Class<PivotProgress> getEntityClass() {
-        return PivotProgress.class;
+    protected Class<RefreshProgress> getEntityClass() {
+        return RefreshProgress.class;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public PivotProgress findByBaseSourceVersion(PivotedSource source, String baseSourceVersion) {
+    public RefreshProgress findByBaseSourceVersion(ServingSource source, String baseSourceVersion) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
@@ -30,7 +30,7 @@ public class PivotProgressDaoImpl extends ProgressDaoImplBase<PivotProgress>
         Query query = session.createQuery(queryStr);
         query.setString("sourceName", sourceName);
         query.setString("version", baseSourceVersion);
-        List<PivotProgress> list = query.list();
+        List<RefreshProgress> list = query.list();
         if (list.size() == 0) {
             return null;
         }

@@ -4,30 +4,27 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
+import com.latticeengines.propdata.collection.source.impl.BuiltWith;
 
 @Component
-public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
+public class BuiltWithArchiveServiceImplDeploymentTestNG extends CollectionArchiveServiceImplDeploymentTestNGBase {
 
     @Autowired
-    @Qualifier(value = "builtWithArchiveService")
-    ArchiveService archiveService;
+    BuiltWithArchiveService collectedArchiveService;
 
     @Autowired
-    @Qualifier(value = "builtWithSource")
-    CollectedSource source;
+    BuiltWith source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
 
-    @Override
-    ArchiveService getArchiveService() {
-        return archiveService;
+    CollectedArchiveService getCollectedArchiveService() {
+        return collectedArchiveService;
     }
 
     @Override
@@ -51,9 +48,5 @@ public class BuiltWithArchiveServiceImplDeploymentTestNG extends ArchiveServiceI
 
     @Override
     CollectedSource getSource() { return source; }
-
-    @Override
-    String[] uniqueColumns() { return new String[]{"Domain", "Technology_Name"}; }
-
 
 }

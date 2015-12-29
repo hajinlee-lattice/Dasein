@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.collection.source;
 
-public interface DomainBasedSource extends Source {
+public interface DomainBased {
 
     String getDomainField();
 

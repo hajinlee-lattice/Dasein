@@ -22,9 +22,11 @@ import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.DomainBasedSource;
+import com.latticeengines.propdata.collection.source.DomainBased;
+import com.latticeengines.propdata.collection.source.MostRecentSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.source.impl.HGData;
 import com.latticeengines.propdata.collection.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -43,6 +45,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
+    @Autowired
+    private HGData hgData;
+
     @Value("${propdata.collection.use.default.job.properties:true}")
     private boolean useDefaultProperties;
 
@@ -53,25 +58,26 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected String cascadingPlatform;
 
     @Override
-    public void executeMergeRawSnapshotData(CollectedSource source, String uid) {
+    public void executeMergeRawData(MostRecentSource source, String uid) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
 
+        CollectedSource baseSource = source.getBaseSource();
         Map<String, Table> sources = new HashMap<>();
-        String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+        String rawDir = hdfsPathBuilder.constructRawDir(baseSource).toString();
         try {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
                     dir = dir.substring(dir.lastIndexOf("/") + 1);
-                    Table table = TableUtils.createTable(source.getSourceName(), rawDir + "/" + dir + "/*.avro");
+                    Table table = TableUtils.createTable(baseSource.getSourceName(), rawDir + "/" + dir + "/*.avro");
                     sources.put(dir, table);
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
+            throw new RuntimeException("Failed to get all incremental raw data dirs for " + baseSource.getSourceName());
         }
 
         MergeDataFlowParameters parameters = new MergeDataFlowParameters();
-        parameters.setDomainField(((DomainBasedSource) source).getDomainField());
+        parameters.setDomainField(((DomainBased) source).getDomainField());
         parameters.setTimestampField(source.getTimestampField());
         parameters.setPrimaryKeys(source.getPrimaryKey());
         parameters.setSourceTables(sources.keySet().toArray(new String[sources.size()]));
@@ -101,6 +107,20 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "pivotBaseSource");
+    }
+
+    @Override
+    public void executeRefreshHGData(String baseVersion, String uid) {
+        String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(hgData, flowName).append(uid).toString();
+
+        Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(hgData.getBaseSource(), baseVersion);
+        Map<String, Table> sources = new HashMap<>();
+        sources.put(CollectionDataFlowKeys.SOURCE, baseTable);
+
+        DataFlowContext ctx = dataFlowContext(hgData, sources, new DataFlowParameters(), targetPath);
+        ctx.setProperty("FLOWNAME", hgData.getSourceName() + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, "hgDataRefreshFlow");
     }
 
     private DataFlowContext dataFlowContext(Source source,

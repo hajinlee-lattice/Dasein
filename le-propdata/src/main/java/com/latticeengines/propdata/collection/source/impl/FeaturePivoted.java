@@ -1,21 +1,19 @@
 package com.latticeengines.propdata.collection.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.collection.source.DomainBasedSource;
+import com.latticeengines.propdata.collection.source.DomainBased;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
 
-@Component("featurePivotedSource")
-public class FeaturePivotedSource implements PivotedSource, DomainBasedSource {
+@Component("featurePivoted")
+public class FeaturePivoted implements PivotedSource, DomainBased {
 
     private static final long serialVersionUID = -1456685001590154145L;
 
     @Autowired
-    @Qualifier(value = "featureSource")
-    Source baseSource;
+    FeatureMostRecent baseSource;
 
     @Override
     public String getSourceName() { return "FeaturePivoted"; }

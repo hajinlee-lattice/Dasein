@@ -1,0 +1,9 @@
+package com.latticeengines.propdata.collection.source;
+
+
+public interface MostRecentSource extends ServingSource {
+
+    @Override
+    CollectedSource getBaseSource();
+
+}

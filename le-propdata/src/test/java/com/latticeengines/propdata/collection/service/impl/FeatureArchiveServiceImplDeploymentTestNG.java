@@ -4,34 +4,29 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.util.DateRange;
+import com.latticeengines.propdata.collection.source.impl.Feature;
 
 @Component
-public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImplDeploymentTestNGBase {
+public class FeatureArchiveServiceImplDeploymentTestNG extends CollectionArchiveServiceImplDeploymentTestNGBase {
 
     @Autowired
-    @Qualifier(value = "featureArchiveService")
-    ArchiveService archiveService;
+    FeatureArchiveService collectedArchiveService;
 
     @Autowired
-    @Qualifier(value = "featureSource")
-    CollectedSource source;
+    Feature source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
 
-    @Override
-    ArchiveService getArchiveService() {
-        return archiveService;
+    CollectedArchiveService getCollectedArchiveService() {
+        return collectedArchiveService;
     }
 
     @Override
@@ -58,9 +53,7 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
         Date[] dates = getEmptyDataDates();
 
         ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
-        progress = importFromDB(progress);
-        progress = transformRawData(progress);
-        exportToDB(progress);
+        importFromDB(progress);
 
         cleanupProgressTables();
     }
@@ -68,23 +61,20 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends ArchiveServiceImp
     @Override
     CollectedSource getSource() { return source; }
 
-    @Override
-    String[] uniqueColumns() { return new String[]{"URL", "Feature"}; }
-
-    // not every kind of progress need this, we only need to test this on one kind
-    @Override
-    protected void testAutoDetermineDateRange() {
-        DateRange range = archiveService.determineNewJobDateRange();
-        System.out.println(range);
-
-        Date cutDate = dates[1];
-        Assert.assertTrue(range.getStartDate().before(cutDate),
-                "the auto determined range should start before " + cutDate
-                        + ". But it is " + range.getStartDate());
-        Assert.assertTrue(range.getEndDate().after(cutDate),
-                "the auto determined range should end after " + cutDate
-                        + ". But it is " + range.getStartDate());
-    }
+//    // not every kind of progress need this, we only need to test this on one kind
+//    @Override
+//    protected void testAutoDetermineDateRange() {
+//        DateRange range = archiveService.determineNewJobDateRange();
+//        System.out.println(range);
+//
+//        Date cutDate = dates[1];
+//        Assert.assertTrue(range.getStartDate().before(cutDate),
+//                "the auto determined range should start before " + cutDate
+//                        + ". But it is " + range.getStartDate());
+//        Assert.assertTrue(range.getEndDate().after(cutDate),
+//                "the auto determined range should end after " + cutDate
+//                        + ". But it is " + range.getStartDate());
+//    }
 
     private Date[] getEmptyDataDates() {
         Date[] dates = new Date[2];

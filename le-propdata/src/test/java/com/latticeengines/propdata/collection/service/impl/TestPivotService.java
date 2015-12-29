@@ -3,18 +3,18 @@ package com.latticeengines.propdata.collection.service.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.collection.source.impl.TestPivotedSource;
 
 @Component("testPivotService")
-public class TestPivotServiceImpl extends AbstractPivotService implements PivotService {
+public class TestPivotService extends AbstractPivotService implements PivotService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -22,20 +22,16 @@ public class TestPivotServiceImpl extends AbstractPivotService implements PivotS
     ArchiveProgressEntityMgr archiveProgressEntityMgr;
 
     @Autowired
-    PivotProgressEntityMgr progressEntityMgr;
+    RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    @Qualifier(value = "testPivotedSource")
-    PivotedSource source;
+    TestPivotedSource source;
 
     @Override
     public PivotedSource getSource() { return source; }
 
     @Override
-    PivotProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
-
-    @Override
-    ArchiveProgressEntityMgr getBaseSourceArchiveProgressEntityMgr() { return archiveProgressEntityMgr; }
+    RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
     Log getLogger() { return log; }
@@ -45,5 +41,8 @@ public class TestPivotServiceImpl extends AbstractPivotService implements PivotS
 
     @Override
     PivotStrategyImpl getPivotStrategy() { return null; }
+
+    @Override
+    public String createStageTableSql() { return ""; }
 
 }

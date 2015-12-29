@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.collection.PivotProgress;
-import com.latticeengines.propdata.collection.entitymanager.PivotProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
+import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
@@ -19,15 +18,14 @@ import com.latticeengines.propdata.collection.testframework.PropDataCollectionFu
 public class PivotProgressEntityMgrImplTestNG extends PropDataCollectionFunctionalTestNGBase {
 
     @Autowired
-    private PivotProgressEntityMgr progressEntityMgr;
+    private RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    @Qualifier(value = "featurePivotedSource")
-    PivotedSource source;
+    FeaturePivoted source;
 
     @Test(groups = "functional")
     public void testInsertNew() throws IOException {
-        PivotProgress progress =
+        RefreshProgress progress =
                 progressEntityMgr.insertNewProgress(source, new Date(), "FunctionalTest");
         Assert.assertNotNull(progressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID()));
         progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());

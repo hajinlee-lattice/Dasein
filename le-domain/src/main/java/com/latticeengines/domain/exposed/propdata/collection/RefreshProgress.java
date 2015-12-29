@@ -17,8 +17,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "PivotProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
-public class PivotProgress implements Progress {
+@Table(name = "RefreshProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
+public class RefreshProgress implements Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProgressID", unique = true, nullable = false)
@@ -152,9 +152,9 @@ public class PivotProgress implements Progress {
     @Override
     public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
 
-    public static PivotProgress constructByDate(String sourceName, Date pivotDate)
+    public static RefreshProgress constructByDate(String sourceName, Date pivotDate)
             throws InstantiationException, IllegalAccessException {
-        PivotProgress progress = new PivotProgress();
+        RefreshProgress progress = new RefreshProgress();
         progress.setSourceName(sourceName);
         progress.setPivotDate(pivotDate);
 
@@ -167,6 +167,6 @@ public class PivotProgress implements Progress {
 
     @Override
     public String toString() {
-        return String.format("PivotProgress %s [%s]", sourceName, rootOperationUID);
+        return String.format("RefreshProgress %s [%s]", sourceName, rootOperationUID);
     }
 }
