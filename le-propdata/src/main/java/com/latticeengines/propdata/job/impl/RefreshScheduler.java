@@ -4,15 +4,15 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import com.latticeengines.propdata.collection.service.CollectedArchiveService;
+import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.impl.ArchiveExecutor;
 
-public class CollectionRefreshScheduler extends QuartzJobBean {
+public class RefreshScheduler extends QuartzJobBean {
 
-    private CollectedArchiveService collectedArchiveService;
+    private ArchiveService archiveService;
 
     private ArchiveExecutor getExecutor() {
-        return new ArchiveExecutor(collectedArchiveService, null);
+        return new ArchiveExecutor(archiveService, null);
     }
 
     @Override
@@ -20,8 +20,8 @@ public class CollectionRefreshScheduler extends QuartzJobBean {
         getExecutor().kickOffNewProgress();
     }
 
-    public void setCollectedArchiveService(CollectedArchiveService collectedArchiveService) {
-        this.collectedArchiveService = collectedArchiveService;
+    public void setArchiveService(ArchiveService archiveService) {
+        this.archiveService = archiveService;
     }
 
 }
