@@ -245,6 +245,15 @@ class LP_020200_DL_PushToLeadDestination(StepBase):
     ngsxml = '<ngs><ng n="LoadScoredLeads_Step1"/><ng n="LoadScoredLeads_Step2"/><ng n="PushDataToDante_Hourly"/><ng n="InsightsAllSteps"/><ng n="PushLeadsLastScoredToDestination"/><ng n="PushToLeadDestination_TimeStamp"/><ng n="PushToLeadDestination_Validation"/></ngs>'
     lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
 
+    #Remove the extractQueries in PushLeadsInDanteToDestination
+    pltd_eq_xml = lgm.getLoadGroupFunctionality('PushLeadsInDanteToDestination','extractQueries')
+    pltd_eq = etree.fromstring( pltd_eq_xml )
+    for eq in pltd_eq:
+      if eq.get('queryAlias') == 'Q_Timestamp_PushToDestination':
+        pltd_eq.remove( eq )
+
+    lgm.setLoadGroupFunctionality( 'PushLeadsInDanteToDestination', etree.tostring(pltd_eq) )
+
     success = True
 
     return success
