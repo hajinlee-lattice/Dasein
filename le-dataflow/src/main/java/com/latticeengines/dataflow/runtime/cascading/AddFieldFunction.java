@@ -10,6 +10,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class AddFieldFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 337831829609802778L;
