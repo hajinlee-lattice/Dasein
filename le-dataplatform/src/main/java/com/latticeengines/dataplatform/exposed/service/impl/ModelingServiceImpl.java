@@ -571,7 +571,11 @@ public class ModelingServiceImpl implements ModelingService {
                 if (!depivoted) {
                     pivotedFeatures.add(name);
                     if (model.getFeaturesThreshold() > 0) {
-                        populateFeatureScore(featureScoreMap, name, datum.get("uncertaintyCoefficient").toString());
+                        String columnValue = "0";
+                        if (datum.get("uncertaintyCoefficient") != null) {
+                            columnValue = datum.get("uncertaintyCoefficient").toString();
+                        }
+                        populateFeatureScore(featureScoreMap, name, columnValue);
                     }
                     continue;
                 }
