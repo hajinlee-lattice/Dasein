@@ -145,9 +145,19 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
+        
+        waitForWorkflowStatus(targetMarket.getApplicationId(), true);
+        
+        boolean exception = false;
+        try {
+            restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Map.class);
+        } catch (Exception e) {
+            exception = true;
+        }
+        assertTrue(exception);
 
-        WorkflowStatus status = waitForWorkflowCompletion(targetMarket.getApplicationId());
-        assertEquals(status.getStatus().name(), BatchStatus.COMPLETED.name());
+        WorkflowStatus completedStatus = waitForWorkflowStatus(targetMarket.getApplicationId(), false);
+        assertEquals(completedStatus.getStatus().name(), BatchStatus.COMPLETED.name());
         
         List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports",
                 List.class);
@@ -161,13 +171,14 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         }
     }
 
-    private WorkflowStatus waitForWorkflowCompletion(String applicationId) {
+    private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
         while (true) {
             WorkflowStatus status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
             if (status == null) {
                 continue;
             }
-            if (!status.getStatus().isRunning()) {
+            if ((running && status.getStatus().isRunning()) 
+                    || (!running && !status.getStatus().isRunning())) {
                 return status;
             }
             try {
