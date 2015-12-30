@@ -1,6 +1,7 @@
 package com.latticeengines.pls.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,8 +113,9 @@ public class WorkflowSubmitter {
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                     .eventColumns(eventCols) //
                     .uniqueKeyColumn("LatticeAccountID") //
-                    .sourceDir(accountMasterPath) //
+                    .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //
+                    .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                     .build();
 
             String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();
