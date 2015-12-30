@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.exposed.builder;
 
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -384,6 +383,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             String path = null;
             try {
                 List<String> matches = HdfsUtils.getFilesByGlob(config, extract.getPath());
+                if (HdfsUtils.isDirectory(config, extract.getPath())) {
+                    matches = HdfsUtils.getFilesByGlob(config, extract.getPath() + "/*.avro");
+                }
+                
                 if (matches.size() == 0) {
                     throw new IllegalStateException(String.format("Could not find extract with path %s in HDFS",
                             extract.getPath()));
@@ -394,7 +397,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     allColumns.put(field.name(), field);
                 }
                 i++;
-            } catch (IllegalArgumentException | IOException e) {
+            } catch (Exception e) {
                 if (path != null) {
                     throw new LedpException(LedpCode.LEDP_26006, e, new String[] { path });
                 } else {
@@ -560,6 +563,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     private String getSchemaPath(Configuration config, String sourcePath) throws Exception {
+        if (HdfsUtils.isDirectory(config, sourcePath)) {
+            sourcePath = sourcePath + "/*.avro";
+        }
         List<String> files = HdfsUtils.getFilesByGlob(config, sourcePath);
         if (files.size() > 0) {
             sourcePath = files.get(0);
