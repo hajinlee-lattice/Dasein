@@ -9,7 +9,9 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTableConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.RunImportSummaryDataFlowConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.RunScoreTableDataFlowConfiguration;
 import com.latticeengines.prospectdiscovery.workflow.steps.TargetMarketStepConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
@@ -35,6 +37,9 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private ChooseModelStepConfiguration chooseModel = new ChooseModelStepConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private TargetMarketStepConfiguration targetMarketConfiguration = new TargetMarketStepConfiguration();
+        private RunScoreTableDataFlowConfiguration runScoreTableDataFlow = new RunScoreTableDataFlowConfiguration();
+        private RunAttributeLevelSummaryDataFlowsConfiguration attrLevelSummaryDataFlows = new RunAttributeLevelSummaryDataFlowsConfiguration();
+
 
         public Builder customer(CustomerSpace customerSpace) {
             fitModel.setCustomerSpace(customerSpace);
@@ -111,14 +116,16 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder uniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
+            runScoreTableDataFlow.setUniqueKeyColumn(uniqueKeyColumn);
             return this;
         }
 
-        public Builder sourceDir(String sourceDir) {
-            score.setSourceDir(sourceDir);
+        public Builder directoryToScore(String directoryToScore) {
+            score.setSourceDir(directoryToScore);
+            runScoreTableDataFlow.setAccountMasterNameAndPath(new String[] { "AccountMaster", directoryToScore });
             return this;
         }
-
+        
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
             return this;
@@ -126,6 +133,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder registerScoredTable(Boolean registerScoredTable) {
             score.setRegisterScoredTable(registerScoredTable);
+            return this;
+        }
+        
+        public Builder attributes(List<String> attributes) {
+            attrLevelSummaryDataFlows.setAttributes(attributes);
             return this;
         }
 
@@ -138,6 +150,8 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             chooseModel.microserviceStepConfiguration(microservice);
             score.microserviceStepConfiguration(microservice);
             targetMarketConfiguration.microserviceStepConfiguration(microservice);
+            runScoreTableDataFlow.microserviceStepConfiguration(microservice);
+            attrLevelSummaryDataFlows.microserviceStepConfiguration(microservice);
 
             fitModel.add(microservice);
             fitModel.add(importData);
@@ -148,6 +162,8 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             fitModel.add(chooseModel);
             fitModel.add(score);
             fitModel.add(targetMarketConfiguration);
+            fitModel.add(runScoreTableDataFlow);
+            fitModel.add(attrLevelSummaryDataFlows);
 
             return fitModel;
         }

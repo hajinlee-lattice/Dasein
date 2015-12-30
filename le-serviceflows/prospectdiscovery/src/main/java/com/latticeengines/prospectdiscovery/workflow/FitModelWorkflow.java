@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreateImportSummaryWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTable;
 import com.latticeengines.prospectdiscovery.workflow.steps.MarkReportOutOfDate;
@@ -48,6 +49,9 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Autowired
     private Score score;
+    
+    @Autowired
+    private CreateAttributeLevelSummaryWorkflow createAttributeLevelSummaryWorkflow;
 
     @Bean
     public Job fitModelWorkflowJob() throws Exception {
@@ -65,6 +69,7 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(profileAndModel) //
                 .next(chooseModel) //
                 .next(score) //
+                .next(createAttributeLevelSummaryWorkflow) //
                 .build();
     }
 

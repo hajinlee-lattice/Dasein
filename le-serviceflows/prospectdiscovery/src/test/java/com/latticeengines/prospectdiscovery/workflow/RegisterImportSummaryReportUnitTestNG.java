@@ -29,7 +29,7 @@ public class RegisterImportSummaryReportUnitTestNG {
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(resource.getFile().getPath()));
         assertEquals(records.size(), 1);
         GenericRecord stats = records.get(0);
-        ObjectNode json = registerImportSummaryReport.buildJson(stats);
+        ObjectNode json = registerImportSummaryReport.getReportRegistrator().buildJson(stats);
         double matchRate = json.get("accounts").get("match_rate").asDouble();
         assertTrue(matchRate >= 0.0 && matchRate <= 1.0);
     }
