@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
 
 public class DataFlowConfigurationUnitTestNG {
 
@@ -15,6 +16,8 @@ public class DataFlowConfigurationUnitTestNG {
         payload.setName("Payload1");
         payload.setCustomerSpace(CustomerSpace.parse("CONTRACT1.TENANT1.Production"));
         payload.setDataFlowBeanName("dataFlowBean");
+        CreateScoreTableParameters dataFlowParams = new CreateScoreTableParameters("ABC", "DEF", "GHI");
+        payload.setDataFlowParameters(dataFlowParams);
         
         String serializedStr = JsonUtils.serialize(payload);
         
