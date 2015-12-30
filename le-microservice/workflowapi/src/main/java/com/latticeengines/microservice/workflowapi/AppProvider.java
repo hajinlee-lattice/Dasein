@@ -1,4 +1,5 @@
-package com.latticeengines.microservice.dataflowapi;
+package com.latticeengines.microservice.workflowapi;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.microservice.exposed.AppInfoProvider;
