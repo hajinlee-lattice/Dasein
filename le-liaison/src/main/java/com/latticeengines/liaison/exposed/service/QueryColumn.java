@@ -119,28 +119,28 @@ public abstract class QueryColumn {
     }
     
     public void setMetadata( String metadataType, String metadataValue ) throws BadMetadataValueException {
-        if( metadataType == "ApprovedUsage" ) {
+        if( metadataType.equals("ApprovedUsage") ) {
             setApprovedUsage( metadataValue );
         }
-        else if ( metadataType == "DisplayName" ) {
+        else if ( metadataType.equals("DisplayName") ) {
             setDisplayName( metadataValue );
         }
-        else if ( metadataType == "Category" ) {
+        else if ( metadataType.equals("Category") ) {
             setCategory( metadataValue );
         }
-        else if ( metadataType == "StatisticalType" ) {
+        else if ( metadataType.equals("StatisticalType") ) {
             setStatisticalType( metadataValue );
         }
-        else if ( metadataType == "Tags" ) {
+        else if ( metadataType.equals("Tags") ) {
             setTags( metadataValue );
         }
-        else if ( metadataType == "FundamentalType" ) {
+        else if ( metadataType.equals("FundamentalType") ) {
             setFundamentalType( metadataValue );
         }
-        else if ( metadataType == "Description" ) {
+        else if ( metadataType.equals("Description") ) {
             setDescription( metadataValue );
         }
-        else if ( metadataType == "DisplayDiscretizationStrategy" ) {
+        else if ( metadataType.equals("DisplayDiscretizationStrategy") ) {
             setDisplayDiscretization( metadataValue );
         }
         else {
