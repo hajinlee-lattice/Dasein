@@ -1,22 +1,182 @@
-.main-content {
-	padding-bottom: 8em;
+
+/* 
+Logo
+==================================================== */
+.logo {
+  display: inline-block;
+  width: 100px;
+  margin: 20px 0;
+  opacity: 0.7;
+  filter: alpha(opacity=70);
+  img {
+    width: 100%;
+  }
 }
+.no-nav-logo {
+  width: 110px;
+  margin-top: 12px;
+}
+.open-nav .no-nav-logo {
+  display: none;
+}
+
+
+/*
+Main Content & Page Header
+=================================================== */
 .page-header {
 	text-align: center;
 }
-.link-nav {
+.main-content {
+	padding-bottom: 8em;
+}
+
+
+
+/* 
+Page Summary / Sub-Nav Headers
+==================================================== */
+.summary {
+  padding: 40px 0;
+  text-align: center;
+  background: $palladium;
+  &.blue-steel {
+    background: url("../img/bkg-blue-steel.jpg") no-repeat center;
+    background-size: cover;
+    h1, h2, h3, h4, p {
+      color: #fff;
+      &.summary-title {
+        color: #222;
+      }
+    }
+  }
+}
+
+
+/* 
+Toggle UI Components
+====================================================== */
+.toggle {
+  & > ul, & > div {
+    display: none;
+  }
+  &.open {
+    & > ul, & > div {
+      display: block;
+    }
+  }
+}
+
+
+
+/*
+Icons
+======================================================== */
+.ico {
 	display: inline-block;
-	margin-top: 10px;
-	li {
-		display: inline-block;
-		&.divider {
-			padding: 0 10px;
-		}
-		a {
-			color: $jet;
-			&.active {
-				color: $saphire;
-			}
-		} 
+	width: 12px;
+	height: 12px;
+	vertical-align: middle;
+	&.ico-small {
+		width: 12px;
+	}
+	&.ico-search {
+		background-image: url("../img/ico-search.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-filter {
+		background-image: url("../img/ico-filter.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-sort {
+		background-image: url("../img/ico-sort.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-grid {
+		background-image: url("../img/ico-grid.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-list {
+		background-image: url("../img/ico-list.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-fingerprint {
+		background-image: url("../img/ico-fingerprint.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-bullseye {
+		background-image: url("../img/ico-bullseye.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-cog {
+		background-image: url("../img/ico-cog.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-user {
+		background-image: url("../img/ico-user.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-step-open {
+		background-image: url("../img/ico-step-open.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-step-current {
+		background-image: url("../img/ico-step-current.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-step-checked {
+		background-image: url("../img/ico-step-checked.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-industry {
+		background-image: url("../img/ico-industry.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-locations {
+		background-image: url("../img/ico-location.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-firmographics {
+		background-image: url("../img/ico-firmographics.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-tech-profile {
+		background-image: url("../img/ico-tech-profile.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-chip {
+		background-image: url("../img/ico-chip.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-user {
+		background-image: url("../img/ico-user.svg");
+		background-repeat: no-repeat;
+		background-position: center;
+	}
+	&.ico-user-card {
+		background-image: url("../img/ico-user-card.svg");
+		background-repeat: no-repeat;
+		background-position: center;
 	}
 }
+
+
+
+

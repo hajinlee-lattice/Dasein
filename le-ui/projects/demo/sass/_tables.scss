@@ -88,11 +88,33 @@ table {
     text-align: right;
 }
 .panel .panel-heading.custom-heading {
-    height: 38px;
-    background: #d0d0d0;
-    padding: 8px 0px !important;
-    font-size: 125%;
-    color: #000;
+    padding: 4px 10px; 
+    font-weight: bold;
+    background: #fff;
+    color: $dark-gray;
+    border-bottom: #d0d2d3 solid 3px;
+}
+
+.job-td-row {   
+    border-bottom: $palladium solid 1px;
+    &:nth-child(odd) {
+        background: #f9f9f9;
+    }
+    &:last-child {
+        border-bottom: none;
+    } 
+    .fa-angle-double-up, .fa-angle-double-down {
+        color: #000;
+    }
+}
+.completion-times {
+    color: #868e92;
+    font-size: 12px;
+    margin-bottom: 10px;
+    span {
+        display: inline-block;
+        width: 19%;
+    }
 }
 
 .breadcrumb {
@@ -180,8 +202,4 @@ table {
 }
 .expanded-true {
     background: #e7e7e7;
-    margin-bottom: 3px;
-}
-.expanded-false {
-    border-bottom: solid 3px #ddd;
 }

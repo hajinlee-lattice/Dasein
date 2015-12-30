@@ -111,6 +111,10 @@ Off Canvas Navigation
 .main-content {
   height: 100%;
   overflow: auto;
+  @include media('>large') {
+    right: auto;
+    margin-right: 0;
+  }
 }
 .open-nav .main-content {
   @include media('>large') {
@@ -134,8 +138,13 @@ Secondary Nav (Hamburger and Profile Nav)
   .profile-nav {
     float: right;
     & > a {
-      padding: 20px;
+      padding: 20px 20px 20px 52px;
       display: block;
+      color: $dark-gray;
+      background-image: url("../img/ico-user-profile.svg");
+      background-size: 30px 30px;
+      background-repeat: no-repeat; 
+      background-position: 12px 50%;
     }
   }
   button:hover, .profile-nav:hover {
@@ -147,26 +156,12 @@ Secondary Nav (Hamburger and Profile Nav)
     clear: both;
   }
 }
-
-/* 
-Logo
-==================================================== */
-.logo {
-  display: inline-block;
-  width: 100px;
-  margin: 20px 0;
-  img {
-    width: 100%;
-  }
+.profile-nav.dropdown>a.active {
+  background-image: url("../img/ico-user-profile.svg");
+  background-size: 30px 30px;
+  background-repeat: no-repeat; 
+  background-position: 12px 50%;
 }
-.no-nav-logo {
-  width: 110px;
-  margin-top: 12px;
-}
-.open-nav .no-nav-logo {
-  display: none;
-}
-
 
 
 /* 
@@ -202,30 +197,35 @@ Primary Sidebar Nav Menu Styling
     display: block;
     padding: 0.75em 1.25em;
     font-size: 16px;
-    border-left: transparent solid 4px;
-    color: #bcbec1;
+    border-left: transparent solid 5px;
+    color: rgba(255, 255, 255, 0.7);
     &:hover {
-      background-color: #2d333c;
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.8);
     }
   }
   & > li > a span:first-of-type {
     font-size: 27px;
   }
   li.active > a {
-    background-color: #2d333c;
-    border-left: #ef6a30 solid 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: #ef6a30 solid 5px;
+    color: rgba(255, 255, 255, 1);
   }
   ul a, li > div {
-    padding: 0.75em 1.5em 0.75em 4em;
+    padding: 0.75em 1.5em 0.75em 5em;
   }  
-  .fa {
+  .fa, .ico {
     display: inline-block;
     margin-right: 12px;
-    font-size: 16px;
     color: #fff;
     &.blue-text {
       color: $blue-text;
     }
+  }
+  .ico {
+    width: 22px;
+    height: 22px;
   }
   .fa-circle-thin, .fa-check-circle-o {
     background-color: #222831; 
@@ -256,38 +256,66 @@ Primary Sidebar Nav Menu Styling
   &.progress-menu li:last-child > div {
     background-image: none;
   }
-
 }
 
-.toggle {
-  & > ul, & > div {
-    display: none;
-  }
-  &.open {
-    & > ul, & > div {
-      display: block;
+.primary-nav {
+    overflow: hidden;
+    &>div {
+        transition: all 250ms ease;
+        transform-origin: 50% 50%;
     }
-  }
+    &>div.ng-enter {
+        opacity: 0;
+        transform: scale(.5,.5);
+    }
+    &>div.ng-enter-active {
+        opacity: 1;
+        transform: scale(1,1);
+    }
+    &>div.ng-leave {
+        position:absolute;
+        top: 0;
+        opacity: 1;
+        transform: scale(1,1);
+    }
+    &>div.ng-leave-active {
+        opacity: 0;
+        transform: scale(1.333,1.333);
+    }
+    .progress-menu .jade-text {
+        color: #6fbe4a;
+    }
+    .progress-menu .gold-text {
+        color: #ffbd48;
+    }
+    .progress-menu ul li span {
+        width: 1.4em;
+        text-align: center;
+    }
+    .pd-sidebar-accordion-list {
+        max-height: 10em;
+        overflow: auto;
+    }
 }
 
 
-
-/* 
-Page Summary / Sub-Nav Headers
-==================================================== */
-.summary {
-  padding: 40px 0;
-  text-align: center;
-  background: $palladium;
-  &.blue-steel {
-    background: url("../img/bkg-blue-steel.jpg") no-repeat center;
-    background-size: cover;
-    h1, h2, h3, h4, p {
-      color: #fff;
-      &.summary-title {
-        color: #222;
+/*
+Link Navigation
+======================================================== */
+.link-nav {
+  display: inline-block;
+  margin-top: 10px;
+  li {
+    display: inline-block;
+    &.divider {
+      padding: 0 10px;
+    }
+    a {
+      color: $jet;
+      &.active {
+        color: $saphire;
       }
-    }
+    } 
   }
 }
 
