@@ -52,7 +52,7 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
     @Test(groups = "deployment")
     public void verifyCredentialUsingEai() {
         // sfdc production
-        FeatureFlagDefinition def = new FeatureFlagDefinition();
+        FeatureFlagDefinition def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         def.setConfigurable(true);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
         FeatureFlagClient.setEnabled(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
