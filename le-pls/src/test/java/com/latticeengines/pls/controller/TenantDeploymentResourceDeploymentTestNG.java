@@ -60,7 +60,7 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
         }
         camille.create(path, new Document(CRMTopology.SFDC.name()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-        FeatureFlagDefinition def = new FeatureFlagDefinition();
+        FeatureFlagDefinition def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         def.setConfigurable(true);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
         FeatureFlagClient.setEnabled(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
