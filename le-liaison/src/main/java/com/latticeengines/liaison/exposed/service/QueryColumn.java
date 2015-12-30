@@ -21,7 +21,7 @@ public abstract class QueryColumn {
     private static final Set<String> approvedUsageValues = new HashSet<String>( Arrays.asList("None","Model","ModelAndModelInsights","ModelAndAllInsights") );
     private static final Set<String> statisticalTypeValues = new HashSet<String>( Arrays.asList("nominal","ratio","ordinal","interval") );
     private static final Set<String> tagsValues = new HashSet<String>( Arrays.asList("Internal","External") );
-    private static final Set<String> fundamentalTypeValues = new HashSet<String>( Arrays.asList("alpha","numeric","currency","percentage","boolean","year") );
+    private static final Set<String> fundamentalTypeValues = new HashSet<String>( Arrays.asList("unknown","nominal","float","alpha","numeric","currency","percentage","boolean","year") );
     
     
     public QueryColumn( String definition ) throws DefinitionException {
@@ -76,10 +76,10 @@ public abstract class QueryColumn {
     }
     
     public void setStatisticalType( String value ) throws BadMetadataValueException {
-        if( !statisticalTypeValues.contains(value) ) {
+        if( !statisticalTypeValues.contains(value.toLowerCase()) ) {
             throw new BadMetadataValueException( String.format("Cannot set StatisticalType to %s", value) );
         }
-        metadata.put( "StatisticalType", value );
+        metadata.put( "StatisticalType", value.toLowerCase() );
     }
     
     public void setTags( String value ) throws BadMetadataValueException {
@@ -90,10 +90,15 @@ public abstract class QueryColumn {
     }
     
     public void setFundamentalType( String value ) throws BadMetadataValueException {
-        if( !fundamentalTypeValues.contains(value) ) {
+        if( !fundamentalTypeValues.contains(value.toLowerCase()) ) {
             throw new BadMetadataValueException( String.format("Cannot set FundamentalType to %s", value) );
         }
-        metadata.put( "FundamentalType", value );
+        if( value.equals("Unknown") ) {
+            metadata.put( "FundamentalType", value );
+        }
+        else {
+            metadata.put( "FundamentalType", value.toLowerCase() );
+        }
     }
     
     public void setDescription( String value ) throws BadMetadataValueException {
