@@ -56,18 +56,12 @@ class ImputationStep(PipelineStep):
     enumMappings_ = OrderedDict()
     imputationValues = {}
     targetColumn = ""    
-    scalingArray = []
-    meanColumn = []
-    componentMatrix = []
-      
-    def __init__(self, enumMappings, imputationValues, scalingArray, meanColumn, componentMatrix, targetCol):
+
+    def __init__(self, enumMappings, imputationValues, targetCol):
         self.enumMappings_ = enumMappings
         self.imputationValues = imputationValues
         self.targetColumn = targetCol
-        self.scalingArray = scalingArray
-        self.meanColumn = meanColumn
-        self.componentMatrix = componentMatrix
-     
+
     def transform(self, dataFrame):
         outputFrame = dataFrame
                       
@@ -75,92 +69,29 @@ class ImputationStep(PipelineStep):
         if len(self.imputationValues) != 0:
             calculateImputationValues = False
  
-        outputFrame, nullValues = self.generateTransformedBooleanColumns(dataFrame, calculateImputationValues)
+        nullValues = self.getNullValues(outputFrame)
         outputFrame = self.imputeValues(outputFrame, nullValues, calculateImputationValues)
           
         return outputFrame
   
-        
-    def generateTransformedBooleanColumns(self, dataFrame, calculateImputationValues):
-        outputFrame = dataFrame
-        nullCols, nullValues = self.generateIsNullColumns(outputFrame)
-  
-        if len(nullValues) > 0:
-            if calculateImputationValues:
-                (self.scalingArray, self.meanColumn, self.componentMatrix) = self.nullValuePCA(nullCols, outputFrame[self.targetColumn])
-      
-            nullCol_transformed = self.getTransformedMatrix(self.scalingArray, self.meanColumn, self.componentMatrix, nullCols)
-            if len(nullCol_transformed > 0):
-                nullCol_transformed = pd.DataFrame(nullCol_transformed)
-                nullCol_transformed.columns = ["Transformed_Boolean_" + str(nullCol_transformed.columns.values[i]) for i in range(len(nullCol_transformed.columns.values))]
-                outputFrame = pd.concat([outputFrame, nullCol_transformed], axis = 1)
-        return outputFrame, nullValues
-        
-    def generateIsNullColumns(self, dataFrame):
+    def getNullValues(self, dataFrame):
         nullValues = {}
         outputFrame = dataFrame
-        nullColsFrame = pd.DataFrame()
-  
+
         if len(self.enumMappings_) > 0:
             for column in self.enumMappings_:
                 if column in outputFrame:
-                    isNullColumn, nullCount = self.getIsNullColumn(outputFrame[column])
+                    nullCount = self.getIsNullColumn(outputFrame[column])
                     nullValues[column] = nullCount
-                    nullColsFrame[column + "_isNull"] = pd.Series(isNullColumn)
-  
-        return nullColsFrame, nullValues
+        return nullValues
                  
     def getIsNullColumn(self, dataColumn):
         nullCount = 0
-        isNullColumn = []
+        
         for i in range(len(dataColumn)):
             if pd.isnull(dataColumn[i]):
                 nullCount = nullCount + 1
-                isNullColumn.append(1.0)
-            else:
-                isNullColumn.append(0.0)
-        return isNullColumn, nullCount
-        
-    def getScalingForPCA(self, dataFrame, eventColumn):
-        ratePopulation = np.mean(eventColumn)
-        scalarList = []
-        for col in dataFrame.columns:
-            rateColumn = np.mean(eventColumn[dataFrame[col] > 0])
-            if np.isnan(rateColumn):
-                rateColumn = 0
-                     
-            scalarList.append(rateColumn - ratePopulation)
-        return np.array(scalarList)
-         
-    def getindexofMaxVariance(self, explainedVarianceRatio, thresholdVariance):
-        sumVarianceRatio = 0
-        for i in range(len(explainedVarianceRatio)):
-            sumVarianceRatio += explainedVarianceRatio[i]
-            if sumVarianceRatio > thresholdVariance:
-                return i + 1
-         
-    def getPCAComponents(self, X):
-        pca = PCA()
-        pca.fit(X)
-        explainedVarianceRatio =  pca.explained_variance_ratio_
-        componentsMatrix = pca.components_
-        X_transformed = pca.transform(X)
-             
-        return (explainedVarianceRatio, componentsMatrix, X_transformed)  
-        
-    def nullValuePCA(self, inputDF, eventCol, thresholdVariance=0.98, numberOfColumnsThreshold=5):
-        if (len(inputDF.columns.values) < numberOfColumnsThreshold):
-            numberOfColumnsThreshold = len(inputDF.columns.values) - 1
-  
-        scaling_array = self.getScalingForPCA(inputDF, eventCol)
-        inputScaled = np.multiply(inputDF.values, np.ones(inputDF.shape) * scaling_array.T)
-        np.nan_to_num(inputScaled)
-  
-        (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
-        indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
-        means = np.mean(inputScaled, axis = 0)
-  
-        return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
+        return nullCount
         
     def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
@@ -188,15 +119,6 @@ class ImputationStep(PipelineStep):
         oneLabels = (dataFrame[targetColumn] == 1).sum()
         expectedLabelValue = float(oneLabels) / (oneLabels + zeroLabels)
         return expectedLabelValue
-        
-    def getTransformedMatrix(self, scalingArray, meanColumn, componentMatrix, originalMatrix):
-        transformedMatrix = np.ndarray(shape = (0, 0)) 
-          
-        if (len(originalMatrix) > 0):
-            scaledMatrix = np.multiply(originalMatrix, np.ones(originalMatrix.shape) * scalingArray.T)
-            centeredMatrix = scaledMatrix - np.ones(originalMatrix.shape) * meanColumn.T
-            transformedMatrix = np.dot(centeredMatrix, componentMatrix.T)
-        return transformedMatrix
         
     def createIndexSequence(self, number, rawSplits):
         if number == 0:
