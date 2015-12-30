@@ -22,7 +22,7 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Matching Contacts</dt>
-                        <dd>34,665</dd>
+                        <dd>{{ ContactsTotal | number: 0 }}</dd>
                     </dl>
                     <a href="#" class="view-samples pull-right">Samples</a>
                 </div>
@@ -63,22 +63,22 @@
                         </a>
                     </div>
                     <div class="carousel-slide-container">
-                        <a ui-sref="builder.category({AttrKey: 'EmployeesRange', ParentKey: '', ParentValue: ''})">
+                        <a ui-sref="builder.category({AttrKey: 'Employees Range', ParentKey: '', ParentValue: ''})">
                             <div class="white-border">
                                 <span class="ico ico-firmographics gold-bkg"></span>
                             </div>
-                            <div class="tmb-nav-title">Firmographics</div>
+                            <div class="tmb-nav-title">Employees Range</div>
                             <div class="tmb-nav-meta">
                                 <span class="badge">0</span> of 64
                             </div>
                         </a>
                     </div>
                     <div class="carousel-slide-container">
-                        <a ui-sref="builder.category({AttrKey: 'Growth Trends', ParentKey: '', ParentValue: ''})">
+                        <a ui-sref="builder.category({AttrKey: 'Revenue Range', ParentKey: '', ParentValue: ''})">
                             <div class="white-border">
                                 <span class="fa fa-2x fa-line-chart amber-bkg"></span>
                             </div>
-                            <div class="tmb-nav-title">Growth Trends</div>
+                            <div class="tmb-nav-title">Revenue Range</div>
                             <div class="tmb-nav-meta">
                                 <span class="badge">2</span> of 11
                             </div>

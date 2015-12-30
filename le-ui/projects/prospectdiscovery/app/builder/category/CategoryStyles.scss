@@ -41,8 +41,13 @@
         transition-duration: 0s;
     }
 
-    div.list-item {
-        pointer: hand;
+    div.list-item.has-sub {
+        cursor: pointer;
+    }
+    
+    .list-item:hover,
+    .list-item {
+        cursor: default;
         
         .attr-select-container {
             position: relative;

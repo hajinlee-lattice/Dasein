@@ -18,5 +18,4 @@ angular
 
             return deferred.promise;
         };
-    }
-);
+    });

@@ -1,9 +1,27 @@
-angular.module('pd.navigation.subnav', [])
-    .controller('SubNavSummaryCtrl', function($scope, $rootScope) {
+angular.module('pd.navigation.subnav', [
+        'pd.builder.attributes'
+    ])
+    .controller('SubNavSummaryCtrl', function($scope, $rootScope, $filter, AttributesModel) {
+        angular.extend($scope, AttributesModel);
+
         $scope.CompaniesTotal = 0;
         $scope.RevenueTotal = 0;
+        $scope.ContactsTotal = 0;
+        $scope.$watch('MasterList', function (lists) {
+            $scope.CompaniesTotal = 0;
+            $scope.RevenueTotal = 0;
+            $scope.ContactsTotal = 0;
 
-        $scope.$on('Builder-Sidebar-List', function(event, args) {
+            var list = $filter('filter')($scope.MasterList, { visible: true, selected: true }, true);
+            console.log('SubNavSummaryCtrl', list);
+            list.forEach(function(item, key) {
+                $scope.CompaniesTotal += parseInt(item.Properties.CompanyCount);
+                $scope.RevenueTotal += parseInt(item.revenue);
+                $scope.ContactsTotal += parseInt(item.customers);
+            });
+        }, true);
+        /*
+        $scope.$on('Builder-Navigation-Updated', function(event, args) {
             $scope.CompaniesTotal = 0;
             $scope.RevenueTotal = 0;
             
@@ -13,6 +31,7 @@ angular.module('pd.navigation.subnav', [])
             });
 
         });
+        */
     })
     .controller('SubNavCtrl', function ($scope, $rootScope) {
         this.init = function() { 

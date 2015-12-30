@@ -58,12 +58,6 @@ var mainApp = angular.module('mainApp', [
                 var scope = $rootScope.$new();
                 $compile($("#mainHeaderView").html(html))(scope);
             });
-            /*
-            $http.get('./app/subnav/SubNavView.html').success(function (html) {
-                var scope = $rootScope.$new();
-                $compile($("#mainNavigationView").html(html))(scope);
-            });
-            */
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
             return window.open('/','_self');

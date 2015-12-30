@@ -1,0 +1,38 @@
+.primary-nav {
+    .progress-menu .amber-text {
+        color: #f16a22;
+    }
+
+    .progress-menu ul li span.pd-sidebar-category-total {
+        float: right;
+    }
+
+    .pd-sidebar-category em {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 13.5em;
+        display: inline-block;
+        overflow: hidden;
+        height: 1.4em;
+        vertical-align: sub;
+    }
+    .pd-sidebar-category {
+        max-height: 20em;
+        overflow: auto;
+        margin-right: 1.4em;
+    }
+
+    .pd-sidebar-header span {
+        vertical-align: bottom;
+    }
+
+    .pd-sidebar-header span.badge {
+        margin-top: 5px;
+    }
+
+    .pd-sidebar-subcategory li span {
+        margin-left: 4em;
+        font-size: 0.9em;
+        color: #999;
+    }
+}

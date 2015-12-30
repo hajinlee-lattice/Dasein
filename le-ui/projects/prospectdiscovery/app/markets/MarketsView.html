@@ -49,51 +49,9 @@
                     </tr>
                 </thead>
                 <tbody>
-
-                    <!-- fake data for testing purposes -->
-                    <tr>
-                        <td>Global Target Market</td>
-                        <td>2015/01/01</td>
-                        <td>2.3x</td>
-                        <td>75</td>
-                        <td>$323,001,950</td>
-                        <td>19,745</td>
-                        <td>3,000</td>
-                        <td>$64,512,800</td>
-                    </tr>
-                    <tr>
-                        <td>Global Target Market</td>
-                        <td>2015/01/01</td>
-                        <td>2.3x</td>
-                        <td>75</td>
-                        <td>$323,001,950</td>
-                        <td>19,745</td>
-                        <td>3,000</td>
-                        <td>$64,512,800</td>
-                    </tr>
-                    <tr>
-                        <td>Global Target Market</td>
-                        <td>2015/01/01</td>
-                        <td>2.3x</td>
-                        <td>75</td>
-                        <td>$323,001,950</td>
-                        <td>19,745</td>
-                        <td>3,000</td>
-                        <td>$64,512,800</td>
-                    </tr>
-                    <tr>
-                        <td>Global Target Market</td>
-                        <td>2015/01/01</td>
-                        <td>2.3x</td>
-                        <td>75</td>
-                        <td>$323,001,950</td>
-                        <td>19,745</td>
-                        <td>3,000</td>
-                        <td>$64,512,800</td>
-                    </tr>
-                    <tr>
-                        <td>Global Target Market</td>
-                        <td>2015/01/01</td>
+                    <tr ng-repeat="item in targetMarkets">
+                        <td>{{ item.description }}</td>
+                        <td>{{ item.creation_timestamp }}</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>

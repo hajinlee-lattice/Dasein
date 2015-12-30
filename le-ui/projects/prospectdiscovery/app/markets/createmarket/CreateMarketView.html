@@ -1,0 +1,46 @@
+<div class="summary blue-steel">
+    <h3>Enter a Name to begin Target Market Builder workflow</h3>
+</div>
+<div class="container" ng-controller="CreateMarketCtrl">
+
+    <div class="row page-header">
+        <h4 class="columns six">
+            Create Target Market
+        </h4>
+        <span class="columns six">
+            <button type="button" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'AttrValue' ? '-AttrValue' : 'AttrValue')" ng-init="SortOrder = 'AttrValue';">
+                <span class="fa fa-sort-alpha-{{ SortOrder == 'AttrValue' ? 'asc' : 'desc' }}"></span>
+            </button>
+        </span>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns">
+            <div class="input-section">
+                <div class="input-title">Enable Something?</div>
+                <div class="toggle-check">
+                  <label for="prod-sand-check">Yarr</label>
+                  <input type="checkbox" name="prod-sand-check" id="prod-sand-check" class="toggle-switch" />
+                  <label for="prod-sand-check">Nay</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pd-markets-create-form">
+        <div class="twelve columns">
+            <div class="input-section">
+                <div class="input-title">Target Market Name:</div>
+                <input type="text" class="form-control" value="" />
+            </div>
+        </div>
+    </div>            
+            
+    <div class="row">
+        <div class="twelve columns">
+            <div>
+                <a ui-sref="builder.category({AttrKey: 'Industry', ParentValue: ''})"><button type="button" class="button orange-button">Enter Builder</button></a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,31 +1,56 @@
 angular
-    .module('pd.builder.category', [
-    ])
-    .service('CategoryModel', function($rootScope, $q, _, CategoryService) {
-        var CategoryModel = this;
+    .module('pd.builder.attributes', [])
+    .service('AttributesModel', function($q, AttributesService, $filter) {
+        var AttributesModel = this;
 
-        this.MasterList = {}
+        this.SubCategoryMap = {
+            'Industry': 'SubIndustry',
+            'Locations': 'State'
+        };
+
+        this.ParentCategoryMap = {
+            'Locations': 'Region',
+            'Employees Range': 'EmployeesRange',
+            'Revenue Range': 'RevenueRange'
+        };
+
+        this.MasterList = [];
+
+        this.getMaster = function(args) {
+            var fields = {
+                AttrKey: (this.ParentCategoryMap[args.AttrKey] || args.AttrKey)
+            };
+
+            if (args.AttrValue) fields.AttrValue = args.AttrValue;
+            if (args.ParentValue) fields.ParentValue = args.ParentValue;
+            if (args.ParentKey) fields.ParentKey = args.ParentKey;
+
+            var list = $filter('filter')(this.MasterList, fields, true);
+            console.log('getMaster', fields, list, this.MasterList);
+
+            return list || [];
+        }
 
         this.getList = function(args) {
-            var deferred = $q.defer();
+            var deferred = $q.defer(),
+                master = this.getMaster(args);
 
-            var list = this.MasterList[args.AttrKey];
-
-            if (list && args.ParentValue) {
-                list = list[args.ParentValue];
-            }
-            
-            if (list) {
+            if (master && master.length > 0) {
                 setTimeout(function() {
-                    deferred.resolve(list);
-                },1);
+                    deferred.resolve(master);
+                }, 1);
             } else {
-                CategoryService.get(args).then(function(list) {
-                    var list = list || [];
+                master = this.MasterList;
+
+                AttributesService.get(args).then(function(list) {
+                    list = list || [];
 
                     // FIXME - Fudging the numbers a bit for the demo...
                     list.forEach(function(item, index) {
-                        item.total = Math.round(Math.random() * 20);
+                        // FIXME - Make REGION top level
+                        if (item.ParentKey == 'Country')
+                            item.ParentKey = '_OBJECT_';
+
                         item.lift = (Math.random() * 3.0).toFixed(1) + 'x';
 
                         item.revenue = Math.round(Math.random() * 30000000);
@@ -41,19 +66,16 @@ angular
                         item.smallp = ((item.customers / item.lattice_companies) * 100).toFixed(3);
                         item.smallp_of_theirs = ((item.customers / item.their_companies) * 100).toFixed(3);
 
-                        item.mediump = item.mediump < 16 ? 16 : item.mediump;
+                        item.mediump = item.mediump < 15 ? 15 : item.mediump;
                         item.smallp = item.smallp < 10 ? 10 : item.smallp;
 
                         item.selected = false;
+
+                        master.push(item);
                     });
 
                     deferred.resolve(list);
 
-                    if (CategoryModel.MasterList[args.AttrKey] && args.ParentValue) {
-                        CategoryModel.MasterList[args.AttrKey][args.ParentValue] = list;
-                    } else {
-                        CategoryModel.MasterList[args.AttrKey] = list;
-                    }
                     console.log('builder category list:', list);
                 });
             }
@@ -61,10 +83,12 @@ angular
             return deferred.promise;
         }
     })
-    .service('CategoryService', function($http, $q, _) {
+    .service('AttributesService', function($http, $q) {
         this.QueryMap = {
-            Industry: [ 'Industry' ],
-            Locations: [ 'Region', 'State', 'Country' ]
+            'Industry': [ 'Industry' ],
+            'Locations': [ 'Region' ],
+            'Employees Range': [ 'EmployeesRange' ],
+            'Revenue Range': [ 'RevenueRange' ]
         };
 
         this.get = function(args) {
@@ -85,8 +109,9 @@ angular
                 queries.push(query);
             });
             
-
-            var url = '/pls/amattributes?populate=true&queries=' + encodeURIComponent(JSON.stringify(queries));
+            var url = '/pls/amattributes' +
+                      '?populate=true' +
+                      '&queries=' + encodeURIComponent(JSON.stringify(queries));
 
             $http({
                 method: 'GET',
@@ -99,8 +124,6 @@ angular
                         result = result.concat(response.data[i]);
                     }
 
-                    console.log(result, response);
-
                     deferred.resolve(result);
                 }, function onError(response) {
                     deferred.reject('Error fetching data.')
@@ -110,46 +133,67 @@ angular
             return deferred.promise;
         };
     })
-    .controller('CategoryCtrl', function($scope, $rootScope, $state, $stateParams, CategoryModel) {
-        $scope.lists = [];
-        $scope.AttrKey = AttrKey = $stateParams.AttrKey;
-        $scope.ParentKey = $stateParams.ParentKey;
-        $scope.ParentValue = $stateParams.ParentValue;
-        $scope.truncate_limit = 28;
+    .controller('AttributesCtrl', function($state, $stateParams, AttributesModel) {
+        this.SubCategoryMap = AttributesModel.SubCategoryMap;
+        this.ParentCategoryMap = AttributesModel.ParentCategoryMap;
 
-        if (!AttrKey) {
-            return console.log('<!> No stateParams provided.');
-        }
+        angular.extend(this, $stateParams, {
+            init: function() {
+                this.truncate_limit = 32;
 
-        console.log($stateParams, $scope);
+                if (!this.AttrKey) {
+                    return console.log('<!> No stateParams provided');
+                }
 
-        CategoryModel.getList($stateParams).then(function(list) {
-            var chunks = 100;
+                AttributesModel
+                    .getList($stateParams)
+                    .then(angular.bind(this, this.setList));
+            },
+            setList: function(list) {
+                this.total = list.length;
+                this.list = list;
+                this.SubCategory = this.SubCategoryMap[this.AttrKey];
+                this.ParentCategory = this.ParentCategoryMap[this.AttrKey] || this.AttrKey;
 
-            $scope.total = list.length;
+                console.log('AttributesCtrl', this, AttributesModel);
+            },
+            handleTileClick: function($event, item) {
+                console.log('click',$event, item, this);
 
-            /*
-            // Break the array up into rows of 3 each
-            var list = _.chain(list).groupBy(function(element, index) {
-                return Math.floor(index / chunks);
-            }).toArray().value();
-            */
+                if (this.SubCategory) {
+                    $state.go("builder.category", { 
+                        ParentKey: this.ParentCategory, 
+                        ParentValue: item.AttrValue, 
+                        AttrKey: this.SubCategory
+                    });
+                }
+            },
+            handleTileSelect: function(selected) {
+                console.log('select', selected.selected, selected, this.SubCategory);
+                var SubCategory = this.SubCategory;
 
-            $scope.list = list;
-            $scope.handleTileSelection();
+                selected.modified = Date.now();
+                selected.visible = !SubCategory;
+                if (SubCategory) {
+                    AttributesModel
+                        .getList({
+                            ParentKey: this.ParentCategory,
+                            ParentValue: selected.AttrValue,
+                            AttrKey: SubCategory
+                        })
+                        .then(angular.bind(this, function(result) {
+                            console.log('selectlist', result);
+                            selected.total = result.length;
+
+                            result.forEach(function(item, index) {
+                                item.selected = selected.selected;
+                                item.modified = Date.now();
+                                item.visible = true;
+                            });
+                        }));
+                }
+            }
         });
 
-        $scope.handleTileSelection = function() {
-            var Industry = CategoryModel.MasterList.Industry ||  [];
-            var Locations = CategoryModel.MasterList.Locations ||  [];
-            var EmployeesRange = CategoryModel.MasterList.EmployeesRange ||  [];
-            var list = Industry.concat(Locations,EmployeesRange);
-
-            var SelectedList = list.filter(function(item) {
-                return item.selected;
-            });
-
-            $rootScope.$broadcast('Builder-Sidebar-List', SelectedList);
-        }
-    }
-);
+        this.init();
+    });
