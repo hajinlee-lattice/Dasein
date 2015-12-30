@@ -24,7 +24,7 @@
     /*centering*/
     display: inline-block;
     overflow: hidden;
-    background-color: #f1f1f1 !important;
+    background-color: #f7f7f7 !important;
     text-align: center;
 }
 
@@ -55,8 +55,12 @@ span.chevron-content.chevron-content-text {
     color: black;
     font-size: 15px;
     
+    .expanded-true {
+        background: #f7f7f7;
+    }
+    
     div.clearfix {
-        padding-left: 25px;
+        padding-left: 10px;
         
         .Completed {
             color: rgb(113, 188, 81);
@@ -86,7 +90,7 @@ span.chevron-content.chevron-content-text {
     background: white;
     /*stylish arrow design using box shadow*/
     box-shadow: 
-        5px -5px 0 5px #f1f1f1;
+        5px -5px 0 5px #f7f7f7;
     border-radius: 0 0px 0 50px;
 }
 /*we dont need an arrow after the last link*/
@@ -106,7 +110,7 @@ span.chevron-content.chevron-content-text {
 .flat div .icon {
     right: 0;
     z-index: 99;
-    padding-right: 10px;
+    padding-right: 12px;
 }
 .fa.fa-check {
     color: rgb(113, 188, 81);

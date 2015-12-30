@@ -15,8 +15,8 @@ angular.module('pd.jobs.import.ready', [
         $scope.jobType = jobStatus.jobType;
         $scope.user = jobStatus.user;
         var jobStartTimeStamp = new Date(jobStatus.startTimestamp);
-        $scope.jobStartDate = jobStartTimeStamp.getMonth() + '/' + jobStartTimeStamp.getDate() + '/' + jobStartTimeStamp.getFullYear();
-        $scope.jobStartTime = jobStartTimeStamp.toLocaleTimeString();
+        $scope.jobStartDate = jobStartTimeStamp.toLocaleDateString();
+        $scope.jobStartTime = jobStartTimeStamp.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
         $scope.stepsCompletedTimes = jobStatus.completedTimes;
     });
     

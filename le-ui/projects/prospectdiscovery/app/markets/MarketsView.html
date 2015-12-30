@@ -51,7 +51,7 @@
                 <tbody>
                     <tr ng-repeat="item in targetMarkets">
                         <td>{{ item.description }}</td>
-                        <td>{{ item.creation_timestamp }}</td>
+                        <td>{{ item.creation_timestamp | date: 'MM/dd/yyyy' }}</td>
                         <td>2.3x</td>
                         <td>75</td>
                         <td>$323,001,950</td>

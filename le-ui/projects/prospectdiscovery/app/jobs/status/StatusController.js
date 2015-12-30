@@ -86,6 +86,7 @@ angular
                 function updateStatesBasedOnJobStatus(jobStatus) {
                     for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                         $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
+                        $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
                     }
                     
                     if (jobStatus.jobStatus == "Running") {

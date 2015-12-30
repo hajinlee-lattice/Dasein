@@ -131,7 +131,7 @@ angular.module('pd.jobs', [
         for (var i = 0; i < job.steps.length; i++) {
             var stepRunning = stepsNameDictionary[job.steps[i].jobStepType.trim()];
             if (stepRunning && job.steps[i].stepStatus == "Running") {
-                return stepsNameDictionary[job.steps[i].jobStepType];
+                return stepsNameDictionary[job.steps[i].jobStepType.trim()];
             }
         }
         return null;
