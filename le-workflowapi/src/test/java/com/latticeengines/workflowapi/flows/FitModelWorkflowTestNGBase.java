@@ -1,25 +1,15 @@
 package com.latticeengines.workflowapi.flows;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
-
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
@@ -48,12 +38,9 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
@@ -65,9 +52,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
-
-    @Autowired
-    private SoftwareLibraryService softwareLibraryService;
 
     @Value("${workflowapi.test.sfdc.user.name}")
     private String salesforceUserName;
@@ -88,9 +72,9 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     protected void setupForFitModel() throws Exception {
         restTemplate.setInterceptors(getAddMagicAuthHeaders());
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
-        setupUsers();
+        setupUsers(DEMO_CUSTOMERSPACE);
         setupCamille(DEMO_CUSTOMERSPACE);
-        setupHdfs();
+        setupHdfs(DEMO_CUSTOMERSPACE);
         installServiceFlow();
         createImportTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
         copyStopListToHdfs();
@@ -133,8 +117,9 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .targetMarket(defaultTargetMarket) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .uniqueKeyColumn("LatticeAccountID") //
-                .sourceDir("/tmp/AccountMaster") //
+                .directoryToScore("/tmp/AccountMaster") //
                 .registerScoredTable(true) //
+                .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                 .build();
 
         return workflowConfig;
@@ -169,106 +154,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         Path importTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
                 .append("ImportTimeout");
         camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-    }
-
-    private void setupUsers() throws Exception {
-        createAdminUserByRestCall(DEMO_CUSTOMERSPACE.toString(), //
-                "rgonzalez@lattice-engines.com", //
-                "rgonzalez@lattice-engines.com", //
-                "PD Super", //
-                "User", //
-                SecurityFunctionalTestNGBase.adminPasswordHash);
-    }
-
-    private void setupHdfs() throws Exception {
-        String podId = CamilleEnvironment.getPodId();
-        HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/DemoContract");
-        HdfsUtils.rmdir(yarnConfiguration, "/tmp/Stoplist");
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/DemoContract.DemoTenant.Production");
-    }
-
-    private void installServiceFlow() throws Exception {
-        String mavenHome = System.getProperty("MVN_HOME", "/usr");
-        String version = getVersionFromPomXmlFile();
-        // Retrieve the service flow jar file from the maven repository
-        String command = "%s/bin/mvn -DgroupId=com.latticeengines " + "-DartifactId=le-serviceflows-prospectdiscovery "
-                + "-Dversion=%s -Dclassifier=shaded -Ddest=%s.jar dependency:get";
-        String jarFileName = "le-serviceflows-prospectdiscovery-" + System.currentTimeMillis();
-        command = String.format(command, mavenHome, version, jarFileName);
-
-        CommandLine cmdLine = CommandLine.parse(command);
-        DefaultExecutor executor = new DefaultExecutor();
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
-        PumpStreamHandler psh = new PumpStreamHandler(stdout);
-        executor.setStreamHandler(psh);
-        executor.execute(cmdLine);
-
-        System.out.println(new String(stdout.toByteArray()));
-
-        HdfsUtils.rmdir(yarnConfiguration, //
-                String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, "dataflowapi"));
-        SoftwarePackage pkg = new SoftwarePackage();
-        pkg.setModule("dataflowapi");
-        pkg.setGroupId("com.latticeengines");
-        pkg.setArtifactId("le-serviceflows-prospectdiscovery");
-        pkg.setVersion(version);
-        pkg.setInitializerClass("com.latticeengines.prospectdiscovery.Initializer");
-        File localFile = new File(jarFileName + ".jar");
-        try {
-            softwareLibraryService.installPackage(pkg, localFile);
-        } finally {
-            FileUtils.deleteQuietly(localFile);
-        }
-    }
-
-    private String getVersionFromPomXmlFile() throws Exception {
-        Collection<File> files = FileUtils.listFiles(new File("."), new IOFileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                return file.getName().equals("pom.xml");
-            }
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.equals("le-pls");
-            }
-
-        }, null);
-
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(files.iterator().next()));
-        StringBuilder content = null;
-        String version = null;
-        while (reader.hasNext() && version == null) {
-            int event = reader.next();
-
-            switch (event) {
-            case XMLStreamConstants.START_ELEMENT:
-                if ("version".equalsIgnoreCase(reader.getLocalName())) {
-                    content = new StringBuilder();
-                }
-                break;
-
-            case XMLStreamConstants.CHARACTERS:
-                if (content != null) {
-                    content.append(reader.getText().trim());
-                }
-                break;
-
-            case XMLStreamConstants.END_ELEMENT:
-                if (content != null) {
-                    version = content.toString();
-                }
-                content = null;
-                break;
-
-            case XMLStreamConstants.START_DOCUMENT:
-                break;
-            }
-        }
-
-        return version;
     }
 
     private void createImportTablesInMetadataStore(CustomerSpace customerSpace, Tenant tenant) throws IOException {
