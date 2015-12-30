@@ -28,13 +28,17 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String EVENT_TABLE = "EVENT_TABLE";
+    protected static final String EVENT_COLUMN = "EVENT_COLUMN";
     protected static final String DB_CREDS = "DB_CREDS";
     protected static final String MATCH_COMMAND_ID = "MATCH_COMMAND_ID";
+    protected static final String MATCH_TABLE = "MATCH_TABLE";
     protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
+    protected static final String SCORING_RESULT_TABLE = "SCORING_RESULT_TABLE";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
     protected static final String SCORING_SOURCE_DIR = "SCORING_SOURCE_DIR";
     protected static final String SCORING_UNIQUEKEY_COLUMN = "SCORING_UNIQUEKEY_COLUMN";
+    protected static final String ATTR_LEVEL_TYPE = "ATTR_LEVEL_TYPE";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -111,6 +115,15 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
                 .table(eventTable.getName());
 
         return bldr;
+    }
+
+    protected String getStringValueFromContext(String key) {
+        try {
+            return executionContext.getString(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+        
     }
 
 }

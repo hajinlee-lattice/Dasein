@@ -7,7 +7,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -61,6 +59,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         }
 
         executionContext.putString(EVENT_TABLE, JsonUtils.serialize(eventTable));
+        executionContext.putString(MATCH_TABLE, eventTable.getName());
     }
 
     private boolean deleteEventTableFromMatchDB(Table preMatchEventTable, DbCreds dbCreds) throws Exception {
@@ -112,16 +111,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
 
         AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
         waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
-        List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsTargetPath,
-                new HdfsUtils.HdfsFilenameFilter() {
-
-                    @Override
-                    public boolean accept(String fileName) {
-                        return fileName.endsWith(".avro");
-                    }
-                });
-
-        Table eventTable = MetadataConverter.getTable(yarnConfiguration, avroFiles.get(0), null, null);
+        Table eventTable = MetadataConverter.getTable(yarnConfiguration, hdfsTargetPath, null, null);
         eventTable.setName(matchTableName);
 
         addMetadata(eventTable, dbCreds);

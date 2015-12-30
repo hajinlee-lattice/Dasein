@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
 public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
@@ -21,6 +22,8 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull
     private String name;
+    
+    private DataFlowParameters dataFlowParams;
 
     @JsonProperty("target_path")
     public String getTargetPath() {
@@ -60,5 +63,15 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty("data_flow_params")
+    public DataFlowParameters getDataFlowParams() {
+        return dataFlowParams;
+    }
+
+    @JsonProperty("data_flow_params")
+    public void setDataFlowParams(DataFlowParameters dataFlowParams) {
+        this.dataFlowParams = dataFlowParams;
     }
 }

@@ -1,7 +1,9 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());
         dataFlowConfig.setDataSources(createDataFlowSources());
         dataFlowConfig.setTargetPath(configuration.getTargetPath());
+        dataFlowConfig.setDataFlowParameters(configuration.getDataFlowParams());
         return dataFlowConfig;
     }
 
@@ -57,16 +60,19 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
     private List<Table> retrieveRegisteredTablesAndExtraSources() {
         String url = String.format("%s/metadata/customerspaces/%s/tables", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace());
-        List<String> tableList = restTemplate.getForObject(url, List.class);
+        Set<String> tableSet = new HashSet<>(restTemplate.getForObject(url, List.class));
         List<Table> tables = new ArrayList<>();
 
-        for (String tableName : tableList) {
+        for (String tableName : tableSet) {
             Table t = new Table();
             t.setName(tableName);
             tables.add(t);
         }
 
         for (String extraSourceName : configuration.getExtraSources().keySet()) {
+            if (tableSet.contains(extraSourceName)) {
+                continue;
+            }
             Table extraSourceTable = MetadataConverter.getTable(yarnConfiguration,
                     configuration.getExtraSources().get(extraSourceName), null, null);
             extraSourceTable.setName(extraSourceName);

@@ -61,7 +61,7 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
                 configuration.getMicroServiceHostPort(), configuration.getCustomerSpace(),
                 tableName);
         restTemplate.postForLocation(url, eventTable);
-
+        executionContext.putString(SCORING_RESULT_TABLE, tableName);
     }
 
     private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {
@@ -87,11 +87,11 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
     }
 
     private String getSourceDir() {
-        String modelId = getStringValueFromContext(SCORING_SOURCE_DIR);
-        if (modelId == null) {
-            modelId = configuration.getSourceDir();
+        String sourceDir = getStringValueFromContext(SCORING_SOURCE_DIR);
+        if (sourceDir == null) {
+            sourceDir = configuration.getSourceDir();
         }
-        return modelId;
+        return sourceDir;
     }
 
     private String getUniqueKeyColumn() {
@@ -102,13 +102,4 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
         return uniqueKeyColumn;
     }
     
-    private String getStringValueFromContext(String key) {
-        try {
-            return executionContext.getString(key);
-        } catch (ClassCastException e) {
-            return null;
-        }
-        
-    }
-
 }
