@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
@@ -59,7 +61,7 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
 
         Set<String> pivotedKeys = new HashSet<>();
         Map<String, Class<?>> resultColumnClassMap = new HashMap<>();
-        Map<String, Object> defaultValues = new HashMap<>();
+        Map<String, Serializable> defaultValues = new HashMap<>();
 
         for (Map<String, Object> result: results) {
             String feature = (String) result.get("Feature");
@@ -74,8 +76,11 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
             }
         }
 
-        return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, String.class, null, null,
-                resultColumnClassMap, defaultValues, 1);
+        return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys,
+                null,
+                resultColumnClassMap, String.class,
+                null, PivotType.ANY,
+                defaultValues, 1);
     }
 
     @Override

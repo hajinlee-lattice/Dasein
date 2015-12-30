@@ -47,10 +47,13 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
                 "com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         String contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro")
                 .getPath();
+        String feature = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Feature.avro")
+                .getPath();
         List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
         entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, "/tmp/avro"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro"));
         entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + feature, "/tmp/avro"));
 
         FileSystem fs = FileSystem.get(configuration);
         doCopy(fs, entries);

@@ -21,7 +21,6 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
         Node source = addSource(CollectionDataFlowKeys.SOURCE);
         source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
                 new FieldMetadata(domainField, String.class));
-        source = source.addRowID("ID");
 
         FieldList contents = new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
                 "HGCategory1Parent", "HGCategory2Parent");
@@ -36,14 +35,17 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
 
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("Intensity", "MaxIntensity", Aggregation.AggregationType.MAX));
-        aggregations.add(new Aggregation("ID", "LocationCount", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("URL", "LocationCount", Aggregation.AggregationType.COUNT));
         Node aggregated = source.groupBy(contentsWithDate, aggregations);
         aggregated = aggregated.retain(new FieldList("URL", "SupplierName", "ProductName",
                 "HGCategory1", "HGCategory2", "HGCategory1Parent", "HGCategory2Parent", "DateLastVerified",
                 "MaxIntensity", "LocationCount"));
 
-        aggregated.addTimestamp("Creation_Date");
-        aggregated.addTimestamp("LE_Last_Upload_Date");
+        aggregated = aggregated.addFunction("LocationCount.intValue()", new FieldList("LocationCount"),
+                new FieldMetadata("LocationCount", Integer.class));
+
+        aggregated = aggregated.addTimestamp("Creation_Date");
+        aggregated = aggregated.addTimestamp("LE_Last_Upload_Date");
 
         aggregated = aggregated.rename(new FieldList(
                 "URL",

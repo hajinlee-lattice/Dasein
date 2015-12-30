@@ -25,4 +25,7 @@ public class Feature implements CollectedSource {
 
     @Override
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
+
+    @Override
+    public String[] getPrimaryKey() { return new String[] { "URL", "Feature", "LE_Last_Upload_Date"  };  }
 }

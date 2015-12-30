@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
@@ -27,7 +26,6 @@ import com.latticeengines.propdata.collection.source.MostRecentSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.source.impl.HGData;
-import com.latticeengines.propdata.collection.util.TableUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -63,24 +61,14 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         CollectedSource baseSource = source.getBaseSource();
         Map<String, Table> sources = new HashMap<>();
-        String rawDir = hdfsPathBuilder.constructRawDir(baseSource).toString();
-        try {
-            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
-                if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
-                    dir = dir.substring(dir.lastIndexOf("/") + 1);
-                    Table table = TableUtils.createTable(baseSource.getSourceName(), rawDir + "/" + dir + "/*.avro");
-                    sources.put(dir, table);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get all incremental raw data dirs for " + baseSource.getSourceName());
-        }
+        Table table = hdfsSourceEntityMgr.getTableAtVersion(baseSource, null);
+        sources.put(baseSource.getSourceName(), table);
 
         MergeDataFlowParameters parameters = new MergeDataFlowParameters();
         parameters.setDomainField(((DomainBased) source).getDomainField());
         parameters.setTimestampField(source.getTimestampField());
-        parameters.setPrimaryKeys(source.getPrimaryKey());
-        parameters.setSourceTables(sources.keySet().toArray(new String[sources.size()]));
+        parameters.setGroupbyFields(source.getPrimaryKey());
+        parameters.setSourceTable(baseSource.getSourceName());
 
         String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
@@ -93,7 +81,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
                                  PivotStrategyImpl pivotStrategy, String uid) {
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
-
 
         Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(source.getBaseSource(), baseVersion);
         Map<String, Table> sources = new HashMap<>();

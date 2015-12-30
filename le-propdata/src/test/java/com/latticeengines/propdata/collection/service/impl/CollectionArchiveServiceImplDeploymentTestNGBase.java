@@ -49,7 +49,7 @@ abstract public class CollectionArchiveServiceImplDeploymentTestNGBase extends P
     @AfterMethod(groups = "deployment")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWholeProgress() {
         purgeRawData();
 

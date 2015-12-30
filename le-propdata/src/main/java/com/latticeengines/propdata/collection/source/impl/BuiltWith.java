@@ -24,4 +24,7 @@ public class BuiltWith implements CollectedSource {
     @Override
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
 
+    @Override
+    public String[] getPrimaryKey() { return new String[] { "Domain", "Technology_Name", "LE_Last_Upload_Date"  };  }
+
 }

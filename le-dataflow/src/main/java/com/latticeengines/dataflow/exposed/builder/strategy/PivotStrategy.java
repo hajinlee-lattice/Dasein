@@ -20,4 +20,6 @@ public interface PivotStrategy extends Serializable {
 
     Set<String> getResultColumns();
 
+
+
 }

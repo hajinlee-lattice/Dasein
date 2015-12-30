@@ -3,10 +3,8 @@ package com.latticeengines.dataflow.exposed.operation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -111,7 +109,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.pivotToClassWithDefaultValue(
+                PivotStrategyImpl mapper = PivotStrategyImpl.any(
                         "Feature", "Value", features, Integer.class, 0);
                 return feature.pivot(new FieldList("Domain"), mapper);
             }
@@ -136,37 +134,21 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
-    @Test(groups = "functional")
-    public void testPivotWithPriority() throws Exception {
+
+    @Test(groups = "functional", enabled = true)
+    public void testMaxPivot() throws Exception {
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
 
-        prepareSimplePivotData(avroDir, fileName);
+        prepareMaxPivotData(avroDir, fileName);
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
             @Override
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
-                Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "k1_low", "k1_high"));
-
-                Map<String, Integer> priority = new HashMap<>();
-                priority.put("k1_high", 2);
-
-                Map<String, String> columns = new HashMap<>();
-                columns.put("k1_low", "k1");
-                columns.put("k1_high", "k1");
-
-                PivotStrategyImpl mapper = new PivotStrategyImpl(
-                        "Feature",
-                        "Value",
-                        features,
-                        Integer.class,
-                        columns,
-                        priority,
-                        null,
-                        0,
-                        1);
-
+                Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
+                PivotStrategyImpl mapper = PivotStrategyImpl.max(
+                        "Feature", "Value", features, Integer.class, null);
                 return feature.pivot(new FieldList("Domain"), mapper);
             }
         });
@@ -175,20 +157,78 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         for (GenericRecord record: output) {
             System.out.println(record);
             if (record.get("Domain").equals("dom1.com")) {
-                Assert.assertEquals(record.get("f1"), 1);
-                Assert.assertEquals(record.get("f2"), 2);
-                Assert.assertEquals(record.get("f3"), 3);
-                Assert.assertEquals(record.get("k1"), 5);
-            } else if (record.get("Domain").equals("dom2.com")) {
-                Assert.assertEquals(record.get("f1"), 0);
-                Assert.assertEquals(record.get("f2"), 4);
-                Assert.assertEquals(record.get("f3"), 2);
-                Assert.assertEquals(record.get("k1"), 3);
+                Assert.assertEquals(record.get("f1"), 2);
+                Assert.assertEquals(record.get("f2"), 3);
+                Assert.assertEquals(record.get("f3"), 4);
+                Assert.assertEquals(record.get("f4"), null);
             }
         }
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
+
+    @Test(groups = "functional", enabled = true)
+    public void testCountPivot() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        prepareMaxPivotData(avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
+                PivotStrategyImpl mapper = PivotStrategyImpl.count("Feature", "Value", features);
+                return feature.pivot(new FieldList("Domain"), mapper);
+            }
+        });
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record: output) {
+            System.out.println(record);
+            if (record.get("Domain").equals("dom1.com")) {
+                Assert.assertEquals(record.get("f1"), 2);
+                Assert.assertEquals(record.get("f2"), 3);
+                Assert.assertEquals(record.get("f3"), 2);
+                Assert.assertEquals(record.get("f4"), 0);
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testExistsPivot() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        prepareMaxPivotData(avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
+                PivotStrategyImpl mapper = PivotStrategyImpl.exists("Feature", features);
+                return feature.pivot(new FieldList("Domain"), mapper);
+            }
+        });
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record: output) {
+            System.out.println(record);
+            if (record.get("Domain").equals("dom1.com")) {
+                Assert.assertEquals(record.get("f1"), true);
+                Assert.assertEquals(record.get("f2"), true);
+                Assert.assertEquals(record.get("f3"), true);
+                Assert.assertEquals(record.get("f4"), false);
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
 
 
     @Test(groups = "functional")
@@ -263,6 +303,24 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 {"dom2.com", "k1_low", 3, 124L},
         };
 
+        uploadAvro(data, avroDir, fileName);
+    }
+
+    private void prepareMaxPivotData(String avroDir, String fileName) {
+        Object[][] data = new Object[][] {
+                {"dom1.com", "f1", 1, 123L},
+                {"dom1.com", "f2", 2, 125L},
+                {"dom1.com", "f3", 4, 124L},
+                {"dom1.com", "f1", 2, 129L},
+                {"dom1.com", "f3", 1, 122L},
+                {"dom1.com", "f2", 3, 121L},
+                {"dom1.com", "f2", 1, 122L},
+        };
+
+        uploadAvro(data, avroDir, fileName);
+    }
+
+    private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records =  new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
         Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," +

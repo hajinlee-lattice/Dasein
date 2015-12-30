@@ -15,18 +15,13 @@ public class MergeRawFlow extends TypesafeDataFlowBuilder<MergeDataFlowParameter
 
     @Override
     public Node construct(MergeDataFlowParameters parameters) {
-        String[] sources = parameters.getSourceTables();
+        Node source = addSource(parameters.getSourceTable());
+        String[] groupbyFields = parameters.getGroupbyFields();
         String timestampField = parameters.getTimestampField();
         String domainField = parameters.getDomainField();
-        String[] uniqueFields = parameters.getPrimaryKeys();
-        Node[] nodes = new Node[sources.length];
-        for (int i = 0; i< sources.length; i++) {
-            Node source = addSource(sources[i]);
-            nodes[i] = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
-                    new FieldMetadata(domainField, String.class));
-        }
-        Node merged = mergeNodes(nodes);
-        return merged.groupByAndLimit(new FieldList(uniqueFields), new FieldList(timestampField), 1, true, true);
+        source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
+                new FieldMetadata(domainField, String.class));
+        return source.groupByAndLimit(new FieldList(groupbyFields), new FieldList(timestampField), 1, true, true);
     }
 
 }

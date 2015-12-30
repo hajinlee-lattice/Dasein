@@ -15,7 +15,7 @@ public class HGDataRefreshServiceImplDeploymentTestNG extends RefreshBulkService
     HGDataRefreshService refreshService;
 
     @Autowired
-    HGDataCustomersArchiveServiceImplDeploymentTestNG hgDataCustomersArchiveServiceImplDeploymentTestNG;
+    HGDataRawArchiveServiceImplDeploymentTestNG hgDataRawArchiveServiceImplDeploymentTestNG;
 
     @Autowired
     HGData source;
@@ -36,7 +36,7 @@ public class HGDataRefreshServiceImplDeploymentTestNG extends RefreshBulkService
 
     @Override
     BulkArchiveServiceImplDeploymentTestNGBase getBaseSourceTestBean() {
-        return hgDataCustomersArchiveServiceImplDeploymentTestNG;
+        return hgDataRawArchiveServiceImplDeploymentTestNG;
     }
 
 }

@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,6 +11,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.collection.source.BulkSource;
+import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.source.ServingSource;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.util.TableUtils;
@@ -60,11 +65,29 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public Table getTableAtVersion(Source source, String version) {
-        String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
         if (source instanceof ServingSource) {
+            String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(((ServingSource) source).getSqlTableName(), path + "/*.avro");
-        } else {
+        } else if (source instanceof BulkSource ) {
+            String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
+        } else if (source instanceof CollectedSource) {
+            String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+            List<String> avroPaths = new ArrayList<>();
+            try {
+                for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
+                    if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+                        dir = dir.substring(dir.lastIndexOf("/") + 1);
+                        avroPaths.add(rawDir + "/" + dir + "/*.avro");
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
+            }
+            return TableUtils.createTable(source.getSourceName(),
+                    avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
+        } else {
+            throw new UnsupportedOperationException("Do not know how to extract table for the given source type.");
         }
     }
 

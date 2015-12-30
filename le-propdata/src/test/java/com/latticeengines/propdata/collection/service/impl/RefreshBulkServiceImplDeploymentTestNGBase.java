@@ -51,20 +51,20 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
 
-        truncateDestTable();
+//        truncateDestTable();
 
-        getBaseSourceTestBean().purgeRawData();
-        archiveProgress = getBaseSourceTestBean().createNewProgress();
-        getBaseSourceTestBean().importFromDB(archiveProgress);
-        getBaseSourceTestBean().finish(archiveProgress);
+//        getBaseSourceTestBean().purgeRawData();
+//        archiveProgress = getBaseSourceTestBean().createNewProgress();
+//        getBaseSourceTestBean().importFromDB(archiveProgress);
+//        getBaseSourceTestBean().finish(archiveProgress);
 
         progress = createNewProgress(new Date());
-        progress = pivotData(progress);
+        progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);
 
-        verifyResultTable();
-        cleanupProgressTables();
+//        verifyResultTable();
+//        cleanupProgressTables();
     }
 
     private void truncateDestTable() {
@@ -83,7 +83,7 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
         return progress;
     }
 
-    protected RefreshProgress pivotData(RefreshProgress progress) {
+    protected RefreshProgress transformData(RefreshProgress progress) {
         RefreshProgress response = refreshService.transform(progress);
 
         Assert.assertEquals(response.getStatus(), ProgressStatus.TRANSFORMED);

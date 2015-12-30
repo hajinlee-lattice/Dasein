@@ -21,6 +21,8 @@ import com.latticeengines.propdata.collection.testframework.PropDataCollectionDe
 
 abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
 
+    private static final String testPod = "DeploymentTestMostRecent";
+
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;
     MostRecentSource source;
@@ -35,9 +37,9 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
 
     @BeforeMethod(groups = "deployment")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTest");
+        hdfsPathBuilder.changeHdfsPodId(testPod);
 
-        getBaseSourceTestBean().setUpPod("DeploymentTest");
+        getBaseSourceTestBean().setUpPod(testPod);
 
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
@@ -64,7 +66,7 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         getBaseSourceTestBean().finish(archiveProgress);
 
         progress = createNewProgress(new Date());
-        progress = pivotData(progress);
+        progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);
 
@@ -73,7 +75,7 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         getBaseSourceTestBean().finish(archiveProgress);
 
         progress = createNewProgress(new Date());
-        progress = pivotData(progress);
+        progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);
 
@@ -96,7 +98,7 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         return progress;
     }
 
-    protected RefreshProgress pivotData(RefreshProgress progress) {
+    protected RefreshProgress transformData(RefreshProgress progress) {
         RefreshProgress response = refreshService.transform(progress);
 
         Assert.assertEquals(response.getStatus(), ProgressStatus.TRANSFORMED);

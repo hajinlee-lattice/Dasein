@@ -1,8 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,17 +83,75 @@ public class PivotBuffer extends BaseOperation implements Buffer {
             }
         }
 
-        Collections.sort(pivotResults, new Comparator<PivotResult>() {
-            @Override
-            public int compare(PivotResult o1, PivotResult o2) {
-                return Integer.compare(o1.getPriority(), o2.getPriority());
-            }
-        });
-
         for (PivotResult pivotResult: pivotResults) {
             Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
-            result.set(loc, pivotResult.getValue());
+            result.set(loc, aggregateValue(result.getObject(loc), pivotResult));
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object aggregateValue(Object oldValue, PivotResult result) {
+        switch (result.getPivotType()) {
+            case ANY:
+                return aggregateAny(oldValue, result.getValue());
+            case MAX:
+                return aggregateMax(oldValue, result.getValue());
+            case MIN:
+                return aggregateMin(oldValue, result.getValue());
+            case COUNT:
+                return aggregateCount(oldValue, result.getValue());
+            case EXISTS:
+                return aggregateExists(oldValue, result.getValue());
+            default:
+                return result.getValue();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateAny(Object oldValue, Object newValue) {
+        if (newValue != null) {
+            return newValue;
+        } else {
+            return oldValue;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateMax(Object oldValue, Object newValue) {
+        if (oldValue == null) {
+            return newValue;
+        } else if (newValue == null) {
+            return oldValue;
+        } else {
+            Comparable<Object> comparable = (Comparable<Object>) newValue;
+            return comparable.compareTo(oldValue) >= 0 ? newValue : oldValue;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateMin(Object oldValue, Object newValue) {
+        if (oldValue == null) {
+            return newValue;
+        } else if (newValue == null) {
+            return oldValue;
+        } else {
+            Comparable<Object> comparable = (Comparable<Object>) newValue;
+            return comparable.compareTo(oldValue) <= 0 ? newValue : oldValue;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateCount(Object oldValue, Object newValue) {
+        if (newValue instanceof Long) {
+            return (Long) oldValue + 1L;
+        } else {
+            return (Integer) oldValue + 1;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateExists(Object oldValue, Object newValue) {
+        return (Boolean) oldValue || (newValue != null);
     }
 
     private void populateDefault(Tuple result) {

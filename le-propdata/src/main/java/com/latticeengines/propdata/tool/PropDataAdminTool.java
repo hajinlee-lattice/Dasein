@@ -337,7 +337,7 @@ public class PropDataAdminTool {
     enum SourceToBeArchived {
         FEATURE("Feature", "featureArchiveService", RAW_TYPE_COLLECTED),
         BUILTWITH("BuiltWith", "builtWithArchiveService", RAW_TYPE_COLLECTED),
-        HGDATACUSTOMERS("HGDataCustomers", "hgDataCustomersArchiveService", RAW_TYPE_BULK);
+        HGDATARAW("HGDataRaw", "hgDataRawArchiveService", RAW_TYPE_BULK);
 
         private static Map<String, SourceToBeArchived> nameMap;
 

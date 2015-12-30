@@ -13,7 +13,7 @@ public class HGData implements DomainBased, ServingSource {
     private static final long serialVersionUID = 603829385601451984L;
 
     @Autowired
-    HGDataCustomers baseSource;
+    HGDataRaw baseSource;
 
     @Override
     public String getSourceName() { return "HGData"; }

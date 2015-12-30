@@ -31,4 +31,7 @@ public class TestCollectedSource implements DomainBased, CollectedSource {
     @Override
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
 
+    @Override
+    public String[] getPrimaryKey() { return new String[]{}; }
+
 }

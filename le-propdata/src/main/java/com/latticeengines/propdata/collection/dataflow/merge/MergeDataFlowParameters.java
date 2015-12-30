@@ -6,8 +6,8 @@ public class MergeDataFlowParameters extends DataFlowParameters {
 
     private String domainField;
     private String timestampField;
-    private String[] primaryKeys;
-    private String[] sourceTables;
+    private String[] groupbyFields;
+    private String sourceTable;
 
     public String getDomainField() {
         return domainField;
@@ -25,17 +25,17 @@ public class MergeDataFlowParameters extends DataFlowParameters {
         this.timestampField = timestampField;
     }
 
-    public String[] getPrimaryKeys() {
-        return primaryKeys;
+    public String[] getGroupbyFields() {
+        return groupbyFields;
     }
 
-    public void setPrimaryKeys(String[] primaryKeys) {
-        this.primaryKeys = primaryKeys;
+    public void setGroupbyFields(String[] groupbyFields) {
+        this.groupbyFields = groupbyFields;
     }
 
-    public String[] getSourceTables() { return sourceTables; }
+    public String getSourceTable() { return sourceTable; }
 
-    public void setSourceTables(String[] sourceTables) {
-        this.sourceTables = sourceTables;
+    public void setSourceTable(String sourceTable) {
+        this.sourceTable = sourceTable;
     }
 }

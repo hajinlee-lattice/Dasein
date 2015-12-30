@@ -42,7 +42,7 @@ abstract public class BulkArchiveServiceImplDeploymentTestNGBase extends PropDat
     @AfterMethod(groups = "deployment")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testWholeProgress() {
         run();
         cleanupProgressTables();

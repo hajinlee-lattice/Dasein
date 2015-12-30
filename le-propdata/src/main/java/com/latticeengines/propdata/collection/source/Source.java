@@ -10,4 +10,6 @@ public interface Source extends Serializable {
 
     String getTimestampField();
 
+    String[] getPrimaryKey();
+
 }
