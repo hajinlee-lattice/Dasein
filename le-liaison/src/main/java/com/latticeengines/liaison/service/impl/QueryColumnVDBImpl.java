@@ -22,6 +22,7 @@ public class QueryColumnVDBImpl extends QueryColumn {
     );
     
     private static final Pattern pattern_sqnf_no_md = Pattern.compile("^SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\)$");
+    private static final Pattern pattern_sqnf_no_md_alt = Pattern.compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(empty\\)\\)$");
     private static final Pattern pattern_sqnf_fcnbndry = Pattern.compile("^SpecQueryNamedFunctionEntityFunctionBoundary$");
     private static final Pattern pattern_sqnf_has_md = Pattern.compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(\\((.*)\\)\\)\\)$");
 
@@ -54,8 +55,18 @@ public class QueryColumnVDBImpl extends QueryColumn {
             }
         }
         
+        if( !isMatched ) {
+            // Case (2): There is an empty metadata object
+            Matcher c_no_md_alt = pattern_sqnf_no_md_alt.matcher( defn );
+            if( c_no_md_alt.matches() ) {
+                name = c_no_md_alt.group(1);
+                expression = c_no_md_alt.group(2);
+                isMatched = Boolean.TRUE;
+            }
+        }
+        
         if ( !isMatched ) {
-            // Case (2): The entity-attribute boundary
+            // Case (3): The entity-attribute boundary
             Matcher c_fcnbndry = pattern_sqnf_fcnbndry.matcher( defn );
             if( c_fcnbndry.matches() ) {
                 name = "EntityFunctionBoundary";
@@ -65,7 +76,7 @@ public class QueryColumnVDBImpl extends QueryColumn {
         }
         
         if ( !isMatched ) {
-            // Case (3): There is metadata attached
+            // Case (4): There is metadata attached
             Matcher c_has_md = pattern_sqnf_has_md.matcher( defn );
             if( c_has_md.matches() ) {
                 name = c_has_md.group(1);
