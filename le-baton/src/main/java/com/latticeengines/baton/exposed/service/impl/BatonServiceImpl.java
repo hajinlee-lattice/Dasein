@@ -188,6 +188,23 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
+    public boolean deleteContract(String contractId) {
+        try {
+            CamilleEnvironment.getCamille();
+            if (ContractLifecycleManager.exists(contractId)) {
+                ContractLifecycleManager.delete(contractId);
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            log.error("Error retrieving tenants", e);
+            return false;
+        }
+    }
+
+    @Override
     public TenantDocument getTenant(String contractId, String tenantId) {
         TenantDocument doc = new TenantDocument();
         try {

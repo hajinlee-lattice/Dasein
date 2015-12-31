@@ -33,6 +33,8 @@ public interface BatonService {
 
     boolean deleteTenant(String contractId, String tenantId);
 
+    boolean deleteContract(String contractId);
+
     boolean discardService(String serviceName);
 
     Set<String> getRegisteredServices();
