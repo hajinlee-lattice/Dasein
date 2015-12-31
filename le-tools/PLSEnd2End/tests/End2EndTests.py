@@ -30,22 +30,22 @@ class Test(unittest.TestCase):
             assert False;
 
         elq = EloquaRequest();
-        contact_lists = elq.addEloquaContactForDante(5);
+        contact_lists = elq.addEloquaContactForDante(2);
         PlsOperations.runBulkScoring(tenant);
         time.sleep(15)
-        contact_lists = elq.getEloquaContact(contact_lists[0]);
-        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
+        elq_contacts = elq.getEloquaContact(contact_lists[0]);
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",elq_contacts);
         assert len(contact_faileds)==0, contact_faileds;
 
         danteLead = contact_lists[2].values()[0]
         dr = DanteRunner()
         dr.checkDanteValue(tenant,danteLead)
 
-        contact_lists = elq.addEloquaContactForDante(2);
+        contact_lists = elq.addEloquaContactForDante(1);
         PlsOperations.runHourlyScoring(tenant);
         time.sleep(15)
-        contact_lists = elq.getEloquaContact(contact_lists[0]);
-        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
+        elq_contacts = elq.getEloquaContact(contact_lists[0]);
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",elq_contacts);
         assert len(contact_faileds)==0, contact_faileds;
 
         '''verify the dante result, check the leadcache table in dante database directly.'''
@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
             assert False;
 
         mkto = MarketoRequest();
-        leads_list = mkto.addLeadToMarketoForDante(5);
+        leads_list = mkto.addLeadToMarketoForDante(2);
         PlsOperations.runBulkScoring(tenant);
         time.sleep(15)
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         dr = DanteRunner()
         dr.checkDanteValue(tenant,danteLead)
 
-        leads_list = mkto.addLeadToMarketoForDante(2);
+        leads_list = mkto.addLeadToMarketoForDante(1);
         PlsOperations.runHourlyScoring(tenant);
         time.sleep(15)
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
@@ -100,8 +100,8 @@ class Test(unittest.TestCase):
             assert False;
 
         sfdc = SFDCRequest();
-        leads_list = sfdc.addLeadsToSFDC(5);
-        contacts_list = sfdc.addContactsToSFDC(5)
+        leads_list = sfdc.addLeadsToSFDC(2);
+        contacts_list = sfdc.addContactsToSFDC(2)
         PlsOperations.runBulkScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC);
         time.sleep(15)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list);
@@ -117,8 +117,8 @@ class Test(unittest.TestCase):
         danteLead = contacts_list.keys()[0]
         dr.checkDanteValue(tenant,danteLead)
 
-        leads_list = sfdc.addLeadsToSFDC(2);
-        contacts_list = sfdc.addContactsToSFDC(2)
+        leads_list = sfdc.addLeadsToSFDC(1);
+        contacts_list = sfdc.addContactsToSFDC(1)
         PlsOperations.runHourlyScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC);
         time.sleep(15)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list);

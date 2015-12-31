@@ -75,7 +75,7 @@ def getActivityTypes(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegra
 def verifyResult(operation,records):
     results = []
     for r in records[1:]:
-        print r;
+        # print r;
         passed = True;
         if r["latticeforleads__Last_Score_Date__c"]==None:
             r["latticeforleads__Last_Score_Date__c"]="1900-01-01";
@@ -247,7 +247,7 @@ class EloquaRequest():
             response = self.getContact(k);
             if len(response.text)>0:
                 result = json.loads(response.text);
-                print result
+                # print result
                 results = {};
                 results["id"]=k;
                 results["email"]=result["emailAddress"];
@@ -421,7 +421,7 @@ class MarketoRequest():
             response=self.getLead(k);
             if response.status_code == 200:
                 results = json.loads(response.text)["result"];
-                print results
+                # print results
                 if len(results)>0:
                     result = results[0];
                     print "==>    %s    %s    %d    %s" % (k, result["email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
@@ -492,7 +492,7 @@ class SFDCRequest():
             response=self.getRecord(sobjects,k);            
             if response.status_code == 200:
                 result = json.loads(response.text);
-                print result
+                # print result
                 print "==>    %s    %s    %s    %s" % (k, result["Email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
                 result["id"]=result["Id"];
                 del result["Id"];
