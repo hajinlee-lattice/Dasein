@@ -2,6 +2,7 @@ package com.latticeengines.propdata.collection.dataflow.pivot;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -115,6 +116,9 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             case PIVOT_MAX:
                 pivotType = PivotType.MAX;
                 break;
+            case PIVOT_SUM:
+                pivotType = PivotType.SUM;
+                break;
             case PIVOT_COUNT:
                 pivotType = PivotType.COUNT;
                 break;
@@ -132,50 +136,50 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             String[] pivotKeys = json.get("TargetPivotKeys").asText().split(",");
 
             Set<String> keySet = new HashSet<>();
-            Map<String, String> columnMap = new HashMap<>();
+            List<AbstractMap.SimpleImmutableEntry<String, String>> columnMappingList = new ArrayList<>();
             for (String key: pivotKeys) {
                 keySet.add(key);
-                columnMap.put(key, column.getColumnName());
+                columnMappingList.add(new AbstractMap.SimpleImmutableEntry<>(key, column.getColumnName()));
             }
 
             if (column.getColumnType().contains("VARCHAR")) {
                 if (json.has("DefaultValue")) {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             String.class, pivotType, json.get("DefaultValue").asText());
                 } else {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             String.class, pivotType, null);
                 }
             } else if (column.getColumnType().contains("INT")) {
                 if (json.has("DefaultValue")) {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Integer.class, pivotType, json.get("DefaultValue").asInt());
                 } else {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Integer.class, pivotType, null);
                 }
             } else if (column.getColumnType().contains("BIGINT")) {
                 if (json.has("DefaultValue")) {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, json.get("DefaultValue").asLong());
                 } else {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, null);
                 }
             } else if (column.getColumnType().contains("BIT")) {
                 if (json.has("DefaultValue")) {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Boolean.class, pivotType, json.get("DefaultValue").asBoolean());
                 } else {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Boolean.class, pivotType, null);
                 }
             } else if (column.getColumnType().contains("DATETIME")) {
                 if (json.has("DefaultValue")) {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, json.get("DefaultValue").asLong());
                 } else {
-                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMap,
+                    return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, null);
                 }
             } else {
@@ -194,13 +198,13 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
 
         String keyColumn = impl1.keyColumn;
         String valueColumn = impl1.valueColumn;
-        Map<String, String> columnMap = new HashMap<>(impl1.columnMap);
+        List<AbstractMap.SimpleImmutableEntry<String, String>> columnMap = new ArrayList<>(impl1.columnEntryList);
         Map<String, Serializable> defaultValues = new HashMap<>(impl1.defaultValues);
         Set<String> pivotedKeys = new HashSet<>(impl1.pivotedKeys);
         Map<String, Class<?>> classMap = new HashMap<>(impl1.resultColumnClassMap);
         Map<String, PivotType> typeMap =  new HashMap<>(impl1.pivotTypeMap);
 
-        columnMap.putAll(impl2.columnMap);
+        columnMap.addAll(impl2.columnEntryList);
         defaultValues.putAll(impl2.defaultValues);
         pivotedKeys.addAll(impl2.pivotedKeys);
         classMap.putAll(impl2.resultColumnClassMap);

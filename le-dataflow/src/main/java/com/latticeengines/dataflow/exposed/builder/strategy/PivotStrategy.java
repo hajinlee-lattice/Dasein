@@ -12,7 +12,7 @@ import cascading.tuple.TupleEntry;
 
 public interface PivotStrategy extends Serializable {
 
-    PivotResult pivot(TupleEntry arguments);
+    List<PivotResult> pivot(TupleEntry arguments);
 
     Map<String, Object> getDefaultValues();
 

@@ -142,6 +142,7 @@ public class SourceColumn implements HasPid, Serializable {
         PIVOT_ANY,
         PIVOT_MAX,
         PIVOT_MIN,
+        PIVOT_SUM,
         PIVOT_COUNT,
         PIVOT_EXISTS,
         OTHER

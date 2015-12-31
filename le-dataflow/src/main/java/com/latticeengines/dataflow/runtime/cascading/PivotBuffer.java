@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -13,9 +16,6 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 
 @SuppressWarnings("rawtypes")
 public class PivotBuffer extends BaseOperation implements Buffer {
@@ -77,10 +77,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         List<PivotResult> pivotResults = new ArrayList<>();
         while (argumentsInGroup.hasNext()) {
             TupleEntry arguments = argumentsInGroup.next();
-            PivotResult pivotResult = pivotStrategy.pivot(arguments);
-            if (pivotResult != null) {
-                pivotResults.add(pivotResult);
-            }
+            pivotResults.addAll(pivotStrategy.pivot(arguments));
         }
 
         for (PivotResult pivotResult: pivotResults) {
@@ -97,6 +94,8 @@ public class PivotBuffer extends BaseOperation implements Buffer {
                 return aggregateMax(oldValue, result.getValue());
             case MIN:
                 return aggregateMin(oldValue, result.getValue());
+            case SUM:
+                return aggregateSum(oldValue, result.getValue());
             case COUNT:
                 return aggregateCount(oldValue, result.getValue());
             case EXISTS:
@@ -135,6 +134,27 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         } else {
             Comparable<Object> comparable = (Comparable<Object>) newValue;
             return comparable.compareTo(oldValue) <= 0 ? newValue : oldValue;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Object aggregateSum(Object oldValue, Object newValue) {
+        if (oldValue == null) {
+            return newValue;
+        } else if (newValue == null) {
+            return oldValue;
+        } else {
+            if (oldValue instanceof Integer) {
+                return (Integer) oldValue + (Integer) newValue;
+            } else if (oldValue instanceof Long) {
+                return (Long) oldValue + (Long) newValue;
+            } else if (oldValue instanceof Double) {
+                return (Double) oldValue + (Double) newValue;
+            } else if (oldValue instanceof Float) {
+                return (Float) oldValue + (Float) newValue;
+            } else {
+                return null;
+            }
         }
     }
 

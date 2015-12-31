@@ -3,6 +3,7 @@ package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 import static com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.FieldMetadata;
 
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
@@ -31,22 +33,21 @@ public class PivotStrategyImpl implements PivotStrategy {
     public final String keyColumn;
     public final String valueColumn;
     public final ImmutableSet<String> pivotedKeys;  // the values in the key column can be pivoted
-    public final ImmutableMap<String, String> columnMap;
+    public final ImmutableList<AbstractMap.SimpleImmutableEntry<String, String>> columnEntryList;
     public final ImmutableMap<String, Class<?>> resultColumnClassMap; // class of each result column
     public final Map<String, Serializable> defaultValues;
     public final ImmutableMap<String, PivotType> pivotTypeMap;
 
-
     public static <T extends Serializable> PivotStrategyImpl withColumnMap(String keyColumn,
-                                                                              String valueColumn,
-                                                                              Set<String> pivotedKeys,
-                                                                              Map<String, String> columnMap,
-                                                                              Class<T> resultClass,
-                                                                              PivotType type,
-                                                                              T defaultValue) {
+                                                                           String valueColumn,
+                                                                           Set<String> pivotedKeys,
+                                                                           List<AbstractMap.SimpleImmutableEntry<String, String>> columnEntryList,
+                                                                           Class<T> resultClass,
+                                                                           PivotType type,
+                                                                           T defaultValue) {
         return new PivotStrategyImpl(
                 keyColumn, valueColumn, pivotedKeys,
-                columnMap,
+                columnEntryList,
                 null, resultClass,
                 null, type,
                 null, defaultValue
@@ -81,6 +82,17 @@ public class PivotStrategyImpl implements PivotStrategy {
         );
     }
 
+    public static <T extends Serializable> PivotStrategyImpl sum(String keyColumn, String valueColumn,
+                                          Set<String> pivotedKeys, Class<T> resultClass, T defaultValue) {
+        return new PivotStrategyImpl(
+                keyColumn, valueColumn, pivotedKeys,
+                null,
+                null, resultClass,
+                null, PivotType.SUM,
+                null, defaultValue
+        );
+    }
+
     public static PivotStrategyImpl count(String keyColumn, String valueColumn,
             Set<String> pivotedKeys) {
         return new PivotStrategyImpl(
@@ -103,7 +115,7 @@ public class PivotStrategyImpl implements PivotStrategy {
     }
 
     public PivotStrategyImpl(String keyColumn, String valueColumn, Set<String> pivotedKeys,
-                             Map<String, String> columnMap,
+                             List<AbstractMap.SimpleImmutableEntry<String, String>> columnEntryList,
                              Map<String, Class<?>> resultColumnClassMap, Class<?> defaultResultClass,
                              Map<String, PivotType> pivotTypeMap, PivotType defaultType,
                              Map<String, Serializable> defaultValues, Serializable defaultValue) {
@@ -122,29 +134,37 @@ public class PivotStrategyImpl implements PivotStrategy {
         this.keyColumn = keyColumn;
         this.valueColumn = valueColumn;
         this.pivotedKeys = ImmutableSet.copyOf(pivotedKeys);
-        this.columnMap = ImmutableMap.copyOf(constructColumnMap(columnMap));
+        this.columnEntryList = ImmutableList.copyOf(constructColumnEntryList(columnEntryList));
         this.resultColumnClassMap = ImmutableMap.copyOf(constructResultColumnClassMap(resultColumnClassMap, defaultResultClass));
         this.pivotTypeMap = ImmutableMap.copyOf(constructPivotTypeMap(pivotTypeMap, defaultType));
         this.defaultValues = constructDefaultValues(defaultValues, defaultValue);
-
-        checkColumnCollision();
     }
 
     // map from original key
-    private Map<String, String> constructColumnMap(Map<String, String> columnMap) {
-        Map<String, String> toReturn = new HashMap<>();
-        if (columnMap == null) { columnMap = new HashMap<>(); }
+    private List<AbstractMap.SimpleImmutableEntry<String, String>>
+    constructColumnEntryList(List<AbstractMap.SimpleImmutableEntry<String, String>> columnEntryList) {
+        List<AbstractMap.SimpleImmutableEntry<String, String>> toReturn = new ArrayList<>();
+        if (columnEntryList == null) { columnEntryList = new ArrayList<>(); }
         for (String key: pivotedKeys) {
-            String column = columnMap.get(key);
-            if (StringUtils.isEmpty(column)) {
-                toReturn.put(key, String.valueOf(key)); // nature column naming
-            } else {
-                toReturn.put(key, column);
+            boolean defined = false;
+            for (Map.Entry<String, String> entry: columnEntryList) {
+                if (entry.getKey().equalsIgnoreCase(key)) {
+                    defined = true;
+                    AbstractMap.SimpleImmutableEntry<String, String> colMapping =
+                            new AbstractMap.SimpleImmutableEntry<>(entry.getKey(), entry.getValue());
+                    toReturn.add(colMapping);
+                }
+            }
+
+            if (!defined) {
+                // nature column naming
+                AbstractMap.SimpleImmutableEntry<String, String> colMapping =
+                        new AbstractMap.SimpleImmutableEntry<>(key, String.valueOf(key));
+                toReturn.add(colMapping);
             }
         }
         return toReturn;
     }
-
 
     // map from result columns
     private Map<String, Class<?>> constructResultColumnClassMap(Map<String, Class<?>> classMap,
@@ -152,7 +172,7 @@ public class PivotStrategyImpl implements PivotStrategy {
         Map<String, Class<?>> toReturn = new HashMap<>();
         if (classMap == null) { classMap = new HashMap<>(); }
         if (defaultResultClass == null) { defaultResultClass = DEFAULT_RESULT_CLASS; }
-        for (String resultColumn: new HashSet<>(columnMap.values())) {
+        for (String resultColumn: getResultColumns()) {
             if (classMap.containsKey(resultColumn)) {
                 toReturn.put(resultColumn, classMap.get(resultColumn));
             } else {
@@ -160,22 +180,6 @@ public class PivotStrategyImpl implements PivotStrategy {
             }
         }
         return toReturn;
-    }
-
-    private void checkColumnCollision() {
-        Set<String> columnClassSet = new HashSet<>();
-        Set<String> columnSet = new HashSet<>();
-        for (Map.Entry<String, String> entry: columnMap.entrySet()) {
-            String column = entry.getValue();
-            String className = resultColumnClassMap.get(column).getSimpleName();
-            columnClassSet.add(column + "[" + className + "]");
-            columnSet.add(column);
-        }
-
-        if (columnSet.size() < columnClassSet.size()) {
-            String columns = StringUtils.join(columnClassSet, ",");
-            throw new IllegalArgumentException("There are column collision in column map: { " + columns + " }");
-        }
     }
 
     private Map<String, PivotType> constructPivotTypeMap(Map<String, PivotType> pivotTypeMap, PivotType defaultType) {
@@ -220,7 +224,7 @@ public class PivotStrategyImpl implements PivotStrategy {
     public List<FieldMetadata> getFieldMetadataList() {
         List<FieldMetadata> fieldMetadataList = new ArrayList<>();
         Set<String> columnsVisited = new HashSet<>();
-        for (String column: new HashSet<>(columnMap.values())) {
+        for (String column: getResultColumns()) {
             if (!columnsVisited.contains(column)) {
                 Class<?> clazz = resultColumnClassMap.get(column);
                 FieldMetadata metadata = new FieldMetadata(column, clazz);
@@ -240,41 +244,55 @@ public class PivotStrategyImpl implements PivotStrategy {
     @Override
     public Set<String> getResultColumns() {
         Set<String> columns = new HashSet<>();
-        for (String key: pivotedKeys) {
-            columns.add(columnMap.get(key));
+        for (AbstractMap.SimpleImmutableEntry<String, String> entry: columnEntryList) {
+            columns.add(entry.getValue());
         }
         return columns;
     }
 
     @Override
-    public PivotResult pivot(TupleEntry arguments) {
+    public List<PivotResult> pivot(TupleEntry arguments) {
+        List<PivotResult> toReturn = new ArrayList<>();
         String key = arguments.getString(keyColumn);
-        if (StringUtils.isEmpty(key) || !columnMap.containsKey(key)) { return null; }
-        PivotResult result = pivot(key);
-        if (PivotType.COUNT.equals(result.getPivotType())) {
-            Class<?> clz = resultColumnClassMap.get(columnMap.get(key));
-            if (clz.equals(Integer.class)) {
-                result.setValue(1);
+        List<PivotResult> results = pivot(key);
+        for (PivotResult result: results) {
+            if (PivotType.COUNT.equals(result.getPivotType())) {
+                Class<?> clz = resultColumnClassMap.get(result.getColumnName());
+                if (clz.equals(Integer.class)) {
+                    result.setValue(1);
+                } else {
+                    result.setValue(1L);
+                }
             } else {
-                result.setValue(1L);
+                Object value = arguments.getObject(valueColumn);
+                result.setValue(castValue(result.getColumnName(), value));
             }
-        } else {
-            Object value = arguments.getObject(valueColumn);
-            result.setValue(castValue(key, value));
+            toReturn.add(result);
         }
-        return result;
+        return toReturn;
     }
 
-    public PivotResult pivot(String key) {
-        if (columnMap.containsKey(key)) {
-            return new PivotResult(columnMap.get(key), pivotTypeMap.get(columnMap.get(key)));
-        } else {
-            return null;
+    public List<PivotResult> pivot(String key) {
+        List<PivotResult> results = new ArrayList<>();
+        if (pivotedKeys.contains(key)) {
+            for (String column: resultColumnsFromKey(key)) {
+                results.add(new PivotResult(column, pivotTypeMap.get(column)));
+            }
         }
+        return results;
     }
 
-    protected Object castValue(String key, Object value) {
-        String column = columnMap.get(key);
+    private Set<String> resultColumnsFromKey(String key) {
+        Set<String> columns = new HashSet<>();
+        for (AbstractMap.SimpleImmutableEntry<String, String> entry: columnEntryList) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                columns.add(entry.getValue());
+            }
+        }
+        return columns;
+    }
+
+    protected Object castValue(String column, Object value) {
         Class<?> clazz = resultColumnClassMap.get(column);
         try {
             if (value == null) {

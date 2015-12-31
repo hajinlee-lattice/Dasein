@@ -57,7 +57,7 @@ public class PropDataAdminTool {
     private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("archive");
 
     private Command command;
-    private SourceToBeArchived sourceToBeArchived;
+    private PropDataRawSource sourceToBeArchived;
 
     private DateRange fullDateRange;
     private List<DateRange> periods;
@@ -77,7 +77,7 @@ public class PropDataAdminTool {
                 .dest(NS_SOURCE)
                 .required(true)
                 .type(String.class)
-                .choices(SourceToBeArchived.allNames())
+                .choices(PropDataRawSource.allNames())
                 .help("source to archive");
 
         parser.addArgument("-sd", "--start-date")
@@ -149,7 +149,7 @@ public class PropDataAdminTool {
     }
 
     private void validateAndTransformArchiveArgs(Namespace ns) {
-        sourceToBeArchived = SourceToBeArchived.fromName(ns.getString(NS_SOURCE));
+        sourceToBeArchived = PropDataRawSource.fromName(ns.getString(NS_SOURCE));
 
         if (sourceToBeArchived.getSourceType().equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
             Date startDate = toStartOfTheDay(parseDateInput(ns.getString(NS_START_DATE)));
@@ -334,17 +334,17 @@ public class PropDataAdminTool {
         }
     }
 
-    enum SourceToBeArchived {
+    enum PropDataRawSource {
         FEATURE("Feature", "featureArchiveService", RAW_TYPE_COLLECTED),
         BUILTWITH("BuiltWith", "builtWithArchiveService", RAW_TYPE_COLLECTED),
         HGDATARAW("HGDataRaw", "hgDataRawArchiveService", RAW_TYPE_BULK);
 
-        private static Map<String, SourceToBeArchived> nameMap;
+        private static Map<String, PropDataRawSource> nameMap;
 
         private final String name;
         private final String serviceBean;
         private final String sourceType;
-        SourceToBeArchived(String name, String archiveJobBean, String sourceType) {
+        PropDataRawSource(String name, String archiveJobBean, String sourceType) {
             this.name = name;
             this.serviceBean = archiveJobBean;
             this.sourceType = sourceType;
@@ -356,8 +356,8 @@ public class PropDataAdminTool {
 
         static {
             nameMap = new HashMap<>();
-            for (SourceToBeArchived sourceToBeArchived : SourceToBeArchived.values()) {
-                nameMap.put(sourceToBeArchived.getName(), sourceToBeArchived);
+            for (PropDataRawSource propDataRawSource : PropDataRawSource.values()) {
+                nameMap.put(propDataRawSource.getName(), propDataRawSource);
             }
         }
 
@@ -367,7 +367,7 @@ public class PropDataAdminTool {
             return names.toArray(nameArray);
         }
 
-        static SourceToBeArchived fromName(String name) {
+        static PropDataRawSource fromName(String name) {
             return nameMap.get(name);
         }
 

@@ -1,6 +1,7 @@
 package com.latticeengines.dataflow.exposed.operation;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
@@ -118,12 +120,12 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         List<GenericRecord> output = readOutput();
         for (GenericRecord record: output) {
             System.out.println(record);
-            if (record.get("Domain").equals("dom1.com")) {
+            if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 1);
                 Assert.assertEquals(record.get("f2"), 2);
                 Assert.assertEquals(record.get("f3"), 3);
                 Assert.assertEquals(record.get("f4"), 0);
-            } else if (record.get("Domain").equals("dom2.com")) {
+            } else if ("dom2.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 0);
                 Assert.assertEquals(record.get("f2"), 4);
                 Assert.assertEquals(record.get("f3"), 2);
@@ -156,7 +158,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         List<GenericRecord> output = readOutput();
         for (GenericRecord record: output) {
             System.out.println(record);
-            if (record.get("Domain").equals("dom1.com")) {
+            if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 2);
                 Assert.assertEquals(record.get("f2"), 3);
                 Assert.assertEquals(record.get("f3"), 4);
@@ -187,7 +189,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         List<GenericRecord> output = readOutput();
         for (GenericRecord record: output) {
             System.out.println(record);
-            if (record.get("Domain").equals("dom1.com")) {
+            if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 2);
                 Assert.assertEquals(record.get("f2"), 3);
                 Assert.assertEquals(record.get("f3"), 2);
@@ -218,7 +220,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         List<GenericRecord> output = readOutput();
         for (GenericRecord record: output) {
             System.out.println(record);
-            if (record.get("Domain").equals("dom1.com")) {
+            if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), true);
                 Assert.assertEquals(record.get("f2"), true);
                 Assert.assertEquals(record.get("f3"), true);
@@ -229,6 +231,52 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
+
+    @Test(groups = "functional", enabled = true)
+    public void testMergingPivot() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+
+        prepareMaxPivotData(avroDir, fileName);
+
+        final List<AbstractMap.SimpleImmutableEntry<String, String>> columnMappings = new ArrayList<>();
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f1", "f1"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f2", "f2"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f3", "f3"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f1", "combo1"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f2", "combo1"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f3", "combo1"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f2", "combo2"));
+        columnMappings.add(new AbstractMap.SimpleImmutableEntry<>("f3", "combo2"));
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node feature = addSource("Feature");
+                Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap(
+                        "Feature", "Value", features, columnMappings,
+                        Integer.class, PivotType.SUM, 0
+                );
+                return feature.pivot(new String[]{ "Domain" }, mapper);
+            }
+        });
+
+        List<GenericRecord> output = readOutput();
+        for (GenericRecord record: output) {
+            System.out.println(record);
+            if ("dom1.com".equals(record.get("Domain").toString())) {
+                Assert.assertEquals(record.get("f1"), 3);
+                Assert.assertEquals(record.get("f2"), 6);
+                Assert.assertEquals(record.get("f3"), 5);
+                Assert.assertEquals(record.get("f4"), 0);
+                Assert.assertEquals(record.get("combo1"), 14);
+                Assert.assertEquals(record.get("combo2"), 11);
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
 
 
     @Test(groups = "functional")
