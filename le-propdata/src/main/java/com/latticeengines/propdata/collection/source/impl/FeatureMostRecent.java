@@ -34,6 +34,6 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     public String getDomainField() {  return "URL"; }
 
     @Override
-    public CollectedSource getBaseSource() { return baseSource; }
+    public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
 
 }

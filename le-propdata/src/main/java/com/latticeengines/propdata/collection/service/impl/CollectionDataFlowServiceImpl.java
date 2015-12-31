@@ -50,9 +50,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     private HGData hgData;
 
-    @Value("${propdata.collection.use.default.job.properties:true}")
-    private boolean useDefaultProperties;
-
     @Value("${propdata.collection.mapred.reduce.tasks:8}")
     private int reduceTasks;
 
@@ -63,7 +60,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     public void executeMergeRawData(MostRecentSource source, String uid) {
         String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
 
-        CollectedSource baseSource = source.getBaseSource();
+        CollectedSource baseSource = source.getBaseSources()[0];
         Map<String, Table> sources = new HashMap<>();
         Table table = hdfsSourceEntityMgr.getTableAtVersion(baseSource, null);
         sources.put(baseSource.getSourceName(), table);
@@ -85,11 +82,13 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
-        Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(source.getBaseSource(), baseVersion);
         Map<String, Table> sources = new HashMap<>();
         List<String> baseTables = new ArrayList<>();
-        sources.put(source.getBaseSource().getSourceName(), baseTable);
-        baseTables.add(source.getBaseSource().getSourceName());
+        for (Source baseSource: source.getBaseSources()) {
+            Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, baseVersion);
+            sources.put(baseSource.getSourceName(), baseTable);
+            baseTables.add(baseSource.getSourceName());
+        }
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
         parameters.setTimestampField(source.getTimestampField());
@@ -107,7 +106,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(hgData, flowName).append(uid).toString();
 
-        Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(hgData.getBaseSource(), baseVersion);
+        Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(hgData.getBaseSources()[0], baseVersion);
         Map<String, Table> sources = new HashMap<>();
         sources.put(CollectionDataFlowKeys.SOURCE, baseTable);
 
@@ -144,14 +143,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     protected Properties getJobProperties() {
         Properties jobProperties = new Properties();
-        if (!useDefaultProperties) {
-            jobProperties.put("mapred.reduce.tasks", String.valueOf(reduceTasks));
-            jobProperties.put("mapred.tasktracker.map.tasks.maximum", "8");
-            jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "8");
-            jobProperties.put("mapred.compress.map.output", "true");
-            jobProperties.put("mapred.output.compression.type", "BLOCK");
-            jobProperties.put("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.BZip2Codec");
-        }
         jobProperties.put("mapred.mapper.new-api", "false");
         return jobProperties;
     }

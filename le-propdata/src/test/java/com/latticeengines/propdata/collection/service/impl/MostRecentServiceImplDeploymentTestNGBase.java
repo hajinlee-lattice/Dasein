@@ -44,7 +44,7 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
-        baseSource = source.getBaseSource();
+        baseSource = source.getBaseSources()[0];
         dates = getBaseSourceTestBean().getDates();
     }
 
@@ -57,8 +57,6 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
-
-        truncateDestTable();
 
         getBaseSourceTestBean().purgeRawData();
         archiveProgress = getBaseSourceTestBean().createNewProgress(dates[0], dates[1]);
@@ -83,11 +81,6 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         cleanupProgressTables();
     }
 
-    private void truncateDestTable() {
-        String tableName = source.getSqlTableName();
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
-    }
 
     protected RefreshProgress createNewProgress(Date pivotDate) {
         RefreshProgress progress = refreshService.startNewProgress(pivotDate, null, progressCreator);

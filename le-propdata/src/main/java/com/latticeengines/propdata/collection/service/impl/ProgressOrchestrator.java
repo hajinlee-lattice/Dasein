@@ -62,8 +62,9 @@ public class ProgressOrchestrator {
             Object service = ac.getBean(source.getRefreshServiceBean());
             if (service != null) {
                 if (source instanceof ServingSource) {
-                    Source baseSource = ((ServingSource) source).getBaseSource();
-                    downstreamServiceMap.get(baseSource).add((RefreshService) service);
+                    for (Source baseSource: ((ServingSource) source).getBaseSources()) {
+                        downstreamServiceMap.get(baseSource).add((RefreshService) service);
+                    }
                 }
             }
         }

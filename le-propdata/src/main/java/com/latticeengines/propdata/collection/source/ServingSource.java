@@ -4,5 +4,5 @@ public interface ServingSource extends Source {
 
     String getSqlTableName();
 
-    Source getBaseSource();
+    Source[] getBaseSources();
 }

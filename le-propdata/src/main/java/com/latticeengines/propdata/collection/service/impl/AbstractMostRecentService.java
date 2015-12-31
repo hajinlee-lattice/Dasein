@@ -33,7 +33,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
     }
 
     private String rawCollectedSourceTableName(MostRecentSource source) {
-        return source.getBaseSource().getCollectedTableName();
+        return source.getBaseSources()[0].getCollectedTableName();
     }
 
     @Override

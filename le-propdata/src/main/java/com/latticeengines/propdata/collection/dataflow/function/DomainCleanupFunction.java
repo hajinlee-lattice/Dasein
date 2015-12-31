@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.collection.dataflow.function;
 
+
+import org.apache.commons.lang.StringUtils;
+
 import com.latticeengines.propdata.collection.util.DomainUtils;
 
 import cascading.operation.Function;
@@ -22,7 +25,7 @@ public class DomainCleanupFunction extends CleanupFunction implements Function
         String url = arguments.getString(domainField);
         try {
             String domain = DomainUtils.parseDomain(url.toLowerCase());
-            if (domain == null) {
+            if (StringUtils.isEmpty(domain)) {
                 return null;
             } else {
                 return new Tuple(domain);

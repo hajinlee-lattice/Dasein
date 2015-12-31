@@ -34,6 +34,6 @@ public class TestPivotedSource implements PivotedSource, DomainBased {
     public String getDomainField() {  return "Domain"; }
 
     @Override
-    public Source getBaseSource() { return baseSource; }
+    public Source[] getBaseSources() { return new Source[] { baseSource }; }
 
 }

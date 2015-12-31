@@ -38,7 +38,7 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
-        baseSource = source.getBaseSource();
+        baseSource = source.getBaseSources()[0];
     }
 
     @AfterMethod(groups = "deployment")

@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.TestPivotedSource;
+import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.collection.source.MostRecentSource;
+import com.latticeengines.propdata.collection.source.impl.BuiltWithMostRecent;
 
-@Component("testPivotService")
-public class TestPivotService extends AbstractPivotService implements PivotService {
+@Component("builtWithRefreshService")
+public class BuiltWithRefreshService extends AbstractMostRecentService implements RefreshService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -23,18 +23,20 @@ public class TestPivotService extends AbstractPivotService implements PivotServi
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    TestPivotedSource source;
+    BuiltWithMostRecent source;
 
     @Override
-    public PivotedSource getSource() { return source; }
+    public MostRecentSource getSource() {
+        return source;
+    }
 
     @Override
-    RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
+    RefreshProgressEntityMgr getProgressEntityMgr() {
+        return progressEntityMgr;
+    }
 
     @Override
-    Log getLogger() { return log; }
-
-    @Override
-    public void createStageTable() { }
-
+    Log getLogger() {
+        return log;
+    }
 }

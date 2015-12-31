@@ -34,6 +34,6 @@ public class FeaturePivoted implements PivotedSource, DomainBased {
     public String getDomainField() {  return "URL"; }
 
     @Override
-    public Source getBaseSource() { return baseSource; }
+    public Source[] getBaseSources() { return new Source[] { baseSource }; }
 
 }

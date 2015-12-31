@@ -36,6 +36,6 @@ public class HGData implements DomainBased, ServingSource {
     public String getDomainField() {  return "URL"; }
 
     @Override
-    public Source getBaseSource() { return baseSource; }
+    public Source[] getBaseSources() { return new Source[]{ baseSource }; }
 
 }

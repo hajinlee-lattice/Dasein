@@ -38,7 +38,7 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
-        baseSource = (BulkSource) source.getBaseSource();
+        baseSource = (BulkSource) source.getBaseSources()[0];
     }
 
     @AfterMethod(groups = "deployment")
@@ -51,20 +51,20 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
 
-//        truncateDestTable();
+        truncateDestTable();
 
-//        getBaseSourceTestBean().purgeRawData();
-//        archiveProgress = getBaseSourceTestBean().createNewProgress();
-//        getBaseSourceTestBean().importFromDB(archiveProgress);
-//        getBaseSourceTestBean().finish(archiveProgress);
+        getBaseSourceTestBean().purgeRawData();
+        archiveProgress = getBaseSourceTestBean().createNewProgress();
+        getBaseSourceTestBean().importFromDB(archiveProgress);
+        getBaseSourceTestBean().finish(archiveProgress);
 
         progress = createNewProgress(new Date());
         progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);
 
-//        verifyResultTable();
-//        cleanupProgressTables();
+        verifyResultTable();
+        cleanupProgressTables();
     }
 
     private void truncateDestTable() {
@@ -74,7 +74,7 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
     }
 
     protected RefreshProgress createNewProgress(Date pivotDate) {
-        baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource().getBaseSource());
+        baseSourceVersion = hdfsSourceEntityMgr.getCurrentVersion(baseSource);
         RefreshProgress progress = refreshService.startNewProgress(pivotDate, baseSourceVersion, progressCreator);
         Assert.assertNotNull(progress, "Should have a progress in the job context.");
         Long pid = progress.getPid();
