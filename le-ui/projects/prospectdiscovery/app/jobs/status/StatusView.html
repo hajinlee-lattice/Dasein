@@ -15,7 +15,7 @@
                 <!-- <small>Displaying 1-8 of 12</small> -->
             </div>
             <div class="eight columns text-right">
-                <input type="text" class="form-control" placeholder="Search for job with job type" ng-model="SearchByName.jobType" ng-show="ShowSearch" />
+                <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
                 <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
                     <span class="ico ico-search"></span>
                 </a>
@@ -38,7 +38,7 @@
                 <span class="columns four">Status</span>
             </div>
             <div class="jobs-table-content">
-                <div data-job-status-row data-ng-repeat="job in jobs | filter:SearchByName | orderBy: SortOrder" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage" class="job-td-row"></div>
+                <div data-job-status-row data-ng-repeat="job in jobs | filter: query | orderBy: SortOrder" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage" class="job-td-row"></div>
                 <div data-ng-show="showEmptyJobsMessage">
                     There are no jobs to show at the moment
                 </div>
