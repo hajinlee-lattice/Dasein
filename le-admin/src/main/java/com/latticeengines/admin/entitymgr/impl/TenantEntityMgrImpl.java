@@ -41,7 +41,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
 
     @Override
     public boolean deleteTenant(String contractId, String tenantId) {
-        boolean success = batonService.deleteTenant(contractId, tenantId);
+        boolean success = batonService.deleteContract(contractId);
         LOGGER.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId,
                 String.valueOf(success)));
         return success;
