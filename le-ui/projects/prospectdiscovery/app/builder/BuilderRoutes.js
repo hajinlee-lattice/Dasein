@@ -4,7 +4,7 @@ angular
         $stateProvider
             .state('builder', {
                 url: '/builder',
-                redirectTo: "builder.category({AttrKey: 'Industry', ParentValue: ''})",
+                redirectTo: "builder.category",
                 views: {
                     "navigation@": {
                         templateUrl: './app/navigation/sidebar/BuilderView.html'
@@ -16,6 +16,14 @@ angular
             })
             .state('builder.category', {
                 url: '/categories/:AttrKey/:ParentKey/:ParentValue',
+                onEnter: function($stateParams) {
+                    if (!$stateParams.AttrKey) {
+                        $stateParams.AttrKey = 'Industry';
+                        $stateParams.AttrValue = '';
+                        $stateParams.ParentKey = '';
+                        $stateParams.ParentValue = '';
+                    }
+                },
                 views: {
                     "main@": {
                         templateUrl: './app/builder/category/CategoryView.html'

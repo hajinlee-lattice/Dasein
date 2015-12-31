@@ -154,12 +154,8 @@ angular
                 this.list = list;
                 this.SubCategory = this.SubCategoryMap[this.AttrKey];
                 this.ParentCategory = this.ParentCategoryMap[this.AttrKey] || this.AttrKey;
-
-                console.log('AttributesCtrl', this, AttributesModel);
             },
             handleTileClick: function($event, item) {
-                console.log('click',$event, item, this);
-
                 if (this.SubCategory) {
                     $state.go("builder.category", { 
                         ParentKey: this.ParentCategory, 
@@ -169,11 +165,11 @@ angular
                 }
             },
             handleTileSelect: function(selected) {
-                console.log('select', selected.selected, selected, this.SubCategory);
                 var SubCategory = this.SubCategory;
 
                 selected.modified = Date.now();
                 selected.visible = !SubCategory;
+
                 if (SubCategory) {
                     AttributesModel
                         .getList({
@@ -182,13 +178,23 @@ angular
                             AttrKey: SubCategory
                         })
                         .then(angular.bind(this, function(result) {
-                            console.log('selectlist', result);
                             selected.total = result.length;
 
                             result.forEach(function(item, index) {
                                 item.selected = selected.selected;
                                 item.modified = Date.now();
                                 item.visible = true;
+                            });
+                        }));
+                } else {
+                    AttributesModel
+                        .getList({
+                            AttrKey: selected.ParentKey,
+                            AttrValue: selected.ParentValue
+                        })
+                        .then(angular.bind(this, function(result) {
+                            result.forEach(function(item, index) {
+                                item.selected = true;
                             });
                         }));
                 }

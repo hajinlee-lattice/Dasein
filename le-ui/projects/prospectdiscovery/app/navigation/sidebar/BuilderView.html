@@ -9,24 +9,32 @@
         <a class="pd-sidebar-header" ui-sref="builder.category">
             <span class="fa fa-circle-thin"></span>
             <span class="pd-sidebar-header-label">Select Attributes</span>
-            <span class="badge badge-blue pull-right" ng-init="attrCount = 0;">{{ (MasterList | filter:{selected:true,visible:true}).length || "0" }}</span>
+            <span class="badge badge-blue pull-right" ng-init="attrCount = 0;">
+                {{ (MasterList | filter: { selected: true, visible: true }).length || "0" }}
+            </span>
         </a>
         <ul class="pd-sidebar-category">
-            <li ng-repeat="item in MasterList | filter: { selected: true, ParentKey: '_OBJECT_' } | orderBy: '-modified' ">
-                <a href="#">
+            <li 
+                ng-show="SelectedChildren.length > 0 || item.visible"
+                ng-repeat="item in MasterList | filter: { selected: true, ParentKey: '_OBJECT_' } | orderBy: '-modified' "
+            >
+                <a href="javascript:void(0);">
                     <span ng-click="item.expanded = !item.expanded">
                         <span class="fa fa-bank blue-text" ng-if="item.AttrKey == 'Industry'"></span>
                         <span class="fa fa-map-marker jade-text" ng-if="item.AttrKey == 'Region'"></span>
                         <span class="fa fa-bar-chart-o gold-text" ng-if="item.AttrKey == 'EmployeesRange'"></span>
                         <span class="fa fa-line-chart amber-text" ng-if="item.AttrKey == 'RevenueRange'"></span>
                         <em>{{ item.AttrValue }}</em>
-                        <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ BUH.length }}</span>]</span>
+                        <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
                     </span>
                     <ul class="pd-sidebar-subcategory" ng-show="item.expanded">
-                        <li ng-repeat="SubCategory in MasterList | filter: { selected: true, ParentKey: item.AttrKey, ParentValue: item.AttrValue } as BUH">
-                            <a href="#">
-                                <span>{{ SubCategory.AttrValue }}</span>
-                            </a>
+                        <li ng-repeat="SubCategory in MasterList | filter: { selected: true, ParentKey: item.AttrKey, ParentValue: item.AttrValue } as SelectedChildren">
+                                <input 
+                                    id="{{ SubCategory.AttrValue }}" 
+                                    type="checkbox" 
+                                    ng-model="SubCategory.selected" 
+                                />
+                                <label for="{{ SubCategory.AttrValue }}" ng-click="$event.stopPropagation()">{{ SubCategory.AttrValue }}</label>
                         </li>
                     </ul>
                 </a>

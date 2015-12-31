@@ -7,31 +7,20 @@ angular.module('pd.navigation.subnav', [
         $scope.CompaniesTotal = 0;
         $scope.RevenueTotal = 0;
         $scope.ContactsTotal = 0;
+        
         $scope.$watch('MasterList', function (lists) {
             $scope.CompaniesTotal = 0;
             $scope.RevenueTotal = 0;
             $scope.ContactsTotal = 0;
 
             var list = $filter('filter')($scope.MasterList, { visible: true, selected: true }, true);
-            console.log('SubNavSummaryCtrl', list);
+            
             list.forEach(function(item, key) {
                 $scope.CompaniesTotal += parseInt(item.Properties.CompanyCount);
                 $scope.RevenueTotal += parseInt(item.revenue);
                 $scope.ContactsTotal += parseInt(item.customers);
             });
         }, true);
-        /*
-        $scope.$on('Builder-Navigation-Updated', function(event, args) {
-            $scope.CompaniesTotal = 0;
-            $scope.RevenueTotal = 0;
-            
-            args.forEach(function(item, key) {
-                $scope.CompaniesTotal += parseInt(item.Properties.CompanyCount);
-                $scope.RevenueTotal += parseInt(item.revenue);
-            });
-
-        });
-        */
     })
     .controller('SubNavCtrl', function ($scope, $rootScope) {
         this.init = function() { 
