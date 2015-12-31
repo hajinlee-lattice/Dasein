@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.TenantService;
 

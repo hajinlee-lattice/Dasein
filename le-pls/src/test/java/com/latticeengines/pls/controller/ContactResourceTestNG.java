@@ -1,19 +1,17 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.net.URI;
-
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.latticeengines.domain.exposed.pls.Contact;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;

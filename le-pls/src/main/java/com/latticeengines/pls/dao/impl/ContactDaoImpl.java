@@ -1,16 +1,16 @@
 package com.latticeengines.pls.dao.impl;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Disjunction;
 import org.hibernate.Session;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -52,7 +52,6 @@ public class ContactDaoImpl extends BaseDaoImpl<Contact> implements ContactDao {
         return criteria.list();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Long findContactCount(Map<String, String> params) {
         Session session = getSession();
@@ -67,11 +66,11 @@ public class ContactDaoImpl extends BaseDaoImpl<Contact> implements ContactDao {
 
         int pageSize = maxReturns;
         int pageNum = 0;
-        Iterator paramIter = params.entrySet().iterator();
+        Iterator<Map.Entry<String, String>> paramIter = params.entrySet().iterator();
         while (paramIter.hasNext()) {
-            Map.Entry param = (Map.Entry) paramIter.next();
-            String key = (String)param.getKey();
-            String value = (String)param.getValue();
+            Map.Entry<String, String> param = paramIter.next();
+            String key = param.getKey();
+            String value = param.getValue();
             switch (key) {
                case "Page":
                    pageNum = Integer.parseInt(value.trim());

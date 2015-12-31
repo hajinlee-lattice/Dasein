@@ -1,31 +1,26 @@
 package com.latticeengines.pls.dao.impl;
 
-import java.util.List;
 import java.lang.reflect.Field;
+import java.util.List;
 
-
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.Session;
-import org.springframework.stereotype.Component;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.AmAttribute;
 import com.latticeengines.domain.exposed.pls.Company;
-
 import com.latticeengines.pls.dao.AmAttributeDao;
 
 @Component("amAttributeDao")
 public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAttributeDao {
 
     private static final Log log = LogFactory.getLog(AmAttributeDaoImpl.class);
-    private final int maxReturns = 256;
-
 
     @Override
     protected Class<AmAttribute> getEntityClass() {
@@ -96,7 +91,7 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
         return list;
     }
 
-    private String convertPropToField(Class entityClass, String property) {
+    private String convertPropToField(Class<?> entityClass, String property) {
          String fieldName = property;
          for (Field f : entityClass.getDeclaredFields()) {
              if (f.getName().equalsIgnoreCase(property)) {

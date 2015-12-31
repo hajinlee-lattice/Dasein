@@ -1,6 +1,5 @@
 package com.latticeengines.pls.entitymanager;
 
-import java.util.Map;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
