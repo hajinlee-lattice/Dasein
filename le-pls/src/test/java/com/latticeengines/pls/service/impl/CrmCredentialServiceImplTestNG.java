@@ -109,6 +109,8 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 //        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
 //        Assert.assertEquals(newCrmCredential.getOrgId(), SFDC_SANDBOX_ORG_ID);
         FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+        def.setConfigurable(false);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
     }
 
     @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingEai")

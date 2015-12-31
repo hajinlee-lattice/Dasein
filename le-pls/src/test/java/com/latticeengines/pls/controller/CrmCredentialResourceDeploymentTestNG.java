@@ -78,6 +78,8 @@ public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBa
 //                crmCredential, CrmCredential.class);
 //        Assert.assertEquals(newCrmCredential.getOrgId(), "00DM0000001dg3uMAA");
         FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+        def.setConfigurable(false);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "verifyCredentialUsingEai")

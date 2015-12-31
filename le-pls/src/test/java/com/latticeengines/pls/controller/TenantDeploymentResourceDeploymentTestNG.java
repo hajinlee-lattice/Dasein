@@ -38,6 +38,8 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
+    
+    private FeatureFlagDefinition def;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -60,7 +62,7 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
         }
         camille.create(path, new Document(CRMTopology.SFDC.name()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-        FeatureFlagDefinition def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+        def = FeatureFlagClient.getDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         def.setConfigurable(true);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
         FeatureFlagClient.setEnabled(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), true);
@@ -82,6 +84,11 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
                 + "/pls/credentials/sfdc?tenantId=" +  mainTestingTenant.getId() +   "&isProduction=true&verifyOnly=false",
                 crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
+
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestingTenant.getId());
+        FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
+        def.setConfigurable(false);
+        FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);
     }
 
     private void clearTemplateData() {
