@@ -1,7 +1,8 @@
 angular
     .module('pd.jobs.status', [
+        'mainApp.core.utilities.BrowserStorageUtility',
     ])
-    .directive('jobStatusRow', function() {
+    .directive('jobStatusRow', function(BrowserStorageUtility) {
         return {
             restrict: 'EA',
             templateUrl: 'app/jobs/status/JobStatusRow.html',
@@ -123,6 +124,7 @@ angular
                             if (response.resultObj.jobStatus == "Complete") {
                                 cancelPeriodJobStatusQuery();
                                 $scope.showJobSuccessMessage = true;
+                                BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
                             }
                             updateStatesBasedOnJobStatus(response.resultObj);
                         }

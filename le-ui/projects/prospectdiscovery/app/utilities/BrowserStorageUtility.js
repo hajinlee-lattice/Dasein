@@ -28,6 +28,7 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this._featureFlagsDocument = null; // actual client session object
     
     this._sessionLastActiveTimestampStorageKey = "GriotSessionLastActiveTimestamp";
+    this._sessionShouldShowJobCompleteMessage = "GriotSessionShowJobCompleteMessage";
     
     this.setSessionLastActiveTimestamp = function(timeStamp) {
         $.jStorage.set(this._sessionLastActiveTimestampStorageKey, timeStamp);
@@ -36,6 +37,14 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     this.getSessionLastActiveTimestamp = function() {
         $.jStorage.reInit();
         return $.jStorage.get(this._sessionLastActiveTimestampStorageKey);
+    };
+    
+    this.setSessionShouldShowJobCompleteMessage = function(shouldShow) {
+        $.jStorage.set(this._sessionShouldShowJobCompleteMessage, shouldShow);
+    };
+    
+    this.getSessionShouldShowJobCompleteMessage = function() {
+        return $.jStorage.get(this._sessionShouldShowJobCompleteMessage);
     };
     
     this.setTokenDocument = function (data, successHandler) {

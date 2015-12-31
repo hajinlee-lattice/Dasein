@@ -2,7 +2,8 @@ angular.module('pd.jobs', [
     'pd.jobs.import.credentials',
     'pd.jobs.import.file',
     'pd.jobs.import.ready',
-    'pd.jobs.status'
+    'pd.jobs.status',
+    'mainApp.core.utilities.BrowserStorageUtility',
 ])
 
 .service('JobsService', function($http, $q, _) {
@@ -156,12 +157,12 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $rootScope, $http, JobsService) {
+.controller('JobsCtrl', function($scope, $rootScope, $http, JobsService, BrowserStorageUtility) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.showEmptyJobsMessage = false;
-    $scope.showJobSuccessMessage = false;
+    $scope.showJobSuccessMessage = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -189,5 +190,6 @@ angular.module('pd.jobs', [
     
     $scope.closeJobSuccessMessage = function() {
         $scope.showJobSuccessMessage = false;
+        BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(false);
     };
 });

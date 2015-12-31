@@ -58,7 +58,7 @@ angular
                 url: '/fit_model',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/BuildFitModelView.html'
+                        templateUrl: './app/builder/prospects/SetFitCriteriaView.html'
                     },
                     "summary@": {
                         template: ''
@@ -69,7 +69,7 @@ angular
                 url: '/intent_model',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/BuildIntentModelView.html'
+                        templateUrl: './app/builder/prospects/SetIntentCriteriaView.html'
                     },
                     "summary@": {
                         template: ''

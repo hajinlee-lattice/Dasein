@@ -8,23 +8,21 @@
         </div>
         <div class="row">
             <div class="four columns meta">
-                <small>Displaying 1-8 of 12</small>
+                <!-- <small>Displaying 1-8 of 12</small> -->
             </div>
             <div class="eight columns text-right">
-                <a ui-sref="markets.builder" class="button icon-button white-button">
+                <input type="text" class="form-control" placeholder="Search for target market by name" ng-model="query" ng-show="ShowSearch" />
+                <a ui-sref="markets.builder" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
                     <span class="ico ico-search"></span>
                 </a>
-                <a ui-sref="markets.builder" class="button icon-button white-button">
-                    <span class="ico ico-filter"></span>
-                </a>
-                <a ui-sref="markets.builder" class="button icon-button white-button">
-                    <span class="ico ico-sort"></span>
+                <a ui-sref="markets.builder" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'creation_timestamp' ? '-creation_timestamp' : 'creation_timestamp')" ng-init="SortOrder = '-creation_timestamp';">
+                    <span class="fa fa-sort-amount-{{ SortOrder == 'creation_timestamp' ? 'asc' : 'desc' }}"></span>
                 </a>
                 <a ui-sref="markets.builder" class="button icon-button white-button">
                     <span class="ico ico-grid"></span>
                 </a>
                 <a ui-sref="markets.builder" class="button icon-button white-button">
-                    <span class="ico ico-list"></span>
+                    <span class="ico ico-list selected-icon"></span>
                 </a>
                 <a ui-sref="builder.category({AttrKey: 'Industry', ParentValue: ''})">
                     <button type="button" class="button blue-button">New Target Market</button>
@@ -49,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr ng-repeat="item in targetMarkets">
+                    <tr ng-repeat="item in targetMarkets | filter: { description: query } | orderBy: SortOrder">
                         <td>{{ item.description }}</td>
                         <td>{{ item.creation_timestamp | date: 'MM/dd/yyyy' }}</td>
                         <td>2.3x</td>
