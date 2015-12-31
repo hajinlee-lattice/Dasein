@@ -77,103 +77,128 @@ Icons
 	width: 12px;
 	height: 12px;
 	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-position: center;
 	&.ico-small {
 		width: 12px;
 	}
 	&.ico-search {
-		background-image: url("../img/ico-search.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $jet;
+		-webkit-mask:  url("../img/ico-search.svg");
+		mask:  url("../img/ico-search.svg");
 	}
 	&.ico-filter {
-		background-image: url("../img/ico-filter.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $jet;
+		-webkit-mask:  url("../img/ico-filter.svg");
+		mask:  url("../img/ico-filter.svg");
 	}
 	&.ico-sort {
-		background-image: url("../img/ico-sort.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $jet;
+		-webkit-mask:  url("../img/ico-sort.svg");
+		mask:  url("../img/ico-sort.svg");
 	}
 	&.ico-grid {
-		background-image: url("../img/ico-grid.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $jet;
+		-webkit-mask:  url("../img/ico-grid.svg");
+		mask:  url("../img/ico-grid.svg");
 	}
 	&.ico-list {
-		background-image: url("../img/ico-list.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $jet;
+		-webkit-mask:  url("../img/ico-list.svg");
+		mask:  url("../img/ico-list.svg");
 	}
 	&.ico-fingerprint {
-		background-image: url("../img/ico-fingerprint.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-fingerprint.svg");
+		mask:  url("../img/ico-fingerprint.svg");
 	}
 	&.ico-bullseye {
-		background-image: url("../img/ico-bullseye.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-bullseye.svg");
+		mask:  url("../img/ico-bullseye.svg");
 	}
 	&.ico-cog {
-		background-image: url("../img/ico-cog.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-user {
-		background-image: url("../img/ico-user.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-cog.svg");
+		mask:  url("../img/ico-cog.svg");
 	}
 	&.ico-step-open {
 		background-image: url("../img/ico-step-open.svg");
-		background-repeat: no-repeat;
-		background-position: center;
 	}
 	&.ico-step-current {
 		background-image: url("../img/ico-step-current.svg");
-		background-repeat: no-repeat;
-		background-position: center;
 	}
 	&.ico-step-checked {
 		background-image: url("../img/ico-step-checked.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-industry {
-		background-image: url("../img/ico-industry.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-locations {
-		background-image: url("../img/ico-location.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-firmographics {
-		background-image: url("../img/ico-firmographics.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-tech-profile {
-		background-image: url("../img/ico-tech-profile.svg");
-		background-repeat: no-repeat;
-		background-position: center;
-	}
-	&.ico-chip {
-		background-image: url("../img/ico-chip.svg");
-		background-repeat: no-repeat;
-		background-position: center;
 	}
 	&.ico-user {
-		background-image: url("../img/ico-user.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-user.svg");
+		mask:  url("../img/ico-user.svg");
 	}
 	&.ico-user-card {
-		background-image: url("../img/ico-user-card.svg");
-		background-repeat: no-repeat;
-		background-position: center;
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-user-card.svg");
+		mask:  url("../img/ico-user-card.svg");
+	}
+	&.ico-industry {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-industry.svg");
+		mask:  url("../img/ico-industry.svg");
+	}
+	&.ico-locations {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-locations.svg");
+		mask:  url("../img/ico-locations.svg");
+	}
+	&.ico-tmb-user {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-user.svg");
+		mask:  url("../img/ico-user.svg");
+	}
+	&.ico-tmb-chart {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-chart.svg");
+		mask:  url("../img/ico-chart.svg");
+	}
+	&.ico-tech-profile {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-web.svg");
+		mask:  url("../img/ico-web.svg");
+	}
+	&.ico-web {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-web.svg");
+		mask:  url("../img/ico-web.svg");
+	}
+	&.ico-chip {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../img/ico-chip.svg");
+		mask:  url("../img/ico-chip.svg");
+	}
+	&.ico-white {
+		background-color: $pearl-white;
+	}
+	&.ico-jet {
+		background-color: $jet;
+	}
+	&.ico-saphire {
+		background-color: $saphire;
+	}
+	&.ico-ruby {
+		background-color: $ruby;
+	}
+	&.ico-amber {
+		background-color: $amber;
+	}
+	&.ico-gold {
+		background-color: $gold;
+	}
+	&.ico-jade {
+		background-color: $jade;
+	}
+	&.ico-amethyst {
+		background-color: $amethyst;
 	}
 }
 

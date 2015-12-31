@@ -226,35 +226,47 @@ Primary Sidebar Nav Menu Styling
   .ico {
     width: 22px;
     height: 22px;
+    &.ico-fingerprint {
+      width: 16px;
+    }
   }
   .fa-circle-thin, .fa-check-circle-o {
     background-color: #222831; 
   }
-  &.progress-menu a, &.progress-menu li > div {    
-    background-image: url("/demo/img/bkg-nav-full-piping.png");
-    background-repeat: no-repeat;
-    background-position: 31px;
-  }
-  &.progress-menu li ul li a {
-    padding: 0 0.5em 0 4em;
-  }
-  &.progress-menu > li:first-of-type > a {
-    background-position: 31px 20px;
-  }
-  &.progress-menu > li:last-child > a {
-    background-position: 31px -320px;
-  }
-  &.progress-menu li > div {
-    background-image: url("/demo/img/bkg-nav-full-piping.png");
-    background-repeat: no-repeat;
-    background-position: 31px;
-    padding-top: 10px;
-    p, ul {
-      margin-bottom: 10px;
+  &.progress-menu {
+    a, li > div {    
+      background-image: url("/demo/img/bkg-nav-full-piping.png");
+      background-repeat: no-repeat;
+      background-position: 31px;
     }
-  }
-  &.progress-menu li:last-child > div {
-    background-image: none;
+    li ul li a {
+      padding: 0 0.5em 0 4em;
+    }
+    &> li:first-of-type > a {
+      background-position: 31px 20px;
+    }
+    &> li:last-child > a {
+      background-position: 31px -320px;
+    }
+    li > div {
+      padding-top: 10px;
+      p, ul {
+        margin-bottom: 10px;
+      }
+    }
+    li:last-child > div {
+      background-image: none;
+    }
+    .ico {
+      height: 20px;
+      &.ico-tmb-user {
+        width: 19px;
+      }
+      &.ico-industry {
+        height: 16px;
+        width: 20px;
+      }
+    }
   }
 }
 

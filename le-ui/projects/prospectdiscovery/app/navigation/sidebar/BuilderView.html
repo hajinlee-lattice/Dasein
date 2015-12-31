@@ -21,10 +21,10 @@
                 >
                     <a href="javascript:void(0);">
                         <span ng-click="item.expanded = !item.expanded">
-                            <span class="fa fa-bank blue-text" ng-if="item.AttrKey == 'Industry'"></span>
-                            <span class="fa fa-map-marker jade-text" ng-if="item.AttrKey == 'Region'"></span>
-                            <span class="fa fa-bar-chart-o gold-text" ng-if="item.AttrKey == 'EmployeesRange'"></span>
-                            <span class="fa fa-line-chart amber-text" ng-if="item.AttrKey == 'RevenueRange'"></span>
+                            <span class="ico ico-industry ico-saphire" ng-if="item.AttrKey == 'Industry'"></span>
+                            <span class="ico ico-locations ico-jade" ng-if="item.AttrKey == 'Region'"></span>
+                            <span class="ico ico-tmb-user ico-gold" ng-if="item.AttrKey == 'EmployeesRange'"></span>
+                            <span class="ico ico-tmb-chart ico-gold" ng-if="item.AttrKey == 'RevenueRange'"></span>
                             <em>{{ item.AttrValue }}</em>
                             <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
                         </span>
