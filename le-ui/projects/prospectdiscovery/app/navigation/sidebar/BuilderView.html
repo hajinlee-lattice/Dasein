@@ -1,85 +1,89 @@
-<div class="menu-header">
-	<a ui-sref="markets.list" class="button icon-button">
-	    <span class="fa fa-angle-left"></span>
-	</a>
-	<h3>Create Target Market</h3>
+<div ng-controller="BuilderSidebarCtrl">
+    <div class="menu-header">
+    	<a ui-sref="markets.list" class="button icon-button">
+    	    <span class="fa fa-angle-left"></span>
+    	</a>
+    	<h3>{{ TargetMarketName }}</h3>
+    </div>
+    <ul class="menu progress-menu">
+        <li role="presentation" ui-sref-active-eq="active">
+            <a class="pd-sidebar-header" ui-sref="builder.category">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Select Attributes</span>
+                <span class="badge badge-blue pull-right" ng-init="attrCount = 0;">
+                    {{ (MasterList | filter: { selected: true, visible: true }).length || "0" }}
+                </span>
+            </a>
+            <ul class="pd-sidebar-category">
+                <li 
+                    ng-show="SelectedChildren.length > 0 || item.visible"
+                    ng-repeat="item in MasterList | filter: { selected: true, ParentKey: '_OBJECT_' } | orderBy: '-modified' "
+                >
+                    <a href="javascript:void(0);">
+                        <span ng-click="item.expanded = !item.expanded">
+                            <span class="fa fa-bank blue-text" ng-if="item.AttrKey == 'Industry'"></span>
+                            <span class="fa fa-map-marker jade-text" ng-if="item.AttrKey == 'Region'"></span>
+                            <span class="fa fa-bar-chart-o gold-text" ng-if="item.AttrKey == 'EmployeesRange'"></span>
+                            <span class="fa fa-line-chart amber-text" ng-if="item.AttrKey == 'RevenueRange'"></span>
+                            <em>{{ item.AttrValue }}</em>
+                            <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
+                        </span>
+                        <ul class="pd-sidebar-subcategory" ng-show="item.expanded">
+                            <li ng-repeat="SubCategory in MasterList | filter: { selected: true, ParentKey: item.AttrKey, ParentValue: item.AttrValue } as SelectedChildren">
+                                    <input 
+                                        id="{{ SubCategory.AttrValue }}" 
+                                        type="checkbox" 
+                                        ng-change="handleSubCategoryRemoval(SubCategory, SelectedChildren)"
+                                        ng-model="SubCategory.selected" />
+                                    <label 
+                                        for="{{ SubCategory.AttrValue }}" 
+                                        ng-click="$event.stopPropagation()">{{ SubCategory.AttrValue }}</label>
+                            </li>
+                        </ul>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a class="pd-sidebar-header" ui-sref="builder.intent({AttrKey: 'Industry'})">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Select Intent Topics</span>
+                <span class="badge badge-blue pull-right">0</span>
+            </a>
+            <ul>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a class="pd-sidebar-header" ui-sref="builder.filtercontacts">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Filter the Contacts</span>
+            </a>
+            <ul>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a class="pd-sidebar-header" ui-sref="builder.fitmodel">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Build the Fit Model</span>
+            </a>
+            <ul>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a class="pd-sidebar-header" ui-sref="builder.intentmodel">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Build the Intent Model</span>
+            </a>
+            <ul>
+            </ul>
+        </li>
+        <li role="presentation" ui-sref-active="active">
+            <a class="pd-sidebar-header" ui-sref="builder.setup">
+                <span class="fa fa-circle-thin"></span>
+                <span class="pd-sidebar-header-label">Setup Prospecting</span>
+            </a>
+            <ul>
+            </ul>
+        </li>
+    </ul>
 </div>
-<ul class="menu progress-menu" ng-controller="BuilderSidebarCtrl">
-    <li role="presentation" ui-sref-active-eq="active">
-        <a class="pd-sidebar-header" ui-sref="builder.category">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Select Attributes</span>
-            <span class="badge badge-blue pull-right" ng-init="attrCount = 0;">
-                {{ (MasterList | filter: { selected: true, visible: true }).length || "0" }}
-            </span>
-        </a>
-        <ul class="pd-sidebar-category">
-            <li 
-                ng-show="SelectedChildren.length > 0 || item.visible"
-                ng-repeat="item in MasterList | filter: { selected: true, ParentKey: '_OBJECT_' } | orderBy: '-modified' "
-            >
-                <a href="javascript:void(0);">
-                    <span ng-click="item.expanded = !item.expanded">
-                        <span class="fa fa-bank blue-text" ng-if="item.AttrKey == 'Industry'"></span>
-                        <span class="fa fa-map-marker jade-text" ng-if="item.AttrKey == 'Region'"></span>
-                        <span class="fa fa-bar-chart-o gold-text" ng-if="item.AttrKey == 'EmployeesRange'"></span>
-                        <span class="fa fa-line-chart amber-text" ng-if="item.AttrKey == 'RevenueRange'"></span>
-                        <em>{{ item.AttrValue }}</em>
-                        <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
-                    </span>
-                    <ul class="pd-sidebar-subcategory" ng-show="item.expanded">
-                        <li ng-repeat="SubCategory in MasterList | filter: { selected: true, ParentKey: item.AttrKey, ParentValue: item.AttrValue } as SelectedChildren">
-                                <input 
-                                    id="{{ SubCategory.AttrValue }}" 
-                                    type="checkbox" 
-                                    ng-model="SubCategory.selected" 
-                                />
-                                <label for="{{ SubCategory.AttrValue }}" ng-click="$event.stopPropagation()">{{ SubCategory.AttrValue }}</label>
-                        </li>
-                    </ul>
-                </a>
-            </li>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a class="pd-sidebar-header" ui-sref="builder.intent({AttrKey: 'Industry'})">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Select Intent Topics</span>
-            <span class="badge badge-blue pull-right">0</span>
-        </a>
-        <ul>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a class="pd-sidebar-header" ui-sref="builder.filtercontacts">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Filter the Contacts</span>
-        </a>
-        <ul>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a class="pd-sidebar-header" ui-sref="builder.fitmodel">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Build the Fit Model</span>
-        </a>
-        <ul>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a class="pd-sidebar-header" ui-sref="builder.intentmodel">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Build the Intent Model</span>
-        </a>
-        <ul>
-        </ul>
-    </li>
-    <li role="presentation" ui-sref-active="active">
-        <a class="pd-sidebar-header" ui-sref="builder.setup">
-            <span class="fa fa-circle-thin"></span>
-            <span class="pd-sidebar-header-label">Setup Prospecting</span>
-        </a>
-        <ul>
-        </ul>
-    </li>
-</ul>

@@ -1,7 +1,7 @@
 <div class="summary blue-steel">
     <h3>Enter a Name to begin Target Market Builder workflow</h3>
 </div>
-<div class="container" ng-controller="CreateMarketCtrl">
+<div class="container" ng-controller="CreateMarketCtrl as vm">
 
     <div class="row page-header">
         <h4 class="columns six">
@@ -31,7 +31,7 @@
         <div class="twelve columns">
             <div class="input-section">
                 <div class="input-title">Target Market Name:</div>
-                <input type="text" class="form-control" value="" />
+                <input type="text" class="form-control" ng-model="vm.AttributesModel.TargetMarketName" />
             </div>
         </div>
     </div>            

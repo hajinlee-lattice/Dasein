@@ -3,11 +3,13 @@ angular
     .service('AttributesModel', function($q, AttributesService, $filter) {
         var AttributesModel = this;
 
+        // Map used to determine AttrKey's sub category
         this.SubCategoryMap = {
             'Industry': 'SubIndustry',
             'Locations': 'State'
         };
 
+        // Map converts friendly labels to ParentKey
         this.ParentCategoryMap = {
             'Locations': 'Region',
             'Employees Range': 'EmployeesRange',
@@ -16,21 +18,25 @@ angular
 
         this.MasterList = [];
 
+        // Filters MasterList via args (ParentKey/ParentValue/AttrKey/AttrValue)
         this.getMaster = function(args) {
             var fields = {
                 AttrKey: (this.ParentCategoryMap[args.AttrKey] || args.AttrKey)
             };
 
-            if (args.AttrValue) fields.AttrValue = args.AttrValue;
-            if (args.ParentValue) fields.ParentValue = args.ParentValue;
-            if (args.ParentKey) fields.ParentKey = args.ParentKey;
+            // only pass through args that have a definite value
+            ['AttrValue','ParentValue','ParentKey','selected','visible'].forEach(function(key) {
+                args[key] ? fields[key] = args[key] : null;
+            });
 
             var list = $filter('filter')(this.MasterList, fields, true);
-            console.log('getMaster', fields, list, this.MasterList);
+
+            console.log('<!> getMaster from Cache:', fields, list);
 
             return list || [];
         }
 
+        // checks if items matching args exists, performs XHR to fetch if they don't
         this.getList = function(args) {
             var deferred = $q.defer(),
                 master = this.getMaster(args);
@@ -45,27 +51,27 @@ angular
                 AttributesService.get(args).then(function(list) {
                     list = list || [];
 
-                    // FIXME - Fudging the numbers a bit for the demo...
                     list.forEach(function(item, index) {
-                        // FIXME - Make REGION top level
+                        // FIXME - Make REGION top level, because Country data is limited
                         if (item.ParentKey == 'Country')
                             item.ParentKey = '_OBJECT_';
 
+                        // FIXME - Fudging the numbers a bit for the demo
+                        // Will be removing this stuff when API returns real data
                         item.lift = (Math.random() * 3.0).toFixed(1) + 'x';
-
                         item.revenue = Math.round(Math.random() * 30000000);
-                        
                         item.lattice_companies = item.Properties.CompanyCount;
                         item.their_companies = Math.round(Math.random() * item.lattice_companies);
                         item.customers = Math.round(Math.random() * item.their_companies);
-
                         item.their_companies = item.their_companies > item.lattice_companies ? item.lattice_companies >> 1 : item.their_companies;
                         item.customers = item.customers > item.their_companies ? item.their_companies >> 1 : item.customers
-
+                        
+                        // Calculate percentages for bubble visualization
                         item.mediump = ((item.their_companies / item.lattice_companies) * 100).toFixed(3);
                         item.smallp = ((item.customers / item.lattice_companies) * 100).toFixed(3);
                         item.smallp_of_theirs = ((item.customers / item.their_companies) * 100).toFixed(3);
-
+                        
+                        // set a minimum constaint just so things look good
                         item.mediump = item.mediump < 15 ? 15 : item.mediump;
                         item.smallp = item.smallp < 10 ? 10 : item.smallp;
 
@@ -75,8 +81,6 @@ angular
                     });
 
                     deferred.resolve(list);
-
-                    console.log('builder category list:', list);
                 });
             }
 
@@ -145,16 +149,20 @@ angular
                     return console.log('<!> No stateParams provided');
                 }
 
+                // This might work better in a UI-Router "resolve"
                 AttributesModel
                     .getList($stateParams)
                     .then(angular.bind(this, this.setList));
             },
+
             setList: function(list) {
                 this.total = list.length;
                 this.list = list;
                 this.SubCategory = this.SubCategoryMap[this.AttrKey];
                 this.ParentCategory = this.ParentCategoryMap[this.AttrKey] || this.AttrKey;
             },
+
+            // Drill down to sub category if one exists
             handleTileClick: function($event, item) {
                 if (this.SubCategory) {
                     $state.go("builder.category", { 
@@ -164,6 +172,8 @@ angular
                     });
                 }
             },
+
+            // Parent selects all children, and a child makes sure parent is selected.
             handleTileSelect: function(selected) {
                 var SubCategory = this.SubCategory;
 
@@ -186,17 +196,38 @@ angular
                                 item.visible = true;
                             });
                         }));
-                } else {
+                } else if (selected.selected) {
                     AttributesModel
                         .getList({
                             AttrKey: selected.ParentKey,
                             AttrValue: selected.ParentValue
                         })
                         .then(angular.bind(this, function(result) {
-                            result.forEach(function(item, index) {
-                                item.selected = true;
-                            });
+                            console.log('select parent', result.length, result, selected);
+                            (result.length > 0 ? result[0] : {})
+                                .selected = selected.selected;
                         }));
+                } else {
+
+                    var result = AttributesModel.getMaster({
+                        ParentValue: selected.ParentValue,
+                        ParentKey: selected.ParentKey,
+                        selected: true
+                    });
+
+                    console.log('@@@',result.length, result);
+                    if (result.length == 0) {
+                    AttributesModel
+                        .getList({
+                            AttrKey: selected.ParentKey,
+                            AttrValue: selected.ParentValue
+                        })
+                        .then(angular.bind(this, function(result) {
+                            console.log('select parent', result.length, result, selected);
+                            (result.length > 0 ? result[0] : {})
+                                .selected = selected.selected;
+                        }));
+                    }
                 }
             }
         });
