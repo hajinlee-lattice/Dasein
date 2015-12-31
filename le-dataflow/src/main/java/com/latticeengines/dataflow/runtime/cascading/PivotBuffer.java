@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -16,6 +13,9 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 
 @SuppressWarnings("rawtypes")
 public class PivotBuffer extends BaseOperation implements Buffer {
@@ -89,7 +89,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Object aggregateValue(Object oldValue, PivotResult result) {
         switch (result.getPivotType()) {
             case ANY:
@@ -107,7 +106,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static Object aggregateAny(Object oldValue, Object newValue) {
         if (newValue != null) {
             return newValue;
@@ -140,7 +138,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static Object aggregateCount(Object oldValue, Object newValue) {
         if (newValue instanceof Long) {
             return (Long) oldValue + 1L;
@@ -149,7 +146,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static Object aggregateExists(Object oldValue, Object newValue) {
         return (Boolean) oldValue || (newValue != null);
     }

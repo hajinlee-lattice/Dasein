@@ -21,14 +21,12 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
     @Autowired
     private CreateFinalEventTable createFinalEventTable;
 
     @Autowired
     private CreateInitialEventTable createInitialEventTable;
 
-    @SuppressWarnings("unused")
     @Autowired
     private CreatePropDataInput createPropDataInput;
 
