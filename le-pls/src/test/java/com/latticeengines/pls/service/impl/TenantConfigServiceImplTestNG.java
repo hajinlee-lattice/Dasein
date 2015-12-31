@@ -212,6 +212,45 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
+    @Test(groups = "functional")
+    public void testRemoveDLRestServicePart() {
+        String url = "https://10.41.1.187:8081/DLRestService";
+        String newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "https://10.41.1.187:8081/DLRestService/";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "https://10.41.1.187:8081/dlrestservice";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "https://10.41.1.187:8081/dlrestservice/";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "https://10.41.1.187:8081/";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "https://10.41.1.187:8081";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "https://10.41.1.187:8081");
+
+        url = "/";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "");
+
+        url = "";
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, "");
+
+        url = null;
+        newUrl = configService.removeDLRestServicePart(url);
+        Assert.assertEquals(newUrl, null);
+    }
+
     private void testOverwriteFlag(String flagId, Boolean value) {
         CustomerSpace space = CustomerSpace.parse(PLSTenantId);
         FeatureFlagClient.setEnabled(space, flagId, value);

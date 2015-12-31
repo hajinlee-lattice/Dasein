@@ -105,6 +105,20 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     }
 
     @Override
+    public String removeDLRestServicePart(String dlRestServiceUrl) {
+        String newUrl = dlRestServiceUrl;
+        if (newUrl != null && newUrl.length() > 0) {
+            int index = newUrl.toLowerCase().indexOf("/dlrestservice");
+            if (index > -1) {
+                newUrl = newUrl.substring(0, index);
+            } else if (newUrl.charAt(newUrl.length() - 1) == '/') {
+                newUrl = newUrl.substring(0, newUrl.length() - 1);
+            }
+        }
+        return newUrl;
+    }
+
+    @Override
     public TenantDocument getTenantDocument(String tenantId) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);

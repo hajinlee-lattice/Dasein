@@ -15,6 +15,10 @@
                     <td>{{TenantName}}</td>
                 </tr>
                 <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_DATALOADER_URL_LABEL')}}</th>
+                    <td>{{DataLoaderUrl}}<span data-ng-show="DataLoaderUrlError != null" class="error">{{DataLoaderUrlError}}</span></td>
+                </tr>
+                <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_DATALOADER_TENANT_NAME_LABEL')}}</th>
                     <td>{{DataLoaderTenantName}}</td>
                 </tr>

@@ -10,6 +10,8 @@ public interface TenantConfigService {
 
     String getDLRestServiceAddress(String tenantId);
 
+    String removeDLRestServicePart(String dlRestServiceUrl);
+
     TenantDocument getTenantDocument(String tenantId);
 
     FeatureFlagValueMap getFeatureFlags(String tenantId);

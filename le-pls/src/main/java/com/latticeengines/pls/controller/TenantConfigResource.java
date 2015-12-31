@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -35,6 +36,15 @@ public class TenantConfigResource {
     @ApiOperation(value = "Get tenant's feature flags")
     public FeatureFlagValueMap getFeatureFlags(@RequestParam(value = "tenantId") String tenantId) {
         return configService.getFeatureFlags(tenantId);
+    }
+
+    @RequestMapping(value = "/dataloaderurl", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant's DataLoader url")
+    public String getDataLoaderUrl(@RequestParam(value = "tenantId") String tenantId) throws Exception {
+        String url = configService.getDLRestServiceAddress(tenantId);
+        url = configService.removeDLRestServicePart(url);
+        return JsonUtils.serialize(url);
     }
 
     // this class can bubble up the schema to swagger UI

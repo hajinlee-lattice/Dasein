@@ -2,9 +2,10 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
+    'mainApp.config.services.ConfigService',
     'mainApp.core.services.SessionService'
 ])
-.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
+.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
@@ -21,6 +22,14 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
         alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
     };
+
+    ConfigService.GetCurrentDataLoaderUrl().then(function (data) {
+        if (data.success && data.resultObj != null) {
+            $scope.DataLoaderUrl = data.resultObj;
+        } else {
+            $scope.DataLoaderUrlError = data.resultErrors;
+        }
+    });
 })
 .directive('adminInfoSummaryWidget', function () {
     return {

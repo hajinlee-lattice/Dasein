@@ -204,7 +204,35 @@ angular.module('mainApp.config.services.ConfigService', [
             };
             deferred.resolve(result);
         });
-        
+
+        return deferred.promise;
+    };
+
+    this.GetCurrentDataLoaderUrl = function () {
+        var deferred = $q.defer();
+
+        $http({
+            method: "GET",
+            url: "/pls/config/dataloaderurl?tenantId=" + BrowserStorageUtility.getClientSession().Tenant.Identifier
+        })
+        .success(function(data) {
+            var result = {
+                success: true,
+                resultObj: data,
+                resultErrors: null
+            };
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString("GET_DATALOADER_URL_ERROR")
+            };
+            deferred.resolve(result);
+        });
+
         return deferred.promise;
     };
 });
