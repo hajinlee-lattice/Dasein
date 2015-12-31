@@ -20,7 +20,7 @@ class SqlServerClient():
         result = cur.fetchall()
         return result
 
-    def queryOne(self, SQL, fetchAll=False):
+    def queryOne(self, SQL):
         cur = self.conn.cursor()
         assert cur != None
         cur.execute(SQL)

@@ -9,6 +9,7 @@ import time
 import threading
 import json
 from PlaymakerEnd2End.tools import apitool
+from Libs.dbtool import SqlServerClient
 
 
 
@@ -192,6 +193,113 @@ class Test(unittest.TestCase):
         assert request2.status_code == 200
         self.assertEqual(json.loads(request2.text)['count'], 175)
 
+
+    def testNomalizedScore(self):
+
+        ''' test that if prelead.[Normalized_Score] score exists, return it as likelyhood, if not exist, return prelead.[Likelihood] '''
+
+        # get token for tenant
+        tenant = 'TestAPI_DB_75'
+        key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=TestAPI_DB_75')
+        newToken = 'bearer ' + apitool.getAccessToken(key, tenant)
+
+        # use api to request one prelead
+        url = self.apiUrl + "/recommendations"
+        params = {'start':'0', 'offset':'0', 'maximum':'1', 'destination':'SFDC'}
+        request_old = requests.get(url, headers={'Authorization':self.token}, params=params)
+        request_new = requests.get(url, headers={'Authorization':newToken}, params=params)
+        assert request_old.status_code == 200
+        assert request_new.status_code == 200
+
+        prelead_id_old = str(json.loads(request_old.text)['records'][0]['ID'])
+        prelead_id_new = str(json.loads(request_new.text)['records'][0]['ID'])
+        likelyhood_old_from_api = json.loads(request_old.text)['records'][0]['Likelihood']
+        likelyhood_new_from_api = json.loads(request_new.text)['records'][0]['Likelihood']
+
+        # query the database using the preleadId
+        db_old = SqlServerClient(server='10.41.1.193\SQL2008R2', database='TestAPI_DB', user='playmaker', password='playmaker')
+        db_new = SqlServerClient(server='10.41.1.193\SQL2008R2', database='TestAPI_DB_75', user='playmaker', password='playmaker')
+        likelyhood_old_from_db = db_old.queryOne('select * from prelead where prelead_id=' + prelead_id_old).Likelihood
+        likelyhood_new_from_db = db_new.queryOne('select * from prelead where prelead_id=' + prelead_id_new).Normalized_Score
+        db_old.disconnect()
+        db_new.disconnect()
+
+        print 'likelyhood_new_from_api=' + str(likelyhood_new_from_api)
+        print 'likelyhood_new_from_db=' + str(likelyhood_new_from_db)
+        print 'likelyhood_old_from_api=' + str(likelyhood_old_from_api)
+        print 'likelyhood_old_from_db=' + str(likelyhood_old_from_db)
+
+        # compare the value between api and db
+        assert likelyhood_new_from_api == likelyhood_new_from_db
+        assert likelyhood_old_from_api == likelyhood_old_from_db
+
+    def testEVPlayRevenue(self):
+
+        ''' test that for an EV play, revenue = Prelead.[Monetary_Value] * Prelead.[Likelihood] / 100 '''
+
+        # get token for tenant
+        tenant = 'TestAPI_DB_75'
+        key = apitool.getOneTimeKey(tenant, 'jdbc:sqlserver://10.41.1.193\\SQL2008R2;databaseName=TestAPI_DB_75')
+        token = 'bearer ' + apitool.getAccessToken(key, tenant)
+
+        # use api to request one prelead
+        url = self.apiUrl + "/recommendations"
+        params = {'start':'0', 'offset':'0', 'maximum':'1', 'destination':'SFDC'}
+        headers = {'Authorization':token}
+        request = requests.get(url, headers=headers, params=params)
+        assert request.status_code == 200
+
+        monetaryValueFromAPI = float(json.loads(request.text)['records'][0]['MonetaryValue'])
+        preleadId = str(json.loads(request.text)['records'][0]['ID'])
+
+        print 'monetary value is: ' + str(monetaryValueFromAPI)
+        print 'prelead Id is: ' + preleadId
+
+        # query the database using the preleadId
+        db = SqlServerClient(server='10.41.1.193\SQL2008R2', database='TestAPI_DB_75', user='playmaker', password='playmaker')
+        record = db.queryOne('select * from prelead where prelead_id=' + preleadId)
+        likelyhood = record.Likelihood
+        monetaryValueFromDB = record.Monetary_Value
+        db.disconnect()
+
+        print 'monetary value from DB: ' + str(monetaryValueFromDB)
+        print 'likelyhood from DB: ' + str(likelyhood)
+
+        # compare the value between api and db
+        assert monetaryValueFromAPI == float(likelyhood) * float(monetaryValueFromDB) / 100
+
+
+    def testRevenueBackwordCompatibility(self):
+
+        ''' test that prior EV modeling, revenue = Prelead.[Likelihood] / 100 * Play.[Avg_Revenue_Per_Account] '''
+
+        # use api to request one prelead
+        url = self.apiUrl + "/recommendations"
+        params = {'start':'0', 'offset':'0', 'maximum':'1', 'destination':'SFDC'}
+        headers = {'Authorization':self.token}
+        request = requests.get(url, headers=headers, params=params)
+        assert request.status_code == 200
+
+        monetaryValueFromAPI = float(json.loads(request.text)['records'][0]['MonetaryValue'])
+        preleadId = str(json.loads(request.text)['records'][0]['ID'])
+        playId = str(json.loads(request.text)['records'][0]['PlayID'])
+
+        print 'monetary value is: ' + str(monetaryValueFromAPI)
+        print 'prelead Id is: ' + preleadId
+
+        # query the database using the preleadId
+        db = SqlServerClient(server='10.41.1.193\SQL2008R2', database='TestAPI_DB', user='playmaker', password='playmaker')
+        prelead = db.queryOne('select * from prelead where prelead_id=' + preleadId)
+        play = db.queryOne('select * from play where play_id=' + playId)
+        likelyhood = prelead.Likelihood
+        monetaryValueFromDB = play.Avg_Revenue_Per_Account
+        db.disconnect()
+
+        print 'monetary value from DB: ' + str(monetaryValueFromDB)
+        print 'likelyhood from DB: ' + str(likelyhood)
+
+        # compare the value between api and db
+        assert monetaryValueFromAPI == float(likelyhood) * float(monetaryValueFromDB) / 100
 
 if __name__ == "__main__":
     unittest.main()
