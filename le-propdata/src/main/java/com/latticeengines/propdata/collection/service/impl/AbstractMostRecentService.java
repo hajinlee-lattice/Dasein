@@ -21,7 +21,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
     }
 
     @Override
-    protected String createStageTableSql() {
+    protected void createStageTable() {
         String sql = "SELECT TOP 0 * INTO [" + getStageTableName() + "] FROM ["
                 + rawCollectedSourceTableName(getSource()) + "] \n";
         sql += " \n CREATE CLUSTERED INDEX IX_PKS ON [" + getStageTableName() + "] ( [";
@@ -29,7 +29,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
         sql += "] ) \n";
         sql += " CREATE INDEX IX_TIME ON [" + getStageTableName() + "] ( [";
         sql += getSource().getTimestampField() + "] )";
-        return sql;
+        jdbcTemplateCollectionDB.execute(sql);
     }
 
     private String rawCollectedSourceTableName(MostRecentSource source) {

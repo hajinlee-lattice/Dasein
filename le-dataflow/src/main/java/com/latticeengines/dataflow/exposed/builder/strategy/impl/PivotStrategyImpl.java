@@ -28,13 +28,30 @@ public class PivotStrategyImpl implements PivotStrategy {
     private static final Class<?> DEFAULT_RESULT_CLASS = String.class;
     private static final PivotType DEFAULT_PIVOT_TYPE = PivotType.ANY;
 
-    protected final String keyColumn;
-    protected final String valueColumn;
-    protected final ImmutableSet<String> pivotedKeys;  // the values in the key column can be pivoted
-    protected final ImmutableMap<String, String> columnMap;
-    protected final ImmutableMap<String, Class<?>> resultColumnClassMap; // class of each result column
-    protected final Map<String, Serializable> defaultValues;
-    protected final ImmutableMap<String, PivotType> pivotTypeMap;
+    public final String keyColumn;
+    public final String valueColumn;
+    public final ImmutableSet<String> pivotedKeys;  // the values in the key column can be pivoted
+    public final ImmutableMap<String, String> columnMap;
+    public final ImmutableMap<String, Class<?>> resultColumnClassMap; // class of each result column
+    public final Map<String, Serializable> defaultValues;
+    public final ImmutableMap<String, PivotType> pivotTypeMap;
+
+
+    public static <T extends Serializable> PivotStrategyImpl withColumnMap(String keyColumn,
+                                                                              String valueColumn,
+                                                                              Set<String> pivotedKeys,
+                                                                              Map<String, String> columnMap,
+                                                                              Class<T> resultClass,
+                                                                              PivotType type,
+                                                                              T defaultValue) {
+        return new PivotStrategyImpl(
+                keyColumn, valueColumn, pivotedKeys,
+                columnMap,
+                null, resultClass,
+                null, type,
+                null, defaultValue
+        );
+    }
 
     public static <T extends Serializable> PivotStrategyImpl any(String keyColumn,
                                                                  String valueColumn,

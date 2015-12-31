@@ -169,7 +169,7 @@ public abstract class AbstractRefreshService
         try {
             LoggingUtils.logInfo(getLogger(), progress, "Create a clean stage table " + stageTableName);
             dropJdbcTableIfExists(stageTableName);
-            jdbcTemplateCollectionDB.execute(createStageTableSql());
+            createStageTable();
 
             DbCreds.Builder builder = new DbCreds.Builder();
             builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
@@ -210,6 +210,11 @@ public abstract class AbstractRefreshService
 
     protected String getStageTableName() { return getSource().getSqlTableName() + "_stage"; }
 
-    abstract protected String createStageTableSql();
+    protected void createStageTable() {
+        String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());
+        for (String statement: statements) {
+            jdbcTemplateCollectionDB.execute(statement);
+        }
+    }
 
 }

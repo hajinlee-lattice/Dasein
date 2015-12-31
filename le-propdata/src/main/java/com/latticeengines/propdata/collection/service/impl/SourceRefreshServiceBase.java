@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.Source;
 import com.latticeengines.propdata.collection.util.LoggingUtils;
@@ -49,6 +50,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")

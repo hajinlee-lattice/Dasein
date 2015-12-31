@@ -1,14 +1,12 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,26 +82,12 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
     }
 
     @Override
-    protected String createStageTableSql() {
-        List<Map<String, Object>> results = jdbcTemplateCollectionDB.queryForList(
-                "SELECT [Feature], [ColumnType] FROM [FeaturePivotMapping]");
-
-        String sql = "CREATE TABLE [" + getStageTableName() +" ] ( \n";
-        sql += "[URL] NVARCHAR(500) NOT NULL, \n";
-
-        List<String> columns = new ArrayList<>();
-        for (Map<String, Object> result: results) {
-            String feature = (String) result.get("Feature");
-            String type = (String) result.get("ColumnType");
-            columns.add("[" + feature + "] " + type + " NULL");
-        }
-        sql += StringUtils.join(columns, ", \n");
-        sql += ",\n [" + getSource().getTimestampField() + "] [DateTime] NOT NULL) " +
-                "ON [PRIMARY] TEXTIMAGE_ON [PRIMARY] \n";
-        sql += "CREATE CLUSTERED INDEX IX_URLFeature ON [Feature_Pivoted_Source_stage] ([URL]) \n";
-        sql += "CREATE CLUSTERED INDEX IX_TIME ON [Feature_Pivoted_Source_stage] ([Timestamp])";
-
-        return sql;
+    protected void createStageTable() {
+        super.createStageTable();
+        jdbcTemplateCollectionDB.execute(
+                "CREATE CLUSTERED INDEX IX_URLFeature ON [" + getStageTableName() + "] ([URL])");
+        jdbcTemplateCollectionDB.execute(
+                "CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] ([Timestamp])");
     }
 
 

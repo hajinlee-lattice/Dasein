@@ -183,7 +183,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
         }
 
-        public Node pivot(FieldList groupyByFields, PivotStrategy pivotStrategy) {
+        public Node pivot(String[] groupyByFields, PivotStrategy pivotStrategy) {
             return new Node(builder.register(new PivotOperation(identifier, groupyByFields, pivotStrategy, builder)), builder);
         }
 

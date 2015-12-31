@@ -24,6 +24,7 @@
             </props>
         </property>
     </bean>
+
     <bean id="transactionManagerPropDataCollectionProgress" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
           p:sessionFactory-ref="sessionFactoryPropDataCollectionProgress">
         <qualifier value="propDataCollectionProgress" />

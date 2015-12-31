@@ -111,7 +111,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.any(
                         "Feature", "Value", features, Integer.class, 0);
-                return feature.pivot(new FieldList("Domain"), mapper);
+                return feature.pivot(new String[]{ "Domain" }, mapper);
             }
         });
 
@@ -149,7 +149,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.max(
                         "Feature", "Value", features, Integer.class, null);
-                return feature.pivot(new FieldList("Domain"), mapper);
+                return feature.pivot(new String[]{ "Domain" }, mapper);
             }
         });
 
@@ -180,7 +180,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.count("Feature", "Value", features);
-                return feature.pivot(new FieldList("Domain"), mapper);
+                return feature.pivot(new String[]{ "Domain" }, mapper);
             }
         });
 
@@ -211,7 +211,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.exists("Feature", features);
-                return feature.pivot(new FieldList("Domain"), mapper);
+                return feature.pivot(new String[]{ "Domain" }, mapper);
             }
         });
 

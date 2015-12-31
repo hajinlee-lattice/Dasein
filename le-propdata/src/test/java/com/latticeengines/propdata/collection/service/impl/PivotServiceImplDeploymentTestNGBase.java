@@ -34,7 +34,7 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
 
     @BeforeMethod(groups = "deployment")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTest");
+        hdfsPathBuilder.changeHdfsPodId("DeploymentTestPivot");
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
@@ -46,7 +46,6 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
 
     @Test(groups = "deployment")
     public void testWholeProgress() {
-        truncateDestTable();
         uploadBaseAvro();
 
         RefreshProgress progress = createNewProgress(new Date());
@@ -57,12 +56,6 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
         verifyResultTable(progress);
 
         cleanupProgressTables();
-    }
-
-    private void truncateDestTable() {
-        String tableName = source.getSqlTableName();
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
 
     private void uploadBaseAvro() {

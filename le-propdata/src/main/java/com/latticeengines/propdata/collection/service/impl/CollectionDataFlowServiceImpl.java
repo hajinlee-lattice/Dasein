@@ -1,6 +1,8 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -9,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.collection.dataflow.merge.MergeDataFlowParameters;
 import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
@@ -42,6 +43,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Autowired
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
     private HGData hgData;
@@ -77,19 +81,21 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     }
 
     @Override
-    public void executePivotData(PivotedSource source, String baseVersion, DataFlowBuilder.FieldList groupByFields,
-                                 PivotStrategyImpl pivotStrategy, String uid) {
+    public void executePivotData(PivotedSource source, String baseVersion, String uid) {
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
         Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(source.getBaseSource(), baseVersion);
         Map<String, Table> sources = new HashMap<>();
-        sources.put(baseTable.getName(), baseTable);
+        List<String> baseTables = new ArrayList<>();
+        sources.put(source.getBaseSource().getSourceName(), baseTable);
+        baseTables.add(source.getBaseSource().getSourceName());
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
-        parameters.setPivotStrategy(pivotStrategy);
-        parameters.setGroupbyFields(groupByFields);
-        parameters.setBaseTableName(baseTable.getName());
+        parameters.setTimestampField(source.getTimestampField());
+        parameters.setColumns(sourceColumnEntityMgr.getConfigurableColumns(source));
+        parameters.setBaseTables(baseTables);
+        parameters.setJoinFields(source.getPrimaryKey());
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);

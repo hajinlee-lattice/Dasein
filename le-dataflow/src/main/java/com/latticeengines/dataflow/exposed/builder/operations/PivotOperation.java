@@ -20,12 +20,12 @@ public class PivotOperation extends Operation {
     private final String prior;
     private PivotStrategy pivotStrategy;
 
-    public PivotOperation(String prior, DataFlowBuilder.FieldList groupyByFields, PivotStrategy pivotStrategy,
+    public PivotOperation(String prior, String[] groupyByFields, PivotStrategy pivotStrategy,
                           CascadingDataFlowBuilder builder) {
         this(prior, groupyByFields, pivotStrategy, true, builder);
     }
 
-    public PivotOperation(String prior, DataFlowBuilder.FieldList groupyByFields, PivotStrategy pivotStrategy,
+    public PivotOperation(String prior, String[] groupyByFields, PivotStrategy pivotStrategy,
                           boolean caseInsensitiveGroupBy, CascadingDataFlowBuilder builder) {
         super(builder);
         this.prior = prior;
@@ -40,9 +40,9 @@ public class PivotOperation extends Operation {
         PivotBuffer buffer = new PivotBuffer(pivotStrategy, new Fields(fieldNames));
 
         List<DataFlowBuilder.FieldMetadata> fieldMetadataList = getMetadata(prior);
-        Fields fieldsWithComparator = new Fields(groupyByFields.getFields());
+        Fields fieldsWithComparator = new Fields(groupyByFields);
         if (caseInsensitiveGroupBy) {
-            List<String> groupByKeys = Arrays.asList(groupyByFields.getFields());
+            List<String> groupByKeys = Arrays.asList(groupyByFields);
             for (DataFlowBuilder.FieldMetadata metadata : fieldMetadataList) {
                 if (groupByKeys.contains(metadata.getFieldName()) && String.class.equals(metadata.getJavaType())) {
                     fieldsWithComparator.setComparator(metadata.getFieldName(), String.CASE_INSENSITIVE_ORDER);
@@ -54,14 +54,14 @@ public class PivotOperation extends Operation {
         this.pipe = new Every(groupby, buffer, Fields.RESULTS);
     }
 
-    private List<DataFlowBuilder.FieldMetadata> constructMetadata(DataFlowBuilder.FieldList groupyByFields) {
+    private List<DataFlowBuilder.FieldMetadata> constructMetadata(String[] groupyByFields) {
         List<DataFlowBuilder.FieldMetadata> originalMetadataList = getMetadata(prior);
         List<DataFlowBuilder.FieldMetadata> finalMetadataList =  new ArrayList<>();
         Set<String> resultColumns = new HashSet<>();
         for (String column: pivotStrategy.getResultColumns()) {
             resultColumns.add(column.toLowerCase());
         }
-        List<String> uniqueColumns = Arrays.asList(groupyByFields.getFields());
+        List<String> uniqueColumns = Arrays.asList(groupyByFields);
         for (DataFlowBuilder.FieldMetadata field: originalMetadataList) {
             if (uniqueColumns.contains(field.getFieldName())) {
                 if (resultColumns.contains(field.getFieldName().toLowerCase())) {

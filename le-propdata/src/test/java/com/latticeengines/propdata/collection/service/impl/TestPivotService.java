@@ -43,6 +43,6 @@ public class TestPivotService extends AbstractPivotService implements PivotServi
     PivotStrategyImpl getPivotStrategy() { return null; }
 
     @Override
-    public String createStageTableSql() { return ""; }
+    public void createStageTable() { }
 
 }

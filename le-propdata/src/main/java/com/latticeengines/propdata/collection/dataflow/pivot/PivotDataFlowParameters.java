@@ -1,36 +1,30 @@
 package com.latticeengines.propdata.collection.dataflow.pivot;
 
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
+import java.util.List;
+
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
 
 public class PivotDataFlowParameters extends DataFlowParameters {
 
-    private PivotStrategyImpl pivotStrategy;
-    private DataFlowBuilder.FieldList groupbyFields;
-    private String baseTableName;
+    private String timestampField;
+    private List<String> baseTables;
+    private String[] joinFields;
+    private List<SourceColumn> columns;
 
-    public PivotStrategyImpl getPivotStrategy() {
-        return pivotStrategy;
-    }
+    public String getTimestampField() { return timestampField; }
 
-    public void setPivotStrategy(PivotStrategyImpl pivotStrategy) {
-        this.pivotStrategy = pivotStrategy;
-    }
+    public void setTimestampField(String timestampField) { this.timestampField = timestampField; }
 
-    public DataFlowBuilder.FieldList getGroupbyFields() {
-        return groupbyFields;
-    }
+    public List<String> getBaseTables() { return baseTables; }
 
-    public void setGroupbyFields(DataFlowBuilder.FieldList groupbyFields) {
-        this.groupbyFields = groupbyFields;
-    }
+    public void setBaseTables(List<String> baseTables) { this.baseTables = baseTables; }
 
-    public String getBaseTableName() {
-        return baseTableName;
-    }
+    public List<SourceColumn> getColumns() { return columns; }
 
-    public void setBaseTableName(String baseTableName) {
-        this.baseTableName = baseTableName;
-    }
+    public void setColumns(List<SourceColumn> columns) { this.columns = columns; }
+
+    public String[] getJoinFields() { return joinFields; }
+
+    public void setJoinFields(String[] joinFields) { this.joinFields = joinFields; }
 }

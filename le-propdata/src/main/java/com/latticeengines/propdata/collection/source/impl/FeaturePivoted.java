@@ -31,7 +31,7 @@ public class FeaturePivoted implements PivotedSource, DomainBased {
     public String getTimestampField() { return "Timestamp"; }
 
     @Override
-    public String getDomainField() {  return "Domain"; }
+    public String getDomainField() {  return "URL"; }
 
     @Override
     public Source getBaseSource() { return baseSource; }

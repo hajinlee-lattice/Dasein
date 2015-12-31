@@ -44,8 +44,8 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
     }
 
     @Override
-    protected String createStageTableSql() {
-        return "CREATE TABLE [" + getStageTableName() + "](\n" +
+    protected void createStageTable() {
+        String sql = "CREATE TABLE [" + getStageTableName() + "](\n" +
                 "\t[Domain] [nvarchar](255) NOT NULL,\n" +
                 "\t[Supplier_Name] [nvarchar](255) NULL,\n" +
                 "\t[Segment_Name] [nvarchar](255) NULL,\n" +
@@ -58,5 +58,6 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
                 "\t[Location_Count] [INT] NULL,\n" +
                 "\t[Max_Location_Intensity] [INT] NULL)\n" +
                 "CREATE INDEX IX_DOMAIN ON [\" + getStageTableName() + \"] ([Domain] ASC)\n";
+        jdbcTemplateCollectionDB.execute(sql);
     }
 }
