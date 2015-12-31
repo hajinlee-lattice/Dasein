@@ -105,15 +105,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
     private void cleanupZK() {
         // use Baton to create a tenant in ZK
-        batonService.deleteTenant(contractId, tenantId);
-        try {
-            if (ContractLifecycleManager.exists(contractId)) {
-                ContractLifecycleManager.delete(contractId);
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-
+        batonService.deleteContract(contractId);
         try {
             Assert.assertFalse(ContractLifecycleManager.exists(contractId));
         } catch (Exception e) {
