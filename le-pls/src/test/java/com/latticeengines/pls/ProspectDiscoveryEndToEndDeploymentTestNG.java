@@ -146,6 +146,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
         
+        System.out.println("Workflow app id = " + targetMarket.getApplicationId());
         waitForWorkflowStatus(targetMarket.getApplicationId(), true);
         
         boolean exception = false;
@@ -167,7 +168,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             Map<String, String> map = (Map<String, String>) r;
             Report report = restTemplate.getForObject(String.format("%s/pls/reports/%s", getRestAPIHostPort(), map.get("name")), Report.class);
             String reportContent = new String(report.getJson().getPayload());
-            System.out.println(String.format("Report %s with payload:\n", report.getPurpose(), reportContent));
+            System.out.println(String.format("Report %s:%s with payload:\n%s\n", report.getName(), report.getPurpose(), reportContent));
         }
     }
 
