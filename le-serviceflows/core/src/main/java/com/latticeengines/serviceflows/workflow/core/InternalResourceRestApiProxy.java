@@ -10,7 +10,6 @@ import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(InternalResourceRestApiProxy.class);
 
     private String internalResourceHostPort;

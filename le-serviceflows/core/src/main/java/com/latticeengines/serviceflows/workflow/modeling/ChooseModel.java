@@ -110,6 +110,10 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
             chosenModel = chooseModelWithHighestLift(validModels);
         }
 
+        if (chosenModel != null) {
+            double avgProbability = (double) chosenModel.getTotalConversionCount() / (double) chosenModel.getTotalRowCount();
+            executionContext.putDouble(MODEL_AVG_PROBABILITY, avgProbability);
+        }
         if (chosenModelIdAndEventColumn == null) {
             chosenModelIdAndEventColumn = Maps.immutableEntry(chosenModel.getId(),
                     modelApplicationIdToEventColumn.get(chosenModel.getApplicationId()));

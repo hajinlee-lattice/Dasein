@@ -34,6 +34,7 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
     protected static final String MATCH_TABLE = "MATCH_TABLE";
     protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
+    protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
     protected static final String SCORING_RESULT_TABLE = "SCORING_RESULT_TABLE";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
     protected static final String SCORING_SOURCE_DIR = "SCORING_SOURCE_DIR";
@@ -120,6 +121,15 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
     protected String getStringValueFromContext(String key) {
         try {
             return executionContext.getString(key);
+        } catch (ClassCastException e) {
+            return null;
+        }
+        
+    }
+
+    protected Double getDoubleValueFromContext(String key) {
+        try {
+            return executionContext.getDouble(key);
         } catch (ClassCastException e) {
             return null;
         }

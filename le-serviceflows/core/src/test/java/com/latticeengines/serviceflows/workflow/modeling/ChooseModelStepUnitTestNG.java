@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.batch.item.ExecutionContext;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,6 +26,8 @@ public class ChooseModelStepUnitTestNG {
     public void testChooseBestModelIdAndEventColumn() {
         ChooseModel chooseModel = new ChooseModel();
 
+        ExecutionContext executionContext = mock(ExecutionContext.class);
+        chooseModel.setExecutionContext(executionContext);
         List<ModelSummary> models = setupModels();
         Map<String, String> modelApplicationIdToEventColumn = new HashMap<>();
         for (ModelSummary model : models) {
@@ -41,6 +44,8 @@ public class ChooseModelStepUnitTestNG {
     @Test(groups = "unit")
     public void testNoDefaultTargetMarketExistsNoValidModelsFallbacktoHighestLift() {
         ChooseModel chooseModel = new ChooseModel();
+        ExecutionContext executionContext = mock(ExecutionContext.class);
+        chooseModel.setExecutionContext(executionContext);
         ChooseModelStepConfiguration configuration = new ChooseModelStepConfiguration();
         chooseModel.setConfiguration(configuration);
         TargetMarket targetMarket = new TargetMarket();
@@ -86,6 +91,9 @@ public class ChooseModelStepUnitTestNG {
 
     private Entry<String, String> chooseFallbackToDefaultTargetMarket(TargetMarket defaultTargetMarket) {
         ChooseModel chooseModel = new ChooseModel();
+        
+        ExecutionContext executionContext = mock(ExecutionContext.class);
+        chooseModel.setExecutionContext(executionContext);
         InternalResourceRestApiProxy proxy = mock(InternalResourceRestApiProxy.class);
         chooseModel.setProxy(proxy);
         ChooseModelStepConfiguration configuration = new ChooseModelStepConfiguration();
@@ -115,6 +123,7 @@ public class ChooseModelStepUnitTestNG {
         modelInvalidLowRoc.setApplicationId("modelInvalidLowRoc");
         modelInvalidLowRoc.setTop20PercentLift(2d);
         modelInvalidLowRoc.setTotalConversionCount(ChooseModel.MINIMUM_POSITIVE_EVENTS);
+        modelInvalidLowRoc.setTotalRowCount(10000L);
         modelInvalidLowRoc.setRocScore(ChooseModel.MINIMUM_ROC - 0.1);
         models.add(modelInvalidLowRoc);
 
@@ -123,6 +132,7 @@ public class ChooseModelStepUnitTestNG {
         modelInvalidLowConversion.setApplicationId("modelInvalidLowConversion");
         modelInvalidLowConversion.setTop20PercentLift(3d);
         modelInvalidLowConversion.setTotalConversionCount(ChooseModel.MINIMUM_POSITIVE_EVENTS - 1);
+        modelInvalidLowConversion.setTotalRowCount(10000L);
         modelInvalidLowConversion.setRocScore(ChooseModel.MINIMUM_ROC);
         models.add(modelInvalidLowConversion);
 
@@ -131,6 +141,7 @@ public class ChooseModelStepUnitTestNG {
         modelInvalidHighestLift.setApplicationId("modelInvalidHighestLift");
         modelInvalidHighestLift.setTop20PercentLift(5d);
         modelInvalidHighestLift.setTotalConversionCount(ChooseModel.MINIMUM_POSITIVE_EVENTS - 1);
+        modelInvalidHighestLift.setTotalRowCount(10000L);
         modelInvalidHighestLift.setRocScore(ChooseModel.MINIMUM_ROC - 0.1);
         models.add(modelInvalidHighestLift);
 
@@ -146,6 +157,7 @@ public class ChooseModelStepUnitTestNG {
         modelValidFirst.setApplicationId("modelValidFirst");
         modelValidFirst.setTop20PercentLift(3d);
         modelValidFirst.setTotalConversionCount(ChooseModel.MINIMUM_POSITIVE_EVENTS);
+        modelValidFirst.setTotalRowCount(10000L);
         modelValidFirst.setRocScore(ChooseModel.MINIMUM_ROC);
         models.add(modelValidFirst);
 
@@ -154,6 +166,7 @@ public class ChooseModelStepUnitTestNG {
         modelValidSecond.setApplicationId("modelValidSecond");
         modelValidSecond.setTop20PercentLift(2d);
         modelValidSecond.setTotalConversionCount(ChooseModel.MINIMUM_POSITIVE_EVENTS);
+        modelValidSecond.setTotalRowCount(10000L);
         modelValidSecond.setRocScore(ChooseModel.MINIMUM_ROC);
         models.add(modelValidSecond);
 
