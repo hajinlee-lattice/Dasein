@@ -21,7 +21,7 @@ public abstract class RegisterReport {
     private TargetMarketStepConfiguration configuration;
     private RestTemplate restTemplate;
     
-    public abstract ObjectNode buildJson(GenericRecord stats);
+    public abstract ObjectNode buildJson(List<GenericRecord> records, Object[] params);
 
     public void setConfiguration(TargetMarketStepConfiguration configuration) {
         this.configuration = configuration;
@@ -30,10 +30,10 @@ public abstract class RegisterReport {
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-
-    public void execute(String reportName, ReportPurpose purpose) {
-        GenericRecord stats = retrieveStats(reportName);
-        ObjectNode json = buildJson(stats);
+    
+    public void execute(String reportName, ReportPurpose purpose, Object[] params) {
+        List<GenericRecord> records = retrieveStats(reportName);
+        ObjectNode json = buildJson(records, params);
         Report report = createReport(json.toString(), purpose);
 
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(
@@ -42,7 +42,7 @@ public abstract class RegisterReport {
                 configuration.getCustomerSpace().toString());
     }
 
-    protected GenericRecord retrieveStats(String reportName) {
+    protected List<GenericRecord> retrieveStats(String reportName) {
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), reportName);
         Table table = restTemplate.getForObject(url, Table.class);
@@ -61,7 +61,7 @@ public abstract class RegisterReport {
             throw new RuntimeException("Failed to calculate report summary - zero records in avro file.");
         }
 
-        return records.get(0);
+        return records;
     }
 
     protected Report createReport(String json, ReportPurpose purpose) {

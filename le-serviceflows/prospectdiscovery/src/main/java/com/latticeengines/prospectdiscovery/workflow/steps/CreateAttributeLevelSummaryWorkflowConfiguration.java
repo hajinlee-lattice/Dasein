@@ -33,11 +33,13 @@ public class CreateAttributeLevelSummaryWorkflowConfiguration extends WorkflowCo
 
         public Builder targetMarket(TargetMarket targetMarket) {
             targetMarketConfiguration.setTargetMarket(targetMarket);
+            attrLevelSummaryDataFlows.setTargetMarket(targetMarket);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             targetMarketConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            attrLevelSummaryDataFlows.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
         
@@ -68,6 +70,11 @@ public class CreateAttributeLevelSummaryWorkflowConfiguration extends WorkflowCo
         
         public Builder eventColumnName(String eventColumnName) {
             attrLevelSummaryDataFlows.setEventColumnName(eventColumnName);
+            return this;
+        }
+        
+        public Builder avgProbability(Double avgProbability) {
+            attrLevelSummaryDataFlows.setAvgProbability(avgProbability);
             return this;
         }
 

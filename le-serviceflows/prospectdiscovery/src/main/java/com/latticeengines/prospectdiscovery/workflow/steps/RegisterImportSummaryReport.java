@@ -22,7 +22,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
     public void execute() {
         registerImportSummary.setConfiguration(configuration);
         registerImportSummary.setRestTemplate(restTemplate);
-        registerImportSummary.execute("CreateImportSummary", ReportPurpose.IMPORT_SUMMARY);
+        registerImportSummary.execute("CreateImportSummary", ReportPurpose.IMPORT_SUMMARY, null);
     }
     
     public RegisterReport getReportRegistrator() {
@@ -31,7 +31,8 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
 
     private class RegisterImportSummary extends RegisterReport {
 
-        public ObjectNode buildJson(GenericRecord stats) {
+        public ObjectNode buildJson(List<GenericRecord> records, Object[] params) {
+            GenericRecord stats = records.get(0);
             ObjectNode json = new ObjectMapper().createObjectNode();
 
             // accounts

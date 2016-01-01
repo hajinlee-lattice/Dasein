@@ -60,6 +60,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         public Builder targetMarket(TargetMarket targetMarket) {
             chooseModel.setTargetMarket(targetMarket);
             targetMarketConfiguration.setTargetMarket(targetMarket);
+            attrLevelSummaryDataFlows.setTargetMarket(targetMarket);
             return this;
         }
 
@@ -111,6 +112,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             chooseModel.setInternalResourceHostPort(internalResourceHostPort);
             targetMarketConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            attrLevelSummaryDataFlows.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
