@@ -96,6 +96,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
                 .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                 .eventColumnName("Event_IsWon") //
                 .eventTableName("MatchedTable") //
+                .avgProbability(0.01) //
                 .build();
 
         return workflowConfig;
