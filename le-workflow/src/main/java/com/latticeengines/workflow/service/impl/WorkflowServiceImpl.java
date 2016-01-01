@@ -9,14 +9,11 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -36,14 +33,13 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.WorkflowAppContext;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.entitymgr.WorkflowAppContextEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
@@ -73,6 +69,9 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Autowired
     private WorkflowAppContextEntityMgr workflowAppContextEntityMgr;
 
+    @Autowired
+    private WorkflowExecutionCache workflowExecutionCache;
+    
     @Override
     public List<String> getNames() {
         return new ArrayList<String>(jobRegistry.getJobNames());
@@ -184,65 +183,20 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
-        JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
-        JobInstance jobInstance = jobExecution.getJobInstance();
-        WorkflowStatus workflowStatus = getStatus(workflowId);
-
-        com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-        job.setId(workflowId.getId());
-        job.setJobStatus(getJobStatusFromBatchStatus(workflowStatus.getStatus()));
-        job.setStartTimestamp(workflowStatus.getStartTime());
-        if (job.getJobStatus() == JobStatus.CANCELLED || job.getJobStatus() == JobStatus.COMPLETED
-                || job.getJobStatus() == JobStatus.FAILED) {
-            job.setEndTimestamp(workflowStatus.getEndTime());
-        }
-
-        job.setJobType(jobInstance.getJobName());
-
-        job.setSteps(getJobSteps(jobExecution));
-
-        return job;
+        return workflowExecutionCache.getJob(workflowId);
     }
+    
+    @Override
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
+        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
-    private List<JobStep> getJobSteps(JobExecution jobExecution) {
-        List<JobStep> steps = new ArrayList<>();
-
-        for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
-            JobStep jobStep = new JobStep();
-            jobStep.setJobStepType(stepExecution.getStepName());
-            jobStep.setStepStatus(getJobStatusFromBatchStatus(stepExecution.getStatus()));
-            jobStep.setStartTimestamp(stepExecution.getStartTime());
-            jobStep.setEndTimestamp(stepExecution.getEndTime());
-            steps.add(jobStep);
+        try {
+            jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
+        } catch (Exception e) {
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(), e.getMessage()));
         }
 
-        return steps;
-    }
-
-    private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {
-        JobStatus jobStatus = JobStatus.PENDING;
-        switch (batchStatus) {
-        case UNKNOWN:
-            jobStatus = JobStatus.PENDING;
-            break;
-        case STARTED:
-        case STARTING:
-        case STOPPING:
-            jobStatus = JobStatus.RUNNING;
-            break;
-        case COMPLETED:
-            jobStatus = JobStatus.COMPLETED;
-            break;
-        case STOPPED:
-            jobStatus = JobStatus.CANCELLED;
-            break;
-        case ABANDONED:
-        case FAILED:
-            jobStatus = JobStatus.FAILED;
-            break;
-        }
-
-        return jobStatus;
+        return jobs;
     }
 
     private String getWorkflowName(WorkflowExecutionId workflowId) {

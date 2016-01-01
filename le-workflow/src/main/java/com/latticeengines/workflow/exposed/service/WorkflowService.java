@@ -29,4 +29,6 @@ public interface WorkflowService {
     WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception;
 
     Job getJob(WorkflowExecutionId workflowId);
+
+    List<Job> getJobs(List<WorkflowExecutionId> workflowIds);
 }

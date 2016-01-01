@@ -139,12 +139,13 @@ public class WorkflowResource implements WorkflowInterface {
         log.info("Looking for workflows for tenant: " + tenantWithPid.toString());
         List<WorkflowAppContext> workflowAppContexts = workflowAppContextEntityMgr
                 .findWorkflowIdsByTenant(tenantWithPid);
-        List<Job> jobs = new ArrayList<>();
+
+        List<WorkflowExecutionId> workflowIds = new ArrayList<>();
         for (WorkflowAppContext workflowAppContext : workflowAppContexts) {
-            Job job = workflowService.getJob(workflowAppContext.getAsWorkflowId());
-            jobs.add(job);
+            workflowIds.add(workflowAppContext.getAsWorkflowId());
         }
 
+        List<Job> jobs = workflowService.getJobs(workflowIds);
         return jobs;
     }
 
