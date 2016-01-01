@@ -92,6 +92,22 @@ class LP_020200_DL_SeparateSpecsDisabled(StepBase):
 
     lgm.setLoadGroupFunctionality( 'ExtractAnalyticAttributesIntoSourceTable', step_xml )
 
+    # Add to the consolidation
+    ce_ces_xml = lgm.getLoadGroupFunctionality('ConsolidateExtracts', 'ces')
+    ce_ces = etree.fromstring(ce_ces_xml)
+    ce_ws = ce_ces.find('ws')
+    ce_ce_xml = '''
+      <ws>
+            <ce itn="SFDC_Campaign_Import" etr="1" sei="0"/>
+            <ce itn="SFDC_CampaignMember_Import" etr="1" sei="0"/>
+      </ws>
+      '''
+    ce = etree.fromstring(ce_ce_xml)
+    ce_list = list(ce.iter('ce'))
+    for ce in ce_list:
+      ce_ws.append(ce)
+    lgm.setLoadGroupFunctionality( 'ConsolidateExtracts', etree.tostring(ce_ces) )
+
     success = True
 
     return success
