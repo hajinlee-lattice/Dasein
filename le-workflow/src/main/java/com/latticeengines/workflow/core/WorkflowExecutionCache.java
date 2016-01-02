@@ -36,7 +36,7 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
 
-    @Value("${workflowapi.jobs.numthreads}")
+    @Value("${db.workflow.jobs.numthreads}")
     private String numJobThreads;
 
     private static final ConcurrentMapCache cache = new ConcurrentMapCache("workflowExecutionCache");
