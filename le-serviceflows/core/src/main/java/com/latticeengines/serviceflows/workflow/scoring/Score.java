@@ -2,7 +2,6 @@ package com.latticeengines.serviceflows.workflow.scoring;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -45,17 +43,8 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
     }
 
     private void registerTable(String tableName, String targetDir) throws Exception {
-        List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir,
-                new HdfsUtils.HdfsFilenameFilter() {
-
-                    @Override
-                    public boolean accept(String fileName) {
-                        return fileName.endsWith(".avro");
-                    }
-                });
-
         Table eventTable = MetadataConverter.getTable(yarnConfiguration,
-                avroFiles.get(0), null, null);
+                targetDir, null, null);
         eventTable.setName(tableName);
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s",
                 configuration.getMicroServiceHostPort(), configuration.getCustomerSpace(),
