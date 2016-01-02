@@ -16,23 +16,21 @@ public class CreateAttributeLevelSummary extends TypesafeDataFlowBuilder<CreateA
         Node eventTable = addSource(parameters.eventTable);
 
         List<Aggregation> aggregation = new ArrayList<>();
-
         switch (parameters.aggregationType) {
         case "COUNT":
             aggregation.add(new Aggregation(parameters.aggregateColumn, "Count",
                     Aggregation.AggregationType.COUNT));
-            break;
-
-        case "AVG":
-            aggregation.add(new Aggregation(parameters.aggregateColumn, "Average",
-                    Aggregation.AggregationType.AVG));
-            break;
+            return eventTable.groupBy(new FieldList(parameters.groupByColumns), aggregation);
 
         default:
-            break;
+            aggregation.add(new Aggregation(parameters.aggregateColumn, "Average",
+                    Aggregation.AggregationType.AVG));
+            Node aggregated = eventTable.groupBy(new FieldList(parameters.groupByColumns), aggregation);
+            return aggregated.addFunction("Average/AverageProbability", new FieldList("Average", "AverageProbability"), //
+                    new FieldMetadata("Lift", Double.class));
+         
         }
-
-        return eventTable.groupBy(new FieldList(parameters.groupByColumns), aggregation);
+        
     }
 
 }

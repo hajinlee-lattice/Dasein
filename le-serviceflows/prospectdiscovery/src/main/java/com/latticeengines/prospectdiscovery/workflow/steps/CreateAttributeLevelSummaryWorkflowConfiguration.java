@@ -73,11 +73,6 @@ public class CreateAttributeLevelSummaryWorkflowConfiguration extends WorkflowCo
             return this;
         }
         
-        public Builder avgProbability(Double avgProbability) {
-            attrLevelSummaryDataFlows.setAvgProbability(avgProbability);
-            return this;
-        }
-
         public CreateAttributeLevelSummaryWorkflowConfiguration build() {
             runScoreTableDataFlow.microserviceStepConfiguration(microservice);
             targetMarketConfiguration.microserviceStepConfiguration(microservice);

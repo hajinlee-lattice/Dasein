@@ -34,7 +34,7 @@ public class RunAttributeLevelSummaryDataFlows extends
             if (attrLevelParams.aggregationType.equals("COUNT")) {
                 attrs = new String[] { attribute, getEventColumnName() };
             } else {
-                attrs = new String[] { attribute };
+                attrs = new String[] { attribute, "AverageProbability" };
             }
             List<String> groupByCols = Arrays.asList(attrs);
 
@@ -58,7 +58,7 @@ public class RunAttributeLevelSummaryDataFlows extends
         if (aggregationType.equals("COUNT")) {
             return new Object[] { attrs[0], attrs[1] };
         }
-        return new Object[] { attrs[0], getAvgProbability() };
+        return new Object[] { attrs[0] };
     }
 
     private RunAttributeLevelSummaryDataFlow getRunAttributeLevelSummaryDataFlow() {
@@ -87,14 +87,6 @@ public class RunAttributeLevelSummaryDataFlows extends
         return registerAttributeLevelSummaryReport;
     }
     
-    private Double getAvgProbability() {
-        Double avgProbability = getDoubleValueFromContext(MODEL_AVG_PROBABILITY);
-        if (avgProbability == null) {
-            avgProbability = configuration.getAvgProbability();
-        }
-        return avgProbability;
-    }
-
     private String getEventColumnName() {
         String eventColumnName = getStringValueFromContext(EVENT_COLUMN);
         if (eventColumnName == null) {

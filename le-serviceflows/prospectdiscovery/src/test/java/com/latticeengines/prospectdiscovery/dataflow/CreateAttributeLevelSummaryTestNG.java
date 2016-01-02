@@ -13,8 +13,9 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctiona
 public class CreateAttributeLevelSummaryTestNG extends ServiceFlowsFunctionalTestNGBase {
     
     private CreateAttributeLevelSummaryParameters getStandardParameters() {
-        List<String> groupByCols = Arrays.asList(new String[] { "BusinessIndustry", "Event_IsWon" });
-        CreateAttributeLevelSummaryParameters params = new CreateAttributeLevelSummaryParameters("ScoredEventTable", groupByCols, "Id");
+        List<String> groupByCols = Arrays.asList(new String[] { "BusinessIndustry", "AverageProbability" });
+        CreateAttributeLevelSummaryParameters params = new CreateAttributeLevelSummaryParameters("ScoredEventTable", groupByCols, "Probability");
+        params.aggregationType = "AVG";
         return params;
         
     }
@@ -31,7 +32,7 @@ public class CreateAttributeLevelSummaryTestNG extends ServiceFlowsFunctionalTes
 
     @Override
     protected String getIdColumnName(String tableName) {
-        return "Id";
+        return "LatticeAccountID";
     }
 
     @Override

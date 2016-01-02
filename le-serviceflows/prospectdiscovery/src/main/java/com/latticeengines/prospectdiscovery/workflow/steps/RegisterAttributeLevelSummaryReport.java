@@ -100,7 +100,6 @@ public class RegisterAttributeLevelSummaryReport extends BaseWorkflowStep<Target
     static class RegisterAttributeLevelProbSummary extends RegisterReport {
 
         public ObjectNode buildJson(List<GenericRecord> records, Object[] params) {
-            Double avg = (Double) params[1];
             ObjectNode json = new ObjectMapper().createObjectNode();
             
             ArrayNode array = json.putArray("records");
@@ -115,11 +114,11 @@ public class RegisterAttributeLevelSummaryReport extends BaseWorkflowStep<Target
                 if (value == null) {
                     value = "No Value";
                 }
-                Double attrAvg = (Double) record.get("Average");
+                Double lift = (Double) record.get("Lift");
 
                 ObjectNode node = array.addObject();
                 node.put("value", value);
-                node.put("lift", attrAvg/avg);
+                node.put("lift", lift);
             }
             
             return json;
