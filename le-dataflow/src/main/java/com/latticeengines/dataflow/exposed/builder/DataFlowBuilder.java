@@ -363,6 +363,9 @@ public abstract class DataFlowBuilder {
         }
 
         public String[] getFields() {
+            if (fields == null) {
+                return null;
+            }
             return fields.toArray(new String[fields.size()]);
         }
 

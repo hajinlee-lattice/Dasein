@@ -22,6 +22,50 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 
+import cascading.avro.AvroScheme;
+import cascading.flow.Flow;
+import cascading.flow.FlowConnector;
+import cascading.flow.FlowDef;
+import cascading.operation.Aggregator;
+import cascading.operation.Buffer;
+import cascading.operation.Function;
+import cascading.operation.NoOp;
+import cascading.operation.aggregator.Average;
+import cascading.operation.aggregator.Count;
+import cascading.operation.aggregator.First;
+import cascading.operation.aggregator.Last;
+import cascading.operation.aggregator.MaxValue;
+import cascading.operation.aggregator.MinValue;
+import cascading.operation.aggregator.Sum;
+import cascading.operation.buffer.FirstNBuffer;
+import cascading.operation.expression.ExpressionFilter;
+import cascading.operation.expression.ExpressionFunction;
+import cascading.operation.filter.Not;
+import cascading.pipe.Checkpoint;
+import cascading.pipe.CoGroup;
+import cascading.pipe.Each;
+import cascading.pipe.Every;
+import cascading.pipe.GroupBy;
+import cascading.pipe.HashJoin;
+import cascading.pipe.Merge;
+import cascading.pipe.Pipe;
+import cascading.pipe.assembly.AverageBy;
+import cascading.pipe.assembly.Discard;
+import cascading.pipe.assembly.Rename;
+import cascading.pipe.assembly.Retain;
+import cascading.pipe.joiner.BaseJoiner;
+import cascading.pipe.joiner.InnerJoin;
+import cascading.pipe.joiner.LeftJoin;
+import cascading.pipe.joiner.OuterJoin;
+import cascading.pipe.joiner.RightJoin;
+import cascading.property.AppProps;
+import cascading.scheme.hadoop.SequenceFile;
+import cascading.tap.SinkMode;
+import cascading.tap.Tap;
+import cascading.tap.hadoop.GlobHfs;
+import cascading.tap.hadoop.Hfs;
+import cascading.tuple.Fields;
+
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -48,48 +92,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-
-import cascading.avro.AvroScheme;
-import cascading.flow.Flow;
-import cascading.flow.FlowConnector;
-import cascading.flow.FlowDef;
-import cascading.operation.Aggregator;
-import cascading.operation.Buffer;
-import cascading.operation.Function;
-import cascading.operation.NoOp;
-import cascading.operation.aggregator.Average;
-import cascading.operation.aggregator.Count;
-import cascading.operation.aggregator.First;
-import cascading.operation.aggregator.Last;
-import cascading.operation.aggregator.MaxValue;
-import cascading.operation.aggregator.MinValue;
-import cascading.operation.aggregator.Sum;
-import cascading.operation.buffer.FirstNBuffer;
-import cascading.operation.expression.ExpressionFilter;
-import cascading.operation.expression.ExpressionFunction;
-import cascading.operation.filter.Not;
-import cascading.pipe.Checkpoint;
-import cascading.pipe.CoGroup;
-import cascading.pipe.Each;
-import cascading.pipe.Every;
-import cascading.pipe.GroupBy;
-import cascading.pipe.Merge;
-import cascading.pipe.Pipe;
-import cascading.pipe.assembly.Discard;
-import cascading.pipe.assembly.Rename;
-import cascading.pipe.assembly.Retain;
-import cascading.pipe.joiner.BaseJoiner;
-import cascading.pipe.joiner.InnerJoin;
-import cascading.pipe.joiner.LeftJoin;
-import cascading.pipe.joiner.OuterJoin;
-import cascading.pipe.joiner.RightJoin;
-import cascading.property.AppProps;
-import cascading.scheme.hadoop.SequenceFile;
-import cascading.tap.SinkMode;
-import cascading.tap.Tap;
-import cascading.tap.hadoop.GlobHfs;
-import cascading.tap.hadoop.Hfs;
-import cascading.tuple.Fields;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -240,6 +242,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         public Node stopList(Node rhs, String lhsFieldName, String rhsFieldName) {
             return new Node(builder.addStopListFilter(identifier, rhs.identifier, lhsFieldName, rhsFieldName), builder);
         }
+        
+        public Node aggregate(Aggregation aggregation) {
+            return new Node(builder.addAggregation(identifier, aggregation), builder);
+        }
+        
         public Node combine(Node rhs) {
             return new Node(builder.addCombine(identifier, rhs.identifier), builder);
         }
@@ -573,6 +580,27 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_18023);
         }
         return sourcePath;
+    }
+    
+    protected String addAggregation(String lhs, Aggregation aggregation) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
+        Pipe lhsPipe = lhsPipesAndFields.getKey();
+        Pipe aggregationPipe = new Pipe(aggregation.getAggregationType() + "-" + lhsPipe.getName(), lhsPipe); 
+        switch (aggregation.getAggregationType()) {
+        case AVG:
+            aggregationPipe = new AverageBy(aggregationPipe, //
+                    Fields.NONE, //
+                    new Fields(aggregation.getAggregatedFieldName()), //
+                    new Fields(aggregation.getTargetFieldName()));
+        default:
+            break;
+        }
+        List<FieldMetadata> mergedFields = new ArrayList<>();
+        mergedFields.addAll(lhsPipesAndFields.getValue());
+        mergedFields.add(new FieldMetadata(aggregation.getTargetFieldName(), Double.class));
+        Pipe merged = new HashJoin(lhs + "-merged", lhsPipe, Fields.NONE, //
+                aggregationPipe, Fields.NONE);
+        return register(merged, mergedFields);
     }
 
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
