@@ -2,6 +2,7 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -85,6 +86,24 @@ public abstract class AbstractCollectionArchiveService
                 progress.getStartDate(), progress.getEndDate());
         String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
+        Date earlist = jdbcTemplateCollectionDB.queryForObject(
+                "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
+                        + getSource().getCollectedTableName() + " WHERE "
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")),
+                Date.class);
+
+        Date latest = jdbcTemplateCollectionDB.queryForObject(
+                "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
+                        + getSource().getCollectedTableName() + " WHERE "
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")),
+                Date.class);
+
+        progress.setStartDate(earlist);
+        progress.setEndDate(latest);
+        getProgressEntityMgr().updateProgress(progress);
+        whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
+                progress.getStartDate(), progress.getEndDate());
+
         if (!importFromCollectionDB(getSource().getCollectedTableName(), targetDir, customer, getSource().getDownloadSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
@@ -95,6 +114,8 @@ public abstract class AbstractCollectionArchiveService
                 + getSource().getCollectedTableName() + " WHERE "
                 + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
+
+        hdfsSourceEntityMgr.setLatestTimestamp(getSource(), latest);
 
         return true;
     }
@@ -111,6 +132,13 @@ public abstract class AbstractCollectionArchiveService
         return latestInSrc;
     }
 
-    abstract protected Date getLatestTimestampArchived();
+    protected Date getLatestTimestampArchived() {
+        Date latestInHdfs = hdfsSourceEntityMgr.getLatestTimestamp(getSource());
+        if (latestInHdfs == null) {
+            latestInHdfs = new Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(3650));
+        }
+        return latestInHdfs;
+
+    }
 
 }

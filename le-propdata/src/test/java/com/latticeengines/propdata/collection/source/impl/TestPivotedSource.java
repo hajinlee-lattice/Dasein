@@ -36,4 +36,7 @@ public class TestPivotedSource implements PivotedSource, DomainBased {
     @Override
     public Source[] getBaseSources() { return new Source[] { baseSource }; }
 
+    @Override
+    public String getCronExpression() { return null; }
+
 }

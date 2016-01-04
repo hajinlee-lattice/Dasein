@@ -16,5 +16,6 @@
 
     <import resource="classpath:propdata-persistence-match-context.xml" />
     <import resource="classpath:propdata-persistence-entitlements-context.xml" />
+    <import resource="classpath:propdata-collection-context.xml" />
 
 </beans>

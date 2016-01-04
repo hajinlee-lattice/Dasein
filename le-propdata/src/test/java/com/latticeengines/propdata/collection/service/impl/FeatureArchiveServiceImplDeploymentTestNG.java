@@ -36,13 +36,13 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends CollectionArchive
     Date[] getDates() {
         Date[] dates = new Date[3];
 
-        calendar.set(2013, Calendar.OCTOBER, 22);
+        calendar.set(2014, Calendar.OCTOBER, 22);
         dates[0] = calendar.getTime();
 
-        calendar.set(2013, Calendar.NOVEMBER, 2);
+        calendar.set(2014, Calendar.NOVEMBER, 2);
         dates[1] = calendar.getTime();
 
-        calendar.set(2014, Calendar.JANUARY, 1);
+        calendar.set(2015, Calendar.JANUARY, 1);
         dates[2] = calendar.getTime();
 
         return dates;

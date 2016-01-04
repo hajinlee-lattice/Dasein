@@ -14,7 +14,9 @@ import com.latticeengines.propdata.collection.source.Source;
 public class HdfsPathBuilder {
 
     private static final String rawDataFlowType = "Raw";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
+    private static final String versionFile = "_CURRENT_VERSION";
+    private static final String latestFile = "_LATEST_TIMESTAMP";
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
 
     static {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -58,7 +60,12 @@ public class HdfsPathBuilder {
 
     public Path constructVersionFile(Source source) {
         Path baseDir = constructSourceDir(source);
-        return baseDir.append("_CURRENT_VERSION");
+        return baseDir.append(versionFile);
+    }
+
+    public Path constructLatestFile(Source source) {
+        Path baseDir = constructSourceDir(source);
+        return baseDir.append(latestFile);
     }
 
     public Path constructRawIncrementalDir(Source source, Date archiveDate) {

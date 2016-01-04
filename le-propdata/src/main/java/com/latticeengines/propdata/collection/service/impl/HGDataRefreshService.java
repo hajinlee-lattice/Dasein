@@ -60,4 +60,9 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
                 "CREATE INDEX IX_DOMAIN ON [\" + getStageTableName() + \"] ([Domain] ASC)\n";
         jdbcTemplateCollectionDB.execute(sql);
     }
+
+    @Override
+    public RefreshProgress canKickOffNewProgress() {
+        return null;
+    }
 }

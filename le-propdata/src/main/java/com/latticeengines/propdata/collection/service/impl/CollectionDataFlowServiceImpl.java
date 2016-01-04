@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.propdata.collection.dataflow.merge.MergeDataFlowParameters;
+import com.latticeengines.propdata.collection.dataflow.merge.MostRecentDataFlowParameters;
 import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
 import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
@@ -58,23 +59,27 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Override
     public void executeMergeRawData(MostRecentSource source, String uid) {
-        String flowName = CollectionDataFlowKeys.MERGE_RAW_FLOW;
+        String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
 
         CollectedSource baseSource = source.getBaseSources()[0];
+        Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
+        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodTokeep());
+
         Map<String, Table> sources = new HashMap<>();
-        Table table = hdfsSourceEntityMgr.getTableAtVersion(baseSource, null);
+        Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);
         sources.put(baseSource.getSourceName(), table);
 
-        MergeDataFlowParameters parameters = new MergeDataFlowParameters();
+        MostRecentDataFlowParameters parameters = new MostRecentDataFlowParameters();
         parameters.setDomainField(((DomainBased) source).getDomainField());
         parameters.setTimestampField(source.getTimestampField());
         parameters.setGroupbyFields(source.getPrimaryKey());
         parameters.setSourceTable(baseSource.getSourceName());
+        parameters.setEarliest(earliestToArchive);
 
         String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, "mergeRawFlow");
+        dataTransformationService.executeNamedTransformation(ctx, "mostRecentFlow");
     }
 
     @Override
@@ -84,10 +89,14 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         Map<String, Table> sources = new HashMap<>();
         List<String> baseTables = new ArrayList<>();
+        String[] versions = baseVersion.split("\\|");
+        int i = 0;
         for (Source baseSource: source.getBaseSources()) {
-            Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, baseVersion);
+            String version = versions[i];
+            Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
             sources.put(baseSource.getSourceName(), baseTable);
             baseTables.add(baseSource.getSourceName());
+            i++;
         }
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();

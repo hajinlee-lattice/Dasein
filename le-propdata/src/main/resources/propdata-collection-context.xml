@@ -10,7 +10,7 @@
 
     <import resource="classpath:propdata-persistence-collection-context.xml" />
     <import resource="classpath:propdata-persistence-bulk-context.xml" />
-    <import resource="classpath:propdata-collection-properties-context.xml"/>
+    <import resource="classpath:propdata-properties-context.xml"/>
     <import resource="classpath:dataplatform-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
     <import resource="classpath:camille-runtime-context.xml" />

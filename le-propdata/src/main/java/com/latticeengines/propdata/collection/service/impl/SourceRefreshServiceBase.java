@@ -1,9 +1,7 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
@@ -140,9 +138,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     }
 
     public String getVersionString(P progress) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_z");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(progress.getCreateTime());
+        return HdfsPathBuilder.dateFormat.format(progress.getCreateTime());
     }
 
     protected void extractSchema(P progress) throws Exception {

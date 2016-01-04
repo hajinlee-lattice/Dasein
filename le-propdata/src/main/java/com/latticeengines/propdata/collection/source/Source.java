@@ -12,4 +12,6 @@ public interface Source extends Serializable {
 
     String[] getPrimaryKey();
 
+    String getCronExpression();
+
 }

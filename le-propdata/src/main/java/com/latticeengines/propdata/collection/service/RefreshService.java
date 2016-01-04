@@ -16,4 +16,6 @@ public interface RefreshService {
 
     String getVersionString(RefreshProgress progress);
 
+    RefreshProgress canKickOffNewProgress();
+
 }

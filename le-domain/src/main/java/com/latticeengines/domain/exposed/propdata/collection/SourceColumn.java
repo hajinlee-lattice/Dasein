@@ -51,6 +51,9 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "Groups", nullable = false)
     private String groups = "";
 
+    @Column(name = "MatchDest", nullable = false)
+    private String matchDest = "";
+
     public SourceColumn() {
         super();
     }
@@ -130,6 +133,10 @@ public class SourceColumn implements HasPid, Serializable {
     public String getGroups() { return groups; }
 
     public void setGroups(String groups) { this.groups = groups == null ? "" : groups; }
+
+    public String getMatchDest() { return matchDest; }
+
+    public void setMatchDest(String matchDest) { this.matchDest = matchDest; }
 
     @Override
     public Long getPid() { return getSourceColumnId(); }

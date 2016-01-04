@@ -11,6 +11,6 @@
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
 
     <import resource="classpath:propdata-collection-context.xml"/>
-    <import resource="classpath:propdata-collection-properties-context.xml"/>
+    <import resource="classpath:propdata-properties-context.xml"/>
 
 </beans>

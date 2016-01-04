@@ -80,6 +80,13 @@ public class PropDataAdminTool {
                 .choices(PropDataRawSource.allNames())
                 .help("source to archive");
 
+        parser.addArgument("-t", "--type")
+                .dest(NS_RAW_TYPE)
+                .required(true)
+                .type(String.class)
+                .choices(new String[]{RAW_TYPE_BULK, RAW_TYPE_COLLECTED})
+                .help("type of the raw source.");
+
         parser.addArgument("-sd", "--start-date")
                 .dest(NS_START_DATE)
                 .required(false)
@@ -375,7 +382,7 @@ public class PropDataAdminTool {
 
     enum Command {
         ARCHIVE("archive"),
-        REFRESH("REFRESH");
+        REFRESH("refresh");
 
         private static Map<String, Command> nameMap;
         private final String name;

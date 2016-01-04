@@ -47,7 +47,6 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return join;
     }
 
-
     private Node joinPipe(String[] joinFields, Node[] pipes) {
         FieldList joinFieldList = new FieldList(joinFields);
         Node join = pipes[0];

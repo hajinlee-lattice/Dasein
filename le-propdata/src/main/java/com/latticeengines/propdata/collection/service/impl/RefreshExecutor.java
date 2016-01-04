@@ -20,11 +20,9 @@ public class RefreshExecutor implements RefreshJobExecutor {
 
     private final String jobSubmitter;
     private final RefreshService refreshService;
-    private final Set<RefreshService> downstreamServices;
 
-    public RefreshExecutor(RefreshService refreshService, Set<RefreshService> downstreamServices) {
+    public RefreshExecutor(RefreshService refreshService) {
         this.refreshService = refreshService;
-        this.downstreamServices = downstreamServices;
         this.jobSubmitter = refreshService.getClass().getSimpleName();
     }
 
@@ -41,7 +39,6 @@ public class RefreshExecutor implements RefreshJobExecutor {
                 break;
             case UPLOADED:
                 refreshProgress = refreshService.finish(refreshProgress);
-                kickOffDownstreamProcesses(refreshProgress);
                 break;
             default:
                 log.warn(String.format("Illegal starting status %s for progress %s",
@@ -62,14 +59,6 @@ public class RefreshExecutor implements RefreshJobExecutor {
             System.out.println(refreshService + " - " + uuid + " start.");
             Thread.sleep(random.nextInt(3000));
             System.out.println(refreshService + " - " + uuid + " finished.");
-
-            for (RefreshService service: downstreamServices) {
-                uuid = UUID.randomUUID().toString();
-                System.out.println(service + " - " + uuid + " start.");
-                Thread.sleep(random.nextInt(1000));
-                System.out.println(service + " - " + uuid + " finished.");
-            }
-
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -94,13 +83,6 @@ public class RefreshExecutor implements RefreshJobExecutor {
             progress.setStatus(resumeStatus);
         }
         return progress;
-    }
-
-    private void kickOffDownstreamProcesses(RefreshProgress progress) {
-        String version = refreshService.getVersionString(progress);
-        for (RefreshService service : downstreamServices) {
-            service.startNewProgress(new Date(), version, jobSubmitter);
-        }
     }
 
     private void logJobSucceed(RefreshProgress progress) {

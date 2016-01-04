@@ -1,13 +1,16 @@
 package com.latticeengines.propdata.collection.dataflow.merge;
 
+import java.util.Date;
+
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
-public class MergeDataFlowParameters extends DataFlowParameters {
+public class MostRecentDataFlowParameters extends DataFlowParameters {
 
     private String domainField;
     private String timestampField;
     private String[] groupbyFields;
     private String sourceTable;
+    protected Date earliest;
 
     public String getDomainField() {
         return domainField;
@@ -38,4 +41,14 @@ public class MergeDataFlowParameters extends DataFlowParameters {
     public void setSourceTable(String sourceTable) {
         this.sourceTable = sourceTable;
     }
+
+    public Date getEarliest() {
+        return earliest;
+    }
+
+    public void setEarliest(Date earliest) {
+        this.earliest = earliest;
+    }
 }
+
+

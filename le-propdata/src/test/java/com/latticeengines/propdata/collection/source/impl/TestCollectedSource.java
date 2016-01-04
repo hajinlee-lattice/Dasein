@@ -34,4 +34,7 @@ public class TestCollectedSource implements DomainBased, CollectedSource {
     @Override
     public String[] getPrimaryKey() { return new String[]{}; }
 
+    @Override
+    public String getCronExpression() { return null; }
+
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -58,9 +59,38 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
-    public String getCurrentSnapshotDir(Source source) {
-        String version = getCurrentVersion(source);
-        return hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+    public Date getLatestTimestamp(CollectedSource source) {
+        String versionFile = hdfsPathBuilder.constructLatestFile(source).toString();
+        int retries = 0;
+        while (retries++ < 3) {
+            try {
+                Long mills = Long.valueOf(HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile));
+                return new Date(mills);
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(1000L);
+                } catch (InterruptedException e2) {
+                    // ignore
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public synchronized void setLatestTimestamp(CollectedSource source, Date timestamp) {
+        Date currentTimestamp = getLatestTimestamp(source);
+        if (currentTimestamp != null && currentTimestamp.after(timestamp)) { return; }
+
+        String timestampFile = hdfsPathBuilder.constructLatestFile(source).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, timestampFile)) {
+                HdfsUtils.rmdir(yarnConfiguration, timestampFile);
+            }
+            HdfsUtils.writeToFile(yarnConfiguration, timestampFile, String.valueOf(timestamp.getTime()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -71,24 +101,31 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } else if (source instanceof BulkSource ) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
-        } else if (source instanceof CollectedSource) {
-            String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
-            List<String> avroPaths = new ArrayList<>();
-            try {
-                for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
-                    if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
-                        dir = dir.substring(dir.lastIndexOf("/") + 1);
-                        avroPaths.add(rawDir + "/" + dir + "/*.avro");
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
-            }
-            return TableUtils.createTable(source.getSourceName(),
-                    avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
         } else {
             throw new UnsupportedOperationException("Do not know how to extract table for the given source type.");
         }
+    }
+
+    @Override
+    public Table getCollectedTableSince(CollectedSource source, Date earliest) {
+        String firstVersion = HdfsPathBuilder.dateFormat.format(earliest);
+
+        String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+        List<String> avroPaths = new ArrayList<>();
+        try {
+            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+                    String version = dir.substring(dir.lastIndexOf("/") + 1);
+                    if (version.compareTo(firstVersion) > 0) {
+                        avroPaths.add(rawDir + "/" + version + "/*.avro");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
+        }
+        return TableUtils.createTable(source.getSourceName(),
+                avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
     }
 
 }

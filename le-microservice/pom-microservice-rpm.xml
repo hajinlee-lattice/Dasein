@@ -192,7 +192,7 @@
                                     <location>${dataflowapi.properties.path}/dataflowapi.properties</location>
                                 </source>
                                 <source>
-                                    <location>${propdata.properties.path}/propdata.api.properties</location>
+                                    <location>${propdata.properties.path}/propdata.properties</location>
                                 </source>
                                 <source>
                                     <location>${monitor.properties.path}/monitor.properties</location>

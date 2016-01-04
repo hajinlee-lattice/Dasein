@@ -22,4 +22,9 @@ public abstract class AbstractPivotService extends AbstractRefreshService implem
                 .append(progress.getRootOperationUID()).toString();
     }
 
+    @Override
+    public RefreshProgress canKickOffNewProgress() {
+        return null;
+    }
+
 }

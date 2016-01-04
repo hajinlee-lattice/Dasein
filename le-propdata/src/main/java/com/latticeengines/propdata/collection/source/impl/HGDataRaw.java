@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.collection.source.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.source.BulkSource;
@@ -9,6 +10,9 @@ import com.latticeengines.propdata.collection.source.StageServer;
 public class HGDataRaw implements BulkSource {
 
     private static final long serialVersionUID = -1724598948350731339L;
+
+    @Value("${propdata.job.hgdataraw.schedule:}")
+    String cronExpression;
 
     @Override
     public String getSourceName() {  return "HGDataRaw"; }
@@ -30,5 +34,8 @@ public class HGDataRaw implements BulkSource {
 
     @Override
     public String[] getPrimaryKey() { return null;  }
+
+    @Override
+    public String getCronExpression() { return cronExpression; }
 
 }

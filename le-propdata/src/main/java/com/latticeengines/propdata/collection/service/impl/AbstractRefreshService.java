@@ -80,7 +80,6 @@ public abstract class AbstractRefreshService
         long uploadStartTime = System.currentTimeMillis();
         String sourceDir = snapshotDirInHdfs(progress);
         String destTable = getSource().getSqlTableName();
-        System.out.println(sourceDir);
         if (!uploadAvroToCollectionDB(progress, sourceDir, destTable)) {
             return progress;
         }

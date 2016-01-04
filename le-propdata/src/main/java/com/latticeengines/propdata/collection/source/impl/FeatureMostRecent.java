@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.collection.source.impl;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,5 +37,11 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
 
     @Override
     public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
+
+    @Override
+    public Long periodTokeep() {  return TimeUnit.DAYS.toMillis(365); }
+
+    @Override
+    public String getCronExpression() { return ""; }
 
 }

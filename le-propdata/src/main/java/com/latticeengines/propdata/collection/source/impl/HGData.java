@@ -38,4 +38,7 @@ public class HGData implements DomainBased, ServingSource {
     @Override
     public Source[] getBaseSources() { return new Source[]{ baseSource }; }
 
+    @Override
+    public String getCronExpression() { return ""; }
+
 }

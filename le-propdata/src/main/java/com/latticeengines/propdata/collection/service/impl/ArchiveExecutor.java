@@ -1,8 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.Date;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +13,6 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
-import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.util.DateRange;
 
 public class ArchiveExecutor implements RefreshJobExecutor {
@@ -23,12 +20,10 @@ public class ArchiveExecutor implements RefreshJobExecutor {
     private final String jobSubmitter;
 
     private final ArchiveService archiveService;
-    private final Set<RefreshService> downstreamServices;
     private static final Log log = LogFactory.getLog(ArchiveExecutor.class);
 
-    public ArchiveExecutor(ArchiveService archiveService, Set<RefreshService> downstreamServices) {
+    public ArchiveExecutor(ArchiveService archiveService) {
         this.archiveService = archiveService;
-        this.downstreamServices = downstreamServices;
         this.jobSubmitter = archiveService.getClass().getSimpleName();
     }
 
@@ -42,7 +37,6 @@ public class ArchiveExecutor implements RefreshJobExecutor {
                 break;
             case DOWNLOADED:
                 archiveProgress = archiveService.finish(archiveProgress);
-                kickOffDownstreamProcesses(archiveProgress);
                 break;
             default:
                 log.warn(String.format("Illegal starting status %s for progress %s",
@@ -64,14 +58,6 @@ public class ArchiveExecutor implements RefreshJobExecutor {
             System.out.println(archiveService + " - " + uuid + " start.");
             Thread.sleep(random.nextInt(3000));
             System.out.println(archiveService + " - " + uuid + " finished.");
-
-            for (RefreshService service: downstreamServices) {
-                uuid = UUID.randomUUID().toString();
-                System.out.println(service + " - " + uuid + " start.");
-                Thread.sleep(random.nextInt(1000));
-                System.out.println(service + " - " + uuid + " finished.");
-            }
-
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -97,13 +83,6 @@ public class ArchiveExecutor implements RefreshJobExecutor {
         } else {
             log.info("Archiving a snapshot of bulk source.");
             archiveService.startNewProgress(null, null, jobSubmitter);
-        }
-    }
-
-    private void kickOffDownstreamProcesses(ArchiveProgress progress) {
-        String version = archiveService.getVersionString(progress);
-        for (RefreshService service: downstreamServices) {
-            service.startNewProgress(new Date(), version, jobSubmitter);
         }
     }
 

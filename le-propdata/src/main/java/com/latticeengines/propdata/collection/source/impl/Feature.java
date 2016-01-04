@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.collection.source.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.source.CollectedSource;
@@ -8,6 +9,9 @@ import com.latticeengines.propdata.collection.source.CollectedSource;
 public class Feature implements CollectedSource {
 
     private static final long serialVersionUID = 2079061038810691592L;
+
+    @Value("${propdata.job.feature.schedule:}")
+    String cronExpression;
 
     @Override
     public String getSourceName() { return "Feature"; }
@@ -28,4 +32,7 @@ public class Feature implements CollectedSource {
 
     @Override
     public String[] getPrimaryKey() { return new String[] { "URL", "Feature", "LE_Last_Upload_Date"  };  }
+
+    @Override
+    public String getCronExpression() { return cronExpression; }
 }

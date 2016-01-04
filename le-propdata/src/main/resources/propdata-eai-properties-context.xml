@@ -7,7 +7,7 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${PROPDATA_PROPDIR}/propdata.api.properties</value>
+                <value>file:${PROPDATA_PROPDIR}/propdata.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
                 <value>file:${DB_PROPDIR}/db.properties</value>
             </list>

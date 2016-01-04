@@ -2,10 +2,8 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +43,6 @@ public class ProgressOrchestrator {
     private Log log = LogFactory.getLog(this.getClass());
     private Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
     private Map<ServingSource, RefreshService> refreshServiceMap = new HashMap<>();
-    private Map<Source, Set<RefreshService>> downstreamServiceMap = new HashMap<>();
     private static final int jobExpirationHours = 48; // expire a job after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
     private Map<String, RefreshJobExecutor> executorMap = new HashMap<>();
@@ -53,41 +50,21 @@ public class ProgressOrchestrator {
 
     @PostConstruct
     private void constructMaps() {
-        downstreamServiceMap = new HashMap<>();
-        for (Source source: sourceList) {
-            downstreamServiceMap.put(source, new HashSet<RefreshService>());
-        }
-
-        for (Source source: sourceList) {
-            Object service = ac.getBean(source.getRefreshServiceBean());
-            if (service != null) {
-                if (source instanceof ServingSource) {
-                    for (Source baseSource: ((ServingSource) source).getBaseSources()) {
-                        downstreamServiceMap.get(baseSource).add((RefreshService) service);
-                    }
-                }
-            }
-        }
-
         for (Source source: sourceList) {
             Object service = ac.getBean(source.getRefreshServiceBean());
             if (service != null) {
                 if (source instanceof RawSource) {
                     archiveServiceMap.put((RawSource) source, (ArchiveService) service);
                     executorMap.put(source.getSourceName(),
-                            new ArchiveExecutor((ArchiveService) service, getDownstreamServices(source)));
+                            new ArchiveExecutor((ArchiveService) service));
                 } else if (source instanceof ServingSource) {
                     refreshServiceMap.put((ServingSource) source, (RefreshService) service);
                     executorMap.put(source.getSourceName(),
-                            new RefreshExecutor((RefreshService) service, getDownstreamServices(source)));
+                            new RefreshExecutor((RefreshService) service));
                 }
             }
         }
 
-    }
-
-    public Set<RefreshService> getDownstreamServices(Source source) {
-        return downstreamServiceMap.get(source);
     }
 
     public synchronized void executeRefresh() {

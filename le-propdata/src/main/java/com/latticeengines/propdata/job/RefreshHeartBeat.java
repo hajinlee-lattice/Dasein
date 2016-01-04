@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.job.impl;
+package com.latticeengines.propdata.job;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;

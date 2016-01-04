@@ -7,41 +7,10 @@
 
     <import resource="classpath:propdata-job-context.xml"/>
 
-    <bean name="featureRefreshJobSchedulerDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="durability" value="true" />
-        <property name="jobClass"
-            value="com.latticeengines.propdata.job.impl.RefreshScheduler" />
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="archiveService" value-ref="featureArchiveService" />
-            </map>
-        </property>
-    </bean>
-    <bean id="featureRefreshCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="featureRefreshJobSchedulerDetail" />
-        <property name="cronExpression" value="${propdata.job.feature.schedule}" />
-    </bean>
-
-
-    <bean name="builtWithRefreshJobSchedulerDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="durability" value="true" />
-        <property name="jobClass"
-                  value="com.latticeengines.propdata.job.impl.RefreshScheduler" />
-        <property name="jobDataAsMap">
-            <map>
-                <entry key="archiveService" value-ref="builtWithArchiveService" />
-            </map>
-        </property>
-    </bean>
-    <bean id="builtWithRefreshCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="builtWithRefreshJobSchedulerDetail" />
-        <property name="cronExpression" value="${propdata.job.buitwith.schedule}" />
-    </bean>
-
     <bean name="refreshJobHeartBeatDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="durability" value="true" />
         <property name="jobClass"
-                  value="com.latticeengines.propdata.job.impl.RefreshHeartBeat" />
+                  value="com.latticeengines.propdata.job.RefreshHeartBeat" />
         <property name="jobDataAsMap">
             <map>
                 <entry key="orchestrator" value-ref="progressOrchestrator" />
@@ -54,12 +23,10 @@
         <property name="cronExpression" value="${propdata.job.heartbeat.schedule}" />
     </bean>
 
-    <bean id="propDataQuartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <bean id="propDataHeartBeatScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="refreshHeartBeatCronTrigger" />
-                <!--<ref bean="featureRefreshCronTrigger" />
-                <ref bean="builtWithRefreshCronTrigger" />-->
             </list>
         </property>
     </bean>

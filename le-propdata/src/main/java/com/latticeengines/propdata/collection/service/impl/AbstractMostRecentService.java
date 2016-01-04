@@ -38,7 +38,12 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
 
     @Override
     protected String workflowDirInHdfs(RefreshProgress progress) {
-        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MERGE_RAW_FLOW)
+        return hdfsPathBuilder.constructWorkFlowDir(getSource(), CollectionDataFlowKeys.MOST_RECENT_FLOW)
                 .append(progress.getRootOperationUID()).toString();
+    }
+
+    @Override
+    public RefreshProgress canKickOffNewProgress() {
+        return null;
     }
 }
