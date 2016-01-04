@@ -15,7 +15,7 @@ def parseArgs():
   parser.add_argument('tenantFile', help="input tenant list csv file")
   parser.add_argument('results', help="specified output csv file")
   parser.add_argument("--op", choices=['upgrade', 'checkOnly'], help="upgrade or check the tenants")
-  parser.add_argument("--configure", choices=['disable', 'daily', 'hourly'], help="disable/daily/hourly buyer insights")
+  parser.add_argument("--buyerInsights", choices=['disable', 'daily', 'hourly'], help="disable/daily/hourly buyer insights")
 
   args = parser.parse_args()
 
@@ -26,9 +26,9 @@ def parseArgs():
 
   resultFile = args.results
 
-  configure = args.configure
+  buyerInsights = args.buyerInsights
 
-  return (checkOnly, tenantFileName, resultFile, configure)
+  return (checkOnly, tenantFileName, resultFile, buyerInsights)
 
 
 if __name__ == "__main__":
@@ -40,17 +40,17 @@ if __name__ == "__main__":
   print 'REV  : {0}'.format(REVISION)
   print ''
 
-  configure = ''
+  buyerInsights = ''
 
-  (checkOnly, tenantFileName, resultsFileName, configure) = parseArgs()
+  (checkOnly, tenantFileName, resultsFileName, buyerInsights) = parseArgs()
 
   sequence = []
 
-  if configure == 'disable':
+  if buyerInsights == 'disable':
     sequence.append(lp020200.LP_020200_Disable_BuyerInsights())
-  elif configure == 'daily':
+  elif buyerInsights == 'daily':
     sequence.append(lp020200.LP_020200_Enable_Daily_BuyerInsights())
-  elif configure == 'hourly':
+  elif buyerInsights == 'hourly':
     sequence.append(lp020200.LP_020200_Enable_Hourly_BuyerInsights())
 
   app = appsequence.AppSequence(tenantFileName, resultsFileName, sequence, checkOnly)
