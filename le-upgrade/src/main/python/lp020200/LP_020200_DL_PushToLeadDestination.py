@@ -242,7 +242,7 @@ class LP_020200_DL_PushToLeadDestination(StepBase):
 
     ptld.set('ng', 'True')
     lgm.setLoadGroup(etree.tostring(ptld))
-    ngsxml = '<ngs><ng n="LoadScoredLeads_Step1"/><ng n="LoadScoredLeads_Step2"/><ng n="PushDataToDante_Hourly"/><ng n="InsightsAllSteps"/><ng n="PushLeadsLastScoredToDestination"/><ng n="PushToLeadDestination_TimeStamp"/><ng n="PushToLeadDestination_Validation"/></ngs>'
+    ngsxml = '<ngs><ng n="LoadScoredLeads_Step1"/><ng n="LoadScoredLeads_Step2"/><ng n="PushDataToDante_Hourly"/><ng n="PushLeadsLastScoredToDestination"/><ng n="PushToLeadDestination_TimeStamp"/><ng n="PushToLeadDestination_Validation"/></ngs>'
     lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
 
     #Remove the extractQueries in PushLeadsInDanteToDestination
