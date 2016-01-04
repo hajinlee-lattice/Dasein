@@ -1,0 +1,40 @@
+<div class="pd-pagination">
+    <button 
+            type="button" 
+            class="button icon-button white-button{{ current > 1 ? '' : ' disabled' }}" 
+            ng-click="current = 1"
+        >
+        <span class="fa fa-angle-double-left"></span>
+    </button>
+    <button 
+            type="button" 
+            class="button icon-button white-button{{ current > 1 ? '' : ' disabled' }}" 
+            ng-click="current = current > 1 ? current - 1 : 1"
+        >
+        <span class="fa fa-angle-left"></span>
+    </button>
+
+    <span class="pd-pagination-center">
+        <span>Page</span>
+        <button type="button" class="button icon-button white-button active">
+            <span>{{ current }}</span>
+        </button>
+        <span>of</span>
+        <span>{{ Math.ceil(max) }}</span>
+    </span>
+
+    <button 
+            type="button" 
+            class="button icon-button white-button{{ current < max ? '' : ' disabled' }}" 
+            ng-click="current = current < max ? current + 1 : max"
+        >
+        <span class="fa fa-angle-right"></span>
+    </button>
+    <button 
+            type="button" 
+            class="button icon-button white-button{{ current < max ? '' : ' disabled' }}" 
+            ng-click="current = Math.ceil(max)"
+        >
+        <span class="fa fa-angle-double-right"></span>
+    </button>
+</div>

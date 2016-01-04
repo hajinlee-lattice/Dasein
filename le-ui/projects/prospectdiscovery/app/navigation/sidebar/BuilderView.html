@@ -16,7 +16,6 @@
             </a>
             <ul class="pd-sidebar-category">
                 <li 
-                    ng-show="SelectedChildren.length > 0 || item.visible"
                     ng-repeat="item in MasterList | filter: { selected: true, ParentKey: '_OBJECT_' } | orderBy: '-modified' "
                 >
                     <a href="javascript:void(0);">
@@ -24,7 +23,7 @@
                             <span class="ico ico-industry ico-saphire" ng-if="item.AttrKey == 'Industry'"></span>
                             <span class="ico ico-locations ico-jade" ng-if="item.AttrKey == 'Region'"></span>
                             <span class="ico ico-tmb-user ico-gold" ng-if="item.AttrKey == 'EmployeesRange'"></span>
-                            <span class="ico ico-tmb-chart ico-gold" ng-if="item.AttrKey == 'RevenueRange'"></span>
+                            <span class="ico ico-tmb-chart ico-amber" ng-if="item.AttrKey == 'RevenueRange'"></span>
                             <em>{{ item.AttrValue }}</em>
                             <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
                         </span>

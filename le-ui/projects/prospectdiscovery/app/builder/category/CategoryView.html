@@ -1,49 +1,87 @@
-<div class="container pd-builder-attributes" ng-controller="AttributesCtrl as attr">
+<div class="container pd-builder-attributes" ng-controller="AttributesCtrl as vm">
     <div class="row page-header">
-        <h4 class="columns six">
-            <span ng-if="!attr.ParentValue">{{ attr.AttrKey }}</span> 
-            <span ng-if="attr.ParentValue">
+        <h4 class="columns four">
+            <span ng-if="!vm.ParentValue">{{ vm.AttrKey }}</span> 
+            <span ng-if="vm.ParentValue">
                 <button 
                     type="button" 
                     class="button icon-button white-button"
-                    ui-sref="builder.category({AttrKey: '{{ attr.ParentKey == 'Region' ? 'Locations' : attr.ParentKey }}', ParentKey: '', ParentValue: ''})"
+                    ui-sref="builder.category({AttrKey: '{{ vm.ParentKey == 'Region' ? 'Locations' : vm.ParentKey }}', ParentKey: '', ParentValue: ''})"
                 >
                     <span class="fa fa-arrow-left"></span>
                 </button>
-                &nbsp;{{ attr.ParentValue }}&nbsp;
+                &nbsp;{{ vm.ParentValue }}&nbsp;
             </span>
-            <span class="smaller" ng-if="attr.total">({{ attr.total }})</span>
+            <span class="smaller" ng-if="vm.total">({{ vm.total }})</span>
         </h4>
-        <span class="columns six">
+        <span class="columns eight">
             <input 
                 type="text" 
                 class="form-control" 
-                ng-model="SearchByName.AttrValue"
-                ng-show="ShowSearch" 
+                ng-model="vm.SearchValue.AttrValue"
+                ng-show="vm.ShowSearch" 
             />
-            <button type="button" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+            <button type="button" class="button icon-button white-button" ng-click="vm.ShowSearch = !vm.ShowSearch">
                 <span class="fa fa-search"></span>
             </button>
-            <button type="button" class="button icon-button white-button" ng-click="FilterChecked = !FilterChecked" ng-init="FilterChecked = false;">
-                <span class="fa fa-check-square{{ FilterChecked ? '' : '-o' }}"></span>
+            <button type="button" class="button icon-button white-button" ng-click="vm.FilterChecked = !vm.FilterChecked">
+                <span class="fa fa-check-square{{ vm.FilterChecked ? '' : '-o' }}"></span>
             </button>
-            <button type="button" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'AttrValue' ? '-AttrValue' : 'AttrValue')" ng-init="SortOrder = 'AttrValue';">
-                <span class="fa fa-sort-alpha-{{ SortOrder == 'AttrValue' ? 'asc' : 'desc' }}"></span>
+            <select 
+                    class="custom-select" 
+                    ng-model="vm.SortProperty"
+                >
+                <option value="AttrValue">Name</option>
+                <option value="lift">Lift</option>
+                <option value="revenue">Revenue</option>
+                <option value="customer_percent_of_theirs">Potential</option>
+            </select>
+            <button 
+                    type="button" 
+                    class="button icon-button white-button" 
+                    ng-click="vm.SortDirection = (vm.SortDirection == '' ? '-' : '')" 
+                >
+                <span class="fa 
+                        fa-sort-{{ 
+                            vm.SortProperty == 'AttrValue' 
+                                ? 'alpha' 
+                                : (vm.SortProperty == 'customer_percent_of_theirs' 
+                                    ? 'amount' 
+                                    : 'numeric') 
+                        }}-{{ 
+                            vm.SortDirection == '' 
+                                ? 'asc' 
+                                : 'desc' 
+                        }}"
+                    >
+                </span>
             </button>
             <a ui-sref="jobs.import.credentials"><button class="button orange-button">Save Attributes</button></a>
         </span>
+    </div>
+    
+    <div class="row" ng-init="pagesize = 9; current = 1" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="current" max="max = vm.list.length / pagesize">
+            </pd-pagination-controls>
+        </div>
     </div>
 
     <div class="row">
         <div class="twelve columns tile-list">
             <div 
-                class="list-item
-                    {{ attr.SubCategory ? ' has-sub' : '' }}
-                    {{ item.selected ? ' selected' : '' }}
-                    {{ FilterChecked ? ' filter-checked' : '' }}"
-                ng-repeat="(col, item) in attr.list | filter:SearchByName | orderBy: SortOrder"
-                ng-click="attr.handleTileClick($event, item)"
-            >                
+                    class="list-item
+                            {{ vm.SubCategory ? ' has-sub' : '' }}
+                            {{ item.selected ? ' selected' : '' }}
+                            {{ vm.FilterChecked ? ' filter-checked' : '' }}"
+                    ng-repeat="
+                            (col, item) in filtered = vm.list | 
+                            filter: vm.SearchValue | 
+                            orderBy: vm.SortDirection + vm.SortProperty |
+                            startFrom: (current - 1) * pagesize |
+                            limitTo: pagesize"
+                    ng-click="vm.handleTileClick($event, item)"
+                >                
                 <div class="tile">
             		<div class="tile-head">
             			<div class="pull-left" ng-click="$event.stopPropagation()">
@@ -52,10 +90,10 @@
                                 id="attr-checkbox_{{ row }}_{{ col }}" 
                                 class="attr-checkbox custom"
                                 ng-model="item.selected"
-                                ng-change="attr.handleTileSelect(item)"
+                                ng-change="vm.handleTileSelect(item)"
                             />
     	        			<label for="attr-checkbox_{{ row }}_{{ col }}" class="attr-label">
-                                {{ item.AttrValue | limitTo: attr.truncate_limit }}{{item.AttrValue.length > attr.truncate_limit ? '&hellip;' : ''}}
+                                {{ item.AttrValue | limitTo: vm.TruncateLimit }}{{item.AttrValue.length > vm.TruncateLimit ? '&hellip;' : ''}}
                                 &nbsp;<span ng-if="item.total">( <span class="blue-text">{{ item.total }}</span> )</span>
                             </label>
             			</div>
@@ -75,7 +113,7 @@
             					<dd class="in-database">
                                     {{ item.their_companies | number:0 }}&nbsp;
                                 <span class="smaller">
-                                    ({{ item.mediump | number:1 }}%)
+                                    ({{ item.companies_percent | number:1 }}%)
                                 </span></dd>
             				</dl>
             				<dl class="stats">
@@ -83,7 +121,7 @@
             					<dd class="your-customers">
                                     {{ item.customers | number:0 }}&nbsp;
                                 <span class="smaller">
-                                    ({{ item.smallp_of_theirs | number:1 }}%)
+                                    ({{ item.customer_percent_of_theirs | number:1 }}%)
                                 </span></dd>
             				</dl>
             			</div>
@@ -93,11 +131,11 @@
                             </div>
                             <div 
                                 class="medium-circle gun-metal-bkg"
-                                style="width:{{ item.mediump }}%;height:{{ item.mediump }}%;">
+                                style="width:{{ item.companies_percent }}%;height:{{ item.companies_percent }}%;">
                             </div>
                             <div 
                                 class="small-circle jet-bkg"
-                                style="width:{{ item.smallp }}%;height:{{ item.smallp }}%;">
+                                style="width:{{ item.customer_percent }}%;height:{{ item.customer_percent }}%;">
                             </div>
                         </div>
             		</div><!-- End .tile-meta -->

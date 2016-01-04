@@ -48,7 +48,7 @@
                 </thead>
                 <tbody>
                     <tr ng-repeat="item in targetMarkets | filter: { description: query } | orderBy: SortOrder">
-                        <td>{{ item.description }}</td>
+                        <td>{{ item.name }}</td>
                         <td>{{ item.creation_timestamp | date: 'MM/dd/yyyy' }}</td>
                         <td>2.3x</td>
                         <td>75</td>

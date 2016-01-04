@@ -10,10 +10,7 @@ angular.module('pd.jobs.import.credentials', [
 .service('CredentialsService', function (StringUtility) {
 
     this.ValidateCredentials = function (type, credentials) {
-        console.log('ValidateCredentials');
-
         if (StringUtility.IsEmptyString(type) || credentials == null) {
-            console.log('credentials == null');
             return false;
         }
 

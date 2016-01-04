@@ -3,5 +3,5 @@ angular.module('pd.markets.createmarket', [
     ])
     .controller('CreateMarketCtrl', function(AttributesModel) {
         this.AttributesModel = AttributesModel;
-        AttributesModel.TargetMarketName = 'Target Market #' + parseInt(Math.random() * 99999);
+        AttributesModel.TargetMarketName = 'Demo Target Market';
     });

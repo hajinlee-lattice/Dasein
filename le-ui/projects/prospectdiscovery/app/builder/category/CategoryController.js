@@ -1,5 +1,7 @@
 angular
-    .module('pd.builder.attributes', [])
+    .module('pd.builder.attributes', [
+        'pd.navigation.pagination'
+    ])
     .service('AttributesModel', function($q, AttributesService, $filter) {
         var AttributesModel = this;
 
@@ -24,14 +26,12 @@ angular
                 AttrKey: (this.ParentCategoryMap[args.AttrKey] || args.AttrKey)
             };
 
-            // only pass through args that have a definite value
+            // only pass through args that have a definite value and in whitelist
             ['AttrValue','ParentValue','ParentKey','selected','visible'].forEach(function(key) {
                 args[key] ? fields[key] = args[key] : null;
             });
 
             var list = $filter('filter')(this.MasterList, fields, true);
-
-            console.log('<!> getMaster from Cache:', fields, list);
 
             return list || [];
         }
@@ -67,13 +67,13 @@ angular
                         item.customers = item.customers > item.their_companies ? item.their_companies >> 1 : item.customers
                         
                         // Calculate percentages for bubble visualization
-                        item.mediump = ((item.their_companies / item.lattice_companies) * 100).toFixed(3);
-                        item.smallp = ((item.customers / item.lattice_companies) * 100).toFixed(3);
-                        item.smallp_of_theirs = ((item.customers / item.their_companies) * 100).toFixed(3);
+                        item.companies_percent = ((item.their_companies / item.lattice_companies) * 100).toFixed(3);
+                        item.customer_percent = ((item.customers / item.lattice_companies) * 100).toFixed(3);
+                        item.customer_percent_of_theirs = ((item.customers / item.their_companies) * 100).toFixed(3);
                         
                         // set a minimum constaint just so things look good
-                        item.mediump = item.mediump < 15 ? 15 : item.mediump;
-                        item.smallp = item.smallp < 10 ? 10 : item.smallp;
+                        item.companies_percent = item.companies_percent < 10 ? 10 : item.companies_percent;
+                        item.customer_percent = item.customer_percent < 5 ? 5 : item.customer_percent;
 
                         item.selected = false;
 
@@ -143,7 +143,12 @@ angular
 
         angular.extend(this, $stateParams, {
             init: function() {
-                this.truncate_limit = 32;
+                this.SortProperty = 'AttrValue';
+                this.SortDirection = '';
+                this.SearchValue = '';
+                this.ShowSearch = false;
+                this.FilterChecked = false;
+                this.TruncateLimit = 32;
 
                 if (!this.AttrKey) {
                     return console.log('<!> No stateParams provided');
@@ -152,15 +157,18 @@ angular
                 // This might work better in a UI-Router "resolve"
                 AttributesModel
                     .getList($stateParams)
-                    .then(angular.bind(this, this.setList));
+                    .then(angular.bind(this, this.processList));
             },
 
-            setList: function(list) {
+            processList: function(list) {
                 this.total = list.length;
                 this.list = list;
                 this.SubCategory = this.SubCategoryMap[this.AttrKey];
                 this.ParentCategory = this.ParentCategoryMap[this.AttrKey] || this.AttrKey;
             },
+
+            // Interaction with the Filters Sorting drop-down
+            handleSortPropertyChange: function($event) { },
 
             // Drill down to sub category if one exists
             handleTileClick: function($event, item) {
@@ -174,63 +182,59 @@ angular
             },
 
             // Parent selects all children, and a child makes sure parent is selected.
-            handleTileSelect: function(selected) {
+            handleTileSelect: function(targetTile) {
                 var SubCategory = this.SubCategory;
 
-                selected.modified = Date.now();
-                selected.visible = !SubCategory;
+                targetTile.modified = Date.now();
+                targetTile.visible = !SubCategory;
 
                 if (SubCategory) {
                     AttributesModel
                         .getList({
                             ParentKey: this.ParentCategory,
-                            ParentValue: selected.AttrValue,
+                            ParentValue: targetTile.AttrValue,
                             AttrKey: SubCategory
                         })
                         .then(angular.bind(this, function(result) {
-                            selected.total = result.length;
+                            targetTile.total = result.length;
 
                             result.forEach(function(item, index) {
-                                item.selected = selected.selected;
+                                item.selected = targetTile.selected;
                                 item.modified = Date.now();
                                 item.visible = true;
                             });
                         }));
-                } else if (selected.selected) {
+                } else if (targetTile.selected) {
                     AttributesModel
                         .getList({
-                            AttrKey: selected.ParentKey,
-                            AttrValue: selected.ParentValue
+                            AttrKey: targetTile.ParentKey,
+                            AttrValue: targetTile.ParentValue
                         })
                         .then(angular.bind(this, function(result) {
-                            console.log('select parent', result.length, result, selected);
                             (result.length > 0 ? result[0] : {})
-                                .selected = selected.selected;
+                                .selected = targetTile.selected;
                         }));
                 } else {
-
-                    var result = AttributesModel.getMaster({
-                        ParentValue: selected.ParentValue,
-                        ParentKey: selected.ParentKey,
+                    var SelectedSiblings = AttributesModel.getMaster({
+                        ParentValue: targetTile.ParentValue,
+                        ParentKey: targetTile.ParentKey,
                         selected: true
                     });
 
-                    console.log('@@@',result.length, result);
-                    if (result.length == 0) {
-                    AttributesModel
-                        .getList({
-                            AttrKey: selected.ParentKey,
-                            AttrValue: selected.ParentValue
-                        })
-                        .then(angular.bind(this, function(result) {
-                            console.log('select parent', result.length, result, selected);
-                            (result.length > 0 ? result[0] : {})
-                                .selected = selected.selected;
-                        }));
+                    if (SelectedSiblings.length == 0) {
+                        AttributesModel
+                            .getList({
+                                AttrKey: targetTile.ParentKey,
+                                AttrValue: targetTile.ParentValue
+                            })
+                            .then(angular.bind(this, function(result) {
+                                (result.length > 0 ? result[0] : {})
+                                    .selected = targetTile.selected;
+                            }));
                     }
                 }
             }
         });
 
         this.init();
-    });
+    })

@@ -1,4 +1,5 @@
 angular.module('pd.navigation', [
+    'pd.navigation.pagination',
     'pd.navigation.sidebar',
     'pd.navigation.table',
     'pd.navigation.message',

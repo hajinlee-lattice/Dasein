@@ -17,7 +17,6 @@ angular
             .state('builder.category', {
                 url: '/categories/:AttrKey/:ParentKey/:ParentValue',
                 onEnter: function($state, $stateParams, AttributesModel) {
-                    console.log('onEnter',AttributesModel);
                     if (!$stateParams.AttrKey) {
                         $stateParams.AttrKey = 'Industry';
                         $stateParams.AttrValue = '';

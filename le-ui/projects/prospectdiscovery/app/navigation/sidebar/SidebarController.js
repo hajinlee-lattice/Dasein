@@ -10,7 +10,7 @@ angular
     .controller('BuilderSidebarCtrl', function($scope, AttributesModel) {
         angular.extend($scope, AttributesModel, {
             init: function() {
-                console.log('!',$scope, AttributesModel);
+                
             },
             handleSubCategoryRemoval: function(selected, children) {
                 console.log('remove', selected, children.length, children, $scope);

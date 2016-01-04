@@ -17,11 +17,6 @@ var mainApp = angular.module('mainApp', [
     'pd.jobs'
 ])
 
-/*
-    Routing moved to routes.js, go there for your routing needs.
-    Eventually modules will define their own routes.
-*/
-
 .config(['$httpProvider', function($httpProvider) {
     //initialize get if not there
     if (!$httpProvider.defaults.headers.get) {
@@ -51,8 +46,6 @@ var mainApp = angular.module('mainApp', [
         var previousSession = BrowserStorageUtility.getClientSession();
         var loginDocument = BrowserStorageUtility.getLoginDocument();
 
-        console.log('init',hasSessionTimedOut(),previousSession);
-
         if (previousSession != null && !hasSessionTimedOut()) {
             $http.get('./app/header/HeaderView.html').success(function (html) {
                 var scope = $rootScope.$new();
@@ -71,7 +64,6 @@ var mainApp = angular.module('mainApp', [
     
     $scope.refreshPreviousSession = function (tenant) {
         //Refresh session and go somewhere
-        console.log('refreshPreviousSession',tenant)
         LoginService.GetSessionDocument(tenant).then(
             // Success
             function (data, status) {
@@ -115,7 +107,6 @@ var mainApp = angular.module('mainApp', [
     };
 
     function startObservingUserActivtyThroughMouseAndKeyboard() {
-        console.log('startObservingUserActivtyThroughMouseAndKeyboard');
         $(this).mousemove(function (e) {
             if (!warningModalInstance) {
                 refreshSessionLastActiveTimeStamp();
@@ -129,7 +120,6 @@ var mainApp = angular.module('mainApp', [
     }
 
     function startCheckingIfSessionIsInactive() {
-        console.log('startCheckingIfSessionIsInactive');
         refreshSessionLastActiveTimeStamp();
         inactivityCheckingId = setInterval(
             checkIfSessionIsInactiveEveryInterval, 
@@ -151,7 +141,6 @@ var mainApp = angular.module('mainApp', [
     function mustUserChangePassword(loginDocument) {
         var isTimedOut = loginDocument.MustChangePassword || TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
 
-        console.log('mustUserChangePassword?',isTimedOut);
         return isTimedOut;
     }
     
@@ -160,7 +149,6 @@ var mainApp = angular.module('mainApp', [
         var isTimedOut = Date.now() - BrowserStorageUtility.getSessionLastActiveTimestamp() >=
             TIME_INTERVAL_INACTIVITY_BEFORE_WARNING + TIME_INTERVAL_WARNING_BEFORE_LOGOUT;
 
-        console.log('hasSessionTimedOut?',isTimedOut);
         return isTimedOut;
     }
 
@@ -170,12 +158,11 @@ var mainApp = angular.module('mainApp', [
     }
 
     function openWarningModal() {
-        console.log('openWarningModal');
         warningModalInstance = $modal.open({
             animation: true,
             backdrop: false,
             scope: $scope,
-            templateUrl: 'app/main/WarningModal.html'
+            templateUrl: 'app/shared/WarningModal.html'
         });
 
         $scope.refreshSession = function() {
@@ -185,19 +172,16 @@ var mainApp = angular.module('mainApp', [
     }
     
     function cancelCheckingIfSessionIsInactiveAndSetIdToNull() {
-        console.log('cancelCheckingIfSessionIsInactiveAndSetIdToNull');
         clearInterval(inactivityCheckingId);
         inactivityCheckingId = null;
     }
 
     function stopObservingUserInteractionBasedOnMouseAndKeyboard() {
-        console.log('stopObservingUserInteractionBasedOnMouseAndKeyboard');
         $(this).off("mousemove");
         $(this).off("keypress");
     }
     
     function callWhenWarningModalExpires() {
-        console.log('callWhenWarningModalExpires');
         if (hasSessionTimedOut()) {
             $scope.sessionExpired = true;
             /** This line is actually necessary. Otherwise, user doesn't get properly logged out when tenant selection modal is up */
@@ -215,7 +199,6 @@ var mainApp = angular.module('mainApp', [
     }
 
     function closeWarningModalAndSetInstanceToNull() {
-        console.log('closeWarningModalAndSetInstanceToNull');
         warningModalInstance.close();
         warningModalInstance = null;
     }

@@ -12,7 +12,6 @@ angular.module('pd.header', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
-    console.log('ResourceUtility', $scope.ResourceUtility);
     var clientSession = BrowserStorageUtility.getClientSession();
     
     $scope.userDisplayName = clientSession.DisplayName;
@@ -29,7 +28,6 @@ angular.module('pd.header', [
         });
     }
     
-
     $(".dropdown > a").click(function(e){
         $(this).toggleClass("active");
         $(".dropdown > ul").toggle();

@@ -2,6 +2,14 @@
     perspective: 7000px;
     perspective-origin: 50% 0%;
     min-height: 1024px;
+    
+    select.custom-select {
+        height: 43px;
+        border: 1px solid #ccc;
+        width: 8em !important;
+        font-size: 12pt;
+        vertical-align: bottom;
+    }
 
     .list-item {
         margin-bottom: 2em;
@@ -39,6 +47,14 @@
     .list-item.ng-enter-stagger {
         transition-delay: 50ms;
         transition-duration: 0s;
+    }
+
+    .list-item.ng-leave  {
+        transform: rotateX(0deg);
+    }
+
+    .list-item.ng-leave-active {
+        transform: rotateX(180deg);
     }
 
     div.list-item.has-sub {

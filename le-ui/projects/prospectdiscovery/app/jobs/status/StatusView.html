@@ -38,11 +38,30 @@
                 <span class="columns four">Status</span>
             </div>
             <div class="jobs-table-content">
-                <div data-job-status-row data-ng-repeat="job in jobs | filter: query | orderBy: SortOrder" job="job" statuses="statuses" expanded="expanded" showJobSuccessMessage="showJobSuccessMessage" class="job-td-row"></div>
+                <div 
+                    data-job-status-row 
+                    data-ng-repeat="job in jobs | 
+                        filter: query | 
+                        orderBy: SortOrder | 
+                        startFrom: (current - 1) * pagesize |
+                        limitTo: pagesize" 
+                    job="job" 
+                    statuses="statuses" 
+                    expanded="expanded" 
+                    showJobSuccessMessage="showJobSuccessMessage" 
+                    class="job-td-row">
+                </div>
                 <div data-ng-show="showEmptyJobsMessage">
                     There are no jobs to show at the moment
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="row" ng-init="pagesize = 5; current = 1" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="current" max="max = jobs.length / pagesize">
+            </pd-pagination-controls>
         </div>
     </div>
 

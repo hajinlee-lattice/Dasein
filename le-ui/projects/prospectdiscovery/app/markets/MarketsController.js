@@ -16,6 +16,7 @@ angular
                 // TODO: get the other attributes page needs
                 $scope.marketNameToAttributes[targetMarketName] = marketAttributes;
             }
+            targetMarkets.push({name:'Demo Target Market',creation_timestamp:Date.now()});
             $scope.targetMarkets = targetMarkets;
             console.log('Target Market List', $scope.marketNameToAttributes, targetMarkets);
         });
