@@ -24,6 +24,11 @@
                             <span class="ico ico-locations ico-jade" ng-if="item.AttrKey == 'Region'"></span>
                             <span class="ico ico-tmb-user ico-gold" ng-if="item.AttrKey == 'EmployeesRange'"></span>
                             <span class="ico ico-tmb-chart ico-amber" ng-if="item.AttrKey == 'RevenueRange'"></span>
+                            <input 
+                                id="{{ item.AttrValue }}" 
+                                type="checkbox" 
+                                ng-change="handleRootCategoryRemoval(item, SelectedChildren)"
+                                ng-model="item.selected" />
                             <em>{{ item.AttrValue }}</em>
                             <span class="pd-sidebar-category-total" ng-if="item.total"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
                         </span>
@@ -35,7 +40,6 @@
                                         ng-change="handleSubCategoryRemoval(SubCategory, SelectedChildren)"
                                         ng-model="SubCategory.selected" />
                                     <label 
-                                        for="{{ SubCategory.AttrValue }}" 
                                         ng-click="$event.stopPropagation()">{{ SubCategory.AttrValue }}</label>
                             </li>
                         </ul>

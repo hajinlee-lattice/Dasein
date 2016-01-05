@@ -12,6 +12,11 @@ angular
             init: function() {
                 
             },
+            handleRootCategoryRemoval: function(item, children) {
+                (children || []).forEach(function(child) {
+                    child.selected = false;
+                });
+            },
             handleSubCategoryRemoval: function(selected, children) {
                 console.log('remove', selected, children.length, children, $scope);
                 

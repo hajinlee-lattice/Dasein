@@ -41,17 +41,10 @@
         }
 
         >li input {
-            margin-left: 32px;
+            margin-left: 3px;
+            margin-right: 2px;
         }
 
-        >li label {
-            color: #999;
-            font-size: 0.9em;
-            vertical-align: top;
-            margin-left: .4em;
-            cursor: pointer;
-        }
-        
         span.fa, span.ico {
             margin-right: 5px;
             vertical-align: text-top;
@@ -60,11 +53,12 @@
         em {
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 13.5em;
+            max-width: 12.5em;
             display: inline-block;
             overflow: hidden;
             height: 1.4em;
             vertical-align: sub;
+            color: #ccc;
         }
     }
 
@@ -77,5 +71,17 @@
     }
 
     .pd-sidebar-subcategory {
+        >li input {
+            margin-left: 50px;
+            margin-right: 0;
+        }
+
+        >li label {
+            color: #888;
+            font-size: 0.9em;
+            vertical-align: top;
+            margin-left: .3em;
+            max-width: 14em;
+        }
     }
 }

@@ -10,7 +10,9 @@
         font-size: 12pt;
         vertical-align: bottom;
     }
-
+    .tile-list {
+        justify-content: space-around;
+    }
     .list-item {
         margin-bottom: 2em;
         color: #000;
@@ -18,11 +20,15 @@
         -moz-backface-visibility: hidden;
         -ms-backface-visibility: hidden;
         backface-visibility: hidden;
-        transition: all 300ms ease;
-        transform-origin: 50% 0%;
+        transition: all 150ms ease;
+        transform-origin: 50% 50%;
 
         .tile.filter-checked {
             display: none;
+        }
+
+        label.attr-label {
+            word-wrap: break-word;
         }
     }
 
@@ -37,24 +43,23 @@
     }
 
     .list-item.ng-enter  {
-        transform: rotateX(180deg);
+        transform: scaleY(0);
+        position: absolute;
+        top: 0;
     }
 
     .list-item.ng-enter-active {
-        transform: rotateX(0deg);
-    }
-
-    .list-item.ng-enter-stagger {
-        transition-delay: 50ms;
-        transition-duration: 0s;
+        transform: scaleY(100%);
+        position: absolute;
+        top: 0;
     }
 
     .list-item.ng-leave  {
-        transform: rotateX(0deg);
+        transform: scaleY(100%);
     }
 
     .list-item.ng-leave-active {
-        transform: rotateX(180deg);
+        transform: scaleY(0);
     }
 
     div.list-item.has-sub {
