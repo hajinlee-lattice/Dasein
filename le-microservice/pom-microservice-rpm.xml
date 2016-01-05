@@ -41,6 +41,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/buildmachine</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/buildmachine</workflowapi.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/buildmachine</workflow.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/buildmachine</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/buildmachine</camille.properties.path>
@@ -67,6 +68,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/devcluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/devcluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/devcluster</workflowapi.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/devcluster</workflow.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/devcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/devcluster</camille.properties.path>
@@ -94,6 +96,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/qacluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/qacluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
@@ -121,6 +124,7 @@
                 <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <scoring.properties.path>../le-scoring/conf/env/prodcluster</scoring.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/prodcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
@@ -208,6 +212,9 @@
                                 </source>
                                 <source>
                                     <location>${workflowapi.properties.path}/workflowapi.properties</location>
+                                </source>
+                                <source>
+                                    <location>${workflow.properties.path}/workflow.properties</location>
                                 </source>
                                 <source>
                                     <location>${proxy.properties.path}/proxy.properties</location>
