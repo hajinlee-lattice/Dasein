@@ -29,6 +29,7 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
 
     @SuppressWarnings("unchecked")
     public List<AmAttribute> findAttributes(String key, String parentKey, String parentValue) {
+        log.info("query attributes for : " + key + " pkey: " + parentKey + " pValue: " + parentValue);
         Session session = getSession();
         Criteria criteria = session.createCriteria(AmAttribute.class);
 
@@ -51,7 +52,6 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
         criteria.add(Restrictions.eq("attrValue",  key));
         criteria.add(Restrictions.eq("attrKey",  "_KEY_"));
         List<AmAttribute> attrs = criteria.list();
-        log.info("Search result " + attrs.toString());
         return attrs.get(0);
     }
 
@@ -83,13 +83,43 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
                                              attrEntityClz.getSimpleName(),
                                              Company.class.getSimpleName(),
                                              keyField);
-            log.info("query string: " + queryStr);
             query = session.createQuery(queryStr);
             query.setString("attrKey", key);
         }
         List list = query.list();
         return list;
     }
+
+    @SuppressWarnings("unchecked")
+    public List<List> findSubCategoryCount(String key, String parentKey, String parentValue) {
+        Query query;
+        Session session = getSession();
+        Class<AmAttribute> attrEntityClz = getEntityClass();
+
+        if (parentKey != null) {
+            String queryStr = String.format("select new list(attr.parentValue, count(*)) from %s attr, %s pAttr " +
+                                            "where pAttr.attrKey = :attrKey and  attr.parentKey = :attrKey and attr.parentValue = pAttr.attrValue " +
+                                            "and pAttr.parentKey = :parentKey and pAttr.parentValue =:parentValue " +
+                                            "group by attr.parentValue ",
+                                             attrEntityClz.getSimpleName(),
+                                             attrEntityClz.getSimpleName());
+             query = session.createQuery(queryStr);
+             query.setString("attrKey", key);
+             query.setString("parentKey", parentKey);
+             query.setString("parentValue", parentValue);
+        } else {
+            String queryStr = String.format("select new list(attr.parentValue, count(*)) from %s attr, %s pAttr " +
+                                            "where pAttr.attrKey = :attrKey and  attr.parentKey = :attrKey and attr.parentValue = pAttr.attrValue " +
+                                            "group by attr.parentValue ",
+                                             attrEntityClz.getSimpleName(),
+                                             attrEntityClz.getSimpleName());
+            query = session.createQuery(queryStr);
+            query.setString("attrKey", key);
+        }
+        List list = query.list();
+        return list;
+    }
+
 
     private String convertPropToField(Class<?> entityClass, String property) {
          String fieldName = property;

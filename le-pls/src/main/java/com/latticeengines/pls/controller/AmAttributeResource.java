@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,7 +31,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 @Api(value = "amattibute", description = "REST resource for account master attributes")
 @RestController
 @RequestMapping("/amattributes")
-// @PreAuthorize("hasRole('View_PLS_Data')")
+@PreAuthorize("hasRole('View_PLS_Reports')")
 public class AmAttributeResource {
 
     private static final Log log = LogFactory.getLog(AmAttributeResource.class);
@@ -79,6 +80,10 @@ public class AmAttributeResource {
         log.info("search attributes Key=" + key + " pKey=" + parentKey + " pValue=" + parentValue + " populate=" + populate);
 
         return amAttributeEntityMgr.findAttributes(key, parentKey, parentValue, populate);
+    }
+
+    public AmAttributeEntityMgr getEntityMgr() {
+        return this.amAttributeEntityMgr;
     }
 
 }
