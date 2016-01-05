@@ -19,7 +19,7 @@ class LP_020200_DL_POC_Model(StepBase):
   def getApplicability(self, appseq):
 
     lgm = appseq.getLoadGroupMgr()
-    if lgm.hasLoadGroup('Download_BasicModelingSet') \
+    if lgm.hasLoadGroup('Download_BasicDataset') \
       and lgm.hasLoadGroup('Initialize') \
       and lgm.hasLoadGroup('Model') \
       and lgm.hasLoadGroup('Score_ConfiguredDateRange') \
@@ -231,27 +231,27 @@ class LP_020200_DL_POC_Model(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
+        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="Id" />
           </mcs>
         </rds>
-        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
+        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="Id" />
           </mcs>
         </rds>
-        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="False" eo_sftp="1">
+        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="False" eo_sftp="1">
           <mcs>
             <mc cn="Id" />
           </mcs>
         </rds>
-        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
+        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="Id" />
           </mcs>
         </rds>
-        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
+        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="ContactId" />
             <mc cn="CreatedById" />
@@ -312,7 +312,7 @@ class LP_020200_DL_POC_Model(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="ActivityRecord_OtherThanNewLead" w="Workspace" sn="MKTO_ActivityRecord" cn="Marketo_DataProvider" u="False" ss="" tn="ActivityRecord" nmo="1" f="@datediff(now, day(2)) AND activityType in ('Click Link','Visit Webpage','Interesting Moment','Open Email','Email Bounced Soft','Fill Out Form','Unsubscribe Email','Click Email')" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="True" sr="50000" htw="24" mtw="60" emt="True" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
+        <rds n="ActivityRecord_OtherThanNewLead" w="Workspace" sn="MKTO_ActivityRecord" cn="Marketo_DataProvider" u="False" ss="" tn="ActivityRecord" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000) AND activityType in ('Click Link','Visit Webpage','Interesting Moment','Open Email','Email Bounced Soft','Fill Out Form','Unsubscribe Email','Click Email')" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="True" sr="50000" htw="24" mtw="60" emt="True" acd="True" mgf="False" eo="1" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="activityDateTime" />
             <mc cn="activityType" />
@@ -354,19 +354,18 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step6xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicModelingSet', 'Services', 'Download_BasicModelingSet', True, False)
-      POC_MKTO1 = etree.fromstring(lgm.getLoadGroup('Download_BasicModelingSet').encode('ascii', 'xmlcharrefreplace'))
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      POC_MKTO1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_MKTO1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_MKTO1))
       ngsxml_POC_MKTO1 = '<ngs><ng n="LoadCRMDataForModeling"/><ng n="LoadMAPDataForModeling_ActivityRecord_OtherThanNewLead"/><ng n="LoadMAPDataForModeling_LeadRecord"/><ng n="PropDataMatch"/></ngs>'
-      lgm.setLoadGroupFunctionality('Download_BasicModelingSet', ngsxml_POC_MKTO1)
+      lgm.setLoadGroupFunctionality('Download_BasicDataset', ngsxml_POC_MKTO1)
 
       lgm.createLoadGroup('Initialize', 'Services', 'Initialize', True, False)
       POC_MKTO2 = etree.fromstring(lgm.getLoadGroup('Initialize').encode('ascii', 'xmlcharrefreplace'))
       POC_MKTO2.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_MKTO2))
-      ngsxml_POC_MKTO2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="LoadCRMData_2Days"/><ng n="LoadMAPDataForModeling_ActivityRecord_NewLead"/>\
-      <ng n="LoadMAPDataForModeling_ActivityRecord_2Days"/><ng n="LoadMAPDataForModeling_LeadRecord"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      ngsxml_POC_MKTO2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="CreateEventTableQueries"/></ngs>'
       lgm.setLoadGroupFunctionality('Initialize', ngsxml_POC_MKTO2)
 
       lgm.createLoadGroup('Model', 'Services', 'Model', True, False)
@@ -375,6 +374,13 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(etree.tostring(POC_MKTO3))
       ngsxml_POC_MKTO3 = '<ngs><ng n="CreateAnalyticPlay"/></ngs>'
       lgm.setLoadGroupFunctionality('Model', ngsxml_POC_MKTO3)
+
+      lgm.createLoadGroup('CreatePOCEventTableQueries', 'Services', 'CreatePOCEventTableQueries', True, False)
+      POC_MKTO4 = etree.fromstring(lgm.getLoadGroup('CreatePOCEventTableQueries').encode('ascii', 'xmlcharrefreplace'))
+      POC_MKTO4.set('ng', 'True')
+      lgm.setLoadGroup(etree.tostring(POC_MKTO4))
+      ngsxml_POC_MKTO4 = '<ngs><ng n="LoadCRMData_2Days"/><ng n="LoadMAPDataForModeling_ActivityRecord_2Days"/><ng n="LoadMAPDataForModeling_LeadRecord"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      lgm.setLoadGroupFunctionality('CreatePOCEventTableQueries', ngsxml_POC_MKTO4)
 
     elif type == 'ELQ':
 
@@ -541,15 +547,15 @@ class LP_020200_DL_POC_Model(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2)) AND @recordcount(1000000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
-        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1">
+        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
+        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1">
           <mcs>
             <mc cn="Id" />
           </mcs>
         </rds>
-        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
-        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
-        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2))" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
+        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
+        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
+        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="1" emd="False" eo_sftp="1" />
       </rdss>
       <validationExtracts />
       <ces />
@@ -595,7 +601,7 @@ class LP_020200_DL_POC_Model(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="ELQ_Contact" w="Workspace" sn="ELQ_Contact" cn="Eloqua_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) AND @recordcount(1000000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="True" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="1">
+        <rds n="ELQ_Contact" w="Workspace" sn="ELQ_Contact" cn="Eloqua_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="True" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="1">
           <mcs>
             <mc cn="C_Address1" />
             <mc cn="C_Annual_Revenue1" />
@@ -659,18 +665,18 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step6xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicModelingSet', 'Services', 'Download_BasicModelingSet', True, False)
-      POC_ELQ1 = etree.fromstring(lgm.getLoadGroup('Download_BasicModelingSet').encode('ascii', 'xmlcharrefreplace'))
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      POC_ELQ1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_ELQ1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_ELQ1))
       ngsxml_POC_ELQ1 = '<ngs><ng n="LoadCRMDataForModeling"/><ng n="LoadMAPDataForModeling"/><ng n="PropDataMatch"/></ngs>'
-      lgm.setLoadGroupFunctionality('Download_BasicModelingSet', ngsxml_POC_ELQ1)
+      lgm.setLoadGroupFunctionality('Download_BasicDataset', ngsxml_POC_ELQ1)
 
       lgm.createLoadGroup('Initialize', 'Services', 'Initialize', True, False)
       POC_ELQ2 = etree.fromstring(lgm.getLoadGroup('Initialize').encode('ascii', 'xmlcharrefreplace'))
       POC_ELQ2.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_ELQ2))
-      ngsxml_POC_ELQ2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="LoadCRMData_2Days"/><ng n="LoadMAPData_2Days"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      ngsxml_POC_ELQ2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="CreateEventTableQueries"/></ngs>'
       lgm.setLoadGroupFunctionality('Initialize', ngsxml_POC_ELQ2)
 
       lgm.createLoadGroup('Model', 'Services', 'Model', True, False)
@@ -679,6 +685,13 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(etree.tostring(POC_ELQ3))
       ngsxml_POC_ELQ3 = '<ngs><ng n="CreateAnalyticPlay"/></ngs>'
       lgm.setLoadGroupFunctionality('Model', ngsxml_POC_ELQ3)
+
+      lgm.createLoadGroup('CreatePOCEventTableQueries', 'Services', 'CreatePOCEventTableQueries', True, False)
+      POC_ELQ4 = etree.fromstring(lgm.getLoadGroup('CreatePOCEventTableQueries').encode('ascii', 'xmlcharrefreplace'))
+      POC_ELQ4.set('ng', 'True')
+      lgm.setLoadGroup(etree.tostring(POC_ELQ4))
+      ngsxml_POC_ELQ4 = '<ngs><ng n="LoadCRMData_2Days"/><ng n="LoadMAPData_2Days"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      lgm.setLoadGroupFunctionality('CreatePOCEventTableQueries', ngsxml_POC_ELQ4)
 
     else:
       # POC SFDC 1: Change filter for LoadCRMDataForModeling
@@ -781,7 +794,7 @@ class LP_020200_DL_POC_Model(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
+        <rds n="SFDC_Contact" w="Workspace" sn="SFDC_Contact" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
           <mcs>
             <mc cn="AccountId" />
             <mc cn="CreatedDate" />
@@ -798,7 +811,7 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="Title" />
           </mcs>
         </rds>
-        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="False" eo_sftp="2">
+        <rds n="SFDC_Lead" w="Workspace" sn="SFDC_Lead" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="False" eo_sftp="2">
           <mcs>
             <mc cn="AnnualRevenue" />
             <mc cn="City" />
@@ -820,7 +833,7 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="Title" />
           </mcs>
         </rds>
-        <rds n="SFDC_Account" w="Workspace" sn="SFDC_Account" cn="SFDC_DataProvider" u="False" ss="" tn="Account" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
+        <rds n="SFDC_Account" w="Workspace" sn="SFDC_Account" cn="SFDC_DataProvider" u="False" ss="" tn="Account" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
           <mcs>
             <mc cn="AnnualRevenue" />
             <mc cn="BillingCity" />
@@ -832,7 +845,7 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="NumberOfEmployees" />
           </mcs>
         </rds>
-        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
+        <rds n="SFDC_Opportunity" w="Workspace" sn="SFDC_Opportunity" cn="SFDC_DataProvider" u="False" ss="" tn="Opportunity" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
           <mcs>
             <mc cn="AccountId" />
             <mc cn="Amount" />
@@ -855,7 +868,7 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="Type" />
           </mcs>
         </rds>
-        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="False" eo_sftp="2">
+        <rds n="SFDC_User" w="Workspace" sn="SFDC_User" cn="SFDC_DataProvider" u="False" ss="" tn="User" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="False" eo_sftp="2">
           <mcs>
             <mc cn="Department" />
             <mc cn="Id" />
@@ -864,7 +877,7 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="Title" />
           </mcs>
         </rds>
-        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2)) " ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
+        <rds n="SFDC_OpportunityContactRole" w="Workspace" sn="SFDC_OpportunityContactRole" cn="SFDC_DataProvider" u="False" ss="" tn="OpportunityContactRole" nmo="1" f="@datediff(now, day(2)) AND @recordCOUNT(5000)" ad="True" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="True" mgf="True" eo="2" emd="True" eo_sftp="2">
           <mcs>
             <mc cn="ContactId" />
             <mc cn="CreatedById" />
@@ -925,18 +938,18 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step2xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicModelingSet', 'Services', 'Download_BasicModelingSet', True, False)
-      POC_SFDC1 = etree.fromstring(lgm.getLoadGroup('Download_BasicModelingSet').encode('ascii', 'xmlcharrefreplace'))
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      POC_SFDC1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_SFDC1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_SFDC1))
       ngsxml_POC_SFDC1 = '<ngs><ng n="LoadCRMDataForModeling"/><ng n="PropDataMatch"/></ngs>'
-      lgm.setLoadGroupFunctionality('Download_BasicModelingSet', ngsxml_POC_SFDC1)
+      lgm.setLoadGroupFunctionality('Download_BasicDataset', ngsxml_POC_SFDC1)
 
       lgm.createLoadGroup('Initialize', 'Services', 'Initialize', True, False)
       POC_SFDC2 = etree.fromstring(lgm.getLoadGroup('Initialize').encode('ascii', 'xmlcharrefreplace'))
       POC_SFDC2.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_SFDC2))
-      ngsxml_POC_SFDC2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="LoadCRMData_2Days"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      ngsxml_POC_SFDC2 = '<ngs><ng n="ImportMetaData"/><ng n="ImportCfgTables"/><ng n="CreateEventTableQueries"/></ngs>'
       lgm.setLoadGroupFunctionality('Initialize', ngsxml_POC_SFDC2)
 
       lgm.createLoadGroup('Model', 'Services', 'Model', True, False)
@@ -946,8 +959,15 @@ class LP_020200_DL_POC_Model(StepBase):
       ngsxml_POC_SFDC3 = '<ngs><ng n="CreateAnalyticPlay"/></ngs>'
       lgm.setLoadGroupFunctionality('Model', ngsxml_POC_SFDC3)
 
+      lgm.createLoadGroup('CreatePOCEventTableQueries', 'Services', 'CreatePOCEventTableQueries', True, False)
+      POC_SFDC4 = etree.fromstring(lgm.getLoadGroup('CreatePOCEventTableQueries').encode('ascii', 'xmlcharrefreplace'))
+      POC_SFDC4.set('ng', 'True')
+      lgm.setLoadGroup(etree.tostring(POC_SFDC4))
+      ngsxml_POC_SFDC4 = '<ngs><ng n="LoadCRMData_2Days"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      lgm.setLoadGroupFunctionality('CreatePOCEventTableQueries', ngsxml_POC_SFDC4)
+
     # Create POC LG for All MKTO, ELQ and SFDC
-    lgm.createLoadGroup('Score_ConfiguredDateRange', 'Services', 'BulkScoring_PushToScoringDB', True, True)
+    lgm.createLoadGroup('Score_ConfiguredDateRange', 'Services', 'Score_ConfiguredDateRange', True, True)
     ngsxml1 = '<ngs><ng n="BulkScoring_PushToScoringDB"/></ngs>'
     lgm.setLoadGroupFunctionality('Score_ConfiguredDateRange', ngsxml1)
 
