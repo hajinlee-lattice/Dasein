@@ -628,6 +628,11 @@ class LP_020200_DL_POC_Model(StepBase):
             <mc cn="ContactID" />
           </mcs>
         </rds>
+        <rds n="ELQ_Contact_2" w="Workspace" sn="ELQ_Contact" cn="Eloqua_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@recordCOUNT(1) " ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2">
+          <mcs>
+            <mc cn="ContactID"/>
+          </mcs>
+        </rds>
       </rdss>
       <validationExtracts />
       <ces />
