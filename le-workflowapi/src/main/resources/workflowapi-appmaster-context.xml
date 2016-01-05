@@ -21,6 +21,7 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
+                <value>file:workflow.properties</value>
                 <value>file:workflowapi.properties</value>
                 <value>file:dataplatform.properties</value>
                 <value>file:db.properties</value>
