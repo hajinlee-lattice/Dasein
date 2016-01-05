@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.workflow;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,6 +10,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class Job implements HasId<Long>, HasName {
+
+    public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED, JobStatus.CANCELLED,
+            JobStatus.FAILED);
 
     private Long id;
     private String name;
