@@ -255,7 +255,7 @@ public class PropDataAdminTool {
     }
 
     private void executeArchiveCommand(Namespace ns) {
-        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-job-context.xml");
+        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
 
         if (ns.getString(NS_RAW_TYPE).equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
             CollectedArchiveService collectedArchiveService = (CollectedArchiveService) ac.getBean(sourceToBeArchived.getServiceBean());

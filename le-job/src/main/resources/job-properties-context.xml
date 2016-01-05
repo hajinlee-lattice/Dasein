@@ -24,17 +24,17 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${JOB_PROPDIR}/job.properties</value>
-                <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
-                <value>file:${DB_PROPDIR}/db.properties</value>
-                <value>file:${PROPDATA_PROPDIR}/propdata.properties</value>
-                <value>file:${DATAFLOW_PROPDIR}/dataflow.properties</value>
-                <value>file:${PLS_PROPDIR}/pls.properties</value>
-                <value>file:${SCORING_PROPDIR}/scoring.properties</value>
-                <value>file:${DELLEBI_PROPDIR}/dellebi.properties</value>
-                <value>file:${SECURITY_PROPDIR}/security.properties</value>
-                <value>file:${PROXY_PROPDIR}/proxy.properties</value>
-                <value>file:${CAMILLE_PROPDIR}/camille.properties</value>
+                <value>file:${JOB_PROPDIR:/etc/ledp}/job.properties</value>
+                <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
+                <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${PROPDATA_PROPDIR:/etc/ledp}/propdata.properties</value>
+                <value>file:${DATAFLOW_PROPDIR:/etc/ledp}/dataflow.properties</value>
+                <value>file:${PLS_PROPDIR:/etc/ledp}/pls.properties</value>
+                <value>file:${SCORING_PROPDIR:/etc/ledp}/scoring.properties</value>
+                <value>file:${DELLEBI_PROPDIR:/etc/ledp}/dellebi.properties</value>
+                <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
+                <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
+                <value>file:${CAMILLE_PROPDIR:/etc/ledp}/camille.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
