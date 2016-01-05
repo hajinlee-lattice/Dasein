@@ -46,7 +46,7 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private JobExplorer jobExplorer;
-    
+
     @Autowired
     private WorkflowService workflowService;
 
@@ -57,7 +57,7 @@ public class WorkflowExecutionCache {
                      .build();
          executorService = Executors.newFixedThreadPool(Integer.parseInt(numJobThreads));
     }
-    
+
     public List<Job> getJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
         List<Job> jobs = new ArrayList<>();
 
@@ -69,11 +69,11 @@ public class WorkflowExecutionCache {
                 jobs.add(cache.getIfPresent(workflowId.getId()));
             }
         }
-        
+
         jobs.addAll(loadMissingJobs(missingJobIds));
         return jobs;
     }
-    
+
     public Job getJob(WorkflowExecutionId workflowId) {
         if (cache.getIfPresent(workflowId.getId()) != null) {
             return cache.getIfPresent(workflowId.getId());
@@ -90,8 +90,7 @@ public class WorkflowExecutionCache {
         job.setStartTimestamp(workflowStatus.getStartTime());
         job.setJobType(jobInstance.getJobName());
         job.setSteps(getJobSteps(jobExecution));
-        if (job.getJobStatus() == JobStatus.CANCELLED || job.getJobStatus() == JobStatus.COMPLETED
-                || job.getJobStatus() == JobStatus.FAILED) {
+        if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());
             cache.put(job.getId(), job);
         }
@@ -102,7 +101,7 @@ public class WorkflowExecutionCache {
     private List<Job> loadMissingJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
         List<Job> missingJobs = new ArrayList<>();
         Set<Callable<Job>> callables = new HashSet<>();
-        
+
         for (final WorkflowExecutionId workflowId : workflowIds) {
             callables.add(new Callable<Job>() {
                 public Job call() throws Exception {
@@ -110,7 +109,7 @@ public class WorkflowExecutionCache {
                 }
             });
         }
-        
+
         List<Future<Job>> futures = executorService.invokeAll(callables);
         for (Future<Job> future : futures) {
             Job job = future.get();
@@ -119,7 +118,7 @@ public class WorkflowExecutionCache {
 
         return missingJobs;
     }
-    
+
     private List<JobStep> getJobSteps(JobExecution jobExecution) {
         List<JobStep> steps = new ArrayList<>();
 
