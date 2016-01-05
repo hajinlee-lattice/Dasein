@@ -115,7 +115,7 @@ public class WorkflowSubmitter {
                     .uniqueKeyColumn("LatticeAccountID") //
                     .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //
-                    .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                    .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                     .build();
 
             String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();
