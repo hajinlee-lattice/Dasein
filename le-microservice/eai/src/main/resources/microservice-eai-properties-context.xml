@@ -24,11 +24,11 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${EAI_PROPDIR}/eai.properties</value>
-                <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
-                <value>file:${DB_PROPDIR}/db.properties</value>
-                <value>file:${SECURITY_PROPDIR}/security.properties</value>
-                <value>file:${PROXY_PROPDIR}/proxy.properties</value>
+                <value>file:${EAI_PROPDIR:/etc/ledp}/eai.properties</value>
+                <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
+                <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
+                <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

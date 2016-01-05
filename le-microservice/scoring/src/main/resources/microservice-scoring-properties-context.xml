@@ -24,9 +24,9 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${SCORING_PROPDIR}/scoring.properties</value>
-                <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
-                <value>file:${DB_PROPDIR}/db.properties</value>
+                <value>file:${SCORING_PROPDIR:/etc/ledp}/scoring.properties</value>
+                <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
+                <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
