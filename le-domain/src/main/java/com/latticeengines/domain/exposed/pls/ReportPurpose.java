@@ -7,9 +7,11 @@ public enum ReportPurpose {
     IMPORT_SUMMARY("ImportSummary"), //
     MODEL_SUMMARY("ModelSummary"), //
     INDUSTRY_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry"), //
+    SUBINDUSTRY_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry2"), //
     REVENUE_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessRevenueRange"), //
     EMPLOYEE_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange"), //
     INDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry_Probability"), //
+    SUBINDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry2_Probability"), //
     REVENUE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessRevenueRange_Probability"), //
     EMPLOYEE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange_Probability");
     
