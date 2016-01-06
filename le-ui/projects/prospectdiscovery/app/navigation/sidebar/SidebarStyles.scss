@@ -46,11 +46,16 @@
         }
 
         span.fa, span.ico {
-            margin-right: 5px;
             vertical-align: text-top;
         }
 
-        em {
+        em.pd-sidebar-category-icon {
+            text-align: center;
+            display: inline-block;
+            width: 1.5em;
+        }
+
+        em.pd-sidebar-category-label {
             text-overflow: ellipsis;
             white-space: nowrap;
             max-width: 12.5em;

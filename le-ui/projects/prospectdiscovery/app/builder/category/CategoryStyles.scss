@@ -3,16 +3,43 @@
     perspective-origin: 50% 0%;
     min-height: 1024px;
     
+    .page-header {
+        padding-top: 0px;
+    }
+
     select.custom-select {
         height: 43px;
         border: 1px solid #ccc;
-        width: 8em !important;
+        width: auto !important;
         font-size: 12pt;
         vertical-align: bottom;
     }
+
+    span.subcategory-header {
+        display: inline-block;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        text-align: left;
+        vertical-align: middle;
+        max-width: calc(100% - 3.5em);
+    }
+
+    span.subcategory-header-total {
+        min-width: 33em;
+        float: right;
+        margin: 0;
+    }
+
+    .category-results {
+        position: relative;
+        min-height: 735px;
+    }
+
     .tile-list {
         justify-content: space-around;
     }
+    
     .list-item {
         margin-bottom: 2em;
         color: #000;

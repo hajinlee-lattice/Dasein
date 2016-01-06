@@ -51,6 +51,7 @@ angular
                 AttributesService.get(args).then(function(list) {
                     list = list || [];
 
+                    console.log('xhr result',list);
                     list.forEach(function(item, index) {
                         // FIXME - Make REGION top level, because Country data is limited
                         if (item.ParentKey == 'Country')
@@ -59,6 +60,7 @@ angular
                         // FIXME - Fudging the numbers a bit for the demo
                         // Will be removing this stuff when API returns real data
                         item.lift = (Math.random() * 3.0).toFixed(1) + 'x';
+                        item.total = item.Properties.SubCategoryCount || null;
                         item.revenue = Math.round(Math.random() * 30000000);
                         item.lattice_companies = item.Properties.CompanyCount;
                         item.their_companies = Math.round(Math.random() * item.lattice_companies);
@@ -137,34 +139,41 @@ angular
             return deferred.promise;
         };
     })
-    .controller('AttributesCtrl', function($state, $stateParams, AttributesModel) {
-        this.SubCategoryMap = AttributesModel.SubCategoryMap;
-        this.ParentCategoryMap = AttributesModel.ParentCategoryMap;
+    .controller('AttributesCtrl', function($scope, $state, $stateParams, AttributesModel) {
+        var vm = this;
 
-        angular.extend(this, $stateParams, {
+        vm.SubCategoryMap = AttributesModel.SubCategoryMap;
+        vm.ParentCategoryMap = AttributesModel.ParentCategoryMap;
+
+        angular.extend(vm, $stateParams, {
             init: function() {
-                this.SortProperty = 'AttrValue';
-                this.SortDirection = '';
-                this.SearchValue = '';
-                this.ShowSearch = false;
-                this.FilterChecked = false;
-                this.TruncateLimit = 32;
+                vm.SortProperty = 'AttrValue';
+                vm.SortDirection = '';
+                vm.SearchValue = '';
+                vm.ShowSearch = false;
+                vm.FilterChecked = false;
+                vm.TruncateLimit = 32;
 
-                if (!this.AttrKey) {
+                if (!vm.AttrKey) {
                     return console.log('<!> No stateParams provided');
                 }
 
                 // This might work better in a UI-Router "resolve"
                 AttributesModel
-                    .getList($stateParams)
-                    .then(angular.bind(this, this.processList));
+                    .getList({ 
+                        AttrKey: vm.AttrKey,
+                        AttrValue: vm.AttrValue,
+                        ParentKey: vm.ParentKey,
+                        ParentValue: vm.ParentValue
+                    })
+                    .then(angular.bind(vm, vm.processList));
             },
 
             processList: function(list) {
-                this.total = list.length;
-                this.list = list;
-                this.SubCategory = this.SubCategoryMap[this.AttrKey];
-                this.ParentCategory = this.ParentCategoryMap[this.AttrKey] || this.AttrKey;
+                vm.total = list.length;
+                vm.list = list;
+                vm.SubCategory = vm.SubCategoryMap[vm.AttrKey];
+                vm.ParentCategory = vm.ParentCategoryMap[vm.AttrKey] || vm.AttrKey;
             },
 
             // Interaction with the Filters Sorting drop-down
@@ -172,18 +181,18 @@ angular
 
             // Drill down to sub category if one exists
             handleTileClick: function($event, item) {
-                if (this.SubCategory) {
+                if (vm.SubCategory) {
                     $state.go("builder.category", { 
-                        ParentKey: this.ParentCategory, 
+                        ParentKey: vm.ParentCategory, 
                         ParentValue: item.AttrValue, 
-                        AttrKey: this.SubCategory
+                        AttrKey: vm.SubCategory
                     });
                 }
             },
 
             // Parent selects all children, and a child makes sure parent is selected.
             handleTileSelect: function(targetTile) {
-                var SubCategory = this.SubCategory;
+                var SubCategory = vm.SubCategory;
 
                 targetTile.modified = Date.now();
                 targetTile.visible = !SubCategory;
@@ -191,11 +200,11 @@ angular
                 if (SubCategory) {
                     AttributesModel
                         .getList({
-                            ParentKey: this.ParentCategory,
+                            ParentKey: vm.ParentCategory,
                             ParentValue: targetTile.AttrValue,
                             AttrKey: SubCategory
                         })
-                        .then(angular.bind(this, function(result) {
+                        .then(angular.bind(vm, function(result) {
                             targetTile.total = result.length;
 
                             result.forEach(function(item, index) {
@@ -210,7 +219,7 @@ angular
                             AttrKey: targetTile.ParentKey,
                             AttrValue: targetTile.ParentValue
                         })
-                        .then(angular.bind(this, function(result) {
+                        .then(angular.bind(vm, function(result) {
                             (result.length > 0 ? result[0] : {})
                                 .selected = targetTile.selected;
                         }));
@@ -227,7 +236,7 @@ angular
                                 AttrKey: targetTile.ParentKey,
                                 AttrValue: targetTile.ParentValue
                             })
-                            .then(angular.bind(this, function(result) {
+                            .then(angular.bind(vm, function(result) {
                                 (result.length > 0 ? result[0] : {})
                                     .selected = targetTile.selected;
                             }));
@@ -235,6 +244,16 @@ angular
                 }
             }
         });
-
-        this.init();
+/*
+        $scope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams){
+            console.log('preventing transition', $state.current.name, event,'\n', toState,'\n', toParams, '\n', fromState, '\n', fromParams);
+            
+            if ($state.current.name == 'builder.category') {
+                angular.extend(vm, toParams);
+                vm.init();
+                event.preventDefault(); 
+            }
+        });
+*/
+        vm.init();
     })

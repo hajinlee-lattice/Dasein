@@ -88,7 +88,7 @@ angular.module('pd.navigation.subnav', [
 
             transition = 'transform ' + duration + 'ms ease';
             transitionEvent = this.whichTransitionEvent();
-            console.log('perspective:',perspective,', magnitude:',magnitude, ', angle:',angle, ', duration:',duration, '\n', transition, transform);
+
             item.style.transition = 'transform 0ms linear';
             //item.style.transform = 'rotate3d(0, 0, 0, 0deg) translate3d(0,0,0px)'; 
             li.style.perspectiveOrigin = '50% 50%';
