@@ -74,16 +74,15 @@ class ImputationStep(PipelineStep):
         outputFrame = self.imputeValues(outputFrame, nullValues, calculateImputationValues)
           
         return outputFrame
-  
-        
+   
     def generateTransformedBooleanColumns(self, dataFrame, calculateImputationValues):
         outputFrame = dataFrame
         nullCols, nullValues = self.generateIsNullColumns(outputFrame)
-  
+
         if len(nullValues) > 0:
             if calculateImputationValues:
                 (self.scalingArray, self.meanColumn, self.componentMatrix) = self.nullValuePCA(nullCols, outputFrame[self.targetColumn])
-      
+
             nullCol_transformed = self.getTransformedMatrix(self.scalingArray, self.meanColumn, self.componentMatrix, nullCols)
             if len(nullCol_transformed > 0):
                 nullCol_transformed = pd.DataFrame(nullCol_transformed)
@@ -95,14 +94,14 @@ class ImputationStep(PipelineStep):
         nullValues = {}
         outputFrame = dataFrame
         nullColsFrame = pd.DataFrame()
-  
+     
         if len(self.enumMappings_) > 0:
             for column in self.enumMappings_:
                 if column in outputFrame:
                     isNullColumn, nullCount = self.getIsNullColumn(outputFrame[column])
                     nullValues[column] = nullCount
                     nullColsFrame[column + "_isNull"] = pd.Series(isNullColumn)
-  
+
         return nullColsFrame, nullValues
                  
     def getIsNullColumn(self, dataColumn):
@@ -150,11 +149,12 @@ class ImputationStep(PipelineStep):
         scaling_array = self.getScalingForPCA(inputDF, eventCol)
         inputScaled = np.multiply(inputDF.values, np.ones(inputDF.shape) * scaling_array.T)
         np.nan_to_num(inputScaled)
-  
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
-        indexOfMaxVariance = self.getindexofMaxVariance(explainedVarianceRatio, thresholdVariance)
-        means = np.mean(inputScaled, axis=0)
-  
+
+        if (len(componentsMatrix) < 5):
+            complementaryColumns = np.zeros((5-len(componentsMatrix), len(componentsMatrix[0])))
+            componentsMatrix = np.vstack((componentsMatrix, complementaryColumns))
+
         return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
         
     def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
