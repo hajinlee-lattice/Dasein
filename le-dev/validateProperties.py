@@ -98,8 +98,8 @@ def compareTwoDictionaries(qaDictionary, prodDictionary):
     qaKeys = set(qaDictionary.keys())
     prodKeys = set(prodDictionary.keys())
     intersectKeys = qaKeys.intersection(prodKeys)
-    qaUniqueKeys = qaKeys - prodKeys
-    prodUniqueKeys = prodKeys - qaKeys
+    qaUniqueKeys = qaKeys - intersectKeys
+    prodUniqueKeys = prodKeys - intersectKeys
     missingValues = {o : (qaDictionary[o], prodDictionary[o]) for o in intersectKeys if (qaDictionary[o] != prodDictionary[o] and (qaDictionary[o] == '' or prodDictionary[o] == ''))}
     if len(qaUniqueKeys) != 0:
         print "QA property file has the following unique keys:"
