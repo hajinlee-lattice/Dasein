@@ -354,7 +354,7 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step6xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download: Basic Dataset', True, False)
       POC_MKTO1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_MKTO1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_MKTO1))
@@ -379,7 +379,7 @@ class LP_020200_DL_POC_Model(StepBase):
       POC_MKTO4 = etree.fromstring(lgm.getLoadGroup('CreatePOCEventTableQueries').encode('ascii', 'xmlcharrefreplace'))
       POC_MKTO4.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_MKTO4))
-      ngsxml_POC_MKTO4 = '<ngs><ng n="LoadCRMData_2Days"/><ng n="LoadMAPDataForModeling_ActivityRecord_2Days"/><ng n="LoadMAPDataForModeling_LeadRecord"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
+      ngsxml_POC_MKTO4 = '<ngs><ng n="LoadCRMData_2Days"/><ng n="LoadMAPData_ActivityRecord_NewLead"/><ng n="LoadMAPDataForModeling_ActivityRecord_2Days"/><ng n="LoadMAPDataForModeling_LeadRecord"/><ng n="PropDataMatch"/><ng n="CreateEventTableQueries"/></ngs>'
       lgm.setLoadGroupFunctionality('CreatePOCEventTableQueries', ngsxml_POC_MKTO4)
 
     elif type == 'ELQ':
@@ -670,7 +670,7 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step6xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download: Basic Dataset', True, False)
       POC_ELQ1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_ELQ1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_ELQ1))
@@ -943,7 +943,7 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroup(step2xml)
 
       # Create POC Nested LGs as Servies
-      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download_BasicDataset', True, False)
+      lgm.createLoadGroup('Download_BasicDataset', 'Services', 'Download: Basic Dataset', True, False)
       POC_SFDC1 = etree.fromstring(lgm.getLoadGroup('Download_BasicDataset').encode('ascii', 'xmlcharrefreplace'))
       POC_SFDC1.set('ng', 'True')
       lgm.setLoadGroup(etree.tostring(POC_SFDC1))
@@ -972,11 +972,11 @@ class LP_020200_DL_POC_Model(StepBase):
       lgm.setLoadGroupFunctionality('CreatePOCEventTableQueries', ngsxml_POC_SFDC4)
 
     # Create POC LG for All MKTO, ELQ and SFDC
-    lgm.createLoadGroup('Score_ConfiguredDateRange', 'Services', 'Score_ConfiguredDateRange', True, True)
+    lgm.createLoadGroup('Score_ConfiguredDateRange', 'Services', 'Score: Configured Date Range', True, True)
     ngsxml1 = '<ngs><ng n="BulkScoring_PushToScoringDB"/></ngs>'
     lgm.setLoadGroupFunctionality('Score_ConfiguredDateRange', ngsxml1)
 
-    lgm.createLoadGroup('Upload_LatestScoredLeadsToCustomer', 'Services', 'Upload_LatestScoredLeadsToCustomer', True, True)
+    lgm.createLoadGroup('Upload_LatestScoredLeadsToCustomer', 'Services', 'Upload: Latest Scored Leads to Customer', True, True)
     ngsxml2 = '<ngs><ng n="PushToLeadDestination"/></ngs>'
     lgm.setLoadGroupFunctionality('Upload_LatestScoredLeadsToCustomer', ngsxml2)
 
