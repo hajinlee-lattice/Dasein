@@ -83,20 +83,22 @@ angular.module('pd.jobs.import.ready', [
             function onSuccess(response) {
                 var targetmarket = response.data;
                 var reportName;
-                if (targetmarket.reports.length == 1) {
-                    reportName = targetmarket.reports[0].report_name;
+                for (var i = 0; i < targetmarket.reports.length; i++) {
+                    if (targetmarket.reports[i].report.purpose.toUpperCase() == "IMPORT_SUMMARY") {
+                        reportName = targetmarket.reports[i].report_name;
 
-                    $http({
-                        method: 'Get',
-                        url: '/pls/reports/' + reportName
-                    }).then(
-                       function onSuccess(response) {
-                           result.resultObj = response.data;
-                           deferred.resolve(result);
-                       }, function onError(response) {
-                           
-                       }
-                    )
+                        $http({
+                            method: 'Get',
+                            url: '/pls/reports/' + reportName
+                        }).then(
+                           function onSuccess(response) {
+                               result.resultObj = response.data;
+                               deferred.resolve(result);
+                           }, function onError(response) {
+                               
+                           }
+                        )
+                    }
                 }
             }, function onError(response) {
                 
