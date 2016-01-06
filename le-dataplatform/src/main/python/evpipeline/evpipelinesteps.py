@@ -151,8 +151,8 @@ class ImputationStep(PipelineStep):
         np.nan_to_num(inputScaled)
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
 
-        if (len(componentsMatrix) < 5):
-            complementaryColumns = np.zeros((5-len(componentsMatrix), len(componentsMatrix[0])))
+        if (len(componentsMatrix) < numberOfColumnsThreshold):
+            complementaryColumns = np.zeros((numberOfColumnsThreshold - len(componentsMatrix), len(componentsMatrix[0])))
             componentsMatrix = np.vstack((componentsMatrix, complementaryColumns))
 
         return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
