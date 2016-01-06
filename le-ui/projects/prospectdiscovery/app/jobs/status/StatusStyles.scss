@@ -22,6 +22,11 @@
 
 .chevron-row {
     text-align: center;
+    
+    .completion-times span {
+        display: inline-block;
+        width: 191px;
+    }
 }
 .breadcrumb {
     /*centering*/
