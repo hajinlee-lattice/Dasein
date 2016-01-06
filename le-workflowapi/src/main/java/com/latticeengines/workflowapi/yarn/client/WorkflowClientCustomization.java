@@ -1,11 +1,18 @@
 package com.latticeengines.workflowapi.yarn.client;
 
+import java.util.Collection;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.LocalResourceType;
+import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.fs.LocalResourcesFactoryBean;
+import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
 import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -27,6 +34,17 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
     @Override
     public String getModuleName() {
         return "workflowapi";
+    }
+
+    @Override
+    public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
+        Collection<TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
+        
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/workflow/workflow.properties", //
+                false));
+        return hdfsEntries;
     }
 
 }
