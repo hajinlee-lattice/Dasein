@@ -6,9 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
-
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Buffer;
@@ -16,6 +13,9 @@ import cascading.operation.BufferCall;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 
 @SuppressWarnings("rawtypes")
 public class PivotBuffer extends BaseOperation implements Buffer {
@@ -137,7 +137,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static Object aggregateSum(Object oldValue, Object newValue) {
         if (oldValue == null) {
             return newValue;
