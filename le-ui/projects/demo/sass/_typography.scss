@@ -188,7 +188,7 @@ Lists
 	padding: 20px;
 	background: rgba(255, 255, 255, 0.9);
 	color: $dark-gray;
-	min-height: 170px;
+	min-height: 180px;
 }
 .gray-summary-list {
 	background: $white-gold;
@@ -205,7 +205,7 @@ Lists
 		float: left;
 		clear: left;
 		text-align: left;
-		width: 50%;
+		width: 60%;
 	}
 }
 .summary-list dt:after {
@@ -216,7 +216,7 @@ Lists
 		color: #497eb8;
 	}
 	@include media(">medium") {
-		margin: 0 0 0 50%;
+		margin: 0 0 0 60%;
 		padding: 0;
 		text-align: right;
 	}
