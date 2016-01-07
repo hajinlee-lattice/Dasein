@@ -3,7 +3,7 @@
     	<a ui-sref="markets.list" class="button icon-button">
     	    <span class="fa fa-angle-left"></span>
     	</a>
-    	<h3>{{ TargetMarketName }}</h3>
+    	<h3 contenteditable="true">{{ TargetMarketName }}</h3>
     </div>
     <ul class="menu progress-menu">
         <li role="presentation" ui-sref-active-eq="active">
@@ -34,7 +34,14 @@
                             <em class="pd-sidebar-category-label">
                                 {{ item.AttrValue }}
                             </em>
-                            <span class="pd-sidebar-category-total" ng-if="item.total > 0"> [<span class="blue-text">{{ SelectedChildren.length }}</span>]</span>
+                            <span class="badge badge-blue pull-right pd-sidebar-category-total" ng-if="SelectedChildren.length > 0">
+                                {{ SelectedChildren.length }}
+                            </span>
+                            <!--
+                            <span class="pd-sidebar-category-total" ng-if="item.total > 0">
+                                [<span class="blue-text">{{ SelectedChildren.length }}</span>]
+                            </span>
+                            -->
                         </span>
                         <ul class="pd-sidebar-subcategory" ng-show="item.expanded">
                             <li ng-repeat="SubCategory in MasterList | filter: { selected: true, ParentKey: item.AttrKey, ParentValue: item.AttrValue } as SelectedChildren">

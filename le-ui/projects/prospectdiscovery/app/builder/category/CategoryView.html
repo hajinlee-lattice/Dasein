@@ -85,11 +85,13 @@
                             />
                             <label for="attr-checkbox_{{ col }}" class="attr-label">
                                 {{ item.AttrValue | limitTo: vm.TruncateLimit }}{{item.AttrValue.length > vm.TruncateLimit ? '&hellip;' : ''}}
-                                &nbsp;<span ng-if="item.total > 0">( <span class="blue-text">{{ item.total }}</span> )</span>
+                                <span class="attr-label-subcategory-total" ng-if="item.total > 0">
+                                    ( <span class="blue-text">{{ item.total }}</span> )
+                                </span>
                             </label>
                         </div>
                         <div class="text-right pull-right">
-                            <h3 class="lift">{{ item.lift || "1.0x" }}</h3>
+                            <h3 class="lift">{{ item.lift | number:1 || "1.0x" }}x</h3>
                             <span class="success-text">${{ item.revenue | number:0 }}</span>
                         </div>
                     </div><!-- End .tile-head ; $event.stopPropagation();-->
@@ -97,11 +99,11 @@
                         <div class="stats-container pull-left">
                             <dl class="stats">
                                 <dt>Available from Lattice</dt>
-                                <dd class="blue-text">{{ item.lattice_companies | number:0 }}</dd>
+                                <dd class="in-database">{{ item.lattice_companies | number:0 }}</dd>
                             </dl>
                             <dl class="stats">
                                 <dt>All in your database</dt>
-                                <dd class="in-database">
+                                <dd class="blue-text">
                                     {{ item.their_companies | number:0 }}&nbsp;
                                 <span class="smaller">
                                     ({{ item.companies_percent | number:1 }}%)
@@ -118,15 +120,12 @@
                         </div>
                         <div class="circle-container pull-right">
                             <div 
-                                class="big-circle saphire-bkg">
-                            </div>
-                            <div 
-                                class="medium-circle gun-metal-bkg"
-                                style="width:{{ item.companies_percent }}%;height:{{ item.companies_percent }}%;">
+                                class="medium-circle saphire-bkg"
+                                style="width:100%;height:100%;">
                             </div>
                             <div 
                                 class="small-circle jet-bkg"
-                                style="width:{{ item.customer_percent }}%;height:{{ item.customer_percent }}%;">
+                                style="width:{{ item.customer_percent_of_theirs | number:3 }}%;height:{{ item.customer_percent_of_theirs | number:3 }}%;">
                             </div>
                         </div>
                     </div><!-- End .tile-meta -->
@@ -143,4 +142,4 @@
         </div>
     </div>
 
-</div>
+</div> <!-- End of line. -->

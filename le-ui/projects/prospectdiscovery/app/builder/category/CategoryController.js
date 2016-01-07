@@ -2,9 +2,7 @@ angular
     .module('pd.builder.attributes', [
         'pd.navigation.pagination'
     ])
-    .service('AttributesModel', function($q, AttributesService, $filter) {
-        var AttributesModel = this;
-
+    .service('AttributesModel', function($q, AttributesService, StateMapping, $filter) {
         // Map used to determine AttrKey's sub category
         this.SubCategoryMap = {
             'Industry': 'SubIndustry',
@@ -47,37 +45,42 @@ angular
                 }, 1);
             } else {
                 master = this.MasterList;
+                
+                var get = function(item, key, random_max) {
+                    return item.Properties
+                        ? item.Properties[key] && item.Properties[key] != "0"
+                            ? item.Properties[key]
+                            : Math.round(Math.random() * random_max)
+                        : 'null';
+                };
 
                 AttributesService.get(args).then(function(list) {
+                    console.log('xhr result',list);
                     list = list || [];
 
-                    console.log('xhr result',list);
                     list.forEach(function(item, index) {
+
                         // FIXME - Make REGION top level, because Country data is limited
-                        if (item.ParentKey == 'Country')
+                        if (item.ParentKey == 'Country') {
                             item.ParentKey = '_OBJECT_';
+                        }
+
+                        item.selected = false;
+                        item.AttrValue = StateMapping[item.AttrValue] || item.AttrValue;
 
                         // FIXME - Fudging the numbers a bit for the demo
                         // Will be removing this stuff when API returns real data
-                        item.lift = (Math.random() * 3.0).toFixed(1) + 'x';
-                        item.total = item.Properties.SubCategoryCount || null;
-                        item.revenue = Math.round(Math.random() * 30000000);
-                        item.lattice_companies = item.Properties.CompanyCount;
-                        item.their_companies = Math.round(Math.random() * item.lattice_companies);
-                        item.customers = Math.round(Math.random() * item.their_companies);
-                        item.their_companies = item.their_companies > item.lattice_companies ? item.lattice_companies >> 1 : item.their_companies;
-                        item.customers = item.customers > item.their_companies ? item.their_companies >> 1 : item.customers
-                        
+                        item.lift = get(item, 'lift', 3.0);
+                        item.total = get(item, 'SubCategoryCount', 15);
+                        item.revenue = get(item, 'revenue', 30000000);
+                        item.lattice_companies = get(item, 'CompanyCount', 99999);
+                        item.their_companies = get(item, 'in_your_db_count', item.lattice_companies);
+                        item.customers = get(item, 'your_customer_count', item.their_companies);
+                   
                         // Calculate percentages for bubble visualization
-                        item.companies_percent = ((item.their_companies / item.lattice_companies) * 100).toFixed(3);
-                        item.customer_percent = ((item.customers / item.lattice_companies) * 100).toFixed(3);
-                        item.customer_percent_of_theirs = ((item.customers / item.their_companies) * 100).toFixed(3);
-                        
-                        // set a minimum constaint just so things look good
-                        item.companies_percent = item.companies_percent < 10 ? 10 : item.companies_percent;
-                        item.customer_percent = item.customer_percent < 5 ? 5 : item.customer_percent;
-
-                        item.selected = false;
+                        item.companies_percent = ((item.their_companies / item.lattice_companies) * 100);
+                        item.customer_percent = ((item.customers / item.lattice_companies) * 100);
+                        item.customer_percent_of_theirs = ((item.customers / item.their_companies) * 100);
 
                         master.push(item);
                     });
@@ -244,7 +247,7 @@ angular
                 }
             }
         });
-/*
+        /*
         $scope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams){
             console.log('preventing transition', $state.current.name, event,'\n', toState,'\n', toParams, '\n', fromState, '\n', fromParams);
             
@@ -254,6 +257,69 @@ angular
                 event.preventDefault(); 
             }
         });
-*/
+        */
         vm.init();
     })
+    .service('StateMapping', function() {
+        return {
+            "AL": "Alabama",
+            "AK": "Alaska",
+            "AS": "American Samoa",
+            "AZ": "Arizona",
+            "AR": "Arkansas",
+            "CA": "California",
+            "CO": "Colorado",
+            "CT": "Connecticut",
+            "DE": "Delaware",
+            "DC": "District Of Columbia",
+            "FM": "Federated States Of Micronesia",
+            "FL": "Florida",
+            "GA": "Georgia",
+            "GU": "Guam",
+            "HI": "Hawaii",
+            "ID": "Idaho",
+            "IL": "Illinois",
+            "IN": "Indiana",
+            "IA": "Iowa",
+            "KS": "Kansas",
+            "KY": "Kentucky",
+            "LA": "Louisiana",
+            "ME": "Maine",
+            "MH": "Marshall Islands",
+            "MD": "Maryland",
+            "MA": "Massachusetts",
+            "MI": "Michigan",
+            "MN": "Minnesota",
+            "MS": "Mississippi",
+            "MO": "Missouri",
+            "MT": "Montana",
+            "NE": "Nebraska",
+            "NV": "Nevada",
+            "NH": "New Hampshire",
+            "NJ": "New Jersey",
+            "NM": "New Mexico",
+            "NY": "New York",
+            "NC": "North Carolina",
+            "ND": "North Dakota",
+            "MP": "Northern Mariana Islands",
+            "OH": "Ohio",
+            "OK": "Oklahoma",
+            "OR": "Oregon",
+            "PW": "Palau",
+            "PA": "Pennsylvania",
+            "PR": "Puerto Rico",
+            "RI": "Rhode Island",
+            "SC": "South Carolina",
+            "SD": "South Dakota",
+            "TN": "Tennessee",
+            "TX": "Texas",
+            "UT": "Utah",
+            "VT": "Vermont",
+            "VI": "Virgin Islands",
+            "VA": "Virginia",
+            "WA": "Washington",
+            "WV": "West Virginia",
+            "WI": "Wisconsin",
+            "WY": "Wyoming"
+        };
+    });

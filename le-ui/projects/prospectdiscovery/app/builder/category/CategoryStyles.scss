@@ -56,6 +56,11 @@
 
         label.attr-label {
             word-wrap: break-word;
+            
+            span.attr-label-subcategory-total {
+                white-space: nowrap;
+                display: inherit;
+            }
         }
     }
 
@@ -142,7 +147,7 @@
             }
 
             div.medium-circle {
-                background: #888888;
+                background: #467dba;
                 width: 70%;
                 height: 70%;
             }

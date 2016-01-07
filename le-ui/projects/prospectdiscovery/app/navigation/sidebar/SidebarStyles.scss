@@ -4,7 +4,9 @@
     }
 
     .progress-menu ul li span.pd-sidebar-category-total {
-        float: right;
+        width: auto;
+        background: #464646;
+        margin-top: 4px;
     }
 
     .pd-sidebar-category {
@@ -58,7 +60,7 @@
         em.pd-sidebar-category-label {
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 12.5em;
+            max-width: 12.25em;
             display: inline-block;
             overflow: hidden;
             height: 1.4em;
