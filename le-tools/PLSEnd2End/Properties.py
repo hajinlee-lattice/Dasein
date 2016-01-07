@@ -16,7 +16,13 @@ class PLSEnvironments(object):
     # properties definition
     pls_bard_1 = "AutoJekinsElq_11_16_1447677239"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
     pls_bard_2 = "AutoJekinsMKTO_11_16_1447681859"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
-    pls_bard_3 = "AutoJekinsSFDC_11_16_1447683254"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_3 = "AutoJekinsSFDC_12_04_1449243201"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_tenant_elq = parser.get("TestSetup", "pls_tenant_elq");
+    pls_tenant_mkto = parser.get("TestSetup", "pls_tenant_mkto");
+    pls_tenant_sfdc = parser.get("TestSetup", "pls_tenant_sfdc");
+    pls_tenant_elq_model_activated = parser.get("TestSetup", "pls_tenant_elq_model_activated");
+    pls_tenant_mkto_model_activated = parser.get("TestSetup", "pls_tenant_mkto_model_activated");
+    pls_tenant_sfdc_model_Activated = parser.get("TestSetup", "pls_tenant_sfdc_model_Activated");
 
     pls_version = parser.get("TestSetup", "pls_version");
     dante_server_name = parser.get("DanteInfo", "dante_server_name");
@@ -89,7 +95,7 @@ class PLSEnvironments(object):
     SQL_ScoringDaemon = connStr + "SERVER=10.41.1.207\SQL2012STD;DATABASE=ScoringDaemon_QA;uid=dataloader_prod;pwd=L@ttice2";
     SQL_BasicDataForIntegrationTest = connStr + "SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
     SQL_conn_dataloader = connStr + "SERVER=%s;DATABASE=DataLoader;uid=%s;pwd=%s;" % (
-    dl_database_instance, dl_database_user, dl_database_password);
+        dl_database_instance, dl_database_user, dl_database_password);
     SQL_conn_pdMatch = connStr + "SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
     SQL_conn_leadscoring = connStr + "SERVER=%s\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;" % "10.41.1.187";
     SQL_conn_dante = connStr + "SERVER=%s.dev.lattice.local\SQL2012STD;DATABASE=%s;uid=%s;pwd=%s;" % (
@@ -189,6 +195,14 @@ class PLSEnvironments(object):
         '''
         Constructor
         '''
+
+    @staticmethod
+    def SetConfig(section, option, value=None):
+        parser = SafeConfigParser()
+        parser.read("config.ini")
+        parser.set(section, option, value)
+        fileHandle = open('config.ini', 'w')
+        parser.write(fileHandle)
 
 
 def main():
