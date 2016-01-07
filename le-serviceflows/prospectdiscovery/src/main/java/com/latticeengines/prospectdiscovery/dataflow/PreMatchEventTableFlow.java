@@ -85,8 +85,10 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         last = addHasContacts(last, contact);
 
         List<String> accountSchema = account.getFieldNames();
-        last = last.retain(new FieldList("Domain", "Event_IsWon", "Event_StageIsClosedWon", //
-                "Event_IsClosed", "Event_OpportunityCreated", "HasContacts", "HasOpportunities") //
+        last = last.retain(new FieldList("Domain", "Event_IsWon", "Revenue_IsWon", //
+                "Event_StageIsClosedWon", "Revenue_StageIsClosedWon", //
+                "Event_IsClosed", "Revenue_IsClosed", "Event_OpportunityCreated", "Revenue_OpportunityCreated", //
+                "HasContacts", "HasOpportunities") //
                 .addAll(accountSchema));
 
         return last;
@@ -97,9 +99,15 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         FieldMetadata isWonInteger = new FieldMetadata("IsWonInteger", Integer.class);
         opportunity = opportunity.addFunction("IsWon ? 1 : 0", new FieldList("IsWon"), isWonInteger);
 
-        // Get count of IsWonInteger for each account
+        // Create a function for Revenue predicated on IsWon = 1
+        FieldMetadata revenue = new FieldMetadata("Revenue_IsWon", Double.class);
+        opportunity = opportunity.addFunction("IsWon ? Amount : new Double(0.0)", new FieldList("IsWon", "Amount"),
+                revenue);
+
+        // Aggregate
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("IsWonInteger", "Count", Aggregation.AggregationType.SUM));
+        aggregations.add(new Aggregation("Revenue_IsWon", "Revenue_IsWon", Aggregation.AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         // Left outer join with that
@@ -107,6 +115,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsWon");
+        fieldsToRetain.add("Revenue_IsWon");
 
         FieldMetadata event = new FieldMetadata("Event_IsWon", Boolean.class);
         event.setPropertyValue("logicalType", "event");
@@ -124,14 +133,22 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("StageName"), //
                 new FieldMetadata("StageIsClosedWon", Integer.class));
 
+        // Create a function for Revenue predicated on Stage = "Closed Won"
+        FieldMetadata revenue = new FieldMetadata("Revenue_StageIsClosedWon", Double.class);
+        opportunity = opportunity.addFunction("StageName.equals(\"Closed Won\") ? Amount : new Double(0.0)",
+                new FieldList("StageName", "Amount"), revenue);
+
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("StageIsClosedWon", "Count", Aggregation.AggregationType.SUM));
+        aggregations.add(new Aggregation("Revenue_StageIsClosedWon", "Revenue_StageIsClosedWon",
+                Aggregation.AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_StageIsClosedWon");
+        fieldsToRetain.add("Revenue_StageIsClosedWon");
 
         FieldMetadata event = new FieldMetadata("Event_StageIsClosedWon", Boolean.class);
         event.setPropertyValue("logicalType", "event");
@@ -147,14 +164,21 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         FieldMetadata isClosedInteger = new FieldMetadata("IsClosedInteger", Integer.class);
         opportunity = opportunity.addFunction("IsClosed ? 1 : 0", new FieldList("IsClosed"), isClosedInteger);
 
+        // Create a function for Revenue predicated on IsClosed
+        FieldMetadata revenue = new FieldMetadata("Revenue_IsClosed", Double.class);
+        opportunity = opportunity.addFunction("IsClosed ? Amount : new Double(0.0)",
+                new FieldList("IsClosed", "Amount"), revenue);
+
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("IsClosedInteger", "Count", Aggregation.AggregationType.SUM));
+        aggregations.add(new Aggregation("Revenue_IsClosed", "Revenue_IsClosed", Aggregation.AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_IsClosed");
+        fieldsToRetain.add("Revenue_IsClosed");
 
         FieldMetadata event = new FieldMetadata("Event_IsClosed", Boolean.class);
         event.setPropertyValue("logicalType", "event");
@@ -168,12 +192,14 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
     private Node addOpportunityCreatedEvent(Node account, Node opportunity) {
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation("AccountId", "Count", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("Amount", "Revenue_OpportunityCreated", Aggregation.AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
 
         List<String> fieldsToRetain = account.getFieldNames();
         fieldsToRetain.add("Event_OpportunityCreated");
+        fieldsToRetain.add("Revenue_OpportunityCreated");
 
         FieldMetadata event = new FieldMetadata("Event_OpportunityCreated", Boolean.class);
         event.setPropertyValue("logicalType", "event");
