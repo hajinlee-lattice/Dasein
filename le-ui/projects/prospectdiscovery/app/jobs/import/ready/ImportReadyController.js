@@ -60,8 +60,8 @@ angular.module('pd.jobs.import.ready', [
                 "items": {
                     "Contacts": importSummary.contacts.total,
                     "Leads": importSummary.leads.total,
-                    "Data Range": startDate.getMonth() + "/" + startDate.getFullYear() + " - "
-                        + endDate.getMonth() + "/" + endDate.getFullYear()
+                    "Data Range": startDate.getMonth()+1 + "/" + startDate.getFullYear() + " - "
+                        + endDate.getMonth()+1 + "/" + endDate.getFullYear()
                 }
             }
         ];
