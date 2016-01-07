@@ -164,8 +164,8 @@ class Test(unittest.TestCase):
         if created:
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_elq", tenant)
             PLSEnvironments.pls_tenant_elq = tenant
-            assert self.lpSFDCCredentials(tenant)
-            assert self.lpElQCredentials(tenant)
+            assert lp.lpSFDCCredentials(tenant)
+            assert lp.lpElQCredentials(tenant)
         else:
             print "Failed to add new tenant: %s via tenant console" % tenant
             assert False
@@ -261,8 +261,8 @@ class Test(unittest.TestCase):
         if created:
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_mkto", tenant)
             PLSEnvironments.pls_tenant_mkto = tenant
-            assert self.lpSFDCCredentials(tenant)
-            assert self.lpElQCredentials(tenant)
+            assert lp.lpSFDCCredentials(tenant)
+            assert lp.lpElQCredentials(tenant)
         else:
             print "Failed to add new tenant: %s via tenant console" % tenant
             assert False
@@ -358,7 +358,7 @@ class Test(unittest.TestCase):
         if created:
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_sfdc", tenant)
             PLSEnvironments.pls_tenant_sfdc = tenant
-            assert self.lpSFDCCredentials(tenant)
+            assert lp.lpSFDCCredentials(tenant)
         else:
             print "Failed to add new tenant: %s via tenant console" % tenant
             assert False
