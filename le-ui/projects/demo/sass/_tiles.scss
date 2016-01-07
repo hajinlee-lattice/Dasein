@@ -42,10 +42,10 @@
 	transition: background 150ms ease;
 	height: 240px;
 	@include media(">medium") {
-		width: 49%;
+		width: calc(50% - 4px);
 	}
 	@include media(">large") {
-		width: 32%;
+		width: calc(33.333% - 4px);
 	}
 	&.filter-checked {
 		display: none;

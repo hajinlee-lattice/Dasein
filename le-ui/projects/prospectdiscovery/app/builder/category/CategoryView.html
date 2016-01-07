@@ -1,6 +1,6 @@
 <div class="container pd-builder-attributes" ng-controller="AttributesCtrl as vm">
     <div class="row page-header">
-        <h4 class="columns four">
+        <h4 class="columns five">
             <span ng-if="!vm.ParentValue"><span class="subcategory-header">{{ vm.AttrKey }}</span></span> 
             <span ng-if="vm.ParentValue">
                 <button type="button" 
@@ -12,7 +12,7 @@
             </span>
             <span class="smaller" ng-if="vm.total">({{ vm.total }})</span>
         </h4>
-        <span class="columns eight subcategory-header-controls">
+        <span class="columns seven subcategory-header-controls">
             
             <div class="search">
                 <button class="button icon-button white-button" ng-click="vm.ShowSearch = !vm.ShowSearch">

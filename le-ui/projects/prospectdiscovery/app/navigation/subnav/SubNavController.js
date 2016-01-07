@@ -24,7 +24,7 @@ angular.module('pd.navigation.subnav', [
     })
     .controller('SubNavCtrl', function ($scope, $rootScope) {
         this.init = function() { 
-            this.lis = lis = $('div.carousel-slide-container div.white-border');
+            this.lis = lis = $('div.carousel-slide-container div.white-border span');
             $(lis).on('mousedown', this.handleClick.bind(this));
         }
 
@@ -41,7 +41,7 @@ angular.module('pd.navigation.subnav', [
 
         this.handleClick = function(event) {
             var target = event.target;//,
-                //target = target.tagName == 'LI' ? target : target.parentNode;
+                //target = target.tagName == 'span' ? target : target.parentNode;
 
             this.render(target, event);
         }
