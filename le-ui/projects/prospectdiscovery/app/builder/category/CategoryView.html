@@ -12,7 +12,7 @@
             </span>
             <span class="smaller" ng-if="vm.total">({{ vm.total }})</span>
         </h4>
-        <span class="columns six subcategory-header-total">
+        <span class="columns six subcategory-header-controls">
             <input 
                 type="text" 
                 class="form-control" 
@@ -85,7 +85,7 @@
                             />
                             <label for="attr-checkbox_{{ col }}" class="attr-label">
                                 {{ item.AttrValue | limitTo: vm.TruncateLimit }}{{item.AttrValue.length > vm.TruncateLimit ? '&hellip;' : ''}}
-                                <span class="attr-label-subcategory-total" ng-if="item.total > 0">
+                                <span class="attr-label-subcategory-total" ng-if="item.total > 0 && vm.SubCategory">
                                     ( <span class="blue-text">{{ item.total }}</span> )
                                 </span>
                             </label>

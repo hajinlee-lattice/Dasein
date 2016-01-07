@@ -7,14 +7,6 @@
         padding-top: 0px;
     }
 
-    select.custom-select {
-        height: 43px;
-        border: 1px solid #ccc;
-        width: auto !important;
-        font-size: 12pt;
-        vertical-align: bottom;
-    }
-
     span.subcategory-header {
         display: inline-block;
         text-overflow: ellipsis;
@@ -25,10 +17,18 @@
         max-width: calc(100% - 3.5em);
     }
 
-    span.subcategory-header-total {
+    span.subcategory-header-controls {
         min-width: 33em;
         float: right;
         margin: 0;
+
+        select.custom-select {
+            height: 43px;
+            border: 1px solid #ccc;
+            width: auto !important;
+            font-size: 12pt;
+            vertical-align: bottom;
+        }
     }
 
     .category-results {

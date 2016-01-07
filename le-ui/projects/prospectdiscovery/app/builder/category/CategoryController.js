@@ -259,9 +259,16 @@ angular
         });
         */
         vm.init();
+
+        //$("span.subcategory-header-controls .custom-select").selectpicker();
     })
     .service('StateMapping', function() {
+        /* 
+            FIXME: there are no collisions yet, but this should be in some
+                   kind of tree structure, but backend might have data soon
+        */
         return {
+            // usa states
             "AL": "Alabama",
             "AK": "Alaska",
             "AS": "American Samoa",
@@ -320,6 +327,21 @@ angular
             "WA": "Washington",
             "WV": "West Virginia",
             "WI": "Wisconsin",
-            "WY": "Wyoming"
+            "WY": "Wyoming",
+            // canada provinces
+            "AB": "Alberta",
+            "BC": "British Columbia",
+            "MB": "Manitoba",
+            "NB": "New Brunswick",
+            "NL": "Newfoundland and Labrador",
+            "NS": "Nova Scotia",
+            "ON": "Ontario",
+            "PE": "Prince Edward Island",
+            "QC": "Quebec",
+            "SK": "Saskatchewan",
+            // canada territories
+            "NT": "Northwest Territories",
+            "NU": "Nunavut",
+            "YT": "Yukon"
         };
     });
