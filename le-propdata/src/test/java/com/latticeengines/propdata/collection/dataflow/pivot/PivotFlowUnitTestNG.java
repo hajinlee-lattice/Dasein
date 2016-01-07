@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.collection.dataflow.pivot;
 
-import static com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calculation;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calculation;
 
 public class PivotFlowUnitTestNG {
 
@@ -116,6 +115,7 @@ public class PivotFlowUnitTestNG {
         return null;
     }
 
+    @SuppressWarnings("unused")
     private ImmutableList<String> getFirstKeyFromMap(Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap) {
         for (Map.Entry<ImmutableList<String>, PivotStrategy> enty: pivotStrategyMap.entrySet()) {
             return enty.getKey();
