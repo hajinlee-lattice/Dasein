@@ -143,7 +143,7 @@ class ImputationStep(PipelineStep):
         return (explainedVarianceRatio, componentsMatrix, X_transformed)  
         
     def nullValuePCA(self, inputDF, eventCol, thresholdVariance=0.98, numberOfColumnsThreshold=5):
-        if (len(inputDF.columns.values) < numberOfColumnsThreshold):
+        if len(inputDF.columns.values) < numberOfColumnsThreshold:
             numberOfColumnsThreshold = len(inputDF.columns.values) - 1
   
         scaling_array = self.getScalingForPCA(inputDF, eventCol)
@@ -151,7 +151,7 @@ class ImputationStep(PipelineStep):
         np.nan_to_num(inputScaled)
         (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
 
-        if (len(componentsMatrix) < numberOfColumnsThreshold):
+        if len(componentsMatrix) < numberOfColumnsThreshold:
             complementaryColumns = np.zeros((numberOfColumnsThreshold - len(componentsMatrix), len(componentsMatrix[0])))
             componentsMatrix = np.vstack((componentsMatrix, complementaryColumns))
 
