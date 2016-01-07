@@ -7,19 +7,20 @@
 
         <div class="container">
             <div class="row">
-                <div class="eight columns offset-three">
+                <div class="eight columns offset-two">
                     <h5>Filter the Contacts</h5>
-        <div class="filter row">
-            <div class="columns twelve">
-                <div>Filter by department</div>
-                <span class="columns one">Admin</span>
-                <span class="columns one">Finance</span>
-                <span class="columns one">HR</span>
-                <span class="columns one">IT</span>
-                <span class="columns one">R&amp;D</span>
-                <span class="columns one">Sales</span>
-            </div>
-        </div>
+        
+                    <div class="filter form-group">
+                        <div>Filter by department</div>
+                        <div class="button-group">
+                            <button class="button white-button" ui-sref-active="active">Admin</button>
+                            <button class="button white-button" ui-sref-active="active">Finance</button>
+                            <button class="button white-button" ui-sref-active="active">HR</button>
+                            <button class="button white-button" ui-sref-active="active">IT</button>
+                            <button class="button white-button" ui-sref-active="active">R&amp;D</button>
+                            <button class="button white-button" ui-sref-active="active">Sales</button>
+                        </div>
+                    </div>
 
                     <div class="filter form-group">
                         <div>Filter by seniority</div>
@@ -33,7 +34,7 @@
                     </div>
 
                     <div class="filter form-group">Filter by Title Keyword <span class="filter">(comma separated)</span>
-                        <div><textarea rows="10" cols="100" name="titles"></textarea></div>
+                        <div><textarea rows="10" class="form-control" name="titles"></textarea></div>
                     </div>
                     
                     <a ui-sref="builder.fitmodel" class="button orange-button">Generate a Model</a>
