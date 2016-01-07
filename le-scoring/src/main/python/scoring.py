@@ -32,6 +32,7 @@ def main(argv):
         #delete the supported files for the next round of scoring
         deleteFiles(scoringFiles)
         deleteFiles(leadFiles)
+        deletePycFiles()
 
 def manipulateSupportedFiles(modelID, scoringFiles, leadFiles):
     s = modelID + "-"
@@ -69,6 +70,15 @@ def deleteFiles(files):
             os.remove(f)
         except OSError, e:
             print ("Error: %s - %s." % (e.filename, e.strerror))
+
+def deletePycFiles():
+    dir = os.listdir(os.getcwd())
+    for f in dir:
+        ext ='.pyc'
+        if f.lower().endswith(ext):
+            print 'found file: '
+            print f
+            os.remove(f)
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
