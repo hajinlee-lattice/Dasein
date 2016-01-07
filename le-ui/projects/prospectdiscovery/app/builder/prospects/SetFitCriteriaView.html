@@ -4,20 +4,34 @@
         <a href="#"><button type="button" class="button orange-button">Build the fit model.</button></a>
     </div>
 
-    <div class="prospecting-settings">
-        <h5>Tune the Fit Model</h5>
-        
-        <div class="fit-model">Model has not been created yet. Return later to tune it.</div>
-        
-        <form>
-            <input type="checkbox" id="useGlobalModel" class="attr-checkbox custom"/>
-                <label for="useGlobalModel" class="attr-label">
-                    Use the global model instead of building one. <span>(This deactivates any existing model, but does not delete it.)</span>
-                </label>
-        </form>
+    <section class="prospecting-settings">
+        <div class="container">
+            <div class="row">
+                <div class="eight columns offset-three">
+                    
+                    <h5>Tune the Fit Model</h5>
+                    
+                    <div class="fit-model">Model has not been created yet. Return later to tune it.</div>
+                    
+                    <form class="form-group">
+                        <input type="checkbox" id="useGlobalModel" class="attr-checkbox custom"/>
+                            <label for="useGlobalModel" class="attr-label">
+                                Use the global model instead of building one. <span>(This deactivates any existing model, but does not delete it.)</span>
+                            </label>
+                    </form>
 
-        <a ui-sref="builder.intentmodel"><button type="button" class="button orange-button">Save & Continue</button></a>
-        <a href="/lp"><button type="button" class="button blue-button">View Models</button></a>
-    </div>
+                    <a ui-sref="builder.intentmodel" class="button orange-button">Save &amp; Continue</a>
+                    <a href="/lp" class="button blue-button">View Models</a>
+
+                </div>
+            </div>
+        </div>
+    
+    </section>
 
 </div>
+
+
+
+
+

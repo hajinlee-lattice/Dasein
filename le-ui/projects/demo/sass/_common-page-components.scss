@@ -68,7 +68,6 @@ Toggle UI Components
 }
 
 
-
 /*
 Icons
 ======================================================== */
@@ -153,12 +152,12 @@ Icons
 	}
 	&.ico-tmb-user {
 		background-color: $pearl-white;
-		-webkit-mask:  url("../img/ico-user.svg");
+		-webkit-mask:  url("../img/ico-employee-range.svg");
 		mask:  url("../img/ico-user.svg");
 	}
 	&.ico-tmb-chart {
 		background-color: $pearl-white;
-		-webkit-mask:  url("../img/ico-chart.svg");
+		-webkit-mask:  url("../img/ico-revenue-range.svg");
 		mask:  url("../img/ico-chart.svg");
 	}
 	&.ico-tech-profile {
@@ -200,6 +199,71 @@ Icons
 	&.ico-amethyst {
 		background-color: $amethyst;
 	}
+}
+.no-cssmask {
+	.ico {
+		background-color: inherit;
+	}
+	.ico-search {
+		background-image:  url("../img/ico-search.svg");
+	}
+	.ico-filter {
+		background-image:  url("../img/ico-filter.svg");
+	}
+	.ico-sort {
+		background-image:  url("../img/ico-sort.svg");
+	}
+	.ico-grid {
+		background-image:  url("../img/ico-grid.svg");
+	}
+	.ico-list {
+		background-image:  url("../img/ico-list.svg");
+	}
+	.ico-fingerprint {
+		background-image:  url("../img/ico-fingerprint.svg");
+	}
+	.ico-bullseye {
+		background-image:  url("../img/ico-bullseye.svg");
+	}
+	.ico-cog {
+		background-image:  url("../img/ico-cog.svg");
+	}
+	.ico-step-open {
+		background-image: url("../img/ico-step-open.svg");
+	}
+	.ico-step-current {
+		background-image: url("../img/ico-step-current.svg");
+	}
+	.ico-step-checked {
+		background-image: url("../img/ico-step-checked.svg");
+	}
+	.ico-user {
+		background-image:  url("../img/ico-user.svg");
+	}
+	.ico-user-card {
+		background-image:  url("../img/ico-user-card.svg");
+	}
+	.ico-industry {
+		background-image:  url("../img/ico-industry.svg");
+	}
+	.ico-locations {
+		background-image:  url("../img/ico-locations.svg");
+	}
+	.ico-tmb-user {
+		background-image:  url("../img/ico-employee-range.svg");
+	}
+	.ico-tmb-chart {
+		background-image:  url("../img/ico-revenue-range.svg");
+	}
+	.ico-tech-profile {
+		background-image:  url("../img/ico-web.svg");
+	}
+	.ico-web {
+		background-image:  url("../img/ico-web.svg");
+	}
+	.ico-chip {
+		background-image:  url("../img/ico-chip.svg");
+	}	
 }
 
 

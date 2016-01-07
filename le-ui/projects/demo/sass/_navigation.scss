@@ -208,7 +208,7 @@ Primary Sidebar Nav Menu Styling
     font-size: 27px;
   }
   li.active > a {
-    background: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.05);
     border-left: #ef6a30 solid 5px;
     color: rgba(255, 255, 255, 1);
   }
@@ -265,6 +265,9 @@ Primary Sidebar Nav Menu Styling
       &.ico-industry {
         height: 16px;
         width: 20px;
+      }
+      &.ico-tmb-chart {
+        width: 16px;
       }
     }
   }

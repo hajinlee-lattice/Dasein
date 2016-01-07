@@ -1,35 +1,55 @@
-button.button, a.button {
+
+
+/*
+Search
+============================================================ */
+.search {
+  display: inline-block;
+  button, input {
+    display: inline-block;
+  }
+  input {
+    width: 140px;
+    margin-left: -4px;
+    padding: 7px 10px 12px;
+  }
+}
+
+/*
+Buttons
+============================================================ */
+button.button, a.button, .button {
 	display: inline-block;
-    padding: 0.8em;
-    margin-bottom: 0;
-    font-family: 'ProximaNova-Regular',Arial,sans-serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.42857143;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    -ms-touch-action: manipulation;
-    touch-action: manipulation;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-image: none;
-    border: 1px solid transparent;
-    color: $pearl-white;
-    &.link-button {
-    	display: inline;
-    	padding: 0;
-    	margin: 0;
-    	border: none;
-    	background: none;
-    }
-    &.close-button {
-    	float: right;
-    }
-    &.blue-button {
+  padding: 0.8em;
+  margin-bottom: 0;
+  font-family: 'ProximaNova-Regular',Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  color: $pearl-white;
+  &.link-button {
+  	display: inline;
+  	padding: 0;
+  	margin: 0;
+  	border: none;
+  	background: none;
+  }
+  &.close-button {
+  	float: right;
+  }
+  &.blue-button {
 		background-color: $saphire;
 		&:hover {
 			background-color: $saphire-two;
@@ -38,7 +58,7 @@ button.button, a.button {
 			background-color: $saphire-three;
 		}
 	}
-    &.orange-button {
+  &.orange-button {
 		background-color: $amber;
 		&:hover {
 			background-color: $amber-two;
@@ -47,7 +67,7 @@ button.button, a.button {
 			background-color: $amber-three;
 		}
 	}
-    &.white-button {
+  &.white-button {
 		color: $black-titanium;
 		background-color: $pearl-white;
 		border-color: $silver;
@@ -58,7 +78,7 @@ button.button, a.button {
 			background-color: $palladium;
 		}
 	}
-    &.gray-button {
+  &.gray-button {
 		color: $silver;
 		background-color: $black-titanium;
 		&:hover {
@@ -69,15 +89,15 @@ button.button, a.button {
 		}
 	}
 	@include media(">medium") {
-        display: inline-block;
-        padding: 0.75em 3em;
-        &.icon-button {
-        	padding: 0.75em 1.5em;
-        }
-        &.dropdown-toggle {
-            padding: 0.75em;
-        }
+    display: inline-block;
+    padding: 0.75em 3em;
+    &.icon-button {
+    	padding: 0.75em 1.5em;
     }
+    &.dropdown-toggle {
+        padding: 0.75em;
+    }
+  }
 }
 
 button,

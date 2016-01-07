@@ -26,11 +26,6 @@ w/*
 	max-width: 400px;
 	font-family: sans-serif;
 	position: relative;
-	&.ico-locations, &.ico-industry, &.ico-firmographics,
-	&.ico-tech-profile, &.ico-chip {
-		transition: transform 500ms ease;
-		transform: rotate3d(0, 0, 0, 0deg) translateZ(0px);
-	}
 	.ico-industry {    
 		width: 42px;
 	    height: 35px;
@@ -43,11 +38,11 @@ w/*
 	}
 	.ico-tmb-user {
 		width: 26px;
-	    height: 28px;
+	    height: 27px;
 	    margin-top: 14px;
 	}
 	.ico-tmb-chart {
-		width: 26px;
+		width: 20px;
 	    height: 25px;
 	    margin-top: 15px;
 	}

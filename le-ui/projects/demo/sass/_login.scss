@@ -1,7 +1,7 @@
 .login-body {
-	margin-top: 20px;
+	padding-top: 20px;
 	@include media(">medium") {
-		margin-top: 14%;
+		padding-top: 5%;
 	}
 	img {
 		width: 100%;

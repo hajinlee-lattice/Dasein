@@ -24,7 +24,7 @@ angular.module('pd.navigation.subnav', [
     })
     .controller('SubNavCtrl', function ($scope, $rootScope) {
         this.init = function() { 
-            this.lis = lis = $('div.carousel-slide-container div.white-border span');
+            this.lis = lis = $('div.carousel-slide-container div.white-border');
             $(lis).on('mousedown', this.handleClick.bind(this));
         }
 
