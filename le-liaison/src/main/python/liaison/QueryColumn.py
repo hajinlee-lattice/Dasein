@@ -81,7 +81,7 @@ class QueryColumn(object):
     def setFundamentalType(self, ft):
         if ft is not None and ft.lower() not in [ 'unknown', 'nominal', 'float', 'alpha', 'numeric', 'currency', 'percentage', 'boolean', 'year' ]:
             raise UnknownMetadataValue(ft)
-        if ft == 'Unknown'
+        if ft == 'Unknown':
             self.fundamental_type_ = ft
         else:
             self.fundamental_type_ = ft if not ft else ft.lower()
