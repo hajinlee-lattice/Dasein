@@ -1,28 +1,36 @@
 package com.latticeengines.propdata.collection.dataflow.pivot;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
-import com.latticeengines.propdata.collection.source.impl.BuiltWithPivoted;
+
+import cascading.operation.Buffer;
+import cascading.tuple.Fields;
 
 @Component("builtWithPivotFlow")
 public class BuiltWithPivotFlow extends PivotFlow {
 
     private static final Long ONE_MONTH = TimeUnit.DAYS.toMillis(30);
 
-    @Autowired
-    BuiltWithPivoted bwPivoted;
+    private static ObjectMapper mapper = new ObjectMapper();
+
+    private String domainField;
 
     @Override
     public Node construct(PivotDataFlowParameters parameters) {
+        domainField = parameters.getJoinFields()[0];
+
         Node source = addSource(parameters.getBaseTables().get(0));
         Map<String, Node> sourceMap = new HashMap<>();
         sourceMap.put(parameters.getBaseTables().get(0), source);
@@ -32,23 +40,64 @@ public class BuiltWithPivotFlow extends PivotFlow {
         current = current.renamePipe("current");
         sourceMap.put(parameters.getBaseTables().get(0) + "_Current", current);
 
+        Node join = joinedPivotedPipes(parameters, sourceMap);
+        Node topAttrs = pivotTopAttributes(source, parameters.getColumns());
+
         PivotStrategy pivotStrategy = new BuiltWithPivotStrategy();
-        Node pivot = source.pivot(new String[]{ "Domain" }, pivotStrategy);
+        Node pivot = source.pivot(parameters.getJoinFields(), pivotStrategy);
 
         for (String typeField: BuiltWithPivotStrategy.typeFlags) {
             pivot = pivot.renameBooleanField(typeField, BooleanType.TRUE_FALSE);
         }
 
-        List<SourceColumn> columns = parameters.getColumns();
-        String[] joinFields = parameters.getJoinFields();
-        List<Node> pivotedPipes = pivotPipes(columns, sourceMap, joinFields);
-        Node join = joinPipe(joinFields, pivotedPipes.toArray(new Node[pivotedPipes.size()]));
-        join = join.renamePipe("join");
+        FieldList joinList = new FieldList(parameters.getJoinFields());
+        pivot = pivot.join(joinList, join, joinList, JoinType.OUTER);
+        pivot = pivot.join(joinList, topAttrs, joinList, JoinType.OUTER);
+        return pivot.addTimestamp(parameters.getTimestampField());
+    }
 
-        FieldList joinList = new FieldList(joinFields);
-        pivot = pivot.innerJoin(joinList, join, joinList);
+    private Node pivotTopAttributes(Node source, List<SourceColumn> columns) {
+        Map<String, String> attrMap = topAttrFields(columns);
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(domainField, String.class));
+        fms.addAll(topAttrFieldMetadata(columns));
 
-        return pivot.addTimestamp(bwPivoted.getTimestampField());
+        List<String> fieldNames = new ArrayList<>();
+        for (FieldMetadata fm: fms) { fieldNames.add(fm.getFieldName()); }
+
+        Buffer<?> buffer = new BuiltWithTopAttrBuffer(attrMap,
+                new Fields(fieldNames.toArray(new String[fieldNames.size()])));
+        Node topAttrs = source.groupByAndBuffer(new FieldList(domainField), buffer, fms);
+        topAttrs = topAttrs.renamePipe("topattr");
+        return topAttrs;
+    }
+
+    private Map<String, String> topAttrFields(List<SourceColumn> columns) {
+        Map<String, String> attrs = new HashMap<>();
+        for (SourceColumn column: columns) {
+            if (column.getCalculation().equals(SourceColumn.Calculation.BUILTWITH_TOPATTR)) {
+                try {
+                    JsonNode argNode = mapper.readTree(column.getArguments());
+                    String[] names = argNode.get("TechnologyNames").asText().split(",");
+                    for (String name: names) {
+                        attrs.put(name, column.getColumnName());
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return attrs;
+    }
+
+    private List<FieldMetadata> topAttrFieldMetadata(List<SourceColumn> columns) {
+        List<FieldMetadata> fms = new ArrayList<>();
+        for (SourceColumn column: columns) {
+            if (column.getCalculation().equals(SourceColumn.Calculation.BUILTWITH_TOPATTR)) {
+                fms.add(new FieldMetadata(column.getColumnName(), String.class));
+            }
+        }
+        return fms;
     }
 
 }

@@ -194,6 +194,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, buffer), builder);
         }
 
+        public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas) {
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, buffer, fieldMetadatas), builder);
+        }
+
         public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
                 FieldList argumentsFieldList, FieldList declaredFieldList) {
             return new Node(builder.addGroupByAndExpand(identifier, groupByFieldList, expandField, //
@@ -947,8 +951,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe groupby = null;
-        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
+        Pipe groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
         groupby = new Every(groupby, buffer, Fields.RESULTS);
 
         return register(groupby, fms);

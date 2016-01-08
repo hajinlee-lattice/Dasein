@@ -105,7 +105,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
         parameters.setTimestampField(source.getTimestampField());
-        parameters.setColumns(sourceColumnEntityMgr.getConfigurableColumns(source));
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(source));
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());
 
@@ -133,7 +133,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         PivotDataFlowParameters parameters = new PivotDataFlowParameters();
         parameters.setTimestampField(builtWithPivoted.getTimestampField());
-        parameters.setColumns(sourceColumnEntityMgr.getConfigurableColumns(builtWithPivoted));
+        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(builtWithPivoted));
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(builtWithPivoted.getPrimaryKey());
 

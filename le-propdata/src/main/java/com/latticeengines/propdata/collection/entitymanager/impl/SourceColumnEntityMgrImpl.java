@@ -3,10 +3,7 @@ package com.latticeengines.propdata.collection.entitymanager.impl;
 import static com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calculation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,46 +22,50 @@ public class SourceColumnEntityMgrImpl implements SourceColumnEntityMgr {
     @Autowired
     private SourceColumnDao sourceColumnDao;
 
-    private static Set<Calculation> unconfigurableCalculations =
-            new HashSet<>(Arrays.asList(Calculation.GROUPBY, Calculation.OTHER));
-
     @Override
     @Transactional(value = "propDataCollection", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<SourceColumn> getConfigurableColumns(ServingSource source) {
-        List<SourceColumn> columns = sourceColumnDao.getColumnsOfSource(source);
-        return filterConfigurableColumns(columns);
+    public List<SourceColumn> getSourceColumns(ServingSource source) {
+        return sourceColumnDao.getColumnsOfSource(source);
     }
 
     @Override
     @Transactional(value = "propDataCollection", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public String[] generateCreateTableSqlStatements(ServingSource source, String tableName) {
         List<SourceColumn> columns = sourceColumnDao.getColumnsOfSource(source);
-        List<SourceColumn> groupByColumns = filterColumnsByCalculation(columns, Calculation.GROUPBY);
+        List<SourceColumn> groupByColumns = filterColumnsByCalculation(columns, Calculation.GROUPBY, true);
         List<String> statements = new ArrayList<>();
         statements.add(toCreateTableSql(groupByColumns, tableName));
-        for (SourceColumn column: filterConfigurableColumns(columns)) {
+        for (SourceColumn column: filterColumnsByCalculation(columns, Calculation.GROUPBY, false)) {
             statements.add(toAddColumnSql(column, tableName));
         }
-        for (SourceColumn column: filterColumnsByCalculation(columns, Calculation.OTHER)) {
-            statements.add(toAddColumnSql(column, tableName));
-        }
-        return statements.toArray(new String[statements.size()]);
+        List<String> groupedStatements = concatStatements(statements);
+        return groupedStatements.toArray(new String[groupedStatements.size()]);
     }
 
-    private static List<SourceColumn> filterConfigurableColumns(List<SourceColumn> columns) {
-        List<SourceColumn> toReturn = new ArrayList<>();
-        for (SourceColumn column: columns) {
-            if (!unconfigurableCalculations.contains(column.getCalculation())) {
-                toReturn.add(column);
+    private List<String> concatStatements(List<String> statements) {
+        List<String> groups = new ArrayList<>();
+        String bigStatement = "";
+        for (String statement: statements) {
+            if (bigStatement.length() < 4000) {
+                bigStatement += statement;
+            } else {
+                groups.add(bigStatement);
+                bigStatement = "";
             }
         }
-        return toReturn;
+        if (StringUtils.isNotEmpty(bigStatement)) {
+            groups.add(bigStatement);
+        }
+        return groups;
     }
 
-    private static List<SourceColumn> filterColumnsByCalculation(List<SourceColumn> columns, Calculation calculation) {
+    private static List<SourceColumn> filterColumnsByCalculation(List<SourceColumn> columns, Calculation calculation,
+                                                                 boolean include) {
         List<SourceColumn> toReturn = new ArrayList<>();
         for (SourceColumn column: columns) {
-            if (calculation.equals(column.getCalculation())) {
+            if (include && calculation.equals(column.getCalculation())) {
+                toReturn.add(column);
+            } else if (!include && !calculation.equals(column.getCalculation())) {
                 toReturn.add(column);
             }
         }

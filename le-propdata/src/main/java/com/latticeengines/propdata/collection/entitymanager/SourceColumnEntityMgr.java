@@ -7,7 +7,7 @@ import com.latticeengines.propdata.collection.source.ServingSource;
 
 public interface SourceColumnEntityMgr {
 
-    List<SourceColumn> getConfigurableColumns(ServingSource source);
+    List<SourceColumn> getSourceColumns(ServingSource source);
 
     String[] generateCreateTableSqlStatements(ServingSource source, String tableName);
 

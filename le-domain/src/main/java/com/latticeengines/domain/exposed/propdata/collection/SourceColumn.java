@@ -1,6 +1,9 @@
 package com.latticeengines.domain.exposed.propdata.collection;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -50,9 +53,6 @@ public class SourceColumn implements HasPid, Serializable {
 
     @Column(name = "Groups", nullable = false)
     private String groups = "";
-
-    @Column(name = "MatchDest", nullable = false)
-    private String matchDest = "";
 
     public SourceColumn() {
         super();
@@ -134,10 +134,6 @@ public class SourceColumn implements HasPid, Serializable {
 
     public void setGroups(String groups) { this.groups = groups == null ? "" : groups; }
 
-    public String getMatchDest() { return matchDest; }
-
-    public void setMatchDest(String matchDest) { this.matchDest = matchDest; }
-
     @Override
     public Long getPid() { return getSourceColumnId(); }
 
@@ -152,6 +148,12 @@ public class SourceColumn implements HasPid, Serializable {
         PIVOT_SUM,
         PIVOT_COUNT,
         PIVOT_EXISTS,
-        OTHER
+        OTHER,
+        BUILTWITH_TOPATTR;
+
+        public static Set<Calculation> unconfigurableCalculations() {
+            return new HashSet<>(Arrays.asList(GROUPBY, OTHER, BUILTWITH_TOPATTR));
+        }
+
     }
 }
