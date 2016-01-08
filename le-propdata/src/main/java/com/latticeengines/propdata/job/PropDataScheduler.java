@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.source.RawSource;
 
-@SuppressWarnings("unused")
 @Component
 public class PropDataScheduler {
 

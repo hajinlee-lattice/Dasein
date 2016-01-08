@@ -1,8 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.Date;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
@@ -18,12 +16,10 @@ public class RefreshExecutor implements RefreshJobExecutor {
 
     private Log log = LogFactory.getLog(this.getClass());
 
-    private final String jobSubmitter;
     private final RefreshService refreshService;
 
     public RefreshExecutor(RefreshService refreshService) {
         this.refreshService = refreshService;
-        this.jobSubmitter = refreshService.getClass().getSimpleName();
     }
 
     @Override

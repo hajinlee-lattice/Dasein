@@ -7,7 +7,6 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.impl.ArchiveExecutor;
 
-@SuppressWarnings("unused")
 public class ArchiveScheduler extends QuartzJobBean {
 
     private ArchiveService archiveService;
