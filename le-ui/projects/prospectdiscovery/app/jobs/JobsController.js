@@ -12,8 +12,8 @@ angular.module('pd.jobs', [
     var stepsNameDictionary = { "markReportOutOfDate": "load_data", "importData": "load_data", "createPreMatchEventTable": "match_data",
             "loadHdfsTableToPDServer": "match_data", "match": "match_data", "createEventTableFromMatchResult": "generate_insights", "runImportSummaryDataFlow": "generate_insights",
             "registerImportSummaryReport": "generate_insights", "sample": "generate_insights", "profileAndModel": "create_global_model",
-            "chooseModel": "create_global_model", "score": "create_global_target_market" };
-    var numStepsInGroup = { "load_data": 1, "match_data": 1, "generate_insights": 1, "create_global_model": 1, "create_global_target_market": 1 };
+            "chooseModel": "create_global_model", "score": "create_global_target_market", "runScoreTableDataFlow": "create_global_target_market", "runAttributeLevelSummaryDataFlows": "create_global_target_market" };
+    var numStepsInGroup = { "load_data": 0, "match_data": 0, "generate_insights": 0, "create_global_model": 0, "create_global_target_market": 0 };
 
     this.getAllJobs = function() {
         var deferred = $q.defer();
@@ -58,6 +58,7 @@ angular.module('pd.jobs', [
             url: '/pls/jobs/' + jobId
         }).then(
             function onSuccess(response) {
+                clearNumSteps();
                 var jobInfo = response.data;
                 var stepRunning = getStepRunning(jobInfo);
                 var stepsCompleted = getStepsCompleted(jobInfo);
@@ -79,7 +80,7 @@ angular.module('pd.jobs', [
 
                 deferred.resolve(result);
             }, function onError(resposne) {
-                
+                console.log("getting job failed: " + jobId);
             }
         );
         return deferred.promise;
@@ -149,12 +150,21 @@ angular.module('pd.jobs', [
             if (job.steps[i].stepStatus == "Completed") {
                 var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType.trim()];
                 if (stepCompleted) {
+                    numStepsInGroup[stepCompleted] += 1;
                     stepsCompleted.push(stepCompleted);
                 }
             }
         }
         
         return stepsCompleted;
+    }
+    
+    function clearNumSteps() {
+        numStepsInGroup.load_data = 0;
+        numStepsInGroup.match_data = 0;
+        numStepsInGroup.generate_insights = 0;
+        numStepsInGroup.create_global_model = 0;
+        numStepsInGroup.create_global_target_market = 0;
     }
 })
 

@@ -37,6 +37,7 @@ angular
 
                 if ($scope.job.status == "Running") {
                     $scope.jobRunning = true;
+                    periodicQueryJobStatus($scope.job.id);
                 } else if ($scope.job.status == "Completed") {
                     $scope.jobCompleted = true;
                 }
@@ -49,9 +50,6 @@ angular
                         JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
                             if (jobStatus.success) {
                                 updateStatesBasedOnJobStatus(jobStatus.resultObj);
-                                if (jobStatus.resultObj.jobStatus == "Running") {
-                                    periodicQueryJobStatus($scope.job.id);
-                                }
                             }
                         });
                     }
@@ -73,11 +71,10 @@ angular
                 $scope.unexpandJobStatus = function() {
                     $scope.jobRowExpanded = false;
                     $scope.expanded[$scope.jobId] = false;
-                    cancelPeriodJobStatusQuery();
                 };
                 
                 var periodicQueryId;
-                var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 5 * 1000;
+                var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
                 function cancelPeriodJobStatusQuery() {
                     clearInterval(periodicQueryId);
@@ -97,7 +94,7 @@ angular
                     $scope.stepsCompletedTimes = jobStatus.completedTimes;
                     saveJobStatusInParentScope();
                     
-                    if (jobStatus.jobStatus == "Complete") {
+                    if (jobStatus.jobStatus == "Completed") {
                         $scope.jobRunning = false;
                         $scope.jobCompleted = true;
                     }
@@ -121,7 +118,7 @@ angular
                 function queryJobStatusAndSetStatesVariables(jobId) {
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
-                            if (response.resultObj.jobStatus == "Complete") {
+                            if (response.resultObj.jobStatus == "Completed") {
                                 cancelPeriodJobStatusQuery();
                                 $scope.showJobSuccessMessage = true;
                                 BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
