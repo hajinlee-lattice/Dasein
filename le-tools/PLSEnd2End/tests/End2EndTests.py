@@ -162,8 +162,11 @@ class Test(unittest.TestCase):
         created = lp.addNewTenant(tenant, "Eloqua", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                   PLSEnvironments.dl_server_name)
         if created:
+            print "New tenant created: %s" % tenant
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_elq", tenant)
             PLSEnvironments.pls_tenant_elq = tenant
+            print "Wait for 5 minutes then fill in CRM credentials"
+            time.sleep(300)
             assert lp.lpSFDCCredentials(tenant)
             assert lp.lpElQCredentials(tenant)
         else:
@@ -259,8 +262,11 @@ class Test(unittest.TestCase):
         created = lp.addNewTenant(tenant, "Marketo", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                   PLSEnvironments.dl_server_name)
         if created:
+            print "New tenant created: %s" % tenant
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_mkto", tenant)
             PLSEnvironments.pls_tenant_mkto = tenant
+            print "Wait for 5 minutes then fill in CRM credentials"
+            time.sleep(300)
             assert lp.lpSFDCCredentials(tenant)
             assert lp.lpElQCredentials(tenant)
         else:
@@ -356,8 +362,11 @@ class Test(unittest.TestCase):
         created = lp.addNewTenant(tenant, "SFDC", PLSEnvironments.jams_server, PLSEnvironments.pls_version,
                                   PLSEnvironments.dl_server_name)
         if created:
+            print "New tenant created: %s" % tenant
             PLSEnvironments.SetConfig("TestSetup", "pls_tenant_sfdc", tenant)
             PLSEnvironments.pls_tenant_sfdc = tenant
+            print "Wait for 5 minutes then fill in CRM credentials"
+            time.sleep(300)
             assert lp.lpSFDCCredentials(tenant)
         else:
             print "Failed to add new tenant: %s via tenant console" % tenant
