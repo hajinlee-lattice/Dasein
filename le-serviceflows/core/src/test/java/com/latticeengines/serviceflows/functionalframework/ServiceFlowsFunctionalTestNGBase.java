@@ -38,8 +38,8 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
 public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-    private boolean local = Boolean.parseBoolean( //
-            System.getenv("SERVICEFLOWS_LOCAL") == null ? "true" : System.getenv("SERVICEFLOWS_LOCAL"));
+    private boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
+    private String engine = getenv("SERVICEFLOWS_ENGINE", "TEZ", String.class);
 
     private static final Log log = LogFactory.getLog(ServiceFlowsFunctionalTestNGBase.class);
 
@@ -158,7 +158,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("ENGINE", "TEZ");
+        ctx.setProperty("ENGINE", engine);
         ctx.setProperty("TARGETPATH", getTargetDirectory());
         ctx.setProperty("TARGETTABLENAME", getFlowBeanName());
         ctx.setProperty("FLOWNAME", getFlowBeanName());
@@ -274,5 +274,18 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         }
 
         return results;
+    }
+
+    private <T> T getenv(String variable, T dflt, Class<T> clazz) {
+        String value = System.getenv(variable);
+        log.info(variable + ": " + value);
+        if (value == null) {
+            return dflt;
+        }
+        try {
+            return clazz.getConstructor(new Class[] { String.class }).newInstance(value);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Failed to parse %s as a %s", value, clazz.getSimpleName()));
+        }
     }
 }
