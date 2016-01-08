@@ -5,7 +5,36 @@ Created on Mar 12, 2015
 '''
 
 from ConfigParser import SafeConfigParser
+from argparse import ArgumentParser
 import platform
+import sys
+
+
+def main():
+    parser = ArgumentParser()
+    parser.add_argument("-s", "--server", dest="dt_server",
+                        help="dante server name")
+    parser.add_argument("-d", "--database", dest="dt_database",
+                        help="dante database")
+    parser.add_argument("-u", "--user", dest="dt_user",
+                        help="dante database user")
+    parser.add_argument("-p", "--password", dest="dt_password",
+                        help="dante database password")
+
+    args = parser.parse_args()
+    print str(args)
+    if args.dt_server:
+        print "Change dante server to %s" % args.dt_server
+        PLSEnvironments.SetConfig('DanteInfo', 'dante_server_name', args.dt_server)
+    if args.dt_database:
+        print "Change dante database to %s" % args.dt_database
+        PLSEnvironments.SetConfig('DanteInfo', 'dante_server_db', args.dt_database)
+    if args.dt_user:
+        print "Change dante db user to %s" % args.dt_user
+        PLSEnvironments.SetConfig('DanteInfo', 'dante_server_user', args.dt_user)
+    if args.dt_password:
+        print "Change dante db password to %s" % args.dt_password
+        PLSEnvironments.SetConfig('DanteInfo', 'dante_server_pwd', args.dt_password)
 
 
 class PLSEnvironments(object):
@@ -48,7 +77,7 @@ class PLSEnvironments(object):
     dl_server = "https://%s.dev.lattice.local:8080/" % dl_server_name;
     dl_server_user = "richard.liu@lattice-engines.com";
     dl_server_pwd = "1";
-    dlc_path = "\\\\10.41.1.55\DevelopmentShare\TestAutomation\DLC"#"\\\\10.61.0.210\DevQA\share\Software\DLTools"
+    dlc_path = "\\\\10.41.1.55\DevelopmentShare\TestAutomation\DLC"  # "\\\\10.61.0.210\DevQA\share\Software\DLTools"
     visidb_server_user = "admin";
     visidb_server_pwd = "visid@t@b@se";
 
@@ -203,10 +232,6 @@ class PLSEnvironments(object):
         parser.set(section, option, value)
         fileHandle = open('config.ini', 'w')
         parser.write(fileHandle)
-
-
-def main():
-    pass
 
 
 if __name__ == '__main__':
