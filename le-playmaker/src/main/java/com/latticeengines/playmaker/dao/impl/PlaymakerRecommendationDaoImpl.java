@@ -28,8 +28,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
                 + getLikelihood()
-                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) AS ExpirationDate, "
-                + getMonetaryValue() 
+                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, " 
+                + "CASE WHEN L.[Expiration_Date] > '2030-03-15' THEN 1899763200 ELSE DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) END AS ExpirationDate, "
                 + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
                 + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
