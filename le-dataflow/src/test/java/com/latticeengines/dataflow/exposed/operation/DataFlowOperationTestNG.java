@@ -174,7 +174,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         String avroDir = "/tmp/avro/";
         String fileName = "Feature.avro";
 
-        prepareMaxPivotData(avroDir, fileName);
+        prepareCountPivotData(avroDir, fileName);
 
         execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
             @Override
@@ -191,7 +191,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 2);
-                Assert.assertEquals(record.get("f2"), 3);
+                Assert.assertEquals(record.get("f2"), 2);
                 Assert.assertEquals(record.get("f3"), 2);
                 Assert.assertEquals(record.get("f4"), 0);
             }
@@ -363,6 +363,20 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 {"dom1.com", "f3", 1, 122L},
                 {"dom1.com", "f2", 3, 121L},
                 {"dom1.com", "f2", 1, 122L},
+        };
+
+        uploadAvro(data, avroDir, fileName);
+    }
+
+    private void prepareCountPivotData(String avroDir, String fileName) {
+        Object[][] data = new Object[][] {
+                {"dom1.com", "f1", 1, 123L},
+                {"dom1.com", "f2", 2, 125L},
+                {"dom1.com", "f3", 4, 124L},
+                {"dom1.com", "f1", 2, 129L},
+                {"dom1.com", "f3", 1, 122L},
+                {"dom1.com", "f2", 3, 121L},
+                {"dom1.com", "f2", 2, 122L},
         };
 
         uploadAvro(data, avroDir, fileName);

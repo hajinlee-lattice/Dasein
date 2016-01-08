@@ -202,7 +202,15 @@ public class PivotStrategyImpl implements PivotStrategy {
         Map<String, Serializable> toReturn = new HashMap<>();
         if (defaultValues == null) { defaultValues = new HashMap<>(); }
         for (String key: resultColumnClassMap.keySet()) {
-            if (defaultValues.containsKey(key) && defaultValues.get(key) != null) {
+            if (pivotTypeMap.get(key).equals(PivotType.COUNT)) {
+                if (resultColumnClassMap.get(key).equals(Long.class)) {
+                    toReturn.put(key, 0L);
+                } else {
+                    toReturn.put(key, 0);
+                }
+            } else if (pivotTypeMap.get(key).equals(PivotType.EXISTS)) {
+                toReturn.put(key, false);
+            } else if (defaultValues.containsKey(key) && defaultValues.get(key) != null) {
                 toReturn.put(key, defaultValues.get(key));
             } else {
                 toReturn.put(key, defaultValue);
@@ -256,15 +264,10 @@ public class PivotStrategyImpl implements PivotStrategy {
         String key = arguments.getString(keyColumn);
         List<PivotResult> results = pivot(key);
         for (PivotResult result: results) {
-            if (PivotType.COUNT.equals(result.getPivotType())) {
-                Class<?> clz = resultColumnClassMap.get(result.getColumnName());
-                if (clz.equals(Integer.class)) {
-                    result.setValue(1);
-                } else {
-                    result.setValue(1L);
-                }
+            Object value = arguments.getObject(valueColumn);
+            if (PivotType.COUNT.equals(result.getPivotType()) || PivotType.EXISTS.equals(result.getPivotType())) {
+                result.setValue(value);
             } else {
-                Object value = arguments.getObject(valueColumn);
                 result.setValue(castValue(result.getColumnName(), value));
             }
             toReturn.add(result);

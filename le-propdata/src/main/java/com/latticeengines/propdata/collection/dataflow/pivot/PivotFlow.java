@@ -24,7 +24,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyIm
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
 
-@Component("pivotBaseSource")
+@Component("pivotFlow")
 public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> {
 
     protected static ObjectMapper objectMapper = new ObjectMapper();
@@ -47,7 +47,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return join;
     }
 
-    private Node joinPipe(String[] joinFields, Node[] pipes) {
+    protected Node joinPipe(String[] joinFields, Node[] pipes) {
         FieldList joinFieldList = new FieldList(joinFields);
         Node join = pipes[0];
         for (int i = 1; i < pipes.length; i++) {
@@ -57,7 +57,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return join;
     }
 
-    private List<Node> pivotPipes(List<SourceColumn> columns, Map<String, Node> sourceMap, String[] joinFields) {
+    protected List<Node> pivotPipes(List<SourceColumn> columns, Map<String, Node> sourceMap, String[] joinFields) {
         Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = getPivotStrategyMap(columns);
 
         List<Node> nodes = new ArrayList<>();

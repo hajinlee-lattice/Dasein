@@ -22,6 +22,34 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 
+import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.BooleanType;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
+
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -66,33 +94,6 @@ import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.Table;
-
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
@@ -113,7 +114,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-            return new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
+            Node join = new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
+
+            List<String> fieldList = new ArrayList<>();
+            for (FieldMetadata fm: this.getSchema()) {
+                if (!fieldList.contains(fm.getFieldName())) {
+                    fieldList.add(fm.getFieldName());
+                }
+            }
+            for (FieldMetadata fm: rhs.getSchema()) {
+                if (!fieldList.contains(fm.getFieldName())) {
+                    fieldList.add(fm.getFieldName());
+                }
+            }
+
+            join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
+            return join;
         }
 
         public Node innerJoin(String lhsField, Node rhs, String rhsField) {
@@ -121,7 +137,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         public Node leftOuterJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-            return new Node(builder.addLeftOuterJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
+            Node join = new Node(builder.addLeftOuterJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields), builder);
+
+            List<String> fieldList = new ArrayList<>();
+            for (FieldMetadata fm: this.getSchema()) {
+                if (!fieldList.contains(fm.getFieldName())) {
+                    fieldList.add(fm.getFieldName());
+                }
+            }
+            for (FieldMetadata fm: rhs.getSchema()) {
+                if (!fieldList.contains(fm.getFieldName())) {
+                    fieldList.add(fm.getFieldName());
+                }
+            }
+
+            join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
+            return join;
         }
 
         public Node leftOuterJoin(String lhsField, Node rhs, String rhsField) {
@@ -197,6 +228,29 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 FieldList outputFields) {
             return new Node(builder.addFunction(identifier, expression, fieldsToApply, targetField, outputFields),
                     builder);
+        }
+
+        public Node renameBooleanField(String booleanField, BooleanType type) {
+            String expression;
+            FieldMetadata fm;
+            switch (type) {
+                case TRUE_FALSE:
+                    expression = String.format("%s ? \"True\" : \"False\"", booleanField);
+                    fm = new FieldMetadata(booleanField, String.class);
+                    break;
+                case YES_NO:
+                    expression = String.format("%s ? \"Yes\" : \"No\"", booleanField);
+                    fm = new FieldMetadata(booleanField, String.class);
+                    break;
+                case Y_N:
+                    expression = String.format("%s ? \"Y\" : \"N\"", booleanField);
+                    fm = new FieldMetadata(booleanField, String.class);
+                    break;
+                default:
+                    return this;
+            }
+
+            return new Node(builder.addFunction(identifier, expression, new FieldList(booleanField), fm), builder);
         }
 
         public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
@@ -460,14 +514,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         toRegister = new Pipe(sourceTableName, toRegister);
 
         return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTableName), this);
-    }
-
-    protected Node mergeNodes(Node[] nodes) {
-        String[] ids = new String[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            ids[i] = nodes[i].getIdentifier();
-        }
-        return new Node(this.register(new MergeOperation(ids, this)), this);
     }
 
     protected Table getSourceMetadata(String sourceName) {

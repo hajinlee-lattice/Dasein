@@ -27,6 +27,7 @@ import com.latticeengines.propdata.collection.source.DomainBased;
 import com.latticeengines.propdata.collection.source.MostRecentSource;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.collection.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.collection.source.impl.HGData;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -50,6 +51,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Autowired
     private HGData hgData;
+
+    @Autowired
+    private BuiltWithPivoted builtWithPivoted;
 
     @Value("${propdata.collection.mapred.reduce.tasks:8}")
     private int reduceTasks;
@@ -107,7 +111,35 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, "pivotBaseSource");
+        dataTransformationService.executeNamedTransformation(ctx, "pivotFlow");
+    }
+
+    @Override
+    public void executePivotBuiltWith(String baseVersion, String uid) {
+        String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
+        String targetPath = hdfsPathBuilder.constructWorkFlowDir(builtWithPivoted, flowName).append(uid).toString();
+
+        Map<String, Table> sources = new HashMap<>();
+        List<String> baseTables = new ArrayList<>();
+        String[] versions = baseVersion.split("\\|");
+        int i = 0;
+        for (Source baseSource: builtWithPivoted.getBaseSources()) {
+            String version = versions[i];
+            Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
+            sources.put(baseSource.getSourceName(), baseTable);
+            baseTables.add(baseSource.getSourceName());
+            i++;
+        }
+
+        PivotDataFlowParameters parameters = new PivotDataFlowParameters();
+        parameters.setTimestampField(builtWithPivoted.getTimestampField());
+        parameters.setColumns(sourceColumnEntityMgr.getConfigurableColumns(builtWithPivoted));
+        parameters.setBaseTables(baseTables);
+        parameters.setJoinFields(builtWithPivoted.getPrimaryKey());
+
+        DataFlowContext ctx = dataFlowContext(builtWithPivoted, sources, parameters, targetPath);
+        ctx.setProperty("FLOWNAME", builtWithPivoted.getSourceName() + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, "builtWithPivotFlow");
     }
 
     @Override

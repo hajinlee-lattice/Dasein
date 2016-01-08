@@ -18,7 +18,7 @@
 
     <bean id="sessionFactoryPropDataCollection" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSourcePropDataCollection" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.collection" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata" />
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
@@ -38,6 +38,14 @@
           p:dataSource-ref="dataSourcePropDataCollection" />
 
     <bean id="sourceColumnDao" class="com.latticeengines.propdata.collection.dao.impl.SourceColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataCollection" />
+    </bean>
+
+    <bean id="externalColumnDao" class="com.latticeengines.propdata.collection.dao.impl.ExternalColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataCollection" />
+    </bean>
+
+    <bean id="columnMappingDao" class="com.latticeengines.propdata.collection.dao.impl.ColumnMappingDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataCollection" />
     </bean>
 

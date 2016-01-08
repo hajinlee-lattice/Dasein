@@ -1,10 +1,14 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -24,6 +28,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
 
     protected Map<String, Integer> namePositionMap;
     private PivotStrategy pivotStrategy;
+    private Map<Integer, Set<Comparable<Serializable>>> countContextMap = new HashMap<>();
 
     protected PivotBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
@@ -82,11 +87,11 @@ public class PivotBuffer extends BaseOperation implements Buffer {
 
         for (PivotResult pivotResult: pivotResults) {
             Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
-            result.set(loc, aggregateValue(result.getObject(loc), pivotResult));
+            result.set(loc, aggregateValue(result.getObject(loc), loc, pivotResult));
         }
     }
 
-    private Object aggregateValue(Object oldValue, PivotResult result) {
+    private Object aggregateValue(Object oldValue, Integer loc, PivotResult result) {
         switch (result.getPivotType()) {
             case ANY:
                 return aggregateAny(oldValue, result.getValue());
@@ -97,7 +102,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
             case SUM:
                 return aggregateSum(oldValue, result.getValue());
             case COUNT:
-                return aggregateCount(oldValue, result.getValue());
+                return aggregateCount(loc, result.getValue());
             case EXISTS:
                 return aggregateExists(oldValue, result.getValue());
             default:
@@ -157,11 +162,22 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    private static Object aggregateCount(Object oldValue, Object newValue) {
-        if (newValue instanceof Long) {
-            return (Long) oldValue + 1L;
+    @SuppressWarnings({"unchecked"})
+    private Object aggregateCount(Integer loc, Object newValue) {
+        Comparable<Serializable> comparable = (Comparable<Serializable>) newValue;
+        if (countContextMap.containsKey(loc)) {
+            Set<Comparable<Serializable>> valueSet = countContextMap.get(loc);
+            valueSet.add(comparable);
+            countContextMap.put(loc, valueSet);
         } else {
-            return (Integer) oldValue + 1;
+            Set<Comparable<Serializable>> valueSet = new HashSet<>(Collections.singleton(comparable));
+            countContextMap.put(loc, valueSet);
+        }
+
+        if (newValue instanceof Long) {
+            return (long) countContextMap.get(loc).size();
+        } else {
+            return countContextMap.get(loc).size();
         }
     }
 
