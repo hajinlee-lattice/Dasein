@@ -1,30 +1,82 @@
 angular.module('pd.navigation.subnav', [
         'pd.builder.attributes'
     ])
-    .controller('SubNavSummaryCtrl', function($scope, $rootScope, $filter, AttributesModel) {
+    .controller('SubNavSummaryCtrl', function($scope, $http, $filter, AttributesModel, StateMapping) {
         angular.extend($scope, AttributesModel);
 
-        $scope.CompaniesTotal = 0;
+        $scope.MatchedTotal = 0;
         $scope.RevenueTotal = 0;
         $scope.ContactsTotal = 0;
+        var request = {}, LastLength = 0, LastMatchedTotal = 0;
         
         $scope.$watch('MasterList', function (lists) {
-            $scope.CompaniesTotal = 0;
-            $scope.RevenueTotal = 0;
-            $scope.ContactsTotal = 0;
+            var request = {};
 
-            var list = $filter('filter')($scope.MasterList, { visible: true, selected: true }, true);
-            
-            list.forEach(function(item, key) {
-                $scope.CompaniesTotal += parseInt(item.Properties.CompanyCount);
-                $scope.RevenueTotal += parseInt(item.revenue);
-                $scope.ContactsTotal += parseInt(item.customers);
+            [
+                'SubIndustry',
+                'State',
+                'EmployeesRange',
+                'RevenueRange'
+            ].forEach(function(category) {
+                var list = $filter('filter')($scope.MasterList, {
+                    AttrKey: category,
+                    visible: true, 
+                    selected: true 
+                }, true);
+                list.forEach(function(item, key) {
+                    if (typeof request != "object") {
+                        request = {};
+                    }
+
+                    if (!request[category]) {
+                        request[category] = '';
+                    }
+
+                    request[category] += 
+                        (request[category] ? '#' : '') + 
+                        (StateMapping.AttrValue[item.AttrValue] || item.AttrValue);
+                });
+            });
+
+            var keys = Object.keys(request), length = 0;
+
+            keys.forEach(function(key) { length += request[key].length; });
+
+            if (length == LastLength) {
+                return false;
+            }
+
+            LastLength = length;
+
+            $scope.refreshing = true;
+
+            $http({
+                method: 'GET',
+                url: '/pls/companies/count',
+                params: request
+            }).then(function(MatchedTotal) {
+                $scope.refreshing = false;
+                $scope.MatchedTotal = parseInt(MatchedTotal.data);
+
+                if ($scope.MatchedTotal == LastMatchedTotal) {
+                    return false;
+                }
+
+                var min = 10, max = 20;
+                $scope.ContactsTotal = 
+                    (Math.floor(Math.random() * (max - min + 1)) + min) * $scope.MatchedTotal;
+                
+                var min = 500, max = 1500;
+                $scope.RevenueTotal = 
+                    (Math.floor(Math.random() * (max - min + 1)) + min) * $scope.MatchedTotal;
+                
+                LastMatchedTotal = $scope.MatchedTotal;
             });
         }, true);
     })
     .controller('SubNavCtrl', function ($scope, $rootScope) {
         this.init = function() { 
-            this.lis = lis = $('div.carousel-slide-container div.white-border span');
+            this.lis = lis = $('div.carousel-slide-container div.white-border');
             $(lis).on('mousedown', this.handleClick.bind(this));
         }
 
@@ -40,10 +92,12 @@ angular.module('pd.navigation.subnav', [
         }
 
         this.handleClick = function(event) {
-            var target = event.target;//,
-                //target = target.tagName == 'span' ? target : target.parentNode;
+            var target = event.target,
+                target = $(target).hasClass('white-border') ? target : target.parentNode;
 
-            this.render(target, event);
+            if ($(target).hasClass('white-border')) {
+                this.render(target, event);
+            }
         }
 
         this.render = function(li, event) {
@@ -75,17 +129,8 @@ angular.module('pd.navigation.subnav', [
                 duration = ((1 - magnitude) * (maxDuration - minDuration)) + minDuration,
                 transition, transform, perspective, transitionEvent;
 
-            if (magnitude > flipThreshold) {
-                transform = 'rotate3d(' + delta.y + ', ' + delta.x + ', 0, 360deg) translate3d(0,0,0px)';
-                perspective = Math.round(origin.x * 100) + '% ' + Math.round(origin.y * 100) + '%';
-            } else {
-                duration = duration >> 2.5;
-                percentage = magnitude / flipThreshold;
-                angle = percentage * maxAngle;
-                transform = 'rotate3d(' + delta.y + ', ' + delta.x + ', 0, ' + angle + 'deg) translate3d(0,0,-8px)';
-                perspective = Math.round(origin.x * 100) + '% ' + Math.round(origin.y * 100) + '%';
-            }
-
+            transform = 'rotate3d(' + delta.y + ', ' + delta.x + ', 0, 360deg) translate3d(0,0,0px)';
+            perspective = Math.round(origin.x * 100) + '% ' + Math.round(origin.y * 100) + '%';
             transition = 'transform ' + duration + 'ms ease';
             transitionEvent = this.whichTransitionEvent();
 
@@ -101,15 +146,9 @@ angular.module('pd.navigation.subnav', [
                 //console.log(origin.x, origin.y, duration, delta.x, delta.y,  transitionEvent, transform, perspective);
                 
                 $(item).one(transitionEvent, function(event) {
-                    if (magnitude > flipThreshold) {
-                        item.style.transition = 'transform 0s linear';
-                        item.style.transform = 'rotate3d(0, 0, 0, 0deg) translate3d(0,0,0px)'; 
-                        li.style.perspectiveOrigin = '50% 50%';
-                    } else {
-                        item.style.transition = 'transform ' + duration << 3 + ' linear';
-                        item.style.transform = 'rotate3d(0, 0, 0, 0deg) translate3d(0,0,0px)'; 
-                        li.style.perspectiveOrigin = '50% 50%';
-                    }
+                    item.style.transition = 'transform 0s linear';
+                    item.style.transform = 'rotate3d(0, 0, 0, 0deg) translate3d(0,0,0px)'; 
+                    li.style.perspectiveOrigin = '50% 50%';
                     
                     $(lis).removeClass('active');
                     $(li).addClass('active');

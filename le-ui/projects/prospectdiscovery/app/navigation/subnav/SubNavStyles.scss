@@ -1,6 +1,37 @@
 .tmb-summary {
+    span.pd-spinner {
+        font-size: 0.5em;
+    }
 
     div.carousel-slide-container {
+        &.active {
+            >a>div.white-border {
+                &.saphire-bkg {
+                    border-color: #467dba;
+                }
+                &.jade-bkg {
+                    border-color: #6fbe4a;
+                }
+                &.gold-bkg {
+                    border-color: #ffbd48;
+                }
+                &.amber-bkg {
+                    border-color: #f16a22;
+                }
+                &.amethyst-bkg {
+                    border-color: #7b4bb2;
+                }
+                &.ruby-bkg {
+                    border-color: #d22027;
+                }
+            }
+
+            .tmb-nav-meta, 
+            .tmb-nav-meta .badge,
+            .tmb-nav-title {
+                font-weight: bold;
+            }
+        }
 
         div.white-border {
             perspective: 100px;
@@ -10,6 +41,7 @@
             width: 70px;
             height: 70px;
             margin: 0 auto;
+            transition: border 333ms ease;
         }
         
         li.active p {

@@ -55,18 +55,17 @@ angular
                 };
 
                 AttributesService.get(args).then(function(list) {
-                    console.log('xhr result',list);
+                    //console.log('xhr result',list);
                     list = list || [];
 
                     list.forEach(function(item, index) {
-
                         // FIXME - Make REGION top level, because Country data is limited
                         if (item.ParentKey == 'Country') {
                             item.ParentKey = '_OBJECT_';
                         }
 
                         item.selected = false;
-                        item.AttrValue = StateMapping[item.AttrValue] || item.AttrValue;
+                        item.AttrValue = StateMapping.DisplayName[item.AttrValue] || item.AttrValue;
 
                         // FIXME - Fudging the numbers a bit for the demo
                         // Will be removing this stuff when API returns real data
@@ -267,7 +266,7 @@ angular
             FIXME: there are no collisions yet, but this should be in some
                    kind of tree structure, but backend might have data soon
         */
-        return {
+        var DisplayName = {
             // usa states
             "AL": "Alabama",
             "AK": "Alaska",
@@ -343,5 +342,14 @@ angular
             "NT": "Northwest Territories",
             "NU": "Nunavut",
             "YT": "Yukon"
-        };
+        }, AttrValue = {};
+
+        Object.keys(DisplayName).forEach(function(value, key) {
+            AttrValue[DisplayName[value]] = value;
+        });
+
+        return {
+            "DisplayName": DisplayName,
+            "AttrValue": AttrValue
+        }
     });

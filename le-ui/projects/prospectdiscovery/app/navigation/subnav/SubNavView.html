@@ -14,7 +14,13 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Matching Companies</dt>
-                        <dd>{{ CompaniesTotal | number: 0 }}</dd>
+                        <dd>
+                            {{ MatchedTotal | number: 0 }}
+                            <span 
+                                ng-show="refreshing" 
+                                class="pd-spinner fa fa-spinner fa-pulse">
+                            </span>
+                        </dd>
                     </dl>
                 </div>
             </div><!-- End .three.columns -->
@@ -40,7 +46,7 @@
             <div class="twelve columns">
 
                 <div class="carousel">
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Industry', ParentKey: '', ParentValue: ''})">
                             <div class="white-border saphire-bkg">
                                 <span class="ico ico-industry"></span>
@@ -51,7 +57,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Locations', ParentKey: '', ParentValue: ''})">
                             <div class="white-border jade-bkg">
                                 <span class="ico ico-locations"></span>
@@ -62,7 +68,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Employees Range', ParentKey: '', ParentValue: ''})">
                             <div class="white-border gold-bkg">
                                 <span class="ico ico-tmb-user"></span>
@@ -73,7 +79,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Revenue Range', ParentKey: '', ParentValue: ''})">
                             <div class="white-border amber-bkg">
                                 <span class="ico ico-tmb-chart"></span>
@@ -84,7 +90,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Technology Profile', ParentKey: '', ParentValue: ''})">
                             <div class="white-border amethyst-bkg">
                                 <span class="ico ico-tech-profile"></span>
@@ -95,7 +101,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Web Presence', ParentKey: '', ParentValue: ''})">
                             <div class="white-border ruby-bkg">
                                 <span class="ico ico-web"></span>
@@ -106,7 +112,7 @@
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container">
+                    <div class="carousel-slide-container" ui-sref-active="active">
                         <a ui-sref="builder.category({AttrKey: 'Other', ParentKey: '', ParentValue: ''})">
                             <div class="white-border saphire-bkg">
                                 <span class="ico ico-chip"></span>
