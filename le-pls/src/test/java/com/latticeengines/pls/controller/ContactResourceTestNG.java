@@ -43,6 +43,7 @@ public class ContactResourceTestNG extends PlsFunctionalTestNGBase {
 
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional" })
     public void findByCriterias() {
         URI contactsUrl= UriComponentsBuilder.fromUriString(getRestAPIHostPort()

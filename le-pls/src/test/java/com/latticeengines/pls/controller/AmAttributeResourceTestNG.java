@@ -11,30 +11,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Matchers.anyString;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.ReportPurpose;
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
-import com.latticeengines.pls.entitymanager.impl.ReportEntityMgrImpl;
-import com.latticeengines.pls.entitymanager.impl.AmAttributeEntityMgrImpl;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 
 public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -66,6 +56,7 @@ public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(reports.size(), 0);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional" })
     public void findByCriterias() {
 
@@ -103,25 +94,27 @@ public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(attrList);
         assertTrue(attrList.size() == 2);
 
-        List attrs = (List)attrList.get(0);
+        List attrs = (List) attrList.get(0);
         validateAttrs(attrs, "Country", false);
-        attrs = (List)attrList.get(1);
+        attrs = (List) attrList.get(1);
         validateAttrs(attrs, "Industry", false);
 
     }
   
+    @SuppressWarnings("rawtypes")
     private void validateAttrs(List attrs, String key, boolean populate) {
 
         for (int index = 0; index < attrs.size(); index++) {
             Map map = (Map) attrs.get(index);
             assertEquals((String)map.get("AttrKey"), key);
             if (populate) {
-                Map properties = (Map)map.get("Properties");
+                Map properties = (Map) map.get("Properties");
                 assertTrue(properties.get("CompanyCount") != null);
             }
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional" })
     public void findWithPopulate() {
 
@@ -170,11 +163,11 @@ public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(attrList);
         assertTrue(attrList.size() == 3);
 
-        List attrs = (List)attrList.get(0);
+        List attrs = (List) attrList.get(0);
         validateAttrs(attrs, "Country", true);
-        attrs = (List)attrList.get(1);
+        attrs = (List) attrList.get(1);
         validateAttrs(attrs, "Industry", true);
-        attrs = (List)attrList.get(2);
+        attrs = (List) attrList.get(2);
         validateAttrs(attrs, "SubIndustry", true);
     }
 

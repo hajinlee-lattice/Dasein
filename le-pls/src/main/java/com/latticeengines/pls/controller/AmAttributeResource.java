@@ -1,9 +1,9 @@
 package com.latticeengines.pls.controller;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,19 +14,18 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.fasterxml.jackson.core.type.TypeReference;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AmAttribute;
 import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "amattibute", description = "REST resource for account master attributes")
 @RestController
@@ -75,7 +74,6 @@ public class AmAttributeResource {
         String key = params.get("AttrKey");
         String parentKey = params.get("ParentKey");
         String parentValue = params.get("ParentValue");
-        String populateStr = params.get("populate");
 
         log.info("search attributes Key=" + key + " pKey=" + parentKey + " pValue=" + parentValue + " populate=" + populate);
 

@@ -55,7 +55,7 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
         return attrs.get(0);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<List> findCompanyCount(String key, String parentKey, String parentValue) {
         Query query;
         Session session = getSession();
@@ -90,7 +90,7 @@ public class AmAttributeDaoImpl extends BaseDaoImpl<AmAttribute> implements AmAt
         return list;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<List> findSubCategoryCount(String key, String parentKey, String parentValue) {
         Query query;
         Session session = getSession();

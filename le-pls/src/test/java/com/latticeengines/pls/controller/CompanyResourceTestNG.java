@@ -42,6 +42,7 @@ public class CompanyResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(company.getAccountId(), Long.valueOf(TEST_COMPANY_ID));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional" })
     public void findByCriterias() {
         URI companiesUrl= UriComponentsBuilder.fromUriString(getRestAPIHostPort()

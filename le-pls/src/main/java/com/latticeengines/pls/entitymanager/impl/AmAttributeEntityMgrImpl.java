@@ -1,10 +1,9 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.io.IOException;
-
-import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,7 +23,8 @@ import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
 import com.latticeengines.pls.entitymanager.ReportEntityMgr;
 
 @Component("amAttributeEntityMgr")
-public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> implements AmAttributeEntityMgr {
+public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> implements
+        AmAttributeEntityMgr {
 
     private static final Log log = LogFactory.getLog(AmAttributeEntityMgrImpl.class);
 
@@ -34,8 +34,8 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
     @Autowired
     private ReportEntityMgr reportEntityMgr;
 
-    private final String countAttrs[] = {"your_customer_count", "in_your_db_count"};
-    private final String liftAttrs[] = {"lift"};
+    private final String countAttrs[] = { "your_customer_count", "in_your_db_count" };
+    private final String liftAttrs[] = { "lift" };
 
     @Override
     public BaseDao<AmAttribute> getDao() {
@@ -44,7 +44,8 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AmAttribute> findAttributes(String key, String parentKey, String parentValue, boolean populate) {
+    public List<AmAttribute> findAttributes(String key, String parentKey, String parentValue,
+            boolean populate) {
         List<AmAttribute> attrs = amAttributeDao.findAttributes(key, parentKey, parentValue);
         if (populate == true) {
             collectProperties(attrs, key, parentKey, parentValue);
@@ -52,16 +53,17 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         return attrs;
     }
 
-    private void collectProperties(List<AmAttribute> attrs, String key, String parentKey, String parentValue) {
+    private void collectProperties(List<AmAttribute> attrs, String key, String parentKey,
+            String parentValue) {
         Map<String, AmAttribute> attrMap = new HashMap<String, AmAttribute>();
-        for (AmAttribute attr: attrs) {
-	     attr.setProperty("CompanyCount", "0");
-             for (int i = 0; i < countAttrs.length; i++)
-	         attr.setProperty(countAttrs[i], "0");
-             for (int i = 0; i < liftAttrs.length; i++)
-	         attr.setProperty(liftAttrs[i], "0");
-	     attr.setProperty("SubCategoryCount", "0");
-             attrMap.put(attr.getAttrValue(), attr);
+        for (AmAttribute attr : attrs) {
+            attr.setProperty("CompanyCount", "0");
+            for (int i = 0; i < countAttrs.length; i++)
+                attr.setProperty(countAttrs[i], "0");
+            for (int i = 0; i < liftAttrs.length; i++)
+                attr.setProperty(liftAttrs[i], "0");
+            attr.setProperty("SubCategoryCount", "0");
+            attrMap.put(attr.getAttrValue(), attr);
         }
         AmAttribute meta = amAttributeDao.findAttributeMeta(key);
         if (meta.getSource().equals("AccountMaster_Accounts")) {
@@ -71,29 +73,34 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         }
     }
 
-    private void collectCompanyCount(Map<String, AmAttribute> attrMap, String key, String parentKey, String parentValue) {
+    @SuppressWarnings("rawtypes")
+    private void collectCompanyCount(Map<String, AmAttribute> attrMap, String key,
+            String parentKey, String parentValue) {
         List<List> list = amAttributeDao.findCompanyCount(key, parentKey, parentValue);
         for (int i = 0; i < list.size(); i++) {
-            List property = (List)list.get(i);
-            AmAttribute attr =  attrMap.get((String)property.get(0));
+            List property = (List) list.get(i);
+            AmAttribute attr = attrMap.get((String) property.get(0));
             attr.setProperty("CompanyCount", property.get(1).toString());
         }
     }
 
-    private void collectSubCategoryCount(Map<String, AmAttribute> attrMap, String key, String parentKey, String parentValue) {
+    @SuppressWarnings("rawtypes")
+    private void collectSubCategoryCount(Map<String, AmAttribute> attrMap, String key,
+            String parentKey, String parentValue) {
 
         List<List> list = amAttributeDao.findSubCategoryCount(key, parentKey, parentValue);
         for (int i = 0; i < list.size(); i++) {
-            List property = (List)list.get(i);
-            AmAttribute attr =  attrMap.get((String)property.get(0));
+            List property = (List) list.get(i);
+            AmAttribute attr = attrMap.get((String) property.get(0));
             attr.setProperty("SubCategoryCount", property.get(1).toString());
         }
     }
 
-    private void collectCustomerData(Map<String, AmAttribute> attrMap, String key, String parentKey, String parentValue) {
+    private void collectCustomerData(Map<String, AmAttribute> attrMap, String key,
+            String parentKey, String parentValue) {
 
-        List<Report> reports =  reportEntityMgr.findAll();
-        HashMap<String, String> reportMap = new HashMap<String, String> ();
+        List<Report> reports = reportEntityMgr.findAll();
+        HashMap<String, String> reportMap = new HashMap<String, String>();
         for (Report report : reports)
             reportMap.put(report.getPurpose().getKey(), report.getName());
 
@@ -115,12 +122,13 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
 
     }
 
-
-    private void collectValueFromReport(Map<String, AmAttribute> attrMap, String reportName, String[] attrs) {
+    private void collectValueFromReport(Map<String, AmAttribute> attrMap, String reportName,
+            String[] attrs) {
 
         log.info("Process report " + reportName);
-        Report report =  reportEntityMgr.findByName(reportName);
-        if (report == null) return;
+        Report report = reportEntityMgr.findByName(reportName);
+        if (report == null)
+            return;
 
         String json = report.getJson().getPayload();
         JsonNode root;
@@ -132,20 +140,22 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         }
 
         JsonNode records = root.get("records");
-        if (!records.isArray()) return;
+        if (!records.isArray())
+            return;
 
         for (JsonNode record : records) {
-             String attrValue = record.get("value").asText();
-             AmAttribute attr =  attrMap.get(attrValue);
-             if (attr == null) continue;
-             for (int i = 0; i < attrs.length; i++) {
-                 JsonNode vNode = record.get(attrs[i]);
-                 if (vNode == null) {
-                     log.info("Failed to find attr " + attrs[i] + " for " + attrValue);
-                     continue;
-                 }
-                 attr.setProperty(attrs[i], vNode.asText());
-             }
+            String attrValue = record.get("value").asText();
+            AmAttribute attr = attrMap.get(attrValue);
+            if (attr == null)
+                continue;
+            for (int i = 0; i < attrs.length; i++) {
+                JsonNode vNode = record.get(attrs[i]);
+                if (vNode == null) {
+                    log.info("Failed to find attr " + attrs[i] + " for " + attrValue);
+                    continue;
+                }
+                attr.setProperty(attrs[i], vNode.asText());
+            }
         }
     }
 }
