@@ -37,6 +37,24 @@ def SetRuntimeConfig_BuyerInsights(tenants, period, hasStaticAttributes):
 
             lg_mgr.commit()
 
+        elif version in ['2.2.0']:
+
+            setIAS_21(lg_mgr, type, hasStaticAttributes)
+
+            if period == 'disabled':
+                setPTLD_Disabled_22(lg_mgr)
+                setFDT_Disabled_21(lg_mgr)
+
+            elif period == 'hourly':
+                setPTLD_Enabled_22(lg_mgr)
+                setFDT_Disabled_21(lg_mgr)
+
+            elif period == 'daily':
+                setPTLD_Disabled_22(lg_mgr)
+                setFDT_Enabled_21(lg_mgr)
+
+            lg_mgr.commit()
+
         else:
             print 'Version \'{0}\' is not supported'.format(version)
 
@@ -80,6 +98,34 @@ def setPTLD_Enabled_21(lgm):
     ngsxml += '<ng n="PushDataToDante_Hourly"/>'
     ngsxml += '<ng n="InsightsAllSteps"/>'
     ngsxml += '<ng n="PushLeadsLastScoredToDestination"/>'
+    ngsxml += '</ngs>'
+
+    lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
+
+
+def setPTLD_Disabled_22(lgm):
+
+    ngsxml = '<ngs>'
+    ngsxml += '<ng n="LoadScoredLeads_Step1"/>'
+    ngsxml += '<ng n="LoadScoredLeads_Step2"/>'
+    ngsxml += '<ng n="PushLeadsLastScoredToDestination"/>'
+    ngsxml += '<ng n="PushToLeadDestination_TimeStamp"/>'
+    ngsxml += '<ng n="PushToLeadDestination_Validation"/>'
+    ngsxml += '</ngs>'
+
+    lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
+
+
+def setPTLD_Enabled_22(lgm):
+
+    ngsxml = '<ngs>'
+    ngsxml += '<ng n="LoadScoredLeads_Step1"/>'
+    ngsxml += '<ng n="LoadScoredLeads_Step2"/>'
+    ngsxml += '<ng n="PushDataToDante_Hourly"/>'
+    ngsxml += '<ng n="InsightsAllSteps"/>'
+    ngsxml += '<ng n="PushLeadsLastScoredToDestination"/>'
+    ngsxml += '<ng n="PushToLeadDestination_TimeStamp"/>'
+    ngsxml += '<ng n="PushToLeadDestination_Validation"/>'
     ngsxml += '</ngs>'
 
     lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
