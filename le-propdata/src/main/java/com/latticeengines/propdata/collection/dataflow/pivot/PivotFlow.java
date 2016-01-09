@@ -22,6 +22,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
+import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
 
 @Component("pivotFlow")
@@ -46,7 +47,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         List<Node> pivotedPipes = pivotPipes(columns, sourceMap, joinFields);
         Node join = joinPipe(joinFields, pivotedPipes.toArray(new Node[pivotedPipes.size()]));
         join = join.renamePipe("join");
-        return rewriteIsNull(join, parameters.getColumns());
+        join = rewriteIsNull(join, parameters.getColumns());
+        return join;
     }
 
     private Node rewriteIsNull(Node join, List<SourceColumn> columns) {
@@ -73,13 +75,18 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             String nullValue = entry.getValue();
             FieldMetadata fieldMetadata = null;
             for (FieldMetadata fm: fms) {
-                if (fm.getFieldName().endsWith(field)) {
+                if (fm.getFieldName().equals(field)) {
                     fieldMetadata = fm;
                     break;
                 }
             }
             if (fieldMetadata != null) {
-                String newValue = String.format("new %s(%s)", fieldMetadata.getJavaType().getSimpleName(), nullValue);
+                String newValue;
+                if (fieldMetadata.getJavaType().equals(String.class)) {
+                    newValue = String.format("\"%s\"", nullValue);
+                } else {
+                    newValue = String.format("new %s(%s)", fieldMetadata.getJavaType().getSimpleName(), nullValue);
+                }
                 join = join.addFunction(String.format("%s == null ? %s : %s", field, newValue, field),
                         new FieldList(field), fieldMetadata);
             }
@@ -112,10 +119,47 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                 pivoted = pivoted.rename(new FieldList(groupbyFields), new FieldList(joinFields));
             }
             pivoted = pivoted.renamePipe("pivoted-" + UUID.randomUUID().toString());
+            pivoted = rewriteBoolean(pivoted, columns);
             nodes.add(pivoted);
         }
 
         return nodes;
+    }
+
+    private Node rewriteBoolean(Node pipe, List<SourceColumn> columns) {
+        Map<String, BooleanType> bTypeMap = new HashMap<>();
+        for (SourceColumn column: columns) {
+            try {
+                if (column.getArguments() != null) {
+                    JsonNode json = objectMapper.readTree(column.getArguments());
+                    if (json.has("BooleanType")) {
+                        BooleanType bType = BooleanType.valueOf(json.get("BooleanType").asText());
+                        bTypeMap.put(column.getColumnName(), bType);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if (bTypeMap.isEmpty()) { return pipe; }
+
+        List<FieldMetadata> fms = pipe.getSchema();
+        for (Map.Entry<String, BooleanType> entry: bTypeMap.entrySet()) {
+            String field = entry.getKey();
+            BooleanType bType = entry.getValue();
+            FieldMetadata fieldMetadata = null;
+            for (FieldMetadata fm: fms) {
+                if (fm.getFieldName().equals(field)) {
+                    fieldMetadata = fm;
+                    break;
+                }
+            }
+            if (fieldMetadata != null) {
+                pipe = pipe.renameBooleanField(field, bType);
+            }
+        }
+        return pipe;
     }
 
     @VisibleForTesting
@@ -176,15 +220,16 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             String keyColumn = json.get("PivotKeyColumn").asText();
             String valueColumn = json.get("PivotValueColumn").asText();
             String[] pivotKeys = json.get("TargetPivotKeys").asText().split(",");
-
             Set<String> keySet = new HashSet<>();
             List<AbstractMap.SimpleImmutableEntry<String, String>> columnMappingList = new ArrayList<>();
             for (String key: pivotKeys) {
                 keySet.add(key);
                 columnMappingList.add(new AbstractMap.SimpleImmutableEntry<>(key, column.getColumnName()));
             }
+            String columnType = column.getColumnType();
+            if (PivotType.EXISTS.equals(pivotType)) { columnType = "BIT"; }
 
-            if (column.getColumnType().contains("VARCHAR")) {
+            if (columnType.contains("VARCHAR")) {
                 if (json.has("DefaultValue")) {
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             String.class, pivotType, json.get("DefaultValue").asText());
@@ -192,7 +237,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             String.class, pivotType, null);
                 }
-            } else if (column.getColumnType().contains("INT")) {
+            } else if (columnType.contains("INT")) {
                 if (json.has("DefaultValue")) {
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Integer.class, pivotType, json.get("DefaultValue").asInt());
@@ -200,7 +245,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Integer.class, pivotType, null);
                 }
-            } else if (column.getColumnType().contains("BIGINT")) {
+            } else if (columnType.contains("BIGINT")) {
                 if (json.has("DefaultValue")) {
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, json.get("DefaultValue").asLong());
@@ -208,15 +253,17 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, null);
                 }
-            } else if (column.getColumnType().contains("BIT")) {
+            } else if (columnType.contains("BIT")) {
                 if (json.has("DefaultValue")) {
+                    Boolean defaultValue = Arrays.asList("1", "true", "yes", "t")
+                            .contains(json.get("DefaultValue").asText().toLowerCase());
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
-                            Boolean.class, pivotType, json.get("DefaultValue").asBoolean());
+                            Boolean.class, pivotType, defaultValue);
                 } else {
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Boolean.class, pivotType, null);
                 }
-            } else if (column.getColumnType().contains("DATETIME")) {
+            } else if (columnType.contains("DATETIME")) {
                 if (json.has("DefaultValue")) {
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Long.class, pivotType, json.get("DefaultValue").asLong());

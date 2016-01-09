@@ -38,7 +38,7 @@ public class BuiltWithPivotFlow extends PivotFlow {
         Node current = source.filter("Technology_Last_Detected + " + ONE_MONTH + "L >= LE_Last_Upload_Date",
                 new FieldList("Technology_Last_Detected", "LE_Last_Upload_Date"));
         current = current.renamePipe("current");
-        sourceMap.put(parameters.getBaseTables().get(0) + "_Current", current);
+        sourceMap.put(parameters.getBaseTables().get(0) + "_LastMonth", current);
 
         Node join = joinedPivotedPipes(parameters, sourceMap);
         Node topAttrs = pivotTopAttributes(source, parameters.getColumns());

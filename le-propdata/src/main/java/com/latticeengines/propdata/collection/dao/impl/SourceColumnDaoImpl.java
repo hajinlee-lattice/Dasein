@@ -25,7 +25,7 @@ public class SourceColumnDaoImpl
     public List<SourceColumn> getColumnsOfSource(ServingSource source) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
-        String queryStr = String.format("from %s where SourceName = :sourceName",
+        String queryStr = String.format("from %s where SourceName = :sourceName order by SourceColumnID",
                 getEntityClass().getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("sourceName", sourceName);
