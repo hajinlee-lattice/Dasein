@@ -66,18 +66,4 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
                         + ". But it is " + range.getStartDate());
     }
 
-    private Date[] getEmptyDataDates() {
-        Date[] dates = new Date[2];
-
-        calendar.set(2015, Calendar.OCTOBER, 22);
-        dates[0] = calendar.getTime();
-
-        calendar.set(2015, Calendar.NOVEMBER, 2);
-        dates[1] = calendar.getTime();
-
-        return dates;
-    }
-
-
-
 }
