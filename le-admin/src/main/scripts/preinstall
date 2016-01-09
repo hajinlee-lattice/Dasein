@@ -1,7 +1,6 @@
 #!/bin/bash
 rm -rf /opt/jetty/webapps/le-admin-*.war
-rm -rf /etc/ledp/admin.properties
-rm -rf /etc/ledp/db.properties
+rm -rf /etc/ledp/*.properties
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /etc/httpd/conf.d/jetty_forward.conf
 rm -rf /home/yarn/.bashrc

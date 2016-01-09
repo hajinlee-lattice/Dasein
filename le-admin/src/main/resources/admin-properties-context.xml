@@ -24,9 +24,10 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${ADMIN_PROPDIR}/admin.properties</value>
-                <value>file:${DB_PROPDIR}/db.properties</value>
-                <value>file:${SECURITY_PROPDIR}/security.properties</value>
+                <value>file:${ADMIN_PROPDIR:/etc/ledp}/admin.properties</value>
+                <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
+                <value>file:${CAMILLE_PROPDIR:/etc/ledp}/camille.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

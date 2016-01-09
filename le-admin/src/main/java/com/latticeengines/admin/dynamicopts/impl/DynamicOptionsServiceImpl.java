@@ -50,9 +50,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
         Path zkPath = new Path(VisiDBDLComponent.componentName, "DL", "DataStore");
         register(zkPath, dataStoreProvider);
 
-        zkPath = new Path(VisiDBDLComponent.componentName, "TemplateVersion");
-        register(zkPath, templateProvider);
-
         zkPath = new Path(LatticeComponent.spaceConfigNode, "Topology");
         register(zkPath, topologyProvider);
 

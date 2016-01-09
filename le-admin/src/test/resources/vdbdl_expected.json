@@ -75,13 +75,10 @@
     },
     {
       "Node":"TemplateVersion",
-      "Data":"2.1.1",
+      "Data":"2.2",
       "Metadata":{
-        "Type":"options",
-        "Options":[
-          "2.1.1"
-        ],
-        "DynamicOptions":true
+        "Type":"string",
+        "Readonly": true
       }
     },
     {

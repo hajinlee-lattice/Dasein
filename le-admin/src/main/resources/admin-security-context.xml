@@ -9,7 +9,7 @@
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:admin-properties-context.xml"/>
-    <import resource="classpath:admin-camille-context.xml"/>
+    <import resource="classpath:camille-bootstrap-context.xml"/>
     <import resource="classpath:admin-bardjams-persistence-context.xml" />
     <import resource="classpath:security-provider-context.xml"/>
     <import resource="classpath:security-email-settings-context.xml"/>
