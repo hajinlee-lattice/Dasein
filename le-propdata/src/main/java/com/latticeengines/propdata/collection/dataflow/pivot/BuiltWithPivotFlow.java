@@ -35,12 +35,12 @@ public class BuiltWithPivotFlow extends PivotFlow {
         Map<String, Node> sourceMap = new HashMap<>();
         sourceMap.put(parameters.getBaseTables().get(0), source);
 
-        Node current = source.filter("Technology_Last_Detected + " + ONE_MONTH + "L >= LE_Last_Upload_Date",
+        Node oneMonth = source.filter("Technology_Last_Detected + " + ONE_MONTH + "L >= LE_Last_Upload_Date",
                 new FieldList("Technology_Last_Detected", "LE_Last_Upload_Date"));
-        current = current.renamePipe("current");
-        sourceMap.put(parameters.getBaseTables().get(0) + "_LastMonth", current);
+        oneMonth = oneMonth.renamePipe("one-month");
+        sourceMap.put(parameters.getBaseTables().get(0) + "_LastMonth", oneMonth);
 
-        Node join = joinedPivotedPipes(parameters, sourceMap);
+        Node join = joinedConfigurablePipes(parameters, sourceMap);
         Node topAttrs = pivotTopAttributes(source, parameters.getColumns());
 
         PivotStrategy pivotStrategy = new BuiltWithPivotStrategy();
@@ -50,10 +50,27 @@ public class BuiltWithPivotFlow extends PivotFlow {
             pivot = pivot.renameBooleanField(typeField, BooleanType.TRUE_FALSE);
         }
 
+        Node recent = pivotRecentTechTag(source);
+
         FieldList joinList = new FieldList(parameters.getJoinFields());
         pivot = pivot.join(joinList, join, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, topAttrs, joinList, JoinType.OUTER);
+        pivot = pivot.join(joinList, recent, joinList, JoinType.OUTER);
         return pivot.addTimestamp(parameters.getTimestampField());
+    }
+
+    private Node pivotRecentTechTag(Node source) {
+        Node threeMonth = source.filter("Technology_First_Detected + " + ONE_MONTH * 3 + "L >= LE_Last_Upload_Date",
+                new FieldList("Technology_First_Detected", "LE_Last_Upload_Date"));
+        threeMonth = threeMonth.renamePipe("recent-tech");
+
+        Buffer<?> buffer = new BuiltWithRecentTechBuffer(new Fields("Domain",
+                "BusinessTechnologiesRecentTechnologies", "BusinessTechnologiesRecentTags"));
+        List<FieldMetadata> fms = new ArrayList<>();
+        fms.add(new FieldMetadata(domainField, String.class));
+        fms.add(new FieldMetadata("BusinessTechnologiesRecentTechnologies", String.class));
+        fms.add(new FieldMetadata("BusinessTechnologiesRecentTags", String.class));
+        return threeMonth.groupByAndBuffer(new FieldList(domainField), buffer, fms);
     }
 
     private Node pivotTopAttributes(Node source, List<SourceColumn> columns) {
@@ -68,7 +85,7 @@ public class BuiltWithPivotFlow extends PivotFlow {
         Buffer<?> buffer = new BuiltWithTopAttrBuffer(attrMap,
                 new Fields(fieldNames.toArray(new String[fieldNames.size()])));
         Node topAttrs = source.groupByAndBuffer(new FieldList(domainField), buffer, fms);
-        topAttrs = topAttrs.renamePipe("topattr");
+        topAttrs = topAttrs.renamePipe("top-attr");
         return topAttrs;
     }
 

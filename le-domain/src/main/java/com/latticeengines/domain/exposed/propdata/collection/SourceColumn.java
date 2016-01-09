@@ -1,9 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.collection;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -148,12 +145,11 @@ public class SourceColumn implements HasPid, Serializable {
         PIVOT_SUM,
         PIVOT_COUNT,
         PIVOT_EXISTS,
+        AGG_MIN,
+        AGG_MAX,
+        AGG_SUM,
+        AGG_COUNT,
         OTHER,
         BUILTWITH_TOPATTR;
-
-        public static Set<Calculation> unconfigurableCalculations() {
-            return new HashSet<>(Arrays.asList(GROUPBY, OTHER, BUILTWITH_TOPATTR));
-        }
-
     }
 }

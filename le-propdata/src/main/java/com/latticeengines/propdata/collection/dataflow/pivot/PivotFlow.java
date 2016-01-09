@@ -36,17 +36,36 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         for (String baseTable: parameters.getBaseTables()) {
             sourceMap.put(baseTable, addSource(baseTable));
         }
-        Node join = joinedPivotedPipes(parameters, sourceMap);
+        Node join = joinedConfigurablePipes(parameters, sourceMap);
         join = join.addTimestamp(parameters.getTimestampField());
         return join;
     }
 
-    protected Node joinedPivotedPipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
+    protected Node joinedConfigurablePipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
+        Node pivot = joinedPivotedPipes(parameters, sourceMap);
+        Node agg = joinedAggregatedPipes(parameters, sourceMap);
+        FieldList joinFieldList = new FieldList(parameters.getJoinFields());
+        Node join = pivot.join(joinFieldList, agg, joinFieldList, JoinType.OUTER);
+        join = join.renamePipe("join");
+        return join;
+    }
+
+    private Node joinedPivotedPipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
         List<SourceColumn> columns = parameters.getColumns();
         String[] joinFields = parameters.getJoinFields();
         List<Node> pivotedPipes = pivotPipes(columns, sourceMap, joinFields);
         Node join = joinPipe(joinFields, pivotedPipes.toArray(new Node[pivotedPipes.size()]));
-        join = join.renamePipe("join");
+        join = join.renamePipe("pivot-joined");
+        join = rewriteIsNull(join, parameters.getColumns());
+        return join;
+    }
+
+    private Node joinedAggregatedPipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
+        List<SourceColumn> columns = parameters.getColumns();
+        String[] joinFields = parameters.getJoinFields();
+        List<Node> aggPipes = aggregatedPipes(columns, sourceMap, joinFields);
+        Node join = joinPipe(joinFields, aggPipes.toArray(new Node[aggPipes.size()]));
+        join = join.renamePipe("agg-joined");
         join = rewriteIsNull(join, parameters.getColumns());
         return join;
     }
@@ -102,6 +121,24 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             join = join.join(joinFieldList, rhs, joinFieldList, JoinType.OUTER);
         }
         return join;
+    }
+
+    private List<Node> aggregatedPipes(List<SourceColumn> columns, Map<String, Node> sourceMap, String[] joinFields) {
+        Map<ImmutableList<String>, List<Aggregation>> aggregationMap = getAggregationMap(columns);
+        List<Node> nodes = new ArrayList<>();
+        for (Map.Entry<ImmutableList<String>, List<Aggregation>> entry: aggregationMap.entrySet()) {
+            ImmutableList<String> keys = entry.getKey();
+            String baseSource = keys.get(0);
+            String[] groupbyFields = keys.get(1).split(",");
+            Node source = sourceMap.get(baseSource);
+            Node agg = source.groupBy(new FieldList(groupbyFields), entry.getValue());
+            if (!ImmutableList.copyOf(groupbyFields).equals(ImmutableList.copyOf(joinFields))) {
+                agg = agg.rename(new FieldList(groupbyFields), new FieldList(joinFields));
+            }
+            agg = agg.renamePipe("agg-" + UUID.randomUUID().toString());
+            nodes.add(agg);
+        }
+        return nodes;
     }
 
     private List<Node> pivotPipes(List<SourceColumn> columns, Map<String, Node> sourceMap, String[] joinFields) {
@@ -160,6 +197,58 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             }
         }
         return pipe;
+    }
+
+    @VisibleForTesting
+    static Map<ImmutableList<String>, List<Aggregation>> getAggregationMap(List<SourceColumn> columns) {
+        Map<SourceColumn, Aggregation> tempMap =  new HashMap<>();
+        for (SourceColumn column: columns) {
+            Aggregation aggregation = constructAggregation(column);
+            if (aggregation != null) {
+                tempMap.put(column, aggregation);
+            }
+        }
+
+        Map<ImmutableList<String>, List<Aggregation>> aggregationMap =  new HashMap<>();
+        for (Map.Entry<SourceColumn, Aggregation> entry: tempMap.entrySet()) {
+            SourceColumn column = entry.getKey();
+            Aggregation aggregation = entry.getValue();
+            ImmutableList<String> identifier = ImmutableList.copyOf(Arrays.asList(
+                    column.getBaseSource(), column.getGroupBy()));
+            if (!aggregationMap.containsKey(identifier)) {
+                aggregationMap.put(identifier, new ArrayList<Aggregation>());
+            }
+            aggregationMap.get(identifier).add(aggregation);
+        }
+        return aggregationMap;
+    }
+
+    private static Aggregation constructAggregation(SourceColumn column) {
+        Aggregation.AggregationType aggType;
+        switch (column.getCalculation()) {
+            case AGG_MIN:
+                aggType = Aggregation.AggregationType.MIN;
+                break;
+            case AGG_MAX:
+                aggType = Aggregation.AggregationType.MAX;
+                break;
+            case AGG_SUM:
+                aggType = Aggregation.AggregationType.SUM;
+                break;
+            case AGG_COUNT:
+                aggType = Aggregation.AggregationType.COUNT;
+                break;
+            default:
+                return null;
+        }
+        try {
+            JsonNode json = objectMapper.readTree(column.getArguments());
+            String aggColumn = json.get("AggregateColumn").asText();
+            return new Aggregation(aggColumn, column.getColumnName(), aggType);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @VisibleForTesting
@@ -302,4 +391,5 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, columnMap,
                 classMap, null, typeMap, null, defaultValues, null);
     }
+
 }
