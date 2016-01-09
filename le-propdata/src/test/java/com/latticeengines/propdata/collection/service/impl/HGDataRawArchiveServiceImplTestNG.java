@@ -9,7 +9,7 @@ import com.latticeengines.propdata.collection.source.BulkSource;
 import com.latticeengines.propdata.collection.source.impl.HGDataRaw;
 
 @Component
-public class HGDataRawArchiveServiceImplDeploymentTestNG extends BulkArchiveServiceImplDeploymentTestNGBase {
+public class HGDataRawArchiveServiceImplTestNG extends BulkArchiveServiceImplTestNGBase {
 
     @Autowired
     HGDataRawArchiveService archiveService;

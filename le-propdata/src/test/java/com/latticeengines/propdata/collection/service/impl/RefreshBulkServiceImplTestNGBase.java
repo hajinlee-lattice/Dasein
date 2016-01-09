@@ -16,9 +16,9 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.source.BulkSource;
 import com.latticeengines.propdata.collection.source.ServingSource;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
-abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
+abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;
     ServingSource source;
@@ -29,24 +29,24 @@ abstract public class RefreshBulkServiceImplDeploymentTestNGBase extends PropDat
     abstract RefreshService getRefreshService();
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
     abstract ServingSource getSource();
-    abstract BulkArchiveServiceImplDeploymentTestNGBase getBaseSourceTestBean();
+    abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "deployment")
+    @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTest");
-        getBaseSourceTestBean().setUpPod("DeploymentTest");
+        hdfsPathBuilder.changeHdfsPodId("FunctionalRefresh");
+        getBaseSourceTestBean().setUpPod("FunctionalRefresh");
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
         baseSource = (BulkSource) source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;

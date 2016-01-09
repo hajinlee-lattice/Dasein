@@ -5,6 +5,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
@@ -12,9 +13,10 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.source.impl.Feature;
+import com.latticeengines.propdata.collection.util.DateRange;
 
 @Component
-public class FeatureArchiveServiceImplDeploymentTestNG extends CollectionArchiveServiceImplDeploymentTestNGBase {
+public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
 
     @Autowired
     FeatureArchiveService collectedArchiveService;
@@ -48,7 +50,7 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends CollectionArchive
         return dates;
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testWholeProgress", enabled = false)
+    @Test(groups = "functional", dependsOnMethods = "testWholeProgress", enabled = true)
     public void testEmptyInput() {
         Date[] dates = getEmptyDataDates();
 
@@ -61,20 +63,20 @@ public class FeatureArchiveServiceImplDeploymentTestNG extends CollectionArchive
     @Override
     CollectedSource getSource() { return source; }
 
-//    // not every kind of progress need this, we only need to test this on one kind
-//    @Override
-//    protected void testAutoDetermineDateRange() {
-//        DateRange range = archiveService.determineNewJobDateRange();
-//        System.out.println(range);
-//
-//        Date cutDate = dates[1];
-//        Assert.assertTrue(range.getStartDate().before(cutDate),
-//                "the auto determined range should start before " + cutDate
-//                        + ". But it is " + range.getStartDate());
-//        Assert.assertTrue(range.getEndDate().after(cutDate),
-//                "the auto determined range should end after " + cutDate
-//                        + ". But it is " + range.getStartDate());
-//    }
+    // not every kind of progress need this, we only need to test this on one kind
+    @Override
+    protected void testAutoDetermineDateRange() {
+        DateRange range = collectedArchiveService.determineNewJobDateRange();
+        System.out.println(range);
+
+        Date cutDate = dates[1];
+        Assert.assertTrue(range.getStartDate().before(cutDate),
+                "the auto determined range should start before " + cutDate
+                        + ". But it is " + range.getStartDate());
+        Assert.assertTrue(range.getEndDate().after(cutDate),
+                "the auto determined range should end after " + cutDate
+                        + ". But it is " + range.getStartDate());
+    }
 
     private Date[] getEmptyDataDates() {
         Date[] dates = new Date[2];

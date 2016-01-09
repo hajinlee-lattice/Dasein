@@ -17,11 +17,11 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.source.MostRecentSource;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
-abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
+abstract public class MostRecentServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
-    private static final String testPod = "DeploymentTestMostRecent";
+    private static final String testPod = "FunctionalMostRecent";
 
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;
@@ -33,9 +33,9 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
     abstract RefreshService getRefreshService();
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
     abstract MostRecentSource getSource();
-    abstract CollectionArchiveServiceImplDeploymentTestNGBase getBaseSourceTestBean();
+    abstract CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "deployment")
+    @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
         hdfsPathBuilder.changeHdfsPodId(testPod);
 
@@ -48,12 +48,12 @@ abstract public class MostRecentServiceImplDeploymentTestNGBase extends PropData
         dates = getBaseSourceTestBean().getDates();
     }
 
-    @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;

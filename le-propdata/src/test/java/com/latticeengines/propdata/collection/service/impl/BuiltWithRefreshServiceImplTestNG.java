@@ -9,13 +9,13 @@ import com.latticeengines.propdata.collection.source.MostRecentSource;
 import com.latticeengines.propdata.collection.source.impl.BuiltWithMostRecent;
 
 @Component
-public class BuiltWithRefreshServiceImplDeploymentTestNG extends MostRecentServiceImplDeploymentTestNGBase {
+public class BuiltWithRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBase {
 
     @Autowired
     BuiltWithRefreshService refreshService;
 
     @Autowired
-    BuiltWithArchiveServiceImplDeploymentTestNG archiveServiceImplDeploymentTestNG;
+    BuiltWithArchiveServiceImplTestNG archiveServiceImplDeploymentTestNG;
 
     @Autowired
     BuiltWithMostRecent source;
@@ -35,7 +35,7 @@ public class BuiltWithRefreshServiceImplDeploymentTestNG extends MostRecentServi
     MostRecentSource getSource() { return source; }
 
     @Override
-    CollectionArchiveServiceImplDeploymentTestNGBase getBaseSourceTestBean() {
+    CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean() {
         return archiveServiceImplDeploymentTestNG;
     }
 

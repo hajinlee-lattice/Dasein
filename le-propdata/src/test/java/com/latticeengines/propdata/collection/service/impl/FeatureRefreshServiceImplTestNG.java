@@ -5,20 +5,20 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.ServingSource;
-import com.latticeengines.propdata.collection.source.impl.HGData;
+import com.latticeengines.propdata.collection.source.MostRecentSource;
+import com.latticeengines.propdata.collection.source.impl.FeatureMostRecent;
 
 @Component
-public class HGDataRefreshServiceImplDeploymentTestNG extends RefreshBulkServiceImplDeploymentTestNGBase {
+public class FeatureRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBase {
 
     @Autowired
-    HGDataRefreshService refreshService;
+    FeatureRefreshService refreshService;
 
     @Autowired
-    HGDataRawArchiveServiceImplDeploymentTestNG hgDataRawArchiveServiceImplDeploymentTestNG;
+    FeatureArchiveServiceImplTestNG archiveServiceImplDeploymentTestNG;
 
     @Autowired
-    HGData source;
+    FeatureMostRecent source;
 
     @Autowired
     RefreshProgressEntityMgr progressEntityMgr;
@@ -32,11 +32,11 @@ public class HGDataRefreshServiceImplDeploymentTestNG extends RefreshBulkService
     RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
-    ServingSource getSource() { return source; }
+    MostRecentSource getSource() { return source; }
 
     @Override
-    BulkArchiveServiceImplDeploymentTestNGBase getBaseSourceTestBean() {
-        return hgDataRawArchiveServiceImplDeploymentTestNG;
+    CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean() {
+        return archiveServiceImplDeploymentTestNG;
     }
 
 }

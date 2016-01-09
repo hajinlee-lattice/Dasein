@@ -11,15 +11,15 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
 import com.latticeengines.propdata.collection.source.Source;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
-abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
+abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
     PivotService pivotService;
     RefreshProgressEntityMgr progressEntityMgr;
@@ -32,19 +32,19 @@ abstract public class PivotServiceImplDeploymentTestNGBase extends PropDataColle
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
     abstract PivotedSource getSource();
 
-    @BeforeMethod(groups = "deployment")
+    @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTestPivot");
+        hdfsPathBuilder.changeHdfsPodId("FunctionalPivot");
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
         baseSource = source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "functional")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testWholeProgress() {
         uploadBaseAvro();
 

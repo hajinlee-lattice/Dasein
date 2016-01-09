@@ -17,9 +17,9 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionDeploymentTestNGBase;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
-abstract public class CollectionArchiveServiceImplDeploymentTestNGBase extends PropDataCollectionDeploymentTestNGBase {
+abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
     CollectedArchiveService collectedArchiveService;
     ArchiveProgressEntityMgr progressEntityMgr;
@@ -33,9 +33,9 @@ abstract public class CollectionArchiveServiceImplDeploymentTestNGBase extends P
     abstract CollectedSource getSource();
     abstract Date[] getDates();
 
-    @BeforeMethod(groups = "deployment")
+    @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
-        setUpPod("DeploymentTest");
+        setUpPod("FunctionalArchiveCollected");
     }
 
     void setUpPod(String podID) {
@@ -46,10 +46,10 @@ abstract public class CollectionArchiveServiceImplDeploymentTestNGBase extends P
         source = getSource();
     }
 
-    @AfterMethod(groups = "deployment")
+    @AfterMethod(groups = "functional")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "functional", enabled = false)
     public void testWholeProgress() {
         purgeRawData();
 

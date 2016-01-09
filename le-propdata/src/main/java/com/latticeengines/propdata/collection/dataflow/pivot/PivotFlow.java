@@ -37,23 +37,31 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             sourceMap.put(baseTable, addSource(baseTable));
         }
         Node join = joinedConfigurablePipes(parameters, sourceMap);
-        join = join.addTimestamp(parameters.getTimestampField());
-        return join;
+        return join.addTimestamp(parameters.getTimestampField());
     }
 
     protected Node joinedConfigurablePipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
         Node pivot = joinedPivotedPipes(parameters, sourceMap);
         Node agg = joinedAggregatedPipes(parameters, sourceMap);
-        FieldList joinFieldList = new FieldList(parameters.getJoinFields());
-        Node join = pivot.join(joinFieldList, agg, joinFieldList, JoinType.OUTER);
-        join = join.renamePipe("join");
-        return join;
+        if (pivot != null && agg != null) {
+            FieldList joinFieldList = new FieldList(parameters.getJoinFields());
+            Node join = pivot.join(joinFieldList, agg, joinFieldList, JoinType.OUTER);
+            return join.renamePipe("join");
+        } else if (pivot != null) {
+            return pivot;
+        } else if (agg != null) {
+            return agg;
+        } else {
+            return null;
+        }
     }
 
     private Node joinedPivotedPipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
         List<SourceColumn> columns = parameters.getColumns();
         String[] joinFields = parameters.getJoinFields();
         List<Node> pivotedPipes = pivotPipes(columns, sourceMap, joinFields);
+        if (pivotedPipes.isEmpty()) { return null; }
+
         Node join = joinPipe(joinFields, pivotedPipes.toArray(new Node[pivotedPipes.size()]));
         join = join.renamePipe("pivot-joined");
         join = rewriteIsNull(join, parameters.getColumns());
@@ -64,6 +72,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         List<SourceColumn> columns = parameters.getColumns();
         String[] joinFields = parameters.getJoinFields();
         List<Node> aggPipes = aggregatedPipes(columns, sourceMap, joinFields);
+        if (aggPipes.isEmpty()) { return null; }
+
         Node join = joinPipe(joinFields, aggPipes.toArray(new Node[aggPipes.size()]));
         join = join.renamePipe("agg-joined");
         join = rewriteIsNull(join, parameters.getColumns());

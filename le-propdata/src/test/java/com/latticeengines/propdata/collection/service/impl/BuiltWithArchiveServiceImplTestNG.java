@@ -12,7 +12,7 @@ import com.latticeengines.propdata.collection.source.CollectedSource;
 import com.latticeengines.propdata.collection.source.impl.BuiltWith;
 
 @Component
-public class BuiltWithArchiveServiceImplDeploymentTestNG extends CollectionArchiveServiceImplDeploymentTestNGBase {
+public class BuiltWithArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
 
     @Autowired
     BuiltWithArchiveService collectedArchiveService;

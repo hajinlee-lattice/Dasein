@@ -6,16 +6,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
+import com.latticeengines.propdata.collection.source.impl.BuiltWithPivoted;
 
 @Component
-public class FeaturePivotServiceImplDeploymentTestNG extends PivotServiceImplDeploymentTestNGBase {
+public class BuiltWithPivotServiceImplTestNG extends PivotServiceImplTestNGBase {
 
     @Autowired
-    FeaturePivotService pivotService;
+    BuiltWithPivotService pivotService;
 
     @Autowired
-    FeaturePivoted source;
+    BuiltWithPivoted source;
 
     @Autowired
     RefreshProgressEntityMgr progressEntityMgr;
