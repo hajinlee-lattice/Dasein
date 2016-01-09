@@ -21,6 +21,8 @@
         <context:exclude-filter type="assignable" expression="com.latticeengines.admin.swagger.SwaggerConfig" />
     </context:component-scan>
 
+    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
+
     <security:http use-expressions="true"
                    pattern="/admin/tenants/**"
                    authentication-manager-ref="authenticationManager"
