@@ -16,7 +16,7 @@ public enum LatticeFeatureFlag {
     private String documentation;
     private static Set<String> names;
 
-    private LatticeFeatureFlag(String name, String documentation) {
+    LatticeFeatureFlag(String name, String documentation) {
         this.name = name;
         this.documentation = documentation;
     }

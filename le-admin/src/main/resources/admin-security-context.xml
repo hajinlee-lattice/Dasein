@@ -8,20 +8,8 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:admin-properties-context.xml"/>
-    <import resource="classpath:camille-bootstrap-context.xml"/>
-    <import resource="classpath:admin-bardjams-persistence-context.xml" />
+    <import resource="classpath:admin-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
-    <import resource="classpath:security-email-settings-context.xml"/>
-    <import resource="classpath:remote-context.xml"/>
-
-    <context:component-scan base-package="com.latticeengines.admin">
-        <!-- Need to exclude instantiating the swagger config except for bringing up the API
-             since the servlet container instances are not available when running tests. -->
-        <context:exclude-filter type="assignable" expression="com.latticeengines.admin.swagger.SwaggerConfig" />
-    </context:component-scan>
-
-    <bean id="batonService" class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl" />
 
     <security:http use-expressions="true"
                    pattern="/admin/tenants/**"

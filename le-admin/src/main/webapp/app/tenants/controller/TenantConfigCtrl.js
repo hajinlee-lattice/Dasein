@@ -104,9 +104,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.onDeleteClick = function(){ popDeleteConfirmationModal(); };
 
     $scope.$on("CALC_DERIVED", function(evt, data) {
-        var derivation = data.derivation;
-        var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
-        data.callback(derivedValue);
+        if ($state.current.name !== "TENANT.CONFIG") {
+            var derivation = data.derivation;
+            var derivedValue = TenantUtility.calcDerivation($scope.components, derivation, $scope);
+            data.callback(derivedValue);
+        }
     });
     
     $scope.toggleSelection = function toggleSelection(productName) {
@@ -211,7 +213,11 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                             }
                             if ($scope.defaultConfigScaned == $scope.services.length) {
                                 $scope.loading = false;
-                                $timeout(function(){$rootScope.$broadcast("UPDATE_DERIVED");}, 500);
+                                if ($state.current.name !== "TENANT.CONFIG") {
+                                    $timeout(function () {
+                                        $rootScope.$broadcast("UPDATE_DERIVED");
+                                    }, 500);
+                                }
                             }
                         }
                     );
@@ -399,8 +405,8 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     }
 
     function updateServiceStatus() {
-        var componentsToScan = $scope.components.length;
-        _.each($scope.components, function (component) {
+        var componentsToScan = $scope.selectedComponents.length;
+        _.each($scope.selectedComponents, function (component) {
             TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
                 function (result) {
                     componentsToScan--;
@@ -415,7 +421,9 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                                 component.RootPath = newComponent.RootPath;
                                 component.Nodes = newComponent.Nodes;
                                 changeComponentToMessage(component);
-                                $scope.$broadcast("UPDATE_DERIVED");
+                                if ($state.current.name !== "TENANT.CONFIG") {
+                                    $scope.$broadcast("UPDATE_DERIVED");
+                                }
                             }
                         );
                     }
