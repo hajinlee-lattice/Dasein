@@ -35,7 +35,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     abstract MostRecentSource getSource();
     abstract CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "source.functional")
     public void setUp() throws Exception {
         hdfsPathBuilder.changeHdfsPodId(testPod);
 
@@ -48,12 +48,12 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         dates = getBaseSourceTestBean().getDates();
     }
 
-    @AfterMethod(groups = "functional")
+    @AfterMethod(groups = "source.functional")
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "source.functional")
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;

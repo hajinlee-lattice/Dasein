@@ -50,7 +50,7 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
         return dates;
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testWholeProgress", enabled = true)
+    @Test(groups = "source.functional", dependsOnMethods = "testWholeProgress", enabled = true)
     public void testEmptyInput() {
         Date[] dates = getEmptyDataDates();
 

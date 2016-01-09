@@ -27,7 +27,7 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
     abstract BulkSource getSource();
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "source.functional")
     public void setUp() throws Exception {
         setUpPod("FunctionalArchiveBulk");
     }
@@ -39,10 +39,10 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
         source = getSource();
     }
 
-    @AfterMethod(groups = "functional")
+    @AfterMethod(groups = "source.functional")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "source.functional", enabled = false)
     public void testWholeProgress() {
         run();
         cleanupProgressTables();

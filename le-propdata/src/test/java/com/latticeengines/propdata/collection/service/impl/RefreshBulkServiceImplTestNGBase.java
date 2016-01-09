@@ -31,7 +31,7 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
     abstract ServingSource getSource();
     abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "source.functional")
     public void setUp() throws Exception {
         hdfsPathBuilder.changeHdfsPodId("FunctionalRefresh");
         getBaseSourceTestBean().setUpPod("FunctionalRefresh");
@@ -41,12 +41,12 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
         baseSource = (BulkSource) source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "functional")
+    @AfterMethod(groups = "source.functional")
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "source.functional")
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
