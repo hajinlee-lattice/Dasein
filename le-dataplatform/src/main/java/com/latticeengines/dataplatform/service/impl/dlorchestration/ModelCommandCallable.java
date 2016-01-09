@@ -252,7 +252,7 @@ public class ModelCommandCallable implements Callable<Long> {
         Long positiveEventCount = metadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate,
                 modelCommand.getEventTable(), commandParameters.getEventColumnName());
 
-        if (rowCount < rowFailThreshold && positiveEventCount < positiveEventFailThreshold) {
+        if (rowCount < rowFailThreshold || positiveEventCount < positiveEventFailThreshold) {
             modelCommandLogService.log(modelCommand,
                     "Failing modeling job due to insufficient rows or positive events. " + "Row count: " + rowCount
                             + " Positive event count: " + positiveEventCount);
