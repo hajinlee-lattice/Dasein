@@ -46,7 +46,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     private String transformOutput1;
     private String transformOutput2;
 
-    @BeforeClass(groups = "madison.functional")
+    @BeforeClass(groups = "functional.madison")
     public void beforeClass() throws Exception {
         today = new Date();
         yesterday = DateUtils.addDays(today, -3);
@@ -66,7 +66,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         removeTransformHdfsDirs();
     }
 
-    @AfterClass(groups = "madison.functional")
+    @AfterClass(groups = "functional.madison")
     public void afterClass() throws Exception {
         if (dailyProgress1 != null) {
             propDataMadisonEntityMgr.delete(dailyProgress1);
@@ -103,7 +103,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         return ((PropDataMadisonServiceImpl) propDataService).getHdfsDataflowIncrementalRawPathWithDate(date);
     }
 
-    @Test(groups = "madison.functional")
+    @Test(groups = "functional.madison")
     public void importFromDB() throws Exception {
 
         downloadFile(dailyProgress1, importOutputDir1);
@@ -129,7 +129,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
-    @Test(groups = "madison.functional", dependsOnMethods = "importFromDB")
+    @Test(groups = "functional.madison", dependsOnMethods = "importFromDB")
     public void transform() throws Exception {
 
         PropDataContext requestContext = new PropDataContext();
@@ -150,7 +150,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
-    @Test(groups = "madison.functional", dependsOnMethods = "transform")
+    @Test(groups = "functional.madison", dependsOnMethods = "transform")
     public void exportToDB() throws Exception {
 
 //        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);

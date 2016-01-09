@@ -33,7 +33,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     abstract CollectedSource getSource();
     abstract Date[] getDates();
 
-    @BeforeMethod(groups = "source.functional")
+    @BeforeMethod(groups = "functional.source")
     public void setUp() throws Exception {
         setUpPod("FunctionalArchiveCollected");
     }
@@ -46,10 +46,10 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
         source = getSource();
     }
 
-    @AfterMethod(groups = "source.functional")
+    @AfterMethod(groups = "functional.source")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "source.functional", enabled = false)
+    @Test(groups = "functional.source", enabled = false)
     public void testWholeProgress() {
         purgeRawData();
 

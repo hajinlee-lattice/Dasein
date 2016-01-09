@@ -32,19 +32,19 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
     abstract PivotedSource getSource();
 
-    @BeforeMethod(groups = "source.functional")
+    @BeforeMethod(groups = "functional.source")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("FunctionalPivot");
+        hdfsPathBuilder.changeHdfsPodId("DeploymentTestPivot");
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
         baseSource = source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "source.functional")
+    @AfterMethod(groups = "functional.source")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "source.functional")
+    @Test(groups = "functional.source")
     public void testWholeProgress() {
         uploadBaseAvro();
 
