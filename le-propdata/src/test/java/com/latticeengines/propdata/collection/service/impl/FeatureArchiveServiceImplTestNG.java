@@ -6,9 +6,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.source.CollectedSource;
@@ -48,16 +46,6 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
         dates[2] = calendar.getTime();
 
         return dates;
-    }
-
-    @Test(groups = "source.functional", dependsOnMethods = "testWholeProgress", enabled = true)
-    public void testEmptyInput() {
-        Date[] dates = getEmptyDataDates();
-
-        ArchiveProgress progress = createNewProgress(dates[0], dates[1]);
-        importFromDB(progress);
-
-        cleanupProgressTables();
     }
 
     @Override
