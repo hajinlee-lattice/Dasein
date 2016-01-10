@@ -5,11 +5,13 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.ZkConfigurationService;
 import com.latticeengines.propdata.collection.service.impl.ArchiveExecutor;
 
 public class ArchiveScheduler extends QuartzJobBean {
 
     private ArchiveService archiveService;
+    private ZkConfigurationService zkConfigurationService;
     private boolean dryrun;
 
     private ArchiveExecutor getExecutor() {
@@ -18,10 +20,12 @@ public class ArchiveScheduler extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        if (dryrun) {
-            System.out.println(archiveService.getClass().getSimpleName() + " triggered.");
-        } else {
-            getExecutor().kickOffNewProgress();
+        if (zkConfigurationService.refreshJobEnabled(archiveService.getSource())) {
+            if (dryrun) {
+                System.out.println(archiveService.getClass().getSimpleName() + " triggered.");
+            } else {
+                getExecutor().kickOffNewProgress();
+            }
         }
     }
 
@@ -30,6 +34,10 @@ public class ArchiveScheduler extends QuartzJobBean {
     //==============================
     public void setArchiveService(ArchiveService archiveService) {
         this.archiveService = archiveService;
+    }
+
+    public void setZkConfigurationService(ZkConfigurationService zkConfigurationService) {
+        this.zkConfigurationService = zkConfigurationService;
     }
 
     public void setDryrun(boolean dryrun) { this.dryrun = dryrun; }

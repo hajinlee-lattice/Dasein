@@ -116,7 +116,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
                     String version = dir.substring(dir.lastIndexOf("/") + 1);
-                    if (version.compareTo(firstVersion) > 0) {
+                    String success = rawDir + "/" + version + "/_SUCCESS";
+                    if (version.compareTo(firstVersion) > 0 && HdfsUtils.fileExists(yarnConfiguration, success)) {
                         avroPaths.add(rawDir + "/" + version + "/*.avro");
                     }
                 }

@@ -21,7 +21,8 @@ public abstract class AbstractCollectionArchiveService
 
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
 
-    abstract CollectedSource getSource();
+    @Override
+    public abstract CollectedSource getSource();
 
     @Override
     public ArchiveProgress startNewProgress(Date startDate, Date endDate, String creator) {

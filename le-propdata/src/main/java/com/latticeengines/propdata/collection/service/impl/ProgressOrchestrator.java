@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -39,6 +40,9 @@ public class ProgressOrchestrator {
 
     @Autowired
     List<Source> sourceList;
+
+    @Value("${propdata.job.schedule.dryrun:true}")
+    Boolean dryrun;
 
     private Log log = LogFactory.getLog(this.getClass());
     private Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
@@ -72,7 +76,7 @@ public class ProgressOrchestrator {
 
         for (RawSource source: archiveServiceMap.keySet()) {
             try {
-                if (zkConfigurationService.refreshJobEnabled(source)) {
+                if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
                     submitProgress(findArchiveProgressToProceed(source));
                 }
             } catch (Exception e) {
@@ -82,7 +86,7 @@ public class ProgressOrchestrator {
 
         for (ServingSource source: refreshServiceMap.keySet()) {
             try {
-                if (zkConfigurationService.refreshJobEnabled(source)) {
+                if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
                     submitProgress(findRefreshProgressToProceed(source));
                 }
             } catch (Exception e) {
@@ -104,7 +108,6 @@ public class ProgressOrchestrator {
         }
     }
 
-    @SuppressWarnings("unused")
     private void submitProgressTest(String sourceName) {
         final RefreshJobExecutor executor = executorMap.get(sourceName);
         if (executor != null) {

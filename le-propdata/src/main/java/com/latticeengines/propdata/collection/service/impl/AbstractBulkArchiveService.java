@@ -23,7 +23,8 @@ public abstract class AbstractBulkArchiveService
 
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
 
-    abstract BulkSource getSource();
+    @Override
+    public abstract BulkSource getSource();
 
     abstract String getSrcTableSplitColumn();
 

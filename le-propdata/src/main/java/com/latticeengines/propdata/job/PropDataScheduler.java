@@ -21,6 +21,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.ZkConfigurationService;
 import com.latticeengines.propdata.collection.source.RawSource;
 
 @Component
@@ -40,6 +41,9 @@ public class PropDataScheduler {
 
     @Autowired
     ApplicationContext applicationContext;
+
+    @Autowired
+    ZkConfigurationService zkConfigurationService;
 
     @PostConstruct
     private void registerJobs() throws SchedulerException {
@@ -64,6 +68,7 @@ public class PropDataScheduler {
                 .usingJobData("dryrun", dryrun)
                 .build();
         job.getJobDataMap().put("archiveService", service);
+        job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
 
         String cron = source.getCronExpression();
         if (StringUtils.isEmpty(cron)) { cron = defaultCron; }
