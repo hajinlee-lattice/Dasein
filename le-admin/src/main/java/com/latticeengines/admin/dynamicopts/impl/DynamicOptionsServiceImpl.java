@@ -35,9 +35,6 @@ public class DynamicOptionsServiceImpl implements DynamicOptionsService {
     @Autowired
     private DataStoreProvider dataStoreProvider;
 
-    @Autowired
-    private TemplateProvider templateProvider;
-
     @PostConstruct
     private void registerProviders() {
         // CRM Topologies

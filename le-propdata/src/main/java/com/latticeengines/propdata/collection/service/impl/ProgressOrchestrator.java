@@ -108,18 +108,6 @@ public class ProgressOrchestrator {
         }
     }
 
-    private void submitProgressTest(String sourceName) {
-        final RefreshJobExecutor executor = executorMap.get(sourceName);
-        if (executor != null) {
-            executorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    executor.print();
-                }
-            });
-        }
-    }
-
     @SuppressWarnings("unchecked")
     ArchiveProgress findArchiveProgressToProceed(RawSource source) {
         ArchiveService archiveService = archiveServiceMap.get(source);
