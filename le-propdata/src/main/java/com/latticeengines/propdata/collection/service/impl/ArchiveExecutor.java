@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -47,19 +45,6 @@ public class ArchiveExecutor implements RefreshJobExecutor {
             logJobFailed(archiveProgress);
         } else {
             logJobSucceed(archiveProgress);
-        }
-    }
-
-    @Override
-    public synchronized void print() {
-        try {
-            String uuid = UUID.randomUUID().toString();
-            Random random = new Random();
-            System.out.println(archiveService + " - " + uuid + " start.");
-            Thread.sleep(random.nextInt(3000));
-            System.out.println(archiveService + " - " + uuid + " finished.");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 

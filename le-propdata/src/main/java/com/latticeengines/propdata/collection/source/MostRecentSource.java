@@ -6,6 +6,6 @@ public interface MostRecentSource extends ServingSource {
     @Override
     CollectedSource[] getBaseSources();
 
-    Long periodTokeep();
+    Long periodToKeep();
 
 }

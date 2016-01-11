@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.source.DomainBased;
@@ -11,6 +12,9 @@ import com.latticeengines.propdata.collection.source.Source;
 public class HGData implements DomainBased, ServingSource {
 
     private static final long serialVersionUID = 603829385601451984L;
+
+    @Value("${propdata.job.hgdata.refresh.schedule:}")
+    String cronExpression;
 
     @Autowired
     HGDataRaw baseSource;
@@ -40,6 +44,6 @@ public class HGData implements DomainBased, ServingSource {
     public Source[] getBaseSources() { return new Source[]{ baseSource }; }
 
     @Override
-    public String getCronExpression() { return ""; }
+    public String getDefaultCronExpression() { return cronExpression; }
 
 }

@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.Random;
-import java.util.UUID;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +16,12 @@ public class RefreshExecutor implements RefreshJobExecutor {
     private Log log = LogFactory.getLog(this.getClass());
 
     private final RefreshService refreshService;
+    private static final int MAX_RETRY = 50;
+    private final String jobSubmitter;
 
     public RefreshExecutor(RefreshService refreshService) {
         this.refreshService = refreshService;
+        this.jobSubmitter = refreshService.getClass().getSimpleName();
     }
 
     @Override
@@ -48,16 +50,24 @@ public class RefreshExecutor implements RefreshJobExecutor {
     }
 
     @Override
-    public synchronized void print() {
-        try {
-            String uuid = UUID.randomUUID().toString();
-            Random random = new Random();
-            System.out.println(refreshService + " - " + uuid + " start.");
-            Thread.sleep(random.nextInt(3000));
-            System.out.println(refreshService + " - " + uuid + " finished.");
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    public void kickOffNewProgress() {
+        int retries = 0;
+        while (retries++ < MAX_RETRY) {
+            try {
+                String baseVersion =  refreshService.findBaseVersionForNewProgress();
+
+                if (baseVersion != null) {
+                    refreshService.startNewProgress(new Date(), baseVersion, jobSubmitter);
+                    return;
+                }
+
+                Thread.sleep(1800 * 1000L);
+            } catch (Exception e) {
+                log.error(e);
+            }
         }
+        log.fatal("Failed to find a chance to kick off a refresh of " + refreshService.getSource().getSourceName()
+            + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
     }
 
     private RefreshProgress retryJob(RefreshProgress progress) {

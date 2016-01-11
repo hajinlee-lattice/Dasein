@@ -63,7 +63,11 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
     }
 
     @Override
-    public RefreshProgress canKickOffNewProgress() {
+    public String findBaseVersionForNewProgress() {
+        String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(getSource().getBaseSources()[0]);
+        if (getProgressEntityMgr().findProgressByBaseVersion(getSource(), currentVersion) == null) {
+            return currentVersion;
+        }
         return null;
     }
 }

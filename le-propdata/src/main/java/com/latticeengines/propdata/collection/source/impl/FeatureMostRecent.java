@@ -3,6 +3,7 @@ package com.latticeengines.propdata.collection.source.impl;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.source.CollectedSource;
@@ -13,6 +14,9 @@ import com.latticeengines.propdata.collection.source.MostRecentSource;
 public class FeatureMostRecent implements MostRecentSource, DomainBased {
 
     private static final long serialVersionUID = 3483355190999074200L;
+
+    @Value("${propdata.job.feature.refresh.schedule:}")
+    String cronExpression;
 
     @Autowired
     Feature baseSource;
@@ -39,9 +43,9 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
 
     @Override
-    public Long periodTokeep() {  return TimeUnit.DAYS.toMillis(365); }
+    public Long periodToKeep() {  return TimeUnit.DAYS.toMillis(365); }
 
     @Override
-    public String getCronExpression() { return ""; }
+    public String getDefaultCronExpression() { return cronExpression; }
 
 }

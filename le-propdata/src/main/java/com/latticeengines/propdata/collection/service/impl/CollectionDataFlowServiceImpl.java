@@ -68,7 +68,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         CollectedSource baseSource = source.getBaseSources()[0];
         Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
-        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodTokeep());
+        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
 
         Map<String, Table> sources = new HashMap<>();
         Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);

@@ -11,7 +11,7 @@ public class HGDataRaw implements BulkSource {
 
     private static final long serialVersionUID = -1724598948350731339L;
 
-    @Value("${propdata.job.hgdataraw.schedule:}")
+    @Value("${propdata.job.hgdata.archive.schedule:}")
     String cronExpression;
 
     @Override
@@ -36,6 +36,6 @@ public class HGDataRaw implements BulkSource {
     public String[] getPrimaryKey() { return null;  }
 
     @Override
-    public String getCronExpression() { return cronExpression; }
+    public String getDefaultCronExpression() { return cronExpression; }
 
 }

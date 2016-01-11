@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.collection.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.source.DomainBased;
@@ -11,6 +12,9 @@ import com.latticeengines.propdata.collection.source.Source;
 public class BuiltWithPivoted implements PivotedSource, DomainBased {
 
     private static final long serialVersionUID = -7458296774400816711L;
+
+    @Value("${propdata.job.builtwith.pivot.schedule:}")
+    String cronExpression;
 
     @Autowired
     BuiltWithMostRecent baseSource;
@@ -37,6 +41,6 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased {
     public Source[] getBaseSources() { return new Source[] { baseSource }; }
 
     @Override
-    public String getCronExpression() { return ""; }
+    public String getDefaultCronExpression() { return cronExpression; }
 
 }

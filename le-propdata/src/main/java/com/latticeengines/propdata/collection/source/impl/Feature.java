@@ -10,7 +10,7 @@ public class Feature implements CollectedSource {
 
     private static final long serialVersionUID = 2079061038810691592L;
 
-    @Value("${propdata.job.feature.schedule:}")
+    @Value("${propdata.job.feature.archive.schedule:}")
     String cronExpression;
 
     @Override
@@ -34,5 +34,5 @@ public class Feature implements CollectedSource {
     public String[] getPrimaryKey() { return new String[] { "URL", "Feature", "LE_Last_Upload_Date"  };  }
 
     @Override
-    public String getCronExpression() { return cronExpression; }
+    public String getDefaultCronExpression() { return cronExpression; }
 }

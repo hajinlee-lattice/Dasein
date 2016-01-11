@@ -6,4 +6,6 @@ public interface ZkConfigurationService {
 
     boolean refreshJobEnabled(Source source);
 
+    String refreshCronSchedule(Source source);
+
 }

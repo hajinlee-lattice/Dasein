@@ -21,8 +21,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.service.ArchiveService;
+import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.ZkConfigurationService;
 import com.latticeengines.propdata.collection.source.RawSource;
+import com.latticeengines.propdata.collection.source.ServingSource;
+import com.latticeengines.propdata.collection.source.Source;
 
 @Component
 public class PropDataScheduler {
@@ -40,6 +43,9 @@ public class PropDataScheduler {
     List<RawSource> rawSourceList;
 
     @Autowired
+    List<ServingSource> servingSourceList;
+
+    @Autowired
     ApplicationContext applicationContext;
 
     @Autowired
@@ -53,7 +59,15 @@ public class PropDataScheduler {
             try {
                 registerArchiveJob(source);
             } catch (Exception e) {
-                log.fatal("Failed to register scheduler for source " + source.getSourceName());
+                log.error("Failed to register scheduler for source " + source.getSourceName());
+            }
+        }
+
+        for (ServingSource source: servingSourceList) {
+            try {
+                registerRefreshJob(source);
+            } catch (Exception e) {
+                log.error("Failed to register scheduler for source " + source.getSourceName());
             }
         }
 
@@ -70,13 +84,28 @@ public class PropDataScheduler {
         job.getJobDataMap().put("archiveService", service);
         job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
 
-        String cron = source.getCronExpression();
+        scheduler.scheduleJob(job, cronTriggerForSource(source));
+    }
+
+    private void registerRefreshJob(ServingSource source) throws SchedulerException {
+        String beanName = source.getRefreshServiceBean();
+        RefreshService service = (RefreshService) applicationContext.getBean(beanName);
+        JobDetail job = JobBuilder.newJob(ArchiveScheduler.class)
+                .usingJobData("dryrun", dryrun)
+                .build();
+        job.getJobDataMap().put("refreshService", service);
+        job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
+
+        scheduler.scheduleJob(job, cronTriggerForSource(source));
+    }
+
+    private Trigger cronTriggerForSource(Source source) {
+        String cron = zkConfigurationService.refreshCronSchedule(source);
         if (StringUtils.isEmpty(cron)) { cron = defaultCron; }
-        Trigger trigger = TriggerBuilder.newTrigger()
+        return TriggerBuilder.newTrigger()
                 .withIdentity(source.getSourceName())
                 .withSchedule(CronScheduleBuilder.cronSchedule(cron))
                 .build();
-        scheduler.scheduleJob(job, trigger);
     }
 
 }

@@ -10,7 +10,7 @@ public class BuiltWith implements CollectedSource {
 
     private static final long serialVersionUID = -1192390855705582815L;
 
-    @Value("${propdata.job.buitwith.schedule:}")
+    @Value("${propdata.job.buitwith.archive.schedule:}")
     String cronExpression;
 
     @Override
@@ -32,6 +32,6 @@ public class BuiltWith implements CollectedSource {
     public String[] getPrimaryKey() { return new String[] { "Domain", "Technology_Name", "LE_Last_Upload_Date"  };  }
 
     @Override
-    public String getCronExpression() { return cronExpression; }
+    public String getDefaultCronExpression() { return cronExpression; }
 
 }

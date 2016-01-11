@@ -35,6 +35,6 @@ public class TestCollectedSource implements DomainBased, CollectedSource {
     public String[] getPrimaryKey() { return new String[]{}; }
 
     @Override
-    public String getCronExpression() { return null; }
+    public String getDefaultCronExpression() { return null; }
 
 }

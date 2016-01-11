@@ -4,13 +4,11 @@ import java.io.File;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
-import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
@@ -23,12 +21,10 @@ public abstract class AbstractRefreshService
 
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
 
-    abstract ServingSource getSource();
+    @Override
+    public abstract ServingSource getSource();
 
     abstract void executeDataFlow(RefreshProgress progress);
-
-    @Autowired
-    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Override
     public RefreshProgress startNewProgress(Date pivotDate, String baseSourceVersion, String creator) {
