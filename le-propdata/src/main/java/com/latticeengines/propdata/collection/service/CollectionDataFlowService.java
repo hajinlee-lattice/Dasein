@@ -7,10 +7,8 @@ public interface CollectionDataFlowService {
 
     void executeMergeRawData(MostRecentSource source, String uid) ;
 
-    void executePivotData(PivotedSource source, String baseVersion, String uid);
+    void executePivotData(PivotedSource source, String baseVersion, String uid, String flowBean);
 
     void executeRefreshHGData(String baseVersion, String uid);
-
-    void executePivotBuiltWith(String baseVersion, String uid);
 
 }

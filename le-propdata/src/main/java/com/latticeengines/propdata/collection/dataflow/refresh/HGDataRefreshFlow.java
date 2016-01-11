@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.propdata.collection.dataflow.function.DateToTimestampFunction;
 import com.latticeengines.propdata.collection.dataflow.function.DomainCleanupFunction;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 
@@ -21,6 +22,9 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
         Node source = addSource(CollectionDataFlowKeys.SOURCE);
         source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
                 new FieldMetadata(domainField, String.class));
+
+        source = source.apply(new DateToTimestampFunction("DateLastVerified"),
+                new FieldList("DateLastVerified"), new FieldMetadata("DateLastVerified", Long.class));
 
         FieldList contents = new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
                 "HGCategory1Parent", "HGCategory2Parent");
@@ -63,9 +67,9 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
                 "Supplier_Name",
                 "Segment_Name",
                 "HG_Category_1",
+                "HG_Category_2",
                 "HG_Category_1_Parent",
                 "HG_Category_2_Parent",
-                "HG_Category_2",
                 "Max_Location_Intensity",
                 "Location_Count",
                 "Last_Verified_Date"

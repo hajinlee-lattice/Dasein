@@ -10,10 +10,10 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.BuiltWithPivoted;
+import com.latticeengines.propdata.collection.source.impl.HGDataPivoted;
 
-@Component("builtWithPivotService")
-public class BuiltWithPivotService extends AbstractPivotService implements PivotService {
+@Component("hgDataPivotService")
+public class HGDataPivotService extends AbstractPivotService implements PivotService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -24,7 +24,7 @@ public class BuiltWithPivotService extends AbstractPivotService implements Pivot
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    BuiltWithPivoted source;
+    HGDataPivoted source;
 
     @Override
     public PivotedSource getSource() { return source; }
@@ -50,7 +50,7 @@ public class BuiltWithPivotService extends AbstractPivotService implements Pivot
                 source,
                 progress.getBaseSourceVersion(),
                 progress.getRootOperationUID(),
-                "builtWithPivotFlow"
+                "hgDataPivotFlow"
         );
     }
 

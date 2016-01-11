@@ -54,6 +54,7 @@ public class HGDataRefreshService extends AbstractRefreshService implements Refr
                 "\t[HG_Category_1_Parent] [nvarchar](255) NULL,\n" +
                 "\t[HG_Category_2_Parent] [nvarchar](255) NULL,\n" +
                 "\t[Creation_Date] [DATETIME] NULL,\n" +
+                "\t[Last_Verified_Date] [DATETIME] NULL,\n" +
                 "\t[LE_Last_Upload_Date] [DATETIME] NULL,\n" +
                 "\t[Location_Count] [INT] NULL,\n" +
                 "\t[Max_Location_Intensity] [INT] NULL)\n" +

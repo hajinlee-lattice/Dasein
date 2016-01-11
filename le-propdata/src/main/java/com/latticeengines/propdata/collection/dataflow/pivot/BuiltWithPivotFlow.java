@@ -56,7 +56,9 @@ public class BuiltWithPivotFlow extends PivotFlow {
         pivot = pivot.join(joinList, join, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, topAttrs, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, recent, joinList, JoinType.OUTER);
-        return pivot.addTimestamp(parameters.getTimestampField());
+
+        pivot = pivot.addTimestamp(parameters.getTimestampField());
+        return finalRetain(pivot, parameters.getColumns());
     }
 
     private Node pivotRecentTechTag(Node source) {

@@ -31,4 +31,7 @@ public class BuiltWithPivotServiceImplTestNG extends PivotServiceImplTestNGBase 
     @Override
     PivotedSource getSource() { return source; }
 
+    @Override
+    Integer getExpectedRows() { return 48; }
+
 }

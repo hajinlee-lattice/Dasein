@@ -26,7 +26,8 @@ public class HGData implements DomainBased, ServingSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[]{"URL", "HG_Category_1", "HG_Category_2", "HG_Category_1_Parent", "HG_Category_2_Parent"};
+        return new String[]{"URL", "Supplier_Name", "Segment_Name",
+                "HG_Category_1", "HG_Category_2", "HG_Category_1_Parent", "HG_Category_2_Parent"};
     }
 
     @Override

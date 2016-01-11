@@ -390,7 +390,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
 
         for (Field field : fieldMap.values()) {
-            Type avroType = field.schema().getTypes().get(0).getType();
+            Type avroType = Type.NULL;
+            for (Schema schema: field.schema().getTypes()) {
+                avroType = schema.getType();
+                if (!Type.NULL.equals(avroType)) { break; }
+            }
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
             fields.add(fm);
         }
@@ -584,7 +588,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
             fields = new ArrayList<>(sourceSchema.getFields().size());
             for (Field field : sourceSchema.getFields()) {
-                Type avroType = field.schema().getTypes().get(0).getType();
+                Type avroType = Type.NULL;
+                for (Schema schema: field.schema().getTypes()) {
+                    avroType = schema.getType();
+                    if (!Type.NULL.equals(avroType)) { break; }
+                }
                 FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
                 fields.add(fm);
             }

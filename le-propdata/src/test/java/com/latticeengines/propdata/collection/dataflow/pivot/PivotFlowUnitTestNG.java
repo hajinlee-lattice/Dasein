@@ -15,6 +15,8 @@ import com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calcul
 
 public class PivotFlowUnitTestNG {
 
+    private PivotFlow pivotFlow = new PivotFlow();
+
     @Test(groups = "unit")
     public void testSimplePivotGroups() {
         Object[][] data = new Object[][] {
@@ -26,7 +28,7 @@ public class PivotFlowUnitTestNG {
                         "{\"PivotKeyColumn\":\"Key\",\"PivotValueColumn\":\"Value\",\"TargetPivotKeys\":\"Key3\"}"},
         };
         List<SourceColumn> columns = parseData(data);
-        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = PivotFlow.getPivotStrategyMap(columns);
+        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = pivotFlow.getPivotStrategyMap(columns);
         Assert.assertEquals(pivotStrategyMap.size(), 1);
         PivotStrategyImpl impl = (PivotStrategyImpl) getFirstStrategyFromMap(pivotStrategyMap);
         Assert.assertNotNull(impl);
@@ -44,7 +46,7 @@ public class PivotFlowUnitTestNG {
                         "{\"PivotKeyColumn\":\"Key\",\"PivotValueColumn\":\"Value\",\"TargetPivotKeys\":\"Key3\"}"},
         };
         List<SourceColumn> columns = parseData(data);
-        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = PivotFlow.getPivotStrategyMap(columns);
+        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = pivotFlow.getPivotStrategyMap(columns);
         Assert.assertEquals(pivotStrategyMap.size(), 1);
     }
 
@@ -59,7 +61,7 @@ public class PivotFlowUnitTestNG {
                         "{\"PivotKeyColumn\":\"Key\",\"PivotValueColumn\":\"Value\",\"TargetPivotKeys\":\"Key3\"}"},
         };
         List<SourceColumn> columns = parseData(data);
-        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = PivotFlow.getPivotStrategyMap(columns);
+        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = pivotFlow.getPivotStrategyMap(columns);
         Assert.assertEquals(pivotStrategyMap.size(), 1);
     }
 
@@ -74,7 +76,7 @@ public class PivotFlowUnitTestNG {
                         "{\"PivotKeyColumn\":\"Key\",\"PivotValueColumn\":\"Value\",\"TargetPivotKeys\":\"Key3\"}"},
         };
         List<SourceColumn> columns = parseData(data);
-        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = PivotFlow.getPivotStrategyMap(columns);
+        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = pivotFlow.getPivotStrategyMap(columns);
         Assert.assertEquals(pivotStrategyMap.size(), 2);
     }
 
@@ -89,7 +91,7 @@ public class PivotFlowUnitTestNG {
                         "{\"PivotKeyColumn\":\"Key\",\"PivotValueColumn\":\"Value\",\"TargetPivotKeys\":\"Key3\"}"},
         };
         List<SourceColumn> columns = parseData(data);
-        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = PivotFlow.getPivotStrategyMap(columns);
+        Map<ImmutableList<String>, PivotStrategy> pivotStrategyMap = pivotFlow.getPivotStrategyMap(columns);
         Assert.assertEquals(pivotStrategyMap.size(), 2);
     }
 

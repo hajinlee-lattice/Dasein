@@ -35,6 +35,9 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "BaseSource", nullable = true)
     private String baseSource;
 
+    @Column(name = "Preparation", nullable = true)
+    private String preparation;
+
     @Column(name = "GroupBy", nullable = true)
     private String groupBy;
 
@@ -95,6 +98,10 @@ public class SourceColumn implements HasPid, Serializable {
         this.baseSource = baseSource;
     }
 
+    public String getPreparation() { return preparation; }
+
+    public void setPreparation(String preparation) { this.preparation = preparation; }
+
     public String getGroupBy() {
         return groupBy;
     }
@@ -150,6 +157,7 @@ public class SourceColumn implements HasPid, Serializable {
         AGG_SUM,
         AGG_COUNT,
         OTHER,
-        BUILTWITH_TOPATTR;
+        BUILTWITH_TOPATTR,
+        HGDATA_NEWTECH;
     }
 }

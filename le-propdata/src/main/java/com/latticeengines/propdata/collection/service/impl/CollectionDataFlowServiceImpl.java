@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -87,7 +88,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     }
 
     @Override
-    public void executePivotData(PivotedSource source, String baseVersion, String uid) {
+    public void executePivotData(PivotedSource source, String baseVersion, String uid, String flowBean) {
         String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
         String targetPath = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
 
@@ -111,35 +112,8 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, "pivotFlow");
-    }
-
-    @Override
-    public void executePivotBuiltWith(String baseVersion, String uid) {
-        String flowName = CollectionDataFlowKeys.PIVOT_FLOW;
-        String targetPath = hdfsPathBuilder.constructWorkFlowDir(builtWithPivoted, flowName).append(uid).toString();
-
-        Map<String, Table> sources = new HashMap<>();
-        List<String> baseTables = new ArrayList<>();
-        String[] versions = baseVersion.split("\\|");
-        int i = 0;
-        for (Source baseSource: builtWithPivoted.getBaseSources()) {
-            String version = versions[i];
-            Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
-            sources.put(baseSource.getSourceName(), baseTable);
-            baseTables.add(baseSource.getSourceName());
-            i++;
-        }
-
-        PivotDataFlowParameters parameters = new PivotDataFlowParameters();
-        parameters.setTimestampField(builtWithPivoted.getTimestampField());
-        parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(builtWithPivoted));
-        parameters.setBaseTables(baseTables);
-        parameters.setJoinFields(builtWithPivoted.getPrimaryKey());
-
-        DataFlowContext ctx = dataFlowContext(builtWithPivoted, sources, parameters, targetPath);
-        ctx.setProperty("FLOWNAME", builtWithPivoted.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, "builtWithPivotFlow");
+        if (StringUtils.isEmpty(flowBean)) { flowBean = "pivotFlow"; }
+        dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 
     @Override

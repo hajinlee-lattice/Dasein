@@ -31,10 +31,11 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     abstract PivotService getPivotService();
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
     abstract PivotedSource getSource();
+    abstract Integer getExpectedRows();
 
     @BeforeMethod(groups = "functional.source")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("DeploymentTestPivot");
+        hdfsPathBuilder.changeHdfsPodId("FunctionalPivot");
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         source = getSource();
@@ -125,5 +126,8 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
         Assert.assertTrue(rowsInPivotedTable > 0,
                 String.format("Only %d results in %s.", rowsInPivotedTable, source.getSqlTableName()));
         Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGenerated());
+        if (getExpectedRows() != null) {
+            Assert.assertEquals(rowsInPivotedTable, (int) getExpectedRows());
+        }
     }
 }

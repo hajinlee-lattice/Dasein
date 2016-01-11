@@ -24,12 +24,14 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "ExternalColumn")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ExternalColumn implements HasPid, Serializable {
 
     private static final long serialVersionUID = 6232580467581472718L;

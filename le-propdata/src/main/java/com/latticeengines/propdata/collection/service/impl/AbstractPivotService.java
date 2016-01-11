@@ -12,7 +12,8 @@ public abstract class AbstractPivotService extends AbstractRefreshService implem
         collectionDataFlowService.executePivotData(
                 (PivotedSource) getSource(),
                 progress.getBaseSourceVersion(),
-                progress.getRootOperationUID()
+                progress.getRootOperationUID(),
+                null
         );
     }
 

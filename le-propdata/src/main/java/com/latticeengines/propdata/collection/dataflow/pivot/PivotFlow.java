@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
 public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> {
 
     protected static ObjectMapper objectMapper = new ObjectMapper();
+    private String rowIdField = "RowId" + UUID.randomUUID().toString().replace("-", "");
 
     @Override
     public Node construct(PivotDataFlowParameters parameters) {
@@ -37,7 +39,16 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             sourceMap.put(baseTable, addSource(baseTable));
         }
         Node join = joinedConfigurablePipes(parameters, sourceMap);
-        return join.addTimestamp(parameters.getTimestampField());
+        join = join.addTimestamp(parameters.getTimestampField());
+        return finalRetain(join, parameters.getColumns());
+    }
+
+    protected Node finalRetain(Node node, List<SourceColumn> columns) {
+        List<String> fields = new ArrayList<>();
+        for (SourceColumn column: columns) {
+            fields.add(column.getColumnName());
+        }
+        return node.retain(new FieldList(fields.toArray(new String[fields.size()])));
     }
 
     protected Node joinedConfigurablePipes(PivotDataFlowParameters parameters, Map<String, Node> sourceMap) {
@@ -161,6 +172,9 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             String baseSource = keys.get(0);
             String[] groupbyFields = keys.get(1).split(",");
             Node source = sourceMap.get(baseSource);
+            if (hasRowCount((PivotStrategyImpl) entry.getValue())) {
+                source = source.addRowID(rowIdField);
+            }
             Node pivoted = source.pivot(groupbyFields, entry.getValue());
             if (!ImmutableList.copyOf(groupbyFields).equals(ImmutableList.copyOf(joinFields))) {
                 pivoted = pivoted.rename(new FieldList(groupbyFields), new FieldList(joinFields));
@@ -223,8 +237,13 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         for (Map.Entry<SourceColumn, Aggregation> entry: tempMap.entrySet()) {
             SourceColumn column = entry.getKey();
             Aggregation aggregation = entry.getValue();
-            ImmutableList<String> identifier = ImmutableList.copyOf(Arrays.asList(
-                    column.getBaseSource(), column.getGroupBy()));
+            ImmutableList<String> identifier;
+            if (StringUtils.isEmpty(column.getPreparation())) {
+                identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource(), column.getGroupBy()));
+            } else {
+                identifier = ImmutableList.copyOf(Arrays.asList(
+                        column.getBaseSource() + "_" + column.getPreparation(), column.getGroupBy()));
+            }
             if (!aggregationMap.containsKey(identifier)) {
                 aggregationMap.put(identifier, new ArrayList<Aggregation>());
             }
@@ -262,7 +281,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
     }
 
     @VisibleForTesting
-    static Map<ImmutableList<String>, PivotStrategy> getPivotStrategyMap(List<SourceColumn> columns) {
+    Map<ImmutableList<String>, PivotStrategy> getPivotStrategyMap(List<SourceColumn> columns) {
         Map<SourceColumn, PivotStrategy> strategyMap =  new HashMap<>();
         for (SourceColumn column: columns) {
             PivotStrategy pivotStrategy = constructPivotStrategy(column);
@@ -275,9 +294,16 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         for (Map.Entry<SourceColumn, PivotStrategy> entry: strategyMap.entrySet()) {
             SourceColumn column = entry.getKey();
             PivotStrategyImpl impl = (PivotStrategyImpl) entry.getValue();
-            ImmutableList<String> identifier = ImmutableList.copyOf(Arrays.asList(
-                    column.getBaseSource(), column.getGroupBy(),
-                    impl.keyColumn, impl.valueColumn));
+
+            ImmutableList<String> identifier;
+            if (StringUtils.isEmpty(column.getPreparation())) {
+                identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource(), column.getGroupBy(),
+                        impl.keyColumn, impl.valueColumn));
+            } else {
+                identifier = ImmutableList.copyOf(Arrays.asList(
+                        column.getBaseSource() + "_" + column.getPreparation(), column.getGroupBy(),
+                        impl.keyColumn, impl.valueColumn));
+            }
 
             if (pivotStrategyMap.containsKey(identifier)) {
                 PivotStrategy oldStrategy = pivotStrategyMap.get(identifier);
@@ -289,7 +315,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         return pivotStrategyMap;
     }
 
-    private static PivotStrategy constructPivotStrategy(SourceColumn column) {
+    private PivotStrategy constructPivotStrategy(SourceColumn column) {
         PivotType pivotType;
         switch (column.getCalculation()) {
             case PIVOT_ANY:
@@ -318,6 +344,11 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             JsonNode json = objectMapper.readTree(column.getArguments());
             String keyColumn = json.get("PivotKeyColumn").asText();
             String valueColumn = json.get("PivotValueColumn").asText();
+
+            if (PivotType.COUNT.equals(pivotType) && "*".equals(valueColumn)) {
+                valueColumn = rowIdField;
+            }
+
             String[] pivotKeys = json.get("TargetPivotKeys").asText().split(",");
             Set<String> keySet = new HashSet<>();
             List<AbstractMap.SimpleImmutableEntry<String, String>> columnMappingList = new ArrayList<>();
@@ -400,6 +431,10 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
 
         return new PivotStrategyImpl(keyColumn, valueColumn, pivotedKeys, columnMap,
                 classMap, null, typeMap, null, defaultValues, null);
+    }
+
+    private boolean hasRowCount(PivotStrategyImpl impl) {
+        return rowIdField.equals(impl.valueColumn);
     }
 
 }

@@ -51,8 +51,6 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
 
-        truncateDestTable();
-
         getBaseSourceTestBean().purgeRawData();
         archiveProgress = getBaseSourceTestBean().createNewProgress();
         getBaseSourceTestBean().importFromDB(archiveProgress);
@@ -65,12 +63,6 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
 
         verifyResultTable();
         cleanupProgressTables();
-    }
-
-    private void truncateDestTable() {
-        String tableName = source.getSqlTableName();
-        jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
-                + tableName + "') AND type in (N'U')) TRUNCATE TABLE " + tableName);
     }
 
     protected RefreshProgress createNewProgress(Date pivotDate) {

@@ -6,16 +6,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
+import com.latticeengines.propdata.collection.source.impl.HGDataPivoted;
 
 @Component
-public class FeaturePivotServiceImplTestNG extends PivotServiceImplTestNGBase {
+public class HGDataPivotServiceImplTestNG extends PivotServiceImplTestNGBase {
 
     @Autowired
-    FeaturePivotService pivotService;
+    HGDataPivotService pivotService;
 
     @Autowired
-    FeaturePivoted source;
+    HGDataPivoted source;
 
     @Autowired
     RefreshProgressEntityMgr progressEntityMgr;
@@ -32,6 +32,6 @@ public class FeaturePivotServiceImplTestNG extends PivotServiceImplTestNGBase {
     PivotedSource getSource() { return source; }
 
     @Override
-    Integer getExpectedRows() { return 70; }
+    Integer getExpectedRows() { return 142; }
 
 }
