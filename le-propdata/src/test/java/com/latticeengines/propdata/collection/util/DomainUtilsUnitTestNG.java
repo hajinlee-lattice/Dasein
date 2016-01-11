@@ -12,13 +12,15 @@ public class DomainUtilsUnitTestNG {
 
     @DataProvider(name = "domainDataProvider")
     Object[][] domainDataProvider() {
-        return new Object[][] {
-                { "google.com", "google.com" },
-                { "http://www.hugedomains.com/domain_profile.cfm?d=whitesidedesigns&e=com", "hugedomains.com" },
-                { "http://www.rutherfordproperty.co.nz", "rutherfordproperty.co.nz" },
-                { "http://trinid.com/", "trinid.com" },
-                { "maps.google.com", "maps.google.com" },
-                { "www.www.com", "www.com" },
+        return new Object[][]{
+                {"google.com", "google.com"},
+                {"http://www.hugedomains.com/domain_profile.cfm?d=whitesidedesigns&e=com", "hugedomains.com"},
+                {"http://www.rutherfordproperty.co.nz", "rutherfordproperty.co.nz"},
+                {"http://trinid.com/", "trinid.com"},
+                {"maps.google.com", "maps.google.com"},
+                {"www.www.com", "www.com"},
+                {"abcdefg", null},
+                {"www.www", null}
         };
     }
 }

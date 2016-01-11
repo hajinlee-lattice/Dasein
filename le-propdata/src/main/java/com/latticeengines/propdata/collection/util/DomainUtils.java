@@ -11,7 +11,12 @@ public class DomainUtils {
         Matcher matcher = pDomainNameOnly.matcher(url);
         if (matcher.find()) {
             String domain = matcher.group(0);
-            return domain.startsWith("www.") ? domain.substring(4) : domain;
+            domain =  domain.startsWith("www.") ? domain.substring(4) : domain;
+            if (domain.contains(".")) {
+                return domain;
+            } else {
+                return null;
+            }
         }
         return null;
     }
