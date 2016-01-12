@@ -29,7 +29,7 @@ from TestRunner import SessionRunner
 from Properties import PLSEnvironments
 
 
-def runLoadGroups(tenant, load_groups, max_run_time_in_sec=10800, sleep_time=30):
+def runLoadGroups(tenant, load_groups, max_run_time_in_sec=PLSEnvironments.load_group_timeout, sleep_time=30):
     for lg in load_groups:
         succeed, launchid = runLoadGroup(tenant, lg, max_run_time_in_sec, sleep_time)
         if not succeed:
@@ -37,7 +37,7 @@ def runLoadGroups(tenant, load_groups, max_run_time_in_sec=10800, sleep_time=30)
     return succeed
 
 
-def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
+def runLoadGroup(tenant, load_group, max_run_time_in_sec=PLSEnvironments.load_group_timeout, sleep_time=30):
     command = "Launch Load Group"
     params = {"-s": PLSEnvironments.dl_server,
               "-u": PLSEnvironments.dl_server_user,
@@ -54,9 +54,6 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
     launchid = dlc.stdout.split(':', 1)[1].strip().strip('.')
 
     start = time.time()
-    lg_start_datetime = None
-    lg_last_succeed_date = None
-    lg_last_fail_date = None
     lg_succeed = True
     while (True):
         # If overtime,then break
@@ -65,6 +62,10 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
                 load_group, datetime.fromtimestamp(start), max_run_time_in_sec)
             lg_succeed = False
             break
+
+        lg_start_datetime = None
+        lg_last_succeed_date = None
+        lg_last_fail_date = None
 
         returnDict = getLoadGroupStatus(dlc, tenant, load_group)
         print returnDict
@@ -79,35 +80,31 @@ def runLoadGroup(tenant, load_group, max_run_time_in_sec=7200, sleep_time=30):
             print "Load Group %s Launch Succeeded" % load_group
             break
         if lg_status == "Idle":
-            # Typicaly, judge the start time and finish time first
-            if lg_start_datetime:
-                if lg_last_succeed_date and lg_last_succeed_date > lg_start_datetime:
-                    print "Load Group %s Launch Succeeded" % load_group
+            # Judge if Last Succeed is Never
+            if not lg_last_succeed_date:  # Last Succeed is Never
+                print "Last Succeed is Never, load Group %s run failed" % load_group
+                lg_succeed = False
+                break
+            elif lg_start_datetime:  # Last Succeed is not Never and have start time
+                if lg_last_succeed_date > lg_start_datetime:
+                    print "lg_last_succeed_date > lg_start_datetime, load Group %s Launch Succeeded" % load_group
                     break
                 if lg_last_fail_date and lg_last_fail_date > lg_start_datetime:
-                    print "Load Group %s run failed" % load_group
+                    print "lg_last_fail_date > lg_start_datetime, load Group %s run failed" % load_group
                     lg_succeed = False
-                    break
-                else:
-                    print "Load Group %s Launch Succeeded" % load_group
                     break
             else:  # When didn't get the start time, judge the Last failed time
                 if not lg_last_fail_date:  # Last Failed is Never
-                    print "Load Group %s Launch Succeeded" % load_group
+                    print "Last Failed is Never, load Group %s Launch Succeeded" % load_group
                     break
-                else:  # Last Failed is not Never
-                    if not lg_last_succeed_date:  # Last Succeeded is Never
-                        print "Load Group %s run failed" % load_group
+                else:  # Both Last Succeeded and Last Failed are not Never
+                    if lg_last_fail_date > lg_last_succeed_date:
+                        print "lg_last_fail_date > lg_last_succeed_date, load Group %s run failed" % load_group
                         lg_succeed = False
                         break
-                    else:  # Both Last Succeeded and Last Failed have value
-                        if lg_last_fail_date > lg_last_succeed_date:
-                            print "Load Group %s run failed" % load_group
-                            lg_succeed = False
-                            break
-                        else:
-                            print "Load Group %s Launch Succeeded" % load_group
-                            break
+                    else:
+                        print "lg_last_fail_date <= lg_last_succeed_date, load Group %s Launch Succeeded" % load_group
+                        break
         print "Load Group %s status is: %s, will try again in %s seconds" % (load_group, lg_status, sleep_time)
         time.sleep(sleep_time)
     print "Run load group %s cost: %s s" % (load_group, time.time() - start)

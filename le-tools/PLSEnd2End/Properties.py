@@ -43,7 +43,7 @@ class PLSEnvironments(object):
     parser.read("config.ini")
 
     # properties definition
-    pls_bard_1 = "AutoJekinsElq_11_16_1447677239"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
+    pls_bard_1 = "AutoJekinsElq_01_10_1452474931"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
     pls_bard_2 = "AutoJekinsMKTO_11_16_1447681859"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
     pls_bard_3 = "AutoJekinsSFDC_12_04_1449243201"  # %s_%s" % (time.strftime('%m_%d'),int(time.time()));
     pls_tenant_elq = parser.get("TestSetup", "pls_tenant_elq");
@@ -52,6 +52,7 @@ class PLSEnvironments(object):
     pls_tenant_elq_model_activated = parser.get("TestSetup", "pls_tenant_elq_model_activated");
     pls_tenant_mkto_model_activated = parser.get("TestSetup", "pls_tenant_mkto_model_activated");
     pls_tenant_sfdc_model_Activated = parser.get("TestSetup", "pls_tenant_sfdc_model_Activated");
+    load_group_timeout = parser.get("TestSetup", "load_group_timeout")
 
     pls_version = parser.get("TestSetup", "pls_version");
     dante_server_name = parser.get("DanteInfo", "dante_server_name");
