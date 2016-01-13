@@ -65,7 +65,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             if (colData.getTags() != null && colData.getTags().size() > 0) {
                 metadata.put("Tags", colData.getTags().get(colData.getTags().size() - 1));
             } else {
-                metadata.put("Tags", "<NULL>");
+                metadata.put("Tags", "Internal");
             }
 
             if (colData.getFundamentalType() != null) {
@@ -89,13 +89,18 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
                 }
             }
             if (!metadata.containsKey("Category")) {
-                metadata.put("Category", "<NULL>");
+                if (metadata.containsKey("Tags") && metadata.get("Tags").equals("Internal")) {
+                    metadata.put("Category", "Lead Information");
+                }
+                else {
+                    metadata.put("Category", "<NULL>");
+                }
             }
             if (!metadata.containsKey("DataType")) {
                 metadata.put("DataType", "<NULL>");
             }
 
-            // Map multiple values or no value to "Lattice Data Cloud"
+            // Map multiple values or no value to "Lattice Data Science"
             if (colData.getDataSource() != null && colData.getDataSource().size() == 1 && !colData.getDataSource().get(0).equals("")) {
                 metadata.put("DataSource", colData.getDataSource().get(0));
             } else {

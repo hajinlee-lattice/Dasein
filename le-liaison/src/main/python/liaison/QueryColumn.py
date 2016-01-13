@@ -56,6 +56,8 @@ class QueryColumn(object):
         if c is not None and len(c) > 22:
             print 'Warning: truncating Category \'{0}\' to 22 characters'.format(c)
             self.category_ = c[:22]
+        elif c is None and self.getTags() == 'Internal':
+            self.category_ = 'Lead Information'
         else:
             self.category_ = c
 
@@ -73,7 +75,10 @@ class QueryColumn(object):
     def setTags(self, t):
         if t is not None and t.lower() not in [ 'internal', 'external' ]:
             raise UnknownMetadataValue(t)
-        self.tags_ = t
+        if t is None:
+            self.tags_ = 'Internal'
+        else:
+            self.tags_ = t
 
     def getFundamentalType(self):
         return self.fundamental_type_
@@ -132,9 +137,9 @@ class QueryColumn(object):
         self.setExpression(expression)
         self.setApprovedUsage(approved_usage)
         self.setDisplayName(display_name)
+        self.setTags(tags)
         self.setCategory(category)
         self.setStatisticalType(statistical_type)
-        self.setTags(tags)
         self.setFundamentalType(fundamental_type)
         self.setDescription(description)
         self.setDisplayDiscretization(display_discretization)

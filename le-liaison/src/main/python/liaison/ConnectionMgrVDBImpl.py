@@ -146,12 +146,14 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             metadata = {}
             metadata['DisplayName']     = col_data['DisplayName']
             metadata['Description']     = col_data['Description']
-            metadata['Tags']            = None
+            metadata['Tags']            = 'Internal'
             if col_data['Tags'] is not None and len(col_data['Tags']) > 0:
                 metadata['Tags']          = col_data['Tags'][-1]
             metadata['FundamentalType'] = col_data['FundamentalType']
             metadata['DisplayDiscretization'] = col_data['DisplayDiscretizationStrategy']
             metadata['Category']        = None
+            if metadata['Tags'] == 'Internal':
+                metadata['Category'] = 'Lead Information'
             metadata['DataType']        = None
             if col_data['Extensions'] is not None:
                 for ext in col_data['Extensions']:
@@ -160,9 +162,9 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                     if k not in ['Category','DataType']:
                         continue
                     metadata[k]             = v
-            metadata['DataSource']      = None
-            if col_data['DataSource'] is not None and len(col_data['DataSource']) > 0:
-                metadata['DataSource']     = col_data['DataSource'][-1]
+            metadata['DataSource']      = 'Lattice Data Science'
+            if col_data['DataSource'] is not None and len(col_data['DataSource']) == 1 and col_data['DataSource'][0] != '':
+                metadata['DataSource']     = col_data['DataSource'][0]
             metadata['ApprovedUsage']   = None
             if col_data['ApprovedUsage'] is not None and len(col_data['ApprovedUsage']) > 0:
                 metadata['ApprovedUsage'] = col_data['ApprovedUsage'][-1]
