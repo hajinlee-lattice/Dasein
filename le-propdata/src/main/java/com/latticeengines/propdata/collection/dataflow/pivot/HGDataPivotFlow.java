@@ -35,7 +35,7 @@ public class HGDataPivotFlow extends PivotFlow {
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(domainField, String.class));
         fms.add(new FieldMetadata("Both", String.class));
-        Buffer buffer = new HGDataBothBuffer(domainField);
+        Buffer<?> buffer = new HGDataBothBuffer(domainField);
         Node both = source.groupByAndBuffer(new FieldList(domainField), buffer, fms);
         both = both.renamePipe("both");
         sourceMap.put(parameters.getBaseTables().get(0) + "_Both", both);
@@ -53,7 +53,7 @@ public class HGDataPivotFlow extends PivotFlow {
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(domainField, String.class));
         fms.add(newTechFieldMetadata(columns));
-        Buffer buffer = new HGDataNewTechBuffer(domainField, newTechFieldMetadata(columns).getFieldName());
+        Buffer<?> buffer = new HGDataNewTechBuffer(domainField, newTechFieldMetadata(columns).getFieldName());
         Node newTech = source.groupByAndBuffer(new FieldList(domainField), buffer, fms);
         return newTech.renamePipe("newTech");
     }
