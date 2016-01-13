@@ -21,3 +21,15 @@ class RevenueStatisticsGeneratorTest(ScoreTargetBase):
         generator.execute()
 
         self.assertEquals(mediator.revenueStatistics, [('topBucketByRevenue_PercentOverlap', 1.0), ('topBucketByRevenue_PercentTopRevenue', 1.0), ('topBucketByComboScore_PercentOverlap', 1.0), ('topBucketByComboScore_PercentTopRevenue', 1.0), ('revenuePrediction_L1Error', 0.0), ('revenuePrediction_SDError', 0.0), ('revenuePrediction_R2', 1.0)])
+        
+        revenue = [0, 0, 0, 0, 0, 0]
+        predictedRevenue = [0, 0, 1.0, 0, 0, 0]
+        self.loadMediator(generator, scoreTarget)
+        mediator = generator.getMediator()
+        mediator.schema["reserved"]["predictedrevenue"] = "PredictedRevenue"
+        mediator.data['PredictedRevenue'] = predictedRevenue
+        mediator.revenueColumn = "Revenue"
+        mediator.data['Revenue'] = revenue
+        
+        generator.execute()
+        self.assertEquals(mediator.revenueStatistics, None)

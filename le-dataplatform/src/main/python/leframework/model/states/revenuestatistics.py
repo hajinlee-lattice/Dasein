@@ -41,8 +41,15 @@ class RevenueStatistics(State):
             return
         predictedEvent = mediator.data[mediator.schema["reserved"]["score"]].as_matrix()
         realizedRevenue = mediator.data[mediator.revenueColumn].fillna(value=0).as_matrix()
+        if np.all(realizedRevenue == 0):
+            mediator.revenueStatistics = None
+            return
+        try:
+            mediator.revenueStatistics = self.combinedOverlapStats(predictedRevenue, predictedEvent, realizedRevenue)
+        except Exception as e:
+            self.logger.error(str(e))
+            mediator.revenueStatistics = None
         
-        mediator.revenueStatistics = self.combinedOverlapStats(predictedRevenue, predictedEvent, realizedRevenue)
         
         
     def basicStats(self, x):
