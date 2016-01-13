@@ -9,7 +9,5 @@
     <import resource="classpath:propdata-persistence-manage-context.xml" />
     <import resource="classpath:propdata-persistence-collection-context.xml" />
     <import resource="classpath:propdata-persistence-bulk-context.xml" />
-    <import resource="classpath:propdata-persistence-entitlements-context.xml" />
-    <import resource="classpath:propdata-persistence-match-context.xml" />
 
 </beans>
