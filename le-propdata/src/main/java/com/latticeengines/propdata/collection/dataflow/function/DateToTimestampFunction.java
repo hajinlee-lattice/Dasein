@@ -23,6 +23,7 @@ public class DateToTimestampFunction extends CleanupFunction implements Function
         this.dateField = dateField;
     }
 
+    @Override
     protected Tuple cleanupArguments(TupleEntry arguments) {
         String date = arguments.getString(dateField);
         try {

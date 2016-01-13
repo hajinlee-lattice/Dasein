@@ -23,6 +23,7 @@ public class OldDataCleanupFunction extends CleanupFunction implements Function
         this.earliest = earliest;
     }
 
+    @Override
     protected Tuple cleanupArguments(TupleEntry arguments) {
         try {
             Date timestamp = new Date(arguments.getLong(timestampField));

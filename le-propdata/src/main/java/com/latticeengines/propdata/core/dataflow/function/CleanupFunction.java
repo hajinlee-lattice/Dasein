@@ -29,6 +29,6 @@ abstract public class CleanupFunction extends BaseOperation implements Function
         }
     }
 
-    abstract Tuple cleanupArguments(TupleEntry arguments);
+    protected abstract Tuple cleanupArguments(TupleEntry arguments);
 
 }
