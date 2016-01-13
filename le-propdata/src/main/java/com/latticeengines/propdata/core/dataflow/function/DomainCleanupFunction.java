@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.collection.dataflow.function;
+package com.latticeengines.propdata.core.dataflow.function;
 
 
 import org.apache.commons.lang.StringUtils;

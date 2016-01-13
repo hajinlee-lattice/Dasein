@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.dataflow.merge;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.propdata.collection.dataflow.function.DomainCleanupFunction;
+import com.latticeengines.propdata.core.dataflow.function.DomainCleanupFunction;
 import com.latticeengines.propdata.collection.dataflow.function.OldDataCleanupFunction;
 
 @Component("mostRecentFlow")

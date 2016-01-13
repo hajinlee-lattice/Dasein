@@ -3,6 +3,8 @@ package com.latticeengines.propdata.collection.dataflow.function;
 
 import java.util.Date;
 
+import com.latticeengines.propdata.core.dataflow.function.CleanupFunction;
+
 import cascading.operation.Function;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
