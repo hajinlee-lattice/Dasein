@@ -13,6 +13,7 @@ Tmpl_LP_02-02-01_SFDC_Main,https://10.41.1.187:8080/
 Alteryx_SFDC,https://data-pls2.prod.lattice.local/dataloader/
 Dell_SFDC,https://data-pls2.prod.lattice.local/dataloader/
 Dell_SFDC_Refresh,https://data-pls2.prod.lattice.local/dataloader/
+Internal_LP_SFDC_220_2,https://data-pls2.prod.lattice.local/dataloader/
 Mulesoft_Relaunch,https://data-pls2.prod.lattice.local/dataloader/
 Mulesoft_Relaunch2,https://data-pls2.prod.lattice.local/dataloader/
 Qlik_Relaunch,https://data-pls2.prod.lattice.local/dataloader/
@@ -20,7 +21,6 @@ Qlik_Relaunch2,https://data-pls2.prod.lattice.local/dataloader/
 2Checkout_LP_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Adobe_Sandbox2,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Alteryx_PD,https://data-pls.lattice-engines.com/Dataloader_PLS/
-Alteryx_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Alteryx_SFDC_2,https://data-pls.lattice-engines.com/Dataloader_PLS/
 AWS_PD_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
 BazaarvoiceLP,https://data-pls.lattice-engines.com/Dataloader_PLS/
@@ -45,6 +45,8 @@ Int_MKTO_AEC_MultModCfg_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_ELQ_134_200_2,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_ELQ_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_MKTO_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Internal_LP_MKTO_220_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Klarna,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Lattice_Relaunch,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Lattice3_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 LeadMD_PLS,https://data-pls.lattice-engines.com/Dataloader_PLS/
