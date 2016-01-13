@@ -10,8 +10,8 @@
     <bean id="dataSourcePropDataBulk" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://${propdata.bulk.host}:${propdata.bulk.port};databaseName=${propdata.bulk.db};" />
-        <property name="username" value="${propdata.collection.user}" />
-        <property name="password" value="${propdata.collection.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="sessionFactoryPropDataBulk" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">

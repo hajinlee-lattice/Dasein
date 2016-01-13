@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.impl.FeaturePivoted;
 
 @Component("featurePivotService")
 public class FeaturePivotService extends AbstractPivotService implements PivotService {

@@ -11,9 +11,9 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.util.DateRange;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.util.DateRange;
+import com.latticeengines.propdata.core.util.LoggingUtils;
 
 public abstract class AbstractCollectionArchiveService
         extends SourceRefreshServiceBase<ArchiveProgress> implements CollectedArchiveService {

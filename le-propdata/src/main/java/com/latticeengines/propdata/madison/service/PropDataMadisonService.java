@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.madison.service;
 
-import com.latticeengines.propdata.eai.service.PropDataContext;
-
 public interface PropDataMadisonService {
 
     public static final String TODAY_KEY = "today";

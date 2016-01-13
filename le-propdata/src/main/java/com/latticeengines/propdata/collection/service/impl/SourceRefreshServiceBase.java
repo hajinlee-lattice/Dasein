@@ -18,12 +18,13 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
-import com.latticeengines.propdata.collection.source.Source;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
@@ -69,10 +70,10 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     @Value("${propdata.collection.db}")
     protected String db;
 
-    @Value("${propdata.collection.user}")
+    @Value("${propdata.user}")
     protected String dbUser;
 
-    @Value("${propdata.collection.password.encrypted}")
+    @Value("${propdata.password.encrypted}")
     protected String dbPassword;
 
     @Value("${propdata.collection.sqoop.mapper.number:8}")

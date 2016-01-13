@@ -20,44 +20,44 @@
     <bean id="pd126ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.126:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="pd127ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.127:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="pd128ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="pd131ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.131:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="pd130ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="pd238ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url"
             value="jdbc:sqlserver://10.41.1.238\\SQL2012:1437;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.matcher.user}" />
-        <property name="password" value="${propdata.matcher.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
 </beans>

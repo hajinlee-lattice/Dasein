@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.ServingSource;
-import com.latticeengines.propdata.collection.source.impl.HGData;
+import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.impl.HGData;
 
 @Component
 public class HGDataRefreshServiceImplTestNG extends RefreshBulkServiceImplTestNGBase {

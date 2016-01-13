@@ -79,6 +79,7 @@
                             <finalName>propdata</finalName>
                             <descriptors>
                                 <descriptor>${basedir}/src/assembly/prod.xml</descriptor>
+                                <descriptor>${basedir}/src/assembly/qa.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </plugin>

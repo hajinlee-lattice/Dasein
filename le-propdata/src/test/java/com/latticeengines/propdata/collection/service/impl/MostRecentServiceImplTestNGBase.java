@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class MostRecentServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {

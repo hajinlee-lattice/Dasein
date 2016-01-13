@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
-import com.latticeengines.propdata.collection.util.DateRange;
+import com.latticeengines.propdata.core.util.DateRange;
 
 public class ArchiveExecutor implements RefreshJobExecutor {
 

@@ -14,8 +14,7 @@
 
     <mvc:annotation-driven />
 
-    <import resource="classpath:propdata-persistence-match-context.xml" />
-    <import resource="classpath:propdata-persistence-entitlements-context.xml" />
-    <import resource="classpath:propdata-collection-context.xml" />
+    <import resource="classpath:propdata-core-context.xml" />
+    <import resource="classpath:propdata-persistence-context.xml" />
 
 </beans>

@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.dataflow.function;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.latticeengines.propdata.collection.util.DomainUtils;
+import com.latticeengines.propdata.core.util.DomainUtils;
 
 import cascading.operation.Function;
 import cascading.tuple.Fields;

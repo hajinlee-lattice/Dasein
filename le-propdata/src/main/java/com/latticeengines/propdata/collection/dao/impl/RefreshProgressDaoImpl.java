@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.dao.RefreshProgressDao;
-import com.latticeengines.propdata.collection.source.ServingSource;
+import com.latticeengines.propdata.core.source.ServingSource;
 
 @Component("refreshProgressDao")
 public class RefreshProgressDaoImpl extends ProgressDaoImplBase<RefreshProgress>

@@ -1,0 +1,11 @@
+package com.latticeengines.propdata.core.service;
+
+import com.latticeengines.propdata.core.source.Source;
+
+public interface ZkConfigurationService {
+
+    boolean refreshJobEnabled(Source source);
+
+    String refreshCronSchedule(Source source);
+
+}

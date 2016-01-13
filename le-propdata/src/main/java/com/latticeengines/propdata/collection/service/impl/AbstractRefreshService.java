@@ -12,8 +12,8 @@ import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.ServingSource;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
+import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractRefreshService

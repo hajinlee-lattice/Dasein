@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.collection.service;
 
-import com.latticeengines.propdata.collection.source.MostRecentSource;
-import com.latticeengines.propdata.collection.source.PivotedSource;
+import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.PivotedSource;
 
 public interface CollectionDataFlowService {
 

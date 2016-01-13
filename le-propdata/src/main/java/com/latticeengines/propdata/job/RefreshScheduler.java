@@ -4,10 +4,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.service.ZkConfigurationService;
-import com.latticeengines.propdata.collection.service.impl.ArchiveExecutor;
+import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.collection.service.impl.RefreshExecutor;
 
 public class RefreshScheduler extends QuartzJobBean {

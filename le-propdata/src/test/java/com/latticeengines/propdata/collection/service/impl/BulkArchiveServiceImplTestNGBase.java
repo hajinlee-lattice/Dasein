@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
-import com.latticeengines.propdata.collection.source.BulkSource;
+import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {

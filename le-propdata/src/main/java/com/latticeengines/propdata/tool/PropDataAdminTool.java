@@ -18,8 +18,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.collection.util.DateRange;
-import com.latticeengines.propdata.collection.util.LoggingUtils;
+import com.latticeengines.propdata.core.util.DateRange;
+import com.latticeengines.propdata.core.util.LoggingUtils;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;

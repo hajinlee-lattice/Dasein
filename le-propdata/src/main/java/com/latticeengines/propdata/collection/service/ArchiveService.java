@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.service;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.propdata.collection.source.RawSource;
+import com.latticeengines.propdata.core.source.RawSource;
 
 public interface ArchiveService {
 

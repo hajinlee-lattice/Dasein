@@ -12,8 +12,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.collection.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -32,10 +32,10 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
     @Value("${propdata.collection.db}")
     private String db;
 
-    @Value("${propdata.collection.user}")
+    @Value("${propdata.user}")
     private String dbUser;
 
-    @Value("${propdata.collection.password.encrypted}")
+    @Value("${propdata.password.encrypted}")
     private String dbPassword;
 
     @Value("${propdata.collection.sqoop.mapper.number}")

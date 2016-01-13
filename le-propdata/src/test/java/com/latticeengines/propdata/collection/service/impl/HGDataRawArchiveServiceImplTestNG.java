@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
-import com.latticeengines.propdata.collection.source.BulkSource;
-import com.latticeengines.propdata.collection.source.impl.HGDataRaw;
+import com.latticeengines.propdata.core.source.BulkSource;
+import com.latticeengines.propdata.core.source.impl.HGDataRaw;
 
 @Component
 public class HGDataRawArchiveServiceImplTestNG extends BulkArchiveServiceImplTestNGBase {

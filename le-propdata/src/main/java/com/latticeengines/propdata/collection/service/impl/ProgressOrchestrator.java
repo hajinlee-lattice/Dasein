@@ -24,10 +24,10 @@ import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.service.ZkConfigurationService;
-import com.latticeengines.propdata.collection.source.RawSource;
-import com.latticeengines.propdata.collection.source.ServingSource;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.core.service.ZkConfigurationService;
+import com.latticeengines.propdata.core.source.RawSource;
+import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.Source;
 
 @Component("progressOrchestrator")
 public class ProgressOrchestrator {

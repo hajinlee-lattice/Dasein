@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.impl.Feature;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.impl.Feature;
 
 @Component("featureArchiveService")
 public class FeatureArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {

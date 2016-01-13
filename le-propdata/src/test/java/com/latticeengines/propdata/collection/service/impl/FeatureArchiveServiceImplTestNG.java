@@ -9,9 +9,9 @@ import org.testng.Assert;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.impl.Feature;
-import com.latticeengines.propdata.collection.util.DateRange;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.impl.Feature;
+import com.latticeengines.propdata.core.util.DateRange;
 
 @Component
 public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {

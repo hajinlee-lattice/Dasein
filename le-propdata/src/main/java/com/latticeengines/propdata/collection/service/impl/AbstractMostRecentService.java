@@ -7,8 +7,9 @@ import org.apache.commons.lang.StringUtils;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.MostRecentSource;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.MostRecentSource;
 
 public abstract class AbstractMostRecentService extends AbstractRefreshService implements RefreshService {
 

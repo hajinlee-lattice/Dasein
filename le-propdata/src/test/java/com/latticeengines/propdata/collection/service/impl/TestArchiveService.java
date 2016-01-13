@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.impl.TestCollectedSource;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.impl.TestCollectedSource;
 
 @Component("testArchiveService")
 public class TestArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {

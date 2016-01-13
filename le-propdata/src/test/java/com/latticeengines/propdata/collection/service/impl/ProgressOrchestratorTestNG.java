@@ -16,16 +16,16 @@ import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.RawSource;
-import com.latticeengines.propdata.collection.source.ServingSource;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.RawSource;
+import com.latticeengines.propdata.core.source.ServingSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 

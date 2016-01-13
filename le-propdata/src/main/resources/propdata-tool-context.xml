@@ -4,7 +4,7 @@
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
 
-    <import resource="classpath:propdata-job-context.xml" />
+    <import resource="classpath:propdata-collection-context.xml" />
 
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">

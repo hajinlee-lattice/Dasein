@@ -8,7 +8,7 @@ import org.hibernate.Session;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.collection.Progress;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.core.source.Source;
 
 public abstract class ProgressDaoImplBase<P extends Progress>
         extends BaseDaoWithAssignedSessionFactoryImpl<P>

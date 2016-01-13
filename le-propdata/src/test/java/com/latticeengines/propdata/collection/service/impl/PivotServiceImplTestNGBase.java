@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {

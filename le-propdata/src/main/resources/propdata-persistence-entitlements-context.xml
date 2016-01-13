@@ -10,8 +10,8 @@
     <bean id="propDataEntitlements" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="${propdata.entitlements.url}" />
-        <property name="username" value="${propdata.entitlements.user}" />
-        <property name="password" value="${propdata.entitlements.password.encrypted}" />
+        <property name="username" value="${propdata.user}" />
+        <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
     <bean id="sessionFactoryPropDataEntitlements" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">

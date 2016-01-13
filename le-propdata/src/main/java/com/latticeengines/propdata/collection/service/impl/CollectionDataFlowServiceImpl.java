@@ -19,17 +19,18 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.collection.dataflow.merge.MostRecentDataFlowParameters;
 import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
-import com.latticeengines.propdata.collection.entitymanager.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
-import com.latticeengines.propdata.collection.source.CollectedSource;
-import com.latticeengines.propdata.collection.source.DomainBased;
-import com.latticeengines.propdata.collection.source.MostRecentSource;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.Source;
-import com.latticeengines.propdata.collection.source.impl.BuiltWithPivoted;
-import com.latticeengines.propdata.collection.source.impl.HGData;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
+import com.latticeengines.propdata.core.source.impl.HGData;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")

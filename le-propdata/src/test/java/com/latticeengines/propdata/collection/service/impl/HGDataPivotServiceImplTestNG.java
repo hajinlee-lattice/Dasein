@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.impl.HGDataPivoted;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.impl.HGDataPivoted;
 
 @Component
 public class HGDataPivotServiceImplTestNG extends PivotServiceImplTestNGBase {

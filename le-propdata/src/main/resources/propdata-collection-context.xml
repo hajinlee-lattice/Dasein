@@ -6,10 +6,16 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
 
-    <import resource="classpath:propdata-persistence-collection-context.xml" />
-    <import resource="classpath:propdata-persistence-bulk-context.xml" />
-    <import resource="classpath:dataplatform-context.xml" />
+    <import resource="classpath:propdata-core-context.xml" />
+    <import resource="classpath:propdata-persistence-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
-    <import resource="classpath:camille-runtime-context.xml" />
+
+    <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+    </bean>
+
+    <bean id="refreshProgressDao" class="com.latticeengines.propdata.collection.dao.impl.RefreshProgressDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+    </bean>
 
 </beans>

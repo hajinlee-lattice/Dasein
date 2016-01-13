@@ -8,8 +8,8 @@ import org.apache.commons.lang.StringUtils;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.PivotService;
-import com.latticeengines.propdata.collection.source.PivotedSource;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.Source;
 
 public abstract class AbstractPivotService extends AbstractRefreshService implements PivotService {
 

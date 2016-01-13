@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.impl.FeaturePivoted;
+import com.latticeengines.propdata.core.source.impl.FeaturePivoted;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 

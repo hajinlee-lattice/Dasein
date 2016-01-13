@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
 import com.latticeengines.propdata.collection.dao.ArchiveProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.source.Source;
+import com.latticeengines.propdata.core.source.Source;
 
 @Component("archiveProgressEntityMgr")
 public class ArchiveProgressEntityMgrImpl
@@ -29,7 +29,7 @@ public class ArchiveProgressEntityMgrImpl
     protected Log getLog() { return log; }
 
     @Override
-    @Transactional(value = "propDataCollectionProgress")
+    @Transactional(value = "propDataManage")
     public ArchiveProgress insertNewProgress(Source source, Date startDate, Date endDate, String creator) {
         try {
             ArchiveProgress newProgress = ArchiveProgress.constructByDates(source.getSourceName(), startDate, endDate);

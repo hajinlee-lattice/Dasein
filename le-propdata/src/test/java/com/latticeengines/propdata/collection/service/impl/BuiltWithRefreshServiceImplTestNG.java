@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.collection.source.MostRecentSource;
-import com.latticeengines.propdata.collection.source.impl.BuiltWithMostRecent;
+import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.impl.BuiltWithMostRecent;
 
 @Component
 public class BuiltWithRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBase {
