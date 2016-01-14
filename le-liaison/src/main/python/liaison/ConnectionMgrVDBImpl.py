@@ -53,6 +53,8 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         if dataloader_url in ['https://10.41.1.187:8080/','http://10.41.1.207:8081/','https://data-pls2.prod.lattice.local/dataloader/']:
             self._verify = False
 
+        self._lg_mgr = None
+
 
     def getTenantName(self):
         return self._tenant_name
@@ -225,49 +227,53 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
     def getLoadGroupMgr(self):
 
-        url = self._url + '/DLRestService/DownloadConfigFile'
-        
-        payload = {}
-        payload['tenantName'] = self._tenant_name
+        if self._lg_mgr is None:
 
-        if self.isVerbose():
-            print self.Type() +': Getting DataLoader Config File...',
+            url = self._url + '/DLRestService/DownloadConfigFile'
 
-        try:
-            response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
-        except requests.exceptions.ConnectionError as e:
-            raise EndpointError( e )
-        
-        if response.status_code != 200:
+            payload = {}
+            payload['tenantName'] = self._tenant_name
+
             if self.isVerbose():
-                print 'HTTP POST request failed'
-            raise HTTPError( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): POST request returned code {0}'.format(response.status_code) )
+                print self.Type() +': Getting DataLoader Config File...',
 
-        status = None
-        errmsg = ''
-        try:
-            status = response.json()['Status']
-            errmsg = response.json()['ErrorMessage']
-        except ValueError as e:
+            try:
+                response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
+            except requests.exceptions.ConnectionError as e:
+                raise EndpointError( e )
+
+            if response.status_code != 200:
+                if self.isVerbose():
+                    print 'HTTP POST request failed'
+                raise HTTPError( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): POST request returned code {0}'.format(response.status_code) )
+
+            status = None
+            errmsg = ''
+            try:
+                status = response.json()['Status']
+                errmsg = response.json()['ErrorMessage']
+            except ValueError as e:
+                if self.isVerbose():
+                    print 'HTTP Endpoint did not return the expected response'
+                raise EndpointError( e )
+
+            if status != 3:
+                if self.isVerbose():
+                    print 'Failed to get config file'
+                    print errmsg
+                raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): {0}'.format(payload['tenantName']) )
+
+            valuedict  = response.json()['Value'][0]
+            configfile = valuedict['Value'].encode('ascii', 'xmlcharrefreplace')
+
+            lgm = LoadGroupMgrImpl( self, configfile )
+
             if self.isVerbose():
-                print 'HTTP Endpoint did not return the expected response'
-            raise EndpointError( e )
+                print 'Success'
 
-        if status != 3:
-            if self.isVerbose():
-                print 'Failed to get config file'
-                print errmsg
-            raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetLoadGroupMgr(): {0}'.format(payload['tenantName']) )
-        
-        valuedict  = response.json()['Value'][0]
-        configfile = valuedict['Value'].encode('ascii', 'xmlcharrefreplace')
-        
-        lgm = LoadGroupMgrImpl( self, configfile )
+            self._lg_mgr = lgm
 
-        if self.isVerbose():
-            print 'Success'
-
-        return lgm
+        return self._lg_mgr
 
  
     def getSpec(self, spec_name):
