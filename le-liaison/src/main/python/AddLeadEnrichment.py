@@ -10,23 +10,24 @@ def AddLeadEnrichment(tenants, attributes):
 
     for ten in tenants:
 
+        source = 'EnrichmentColumns'
+
         try:
             conn_mgr = ConnectionMgrFactory.Create('visiDB', tenant_name=ten)
-            
         except TenantNotMappedToURL:
             print 'Tenant \'{0}\' not on LP DataLoader'.format(ten)
             continue
 
         (lp_template_type, lp_template_version) = getLPTemplateTypeAndVersion(conn_mgr)
 
-        addLDCMatch(conn_mgr, lp_template_version)
+        addLDCMatch(conn_mgr, source, lp_template_version)
 
-        setLDCWritebackAttributes(conn_mgr, attributes, lp_template_version)
+        setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version)
 
         conn_mgr.getLoadGroupMgr().commit()
 
 
-def addLDCMatch(conn_mgr, lp_template_version):
+def addLDCMatch(conn_mgr, source, lp_template_version):
 
     lg_mgr = conn_mgr.getLoadGroupMgr()
 
@@ -53,7 +54,7 @@ def addLDCMatch(conn_mgr, lp_template_version):
             for luo in luos.iter('luo'):
                luos.remove(luo)
             luo = etree.SubElement(luos, 'luo')
-            luo.set('n', 'OrbIntelligence_Source')
+            luo.set('n', source)
 
             pdm1_pdmatches.append(enrichment_match)
 
@@ -61,7 +62,7 @@ def addLDCMatch(conn_mgr, lp_template_version):
         lg_mgr.setLoadGroupFunctionality('PropDataMatch_Step1', pdm1_pdmatches_xml)
 
 
-def setLDCWritebackAttributes(conn_mgr, attributes, lp_template_version):
+def setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version):
 
     lg_mgr = conn_mgr.getLoadGroupMgr()
 
@@ -108,7 +109,7 @@ def setLDCWritebackAttributes(conn_mgr, attributes, lp_template_version):
                 q.removeColumn(c)
 
         for (ldcCol,customerCol) in attributes.iteritems():
-            specstr = 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("{0}")), ContainerElementName("{1}")))'.format('PD_OrbIntelligence_Source',ldcCol)
+            specstr = 'LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("{0}")), ContainerElementName("{1}")))'.format('PD_'+source,ldcCol)
             e = ExpressionVDBImplGeneric(specstr)
             c = QueryColumnVDBImpl('LDC_'+ldcCol,e)
             c.setApprovedUsage('None')
