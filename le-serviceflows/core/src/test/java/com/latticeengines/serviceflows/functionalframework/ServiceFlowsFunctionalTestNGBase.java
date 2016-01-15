@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -171,7 +170,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
     }
 
     private String getTargetDirectory() {
-        return "/tmp/ServiceFlowsFunctionalTest/" + DateTime.now().toString("yyyy-MM-dd") + "/" + getDirectory();
+        return "/tmp/ServiceFlowsFunctionalTest/" + getDirectory();
     }
 
     protected List<GenericRecord> readTable(String avroFile) {
