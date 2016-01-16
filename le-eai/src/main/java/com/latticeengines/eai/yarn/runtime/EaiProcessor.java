@@ -16,6 +16,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -39,6 +40,8 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     private static final Log log = LogFactory.getLog(EaiProcessor.class);
 
+    private ApplicationContext applicationContext;
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -47,8 +50,6 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Autowired
     private ImportContext importContext;
-
-    private ApplicationContext applicationContext;
 
     @Autowired
     private SalesforceComponent salesforce;
@@ -70,7 +71,6 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
-
         CamelContext camelContext = constructCamelContext(importConfig);
         camelContext.start();
 
