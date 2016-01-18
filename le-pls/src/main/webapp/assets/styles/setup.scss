@@ -614,3 +614,150 @@
 #deploymentWizard .clear-link {
   margin-top: 20px;
 }
+
+#leadEnrichment {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  right: 0;
+  bottom: 34px;
+  background: #fff;
+  overflow: auto;
+}
+
+#leadEnrichment .title {
+  padding: 10px 40px 0 40px;
+}
+
+#leadEnrichment .content {
+  padding: 10px 40px;
+  width: 800px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+#leadEnrichment .content .sub-title {
+  margin: 0 0 2px 0;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+#leadEnrichment .list-group {
+  width: 100%;
+  height: 343px;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid #ddd;
+  overflow: auto;
+  cursor: default;
+}
+
+#leadEnrichment .list-group-item {
+  padding: 2px 4px;
+  border: none;
+}
+
+#leadEnrichment .list-group-item:hover {
+  background: #bbdefb;
+}
+
+#leadEnrichment .list-group-item.selected {
+  background: #3888e8 !important;
+  color: #fff;
+}
+
+#leadEnrichment .col-md-4 {
+  float: left;
+  width: 320px;
+}
+
+#leadEnrichment .col-toggle {
+  float: left;
+  width: 30px;
+  height: 364px;
+}
+
+#leadEnrichment .btn-area-middle {
+  position: relative;
+  top: 50%;
+  margin-top: -36px;
+}
+
+#leadEnrichment .btn-area-middle .btn {
+  display: block;
+  margin: 0 auto;
+  width: 28px;
+  height: 32px;
+  background: #fff;
+  color: #000;
+}
+
+#leadEnrichment .btn-area-middle .btn-right {
+  padding: 1px 0 0 2px;
+}
+
+#leadEnrichment .btn-area-middle .btn-left {
+  margin-top: 8px;
+  padding: 1px 1px 0 0;
+}
+
+#leadEnrichment .btn-area-middle .btn:hover {
+  border-color: #487bba;
+  color: #487bba;
+}
+
+#leadEnrichment .btn-area-middle .btn.disabled {
+  color: #666;
+  opacity: 0.5;
+}
+
+#leadEnrichment .fa-2 {
+  font-size: 1.4em;
+  vertical-align: middle;
+}
+
+#leadEnrichment .popover {
+  display: block;
+  max-width: 276px !important;
+}
+
+#leadEnrichment .popover.bottom > .arrow {
+  left: 30%;
+}
+
+#leadEnrichment .warning {
+  color: #D96D00;
+  cursor: default;
+}
+
+#leadEnrichment .alert .close {
+  margin-top: -2px;
+  opacity: 0.5;
+  color: inherit;
+}
+
+#leadEnrichment .alert .close:hover {
+  opacity: 1;
+  color: inherit;
+}
+
+#leadEnrichment .panel {
+  margin-bottom: 12px;
+  border: 1px solid #ddd;
+  box-shadow: none;
+}
+
+#leadEnrichment th,
+#leadEnrichment td {
+  font-size: 13px;
+}
+
+#saveLeadEnrichmentAttributesButton {
+  float: right;
+  margin-top: 10px;
+}
+
+#returnLeadEnrichmentButton {
+  float: right;
+}

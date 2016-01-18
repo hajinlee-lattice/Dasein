@@ -35,7 +35,8 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         SETUP_PAGE: 'SetupPage',
         DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
-        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage'
+        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
+        LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
     };
     this.Flags = function(){ return flags; };
 
@@ -79,6 +80,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.SYSTEM_SETUP_PAGE, false);
             SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
             SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
+            SetFlag(flags.LEAD_ENRICHMENT_PAGE, false);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();
@@ -120,6 +122,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.LEAD_ENRICHMENT_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
     }
 
 });

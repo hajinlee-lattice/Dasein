@@ -22,6 +22,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.SETUP_NAV_EVENT = "SetupNavEvent";
     this.LOAD_FIELDS_NAV_EVENT = "LoadFieldsEvent";
     this.DEPLOYMENT_WIZARD_NAV_EVENT = "DeploymentWizardNavEvent";
+    this.LEAD_ENRICHMENT_NAV_EVENT = "LeadEnrichment";
 
     // General Event Constants
     this.SYSTEM_CONFIGURED_COMPLETE_EVENT = "SystemConfiguredCompleteEvent";

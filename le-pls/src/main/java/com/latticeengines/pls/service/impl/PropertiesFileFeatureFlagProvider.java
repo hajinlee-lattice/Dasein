@@ -31,6 +31,9 @@ public class PropertiesFileFeatureFlagProvider implements DefaultFeatureFlagProv
     @Value("${pls.ff.deploymentwizardpage:None}")
     private String deploymentWizardPage;
 
+    @Value("${pls.ff.leadenrichmentpage:None}")
+    private String leadEnrichmentPage;
+
     @Override
     public FeatureFlagValueMap getDefaultFlags() {
         flagDefinitions = FeatureFlagClient.getDefinitions();
@@ -38,6 +41,7 @@ public class PropertiesFileFeatureFlagProvider implements DefaultFeatureFlagProv
         setFlagIfNotNull(PlsFeatureFlag.SETUP_PAGE.getName(), setupPage);
         setFlagIfNotNull(PlsFeatureFlag.ADMIN_ALERTS_TAB.getName(), adminAlertsTab);
         setFlagIfNotNull(PlsFeatureFlag.DEPLOYMENT_WIZARD_PAGE.getName(), deploymentWizardPage);
+        setFlagIfNotNull(PlsFeatureFlag.LEAD_ENRICHMENT_PAGE.getName(), leadEnrichmentPage);
 
         setFlagIfNotNull("PlsTestFlag", plsTestFlag);
         return new FeatureFlagValueMap(flags);

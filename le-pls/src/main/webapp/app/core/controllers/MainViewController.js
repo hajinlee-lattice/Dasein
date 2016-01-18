@@ -15,7 +15,8 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ActivateModelController',
     'mainApp.core.services.FeatureFlagService',
     'mainApp.setup.controllers.SetupController',
-    'mainApp.setup.controllers.DeploymentWizardController'
+    'mainApp.setup.controllers.DeploymentWizardController',
+    'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
@@ -214,6 +215,22 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/DeploymentWizardView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+
+    // Handle the lead enrichment nav event
+    $scope.$on(NavUtility.LEAD_ENRICHMENT_NAV_EVENT, function (event, data) {
+        createLeadEnrichmentView();
+    });
+
+    function createLeadEnrichmentView() {
+        // Set the hash
+        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+
+        // Fetch the view and make it Angular aware
+        $http.get('./app/setup/views/LeadEnrichmentView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });

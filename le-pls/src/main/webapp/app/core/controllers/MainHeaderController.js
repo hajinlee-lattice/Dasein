@@ -22,6 +22,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
             $scope.showDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE);
             $scope.redirectToDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE);
+            $scope.showLeadEnrichment = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
         });
     }
 
@@ -109,6 +110,14 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         }
 
         $rootScope.$broadcast(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT);
+    };
+
+    $scope.leadEnrichmentClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $rootScope.$broadcast(NavUtility.LEAD_ENRICHMENT_NAV_EVENT);
     };
 
     $scope.logoutClicked = function ($event) {
