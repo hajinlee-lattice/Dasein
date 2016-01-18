@@ -27,12 +27,12 @@ public class HdfsSourceEntityMgrImplTestNG extends PropDataCoreFunctionalTestNGB
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
         hdfsPathBuilder.changeHdfsPodId("FunctionalTestHdfsSource");
-        HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.constructPodDir().toString());
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
     }
 
     @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.constructPodDir().toString());
+        HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
     }
 
     @Test(groups = "functional")

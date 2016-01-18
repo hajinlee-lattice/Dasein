@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.propdata.ColumnSelection;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("hdfsPathBuilder")
@@ -31,15 +32,18 @@ public class HdfsPathBuilder {
         podId = CamilleEnvironment.getPodId();
     }
 
-    public Path constructPodDir() {
+    public Path podDir() {
         return new Path("/Pods").append(podId);
+    }
+
+    public Path propDataDir() {
+        return podDir().append("Services").append("PropData");
     }
 
     public Path constructSourceDir(Source source) {
         String sourceName = source.getSourceName();
         sourceName = sourceName.endsWith("/") ? sourceName.substring(0, sourceName.lastIndexOf("/")) : sourceName;
-        return new Path("/Pods").append(podId).append("Services").append("PropData")
-                .append("Sources").append(sourceName);
+        return propDataDir().append("Sources").append(sourceName);
     }
 
     public Path constructRawDir(Source source) {
@@ -61,7 +65,6 @@ public class HdfsPathBuilder {
         Path baseDir = constructSourceDir(source);
         String avscFile = source.getSourceName() + ".avsc";
         return baseDir.append("Schema").append(version).append(avscFile);
-
     }
 
     public Path constructVersionFile(Source source) {
@@ -77,6 +80,18 @@ public class HdfsPathBuilder {
     public Path constructRawIncrementalDir(Source source, Date archiveDate) {
         Path baseDir = constructRawDir(source);
         return baseDir.append(dateFormat.format(archiveDate));
+    }
+
+    public Path predefinedColumnSelectionDir(ColumnSelection.Predefined predefined) {
+        return propDataDir().append("ColumnSelections").append(predefined.getName());
+    }
+
+    public Path predefinedColumnSelectionFile(ColumnSelection.Predefined predefined, String version) {
+        return predefinedColumnSelectionDir(predefined).append(predefined.getJsonFileName(version));
+    }
+
+    public Path predefinedColumnSelectionVersionFile(ColumnSelection.Predefined predefined) {
+        return predefinedColumnSelectionDir(predefined).append(versionFile);
     }
 
     public void changeHdfsPodId(String podId) { this.podId = podId; }
