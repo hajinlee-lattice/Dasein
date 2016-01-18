@@ -10,7 +10,8 @@ public enum PlsFeatureFlag {
     ACTIVATE_MODEL_PAGE("ActivateModelPage", "the page to manage model activities through segments."), SYSTEM_SETUP_PAGE(
             "SystemSetupPage", "System Setup page."), ADMIN_ALERTS_TAB("AdminAlertsTab",
             "Alerts tab in the admin page."), SETUP_PAGE("SetupPage", "Root flag for the whole Setup page."),
-            DEPLOYMENT_WIZARD_PAGE("DeploymentWizardPage", "Root flag for the deployment wizard page.");
+            DEPLOYMENT_WIZARD_PAGE("DeploymentWizardPage", "Root flag for the deployment wizard page."),
+            LEAD_ENRICHMENT_PAGE("LeadEnrichmentPage", "Root flag for the lead enrichment page.");
 
     private String name;
     private FeatureFlagDefinition definition;
