@@ -2,10 +2,10 @@ package com.latticeengines.metadata.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotEquals;
 
 import java.io.File;
 import java.util.Arrays;
@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -20,7 +21,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -28,6 +28,8 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 import com.latticeengines.security.exposed.Constants;
 
 public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
+
+    private static final Logger log = Logger.getLogger(TableResourceTestNG.class);
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -38,13 +40,13 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
     public void createTableWithResource(String urlType) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        Table table = createTable(null, TABLE3);
+        Table table = createTable(null, TABLE2, TABLE_LOCATION2);
 
-        System.out.println("Creating table3 for " + CUSTOMERSPACE1 + " with url type " + urlType);
+        log.info("Creating TABLE2 for " + CUSTOMERSPACE1 + " with url type " + urlType);
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), CUSTOMERSPACE1,
                 urlType, table.getName());
         restTemplate.postForLocation(url, table);
-        System.out.println("Creating table3 for " + CUSTOMERSPACE2 + " with url type " + urlType);
+        log.info("Creating TABLE2 for " + CUSTOMERSPACE2 + " with url type " + urlType);
         url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), CUSTOMERSPACE2, urlType,
                 table.getName());
         restTemplate.postForLocation(url, table);
@@ -57,17 +59,16 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "createTableWithResource" })
     public void updateTable(String urlType) {
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
-                getRestAPIHostPort(), CUSTOMERSPACE1, urlType, TABLE3);
+                getRestAPIHostPort(), CUSTOMERSPACE1, urlType, TABLE2);
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         Table table = restTemplate.getForObject(url, Table.class, new HashMap<>());
         assertNotNull(table);
 
-        Extract extract = createExtract("NewExtract");
-        table.addExtract(extract);
+        table.getExtracts().remove(0);
 
-        System.out.println("Updating table3 for " + CUSTOMERSPACE1 + " with url type " + urlType);
+        log.info("Updating TABLE2 for " + CUSTOMERSPACE1 + " with url type " + urlType);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         restTemplate.put(url, table, new HashMap<>());
@@ -89,7 +90,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         Table table = restTemplate.getForObject(url, Table.class, new HashMap<>());
         assertEquals(table.getName(), TABLE1);
 
-        assertEquals(table.getAttributes().size(), 4);
+        assertEquals(table.getAttributes().size(), 22);
     }
 
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })
@@ -100,7 +101,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
                 getRestAPIHostPort(), CUSTOMERSPACE1, urlType, TABLE1);
         ModelingMetadata modelingMetadata = restTemplate.getForObject(url, ModelingMetadata.class, new HashMap<>());
         AttributeMetadata attrMetadata = modelingMetadata.getAttributeMetadata().get(3);
-
+        assertNotNull(attrMetadata);
         assertEquals(attrMetadata.getApprovedUsage().get(0), "Model");
         assertEquals(attrMetadata.getDataSource().get(0), "DerivedColumns");
         assertEquals(attrMetadata.getExtensions().get(0).getKey(), "Category");
@@ -173,7 +174,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "validateMetadataForInvalidPayload" })
     public void resetTables() {
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
-                getRestAPIHostPort(), CUSTOMERSPACE1, String.valueOf(getUrlTypes()[0][0]), TABLE3);
+                getRestAPIHostPort(), CUSTOMERSPACE1, String.valueOf(getUrlTypes()[0][0]), TABLE2);
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -186,7 +187,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         Table importTable = restTemplate.getForObject(importTableUrl, Table.class, new HashMap<>());
         assertNotNull(importTable);
 
-        System.out.println("Resetting table3 for " + CUSTOMERSPACE1);
+        log.info("Resetting TABLE2 for " + CUSTOMERSPACE1);
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         String resetTableUrl = String.format("%s/metadata/customerspaces/%s/%s/%s", //

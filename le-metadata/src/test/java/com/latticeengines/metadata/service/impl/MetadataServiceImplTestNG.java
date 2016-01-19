@@ -16,7 +16,7 @@ import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGB
 import com.latticeengines.metadata.service.MetadataService;
 
 public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
-    
+
     @Autowired
     private MetadataService mdService;
 
@@ -43,8 +43,8 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
         return new Object[][] {
-                { CUSTOMERSPACE1, TABLE1 },
-                { CUSTOMERSPACE2, TABLE2 },
+                { CUSTOMERSPACE1, TABLE1},
+                { CUSTOMERSPACE2, TABLE1},
         };
     }
 }

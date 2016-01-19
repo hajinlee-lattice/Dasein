@@ -66,23 +66,12 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public void createTable(CustomerSpace customerSpace, Table table) {
-        Table t = tableEntityMgr.findByName(table.getName());
-
-        if (t != null) {
-            log.info("Table with name " + table.getName() + " already exists.  Updating instead");
-            updateTable(customerSpace, table);
-        } else {
-            tableEntityMgr.create(table);
-        }
+        tableEntityMgr.create(table);
     }
 
     @Override
     public void deleteTable(CustomerSpace customerSpace, String tableName) {
-        Table t = tableEntityMgr.findByName(tableName);
-
-        if (t != null) {
-            tableEntityMgr.delete(t);
-        }
+        tableEntityMgr.deleteByName(tableName);
     }
 
     @Override
@@ -99,10 +88,12 @@ public class MetadataServiceImpl implements MetadataService {
     public void updateTable(CustomerSpace customerSpace, Table table) {
         tableTypeHolder.setTableType(table.getTableType());
         try {
-            Table t = tableEntityMgr.findByName(table.getName());
-            if (t != null) {
-                tableEntityMgr.delete(t);
+            Table found = tableEntityMgr.findByName(table.getName());
+            if (found != null) {
+                log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
+                tableEntityMgr.deleteByName(found.getName());
             }
+
             tableEntityMgr.create(table);
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);

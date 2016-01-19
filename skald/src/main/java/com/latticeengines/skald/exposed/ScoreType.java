@@ -1,5 +1,8 @@
 package com.latticeengines.skald.exposed;
 
+/**
+ * Output field of a scoring operation.
+ */
 public enum ScoreType {
 
     PROBABILITY(Double.class),

@@ -42,6 +42,9 @@ public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
     @Autowired
     private MetadataService mdService;
 
+    @Autowired
+    private MetadataComponent metadataComponent;
+
     private Tenant tenant;
 
     private static final BatonService batonService = new BatonServiceImpl();
@@ -69,7 +72,7 @@ public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
         createTenantInZK();
         tenantService.registerTenant(tenant);
         bootstrap();
-        int numOfRetries = 10;
+        int numOfRetries = 25;
         BootstrapState state;
 
         do {

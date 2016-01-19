@@ -15,6 +15,7 @@ export SCORING_PROPDIR=$PWD/../le-scoring/conf/env/dev
 export CAMILLE_PROPDIR=$PWD/../le-camille/conf/env/dev
 export DATAFLOW_PROPDIR=$PWD/../le-dataflow/conf/env/dev
 export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -XX:MaxPermSize=1024m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop"
+export CLASSPATH=$CLASSPATH:$HADOOP_HOME/etc/hadoop
 
 pushd $JETTY_HOME
 echo "Running jetty..."

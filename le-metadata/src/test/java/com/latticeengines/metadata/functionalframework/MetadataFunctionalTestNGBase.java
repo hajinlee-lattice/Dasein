@@ -1,8 +1,17 @@
 package com.latticeengines.metadata.functionalframework;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import org.apache.avro.Schema;
+import javax.sql.DataSource;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -11,16 +20,17 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
-import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
+import com.latticeengines.metadata.hive.util.HiveUtils;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -30,32 +40,45 @@ import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGB
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-metadata-context.xml", "classpath:metadata-aspects-context.xml" })
-public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTests {
+public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+    private static final Logger log = Logger.getLogger(MetadataFunctionalTestNGBase.class);
 
-    protected static final String CUSTOMERSPACE1 = "X.Y1.Z";
-    protected static final String CUSTOMERSPACE2 = "X.Y2.Z";
-    protected static final String TABLE1 = "AccountForCustomerSpace1";
-    protected static final String TABLE2 = "AccountForCustomerSpace2";
-    protected static final String TABLE3 = "AccountForCustomerSpace3";
-    
+    protected static final String CUSTOMERSPACE1 = "T1.T1.T1";
+    protected static final String CUSTOMERSPACE2 = "T2.T2.T2";
+    protected static final String TABLE1 = "Account1";
+    protected static final String TABLE2 = "Account2";
+    protected static final String TABLE_RESOURCE1 = "com/latticeengines/metadata/controller/Account1";
+    protected static final String TABLE_RESOURCE2 = "com/latticeengines/metadata/controller/Account2";
+    protected static final String TABLE_LOCATION1 = "/tmp/metadataFunctionalTestDir/Account1";
+    protected static final String TABLE_LOCATION2 = "/tmp/metadataFunctionalTestDir/Account2";
+
+    protected Configuration yarnConfiguration = new Configuration();
+
     protected RestTemplate restTemplate = new RestTemplate();
 
     @Value("${metadata.test.functional.api:http://localhost:8080/}")
     private String hostPort;
-    
+
+    @Value("${metadata.hive.enabled:false}")
+    private boolean hiveEnabled;
+
     @Autowired
     protected TableEntityMgr tableEntityMgr;
 
     @Autowired
     protected TenantEntityMgr tenantEntityMgr;
-    
+
+    @Autowired
+    private DataSource hiveDataSource;
+
     @Autowired
     protected TableTypeHolder tableTypeHolder;
 
     protected SecurityFunctionalTestNGBase securityTestBase = new SecurityFunctionalTestNGBase();
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = securityTestBase.getAuthHeaderInterceptor();
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase.getMagicAuthHeaderInterceptor();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = securityTestBase
+            .getMagicAuthHeaderInterceptor();
     protected GetHttpStatusErrorHandler statusErrorHandler = securityTestBase.getStatusErrorHandler();
 
     protected String getRestAPIHostPort() {
@@ -63,6 +86,33 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
     }
 
     public void setup() {
+        if (hiveEnabled) {
+            dropAllHiveTables();
+        }
+        copyExtractsToHdfs();
+        setupTenantsAndTables();
+    }
+
+    private void copyExtractsToHdfs() {
+        log.info("copyExtractsToHdfs");
+        try {
+            Assert.assertNotEquals(
+                    yarnConfiguration.get("fs.defaultFS"),
+                    "file:///",
+                    "$HADOOP_HOME/etc/hadoop must be on the classpath, and configured to use a hadoop cluster in order for this test to run");
+
+            HdfsUtils.rmdir(yarnConfiguration, "/tmp/metadataFunctionalTestDir");
+            HdfsUtils.mkdir(yarnConfiguration, "/tmp/metadataFunctionalTestDir");
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE1, "/tmp/metadataFunctionalTestDir");
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE2, "/tmp/metadataFunctionalTestDir");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to setup hdfs for metadata test", e);
+        }
+    }
+
+    private void setupTenantsAndTables() {
+        log.info("setupTenantsAndTables");
+
         Tenant t1 = tenantEntityMgr.findByTenantId(CUSTOMERSPACE1);
         if (t1 != null) {
             tenantEntityMgr.delete(t1);
@@ -79,30 +129,60 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         tenantEntityMgr.create(tenant2);
 
         // Tenant1, Type=DATATABLE
-        Table tbl = createTable(tenant1, TABLE1);
+        Table tbl = createTable(tenant1, TABLE1, TABLE_LOCATION1);
         createTableByRestCall(tenant1, tbl, false);
         // Tenant1, Type=IMPORTTABLE
         createTableByRestCall(tenant1, tbl, true);
 
         // Tenant2, Type=DATATABLE
-        tbl = createTable(tenant2, TABLE2);
+        tbl = createTable(tenant2, TABLE1, TABLE_LOCATION1);
         createTableByRestCall(tenant2, tbl, false);
         // Tenant2, Type=IMPORTTABLE
         createTableByRestCall(tenant2, tbl, true);
     }
-    
+
+    private void dropAllHiveTables() {
+        log.info("dropAllHiveTables");
+        try (Connection connection = hiveDataSource.getConnection()) {
+
+            List<String> tables = getAllHiveTables(connection);
+            for (String table : tables) {
+                dropTable(connection, table);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<String> getAllHiveTables(Connection connection) throws SQLException {
+        List<String> tables = new ArrayList<>();
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute("SHOW TABLES");
+            ResultSet results = stmt.getResultSet();
+            while (results.next()) {
+                tables.add(results.getString("tab_name"));
+            }
+        }
+        return tables;
+    }
+
+    private void dropTable(Connection connection, String tableName) throws SQLException {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(HiveUtils.getDropStatement(tableName, true));
+        }
+    }
+
     private void createTableByRestCall(Tenant tenant, Table table, boolean isImport) {
         String urlType = "tables";
         if (isImport) {
             urlType = "importtables";
         }
-        
+
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        String url = String.format("%s/metadata/customerspaces/%s/%s/%s",
-                getRestAPIHostPort(), table.getTenant().getId(), urlType, table.getName());
+        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), table.getTenant()
+                .getId(), urlType, table.getName());
         restTemplate.postForLocation(url, table);
-
     }
 
     protected Tenant createTenant(String customerSpace) {
@@ -112,102 +192,21 @@ public class MetadataFunctionalTestNGBase  extends AbstractTestNGSpringContextTe
         return tenant;
     }
 
-    protected Table createTable(Tenant tenant, String tableName) {
-        Table table = new Table();
-        table.setTenant(tenant);
+    protected Table createTable(Tenant tenant, String tableName, String path) {
+        path = path + "/*.avro";
+        Table table = MetadataConverter.getTable(yarnConfiguration, path, "Id", "CreatedDate");
         table.setName(tableName);
-        table.setDisplayName(tableName);
-        Extract e1 = createExtract("e1");
-        Extract e2 = createExtract("e2");
-        Extract e3 = createExtract("e3");
-        table.addExtract(e1);
-        table.addExtract(e2);
-        table.addExtract(e3);
-        PrimaryKey pk = createPrimaryKey();
-        LastModifiedKey lk = createLastModifiedKey();
-        table.setPrimaryKey(pk);
-        table.setLastModifiedKey(lk);
-
-        Attribute pkAttr = new Attribute();
-        pkAttr.setName("ID");
-        pkAttr.setDisplayName("Id");
-        pkAttr.setLength(10);
-        pkAttr.setPrecision(10);
-        pkAttr.setScale(10);
-        pkAttr.setPhysicalDataType("XYZ");
-        pkAttr.setLogicalDataType("Identity");
-        pkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-
-        Attribute lkAttr = new Attribute();
-        lkAttr.setName("LID");
-        lkAttr.setDisplayName("LastUpdatedDate");
-        lkAttr.setLength(20);
-        lkAttr.setPrecision(20);
-        lkAttr.setScale(20);
-        lkAttr.setPhysicalDataType("ABC");
-        lkAttr.setLogicalDataType("Date");
-        lkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-
-        Attribute spamIndicator = new Attribute();
-        spamIndicator.setName("SPAM_INDICATOR");
-        spamIndicator.setDisplayName("SpamIndicator");
-        spamIndicator.setLength(20);
-        spamIndicator.setPrecision(-1);
-        spamIndicator.setScale(-1);
-        spamIndicator.setPhysicalDataType("Boolean");
-        spamIndicator.setLogicalDataType("Boolean");
-        spamIndicator.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
-        
-        Attribute activeRetirementParticipants = new Attribute();
-        activeRetirementParticipants.setName("ActiveRetirementParticipants");
-        activeRetirementParticipants.setDisplayName("Active Retirement Plan Participants");
-        activeRetirementParticipants.setDescription("Number of active retirement plan participants");
-        activeRetirementParticipants.setLength(5);
-        activeRetirementParticipants.setPrecision(0);
-        activeRetirementParticipants.setScale(0);
-        activeRetirementParticipants.setPhysicalDataType(Schema.Type.INT.toString());
-        activeRetirementParticipants.setLogicalDataType("Integer");
-        activeRetirementParticipants.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
-        activeRetirementParticipants.setCategory("Firmographics");
-        activeRetirementParticipants.setDataType("Int");
-        activeRetirementParticipants.setFundamentalType("numeric");
-        activeRetirementParticipants.setStatisticalType("ratio");
-        activeRetirementParticipants.setTags(ModelingMetadata.EXTERNAL_TAG);
-        activeRetirementParticipants.setDataSource("DerivedColumns");
-
-        table.addAttribute(pkAttr);
-        table.addAttribute(lkAttr);
-        table.addAttribute(spamIndicator);
-        table.addAttribute(activeRetirementParticipants);
+        table.setTenant(tenant);
+        Attribute attribute = table.getAttributes().get(3);
+        attribute.setLogicalDataType("Integer");
+        attribute.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
+        attribute.setCategory("Firmographics");
+        attribute.setDataType("Int");
+        attribute.setFundamentalType("numeric");
+        attribute.setStatisticalType("ratio");
+        attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
+        attribute.setDataSource("DerivedColumns");
 
         return table;
     }
-
-    protected PrimaryKey createPrimaryKey() {
-        PrimaryKey pk = new PrimaryKey();
-        pk.setName("PK_ID");
-        pk.setDisplayName("Primary Key for ID column");
-        pk.addAttribute("ID");
-
-        return pk;
-    }
-
-    protected Extract createExtract(String name) {
-        Extract e = new Extract();
-        e.setName(name);
-        e.setPath("/" + name);
-        e.setExtractionTimestamp(System.currentTimeMillis());
-        return e;
-    }
-
-    protected LastModifiedKey createLastModifiedKey() {
-        LastModifiedKey lk = new LastModifiedKey();
-        lk.setName("LK_LUD");
-        lk.setDisplayName("Last Modified Key for LastUpdatedDate column");
-        lk.addAttribute("LID");
-        lk.setLastModifiedTimestamp(1000000000000L);
-        return lk;
-    }
-    
-
 }

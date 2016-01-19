@@ -2,14 +2,14 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -21,10 +21,17 @@ import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
+import com.latticeengines.metadata.hive.HiveTableDao;
+import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component("tableEntityMgr")
-public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements TableEntityMgr {
+public class TableEntityMgrImpl implements TableEntityMgr {
+
+    private static final Logger log = Logger.getLogger(MetadataServiceImpl.class);
+
+    @Value("${metadata.hive.enabled:false}")
+    private boolean hiveEnabled;
 
     @Autowired
     private AttributeDao attributeDao;
@@ -41,15 +48,14 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
     @Autowired
     private TableDao tableDao;
 
-    public BaseDao<Table> getDao() {
-        return tableDao;
-    }
+    @Autowired
+    private HiveTableDao hiveTableDao;
 
-    @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void create(Table entity) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(final Table entity) {
         setTenantId(entity);
-        getDao().create(entity);
+        tableDao.create(entity);
         updateReferences(entity);
 
         if (entity.getPrimaryKey() != null) {
@@ -70,18 +76,28 @@ public class TableEntityMgrImpl extends BaseEntityMgrImpl<Table> implements Tabl
                 attributeDao.create(attr);
             }
         }
+
+        if (hiveEnabled) {
+            hiveTableDao.create(entity);
+        }
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Table> getAll() {
-        return super.findAll();
+    public void deleteByName(String name) {
+        final Table entity = findByName(name);
+        if (entity != null) {
+            tableDao.delete(entity);
+            if (hiveEnabled) {
+                hiveTableDao.deleteIfExists(entity);
+            }
+        }
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> findAll() {
-        List<Table> tables = super.findAll();
+        List<Table> tables = tableDao.findAll();
         return tables;
     }
 

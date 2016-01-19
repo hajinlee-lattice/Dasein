@@ -48,6 +48,7 @@ public class MetadataConverter {
                 isDirectory = true;
             }
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
+
             Schema schema = AvroUtils.getSchemaFromGlob(configuration, path);
             List<Extract> extracts = new ArrayList<Extract>();
             for (String match : matches) {
@@ -120,6 +121,24 @@ public class MetadataConverter {
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to read avro schema from %s", schema.getName()), e);
         }
+    }
+
+    public static Schema getAvroSchema(Configuration configuration, Table table) {
+        Set<Schema> set = new HashSet<>();
+
+        for (Extract extract : table.getExtracts()) {
+            set.add(getAvroSchema(configuration, extract));
+        }
+
+        if (set.size() > 1) {
+            throw new RuntimeException(String.format("All schemas in table %s must be equivalent", table.getName()));
+        }
+
+        return (Schema) set.toArray()[0];
+    }
+
+    public static Schema getAvroSchema(Configuration configuration, Extract extract) {
+        return AvroUtils.getSchema(configuration, new Path(extract.getPath()));
     }
 
     public static Attribute getAttribute(Schema.Field field) {
