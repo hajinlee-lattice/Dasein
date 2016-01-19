@@ -27,6 +27,7 @@ BazaarvoiceLP,https://data-pls.lattice-engines.com/Dataloader_PLS/
 ben_tenant_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 CA_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Calamos_LP,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Cornerstone,https://data-pls.lattice-engines.com/Dataloader_PLS/
 DataCloudForecast_PLS134,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Demo_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
 DropBox_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
@@ -46,7 +47,7 @@ Internal_LP_ELQ_134_200_2,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_ELQ_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_MKTO_200_210_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Internal_LP_MKTO_220_1,https://data-pls.lattice-engines.com/Dataloader_PLS/
-Klarna,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Klama,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Lattice_Relaunch,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Lattice3_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 LeadMD_PLS,https://data-pls.lattice-engines.com/Dataloader_PLS/
@@ -80,8 +81,10 @@ ProductionTestPLSTenant2,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Qlik_Activity,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Riverbed_Relaunch,https://data-pls.lattice-engines.com/Dataloader_PLS/
 RubrikPD,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Seagate_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 SeagateLPA,https://data-pls.lattice-engines.com/Dataloader_PLS/
 SkillSurvey,https://data-pls.lattice-engines.com/Dataloader_PLS/
+Symantec_FIT,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Test_24hr_SFDC,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Tintri_LP,https://data-pls.lattice-engines.com/Dataloader_PLS/
 Unitrends,https://data-pls.lattice-engines.com/Dataloader_PLS/
