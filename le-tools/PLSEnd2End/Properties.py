@@ -92,7 +92,7 @@ class PLSEnvironments(object):
     pls_SFDC_key = "oIogZVEFGbL3n0qiAp6F66TC";
 
     pls_ELQ_user = "Matt.Sable";
-    pls_ELQ_pwd = "Happy2015";
+    pls_ELQ_pwd = "Lattice2";
     pls_ELQ_company = "TechnologyPartnerLatticeEngines";
     pls_ELQ_url = "https://secure.p03.eloqua.com/API/REST/1.0";
 
