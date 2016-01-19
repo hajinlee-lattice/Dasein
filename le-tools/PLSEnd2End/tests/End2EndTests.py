@@ -216,7 +216,7 @@ class Test(unittest.TestCase):
         elq = EloquaRequest()
         contact_lists = elq.addEloquaContactForDante(2)
         PlsOperations.runBulkScoring(tenant)
-        time.sleep(15)
+        time.sleep(60)
         print contact_lists[0]
         contact_lists = elq.getEloquaContact(contact_lists[0])
         print contact_lists
@@ -240,7 +240,7 @@ class Test(unittest.TestCase):
         elq = EloquaRequest();
         contact_lists = elq.addEloquaContactForDante(1);
         PlsOperations.runHourlyScoring(tenant);
-        time.sleep(15)
+        time.sleep(60)
         print contact_lists[0]
         contact_lists = elq.getEloquaContact(contact_lists[0])
         print contact_lists
@@ -268,7 +268,7 @@ class Test(unittest.TestCase):
             print "Wait for 5 minutes then fill in CRM credentials"
             time.sleep(300)
             assert lp.lpSFDCCredentials(tenant)
-            assert lp.lpElQCredentials(tenant)
+            assert lp.lpMKTOCredentials(tenant)
         else:
             print "Failed to add new tenant: %s via tenant console" % tenant
             assert False
@@ -316,7 +316,7 @@ class Test(unittest.TestCase):
         mkto = MarketoRequest();
         leads_list = mkto.addLeadToMarketoForDante(2);
         PlsOperations.runBulkScoring(tenant);
-        time.sleep(15)
+        time.sleep(60)
         print leads_list
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         print lead_lists
@@ -340,7 +340,7 @@ class Test(unittest.TestCase):
         mkto = MarketoRequest();
         leads_list = mkto.addLeadToMarketoForDante(1);
         PlsOperations.runHourlyScoring(tenant)
-        time.sleep(15)
+        time.sleep(60)
         print leads_list
         lead_lists = mkto.getLeadFromMarketo(leads_list[0]);
         print lead_lists
@@ -416,7 +416,7 @@ class Test(unittest.TestCase):
         leads_list = sfdc.addLeadsToSFDC(2)
         contacts_list = sfdc.addContactsToSFDC(2)
         PlsOperations.runBulkScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC);
-        time.sleep(15)
+        time.sleep(60)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list)
         contact_lists = sfdc.getContactsFromSFDC(contacts_list)
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringSFDC", lead_lists)
@@ -444,7 +444,7 @@ class Test(unittest.TestCase):
         leads_list = sfdc.addLeadsToSFDC(1)
         contacts_list = sfdc.addContactsToSFDC(1)
         PlsOperations.runHourlyScoring(tenant, PLSEnvironments.pls_marketing_app_SFDC)
-        time.sleep(15)
+        time.sleep(60)
         lead_lists = sfdc.getLeadsFromSFDC(leads_list)
         contact_lists = sfdc.getContactsFromSFDC(contacts_list)
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringSFDC", lead_lists)
