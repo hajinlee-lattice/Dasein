@@ -29,5 +29,6 @@
         <module>le-camille</module>
         <module>le-cassandra</module>
         <module>le-swlib</module>
+        <module>le-network</module>
     </modules>
 </project>
