@@ -11,7 +11,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-propdata-collection-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-propdata-core-context.xml" })
 public abstract class PropDataCoreFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Value("${propdata.test.env}")

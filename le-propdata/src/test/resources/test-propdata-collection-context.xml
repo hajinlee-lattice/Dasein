@@ -7,11 +7,10 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
 
-    <import resource="classpath:propdata-core-context.xml" />
-    <import resource="classpath:dataflow-context.xml" />
-
+    <import resource="classpath:test-propdata-core-context.xml" />
     <import resource="classpath:test-propdata-persistence-context.xml" />
     <import resource="classpath:test-propdata-properties-context.xml"/>
+    <import resource="classpath:dataflow-context.xml" />
 
     <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage" />

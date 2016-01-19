@@ -19,7 +19,7 @@ public class ExternalColumnEntityMgrImplTestNG extends PropDataCoreFunctionalTes
     @Autowired
     private ExternalColumnEntityMgr externalColumnEntityMgr;
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testFindAll() throws IOException {
         List<ExternalColumn> columns = externalColumnEntityMgr.getExternalColumns();
         ObjectMapper mapper = new ObjectMapper();
