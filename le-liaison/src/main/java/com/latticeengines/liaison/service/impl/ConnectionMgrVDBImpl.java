@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataCol
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
+import com.latticeengines.liaison.exposed.service.LoadGroupMgr;
 import com.latticeengines.liaison.exposed.service.Query;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
@@ -27,6 +28,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
     private final String dlURL;
 
     private DataLoaderService dataLoaderService;
+    private LoadGroupMgr lg_mgr;
 
     public ConnectionMgrVDBImpl(String tenantName, String dlURL, DataLoaderService dataLoaderService) {
         this.tenantName = tenantName;
@@ -139,6 +141,18 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
 
     public void setQuery(Query query) throws IOException, RuntimeException {
         setSpec(query.getName(), "SpecLatticeNamedElements((" + query.definition() + "))");
+    }
+
+    public LoadGroupMgr getLoadGroupMgr() throws IOException, RuntimeException {
+        if (this.lg_mgr == null) {
+            String configfile = "Not implemented";
+            this.lg_mgr = new LoadGroupMgrImpl(this, configfile);
+        }
+        return this.lg_mgr;
+    }
+
+    public void installDLConfigFile(String config) throws IOException, RuntimeException {
+        
     }
 
     public String getSpec(String specName) throws IOException, RuntimeException {

@@ -2,6 +2,8 @@ package com.latticeengines.liaison.exposed.service;
 
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Set;
 
 public interface LPFunctions {
 
@@ -46,6 +48,27 @@ public interface LPFunctions {
     // RuntimeException is thrown.
 
     Boolean setLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
-            AbstractMap.SimpleImmutableEntry<String, String> attributes, String lp_template_version)
+            Map<String, String> attributes, String lp_template_version)
             throws IOException, RuntimeException;
+
+    // getLDCWritebackAttributes(...)
+    //
+    // Gets Lattice Data Cloud (LDC, or "PropData") attributes to be written
+    // back to the customer in a standard DL/visiDB template.  The attributes
+    // are returned in a map (column_name_in_propdata,column_name_in_customer_system).
+    // If there is a connection problem, an IOException is thrown.
+    // If the DL REST API connection does not return success, then a
+    // RuntimeException is thrown.
+
+    Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr)
+            throws IOException, RuntimeException;
+
+    // setLDCWritebackAttributesDefaultName(...)
+    //
+    // Similar to the above method, but the "column_name_in_customer_system" is derived
+    // from "column_name_in_propdata" according to the lp_template_type.
+
+    Boolean setLDCWritebackAttributesDefaultName(ConnectionMgr conn_mgr, String source,
+            Set<String> column_names_in_propdata, String lp_template_type, 
+            String lp_template_version) throws IOException, RuntimeException;
 }

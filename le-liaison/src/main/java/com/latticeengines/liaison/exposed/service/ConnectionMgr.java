@@ -5,11 +5,14 @@ import java.util.Map;
 
 public interface ConnectionMgr {
 
-    public Query getQuery(String queryName) throws IOException, RuntimeException;
+    Query getQuery(String queryName) throws IOException, RuntimeException;
 
-    public Map<String, Map<String, String>> getMetadata(String queryName) throws IOException,
+    Map<String, Map<String, String>> getMetadata(String queryName) throws IOException,
             RuntimeException;
 
-    public void setQuery(Query query) throws IOException, RuntimeException;
+    void setQuery(Query query) throws IOException, RuntimeException;
 
+    LoadGroupMgr getLoadGroupMgr() throws IOException, RuntimeException;
+
+    void installDLConfigFile(String config) throws IOException, RuntimeException;
 }
