@@ -186,7 +186,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.tenantInfo = {
             properties: {
                 displayName: $scope.tenantId,
-                description: "A LPA tenant under the contract " + $scope.contractId
+                description: "A Lattice tenant under the contract " + $scope.contractId
             }
         };
 
