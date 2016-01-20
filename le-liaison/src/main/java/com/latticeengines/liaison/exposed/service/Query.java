@@ -13,10 +13,10 @@ public abstract class Query {
     private List<String> filterDefns;
     private List<String> entityDefns;
     private String resultSetDefn;
-    private String definition;
+    private String originalDefinition;
 
     public Query(String name, String definition) throws DefinitionException {
-        this.definition = definition;
+        this.originalDefinition = definition;
         initFromDefinition(name, definition);
     }
 
@@ -121,7 +121,7 @@ public abstract class Query {
     public abstract String definition();
 
     public String getOriginalDefinition() {
-        return definition;
+        return originalDefinition;
     }
 
 }
