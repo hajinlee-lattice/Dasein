@@ -26,7 +26,7 @@ class TableColumnVDBImpl(TableColumn):
     @classmethod
     def initFromDefn(cls, defn):
 
-        c = re.search( '^SpecLatticeSourceTableColumn\(LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(LatticeSourceTableIdentifier\(ContainerElementName\(\"(\w*)\"\)\), ContainerElementName\(\"(\w*)\"\)\)\), (.*?), ((\w*)\(.*\))\)$', defn )
+        c = re.search( '^SpecLatticeSourceTableColumn\(LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(LatticeSourceTableIdentifier\(ContainerElementName\(\"(\w*)\"\)\), ContainerElementName\(\"(.*?)\"\)\)\), (.*?), ((\w*).*\))\)$', defn )
 
         ## Note: the datatype extracted from the spec has 'DataType' as the first 8 characters at the beginning.  We strip that out to initialize the datatype variable.
         if c:

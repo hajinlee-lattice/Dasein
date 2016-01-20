@@ -29,6 +29,9 @@ class ExpressionVDBImplFactory( object ):
         elif re.search( '^LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(', defn ):
             return ExpressionVDBImplColRef.InitFromDefn( defn )
 
+        elif re.search( '^LatticeFunctionExpressionTransform\(LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(.*?LatticeAddressSetFromFcnSupport', defn ):
+            return ExpressionVDBImplColRef.InitFromDefn( defn )
+
         return ExpressionVDBImplGeneric.InitFromDefn(defn)
 
 
@@ -224,9 +227,13 @@ class ExpressionVDBImplColRef( ExpressionVDBImpl ):
     def InitFromDefn( cls, defn ):
 
         c = re.search( '^LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(LatticeSourceTableIdentifier\(ContainerElementName\("(.*)"\)\), ContainerElementName\("(.*)"\)\)\)$', defn )
-
         if c:
             return cls( c.group(2), c.group(1) )
+
+        c = re.search( '^LatticeFunctionExpressionTransform\(LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(LatticeSourceTableIdentifier\(ContainerElementName\("(.*?)"\)\), ContainerElementName\("(.*?)"\)\)\), LatticeAddressSetFromFcnSupport\(LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(LatticeSourceTableIdentifier\(ContainerElementName', defn )
+        if c:
+            return cls( c.group(2), c.group(1) )
+
         else:
             raise MaudeStringError( defn )
 

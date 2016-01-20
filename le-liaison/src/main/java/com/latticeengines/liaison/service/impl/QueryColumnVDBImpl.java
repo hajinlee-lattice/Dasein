@@ -18,13 +18,13 @@ public class QueryColumnVDBImpl extends QueryColumn {
             "DisplayDiscretizationStrategy"));
 
     private static final Pattern pattern_sqnf_no_md = Pattern
-            .compile("^SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\)$");
+            .compile("^SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(.*?)\"\\), (LatticeFunction.*)\\)$");
     private static final Pattern pattern_sqnf_no_md_alt = Pattern
-            .compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(empty\\)\\)$");
+            .compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(.*?)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(empty\\)\\)$");
     private static final Pattern pattern_sqnf_fcnbndry = Pattern
             .compile("^SpecQueryNamedFunctionEntityFunctionBoundary$");
     private static final Pattern pattern_sqnf_has_md = Pattern
-            .compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(\\w*)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(\\((.*)\\)\\)\\)$");
+            .compile("^SpecQueryNamedFunctionMetadata\\(SpecQueryNamedFunctionExpression\\(ContainerElementName\\(\"(.*?)\"\\), (LatticeFunction.*)\\), SpecExtractDetails\\(\\((.*)\\)\\)\\)$");
 
     private static final String tmpl_sed_single = "^SpecExtractDetail\\(\"%s\", \"(.*?)\"\\)(, SpecExtractDetail\\(.*|$)";
     private static final String tmpl_sed_list = "^SpecExtractDetail\\(\"%s\", StringList\\(.*?\"(.*?)\"\\)\\)(, SpecExtractDetail\\(.*|$)";

@@ -9,11 +9,11 @@ import re
 
 def IsStandardType( t ):
 
-    c = re.search( '^VarChar\(\d+\)$', t )
+    c = re.search( '^VarChar\(-?\d+\)$', t )
     if c:
         return True
 
-    c = re.search( '^NVarChar\(\d+\)$', t )
+    c = re.search( '^NVarChar\(-?\d+\)$', t )
     if c:
         return True
 

@@ -44,13 +44,13 @@ class QueryColumnVDBImpl(QueryColumn):
         md['Description']      = None
         md['DisplayDiscretizationStrategy'] = None
 
-        c_no_metadata = re.search( '^SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(\w*)\"\), (LatticeFunction.*)\)$', defn )
+        c_no_metadata = re.search( '^SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\)$', defn )
 
         if c_no_metadata:
             name = c_no_metadata.group(1)
             expression = ExpressionVDBImplFactory.Create( c_no_metadata.group(2) )
 
-        c_no_metadata_alt = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(\w*)\"\), (LatticeFunction.*)\), SpecExtractDetails\(empty\)\)$', defn )
+        c_no_metadata_alt = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(empty\)\)$', defn )
 
         if c_no_metadata_alt:
             name = c_no_metadata_alt.group(1)
@@ -62,7 +62,7 @@ class QueryColumnVDBImpl(QueryColumn):
             name = 'EntityFunctionBoundary'
             expression = ExpressionVDBImplFactory.Create( 'SpecQueryNamedFunctionEntityFunctionBoundary' )
         
-        c_has_metadata = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(\w*)\"\), (LatticeFunction.*)\), SpecExtractDetails\(\((.*)\)\)\)$', defn )
+        c_has_metadata = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(\((.*)\)\)\)$', defn )
 
         if c_has_metadata:
             name = c_has_metadata.group(1)
