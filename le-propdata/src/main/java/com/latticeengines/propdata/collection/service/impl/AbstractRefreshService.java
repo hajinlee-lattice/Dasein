@@ -74,7 +74,7 @@ public abstract class AbstractRefreshService
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADING);
         LoggingUtils.logInfo(getLogger(), progress, "Start uploading ...");
 
-        if (!(getSource() instanceof HasSqlPresence)) {
+        if (getSource() instanceof HasSqlPresence) {
             // upload source
             long uploadStartTime = System.currentTimeMillis();
             String sourceDir = snapshotDirInHdfs(progress);
