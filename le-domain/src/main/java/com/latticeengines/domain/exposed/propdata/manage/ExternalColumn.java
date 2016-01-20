@@ -20,6 +20,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -76,6 +78,7 @@ public class ExternalColumn implements HasPid, Serializable {
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "externalColumn")
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(FetchMode.SUBSELECT)
     private List<ColumnMapping> columnMappings;
 
     @Override

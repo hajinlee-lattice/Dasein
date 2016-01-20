@@ -1,5 +1,9 @@
 package com.latticeengines.propdata.core.dao.impl;
 
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
@@ -13,6 +17,18 @@ public class ExternalColumnDaoImpl
     @Override
     protected Class<ExternalColumn> getEntityClass() {
         return ExternalColumn.class;
+    }
+    
+    @SuppressWarnings("unchecked")
+	@Override
+    public List<ExternalColumn> getLeadEnrichment() {
+    	Session session = getSessionFactory().getCurrentSession();
+    	Class<ExternalColumn> entityClz = getEntityClass();
+    	String queryStr = String.format("from %s where Tags like :leadEnrichment", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("leadEnrichment", "%LeadEnrichment%");
+        return query.list();
+
     }
 
 }

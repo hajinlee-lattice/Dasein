@@ -22,5 +22,11 @@ public class ExternalColumnEntityMgrImpl implements ExternalColumnEntityMgr {
     public List<ExternalColumn> getExternalColumns() {
         return externalColumnDao.findAll();
     }
+    
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ExternalColumn> getLeadEnrichment() {
+        return externalColumnDao.getLeadEnrichment();
+    }
 
 }
