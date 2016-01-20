@@ -8,10 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
 @Component("builtWithMostRecent")
-public class BuiltWithMostRecent implements MostRecentSource, DomainBased {
+public class BuiltWithMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = -3304714347997988410L;
 
@@ -47,5 +48,8 @@ public class BuiltWithMostRecent implements MostRecentSource, DomainBased {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlMatchDestination() { return "BuiltWith_Source"; }
 
 }

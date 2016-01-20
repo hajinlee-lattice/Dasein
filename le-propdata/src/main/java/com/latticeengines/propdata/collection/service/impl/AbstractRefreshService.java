@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.ServingSource;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -66,24 +67,27 @@ public abstract class AbstractRefreshService
             return progress;
         }
 
+
         // update status
         long startTime = System.currentTimeMillis();
         logIfRetrying(progress);
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADING);
         LoggingUtils.logInfo(getLogger(), progress, "Start uploading ...");
 
-        // upload source
-        long uploadStartTime = System.currentTimeMillis();
-        String sourceDir = snapshotDirInHdfs(progress);
-        String destTable = getSource().getSqlTableName();
-        if (!uploadAvroToCollectionDB(progress, sourceDir, destTable)) {
-            return progress;
-        }
+        if (!(getSource() instanceof HasSqlPresence)) {
+            // upload source
+            long uploadStartTime = System.currentTimeMillis();
+            String sourceDir = snapshotDirInHdfs(progress);
+            String destTable = ((HasSqlPresence) getSource()).getSqlTableName();
+            if (!uploadAvroToCollectionDB(progress, sourceDir, destTable)) {
+                return progress;
+            }
 
-        long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable, Long.class);
-        progress.setRowsGenerated(rowsUploaded);
-        LoggingUtils.logInfoWithDuration(getLogger(),
-                progress, "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
+            long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable, Long.class);
+            progress.setRowsGenerated(rowsUploaded);
+            LoggingUtils.logInfoWithDuration(getLogger(),
+                    progress, "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
+        }
 
         // finish
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "Uploaded.", startTime);
@@ -203,7 +207,7 @@ public abstract class AbstractRefreshService
         LoggingUtils.logInfo(getLogger(), progress, String.format("Rename %s to %s.", srcTable, destTable));
     }
 
-    protected String getStageTableName() { return getSource().getSqlTableName() + "_stage"; }
+    protected String getStageTableName() { return ((HasSqlPresence) getSource()).getSqlTableName() + "_stage"; }
 
     protected void createStageTable() {
         String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());

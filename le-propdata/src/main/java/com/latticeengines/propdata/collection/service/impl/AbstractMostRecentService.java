@@ -9,6 +9,7 @@ import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
 public abstract class AbstractMostRecentService extends AbstractRefreshService implements RefreshService {
@@ -57,7 +58,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
     private Date archivedLatest() {
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
-                        + getSource().getSqlTableName(),
+                        + ((HasSqlPresence) getSource()).getSqlTableName(),
                 Date.class);
         return latest;
     }

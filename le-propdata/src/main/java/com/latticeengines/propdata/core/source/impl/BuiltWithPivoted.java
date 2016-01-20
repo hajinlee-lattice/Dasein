@@ -5,11 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("builtWithPivoted")
-public class BuiltWithPivoted implements PivotedSource, DomainBased {
+public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = -7458296774400816711L;
 
@@ -42,5 +43,8 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlMatchDestination() { return "BuiltWith_Pivoted_Source"; }
 
 }

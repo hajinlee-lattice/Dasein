@@ -2,7 +2,6 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.ServingSource;
@@ -39,7 +39,7 @@ public class ProgressOrchestrator {
     private ZkConfigurationService zkConfigurationService;
 
     @Autowired
-    List<Source> sourceList;
+    private SourceService sourceService;
 
     @Value("${propdata.job.schedule.dryrun:true}")
     Boolean dryrun;
@@ -54,7 +54,7 @@ public class ProgressOrchestrator {
 
     @PostConstruct
     private void constructMaps() {
-        for (Source source: sourceList) {
+        for (Source source: sourceService.getSources()) {
             Object service = ac.getBean(source.getRefreshServiceBean());
             if (service != null) {
                 if (source instanceof RawSource) {

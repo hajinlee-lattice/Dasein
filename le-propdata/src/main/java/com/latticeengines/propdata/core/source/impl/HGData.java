@@ -5,11 +5,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.ServingSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("hgData")
-public class HGData implements DomainBased, ServingSource {
+public class HGData implements DomainBased, ServingSource, HasSqlPresence {
 
     private static final long serialVersionUID = 603829385601451984L;
 
@@ -45,5 +46,8 @@ public class HGData implements DomainBased, ServingSource {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlMatchDestination() { return "HGData_Source"; }
 
 }

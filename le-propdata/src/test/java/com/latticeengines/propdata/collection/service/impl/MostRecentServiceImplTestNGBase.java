@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
@@ -138,13 +139,13 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
 
     protected void verifyUniqueness() {
         int maxMultiplicity = jdbcTemplateCollectionDB.queryForObject("SELECT TOP 1 COUNT(*) FROM "
-                + source.getSqlTableName() + " GROUP BY " + StringUtils.join(getSource().getPrimaryKey(), ",")
+                + ((HasSqlPresence) source).getSqlTableName() + " GROUP BY " + StringUtils.join(getSource().getPrimaryKey(), ",")
                 + " ORDER BY COUNT(*) DESC", Integer.class);
         Assert.assertEquals(maxMultiplicity, 1, "Each unique key should have one record.");
     }
 
     protected void verifyMostRecent() {
-        String sql = "SELECT COUNT(*) FROM " + source.getSqlTableName() + " lhs \n"
+        String sql = "SELECT COUNT(*) FROM " + ((HasSqlPresence) source).getSqlTableName() + " lhs \n"
                 + "INNER JOIN " + baseSource.getCollectedTableName() + " rhs\n ON ";
         for (String key: source.getPrimaryKey()) {
             sql += "lhs.[" + key + "] = rhs.[" + key + "]\n AND ";

@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
@@ -122,9 +123,9 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
 
     protected void verifyResultTable(RefreshProgress progress) {
         int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT COUNT(*) FROM [" + source.getSqlTableName() + "]", Integer.class);
+                "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
         Assert.assertTrue(rowsInPivotedTable > 0,
-                String.format("Only %d results in %s.", rowsInPivotedTable, source.getSqlTableName()));
+                String.format("Only %d results in %s.", rowsInPivotedTable, ((HasSqlPresence) source).getSqlTableName()));
         Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGenerated());
         if (getExpectedRows() != null) {
             Assert.assertEquals(rowsInPivotedTable, (int) getExpectedRows());

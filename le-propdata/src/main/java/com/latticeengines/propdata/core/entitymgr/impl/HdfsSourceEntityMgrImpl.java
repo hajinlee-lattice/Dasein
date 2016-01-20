@@ -14,7 +14,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.TableUtils;
 
@@ -95,9 +95,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public Table getTableAtVersion(Source source, String version) {
-        if (source instanceof ServingSource) {
+        if (source instanceof HasSqlPresence) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-            return TableUtils.createTable(((ServingSource) source).getSqlTableName(), path + "/*.avro");
+            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(), path + "/*.avro");
         } else if (source instanceof BulkSource ) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
