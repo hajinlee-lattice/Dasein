@@ -10,8 +10,8 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calculation;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
 
 public class PivotFlowUnitTestNG {
 

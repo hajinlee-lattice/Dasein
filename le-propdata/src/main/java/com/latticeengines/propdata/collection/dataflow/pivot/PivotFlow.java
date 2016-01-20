@@ -24,7 +24,7 @@ import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 @Component("pivotFlow")
 public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> {

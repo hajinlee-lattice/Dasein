@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.util.DateRange;

@@ -6,7 +6,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.dao.RefreshProgressDao;
 import com.latticeengines.propdata.core.source.ServingSource;
 

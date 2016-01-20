@@ -2,7 +2,7 @@ package com.latticeengines.propdata.collection.service;
 
 import java.util.Date;
 
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.core.source.Source;
 
 public interface RefreshService {

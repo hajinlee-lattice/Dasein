@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.propdata.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("hdfsPathBuilder")

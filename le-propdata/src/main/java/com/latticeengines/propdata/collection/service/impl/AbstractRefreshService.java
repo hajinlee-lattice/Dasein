@@ -7,8 +7,8 @@ import org.apache.commons.io.FileUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;

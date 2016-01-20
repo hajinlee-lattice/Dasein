@@ -12,8 +12,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;

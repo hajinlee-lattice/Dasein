@@ -9,9 +9,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.BulkSource;

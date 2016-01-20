@@ -3,7 +3,7 @@ package com.latticeengines.propdata.core.dao.impl;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.ColumnMapping;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnMapping;
 import com.latticeengines.propdata.core.dao.ColumnMappingDao;
 
 @Component("columnMappingDao")

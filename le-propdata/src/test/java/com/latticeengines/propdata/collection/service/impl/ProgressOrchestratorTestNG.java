@@ -12,9 +12,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;

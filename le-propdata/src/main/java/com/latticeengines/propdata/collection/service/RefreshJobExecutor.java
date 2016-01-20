@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.collection.service;
 
-import com.latticeengines.domain.exposed.propdata.collection.Progress;
+import com.latticeengines.domain.exposed.propdata.manage.Progress;
 
 public interface RefreshJobExecutor {
 

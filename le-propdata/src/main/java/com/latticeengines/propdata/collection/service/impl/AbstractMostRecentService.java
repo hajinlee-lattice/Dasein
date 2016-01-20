@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;

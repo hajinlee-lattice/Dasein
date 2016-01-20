@@ -5,9 +5,9 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.Progress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.Progress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;

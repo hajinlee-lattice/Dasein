@@ -146,10 +146,12 @@ public class SchemaGenerator {
         int length = args.length;
         String dbName = args[0];
 
-        String[] packages = new String[length - 1];
+        boolean withStaticSql = !("false".equals(args[1].toLowerCase()));
+
+        String[] packages = withStaticSql ? new String[length - 1] : new String[length - 2];
 
         int j = 0;
-        for (int i = 1; i < length; i++) {
+        for (int i = args.length - packages.length; i < length; i++) {
             packages[j++] = args[i];
         }
         SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
@@ -158,8 +160,10 @@ public class SchemaGenerator {
         SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
         File sqlServerExportFile = sqlServerGenerator.generateToScript();
 
-        mysqlGenerator.appendStaticSql(mysqlExportFile, DBDialect.MYSQL5INNODB);
-        sqlServerGenerator.appendStaticSql(sqlServerExportFile, DBDialect.SQLSERVER);
+        if (withStaticSql) {
+            mysqlGenerator.appendStaticSql(mysqlExportFile, DBDialect.MYSQL5INNODB);
+            sqlServerGenerator.appendStaticSql(sqlServerExportFile, DBDialect.SQLSERVER);
+        }
     }
 
     private List<Class<?>> getClasses(String packageName) throws Exception {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.propdata.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.core.entitymgr.ExternalColumnEntityMgr;
 import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;
 

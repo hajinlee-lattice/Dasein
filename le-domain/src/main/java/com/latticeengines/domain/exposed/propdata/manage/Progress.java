@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.collection;
+package com.latticeengines.domain.exposed.propdata.manage;
 
 import java.util.Date;
 

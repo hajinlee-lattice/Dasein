@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.propdata.collection.dao.ArchiveProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.core.source.Source;

@@ -16,10 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.ArchiveProgress;
-import com.latticeengines.domain.exposed.propdata.collection.Progress;
-import com.latticeengines.domain.exposed.propdata.collection.ProgressStatus;
-import com.latticeengines.domain.exposed.propdata.collection.RefreshProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.Progress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;

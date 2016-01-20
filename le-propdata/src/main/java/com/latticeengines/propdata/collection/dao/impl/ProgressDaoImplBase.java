@@ -6,7 +6,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
-import com.latticeengines.domain.exposed.propdata.collection.Progress;
+import com.latticeengines.domain.exposed.propdata.manage.Progress;
 import com.latticeengines.propdata.collection.dao.ProgressDao;
 import com.latticeengines.propdata.core.source.Source;
 

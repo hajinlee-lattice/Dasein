@@ -8,6 +8,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
 
 public class ColumnMetadataUnitTestNG {
 

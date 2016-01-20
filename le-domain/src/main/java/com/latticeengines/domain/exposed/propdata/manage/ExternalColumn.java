@@ -1,37 +1,103 @@
-package com.latticeengines.domain.exposed.propdata;
+package com.latticeengines.domain.exposed.propdata.manage;
 
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.propdata.StatisticalType;
 
+@Entity
+@Access(AccessType.FIELD)
+@Table(name = "ExternalColumn")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ColumnMetadata {
+public class ExternalColumn implements HasPid, Serializable {
 
-    private String columnName;
+    private static final long serialVersionUID = 6232580467581472718L;
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "PID", unique = true, nullable = false)
+    private Long pid;
+
+    @Id
+    @Column(name = "ExternalColumnID", nullable = false)
+    private String externalColumnID;
+
+    @Column(name = "Description", nullable = false)
     private String description;
+
+    @Column(name = "DataType", nullable = false)
     private String dataType;
+
+    @Column(name = "DisplayName", nullable = true)
     private String displayName;
+
+    @Column(name = "Category", nullable = true)
     private String category;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "StatisticalType", nullable = true)
     private StatisticalType statisticalType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "FundamentalType", nullable = true)
     private FundamentalType fundamentalType;
+
+    @Column(name = "ApprovedUsage", nullable = true)
     private String approvedUsage;
+
+    @Column(name = "Tags", nullable = true)
     private String tags;
+
+    @Column(name = "DisplayDiscretizationStrategy", nullable = true)
     private String discretizationStrategy;
-    private String matchDestination;
 
-    @JsonProperty("ColumnName")
-    public String getColumnName() { return columnName; }
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "externalColumn")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<ColumnMapping> columnMappings;
 
-    @JsonProperty("ColumnName")
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+    @Override
+    @JsonIgnore
+    public Long getPid() {
+        return pid;
+    }
+
+    @Override
+    @JsonIgnore
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
+    @JsonProperty("ExternalColumnID")
+    public String getExternalColumnID() {
+        return externalColumnID;
+    }
+
+    @JsonProperty("ExternalColumnID")
+    public void setExternalColumnID(String externalColumnID) {
+        this.externalColumnID = externalColumnID;
     }
 
     @JsonProperty("Description")
@@ -95,33 +161,43 @@ public class ColumnMetadata {
     }
 
     @JsonIgnore
-    public String getTags() {
+    private String getApprovedUsage() {
+        return approvedUsage;
+    }
+
+    @JsonIgnore
+    private void setApprovedUsage(String approvedUsage) {
+        this.approvedUsage = approvedUsage;
+    }
+
+    @JsonIgnore
+    private String getTags() {
         return tags;
     }
 
     @JsonIgnore
-    public void setTags(String tags) {
+    private void setTags(String tags) {
         this.tags = tags;
     }
 
-    @JsonProperty("DiscretizationStrategy")
+    @JsonProperty("DisplayDiscretizationStrategy")
     public String getDiscretizationStrategy() {
         return discretizationStrategy;
     }
 
-    @JsonProperty("DiscretizationStrategy")
+    @JsonProperty("DisplayDiscretizationStrategy")
     public void setDiscretizationStrategy(String discretizationStrategy) {
         this.discretizationStrategy = discretizationStrategy;
     }
 
-    @JsonProperty("MatchDestination")
-    public String getMatchDestination() {
-        return matchDestination;
+    @JsonProperty("ColumnMappings")
+    public List<ColumnMapping> getColumnMappings() {
+        return columnMappings;
     }
 
-    @JsonProperty("MatchDestination")
-    public void setMatchDestination(String matchDestination) {
-        this.matchDestination = matchDestination;
+    @JsonProperty("ColumnMappings")
+    public void setColumnMappings(List<ColumnMapping> columnMappings) {
+        this.columnMappings = columnMappings;
     }
 
     @JsonProperty("FundamentalType")

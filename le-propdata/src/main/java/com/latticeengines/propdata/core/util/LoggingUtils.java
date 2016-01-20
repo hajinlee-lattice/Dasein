@@ -3,7 +3,7 @@ package com.latticeengines.propdata.core.util;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 
-import com.latticeengines.domain.exposed.propdata.collection.Progress;
+import com.latticeengines.domain.exposed.propdata.manage.Progress;
 
 final public class LoggingUtils {
 

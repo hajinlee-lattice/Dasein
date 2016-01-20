@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 import cascading.operation.Buffer;
 

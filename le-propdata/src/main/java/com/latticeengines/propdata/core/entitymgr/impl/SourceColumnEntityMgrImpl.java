@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.core.entitymgr.impl;
 
-import static com.latticeengines.domain.exposed.propdata.collection.SourceColumn.Calculation;
+import static com.latticeengines.domain.exposed.propdata.manage.SourceColumn.Calculation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.core.dao.SourceColumnDao;
 import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.core.source.ServingSource;

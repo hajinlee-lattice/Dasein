@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.dataflow.pivot;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.propdata.collection.SourceColumn;
+import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 public class PivotDataFlowParameters extends DataFlowParameters {
 

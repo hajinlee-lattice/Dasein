@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.domain.exposed.propdata.ExternalColumn;
+import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.propdata.core.dao.ExternalColumnDao;
 import com.latticeengines.propdata.core.entitymgr.ExternalColumnEntityMgr;
 
