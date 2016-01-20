@@ -1,7 +1,12 @@
 package com.latticeengines.liaison.service.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.dataloader.GetSpecRequest;
 import com.latticeengines.domain.exposed.dataloader.GetSpecResult;
@@ -34,14 +39,20 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         return new QueryVDBImpl(queryName, spec);
     }
 
-    public Map<String, Map<String, String>> getMetadata(String queryName) throws IOException, RuntimeException {
+    public Map<String, Map<String, String>> getMetadata(String queryName) throws IOException,
+            RuntimeException {
 
-        final Set<String> allowedExtensions = new HashSet<String>(Arrays.asList("Category", "DataType"));
+        final Set<String> allowedExtensions = new HashSet<String>(Arrays.asList("Category",
+                "DataType"));
 
-        GetQueryMetaDataColumnsResponse getMetadataResponse = dataLoaderService.getQueryMetadataColumns(new GetQueryMetaDataColumnsRequest(tenantName, queryName), dlURL);
+        GetQueryMetaDataColumnsResponse getMetadataResponse = dataLoaderService
+                .getQueryMetadataColumns(new GetQueryMetaDataColumnsRequest(tenantName, queryName),
+                        dlURL);
 
         if (getMetadataResponse.getStatus() != 3) {
-            throw new RuntimeException(String.format("Query \"%s\" not found for tenant \"%s\" at DataLoader URL %s", queryName, tenantName, dlURL));
+            throw new RuntimeException(String.format(
+                    "Query \"%s\" not found for tenant \"%s\" at DataLoader URL %s", queryName,
+                    tenantName, dlURL));
         }
 
         List<AttributeMetadata> mdraw = getMetadataResponse.getMetadata();
@@ -75,7 +86,8 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             }
 
             if (colData.getDisplayDiscretizationStrategy() != null) {
-                metadata.put("DisplayDiscretizationStrategy", colData.getDisplayDiscretizationStrategy());
+                metadata.put("DisplayDiscretizationStrategy",
+                        colData.getDisplayDiscretizationStrategy());
             } else {
                 metadata.put("DisplayDiscretizationStrategy", "<NULL>");
             }
@@ -91,8 +103,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             if (!metadata.containsKey("Category")) {
                 if (metadata.containsKey("Tags") && metadata.get("Tags").equals("Internal")) {
                     metadata.put("Category", "Lead Information");
-                }
-                else {
+                } else {
                     metadata.put("Category", "<NULL>");
                 }
             }
@@ -101,14 +112,16 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             }
 
             // Map multiple values or no value to "Lattice Data Science"
-            if (colData.getDataSource() != null && colData.getDataSource().size() == 1 && !colData.getDataSource().get(0).equals("")) {
+            if (colData.getDataSource() != null && colData.getDataSource().size() == 1
+                    && !colData.getDataSource().get(0).equals("")) {
                 metadata.put("DataSource", colData.getDataSource().get(0));
             } else {
                 metadata.put("DataSource", "Lattice Data Science");
             }
 
             if (colData.getApprovedUsage() != null && colData.getApprovedUsage().size() > 0) {
-                metadata.put("ApprovedUsage", colData.getApprovedUsage().get(colData.getApprovedUsage().size() - 1));
+                metadata.put("ApprovedUsage",
+                        colData.getApprovedUsage().get(colData.getApprovedUsage().size() - 1));
             } else {
                 metadata.put("ApprovedUsage", "<NULL>");
             }
@@ -130,19 +143,24 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
 
     public String getSpec(String specName) throws IOException, RuntimeException {
 
-        GetSpecResult getSpecResult = dataLoaderService.getSpecDetails(new GetSpecRequest(tenantName, specName), dlURL);
+        GetSpecResult getSpecResult = dataLoaderService.getSpecDetails(new GetSpecRequest(
+                tenantName, specName), dlURL);
 
         if (!getSpecResult.getSuccess().equalsIgnoreCase("true")) {
-            if (getSpecResult.getErrorMessage().equals(String.format("Tenant \'%s\' does not exist.", tenantName))) {
-                throw new RuntimeException(String.format("Tenant \"%s\" not found at DataLoader URL %s", tenantName, dlURL));
+            if (getSpecResult.getErrorMessage().equals(
+                    String.format("Tenant \'%s\' does not exist.", tenantName))) {
+                throw new RuntimeException(String.format(
+                        "Tenant \"%s\" not found at DataLoader URL %s", tenantName, dlURL));
             }
-            throw new RuntimeException(String.format("Tenant \"%s\" does not have spec \"%s\"", tenantName, specName));
+            throw new RuntimeException(String.format("Tenant \"%s\" does not have spec \"%s\"",
+                    tenantName, specName));
         }
 
         return getSpecResult.getSpecDetails();
     }
 
-    public void setSpec(String objName, String specLatticeNamedElements) throws IOException, RuntimeException {
+    public void setSpec(String objName, String specLatticeNamedElements) throws IOException,
+            RuntimeException {
 
         StringBuilder vfile = new StringBuilder(100000);
 
@@ -150,17 +168,22 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         vfile.append(specLatticeNamedElements);
         vfile.append("\n      </specs>\n    </workspace>\n  </workspaces>\n</VisiDBStructures>");
 
-        InstallResult getInstallResult = dataLoaderService.installVisiDBStructureFile(new InstallTemplateRequest(tenantName, vfile.toString()), dlURL);
+        InstallResult getInstallResult = dataLoaderService.installVisiDBStructureFile(
+                new InstallTemplateRequest(tenantName, vfile.toString()), dlURL);
 
         if (getInstallResult.getStatus() != 3) {
-            throw new RuntimeException(String.format("Failed to set specs for tenant \"%s\" at DataLoader URL %s", tenantName, dlURL));
+            throw new RuntimeException(
+                    String.format("Failed to set specs for tenant \"%s\" at DataLoader URL %s",
+                            tenantName, dlURL));
         }
 
         List<ValueResult> vrs = getInstallResult.getValueResult();
         ValueResult status2 = vrs.get(0);
 
         if (!status2.getValue().equals("Succeed")) {
-            throw new RuntimeException(String.format("DataLoader error setting specs for tenant \"%s\" at DataLoader URL %s", tenantName, dlURL));
+            throw new RuntimeException(String.format(
+                    "DataLoader error setting specs for tenant \"%s\" at DataLoader URL %s",
+                    tenantName, dlURL));
         }
     }
 

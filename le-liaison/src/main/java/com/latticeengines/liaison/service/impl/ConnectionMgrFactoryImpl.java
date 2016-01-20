@@ -14,11 +14,11 @@ public class ConnectionMgrFactoryImpl implements ConnectionMgrFactory {
     private DataLoaderService dataLoaderService;
 
     @Override
-    public ConnectionMgr getConnectionMgr( String type, String ... args ) throws RuntimeException {
+    public ConnectionMgr getConnectionMgr(String type, String... args) throws RuntimeException {
         // Default is to return a visiDB Manager
-        if( args.length != 2 ) {
-            throw new RuntimeException( "Invalid number of arguments for ConnectionMgrVDBImpl" );
+        if (args.length != 2) {
+            throw new RuntimeException("Invalid number of arguments for ConnectionMgrVDBImpl");
         }
-        return new ConnectionMgrVDBImpl( args[0], args[1], dataLoaderService );
+        return new ConnectionMgrVDBImpl(args[0], args[1], dataLoaderService);
     }
 }
