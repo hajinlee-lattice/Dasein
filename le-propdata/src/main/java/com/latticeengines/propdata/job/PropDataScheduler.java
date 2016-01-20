@@ -90,7 +90,7 @@ public class PropDataScheduler {
     private void registerRefreshJob(ServingSource source) throws SchedulerException {
         String beanName = source.getRefreshServiceBean();
         RefreshService service = (RefreshService) applicationContext.getBean(beanName);
-        JobDetail job = JobBuilder.newJob(ArchiveScheduler.class)
+        JobDetail job = JobBuilder.newJob(RefreshScheduler.class)
                 .usingJobData("dryrun", dryrun)
                 .build();
         job.getJobDataMap().put("refreshService", service);

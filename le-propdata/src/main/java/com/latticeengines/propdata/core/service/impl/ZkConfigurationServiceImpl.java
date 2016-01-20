@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component
+@Component("zkConfigurationService")
 public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     private Camille camille;

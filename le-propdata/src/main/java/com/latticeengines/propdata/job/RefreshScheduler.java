@@ -32,7 +32,7 @@ public class RefreshScheduler extends QuartzJobBean {
     //==============================
     // for quartz detail bean
     //==============================
-    public void setArchiveService(RefreshService refreshService) {
+    public void setRefreshService(RefreshService refreshService) {
         this.refreshService = refreshService;
     }
 
