@@ -1,4 +1,6 @@
 .tmb-summary {
+    height: 200px;
+        
     span.pd-spinner {
         font-size: 0.5em;
     }
@@ -11,6 +13,22 @@
         &>div {
             width: 100% !important;
             margin-left: 0;
+        }
+        &>div.carousel-slide-container {
+            transition: all 333ms ease;
+            overflow: hidden;
+        }
+        &>div.carousel-slide-container.ng-enter {
+            width: 0 !important;
+        }
+        &>div.carousel-slide-container.ng-enter-active {
+            width: 100% !important;
+        }
+        &>div.carousel-slide-container.ng-leave {
+            width: 100% !important;
+        }
+        &>div.carousel-slide-container.ng-leave-active {
+            width: 0 !important;
         }
         &>div.nav-prev {
             text-align: left;
