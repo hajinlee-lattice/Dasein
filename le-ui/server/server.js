@@ -42,36 +42,42 @@ class Server {
     // forward API requests for dev
     useApiProxy(API_URL) {
         if (API_URL) {
-            this.app.use('/pls', (req, res) => {
-                const url = API_URL + '/pls' + req.url;
-                let r = null;
+            try {
+                this.app.use('/pls', (req, res) => {
+                    const url = API_URL + '/pls' + req.url;
+                    let r = null;
 
-                try {
-                    if (req.method === 'POST') {
-                        r = request.post({ 
-                            uri: url, 
-                            json: req.body 
-                        });
-                    } else {
-                        r = request(url);
+                    try {
+                        if (req.method === 'POST') {
+                            r = request.post({ 
+                                uri: url, 
+                                json: req.body 
+                            });
+                        } else {
+                            r = request(url);
+                        }
+
+                        req.pipe(r).pipe(res);
+                    } catch(err) {
+                        console.log(err.msg);
                     }
-
-                    req.pipe(r).pipe(res);
-                } catch(err) {
-                    console.log(err.msg);
-                }
-            });
+                });
+            } catch (err) {
+                console.log(err.msg);
+            }
         }
     }
 
     setAppRoutes(routes) {
+        console.log('<!> WEB ROOT:',this.options.root);
         routes.forEach(route => {
             const dir = this.options.root + route.path;
-            console.log('path:',dir);
+            var displayString = '';
+            console.log('\n<!> PATH:\t'+route.path);
             // set up the static routes for app files
             if (route.folders) {
                 Object.keys(route.folders).forEach(folder => {
-                    console.log('folder:',folder,route.folders[folder]);
+                    displayString += (displayString ? ', ' : '') + route.folders[folder];
                     this.app.use(
                         folder, 
                         this.express.static(dir + route.folders[folder])
@@ -79,10 +85,13 @@ class Server {
                 });
             }
 
+            console.log('<!> STATIC:\t'+displayString);
+
+            displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
                 Object.keys(route.pages).forEach(page => {
-                    console.log('page:',page,route.pages[page]);
+                    console.log('\t'+route.pages[page]+'\t->',page);
                     this.app.get(
                         page, 
                         (req, res) => res.render(dir + '/' + route.pages[page])
@@ -127,9 +136,9 @@ class Server {
         const options = this.options;
         const server = this.app.listen(options.USE_PORT, () => {
             console.log(
-                'listening port:', options.USE_PORT + ',', 
-                'environment:', options.ENV, '\n' +
-                'proxy api:', options.API_URL
+                '\n<!> HOST: http://localhost:' + options.USE_PORT + '/' + 
+                '\tENV:', options.ENV, '\n' +
+                '<!> API:', options.API_URL
             );
         });
     }

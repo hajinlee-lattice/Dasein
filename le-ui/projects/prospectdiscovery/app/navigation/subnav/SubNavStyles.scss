@@ -3,26 +3,73 @@
         font-size: 0.5em;
     }
 
+    div.carousel {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-bottom: -112px;
+        
+        &>div {
+            width: 100% !important;
+            margin-left: 0;
+        }
+        &>div.nav-prev {
+            text-align: left;
+            margin-top: 1em;
+            width: 50px !important;
+        }
+        &>div.nav-next {
+            text-align: right;
+            margin-top: 1em;
+            width: 50px !important;   
+        }
+    }
+
     div.carousel-slide-container {
         &.active {
             >a>div.white-border {
+                background: #fff;
+                
                 &.saphire-bkg {
                     border-color: #467dba;
+
+                    span {
+                        background: #467dba;
+                    }
                 }
                 &.jade-bkg {
                     border-color: #6fbe4a;
+
+                    span {
+                        background: #6fbe4a;
+                    }
                 }
                 &.gold-bkg {
                     border-color: #ffbd48;
+
+                    span {
+                        background: #ffbd48;
+                    }
                 }
                 &.amber-bkg {
                     border-color: #f16a22;
+
+                    span {
+                        background: #f16a22;
+                    }
                 }
                 &.amethyst-bkg {
                     border-color: #7b4bb2;
+
+                    span {
+                        background: #7b4bb2;
+                    }
                 }
                 &.ruby-bkg {
                     border-color: #d22027;
+
+                    span {
+                        background: #d22027;
+                    }
                 }
             }
 
@@ -41,7 +88,6 @@
             width: 70px;
             height: 70px;
             margin: 0 auto;
-            transition: border 333ms ease;
         }
         
         li.active p {

@@ -1,12 +1,12 @@
-<div data-ng-controller="SubNavCtrl" class="summary blue-steel tmb-summary">
+<div class="summary blue-steel tmb-summary">
 
-    <div class="container" ng-controller="SubNavSummaryCtrl">
-        <div class="row">
+    <div class="container">
+        <div class="row" ng-controller="SummaryCtrl as summary">
             <div class="three columns">
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Lift Threshold</dt>
-                        <dd>2.4x at 75%</dd>
+                        <dd>{{ summary.LiftTotal | number: 1 }}x at {{ summary.Percentage | number: 0 }}%</dd>
                     </dl>
                 </div>
             </div><!-- End .three.columns -->
@@ -15,9 +15,9 @@
                     <dl>
                         <dt>Matching Companies</dt>
                         <dd>
-                            {{ MatchedTotal | number: 0 }}
+                            {{ summary.MatchedTotal | number: 0 }}
                             <span 
-                                ng-show="refreshing" 
+                                ng-show="summary.refreshing" 
                                 class="pd-spinner fa fa-spinner fa-pulse">
                             </span>
                         </dd>
@@ -28,7 +28,7 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Matching Contacts</dt>
-                        <dd>{{ ContactsTotal | number: 0 }}</dd>
+                        <dd>{{ summary.ContactsTotal | number: 0 }}</dd>
                     </dl>
                     <a href="#" class="view-samples pull-right">Samples</a>
                 </div>
@@ -37,101 +37,52 @@
                 <div class="stats black-summary-list">
                     <dl>
                         <dt>Expected Revenue</dt>
-                        <dd>${{ RevenueTotal | number: 0 }}</dd>
+                        <dd>{{ summary.RevenueTotal | currency }}</dd>
                     </dl>
                 </div>
             </div><!-- End .three.columns -->          
         </div><!-- End .row -->
-        <div class="row">
+
+        <div class="row" ng-controller="CarouselCtrl as carousel">
             <div class="twelve columns">
 
                 <div class="carousel">
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Industry', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border saphire-bkg">
-                                <span class="ico ico-industry"></span>
+                    <div class="nav-prev" ng-if="carousel.pagesize < carousel.links.length">
+                        <a  ng-click="carousel.previous()" 
+                            href="#" class="prev button icon-button white-button" title="Previous">
+                            
+                            <i class="fa fa-angle-left"></i>
+                        </a>
+                    </div>
+                    <div 
+                        ng-repeat="link in carousel.links | startFrom: (carousel.current - 1) * carousel.pagesize | limitTo: carousel.pagesize"
+                        class="carousel-slide-container" 
+                        ui-sref-active="active"
+                    >
+                        <a 
+                            ui-sref="builder.category({AttrKey: '{{ link.name }}', ParentKey: '', ParentValue: ''})"
+                            ng-click="carousel.click($event)"
+                        >
+                            <div class="white-border {{ link.color }}-bkg">
+                                <span class="ico ico-{{ link.ico }}"></span>
                             </div>
-                            <div class="tmb-nav-title">Industries</div>
+                            <div class="tmb-nav-title">{{ link.label }}</div>
                             <div class="tmb-nav-meta">
-                                <span class="badge">5</span> of 123
+                                <span class="badge">{{ link.amount }}</span> of {{ link.total }}
                             </div>
                         </a>
                     </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Locations', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border jade-bkg">
-                                <span class="ico ico-locations"></span>
-                            </div>
-                            <div class="tmb-nav-title">Locations</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">0</span> of 52
-                            </div>
-                        </a>
-                    </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Employees Range', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border gold-bkg">
-                                <span class="ico ico-tmb-user"></span>
-                            </div>
-                            <div class="tmb-nav-title">Employees Range</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">0</span> of 64
-                            </div>
-                        </a>
-                    </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Revenue Range', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border amber-bkg">
-                                <span class="ico ico-tmb-chart"></span>
-                            </div>
-                            <div class="tmb-nav-title">Revenue Range</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">2</span> of 11
-                            </div>
-                        </a>
-                    </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Technology Profile', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border amethyst-bkg">
-                                <span class="ico ico-tech-profile"></span>
-                            </div>
-                            <div class="tmb-nav-title">Technology Profile</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">5</span> of 32
-                            </div>
-                        </a>
-                    </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Web Presence', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border ruby-bkg">
-                                <span class="ico ico-web"></span>
-                            </div>
-                            <div class="tmb-nav-title">Web Presence</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">5</span> of 123
-                            </div>
-                        </a>
-                    </div>
-                    <div class="carousel-slide-container" ui-sref-active="active">
-                        <a ui-sref="builder.category({AttrKey: 'Other', ParentKey: '', ParentValue: ''})">
-                            <div class="white-border saphire-bkg">
-                                <span class="ico ico-chip"></span>
-                            </div>
-                            <div class="tmb-nav-title">Other Attributes</div>
-                            <div class="tmb-nav-meta">
-                                <span class="badge">5</span> of 123
-                            </div>
+                    <div class="nav-next" ng-if="carousel.pagesize < carousel.links.length">
+                        <a  ng-click="carousel.next()" 
+                            href="#" class="next button icon-button white-button" title="Next">
+                            
+                            <i class="fa fa-angle-right"></i>
                         </a>
                     </div>
                 </div>
 
-                <script src="/demo/js/responsive-carousel.js"></script>
-                <script src="/demo/js/responsive-carousel.dynamic-containers.js"></script>
-                <script src="/demo/js/responsive-carousel.autoinit.js"></script>
-
-
-            </div><!-- End .twelve.columns -->
-        </div><!-- End .row -->
-    </div><!-- End .container -->
+            </div>
+        </div>
+    </div>
 
 </div>

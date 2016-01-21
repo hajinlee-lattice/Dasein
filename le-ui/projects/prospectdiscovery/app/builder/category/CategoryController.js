@@ -25,7 +25,13 @@ angular
             };
 
             // only pass through args that have a definite value and in whitelist
-            ['AttrValue','ParentValue','ParentKey','selected','visible'].forEach(function(key) {
+            [
+                'AttrValue',
+                'ParentValue',
+                'ParentKey',
+                'selected',
+                'visible'
+            ].forEach(function(key) {
                 args[key] ? fields[key] = args[key] : null;
             });
 
@@ -38,6 +44,10 @@ angular
         this.getList = function(args) {
             var deferred = $q.defer(),
                 master = this.getMaster(args);
+console.log('xhr',args);
+            if (!args || !args.AttrKey || args.AttrKey == '_OBJECT_') {
+                deferred.reject('<!> Incorrect Parameters for Attributes XHR');
+            }
 
             if (master && master.length > 0) {
                 setTimeout(function() {
@@ -155,10 +165,6 @@ angular
                 vm.ShowSearch = false;
                 vm.FilterChecked = false;
                 vm.TruncateLimit = 32;
-
-                if (!vm.AttrKey) {
-                    return console.log('<!> No stateParams provided');
-                }
 
                 // This might work better in a UI-Router "resolve"
                 AttributesModel
