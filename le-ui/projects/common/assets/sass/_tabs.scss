@@ -1,0 +1,113 @@
+/* 
+Tabs
+==================================================== */
+.tabs {
+  position: relative;   
+  min-height: 410px; /* This part sucks */
+  clear: both;
+  margin: 25px 0;
+}
+.tab {
+  float: left;
+}
+.tab > label {
+  padding: 12px 16px;  
+  margin-left: -1px; 
+  position: relative;
+  left: 1px; 
+  display: inline;
+}
+.tab > [type=radio] {
+  display: none;   
+}
+.content {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  background: white;
+  bottom: 0;
+  padding-top: 20px;
+  border-top: 1px solid #ccc; 
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+}
+[type=radio]:checked ~ label {
+  background: white;
+  color: #498ad4;
+  border-top: 1px solid #ccc; 
+  border-left: 1px solid #ccc; 
+  border-right: 1px solid #ccc; 
+  border-bottom: 1px solid white;
+  z-index: 2;
+}
+[type=radio]:checked ~ label ~ .content {
+  z-index: 1;
+}
+
+
+
+/* 
+Toggle Switch Tabs
+==================================================== */
+
+.toggle-check {
+    & > label:first-of-type {
+        float: left;
+        margin-right: 7px;
+        margin-top: 3px;
+    }
+}
+input.toggle-switch:empty
+{
+    margin-left: -9999px;
+}
+
+input.toggle-switch:empty ~ label
+{
+    position: relative;
+    float: left;
+    line-height: 1.6em;
+    text-indent: 4em;
+    margin: 0.2em 0;
+    cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input.toggle-switch:empty ~ label:before, 
+input.toggle-switch:empty ~ label:after
+{
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: ' ';
+    width: 3.6em;
+    background-color: #d0d0d0;
+    border-radius: 20px;
+    -webkit-transition: all 100ms ease-in;
+  transition: all 100ms ease-in;
+}
+
+input.toggle-switch:empty ~ label:after
+{
+    width: 16px;
+    height: 16px;
+    top: 3px;
+    bottom: 0.1em;
+    margin-left: 3px;
+    background-color: #000;
+    border-radius: 100%;
+}
+
+input.toggle-switch:checked ~ label:after
+{
+    margin-left: 32px;
+}

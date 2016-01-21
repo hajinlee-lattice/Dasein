@@ -1,0 +1,13 @@
+.login-body {
+	padding-top: 20px;
+	@include media(">medium") {
+		padding-top: 5%;
+	}
+	img {
+		width: 100%;
+	}
+}
+.login-content {
+	padding-left: 40px;
+	border-left: $palladium solid 1px;
+}

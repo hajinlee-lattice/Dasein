@@ -1,0 +1,339 @@
+/* 
+Off Canvas Navigation
+==================================================== */
+#outer-wrap {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+#inner-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transition: -webkit-transform 500ms ease;
+  -moz-transition: -moz-transform 500ms ease;
+  -o-transition: -o-transform 500ms ease;
+  transition: transform 500ms ease;
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -ms-backface-visibility: hidden;
+  -o-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.nav-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 22px;
+  @include media('>=xlarge') {
+    display: none;
+  }
+}
+.primary-nav {
+  position: absolute;
+  left: 0;
+  top:0px;
+  bottom:0px;
+  height: 100%;
+  overflow: auto;
+  background: #222831;
+  width: 400px;
+  text-align: center;
+  -webkit-transform: translate3d(-100%, 0, 0);
+  -moz-transform: translate3d(-100%, 0, 0);
+  -ms-transform: translate3d(-100%, 0, 0);
+  -o-transform: translate3d(-100%, 0, 0);
+  transform: translate3d(-100%, 0, 0);
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  -ms-backface-visibility: hidden;
+  -o-backface-visibility: hidden;
+  backface-visibility: hidden;
+  & > * {
+    position: relative;
+    padding: 0;
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70);
+    opacity: 0.7;
+    -webkit-transition: opacity 300ms 100ms, -webkit-transform 500ms ease;
+    -webkit-transition-delay: ease, 0s;
+    -moz-transition: opacity 300ms 100ms ease, -moz-transform 500ms ease;
+    -o-transition: opacity 300ms 100ms ease, -o-transform 500ms ease;
+    transition: opacity 300ms 100ms ease, transform 500ms ease;
+    -webkit-transform: translate3d(400px, 0, 0) scale3d(0.9, 0.9, 0.9);
+    -moz-transform: translate3d(400px, 0, 0) scale3d(0.9, 0.9, 0.9);
+    -ms-transform: translate3d(400px, 0, 0) scale3d(0.9, 0.9, 0.9);
+    -o-transform: translate3d(400px, 0, 0) scale3d(0.9, 0.9, 0.9);
+    transform: translate3d(400px, 0, 0) scale3d(0.9, 0.9, 0.9);
+    -webkit-transform-origin: 50% 0%;
+    -moz-transform-origin: 50% 0%;
+    -ms-transform-origin: 50% 0%;
+    -o-transform-origin: 50% 0%;
+    transform-origin: 50% 0%;
+  }
+}
+.open-nav .primary-nav {
+  left: 0;
+  & > * {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+.open-nav #inner-wrap {
+  -webkit-transform: translate3d(400px, 0, 0) scale3d(1, 1, 1);
+  -moz-transform: translate3d(400px, 0, 0) scale3d(1, 1, 1);
+  -ms-transform: translate3d(400px, 0, 0) scale3d(1, 1, 1);
+  -o-transform: translate3d(400px, 0, 0) scale3d(1, 1, 1);
+  transform: translate3d(400px, 0, 0) scale3d(1, 1, 1);
+}
+
+.open-nav .menu {
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.main-content {
+  height: 100%;
+  overflow: auto;
+  @include media('>large') {
+    right: auto;
+    margin-right: 0;
+  }
+}
+.open-nav .main-content {
+  @include media('>large') {
+    margin-right: 400px;
+    right: 0;
+  }
+}
+
+/* 
+Secondary Nav (Hamburger and Profile Nav)
+==================================================== */
+.secondary-nav {
+  border-bottom: #ddd solid 1px;
+  button {
+    float: left;
+    padding: 18px;
+    &:focus {
+      outline: 0;
+    }
+  }
+  .profile-nav {
+    float: right;
+    & > a {
+      padding: 20px 20px 20px 52px;
+      display: block;
+      color: $dark-gray;
+      background-image: url("../images/ico-user-profile.svg");
+      background-size: 30px 30px;
+      background-repeat: no-repeat; 
+      background-position: 12px 50%;
+    }
+  }
+  button:hover, .profile-nav:hover {
+    background: #efefef;
+  }
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+}
+.profile-nav.dropdown>a.active {
+  background-image: url("../images/ico-user-profile.svg");
+  background-size: 30px 30px;
+  background-repeat: no-repeat; 
+  background-position: 12px 50%;
+}
+
+
+/* 
+Primary Sidebar Nav Menu Styling
+==================================================== */
+.menu-header {
+  padding: 1.75em 0.25em 1em 1.75em;
+  &:after {
+    display: table;
+    content: "";
+    clear: both;
+  }
+  a.button.icon-button {
+    float: left;
+    background: #65696f;
+    padding: 2px 9px;
+  }
+  h3 {
+    float: left;
+    color: #65696f;
+    font-size: 21px;
+    margin-left: 10px;
+  }
+}
+.menu {
+  -webkit-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
+  -moz-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
+  -ms-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
+  -o-transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
+  transform: translate3d(-100%, 0, 0) scale3d(0.9, 0.9, 0.9);
+  text-align: left;
+  a, li > div {
+    display: block;
+    padding: 0.75em 1.25em;
+    font-size: 16px;
+    border-left: transparent solid 5px;
+    color: rgba(255, 255, 255, 0.7);
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+  & > li > a span:first-of-type {
+    font-size: 27px;
+  }
+  li.active > a {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left: #ef6a30 solid 5px;
+    color: rgba(255, 255, 255, 1);
+  }
+  ul a, li > div {
+    padding: 0.75em 1.5em 0.75em 5em;
+  }  
+  .fa, .ico {
+    display: inline-block;
+    margin-right: 12px;
+    color: #fff;
+    &.blue-text {
+      color: $blue-text;
+    }
+  }
+  .ico {
+    width: 22px;
+    height: 22px;
+    &.ico-fingerprint {
+      width: 16px;
+    }
+  }
+  .fa-circle-thin, .fa-check-circle-o {
+    background-color: #222831; 
+  }
+  &.progress-menu {
+    a, li > div {    
+      background-image: url("../images/bkg-nav-full-piping.png");
+      background-repeat: no-repeat;
+      background-position: 31px;
+    }
+    li ul li a {
+      padding: 0 0.5em 0 4em;
+    }
+    &> li:first-of-type > a {
+      background-position: 31px 20px;
+    }
+    &> li:last-child > a {
+      background-position: 31px -320px;
+    }
+    li > div {
+      padding-top: 10px;
+      p, ul {
+        margin-bottom: 10px;
+      }
+    }
+    li:last-child > div {
+      background-image: none;
+    }
+    .ico {
+      height: 20px;
+      &.ico-tmb-user {
+        width: 19px;
+      }
+      &.ico-industry {
+        height: 16px;
+        width: 20px;
+      }
+      &.ico-tmb-chart {
+        width: 16px;
+      }
+    }
+  }
+}
+
+.primary-nav {
+    overflow: hidden;
+    &>div {
+        transition: all 250ms ease;
+        transform-origin: 50% 50%;
+    }
+    &>div.ng-enter {
+        opacity: 0;
+        transform: scale(.5,.5);
+    }
+    &>div.ng-enter-active {
+        opacity: 1;
+        transform: scale(1,1);
+    }
+    &>div.ng-leave {
+        position:absolute;
+        top: 0;
+        opacity: 1;
+        transform: scale(1,1);
+    }
+    &>div.ng-leave-active {
+        opacity: 0;
+        transform: scale(1.333,1.333);
+    }
+    .progress-menu .jade-text {
+        color: #6fbe4a;
+    }
+    .progress-menu .gold-text {
+        color: #ffbd48;
+    }
+    .progress-menu ul li span {
+        width: 1.4em;
+        text-align: center;
+    }
+    .pd-sidebar-accordion-list {
+        max-height: 10em;
+        overflow: auto;
+    }
+}
+
+
+/*
+Link Navigation
+======================================================== */
+.link-nav {
+  display: inline-block;
+  margin-top: 10px;
+  li {
+    display: inline-block;
+    &.divider {
+      padding: 0 10px;
+    }
+    a {
+      color: $jet;
+      &.active {
+        color: $saphire;
+      }
+    } 
+  }
+}
+
+
+
+

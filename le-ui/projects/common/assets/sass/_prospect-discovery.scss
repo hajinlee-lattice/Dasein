@@ -1,0 +1,40 @@
+.prospecting-settings-actions {
+	&:after {
+		display: table;
+		content: "";
+		clear: both;
+	}
+	button.button {
+		width: 48%;
+		float: left;
+		padding: 0.75em 0;
+		&:first-of-type {
+			margin-right: 4%;
+		}
+	}
+}
+
+a.view-samples {
+	margin-top: -45px;
+    padding-top: 25px;
+	color: #fff;
+	background: url("../img/ico-user-card.svg") no-repeat top;
+	font-size: 12px;
+}
+
+.switch-tab {
+	display: none;
+	&.open {
+		display: block;
+	}
+}
+
+
+.tmb-summary {
+	margin-bottom: 120px;
+}
+.tmb-summary .carousel {
+	margin-bottom: -116px;
+    margin-top: 38px;
+    display: inline-block;
+}

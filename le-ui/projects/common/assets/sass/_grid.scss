@@ -1,0 +1,133 @@
+// Grids adapted from CSS SMart Grids http://dryan.github.io/css-smart-grid/
+
+html, body {
+    height: 100%;
+}
+.main-content section {
+    margin-top: 2em;
+    &:last-child {
+        margin-bottom: 3em;
+    }
+}
+
+$gutter:    percentage(20px/940px);
+$one-column:                6.3829787%;
+$columns-break-point:          481px !default;
+$container-max-width:          1340px !default;
+$flexbox-support: 			  true !default;
+
+$column-list:    (2, "two") (3, "three", "one-fourth") (4, "four", "one-third") (5, "five") (6, "six", "one-half") (7, "seven") (8, "eight", "two-thirds") (9, "nine", "three-fourths") (10, "ten") (11, "eleven") (12, "twelve", "full") !default;
+$offset-list:    (1, "one") (2, "two") (3, "three") (4, "four") (5, "five") (6, "six") (7, "seven") (8, "eight") (9, "nine") (10, "ten") (11, "eleven") !default;
+
+@mixin prefixer($property, $value, $prefixes) {
+	@each $prefix in $prefixes {
+		@if $prefix == spec {
+			#{$property}: $value;
+		} @else {
+			-#{$prefix}-#{$property}: $value;			
+		}
+	}
+}
+@mixin flexbox-row() {
+    html.flexbox & {
+        @media (min-width:$columns-break-point) {
+            display:    -moz-flex;
+            display:     -ms-flex; // one day, maybe
+            display:     -ms-flexbox;
+            display: -webkit-flex;
+            display:         flex;
+            @include prefixer(flex, 1 1 auto, webkit moz ms spec);
+            @include prefixer(flex-flow, row nowrap, webkit moz ms spec);
+            @include prefixer(align-items, flex-start, webkit moz ms);
+            flex-align: flex-start;
+            @include prefixer(justify-content, flex-start, webkit moz ms spec);
+        }
+    }
+}
+@mixin container() {
+    max-width: $container-max-width;
+    padding: 0 $gutter;
+    margin: 0 auto;
+}
+@mixin clearfix() {
+    zoom: 1;
+    &:before,
+    &:after {
+        content: "";
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+@mixin column() {
+    float: left;
+    margin: 0 0 0 $gutter;
+    width: $one-column;
+    &:first-child {
+        margin-left: 0;
+    }
+    @if $flexbox-support == true {
+        html.flexbox &  {
+            float: none;
+        }
+    }
+}
+@mixin columns($count:1) {
+    width: ($one-column * $count) + ($gutter * ($count - 1));
+}
+@mixin offset($columns:1) {
+    margin-left: ($one-column * $columns) + ($gutter * ($columns + 1));
+    &:first-child {
+        margin-left: ($one-column * $columns) + ($gutter * $columns);
+    }
+}
+@mixin column-set() {
+    .columns {
+        @include column;
+        @each $i in $column-list {
+            $selectors: ();
+            @for $j from 2 to length($i) + 1 {
+                $selectors: append($selectors, unquote("&.#{nth($i, $j)}"), comma);
+            }
+            #{$selectors} {
+                @include columns(nth($i, 1));
+            }
+        }
+        @each $i in $offset-list {
+            $selectors: ();
+            @for $j from 2 to length($i) + 1 {
+                $selectors: append($selectors, unquote("&.offset-#{nth($i, $j)}"), comma);
+            }
+            #{$selectors} {
+                @include offset(nth($i, 1));
+            }
+        }
+    }
+}
+.container {
+    @include container;
+}
+.content-body {
+    padding: 40px 0;   
+}
+.container,
+.row {
+    @include clearfix;
+}
+@if $flexbox-support == true {
+	.row {
+		@include flexbox-row;
+	}
+}
+@media (min-width:$columns-break-point) {
+    @include column-set;
+}
+
+// IE support
+html.oldie,
+html.lt-ie9,
+html.no-mq {
+    @include column-set;
+}
+

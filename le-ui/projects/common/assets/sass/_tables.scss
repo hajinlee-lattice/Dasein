@@ -1,0 +1,205 @@
+.table-header {
+    padding: 3em 0 1em;
+    h2 {
+        font-size: 110%;
+        margin-bottom: 0.25em;
+        @include media(">small") {
+            font-size: 120%;
+        }
+        @include media(">medium") {
+            font-size: 150%;
+        }
+        @include media(">large") {
+            font-size: 180%;
+        }
+    }
+    .meta {
+        padding-top: 0.8em;   
+    }
+}
+
+
+table {    
+    background: #fff;
+    color: $dark-gray;
+    margin: 0 0 18px;
+    border-collapse: collapse;
+    border-spacing: 0;
+    vertical-align: baseline;
+    width: 100%;
+    tbody tr {
+        border-bottom: $palladium solid 1px;
+        &:nth-child(odd) {
+            background: #f9f9f9;
+        }
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+    td, th {
+        text-align: left; 
+    }
+    th {
+        padding: 4px 10px; 
+        font-weight: bold;
+        border-bottom: #d0d2d3 solid 3px;
+    }
+    td {
+        padding: 7px 10px;
+    }
+    .fa-download {
+        color: red;
+        margin-right: 5px;
+        font-size: 16px;
+    }
+}
+
+/* Mobile */
+@include media("<medium") {
+	
+	table.responsive { margin-bottom: 0; }
+	
+	.pinned { position: absolute; left: 0; top: 0; background: #fff; width: 35%; overflow: hidden; overflow-x: scroll; border-right: 1px solid #ccc; border-left: 1px solid #ccc; }
+	.pinned table { border-right: none; border-left: none; width: 100%; }
+	.pinned table th, .pinned table td { white-space: nowrap; }
+	.pinned td:last-child { border-bottom: 0; }
+	
+	div.table-wrapper { position: relative; margin-bottom: 20px; overflow: hidden; border-right: 1px solid #ccc; }
+	div.table-wrapper div.scrollable table { margin-left: 35%; }
+	div.table-wrapper div.scrollable { overflow: scroll; overflow-y: hidden; }	
+	
+	table.responsive td, table.responsive th { position: relative; white-space: nowrap; overflow: hidden; }
+	table.responsive th:first-child, table.responsive td:first-child, table.responsive td:first-child, table.responsive.pinned td { display: none; }
+	
+}
+
+
+
+
+
+
+/* Imported from StatusStyles.scss 
+======================================================= */
+.jobs-header {
+    padding-top: 25px;
+    padding-bottom: 10px;
+}
+.jobs-header span {
+    text-align: right;
+}
+.panel .panel-heading.custom-heading {
+    padding: 4px 10px; 
+    font-weight: bold;
+    background: #fff;
+    color: $dark-gray;
+    border-bottom: #d0d2d3 solid 3px;
+}
+
+.job-td-row {   
+    border-bottom: $palladium solid 1px;
+    &:nth-child(odd) {
+        background: #f9f9f9;
+    }
+    &:last-child {
+        border-bottom: none;
+    } 
+    .fa-angle-double-up, .fa-angle-double-down {
+        color: #000;
+    }
+}
+.completion-times {
+    color: #868e92;
+    font-size: 12px;
+    margin-bottom: 10px;
+    span {
+        display: inline-block;
+        width: 196px;
+    }
+}
+
+.breadcrumb {
+    /*centering*/
+    display: inline-block;
+    overflow: hidden;
+}
+
+.breadcrumb a {
+    color: black !important;
+    text-decoration: none;
+    outline: none;
+    display: block;
+    float: left;
+    font-size: 15px;
+    line-height: 60px;
+    padding: 0 50px 0 55px;
+    margin-top: 10px;
+    position: relative;
+}
+/*since the first link does not have a triangle before it we can reduce the left padding to make it look consistent with other links*/
+.breadcrumb a:first-child {
+    padding-left: 35px;
+}
+.breadcrumb a:first-child:before {
+    left: 14px;
+}
+
+.jobs-table-content {
+    background: white;
+    font-size: 125%;
+    
+    div.clearfix {
+        padding: 0.5em 0.5em 0.5em 0em;
+    }
+}
+
+/*adding the arrows for the breadcrumbs using rotated pseudo elements*/
+.breadcrumb a:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -30px; /*half of square's length*/
+    /*same dimension as the line-height of .breadcrumb a */
+    width: 60px; 
+    height: 60px;
+    /*as you see the rotated square takes a larger height. which makes it tough to position it properly. So we are going to scale it down so that the diagonals become equal to the line-height of the link. We scale it to 70.7% because if square's: 
+    length = 1; diagonal = (1^2 + 1^2)^0.5 = 1.414 (pythagoras theorem)
+    if diagonal required = 1; length = 1/1.414 = 0.707*/
+    transform: scale(0.707) rotate(45deg);
+    /*we need to prevent the arrows from getting buried under the next link*/
+    z-index: 1;
+    background: white;
+    /*stylish arrow design using box shadow*/
+    box-shadow: 
+        5px -5px 0 5px #ddd;
+    border-radius: 0 0px 0 50px;
+}
+/*we dont need an arrow after the last link*/
+.breadcrumb a:last-child:after {
+    content: none;
+}
+
+.breadcrumb.flat {
+    background: #ddd;
+    padding: 0px 0px;
+    border-radius: 0px;
+}
+.flat a, .flat a:after {
+    background: white;
+    color: black;
+    transition: all 0.5s;
+}
+.flat a.state-finished-true, .flat a.state-finished-true:after {
+    background: rgb(113, 188, 81);
+}
+.flat a .icon {
+    position: absolute;
+    right: 0;
+    z-index: 99;
+    top: 0;
+}
+.flat a span:last-child, .flat a span:nth-last-child(2) {
+    right: 15px;
+}
+.expanded-true {
+    background: #e7e7e7;
+}

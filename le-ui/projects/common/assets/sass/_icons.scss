@@ -1,0 +1,197 @@
+/*
+Icons
+======================================================== */
+.ico {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-position: center;
+	&.ico-small {
+		width: 12px;
+	}
+	&.ico-search {
+		background-color: $jet;
+		-webkit-mask:  url("../images/ico-search.svg");
+		mask:  url("../images/ico-search.svg");
+	}
+	&.ico-filter {
+		background-color: $jet;
+		-webkit-mask:  url("../images/ico-filter.svg");
+		mask:  url("../images/ico-filter.svg");
+	}
+	&.ico-sort {
+		background-color: $jet;
+		-webkit-mask:  url("../images/ico-sort.svg");
+		mask:  url("../images/ico-sort.svg");
+	}
+	&.ico-grid {
+		background-color: $jet;
+		-webkit-mask:  url("../images/ico-grid.svg");
+		mask:  url("../images/ico-grid.svg");
+	}
+	&.ico-list {
+		background-color: $jet;
+		-webkit-mask:  url("../images/ico-list.svg");
+		mask:  url("../images/ico-list.svg");
+	}
+	&.ico-fingerprint {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-fingerprint.svg");
+		mask:  url("../images/ico-fingerprint.svg");
+	}
+	&.ico-bullseye {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-bullseye.svg");
+		mask:  url("../images/ico-bullseye.svg");
+	}
+	&.ico-cog {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-cog.svg");
+		mask:  url("../images/ico-cog.svg");
+	}
+	&.ico-step-open {
+		background-image: url("../images/ico-step-open.svg");
+	}
+	&.ico-step-current {
+		background-image: url("../images/ico-step-current.svg");
+	}
+	&.ico-step-checked {
+		background-image: url("../images/ico-step-checked.svg");
+	}
+	&.ico-user {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-user.svg");
+		mask:  url("../images/ico-user.svg");
+	}
+	&.ico-user-card {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-user-card.svg");
+		mask:  url("../images/ico-user-card.svg");
+	}
+	&.ico-industry {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-industry.svg");
+		mask:  url("../images/ico-industry.svg");
+	}
+	&.ico-locations {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-locations.svg");
+		mask:  url("../images/ico-locations.svg");
+	}
+	&.ico-tmb-user {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-employee-range.svg");
+		mask:  url("../images/ico-user.svg");
+	}
+	&.ico-tmb-chart {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-revenue-range.svg");
+		mask:  url("../images/ico-chart.svg");
+	}
+	&.ico-tech-profile {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-web.svg");
+		mask:  url("../images/ico-web.svg");
+	}
+	&.ico-web {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-web.svg");
+		mask:  url("../images/ico-web.svg");
+	}
+	&.ico-chip {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-chip.svg");
+		mask:  url("../images/ico-chip.svg");
+	}
+	&.ico-white {
+		background-color: $pearl-white;
+	}
+	&.ico-jet {
+		background-color: $jet;
+	}
+	&.ico-saphire {
+		background-color: $saphire;
+	}
+	&.ico-ruby {
+		background-color: $ruby;
+	}
+	&.ico-amber {
+		background-color: $amber;
+	}
+	&.ico-gold {
+		background-color: $gold;
+	}
+	&.ico-jade {
+		background-color: $jade;
+	}
+	&.ico-amethyst {
+		background-color: $amethyst;
+	}
+}
+.no-cssmask {
+	.ico {
+		background-color: inherit;
+	}
+	.ico-search {
+		background-image:  url("../images/ico-search.svg");
+	}
+	.ico-filter {
+		background-image:  url("../images/ico-filter.svg");
+	}
+	.ico-sort {
+		background-image:  url("../images/ico-sort.svg");
+	}
+	.ico-grid {
+		background-image:  url("../images/ico-grid.svg");
+	}
+	.ico-list {
+		background-image:  url("../images/ico-list.svg");
+	}
+	.ico-fingerprint {
+		background-image:  url("../images/ico-fingerprint.svg");
+	}
+	.ico-bullseye {
+		background-image:  url("../images/ico-bullseye.svg");
+	}
+	.ico-cog {
+		background-image:  url("../images/ico-cog.svg");
+	}
+	.ico-step-open {
+		background-image: url("../images/ico-step-open.svg");
+	}
+	.ico-step-current {
+		background-image: url("../images/ico-step-current.svg");
+	}
+	.ico-step-checked {
+		background-image: url("../images/ico-step-checked.svg");
+	}
+	.ico-user {
+		background-image:  url("../images/ico-user.svg");
+	}
+	.ico-user-card {
+		background-image:  url("../images/ico-user-card.svg");
+	}
+	.ico-industry {
+		background-image:  url("../images/ico-industry.svg");
+	}
+	.ico-locations {
+		background-image:  url("../images/ico-locations.svg");
+	}
+	.ico-tmb-user {
+		background-image:  url("../images/ico-employee-range.svg");
+	}
+	.ico-tmb-chart {
+		background-image:  url("../images/ico-revenue-range.svg");
+	}
+	.ico-tech-profile {
+		background-image:  url("../images/ico-web.svg");
+	}
+	.ico-web {
+		background-image:  url("../images/ico-web.svg");
+	}
+	.ico-chip {
+		background-image:  url("../images/ico-chip.svg");
+	}	
+}
