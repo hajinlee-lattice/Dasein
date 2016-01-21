@@ -22,6 +22,21 @@ class LP_020200_DL_BulkDiagnostic(StepBase):
     lgm = appseq.getLoadGroupMgr()
     if not lgm.hasLoadGroup('Diagnostic_PushToDestination') and not lgm.hasLoadGroup('Diagnostic_LoadLeads'):
       return Applicability.cannotApplyPass
+
+    type = appseq.getText('template_type')
+    scoreField = appseq.getText('score_field')
+    scoreDateField = appseq.getText('score_date_field')
+    sfdcLeadScoreField = appseq.getText('sfdc_lead_score_field')
+    sfdcContactScoreField = appseq.getText('sfdc_contact_score_field')
+    sfdcLeadScoreDateField = appseq.getText('sfdc_lead_score_date_field')
+    sfdcContactScoreDateField = appseq.getText('sfdc_contact_score_date_field')
+
+    if type in ('ELQ', 'MKTO'):
+      if not scoreField or not scoreDateField:
+        return Applicability.cannotApplyPass
+    elif type == 'SFDC':
+      if not ( sfdcLeadScoreField and sfdcContactScoreField and sfdcLeadScoreDateField and sfdcContactScoreDateField):
+        return Applicability.cannotApplyPass
     return Applicability.canApply
 
   def apply(self, appseq):

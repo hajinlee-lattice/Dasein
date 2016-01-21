@@ -127,10 +127,9 @@ class LPCheckVersion( StepBase ):
         s = re.search('queryColumnName=\"C_Lattice_Predictive_Score1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
 
     if not s:
-      raise ValueError( 'Get the Score Field failed' )
+      print ( 'Get the Score Field failed' )
+      return s
     return s.group(1)
-
-
 
   def parseScoreDateField(self, str, type, version):
     if type == 'MKTO':
@@ -143,7 +142,8 @@ class LPCheckVersion( StepBase ):
       s = re.search('queryColumnName=\"C_Lattice_LastScoreDate1\" fsColumnName=\"(.*?)\"', self.getSFDCContactFromTargetQuery(str))
 
     if not s:
-      raise ValueError( 'Get the ScoreDate Field failed' )
+      print( 'Get the ScoreDate Field failed' )
+      return s
     return s.group(1)
 
 
