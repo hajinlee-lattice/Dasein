@@ -1,8 +1,11 @@
 package com.latticeengines.propdata.api.testframework;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 
 public abstract class PropDataApiFunctionalTestNGBase extends PropDataApiAbstractTestNGBase {
+	
+	protected RestTemplate restTemplate = new RestTemplate();
 
     @Value("${propdata.api.functional.hostport}")
     private String hostPort;

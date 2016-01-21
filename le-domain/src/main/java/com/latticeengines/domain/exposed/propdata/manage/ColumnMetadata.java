@@ -210,4 +210,21 @@ public class ColumnMetadata {
         this.tags = StringUtils.join(tokens, ",");
     }
 
+public ColumnMetadata() {
+    	
+    }
+
+    public ColumnMetadata(ExternalColumn extenalColumn) {
+    	this.setColumnName(extenalColumn.getDefaultColumnName());
+    	this.setDescription(extenalColumn.getDescription());
+    	this.setDataType(extenalColumn.getDataType());
+    	this.setDisplayName(extenalColumn.getDisplayName());
+    	this.setCategory(extenalColumn.getCategory());
+		this.setStatisticalType(extenalColumn.getStatisticalType());
+		this.setFundamentalType(extenalColumn.getFundamentalType());
+		this.setApprovedUsageList(extenalColumn.getApprovedUsageList());
+		this.setTagList(extenalColumn.getTagList());
+		this.setDiscretizationStrategy(extenalColumn.getDiscretizationStrategy());
+		this.setMatchDestination(extenalColumn.getColumnMappings().get(0).getSourceName());		// To be modified in ExternalColumnResource
+    }
 }

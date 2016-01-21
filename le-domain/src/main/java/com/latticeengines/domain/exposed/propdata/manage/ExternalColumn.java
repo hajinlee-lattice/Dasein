@@ -46,6 +46,9 @@ public class ExternalColumn implements HasPid, Serializable {
     @Id
     @Column(name = "ExternalColumnID", nullable = false)
     private String externalColumnID;
+    
+    @Column(name = "DefaultColumnName", nullable = false)
+    private String defaultColumnName;
 
     @Column(name = "Description", nullable = false)
     private String description;
@@ -102,6 +105,16 @@ public class ExternalColumn implements HasPid, Serializable {
     public void setExternalColumnID(String externalColumnID) {
         this.externalColumnID = externalColumnID;
     }
+    
+    @JsonProperty("DefaultColumnName")
+    public String getDefaultColumnName() {
+		return defaultColumnName;
+	}
+
+    @JsonProperty("DefaultColumnName")
+	public void setDefaultColumnName(String defaultColumnName) {
+		this.defaultColumnName = defaultColumnName;
+	}
 
     @JsonProperty("Description")
     public String getDescription() {
