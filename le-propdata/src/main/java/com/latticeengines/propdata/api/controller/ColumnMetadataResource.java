@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.network.exposed.propdata.ExternalColumnInterface;
+import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.propdata.core.service.ExternalColumnService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.source.Source;
@@ -21,7 +21,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "columnmetadata", description = "REST resource for column metadata")
 @RestController
 @RequestMapping("/metadata")
-public class ExternalColumnResource implements ExternalColumnInterface{
+public class ColumnMetadataResource implements ColumnMetadataInterface{
 	
 	@Autowired
 	private ExternalColumnService externalColumnService;

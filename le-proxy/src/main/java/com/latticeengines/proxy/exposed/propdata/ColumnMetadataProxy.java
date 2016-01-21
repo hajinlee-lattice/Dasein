@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
-import com.latticeengines.network.exposed.propdata.ExternalColumnInterface;
+import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component
-public class ExternalColumnProxy extends BaseRestApiProxy implements ExternalColumnInterface{
+public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface{
 	
-	public ExternalColumnProxy() {
+	public ColumnMetadataProxy() {
 		super("propdata/metadata");
 	}
 	

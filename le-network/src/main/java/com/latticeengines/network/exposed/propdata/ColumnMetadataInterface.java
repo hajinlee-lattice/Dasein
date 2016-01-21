@@ -4,6 +4,6 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 
-public interface ExternalColumnInterface {
+public interface ColumnMetadataInterface {
 	List<ColumnMetadata> getLeadEnrichment();
 }
