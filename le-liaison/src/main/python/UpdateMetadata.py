@@ -7,6 +7,7 @@ from liaison import *
 def UpdateMetadata( tenant, url, verify ):
 
     query_name = 'Q_PLS_Modeling'
+    query_metadata_name = 'Q_Metadata_Custom'
 
     conn_mgr = ConnectionMgrFactory.Create( 'visiDB', tenant_name=tenant, dataloader_url=url, verify=verify )
     print 'Initializing...',
@@ -18,7 +19,7 @@ def UpdateMetadata( tenant, url, verify ):
 
     while( cmd.lower() != 'exit' ):
         print ''
-        cmd = raw_input('(list, get, set, refresh, commit, exit): ')
+        cmd = raw_input('(list, get, set, batchset, refresh, commit, exit): ')
 
         if cmd.lower() == 'list':
             PrintModelColumns( modelcols )
@@ -33,12 +34,30 @@ def UpdateMetadata( tenant, url, verify ):
             print ''
             updates.append( (colname,type,value) )
 
+        elif cmd.lower() == 'batchset':
+            filename = raw_input('CSV File name (with column headers "ColumnName,MetadataType,MetadataValue"): ')
+            with open( filename ) as mdfile:
+                firstLine = True
+                for line in mdfile:
+                    cols = line.strip().split(',')
+                    if len(cols) != 3:
+                        print 'CSV file does not have three columns'
+                        break
+                    if firstLine:
+                        if (cols[0],cols[1],cols[2]) != ('ColumnName','MetadataType','MetadataValue'):
+                            print 'CSV file does not have the correct column headers'
+                            break
+                        firstLine = False
+                    else:
+                        updates.append( (cols[0],cols[1],cols[2]) )
+
         elif cmd.lower() == 'refresh':
             modelcols = RefreshCache( conn_mgr, query_name )
 
         elif cmd.lower() == 'commit':
             print 'Committing...',
             q = conn_mgr.getQuery( query_name )
+            q_md = conn_mgr.getQuery( query_metadata_name )
             for (colname,type,value) in updates:
                 if colname not in q.getColumnNames():
                     print ''
@@ -47,7 +66,9 @@ def UpdateMetadata( tenant, url, verify ):
                 qc = q.getColumn( colname )
                 qc.setMetadata( type, value )
                 q.updateColumn( qc )
+                q_md.updateColumn( qc )
             conn_mgr.setQuery( q )
+            conn_mgr.setQuery( q_md )
             print 'Done'
             updates = []
             modelcols = RefreshCache( conn_mgr, query_name )

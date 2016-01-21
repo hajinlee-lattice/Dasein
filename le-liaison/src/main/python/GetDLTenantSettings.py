@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 #
-# $LastChangedBy: YeTian $
-# $LastChangedDate: 2016-01-18 01:30:33 +0800 (Mon, 18 Jan 2016) $
-# $Rev: 72119 $
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
 
 import os,sys, datetime, time, requests, re, csv, operator
 from liaison import *
