@@ -129,6 +129,13 @@ public class PropDataAdminTool {
     }
 
     private static void addRefreshArgs(Subparser parser) {
+        parser.addArgument("-s", "--source")
+                .dest(NS_SOURCE)
+                .required(true)
+                .type(String.class)
+                .choices(PropDataDerivedSource.allNames())
+                .help("source to refresh");
+
         parser.addArgument("-pd", "--pivot-date")
                 .dest(NS_PIVOT_DATE)
                 .required(false)
@@ -266,7 +273,7 @@ public class PropDataAdminTool {
 
     private void executeRefreshCommand() {
         ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
-        RefreshService refreshService = (RefreshService) ac.getBean(sourceToBeArchived.getServiceBean());
+        RefreshService refreshService = (RefreshService) ac.getBean(sourceToBeRefreshed.getServiceBean());
 
         System.out.println("\n\n========================================");
         System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
@@ -348,7 +355,7 @@ public class PropDataAdminTool {
     }
 
     private void executeRefresh(RefreshService refreshService) {
-        System.out.println("Start refreshing " + sourceToBeArchived.getName() + " ... ");
+        System.out.println("Start refreshing " + sourceToBeRefreshed.getName() + " ... ");
         long startTime = System.currentTimeMillis();
         try {
             RefreshProgress progress = refreshService.startNewProgress(pivotDate, baseVersions, JOB_SUBMITTER);

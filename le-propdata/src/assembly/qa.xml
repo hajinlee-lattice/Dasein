@@ -22,7 +22,7 @@
             <filtered>true</filtered>
         </file>
         <file>
-            <source>src/main/script/env/qacluster/archive.sh</source>
+            <source>src/main/script/env/qacluster/propdata.sh</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
         </file>
