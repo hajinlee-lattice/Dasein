@@ -13,7 +13,7 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -23,7 +23,7 @@ public abstract class AbstractRefreshService
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
 
     @Override
-    public abstract ServingSource getSource();
+    public abstract DerivedSource getSource();
 
     abstract void executeDataFlow(RefreshProgress progress);
 

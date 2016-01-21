@@ -3,12 +3,12 @@ package com.latticeengines.propdata.core.entitymgr;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 
 public interface SourceColumnEntityMgr {
 
-    List<SourceColumn> getSourceColumns(ServingSource source);
+    List<SourceColumn> getSourceColumns(DerivedSource source);
 
-    String[] generateCreateTableSqlStatements(ServingSource source, String tableName);
+    String[] generateCreateTableSqlStatements(DerivedSource source, String tableName);
 
 }

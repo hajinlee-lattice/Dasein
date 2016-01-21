@@ -24,7 +24,7 @@ import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.core.source.RawSource;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component
@@ -43,7 +43,7 @@ public class PropDataScheduler {
     List<RawSource> rawSourceList;
 
     @Autowired
-    List<ServingSource> servingSourceList;
+    List<DerivedSource> derivedSourceList;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -63,7 +63,7 @@ public class PropDataScheduler {
             }
         }
 
-        for (ServingSource source: servingSourceList) {
+        for (DerivedSource source: derivedSourceList) {
             try {
                 registerRefreshJob(source);
             } catch (Exception e) {
@@ -87,7 +87,7 @@ public class PropDataScheduler {
         scheduler.scheduleJob(job, cronTriggerForSource(source));
     }
 
-    private void registerRefreshJob(ServingSource source) throws SchedulerException {
+    private void registerRefreshJob(DerivedSource source) throws SchedulerException {
         String beanName = source.getRefreshServiceBean();
         RefreshService service = (RefreshService) applicationContext.getBean(beanName);
         JobDetail job = JobBuilder.newJob(RefreshScheduler.class)

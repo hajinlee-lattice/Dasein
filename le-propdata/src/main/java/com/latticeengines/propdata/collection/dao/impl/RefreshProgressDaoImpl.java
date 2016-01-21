@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.dao.RefreshProgressDao;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 
 @Component("refreshProgressDao")
 public class RefreshProgressDaoImpl extends ProgressDaoImplBase<RefreshProgress>
@@ -21,7 +21,7 @@ public class RefreshProgressDaoImpl extends ProgressDaoImplBase<RefreshProgress>
 
     @SuppressWarnings("unchecked")
     @Override
-    public RefreshProgress findByBaseSourceVersion(ServingSource source, String baseSourceVersion) {
+    public RefreshProgress findByBaseSourceVersion(DerivedSource source, String baseSourceVersion) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(

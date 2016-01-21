@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.core.source;
 
-public interface ServingSource extends Source {
+public interface DerivedSource extends Source {
 
     Source[] getBaseSources();
 }

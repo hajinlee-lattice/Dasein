@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoWithAssignedSessionFactoryImpl;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.core.dao.SourceColumnDao;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 
 @Component
 public class SourceColumnDaoImpl
@@ -22,7 +22,7 @@ public class SourceColumnDaoImpl
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<SourceColumn> getColumnsOfSource(ServingSource source) {
+    public List<SourceColumn> getColumnsOfSource(DerivedSource source) {
         String sourceName = source.getSourceName();
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format("from %s where SourceName = :sourceName order by SourceColumnID",

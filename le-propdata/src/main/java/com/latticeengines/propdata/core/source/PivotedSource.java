@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.core.source;
 
 
-public interface PivotedSource extends ServingSource {
+public interface PivotedSource extends DerivedSource {
 
 }

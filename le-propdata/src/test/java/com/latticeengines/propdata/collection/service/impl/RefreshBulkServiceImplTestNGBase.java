@@ -15,20 +15,20 @@ import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.BulkSource;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;
-    ServingSource source;
+    DerivedSource source;
     BulkSource baseSource;
     Collection<RefreshProgress> progresses = new HashSet<>();
 
     String baseSourceVersion;
     abstract RefreshService getRefreshService();
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
-    abstract ServingSource getSource();
+    abstract DerivedSource getSource();
     abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
     @BeforeMethod(groups = "functional.source")

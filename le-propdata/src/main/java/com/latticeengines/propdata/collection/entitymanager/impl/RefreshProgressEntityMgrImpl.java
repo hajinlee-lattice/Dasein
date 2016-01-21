@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.dao.RefreshProgressDao;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 
 @Component("refreshProgressEntityMgr")
 public class RefreshProgressEntityMgrImpl
@@ -30,7 +30,7 @@ public class RefreshProgressEntityMgrImpl
 
     @Override
     @Transactional(value = "propDataManage")
-    public RefreshProgress insertNewProgress(ServingSource source, Date pivotDate, String creator) {
+    public RefreshProgress insertNewProgress(DerivedSource source, Date pivotDate, String creator) {
         try {
             RefreshProgress newProgress = RefreshProgress.constructByDate(source.getSourceName(), pivotDate);
             newProgress.setCreatedBy(creator);
@@ -43,7 +43,7 @@ public class RefreshProgressEntityMgrImpl
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public RefreshProgress findProgressByBaseVersion(ServingSource source, String baseVersion) {
+    public RefreshProgress findProgressByBaseVersion(DerivedSource source, String baseVersion) {
         return progressDao.findByBaseSourceVersion(source, baseVersion);
     }
 

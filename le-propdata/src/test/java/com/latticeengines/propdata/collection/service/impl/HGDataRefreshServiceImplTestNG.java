@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.impl.HGData;
 
 @Component
@@ -32,7 +32,7 @@ public class HGDataRefreshServiceImplTestNG extends RefreshBulkServiceImplTestNG
     RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
 
     @Override
-    ServingSource getSource() { return source; }
+    DerivedSource getSource() { return source; }
 
     @Override
     BulkArchiveServiceImplTestNGBase getBaseSourceTestBean() {

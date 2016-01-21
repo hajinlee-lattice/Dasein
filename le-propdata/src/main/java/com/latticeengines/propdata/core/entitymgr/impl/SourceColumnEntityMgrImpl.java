@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 import com.latticeengines.propdata.core.dao.SourceColumnDao;
 import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 
 @Component("sourceColumnEntityMgr")
 public class SourceColumnEntityMgrImpl implements SourceColumnEntityMgr {
@@ -24,13 +24,13 @@ public class SourceColumnEntityMgrImpl implements SourceColumnEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<SourceColumn> getSourceColumns(ServingSource source) {
+    public List<SourceColumn> getSourceColumns(DerivedSource source) {
         return sourceColumnDao.getColumnsOfSource(source);
     }
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public String[] generateCreateTableSqlStatements(ServingSource source, String tableName) {
+    public String[] generateCreateTableSqlStatements(DerivedSource source, String tableName) {
         List<SourceColumn> columns = sourceColumnDao.getColumnsOfSource(source);
         List<SourceColumn> groupByColumns = filterColumnsByCalculation(columns, Calculation.GROUPBY, true);
         List<String> statements = new ArrayList<>();

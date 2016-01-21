@@ -26,7 +26,7 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.core.source.RawSource;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("progressOrchestrator")
@@ -46,7 +46,7 @@ public class ProgressOrchestrator {
 
     private Log log = LogFactory.getLog(this.getClass());
     private Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
-    private Map<ServingSource, RefreshService> refreshServiceMap = new HashMap<>();
+    private Map<DerivedSource, RefreshService> refreshServiceMap = new HashMap<>();
     private static final int jobExpirationHours = 48; // expire a job after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
     private Map<String, RefreshJobExecutor> executorMap = new HashMap<>();
@@ -61,8 +61,8 @@ public class ProgressOrchestrator {
                     archiveServiceMap.put((RawSource) source, (ArchiveService) service);
                     executorMap.put(source.getSourceName(),
                             new ArchiveExecutor((ArchiveService) service));
-                } else if (source instanceof ServingSource) {
-                    refreshServiceMap.put((ServingSource) source, (RefreshService) service);
+                } else if (source instanceof DerivedSource) {
+                    refreshServiceMap.put((DerivedSource) source, (RefreshService) service);
                     executorMap.put(source.getSourceName(),
                             new RefreshExecutor((RefreshService) service));
                 }
@@ -84,7 +84,7 @@ public class ProgressOrchestrator {
             }
         }
 
-        for (ServingSource source: refreshServiceMap.keySet()) {
+        for (DerivedSource source: refreshServiceMap.keySet()) {
             try {
                 if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
                     submitProgress(findRefreshProgressToProceed(source));
@@ -116,7 +116,7 @@ public class ProgressOrchestrator {
     }
 
     @SuppressWarnings("unchecked")
-    RefreshProgress findRefreshProgressToProceed(ServingSource source) {
+    RefreshProgress findRefreshProgressToProceed(DerivedSource source) {
         RefreshService refreshService = refreshServiceMap.get(source);
         return (RefreshProgress) findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) refreshService);
     }
@@ -156,7 +156,7 @@ public class ProgressOrchestrator {
     }
 
     void setServiceMaps(Map<RawSource, ArchiveService> archiveServiceMap,
-                        Map<ServingSource, RefreshService> pivotServiceMap) {
+                        Map<DerivedSource, RefreshService> pivotServiceMap) {
         this.archiveServiceMap = archiveServiceMap;
         this.refreshServiceMap = pivotServiceMap;
     }

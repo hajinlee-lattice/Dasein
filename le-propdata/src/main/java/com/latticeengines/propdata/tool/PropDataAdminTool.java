@@ -12,12 +12,14 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
+import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
@@ -54,15 +56,17 @@ public class PropDataAdminTool {
     private static final Pattern datePattern = Pattern.compile("(19|20)\\d{2}-(0\\d|1[012])-([012]\\d|3[01])");
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("archive");
+    private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("propdata");
 
     private Command command;
     private PropDataRawSource sourceToBeArchived;
+    private PropDataDerivedSource sourceToBeRefreshed;
 
     private DateRange fullDateRange;
     private List<DateRange> periods;
 
     private Date pivotDate;
+    private String baseVersions;
 
     static {
         parser.description("PropData Admin Tool");
@@ -135,7 +139,7 @@ public class PropDataAdminTool {
                 .dest(NS_PIVOT_VERSION)
                 .required(false)
                 .type(String.class)
-                .help("the version of the base source to be pivoted");
+                .help("the version of the base sources to be pivoted, separated by | if multiple base sources");
     }
 
     public PropDataAdminTool(){ }
@@ -150,6 +154,8 @@ public class PropDataAdminTool {
             case ARCHIVE:
                 validateAndTransformArchiveArgs(ns);
                 break;
+            case REFRESH:
+                validateAndTransformRefreshArgs(ns);
             default:
         }
 
@@ -173,6 +179,19 @@ public class PropDataAdminTool {
                 periods = fullDateRange.splitByNumOfPeriods(num);
             }
         }
+    }
+
+    private void validateAndTransformRefreshArgs(Namespace ns) {
+        sourceToBeRefreshed = PropDataDerivedSource.fromName(ns.getString(NS_SOURCE));
+
+        String pDate = ns.getString(NS_PIVOT_DATE);
+        if (StringUtils.isEmpty(pDate)) {
+            pivotDate = new Date();
+        } else {
+            pivotDate = toStartOfTheDay(parseDateInput(pDate));
+        }
+
+        baseVersions = ns.getString(NS_PIVOT_VERSION);
     }
 
     private Date parseDateInput(String input) {
@@ -246,12 +265,16 @@ public class PropDataAdminTool {
     }
 
     private void executeRefreshCommand() {
-//        System.out.println("\n\n========================================");
-//        System.out.println("Pivoting Collection Source: " + source.getName());
-//        System.out.println("========================================\n");
-//
-//        System.out.println("Source to pivot: " + source.getName());
-//        archiveJobService.pivotData(pivotDate, hdfsSourceEntityMgr.getCurrentVersion(source.getCollectionSource()));
+        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
+        RefreshService refreshService = (RefreshService) ac.getBean(sourceToBeArchived.getServiceBean());
+
+        System.out.println("\n\n========================================");
+        System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
+        System.out.println("========================================\n");
+
+        executeRefresh(refreshService);
+
+        ac.close();
     }
 
     private void executeArchiveCommand(Namespace ns) {
@@ -324,6 +347,20 @@ public class PropDataAdminTool {
         }
     }
 
+    private void executeRefresh(RefreshService refreshService) {
+        System.out.println("Start refreshing " + sourceToBeArchived.getName() + " ... ");
+        long startTime = System.currentTimeMillis();
+        try {
+            RefreshProgress progress = refreshService.startNewProgress(pivotDate, baseVersions, JOB_SUBMITTER);
+            progress = refreshService.transform(progress);
+            progress = refreshService.exportToDB(progress);
+            refreshService.finish(progress);
+            System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
+        } catch (Exception e) {
+            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime));
+        }
+    }
+
     private void promptContinue() {
         // prompt for continue
         while (true) {
@@ -375,6 +412,44 @@ public class PropDataAdminTool {
         }
 
         static PropDataRawSource fromName(String name) {
+            return nameMap.get(name);
+        }
+
+    }
+
+    enum PropDataDerivedSource {
+        FEATURE("FeatureMostRecent", "featureRefreshService"),
+        FEATURE_PIVOTED("FeaturePivoted", "featurePivotService"),
+        BUILTWITH("BuiltWithMostRecent", "builtWithRefreshService"),
+        BUILTWITH_PIVOTED("BuiltWithPivoted", "builtWithPivotService");
+
+        private static Map<String, PropDataDerivedSource> nameMap;
+
+        private final String name;
+        private final String serviceBean;
+
+        PropDataDerivedSource(String name, String refreshBean) {
+            this.name = name;
+            this.serviceBean = refreshBean;
+        }
+
+        String getName() { return this.name; }
+        String getServiceBean() { return this.serviceBean; }
+
+        static {
+            nameMap = new HashMap<>();
+            for (PropDataDerivedSource propDataDerivedSource : PropDataDerivedSource.values()) {
+                nameMap.put(propDataDerivedSource.getName(), propDataDerivedSource);
+            }
+        }
+
+        static String[] allNames() {
+            Set<String> names = nameMap.keySet();
+            String[] nameArray = new String[names.size()];
+            return names.toArray(nameArray);
+        }
+
+        static PropDataDerivedSource fromName(String name) {
             return nameMap.get(name);
         }
 

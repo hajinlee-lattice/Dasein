@@ -25,7 +25,7 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.RawSource;
-import com.latticeengines.propdata.core.source.ServingSource;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
@@ -207,7 +207,7 @@ public class ProgressOrchestratorTestNG extends PropDataCollectionFunctionalTest
 
     private void scanOnlyTestingSources () {
         Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
-        Map<ServingSource, RefreshService> pivotServiceMap = new HashMap<>();
+        Map<DerivedSource, RefreshService> pivotServiceMap = new HashMap<>();
         archiveServiceMap.put(collectedSource, collectedArchiveService);
         pivotServiceMap.put(pivotedSource, pivotService);
         orchestrator.setServiceMaps(archiveServiceMap, pivotServiceMap);
