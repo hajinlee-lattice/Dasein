@@ -95,7 +95,7 @@ public class WorkflowSubmitter {
             Map<String, String> extraSources = new HashMap<>();
             extraSources.put("PublicDomain", stoplistPath);
 
-            MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient();
+            MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
             FitModelWorkflowConfiguration configuration = new FitModelWorkflowConfiguration.Builder()
                     .customer(CustomerSpace.parse(customer)) //

@@ -55,10 +55,11 @@ public class MatchCommandResource implements MatchCommandInterface {
 
     @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Return the best matcher client to use.")
+    @ApiOperation(value = "Return the best matcher client to use. " +
+            "Requires a query parameter \"rows\", which is the number of records to be matched.")
     @Override
-    public MatchClientDocument getBestMatchClient() {
-        return matchCommandService.getBestMatchClient();
+    public MatchClientDocument getBestMatchClient(@RequestParam(value = "rows", required = true) int numRows) {
+        return matchCommandService.getBestMatchClient(numRows);
     }
 
 }

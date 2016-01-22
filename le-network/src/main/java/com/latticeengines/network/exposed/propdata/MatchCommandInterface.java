@@ -10,5 +10,5 @@ public interface MatchCommandInterface {
 
     Commands createMatchCommand(CreateCommandRequest request, String clientName);
 
-    MatchClientDocument getBestMatchClient();
+    MatchClientDocument getBestMatchClient(int numRows);
 }

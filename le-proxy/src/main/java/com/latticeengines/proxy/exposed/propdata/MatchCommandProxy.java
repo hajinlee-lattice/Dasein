@@ -28,8 +28,8 @@ public class MatchCommandProxy extends BaseRestApiProxy implements MatchCommandI
     }
 
     @Override
-    public MatchClientDocument getBestMatchClient() {
-        String url = constructUrl("bestclient");
+    public MatchClientDocument getBestMatchClient(int numRows) {
+        String url = constructUrl("bestclient?rows={numRows}", numRows);
         return get("getBestMatchClient", url, MatchClientDocument.class);
     }
 }

@@ -20,7 +20,7 @@ public interface MatchCommandService {
 
     boolean resultTablesAreReady(Long commandId);
 
-    MatchClientDocument getBestMatchClient();
+    MatchClientDocument getBestMatchClient(int numRows);
 
     MatchClient getMatchClientByName(String clientName);
 

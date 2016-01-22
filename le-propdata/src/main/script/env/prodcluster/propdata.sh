@@ -7,5 +7,6 @@ export JAVA_HOME=/usr/java/default
 export PATH=$JAVA_HOME/bin:$PATH
 
 java -cp /etc/hadoop/conf.empty:$HADOOP_CONF:$TEZ_CONF:$JAVA_HOME/lib/tools.jar:lib/*:propdata.jar:. \
+    -Dsqoop.throwOnError=true \
 	-Dlog4j.configuration=file:`pwd`/log4j.properties \
 	com.latticeengines.propdata.tool.PropDataAdminTool ${@:1}
