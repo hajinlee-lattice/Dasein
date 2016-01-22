@@ -22,6 +22,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.core.service.DataSourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -52,6 +53,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     @Autowired
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
+
+    @Autowired
+    protected DataSourceService dataSourceService;
 
     @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
@@ -187,8 +191,6 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     protected String getSqoopCustomerName(P progress) {
         return getSource().getSourceName() + "[" + progress.getRootOperationUID() + "]";
     }
-
-
 
     protected void updateStatusToFailed(P progress, String errorMsg, Exception e) {
         LoggingUtils.logError(getLogger(), progress, errorMsg, e);

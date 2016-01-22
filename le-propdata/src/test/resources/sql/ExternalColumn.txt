@@ -1,0 +1,2 @@
+;PID;	;ExternalColumnID;	;DefaultColumnName;	;Description;	;DataType;	;DisplayName;	;Category;	;StatisticalType;	;DisplayDiscretizationStrategy;	;FundamentalType;	;ApprovedUsage;	;Tags;
+;105590;	;171;	;TechIndicator_AddThis;	;A test column;	;NVARCHAR(3);	;Display Name;	;;	;ORDINAL;	;;	;BOOLEAN;	;None;	;LeadEnrichment;

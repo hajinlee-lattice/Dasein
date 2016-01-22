@@ -1,0 +1,2 @@
+;PID;	;ExternalColumnID;	;SourceName;	;SourceColumn;	;Priority;
+;60811;	;171;	;BuiltWithPivoted;	;TechIndicator_AddThis;	;1;

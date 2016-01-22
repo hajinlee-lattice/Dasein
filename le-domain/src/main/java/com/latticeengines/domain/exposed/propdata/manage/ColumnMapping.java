@@ -30,10 +30,10 @@ public class ColumnMapping implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "SourceName", nullable = false)
+    @Column(name = "SourceName", nullable = false, length = 100)
     private String sourceName;
 
-    @Column(name = "SourceColumn", nullable = true)
+    @Column(name = "SourceColumn", nullable = true, length = 100)
     private String sourceColumn;
 
     @Column(name = "Priority", nullable = true)

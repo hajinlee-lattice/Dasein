@@ -102,7 +102,7 @@
                         <configuration>
                             <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
                             <arguments>
-                                <argument>ManageDB</argument>
+                                <argument>LDC_ManageDB</argument>
                                 <argument>false</argument>
                                 <argument>com.latticeengines.domain.exposed.propdata.manage</argument>
                             </arguments>

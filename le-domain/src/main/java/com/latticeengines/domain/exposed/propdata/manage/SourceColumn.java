@@ -8,6 +8,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -20,32 +22,33 @@ public class SourceColumn implements HasPid, Serializable {
 
     private static final long serialVersionUID = 5143418326245069058L;
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SourceColumnID", unique = true, nullable = false)
     private Long SourceColumnId;
 
-    @Column(name = "SourceName", nullable = false)
+    @Column(name = "SourceName", nullable = false, length = 100)
     private String sourceName;
 
-    @Column(name = "ColumnName", nullable = false)
+    @Column(name = "ColumnName", nullable = false, length = 100)
     private String columnName;
 
-    @Column(name = "ColumnType", nullable = false)
+    @Column(name = "ColumnType", nullable = false, length = 50)
     private String columnType;
 
-    @Column(name = "BaseSource", nullable = true)
+    @Column(name = "BaseSource", nullable = true, length = 100)
     private String baseSource;
 
-    @Column(name = "Preparation", nullable = true)
+    @Column(name = "Preparation", nullable = true, length = 1000)
     private String preparation;
 
-    @Column(name = "GroupBy", nullable = true)
+    @Column(name = "GroupBy", nullable = true, length = 100)
     private String groupBy;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Calculation", nullable = false)
+    @Column(name = "Calculation", nullable = false, length = 50)
     private Calculation calculation;
 
-    @Column(name = "Arguments", nullable = true)
+    @Column(name = "Arguments", nullable = true, length = 1000)
     private String arguments;
 
     @Column(name = "Priority", nullable = false)

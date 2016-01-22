@@ -30,7 +30,7 @@ public class RefreshProgress implements Progress {
     @Column(name = "PivotDate", nullable = false)
     protected Date pivotDate;
 
-    @Column(name = "BaseSourceVersion", nullable = false)
+    @Column(name = "BaseSourceVersion", nullable = true)
     protected String baseSourceVersion;
 
     @Column(name = "RowsGenerated", nullable = false)

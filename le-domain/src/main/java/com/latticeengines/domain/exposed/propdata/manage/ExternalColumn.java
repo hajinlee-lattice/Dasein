@@ -44,39 +44,39 @@ public class ExternalColumn implements HasPid, Serializable {
     private Long pid;
 
     @Id
-    @Column(name = "ExternalColumnID", nullable = false)
+    @Column(name = "ExternalColumnID", nullable = false, length = 100)
     private String externalColumnID;
     
-    @Column(name = "DefaultColumnName", nullable = false)
+    @Column(name = "DefaultColumnName", nullable = false, length = 100)
     private String defaultColumnName;
 
-    @Column(name = "Description", nullable = false)
+    @Column(name = "Description", nullable = false, length = 1000)
     private String description;
 
-    @Column(name = "DataType", nullable = false)
+    @Column(name = "DataType", nullable = false, length = 50)
     private String dataType;
 
     @Column(name = "DisplayName", nullable = true)
     private String displayName;
 
-    @Column(name = "Category", nullable = true)
+    @Column(name = "Category", nullable = true, length = 50)
     private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "StatisticalType", nullable = true)
+    @Column(name = "StatisticalType", nullable = true, length = 50)
     private StatisticalType statisticalType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "FundamentalType", nullable = true)
+    @Column(name = "FundamentalType", nullable = true, length = 50)
     private FundamentalType fundamentalType;
 
     @Column(name = "ApprovedUsage", nullable = true)
     private String approvedUsage;
 
-    @Column(name = "Tags", nullable = true)
+    @Column(name = "Tags", nullable = true, length = 500)
     private String tags;
 
-    @Column(name = "DisplayDiscretizationStrategy", nullable = true)
+    @Column(name = "DisplayDiscretizationStrategy", nullable = true, length = 1000)
     private String discretizationStrategy;
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "externalColumn")

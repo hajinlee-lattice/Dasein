@@ -95,7 +95,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         Map<String, String> isNullMap = new HashMap<>();
         for (SourceColumn column: columns) {
             try {
-                if (column.getArguments() != null) {
+                if (StringUtils.isNotEmpty(column.getArguments())) {
                     JsonNode json = objectMapper.readTree(column.getArguments());
                     if (json.has("IsNull")) {
                         String nullReplacement = json.get("IsNull").asText();
@@ -191,7 +191,7 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         Map<String, BooleanType> bTypeMap = new HashMap<>();
         for (SourceColumn column: columns) {
             try {
-                if (column.getArguments() != null) {
+                if (StringUtils.isNotEmpty(column.getArguments())) {
                     JsonNode json = objectMapper.readTree(column.getArguments());
                     if (json.has("BooleanType")) {
                         BooleanType bType = BooleanType.valueOf(json.get("BooleanType").asText());
