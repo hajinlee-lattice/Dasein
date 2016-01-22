@@ -217,10 +217,10 @@ class Test(unittest.TestCase):
         contact_lists = elq.addEloquaContactForDante(2)
         PlsOperations.runBulkScoring(tenant)
         time.sleep(60)
-        print contact_lists[0]
-        contact_lists = elq.getEloquaContact(contact_lists[0])
-        print contact_lists
-        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ", contact_lists)
+        print "Before Score: ", contact_lists[0]
+        elq_contacts = elq.getEloquaContact(contact_lists[0])
+        print "After Score: ", elq_contacts
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ", elq_contacts)
         assert len(contact_faileds) == 0, contact_faileds
 
         danteLead = contact_lists[2].values()[0]
@@ -241,10 +241,10 @@ class Test(unittest.TestCase):
         contact_lists = elq.addEloquaContactForDante(1);
         PlsOperations.runHourlyScoring(tenant);
         time.sleep(60)
-        print contact_lists[0]
-        contact_lists = elq.getEloquaContact(contact_lists[0])
-        print contact_lists
-        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ", contact_lists)
+        print "Before Score: ", contact_lists[0]
+        elq_contacts = elq.getEloquaContact(contact_lists[0])
+        print "After Score: ", elq_contacts
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ", elq_contacts)
         assert len(contact_faileds) == 0, contact_faileds
 
         danteLead = contact_lists[2].values()[0]
