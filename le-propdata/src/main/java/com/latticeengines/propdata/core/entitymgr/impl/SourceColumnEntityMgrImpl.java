@@ -38,25 +38,7 @@ public class SourceColumnEntityMgrImpl implements SourceColumnEntityMgr {
         for (SourceColumn column: filterColumnsByCalculation(columns, Calculation.GROUPBY, false)) {
             statements.add(toAddColumnSql(column, tableName));
         }
-        List<String> groupedStatements = concatStatements(statements);
-        return groupedStatements.toArray(new String[groupedStatements.size()]);
-    }
-
-    private List<String> concatStatements(List<String> statements) {
-        List<String> groups = new ArrayList<>();
-        String bigStatement = "";
-        for (String statement: statements) {
-            if (bigStatement.length() < 4000) {
-                bigStatement += statement;
-            } else {
-                groups.add(bigStatement);
-                bigStatement = "";
-            }
-        }
-        if (StringUtils.isNotEmpty(bigStatement)) {
-            groups.add(bigStatement);
-        }
-        return groups;
+        return statements.toArray(new String[statements.size()]);
     }
 
     private static List<SourceColumn> filterColumnsByCalculation(List<SourceColumn> columns, Calculation calculation,

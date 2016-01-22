@@ -36,15 +36,6 @@ public class BuiltWithPivotService extends AbstractPivotService implements Pivot
     Log getLogger() { return log; }
 
     @Override
-    protected void createStageTable() {
-        super.createStageTable();
-        jdbcTemplateCollectionDB.execute(
-                "CREATE CLUSTERED INDEX IX_URLFeature ON [" + getStageTableName() + "] ([Domain])");
-        jdbcTemplateCollectionDB.execute(
-                "CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] ([Timestamp])");
-    }
-
-    @Override
     protected void executeDataFlow(RefreshProgress progress) {
         collectionDataFlowService.executePivotData(
                 source,

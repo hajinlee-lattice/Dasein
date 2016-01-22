@@ -2,8 +2,6 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
@@ -28,12 +26,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
     @Override
     protected void createStageTable() {
         String sql = "SELECT TOP 0 * INTO [" + getStageTableName() + "] FROM ["
-                + rawCollectedSourceTableName(getSource()) + "] \n";
-        sql += " \n CREATE CLUSTERED INDEX IX_PKS ON [" + getStageTableName() + "] ( [";
-        sql += StringUtils.join(getSource().getPrimaryKey(), "], [");
-        sql += "] ) \n";
-        sql += " CREATE INDEX IX_TIME ON [" + getStageTableName() + "] ( [";
-        sql += getSource().getTimestampField() + "] )";
+                + rawCollectedSourceTableName(getSource()) + "]";
         jdbcTemplateCollectionDB.execute(sql);
     }
 

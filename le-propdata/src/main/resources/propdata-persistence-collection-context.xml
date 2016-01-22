@@ -1,36 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-      http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <!-- DAOs for PropData -->
     <bean id="dataSourcePropDataCollection" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://${propdata.collection.host}:${propdata.collection.port};databaseName=${propdata.collection.db};" />
         <property name="username" value="${propdata.user}" />
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
-
-    <bean id="sessionFactoryPropDataCollection" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataSourcePropDataCollection" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata" />
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-            </props>
-        </property>
-    </bean>
-
-    <bean id="transactionManagerPropDataCollection" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-          p:sessionFactory-ref="sessionFactoryPropDataCollection">
-        <qualifier value="propDataCollection" />
-    </bean>
-    <tx:annotation-driven transaction-manager="transactionManagerPropDataCollection" />
 
     <bean id="propDataCollectionJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="dataSourcePropDataCollection" />

@@ -10,13 +10,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
+import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
@@ -51,6 +56,8 @@ public class PropDataAdminTool {
     private static final String NS_PIVOT_DATE = "pivotDate";
     private static final String NS_PIVOT_VERSION = "baseVersion";
 
+    private static final String NS_RETRY_UID = "retryUid";
+
     private static final String JOB_SUBMITTER = "CommandLineRunner";
 
     private static final Pattern datePattern = Pattern.compile("(19|20)\\d{2}-(0\\d|1[012])-([012]\\d|3[01])");
@@ -68,12 +75,17 @@ public class PropDataAdminTool {
     private Date pivotDate;
     private String baseVersions;
 
+    private String uidToRetry;
+
+    private ApplicationContext applicationContext;
+
     static {
         parser.description("PropData Admin Tool");
 
         Subparsers subparsers = parser.addSubparsers().help("valid commands").dest(NS_COMMAND);
         addArchiveArgs(subparsers.addParser(Command.ARCHIVE.getName()).help("archive a collection source"));
         addRefreshArgs(subparsers.addParser(Command.REFRESH.getName()).help("pivot a base source"));
+        addRetryArgs(subparsers.addParser(Command.RETRY.getName()).help("retry a process"));
     }
 
     private static void addArchiveArgs(Subparser parser) {
@@ -149,6 +161,14 @@ public class PropDataAdminTool {
                 .help("the version of the base sources to be pivoted, separated by | if multiple base sources");
     }
 
+    private static void addRetryArgs(Subparser parser) {
+        parser.addArgument("-u", "--uuid")
+                .dest(NS_RETRY_UID)
+                .required(true)
+                .type(String.class)
+                .help("root operation uid");
+    }
+
     public PropDataAdminTool(){ }
 
     private void validateArguments(Namespace ns) {
@@ -163,6 +183,10 @@ public class PropDataAdminTool {
                 break;
             case REFRESH:
                 validateAndTransformRefreshArgs(ns);
+                break;
+            case RETRY:
+                validateAndTransformRetryArgs(ns);
+                break;
             default:
         }
 
@@ -199,6 +223,16 @@ public class PropDataAdminTool {
         }
 
         baseVersions = ns.getString(NS_PIVOT_VERSION);
+    }
+
+    private void validateAndTransformRetryArgs(Namespace ns) {
+        uidToRetry = ns.getString(NS_RETRY_UID);
+
+        Pattern pattern = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+        Matcher matcher = pattern.matcher(uidToRetry.toLowerCase());
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Invalid root operation uid: " + uidToRetry);
+        }
     }
 
     private Date parseDateInput(String input) {
@@ -249,8 +283,8 @@ public class PropDataAdminTool {
     private void run(String[] args) throws Exception {
         try {
             Namespace ns = parser.parseArgs(args);
-
             validateArguments(ns);
+            applicationContext = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
 
             switch (command) {
                 case ARCHIVE:
@@ -258,6 +292,9 @@ public class PropDataAdminTool {
                     break;
                 case REFRESH:
                     executeRefreshCommand();
+                    break;
+                case RETRY:
+                    executeRetryCommand();
                     break;
                 default:
             }
@@ -271,24 +308,28 @@ public class PropDataAdminTool {
         }
     }
 
+    private void executeRetryCommand() {
+        System.out.println("\n\n========================================");
+        System.out.println("Retrying job: " + uidToRetry);
+        System.out.println("========================================\n");
+
+        executeRetry(uidToRetry);
+    }
+
     private void executeRefreshCommand() {
-        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
-        RefreshService refreshService = (RefreshService) ac.getBean(sourceToBeRefreshed.getServiceBean());
+        RefreshService refreshService = (RefreshService) applicationContext.getBean(sourceToBeRefreshed.getServiceBean());
 
         System.out.println("\n\n========================================");
         System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
         System.out.println("========================================\n");
 
         executeRefresh(refreshService);
-
-        ac.close();
     }
 
     private void executeArchiveCommand(Namespace ns) {
-        ClassPathXmlApplicationContext ac = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
-
         if (ns.getString(NS_RAW_TYPE).equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
-            CollectedArchiveService collectedArchiveService = (CollectedArchiveService) ac.getBean(sourceToBeArchived.getServiceBean());
+            CollectedArchiveService collectedArchiveService =
+                    (CollectedArchiveService) applicationContext.getBean(sourceToBeArchived.getServiceBean());
 
             System.out.println("\n\n========================================");
             System.out.println("Archiving Collection Source: " + sourceToBeArchived.getName());
@@ -296,7 +337,8 @@ public class PropDataAdminTool {
             System.out.println(fullDateRange);
             executeArchiveByRanges(collectedArchiveService);
         } else {
-            BulkArchiveService archiveService = (BulkArchiveService) ac.getBean(sourceToBeArchived.getServiceBean());
+            BulkArchiveService archiveService =
+                    (BulkArchiveService) applicationContext.getBean(sourceToBeArchived.getServiceBean());
 
             System.out.println("\n\n========================================");
             System.out.println("Archiving Bulk Source: " + sourceToBeArchived.getName());
@@ -304,8 +346,6 @@ public class PropDataAdminTool {
 
             executeArchiveBulk(archiveService);
         }
-        
-        ac.close();
     }
 
     private void executeArchiveByRanges(CollectedArchiveService collectedArchiveService) {
@@ -336,7 +376,7 @@ public class PropDataAdminTool {
                         + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
             } catch (Exception e) {
                 System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
-                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime) + " " + e.getMessage());
             }
         }
     }
@@ -350,7 +390,7 @@ public class PropDataAdminTool {
             archiveService.finish(progress);
             System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
         } catch (Exception e) {
-            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime));
+            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime) + " " + e.getMessage());
         }
     }
 
@@ -364,8 +404,75 @@ public class PropDataAdminTool {
             refreshService.finish(progress);
             System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
         } catch (Exception e) {
-            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime));
+            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime) + " " + e.getMessage());
         }
+    }
+
+    private void executeRetry(String uid) {
+        System.out.println("Start retrying " + uid + " ... ");
+        long startTime = System.currentTimeMillis();
+
+        try {
+            ArchiveProgressEntityMgr archiveProgressEntityMgr =
+                    (ArchiveProgressEntityMgr) applicationContext.getBean("archiveProgressEntityMgr");
+            ArchiveProgress archiveProgress = archiveProgressEntityMgr.findProgressByRootOperationUid(uid);
+            if (archiveProgress != null) {
+                executeRetryArchiveProgress(archiveProgress);
+                System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
+                return;
+            }
+
+            RefreshProgressEntityMgr refreshProgressEntityMgr =
+                    (RefreshProgressEntityMgr) applicationContext.getBean("refreshProgressEntityMgr");
+            RefreshProgress refreshProgress = refreshProgressEntityMgr.findProgressByRootOperationUid(uid);
+            if (refreshProgress != null) {
+                executeRetryRefreshProgress(refreshProgress);
+                System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime));
+                return;
+            }
+
+            System.out.println("Cannot find the progress with uid " + uid);
+        } catch (Exception e) {
+            System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime) + " " + e.getMessage());
+        }
+    }
+
+    private void executeRetryArchiveProgress(ArchiveProgress archiveProgress) {
+        if (archiveProgress.getStatusBeforeFailed() == null) {
+            System.out.println("ArchiveProgress " + archiveProgress.getRootOperationUID()
+                    + " does not have a StatusBeforeFailed, so cannot retry.");
+            return;
+        }
+
+        String sourceName = archiveProgress.getSourceName();
+        PropDataRawSource source = PropDataRawSource.fromName(sourceName);
+    }
+
+    private void executeRetryRefreshProgress(RefreshProgress refreshProgress) {
+        if (refreshProgress.getStatusBeforeFailed() == null) {
+            System.out.println("RefreshProgress " + refreshProgress.getRootOperationUID()
+                    + " does not have a StatusBeforeFailed, so cannot retry.");
+            return;
+        }
+        String sourceName = refreshProgress.getSourceName();
+        PropDataDerivedSource source = PropDataDerivedSource.fromName(sourceName);
+        RefreshService refreshService = (RefreshService) applicationContext.getBean(source.getServiceBean());
+
+        refreshProgress.setStatus(ProgressStatus.FAILED);
+        switch (refreshProgress.getStatusBeforeFailed()) {
+            case NEW:
+            case TRANSFORMING:
+                refreshProgress = refreshService.transform(refreshProgress);
+            case TRANSFORMED:
+            case UPLOADING:
+                refreshProgress = refreshService.exportToDB(refreshProgress);
+                if (refreshProgress.getStatus().equals(ProgressStatus.FAILED)) {
+                    refreshProgress = refreshService.exportToDB(refreshProgress);
+                }
+            default:
+                refreshService.finish(refreshProgress);
+        }
+
     }
 
     private void promptContinue() {
@@ -464,7 +571,8 @@ public class PropDataAdminTool {
 
     enum Command {
         ARCHIVE("archive"),
-        REFRESH("refresh");
+        REFRESH("refresh"),
+        RETRY("retry");
 
         private static Map<String, Command> nameMap;
         private final String name;

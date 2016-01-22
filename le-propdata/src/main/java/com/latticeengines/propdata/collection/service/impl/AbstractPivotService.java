@@ -8,6 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.PivotService;
+import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 
@@ -40,6 +41,17 @@ public abstract class AbstractPivotService extends AbstractRefreshService implem
             return combinedCurrentVersion;
         }
         return null;
+    }
+
+    @Override
+    protected void createIndicesOnStageTable() {
+        if (getSource() instanceof DomainBased) {
+            String domainField = ((DomainBased) getSource()).getDomainField();
+            jdbcTemplateCollectionDB.execute(
+                    "CREATE CLUSTERED INDEX IX_DOMAIN ON [" + getStageTableName() + "] " +
+                            "([" + domainField + "])");
+        }
+        super.createIndicesOnStageTable();
     }
 
 }

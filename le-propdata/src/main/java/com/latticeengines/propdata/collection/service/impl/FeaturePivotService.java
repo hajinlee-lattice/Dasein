@@ -34,14 +34,5 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
     @Override
     Log getLogger() { return log; }
 
-    @Override
-    protected void createStageTable() {
-        super.createStageTable();
-        jdbcTemplateCollectionDB.execute(
-                "CREATE CLUSTERED INDEX IX_URLFeature ON [" + getStageTableName() + "] ([URL])");
-        jdbcTemplateCollectionDB.execute(
-                "CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] ([Timestamp])");
-    }
-
 
 }

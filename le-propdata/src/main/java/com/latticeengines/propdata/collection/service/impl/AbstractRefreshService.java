@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -24,6 +27,10 @@ public abstract class AbstractRefreshService
 
     @Override
     public abstract DerivedSource getSource();
+
+    @Autowired
+    @Qualifier(value = "dataSourcePropDataCollection")
+    private DriverManagerDataSource collectionDataSource;
 
     abstract void executeDataFlow(RefreshProgress progress);
 
@@ -66,7 +73,6 @@ public abstract class AbstractRefreshService
         if (!checkProgressStatus(progress, ProgressStatus.TRANSFORMED, ProgressStatus.UPLOADING)) {
             return progress;
         }
-
 
         // update status
         long startTime = System.currentTimeMillis();
@@ -175,6 +181,9 @@ public abstract class AbstractRefreshService
             DbCreds creds = new DbCreds(builder);
             sqoopService.exportDataSync(stageTableName, avroDir, creds, assignedQueue,
                     customer + "-upload-" + destTable, numMappers, null);
+
+            LoggingUtils.logInfo(getLogger(), progress, "Creating indices on the stage table " + stageTableName);
+            createIndicesOnStageTable();
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
             return false;
@@ -211,9 +220,16 @@ public abstract class AbstractRefreshService
 
     protected void createStageTable() {
         String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());
-        for (String statement: statements) {
+        for (String statement : statements) {
+            getLogger().info("About to execute \n" + statement);
             jdbcTemplateCollectionDB.execute(statement);
         }
+    }
+
+    protected void createIndicesOnStageTable() {
+        jdbcTemplateCollectionDB.execute(
+                "CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] " +
+                        "([" + getSource().getTimestampField() + "])");
     }
 
 }

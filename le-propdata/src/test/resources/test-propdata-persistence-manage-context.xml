@@ -7,18 +7,18 @@
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
     <bean id="propDataManage" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost:3306/LDC_ManageDB" />
-        <property name="username" value="root" />
-        <property name="password" value="welcome" />
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+        <property name="url" value="jdbc:sqlserver://bodcprodvsql225.prod.lattice.local:1433;databaseName=CollectionDB_Dev;" />
+        <property name="username" value="DLTransfer" />
+        <property name="password" value="free&amp;NSE" />
     </bean>
 
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="propDataManage" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed.propdata.manage" />
         <property name="hibernateProperties">
             <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
                 <prop key="hibernate.show_sql">false</prop>
                 <prop key="hibernate.globally_quoted_identifiers">true</prop>
             </props>
