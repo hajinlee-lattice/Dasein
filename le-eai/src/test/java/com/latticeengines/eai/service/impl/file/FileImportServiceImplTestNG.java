@@ -15,7 +15,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -51,12 +50,6 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
     }
     
-    @AfterClass(groups = "functional")
-    public void tearDown() throws Exception {
-        //HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
-        //HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
-    }
-
     @Test(groups = "functional", enabled = true)
     public void importMetadataAndDataAndWriteToHdfs() throws Exception {
         ImportContext ctx = new ImportContext(yarnConfiguration);

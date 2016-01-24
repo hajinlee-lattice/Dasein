@@ -31,6 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -125,6 +126,11 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         Camille camille = CamilleEnvironment.getCamille();
         Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
                 CustomerSpace.parse(customer), "Eai");
+        try {
+            camille.delete(docPath);
+        } catch (Exception e) {
+        }
+        
         Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
                 .append("ConnectTimeout");
         camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
