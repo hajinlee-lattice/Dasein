@@ -26,7 +26,8 @@ public class SwlibTool {
                 addOption("v", "version", true, " -<version> (version Maven-style)"). //
                 addOption("c", "classifier", false, " -<classifier> (classifier Maven-style)"). //
                 addOption("f", "localFileName", true, " -<localFileName> (path to local file to install)"). //
-                addOption("i", "initializer", true, " -<initializer> (initializer class name)");
+                addOption("i", "initializer", true, " -<initializer> (initializer class name)"). //
+                addOption("h", "defaultFS", true, "-<defaultFS> (Hadoop fs.defaultFS)");
 
         try {
             CommandLine cmd = parser.parse(options, args);
@@ -38,6 +39,7 @@ public class SwlibTool {
                 String version = cmd.getOptionValue("version");
                 String classifier = cmd.getOptionValue("classifier");
                 String initializerClassName = cmd.getOptionValue("initializer");
+                String fsDefaultFS = cmd.getOptionValue("defaultFS");
 
                 File fileToInstall = null;
                 SoftwareLibraryService swlibService = appContext.getBean("softwareLibraryService",
@@ -57,7 +59,13 @@ public class SwlibTool {
                     if (!fileToInstall.exists()) {
                         throw new Exception(String.format("File %s does not exist.", fileName));
                     }
-                    swlibService.installPackage(swPackage, fileToInstall);
+                    if (fsDefaultFS != null) {
+                        swlibService.installPackage(fsDefaultFS, swPackage, fileToInstall);
+                    } else {
+                        swlibService.installPackage(swPackage, fileToInstall);
+                    }
+                    
+
                 } else if (operation.equals("uninstall")) {
                 }
             }

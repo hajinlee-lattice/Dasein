@@ -31,6 +31,7 @@ public class SwlibToolTestNG {
                 "-a", "le-serviceflows", //
                 "-v", "1.0.0", //
                 "-i", INITIALIZER_CLASS, //
+                "-h", "hdfs://localhost:9000", //
                 "-f", jarFile });
         assertTrue(HdfsUtils.fileExists(new Configuration(), //
                 "/app/swlib/dataflow/com/latticeengines/le-serviceflows/1.0.0/le-serviceflows-1.0.0.jar"));

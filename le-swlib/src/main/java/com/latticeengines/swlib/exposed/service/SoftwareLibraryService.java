@@ -15,4 +15,6 @@ public interface SoftwareLibraryService {
 
     List<SoftwarePackage> getLatestInstalledPackages(String module);
 
+    void installPackage(String fsDefaultFS, SoftwarePackage swPackage, File localFile);
+
 }

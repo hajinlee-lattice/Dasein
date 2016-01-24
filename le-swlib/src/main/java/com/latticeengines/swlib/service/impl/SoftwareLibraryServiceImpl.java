@@ -36,6 +36,12 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     }
 
     @Override
+    public void installPackage(String fsDefaultFS, SoftwarePackage swPackage, File localFile) {
+        yarnConfiguration.set("fs.defaultFS", fsDefaultFS);
+        installPackage(swPackage, localFile);
+    }
+
+    @Override
     public void installPackage(SoftwarePackage swPackage, File localFile) {
         log.info("fs.defaultFS = " + yarnConfiguration.get("fs.defaultFS"));
         String localFilePath = localFile.getAbsolutePath();
