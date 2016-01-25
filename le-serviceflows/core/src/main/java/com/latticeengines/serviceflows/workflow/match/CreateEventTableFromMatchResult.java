@@ -31,8 +31,7 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateEventTableFromMatchResult.class);
-    // TODO needs to be replaced with the IsMatched column
-    private static final String IS_MATCHED_COLUMN = "BuiltWith_Pivoted_Source_IsMatched";
+    private static final String IS_MATCHED_COLUMN = "IsMatched";
 
     @Override
     public void execute() {
