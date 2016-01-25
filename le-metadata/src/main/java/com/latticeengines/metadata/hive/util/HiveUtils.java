@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 
 public class HiveUtils {
+
     public static String getCreateStatement(Configuration configuration, String tableName, Table table) {
         return AvroUtils.generateHiveCreateTableStatement(tableName, getLocation(table),
                 MetadataConverter.getAvroSchema(configuration, table));
