@@ -28,6 +28,8 @@ public class QueryColumnVDBImpl extends QueryColumn {
 
     private static final String tmpl_sed_single = "^SpecExtractDetail\\(\"%s\", \"(.*?)\"\\)(, SpecExtractDetail\\(.*|$)";
     private static final String tmpl_sed_list = "^SpecExtractDetail\\(\"%s\", StringList\\(.*?\"(.*?)\"\\)\\)(, SpecExtractDetail\\(.*|$)";
+    private static final Pattern pattern_sed_empty = Pattern
+            .compile("^SpecExtractDetail\\(.*?\\)(, SpecExtractDetail\\(.*|$)");
 
     public QueryColumnVDBImpl(String definition) throws DefinitionException {
         super(definition);
@@ -86,8 +88,9 @@ public class QueryColumnVDBImpl extends QueryColumn {
 
                 while (Boolean.TRUE) {
                     boolean isExtracted = Boolean.FALSE;
+                    Matcher md_found;
                     for (String mdType : mdTypes) {
-                        Matcher md_found = Pattern.compile(String.format(tmpl_sed_single, mdType))
+                        md_found = Pattern.compile(String.format(tmpl_sed_single, mdType))
                                 .matcher(sed);
                         if (md_found.matches()) {
                             metadata.put(mdType, md_found.group(1).replace("\\\"", "\""));
@@ -106,9 +109,15 @@ public class QueryColumnVDBImpl extends QueryColumn {
                     }
 
                     if (!isExtracted) {
-                        throw new DefinitionException(String.format(
-                                "Maude definition (SpecExtractDetail) cannot be interpretted: %s",
-                                sed));
+                        md_found = pattern_sed_empty.matcher(sed);
+                        if (md_found.matches()) {
+                            sed = md_found.group(1);
+                        }
+                        else {
+                            throw new DefinitionException(String.format(
+                                    "Unsupported metadata type: %s",
+                                    sed));
+                        }
                     }
 
                     if (sed.equals("")) {
