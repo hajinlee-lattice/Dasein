@@ -29,12 +29,14 @@ public interface DataLoaderService {
     InstallResult installVisiDBStructureFile(InstallTemplateRequest request, String dlUrl);
 
     InstallResult installDataLoaderConfigFile(InstallTemplateRequest request, String dlUrl);
-    
+
     GetSpecResult getSpecDetails(GetSpecRequest request, String dlUrl);
-    
+
     GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl);
 
     String getTemplateVersion(String tenantName, String dlUrl);
+
+    String getDLConfig(String tenantName, String dlUrl);
 
     String getSfdcUser(String tenantName, String dlUrl);
 

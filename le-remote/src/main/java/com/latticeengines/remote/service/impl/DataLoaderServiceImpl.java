@@ -352,7 +352,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         }
 
     }
-    
+
     @Override
     @RestApiCall
     public GetSpecResult getSpecDetails(GetSpecRequest request, String dlUrl) {
@@ -363,7 +363,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             throw new LedpException(LedpCode.LEDP_21008, ex);
         }
     }
-    
+
     @Override
     @RestApiCall
     public GetQueryMetaDataColumnsResponse getQueryMetadataColumns(GetQueryMetaDataColumnsRequest request, String dlUrl) {
@@ -516,13 +516,14 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return DlConfigUtils.parseEloquaCompany(config);
     }
 
+    @Override
     @RestApiCall
-    private String getDLConfig(String tenantName, String dlUrl) {
-        Map<String, String> paramerters = new HashMap<>();
-        paramerters.put("tenantName", tenantName);
+    public String getDLConfig(String tenantName, String dlUrl) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("tenantName", tenantName);
         String response;
         try {
-            response = callDLRestService(dlUrl, DOWNLOAD_CONFIG, paramerters);
+            response = callDLRestService(dlUrl, DOWNLOAD_CONFIG, parameters);
             JsonNode json = objectMapper.readTree(response);
             if (json.get("Status").asInt() != STATUS_SUCCESS) {
                 throw new IllegalStateException("Returned status from DL is not SUCCESS.");
@@ -615,6 +616,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         return response;
     }
 
+    @Override
     @RestApiCall
     public long executeLoadGroup(String tenantName, String groupName, String dlUrl) {
         try {
