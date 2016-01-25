@@ -2,6 +2,7 @@ package com.latticeengines.propdata.tool;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -25,6 +26,11 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.SourceService;
+import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
@@ -66,6 +72,7 @@ public class PropDataAdminTool {
     private static final ArgumentParser parser = ArgumentParsers.newArgumentParser("propdata");
 
     private Command command;
+    private SourceService sourceService;
     private PropDataRawSource sourceToBeArchived;
     private PropDataDerivedSource sourceToBeRefreshed;
 
@@ -285,6 +292,7 @@ public class PropDataAdminTool {
             Namespace ns = parser.parseArgs(args);
             validateArguments(ns);
             applicationContext = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
+            sourceService = (SourceService) applicationContext.getBean("sourceService");
 
             switch (command) {
                 case ARCHIVE:
@@ -317,7 +325,19 @@ public class PropDataAdminTool {
     }
 
     private void executeRefreshCommand() {
-        RefreshService refreshService = (RefreshService) applicationContext.getBean(sourceToBeRefreshed.getServiceBean());
+        DerivedSource source = (DerivedSource) sourceService.findBySourceName(sourceToBeRefreshed.getName());
+        HdfsSourceEntityMgr hdfsSourceEntityMgr =
+                (HdfsSourceEntityMgr) applicationContext.getBean("hdfsSourceEntityMgr");
+        if (!(source instanceof MostRecentSource) && StringUtils.isEmpty(baseVersions)) {
+            List<String> versions = new ArrayList<>();
+            for (Source baseSource: source.getBaseSources()) {
+                versions.add(hdfsSourceEntityMgr.getCurrentVersion(baseSource));
+            }
+            baseVersions = StringUtils.join(versions, "|");
+        }
+
+        RefreshService refreshService =
+                (RefreshService) applicationContext.getBean(source.getRefreshServiceBean());
 
         System.out.println("\n\n========================================");
         System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
@@ -455,8 +475,8 @@ public class PropDataAdminTool {
             return;
         }
         String sourceName = refreshProgress.getSourceName();
-        PropDataDerivedSource source = PropDataDerivedSource.fromName(sourceName);
-        RefreshService refreshService = (RefreshService) applicationContext.getBean(source.getServiceBean());
+        DerivedSource source = (DerivedSource) sourceService.findBySourceName(sourceName);
+        RefreshService refreshService = (RefreshService) applicationContext.getBean(source.getRefreshServiceBean());
 
         refreshProgress.setStatus(ProgressStatus.FAILED);
         switch (refreshProgress.getStatusBeforeFailed()) {
@@ -532,23 +552,22 @@ public class PropDataAdminTool {
     }
 
     enum PropDataDerivedSource {
-        FEATURE("FeatureMostRecent", "featureRefreshService"),
-        FEATURE_PIVOTED("FeaturePivoted", "featurePivotService"),
-        BUILTWITH("BuiltWithMostRecent", "builtWithRefreshService"),
-        BUILTWITH_PIVOTED("BuiltWithPivoted", "builtWithPivotService");
+        FEATURE("FeatureMostRecent"),
+        FEATURE_PIVOTED("FeaturePivoted"),
+        BUILTWITH("BuiltWithMostRecent"),
+        BUILTWITH_PIVOTED("BuiltWithPivoted"),
+        HGDATA("HGData"),
+        HGDATA_PIVOTED("HGDataPivoted");
 
         private static Map<String, PropDataDerivedSource> nameMap;
 
         private final String name;
-        private final String serviceBean;
 
-        PropDataDerivedSource(String name, String refreshBean) {
+        PropDataDerivedSource(String name) {
             this.name = name;
-            this.serviceBean = refreshBean;
         }
 
         String getName() { return this.name; }
-        String getServiceBean() { return this.serviceBean; }
 
         static {
             nameMap = new HashMap<>();

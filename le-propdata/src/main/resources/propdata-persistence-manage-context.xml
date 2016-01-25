@@ -9,8 +9,8 @@
     <bean id="propDataManage" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${propdata.manage.driver}" />
         <property name="url" value="${propdata.manage.url}" />
-        <property name="username" value="${propdata.manage.user:DLTransfer}" />
-        <property name="password" value="${propdata.manage.password.encrypted:Q1nh4HIYGkg4OnQIEbEuiw==}" />
+        <property name="username" value="${propdata.manage.user}" />
+        <property name="password" value="${propdata.manage.password.encrypted}" />
     </bean>
 
     <bean id="sessionFactoryPropDataManage" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
