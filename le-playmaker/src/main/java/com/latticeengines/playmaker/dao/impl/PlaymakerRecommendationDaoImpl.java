@@ -28,9 +28,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
                 + getLikelihood()
-                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, " 
+                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, "
                 + "CASE WHEN L.[Expiration_Date] > '2030-03-15' THEN 1899763200 ELSE DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) END AS ExpirationDate, "
-                + getMonetaryValue() 
+                + getMonetaryValue()
                 + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1 T.[Display_Name] + '|' + T.[Phone_Number] + '|' + T.[Email_Address] + '|' + "
                 + " T.[Address_Street_1] + '|' + T.[City] + '|' + T.[State_Province] + '|' + T.[Country]+ '|' + T.[Zip] "
@@ -103,8 +103,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON L.Play_ID = PL.Play_ID AND PL.IsActive = 1 AND PL.IsVisible = 1 JOIN Priority P WITH (NOLOCK) "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
-                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND L.IsActive = 1 AND "
-                + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") "
+                + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID "
+                + "WHERE L.Status = 2800 AND L.IsActive = 1 AND " + "L.Synchronization_Destination in ("
+                + getDestinationonValues(syncDestination) + ") "
                 + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
     }
 
@@ -194,7 +195,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum) {
-        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, E.*, "
+        String extensionColumns = getExtensionColumns();
+        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID ," + extensionColumns + " "
                 + "DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY A.[Last_Modification_Date] ) RowNum "
                 + getAccountExtensionFromWhereClause()
@@ -211,6 +213,16 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             }
         }
         return result;
+    }
+
+    private String getExtensionColumns() {
+        List<Map<String, Object>> schema = getAccountExtensionSchema();
+        StringBuilder builder = new StringBuilder();
+        for (Map<String, Object> field : schema) {
+            builder.append("E.").append(field.get("Field")).append(", ");
+        }
+
+        return builder.toString();
     }
 
     @Override
@@ -230,11 +242,21 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
                 + "(SELECT DISTINCT S.value FROM ConfigResource S JOIN [ExtensionColumnSpec] "
                 + "ON S.Key_Name = C.Display_Name_Key) AS DisplayName "
-                + "FROM [ExtensionColumnSpec] C JOIN [ExtensionTableSpec] T ON C.Parent_ID = T.ExtensionTableSpec_ID WHERE T.External_ID = 'LEAccount' ";
+                + "FROM [ExtensionColumnSpec] C JOIN [ExtensionTableSpec] T ON C.Parent_ID = T.ExtensionTableSpec_ID "
+                + "AND T.External_ID = 'LEAccount' "
+                + "JOIN [ConfigTableColumn] CC on C.Column_Name = CC.Column_Lookup_ID "
+                + "JOIN [ConfigTable] CT ON CC.[ConfigTable_ID] = CT.ConfigTable_ID "
+                + "WHERE CC.Column_IsVisible = 1 and CT.External_ID = 'Sales-AccountList'";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
         return result;
+    }
+    
+    @Override
+    public int getAccountExtensionColumnCount() {
+        List<Map<String, Object>> schema = getAccountExtensionSchema();
+        return schema.size();
     }
 
     @Override

@@ -150,6 +150,16 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     }
 
     @Test(groups = "functional", enabled = true)
+    public void getAccountExtensionColumnCount() throws Exception {
+
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensionColumnCount(tenant
+                .getTenantName());
+        
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+        
+    }
+    
+    @Test(groups = "functional", enabled = true)
     public void getPlayValues() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getPlayValues(tenant.getTenantName(), 1000, 1,

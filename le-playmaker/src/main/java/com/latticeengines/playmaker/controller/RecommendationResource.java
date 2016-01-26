@@ -120,7 +120,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
 
     @RequestMapping(value = "/accountextensioncount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get account extension count")
+    @ApiOperation(value = "Get record count of account extension")
     public Map<String, Object> getAccountExtensionCount(
             HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) int start) {
@@ -137,6 +137,14 @@ public class RecommendationResource extends SpringBootServletInitializer {
         return playmakerRecommendationMgr.getAccountExtensionSchema(tenantName);
     }
 
+    @RequestMapping(value = "/accountextensioncolumncount", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get column count of account extension")
+    public Map<String, Object> getAccountExtensionColumnCount(HttpServletRequest request) {
+        String tenantName = getTenantName(request);
+        return playmakerRecommendationMgr.getAccountExtensionColumnCount(tenantName);
+    }
+    
     @RequestMapping(value = "/playvalues", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get flexible play values")

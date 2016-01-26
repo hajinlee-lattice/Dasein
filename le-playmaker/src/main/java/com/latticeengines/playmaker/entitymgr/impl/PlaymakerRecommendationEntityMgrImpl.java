@@ -80,6 +80,15 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
+    public Map<String, Object> getAccountExtensionColumnCount(String tenantName) {
+        PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getAccountExtensionColumnCount());
+        return result;
+    }
+
+    @Override
     public Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 

@@ -32,4 +32,6 @@ public interface PlaymakerRecommendationEntityMgr {
 
     Map<String, Object> getPlayValueCount(String tenantName, long start);
 
+    Map<String, Object> getAccountExtensionColumnCount(String tenantName);
+
 }

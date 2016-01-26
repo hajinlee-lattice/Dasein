@@ -27,4 +27,6 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     int getPlayValueCount(long start);
 
+    int getAccountExtensionColumnCount();
+
 }

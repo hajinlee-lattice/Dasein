@@ -87,6 +87,14 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
     }
 
     @Test(groups = "deployment")
+    public void getAccountExtensionColumnCount() {
+        String url = apiHostPort + "/playmaker/accountextensioncolumncount";
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
+    
+    @Test(groups = "deployment")
     public void getPlayValues() {
         String url = apiHostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")
