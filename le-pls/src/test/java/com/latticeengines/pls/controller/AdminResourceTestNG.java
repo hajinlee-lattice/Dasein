@@ -155,7 +155,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(existingUser.toString(), headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/resetTempPassword",
+        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/temppassword",
                 HttpMethod.PUT, requestEntity, String.class);
         assertNotNull(result.getBody());
     }
@@ -178,7 +178,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
 
         URI attrUrl = UriComponentsBuilder.fromUriString(getRestAPIHostPort() + "/pls/admin/users")
-                .queryParam("userEmail", "ron@lattice-engines.com").build().toUri();
+                .queryParam("useremail", "ron@lattice-engines.com").build().toUri();
         System.out.println("Url Value " + attrUrl.toString());
         Boolean addAdminUserSuccessful = restTemplate.getForObject(attrUrl, Boolean.class);
         assertTrue(addAdminUserSuccessful);
@@ -195,7 +195,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
 
         URI attrUrl = UriComponentsBuilder.fromUriString(getRestAPIHostPort() + "/pls/admin/users")
-                .queryParam("userEmail", "ron@lattice-engines.com").build().toUri();
+                .queryParam("useremail", "ron@lattice-engines.com").build().toUri();
         System.out.println("Url Value " + attrUrl.toString());
         Boolean addAdminUserSuccessful = restTemplate.getForObject(attrUrl, Boolean.class);
         assertFalse(addAdminUserSuccessful);

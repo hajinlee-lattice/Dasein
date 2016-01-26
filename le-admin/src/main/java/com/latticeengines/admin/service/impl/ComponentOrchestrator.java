@@ -183,7 +183,7 @@ public class ComponentOrchestrator {
             headers.add("Accept", "application/json");
             HttpEntity<String> requestEntity = new HttpEntity<>(user.toString(), headers);
 
-            ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/resetTempPassword",
+            ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/temppassword",
                     HttpMethod.PUT, requestEntity, String.class);
 
             emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);

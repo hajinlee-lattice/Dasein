@@ -159,7 +159,7 @@ public class AdminResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/resetTempPassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/temppassword", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset temporary password")
     public String restTempPassword(@RequestBody User user, HttpServletRequest request) {
@@ -178,7 +178,7 @@ public class AdminResource extends InternalResourceBase {
     @RequestMapping(value = "/users", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Check whether a user exists by email")
-    public Boolean checkUserExistenceByEmail(@RequestParam(value = "userEmail") String userEmail,
+    public Boolean checkUserExistenceByEmail(@RequestParam(value = "useremail") String userEmail,
             HttpServletRequest request) {
         checkHeader(request);
         User user = userService.findByEmail(userEmail);

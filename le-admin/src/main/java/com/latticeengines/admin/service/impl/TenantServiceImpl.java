@@ -195,7 +195,7 @@ public class TenantServiceImpl implements TenantService {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         URI attrUrl = UriComponentsBuilder.fromUriString(plsEndHost + "/pls/admin/users")
-                .queryParam("userEmail", externalEmail).build().toUri();
+                .queryParam("useremail", externalEmail).build().toUri();
         log.info("Url Value " + attrUrl.toString());
         Boolean externalUserExists = restTemplate.getForObject(attrUrl, Boolean.class);
         return externalUserExists.booleanValue();
