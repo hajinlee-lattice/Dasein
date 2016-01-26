@@ -94,3 +94,20 @@ foreign key (ExternalColumnID)
 references `ExternalColumn` (`ExternalColumnID`)
   on delete cascade;
 
+LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/ExternalColumn.txt' INTO TABLE `SourceColumn`
+FIELDS TERMINATED BY '\t'  ENCLOSED BY ';'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(SourceColumnID,SourceName,ColumnName,ColumnType,BaseSource,Preparation,Priority,GroupBy,Calculation,Arguments,Groups);
+
+LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/ExternalColumn.txt' INTO TABLE `ExternalColumn`
+FIELDS TERMINATED BY '\t'  ENCLOSED BY ';'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,ExternalColumnID,DefaultColumnName,Description,DataType,DisplayName,Category,StatisticalType,DisplayDiscretizationStrategy,FundamentalType,ApprovedUsage,Tags);
+
+LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/ColumnMapping.txt' INTO TABLE `ColumnMapping`
+FIELDS TERMINATED BY '\t'  ENCLOSED BY ';'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(PID,ExternalColumnID,SourceName,SourceColumn,Priority);

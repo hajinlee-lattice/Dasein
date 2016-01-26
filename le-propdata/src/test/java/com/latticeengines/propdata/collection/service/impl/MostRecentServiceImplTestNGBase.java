@@ -133,8 +133,10 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     }
 
     protected void verifyResultTable() {
-        verifyUniqueness();
-        verifyMostRecent();
+        if (source instanceof HasSqlPresence) {
+            verifyUniqueness();
+            verifyMostRecent();
+        }
     }
 
     protected void verifyUniqueness() {
