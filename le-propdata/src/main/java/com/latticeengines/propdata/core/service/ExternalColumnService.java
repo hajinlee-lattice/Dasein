@@ -5,7 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 
 public interface ExternalColumnService {
-	
-	List<ExternalColumn> getLeadEnrichment();
+
+    List<ExternalColumn> columnSelection(String selectName);
 
 }

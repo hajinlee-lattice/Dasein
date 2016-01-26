@@ -5,5 +5,5 @@ import java.util.List;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 
 public interface ColumnMetadataInterface {
-	List<ColumnMetadata> getLeadEnrichment();
+    List<ColumnMetadata> columnSelection(String selectName);
 }
