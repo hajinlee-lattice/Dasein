@@ -18,6 +18,8 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -118,6 +120,37 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                         false);
                 long time2 = System.currentTimeMillis();
                 log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
+                return appId;
+            } catch (Exception e) {
+                log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
+                if (retryCount == MAX_SQOOP_RETRY) {
+                    throw new LedpException(LedpCode.LEDP_12010, e, new String[] { "import" });
+                }
+                try {
+                    Thread.sleep(RetryUtils.getExponentialWaitTime(++retryCount));
+                } catch (InterruptedException e1) {
+                    log.error("Sqoop Import Retry Failed! " + ExceptionUtils.getStackTrace(e1));
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ApplicationId importData(SqoopImporter importer) {
+        long time1 = System.currentTimeMillis();
+        final String jobName = jobNameService.createJobName(importer.getCustomer(), "sqoop-import");
+
+        int retryCount = 0;
+        while (retryCount < MAX_SQOOP_RETRY) {
+            try {
+                ApplicationId appId = super.importData(importer, jobName, metadataService, hadoopConfiguration);
+                long time2 = System.currentTimeMillis();
+                if (importer.isSync() && SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
+                    log.info(String.format("Time for importin %s = %d ms.", importer.getTable(), (time2 - time1)));
+                } else if (importer.isSync() && SqoopImporter.Mode.QUERY.equals(importer.getMode())) {
+                    log.info(String.format("Time for executing %s = %d ms.", importer.getQuery(), (time2 - time1)));
+                }
                 return appId;
             } catch (Exception e) {
                 log.error("Sqoop Import Failed! Retry " + retryCount + "\n", e);
@@ -298,6 +331,12 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 hadoopConfiguration, //
                 true, //
                 otherOptions);
+    }
+
+    @Override
+    public ApplicationId exportData(SqoopExporter exporter) {
+        String jobName = jobNameService.createJobName(exporter.getCustomer(), "sqoop-export");
+        return super.exportData(exporter, jobName, metadataService, hadoopConfiguration);
     }
 
 }

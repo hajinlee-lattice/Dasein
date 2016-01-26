@@ -23,6 +23,8 @@ import org.apache.sqoop.LedpSqoop;
 
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -83,6 +85,58 @@ public class SqoopJobServiceImpl {
         }
     }
 
+    protected ApplicationId exportData(SqoopExporter exporter, String jobName, MetadataService metadataService,
+                                       Configuration defaultConfiguration) {
+        Configuration yarnConfiguration = exporter.getYarnConfiguration();
+        if (yarnConfiguration == null) { yarnConfiguration = defaultConfiguration; }
+        int numMappers = exporter.getNumMappers();
+        if (numMappers < 1) {
+            numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
+        }
+
+        List<String> cmds = new ArrayList<>();
+        cmds.add("export");
+        if (exporter.getHadoopArgs() != null) {
+            for (String option : exporter.getHadoopArgs()) {
+                cmds.add(option);
+            }
+        }
+        cmds.add("--connect");
+        cmds.add(metadataService.getJdbcConnectionUrl(exporter.getDbCreds()));
+        cmds.add("--m");
+        cmds.add(Integer.toString(numMappers));
+        cmds.add("--table");
+        cmds.add(exporter.getTable());
+        cmds.add("--mapreduce-job-name");
+        cmds.add(jobName);
+        cmds.add("--export-dir");
+        cmds.add(exporter.getSourceDir());
+        String uuid = UUID.randomUUID().toString();
+        cmds.add("--bindir");
+        cmds.add(getBinaryInputDir(uuid));
+        cmds.add("--outdir");
+        cmds.add(getGenerateOutputDir(uuid));
+        if (StringUtils.isNotEmpty(exporter.getJavaColumnTypeMappings())) {
+            cmds.add("--map-column-java");
+            cmds.add(exporter.getJavaColumnTypeMappings());
+        }
+        if (exporter.getExportColumns() != null && !exporter.getExportColumns().isEmpty()) {
+            cmds.add("--columns");
+            cmds.add(StringUtils.join(exporter.getExportColumns(), ","));
+        }
+        if (exporter.getOtherOptions() != null) {
+            for (String option : exporter.getOtherOptions()) {
+                cmds.add(option);
+            }
+        }
+        try {
+            return runTool(cmds, yarnConfiguration, exporter.isSync(), uuid);
+        } finally {
+            FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
+            FileUtils.deleteQuietly(new File(getBinaryInputDir(uuid)));
+        }
+    }
+
     protected ApplicationId importData(String table, //
             String query, //
             String targetDir, //
@@ -101,6 +155,127 @@ public class SqoopJobServiceImpl {
         return importDataWithWhereCondition(table, query, targetDir, creds, queue, jobName, splitCols, //
                 columnsToInclude, "", numMappers, driver, props, //
                 metadataService, yarnConfiguration, sync);
+    }
+
+    protected ApplicationId importData(SqoopImporter importer, //
+                                       String jobName,
+                                       MetadataService metadataService, //
+                                       Configuration defaultConfiguration) {
+
+
+        Configuration yarnConfiguration = importer.getYarnConfiguration();
+        if (yarnConfiguration == null) { yarnConfiguration = defaultConfiguration; }
+
+        int numMappers = importer.getNumMappers();
+        if (numMappers < 1) {
+            numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
+        }
+
+        String table = importer.getTable();
+        if (importer.getSplitColumn() == null || importer.getSplitColumn().isEmpty() ||
+                (StringUtils.isNotEmpty(table) && table.startsWith("Play"))) {
+            numMappers = 1;
+        }
+
+        List<String> cmds = new ArrayList<>();
+        String connectionUrl = metadataService.getJdbcConnectionUrl(importer.getDbCreds());
+        cmds.add("import");
+        if (importer.getHadoopArgs() != null) {
+            for (String option : importer.getHadoopArgs()) {
+                cmds.add(option);
+            }
+        }
+        cmds.add("--connect");
+        cmds.add(connectionUrl);
+        cmds.add("--m");
+        cmds.add(Integer.toString(numMappers));
+
+        if (SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
+            cmds.add("--table");
+            cmds.add(table);
+        } else {
+            cmds.add("--query");
+            cmds.add(importer.getQuery());
+        }
+        cmds.add("--mapreduce-job-name");
+        cmds.add(jobName);
+        if (importer.getColumnsToInclude() != null && !importer.getColumnsToInclude().isEmpty()) {
+            cmds.add("--columns");
+            cmds.add(StringUtils.join(importer.getColumnsToInclude(), ","));
+        }
+        if (StringUtils.isNotEmpty(importer.getDbCreds().getDriverClass())) {
+            cmds.add("--driver");
+            cmds.add(importer.getDbCreds().getDriverClass());
+        }
+        if (StringUtils.isNotEmpty(importer.getSplitColumn())) {
+            cmds.add("--split-by");
+            cmds.add(importer.getSplitColumn());
+        }
+        cmds.add("--target-dir");
+        cmds.add(importer.getTargetDir());
+        String uuid = UUID.randomUUID().toString();
+        cmds.add("--bindir");
+        cmds.add(getBinaryInputDir(uuid));
+        cmds.add("--outdir");
+        cmds.add(getGenerateOutputDir(uuid));
+
+        if (importer.getOtherOptions() != null) {
+            for (String option : importer.getOtherOptions()) {
+                cmds.add(option);
+            }
+        }
+
+        String propsFileName = null;
+        if (importer.getProperties() != null) {
+            propsFileName = String.format("sqoop-import-props-%s.properties", System.currentTimeMillis());
+            File propsFile = new File(propsFileName);
+            try {
+                importer.getProperties().store(new FileWriter(propsFile), "");
+                cmds.add("--connection-param-file");
+                cmds.add(propsFile.getCanonicalPath());
+            } catch (IOException e) {
+                log.error(e);
+            }
+            String hdfsClassPath = importer.getProperties().getProperty("yarn.mr.hdfs.class.path");
+
+            if (hdfsClassPath != null) {
+                yarnConfiguration.set("yarn.mr.hdfs.class.path", hdfsClassPath);
+            }
+
+            String hdfsResources = importer.getProperties().getProperty("yarn.mr.hdfs.resources");
+
+            if (hdfsResources != null) {
+                String[] hdfsResourceList = hdfsResources.split(",");
+
+                for (String hdfsResource : hdfsResourceList) {
+                    try {
+                        DistributedCache.addCacheFile(new URI(hdfsResource), yarnConfiguration);
+                    } catch (URISyntaxException e) {
+                        log.error(e);
+                    }
+                }
+            }
+        }
+        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration);
+        for (String jarFilePath : jarFilePaths) {
+            try {
+                DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
+            } catch (URISyntaxException e) {
+                log.error(e);
+                throw new LedpException(LedpCode.LEDP_00002);
+            }
+        }
+        yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
+
+        try {
+            return runTool(cmds, yarnConfiguration, importer.isSync(), uuid);
+        } finally {
+            FileUtils.deleteQuietly(new File(getGenerateOutputDir(uuid)));
+            FileUtils.deleteQuietly(new File(getBinaryInputDir(uuid)));
+            if (StringUtils.isNotEmpty(propsFileName)) {
+                FileUtils.deleteQuietly(new File(propsFileName));
+            }
+        }
     }
 
     protected ApplicationId importDataWithWhereCondition(String table, //

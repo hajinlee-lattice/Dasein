@@ -30,5 +30,7 @@
         <module>le-cassandra</module>
         <module>le-swlib</module>
         <module>le-network</module>
+        <module>le-proxy</module>
+        <module>le-security</module>
     </modules>
 </project>

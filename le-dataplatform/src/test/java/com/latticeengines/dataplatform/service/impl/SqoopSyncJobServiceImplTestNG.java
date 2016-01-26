@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -33,6 +32,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -237,15 +238,20 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         props.put("trimHeaders", "true");
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.resources", "/tmp/Nutanix.csv#Nutanix.csv");
-        ApplicationId appId = sqoopSyncJobService.importData("Nutanix", //
-                "/tmp/dataFromFile", //
-                creds, //
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
-                "Nutanix", //
-                Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }), //
-                null, //
-                1, //
-                props);
+
+        SqoopImporter importer = new SqoopImporter.Builder()
+                .setTable("Nutanix")
+                .setTargetDir("/tmp/dataFromFile")
+                .setDbCreds(creds)
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("Nutanix")
+                .setSplitColumn("Nutanix_EventTable_Clean")
+                .setNumMappers(1)
+                .setProperties(props)
+                .setSync(false)
+                .build();
+
+        ApplicationId appId = sqoopSyncJobService.importData(importer);
 
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -292,28 +298,43 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_WARRANTY_GLOBAL";
         String sourceDir = "/tmp/Warranty_Dell.txt";
-        String targetColumns = "ORDER_BUSINESS_UNIT_ID,LOCAL_CHANNEL,SERVICE_TAG_ID,ORDER_NUMBER,"
-                + "SERVICE_CONTRACT_ORDER_NUMBER,SERVICE_CONTRACT_START_DATE,SERVICE_CONTRACT_END_DATE,"
-                + "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM,BRAND_DESC,SERVICE_LEVEL_CODE,CUSTOMER_NUMBER,"
-                + "SERVICE_CONTRACT_CUSTOMER_NUMBER,PRODUCT_LINE_PARENT,PRODUCT_LINE_DESC,PRODUCT_LINE,"
-                + "SERVICE_CONTRACT_STATUS_DESC,SOURCE_SYSTEM_UPDATE_DATE,REGION_CODE";
+        List<String> targetColumns =  Arrays.asList(
+                "ORDER_BUSINESS_UNIT_ID",
+                "LOCAL_CHANNEL",
+                "SERVICE_TAG_ID",
+                "ORDER_NUMBER",
+                "SERVICE_CONTRACT_ORDER_NUMBER",
+                "SERVICE_CONTRACT_START_DATE",
+                "SERVICE_CONTRACT_END_DATE",
+                "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM",
+                "BRAND_DESC",
+                "SERVICE_LEVEL_CODE","CUSTOMER_NUMBER",
+                "SERVICE_CONTRACT_CUSTOMER_NUMBER",
+                "PRODUCT_LINE_PARENT",
+                "PRODUCT_LINE_DESC",
+                "PRODUCT_LINE",
+                "SERVICE_CONTRACT_STATUS_DESC",
+                "SOURCE_SYSTEM_UPDATE_DATE",
+                "REGION_CODE"
+        );
         String optionalEnclosurePara = "--optionally-enclosed-by";
         String optionalEnclosureValue = "\\\"";
-        List<String> options = new ArrayList<>();
-        options.add(optionalEnclosurePara);
-        options.add(optionalEnclosureValue);
-
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt", "/tmp");
 
-        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
-                sourceDir, //
-                getSQLServerCreds(), //
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
-                "DellEbi_Warranty", //
-                1, //
-                null, //
-                targetColumns, //
-                options);
+        SqoopExporter exporter = new SqoopExporter.Builder()
+                .setTable(targetTable)
+                .setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds())
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_Warranty")
+                .setExportColumns(targetColumns)
+                .setNumMappers(1)
+                .addExtraOption(optionalEnclosurePara)
+                .addExtraOption(optionalEnclosureValue)
+                .setSync(false)
+                .build();
+
+        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -328,24 +349,25 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell_Delimiter.txt";
-        String targetColumns = "MFG_NAME,SUBCLASS_DESC,ITM_SHRT_DESC,MFG_PART_NUM";
+        List<String> targetColumns = Arrays.asList("MFG_NAME","SUBCLASS_DESC","ITM_SHRT_DESC","MFG_PART_NUM");
         String optionalEnclosurePara = "--fields-terminated-by";
         String optionalEnclosureValue = "|~|";
-        List<String> options = new ArrayList<>();
-        options.add(optionalEnclosurePara);
-        options.add(optionalEnclosureValue);
 
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell_Delimiter.txt", "/tmp");
 
-        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
-                sourceDir, //
-                getSQLServerCreds(), //
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
-                "DellEbi_SKU_Mfg", //
-                1, //
-                null, //
-                targetColumns, //
-                options);
+        SqoopExporter exporter = new SqoopExporter.Builder()
+                .setTable(targetTable)
+                .setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds())
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_SKU_Mfg")
+                .setNumMappers(1)
+                .setExportColumns(targetColumns)
+                .addExtraOption(optionalEnclosurePara)
+                .addExtraOption(optionalEnclosureValue)
+                .build();
+
+        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -359,18 +381,22 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell.txt";
-        String targetColumns = "MFG_NAME,SUBCLASS_DESC,ITM_SHRT_DESC,MFG_PART_NUM";
+        List<String> targetColumns = Arrays.asList("MFG_NAME","SUBCLASS_DESC","ITM_SHRT_DESC","MFG_PART_NUM");
 
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt", "/tmp");
 
-        ApplicationId appId = sqoopSyncJobService.exportDataSync(targetTable, //
-                sourceDir, //
-                getSQLServerCreds(), //
-                LedpQueueAssigner.getModelingQueueNameForSubmission(), //
-                "DellEbi_SKU_Mfg", //
-                1, //
-                null, //
-                targetColumns);
+        SqoopExporter exporter = new SqoopExporter.Builder()
+                .setTable(targetTable)
+                .setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds())
+                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_SKU_Mfg")
+                .setNumMappers(1)
+                .setExportColumns(targetColumns)
+                .build();
+
+
+        ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
         log.info(String.format("Waiting for appId %s", appId));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);

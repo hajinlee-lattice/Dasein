@@ -85,7 +85,6 @@ public abstract class AbstractCollectionArchiveService
 
         String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
                 progress.getStartDate(), progress.getEndDate());
-        String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
 
         Date earlist = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
@@ -105,7 +104,7 @@ public abstract class AbstractCollectionArchiveService
         whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
                 progress.getStartDate(), progress.getEndDate());
 
-        if (!importFromCollectionDB(getSource().getCollectedTableName(), targetDir, customer, getSource().getDownloadSplitColumn(),
+        if (!importFromCollectionDB(getSource().getCollectedTableName(), targetDir, getSource().getDownloadSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;

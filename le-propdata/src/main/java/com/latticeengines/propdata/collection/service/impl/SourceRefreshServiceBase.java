@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.collection.service.impl;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -15,13 +14,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
-import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.core.service.DataSourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -80,7 +80,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     @Value("${propdata.password.encrypted}")
     protected String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number:4}")
+    @Value("${propdata.collection.sqoop.mapper.number:8}")
     protected int numMappers;
 
     public P findRunningJob() {
@@ -166,21 +166,12 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         }
     }
 
-    protected boolean importFromCollectionDB(String table, String targetDir, String customer, String splitColumn,
+    protected boolean importFromCollectionDB(String table, String targetDir, String splitColumn,
                                              String whereClause, P progress) {
-        String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-        DbCreds creds = new DbCreds(builder);
         try {
-            if (StringUtils.isEmpty(whereClause)) {
-                sqoopService.importDataSync(table, targetDir, creds, assignedQueue, customer,
-                        Collections.singletonList(splitColumn), "", numMappers);
-            } else {
-                sqoopService.importDataSyncWithWhereCondition(
-                        table, targetDir, creds, assignedQueue, customer,
-                        Collections.singletonList(splitColumn), "", whereClause, numMappers);
-            }
+            String customer = getSqoopCustomerName(progress);
+            SqoopImporter importer = getCollectionDbImporter(table, targetDir, customer, splitColumn, whereClause);
+            sqoopService.importData(importer);
         } catch (Exception e) {
             LoggingUtils.logError(getLogger(), progress, "Failed to import data from source DB.", e);
             return false;
@@ -203,6 +194,27 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         progress.setNumRetries(0);
         LoggingUtils.logInfo(getLogger(), progress, "Finished.");
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
+    }
+
+    protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String customer,
+                                                    String splitColumn, String whereClause) {
+        DbCreds.Builder credsBuilder = new DbCreds.Builder();
+        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
+
+        SqoopImporter.Builder builder =  new SqoopImporter.Builder()
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
+                .setCustomer(customer + "-" + sqlTable)
+                .setNumMappers(numMappers)
+                .setSplitColumn(splitColumn)
+                .setTable(sqlTable).setTargetDir(avroDir)
+                .setDbCreds(new DbCreds(credsBuilder))
+                .setSync(true);
+
+        if (StringUtils.isNotEmpty(whereClause)) {
+            builder = builder.addExtraOption("--where").addExtraOption(whereClause);
+        }
+
+        return builder.build();
     }
 
 }

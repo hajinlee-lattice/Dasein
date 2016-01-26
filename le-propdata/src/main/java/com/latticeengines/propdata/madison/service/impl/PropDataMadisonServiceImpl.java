@@ -2,7 +2,6 @@ package com.latticeengines.propdata.madison.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -17,13 +16,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
-import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.entitymanager.PropDataMadisonEntityMgr;
+import com.latticeengines.propdata.madison.service.PropDataContext;
 import com.latticeengines.propdata.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.propdata.madison.service.PropDataMadisonService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -139,9 +140,18 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             builder.host(sourceDataJdbcHost).port(Integer.parseInt(sourceDataJdbcPort)).db(sourceDataJdbcDb)
                     .user(sourceDataJdbcUser).password(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
             DbCreds creds = new DbCreds(builder);
-            propDataJobService.importDataSync(dailyProgress.getDestinationTable(), targetDir, creds, assignedQueue,
-                    getJobName() + "-Progress Id-" + dailyProgress.getPid(), Arrays.asList(splitColumns.split(",")),
-                    "", numMappers);
+
+            SqoopImporter importer = new SqoopImporter.Builder()
+                    .setTable(dailyProgress.getDestinationTable())
+                    .setTargetDir(targetDir)
+                    .setDbCreds(creds)
+                    .setQueue(assignedQueue)
+                    .setCustomer(getJobName() + "-Progress Id-" + dailyProgress.getPid())
+                    .setSplitColumn(splitColumns.split(",")[0])
+                    .setNumMappers(numMappers)
+                    .setSync(true)
+                    .build();
+            propDataJobService.importData(importer);
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -257,8 +267,19 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
                         .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
                 DbCreds creds = new DbCreds(builder);
-                propDataJobService.importDataSync(targetTable + "_new", schemaPath, creds, assignedQueue, getJobName()
-                        + "-schema", Arrays.asList("DomainID"), "", 1);
+
+                SqoopImporter importer = new SqoopImporter.Builder()
+                        .setTable(targetTable + "_new")
+                        .setTargetDir(schemaPath)
+                        .setDbCreds(creds)
+                        .setQueue(assignedQueue)
+                        .setCustomer(getJobName() + "-schema")
+                        .setSplitColumn("DomainID")
+                        .setNumMappers(1)
+                        .setSync(true)
+                        .build();
+                propDataJobService.importData(importer);
+
                 log.info("Finished getting targetTable's schema file=" + schemaPath);
             }
         } catch (Exception e) {
@@ -359,8 +380,21 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb).user(targetJdbcUser)
                 .password(targetJdbcPassword).dbType(targetJdbcType);
         DbCreds creds = new DbCreds(builder);
-        propDataJobService.exportDataSync(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
-                + "-uploadAggregationData", numMappers, null);
+
+        SqoopExporter exporter = new SqoopExporter.Builder()
+                .setTable(getTableNew())
+                .setDbCreds(creds)
+                .setSourceDir(getOutputDir(sourceDir))
+                .setQueue(assignedQueue)
+                .setCustomer(getJobName())
+                .setNumMappers(numMappers)
+                .setSync(true)
+                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
+                .addHadoopArg("-Dexport.statements.per.transaction=1")
+                .addExtraOption("--batch")
+                .build();
+
+        propDataJobService.exportData(exporter);
 
         swapTargetTables(assignedQueue);
     }
@@ -413,8 +447,20 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 + "-uploadRawDataCreateTable", connectionString);
         log.info("Uploading today's data, targetTable=" + tableName);
 
-        propDataJobService.exportDataSync(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
-                + "-uploadRawDataExportData", numMappers, null);
+        SqoopExporter exporter = new SqoopExporter.Builder()
+                .setTable(tableName)
+                .setDbCreds(creds)
+                .setSourceDir(todayIncrementalPath)
+                .setQueue(assignedQueue)
+                .setCustomer(getJobName())
+                .setNumMappers(numMappers)
+                .setSync(true)
+                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
+                .addHadoopArg("-Dexport.statements.per.transaction=1")
+                .addExtraOption("--batch")
+                .build();
+
+        propDataJobService.exportData(exporter);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
                 + "-uploadRawDataMergeTable", connectionString);
 

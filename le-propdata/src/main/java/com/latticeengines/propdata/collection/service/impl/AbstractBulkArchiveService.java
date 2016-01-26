@@ -80,10 +80,8 @@ public abstract class AbstractBulkArchiveService
             updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
             return false;
         }
-        String customer = getSqoopCustomerName(progress) + "-downloadRawData" ;
-
         if (StageServer.COLLECTION_DB.equals(getSource().getBulkStageServer())) {
-            if (!importFromCollectionDB(getSource().getBulkStageTableName(), targetDir, customer, getSrcTableSplitColumn(),
+            if (!importFromCollectionDB(getSource().getBulkStageTableName(), targetDir, getSrcTableSplitColumn(),
                     null, progress)) {
                 updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
                 return false;

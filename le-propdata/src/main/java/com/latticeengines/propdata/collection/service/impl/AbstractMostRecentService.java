@@ -7,7 +7,6 @@ import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
 public abstract class AbstractMostRecentService extends AbstractRefreshService implements RefreshService {
@@ -44,15 +43,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
     public String findBaseVersionForNewProgress() {
         CollectedSource baseSource = getSource().getBaseSources()[0];
         Date collectedLatest = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
-        Date archivedLatest = archivedLatest();
-        return collectedLatest.after(archivedLatest) ? HdfsPathBuilder.dateFormat.format(collectedLatest) : null;
+        return HdfsPathBuilder.dateFormat.format(collectedLatest);
     }
 
-    private Date archivedLatest() {
-        Date latest = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
-                        + ((HasSqlPresence) getSource()).getSqlTableName(),
-                Date.class);
-        return latest;
-    }
 }

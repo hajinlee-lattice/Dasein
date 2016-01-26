@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public interface SqoopSyncJobService {
@@ -21,6 +23,8 @@ public interface SqoopSyncJobService {
     ApplicationId importData(String table, String query, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers, Properties props);
 
+    ApplicationId importData(SqoopImporter importer);
+
     ApplicationId importDataSync(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, String columnsToInclude, int numMappers);
 
@@ -34,6 +38,8 @@ public interface SqoopSyncJobService {
 
     ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer,
             int numMappers, String javaColumnTypeMappings);
+
+    ApplicationId exportData(SqoopExporter exporter);
 
     ApplicationId exportDataSync(String table, String sourceDir, DbCreds creds, String queue, String customer,
             int numMappers, String javaColumnTypeMappings);
