@@ -30,6 +30,7 @@ public class BuiltWithRecentTechBuffer extends BaseOperation implements Buffer {
 
     private static final Integer RECENT_TECH_LOC = 1;
     private static final Integer RECENT_TAG_LOC = 2;
+    private static final int NUM_TAG = 15;
 
     private static Set<String> tags = new HashSet<>(Arrays.asList(
             "Web Server",
@@ -102,8 +103,12 @@ public class BuiltWithRecentTechBuffer extends BaseOperation implements Buffer {
             if (tags.contains(tag)) {
                 String techToken = tech + "(" + dateFormat.format(new Date(firstDetected)) + ")";
                 String tagToken = tag + "(" + dateFormat.format(new Date(firstDetected)) + ")";
-                recentTechs.add(techToken);
-                recentTags.add(tagToken);
+                if (recentTechs.size() < NUM_TAG) {
+                    recentTechs.add(techToken);
+                }
+                if (recentTags.size() < NUM_TAG) {
+                    recentTags.add(tagToken);
+                }
             }
         }
 

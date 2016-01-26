@@ -26,6 +26,7 @@ public class BuiltWithTopAttrBuffer extends BaseOperation implements Buffer {
 
     private static final String TECHNOLOGY_NAME = "Technology_Name";
     private static final String TECHNOLOGY_FIRST = "Technology_First_Detected";
+    private static final int NUM_ATTR = 6;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
     protected Map<String, Integer> namePositionMap;
@@ -86,7 +87,7 @@ public class BuiltWithTopAttrBuffer extends BaseOperation implements Buffer {
                 String resultColumn = attrMap.get(tech);
                 Integer loc = namePositionMap.get(resultColumn);
                 String token = tech + "(" + dateFormat.format(new Date(firstDetected)) + ")";
-                if (countContextMap.containsKey(loc)) {
+                if (countContextMap.containsKey(loc) && countContextMap.get(loc).size() < NUM_ATTR) {
                     countContextMap.get(loc).add(token);
                 } else {
                     countContextMap.put(loc, new HashSet<>(Collections.singleton(token)));

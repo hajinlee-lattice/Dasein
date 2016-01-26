@@ -25,6 +25,7 @@ public class HGDataNewTechBuffer extends BaseOperation implements Buffer {
 
     private static final String CATEGORY_1 = "HG_Category_1";
     private static final String LAST_VERIFIED = "Last_Verified_Date";
+    private static final int NUM_TECH = 10;
     private final String domainField;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
@@ -64,6 +65,7 @@ public class HGDataNewTechBuffer extends BaseOperation implements Buffer {
             String cat = entry.getKey();
             Long date = entry.getValue();
             tokens.add(cat + "(" + dateFormat.format(new Date(date)) + ")");
+            if (tokens.size() >= NUM_TECH) break;
         }
         return StringUtils.join(tokens, ",");
     }

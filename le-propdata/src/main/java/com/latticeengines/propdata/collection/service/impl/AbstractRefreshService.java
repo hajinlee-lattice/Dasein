@@ -221,7 +221,6 @@ public abstract class AbstractRefreshService
     protected void createStageTable() {
         String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());
         for (String statement : statements) {
-            getLogger().info("About to execute \n" + statement);
             jdbcTemplateCollectionDB.execute(statement);
         }
     }

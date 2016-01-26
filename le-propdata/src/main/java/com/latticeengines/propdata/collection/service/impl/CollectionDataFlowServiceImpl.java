@@ -29,7 +29,6 @@ import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.core.source.impl.HGData;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -54,10 +53,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     private HGData hgData;
 
-    @Autowired
-    private BuiltWithPivoted builtWithPivoted;
-
-    @Value("${propdata.collection.mapred.reduce.tasks:8}")
+    @Value("${propdata.collection.mapred.reduce.tasks:4}")
     private int reduceTasks;
 
     @Value("${propdata.collection.cascading.platform:tez}")
