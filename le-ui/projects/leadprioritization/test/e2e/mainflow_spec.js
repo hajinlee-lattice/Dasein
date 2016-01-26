@@ -57,7 +57,7 @@ describe('smoketest main flow of app', function() {
         browser.driver.sleep(1000);
 
         // check existence of alerts tab
-        var showAlertsTab = true;
+        var showAlertsTab = ! browser.params.isProd;
         if (showAlertsTab) {
             expect(element(by.id('adminInfoAlertsTable')).getWebElement().isDisplayed()).toBe(false);
             modelTabs.getTabByIndex(1).click();

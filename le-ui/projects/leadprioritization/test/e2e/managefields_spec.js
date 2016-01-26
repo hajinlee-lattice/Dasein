@@ -29,6 +29,24 @@ describe('manage fields tests', function () {
         loginPage.logout();
     });
 
+    it('should validate that you can build model', function () {
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Build Model
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.SetupLink.isPresent().then(function (present){
+            if (present) {
+                clickSetupLink();
+                manageFields.testBuildModel();
+            }
+        });
+
+        loginPage.logout();
+    });
+
     it('should validate that you can filter fields', function () {
         loginPage.loginAsSuperAdmin();
 
@@ -90,29 +108,6 @@ describe('manage fields tests', function () {
                 grid.isDisplayed().then(function (displayed) {
                     if (displayed) {
                         manageFields.testEditDisplayName(grid);
-                    }
-                });
-            }
-        });
-
-        loginPage.logout();
-    });
-
-    it('should validate that you can edit tags', function () {
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Edit Tags and Roll Back
-        //==================================================
-        userDropdown.toggleDropdown();
-        browser.waitForAngular();
-        userDropdown.SetupLink.isPresent().then(function (present){
-            if (present) {
-                clickSetupLink();
-                var grid = element(by.id('fieldsGrid'));
-                grid.isDisplayed().then(function (displayed) {
-                    if (displayed) {
-                        manageFields.testEditTags(grid);
                     }
                 });
             }
@@ -262,7 +257,7 @@ describe('manage fields tests', function () {
     function clickSetupLink() {
         userDropdown.SetupLink.click();
         browser.waitForAngular();
-        browser.driver.sleep(12000);
+        browser.driver.sleep(15000);
     }
 
 });

@@ -19,26 +19,23 @@ angular.module('mainApp.login.services.LoginService', [
             method: 'POST', 
             url: '/pls/login',
             data: JSON.stringify({ Username: username, Password: passwordHash.toString() })
-         })
-        .success(function(data, status, headers, config) {
-            var result = null;    
-            if (data != null && data !== "") {
-                result = data;
-                BrowserStorageUtility.setTokenDocument(data.Uniqueness + "." + data.Randomness);
-                data.Result.UserName = username;
-                BrowserStorageUtility.setLoginDocument(data.Result);
-            }
-            deferred.resolve(result);
-        })
-        .error(function(data, status, headers, config) {
-            var result = {
-                Success: false,
-                errorMessage: data ? data.errorMsg : ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
-            };
-            
-            if (data.errorCode == 'LEDP_18001') result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
-            deferred.resolve(result);
-        });
+         }).then(
+            function onSuccess(response) {
+                var result = response.data;
+                if (result != null && result !== "") {
+                    BrowserStorageUtility.setTokenDocument(result.Uniqueness + "." + result.Randomness);
+                    result.Result.UserName = username;
+                    BrowserStorageUtility.setLoginDocument(result.Result);
+                }
+                deferred.resolve(result);
+            }, function onError(response) {
+                var result = {
+                    Success: false,
+                    errorMessage: ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
+                };
+                if (response.data.errorCode == 'LEDP_18001') result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
+                deferred.resolve(result);
+            });
         
         return deferred.promise;
     };
@@ -124,10 +121,7 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
-                
-                window.open("/login/", "_self");
-                
-                //window.location.reload();
+                window.location.reload();
             } else {
                 SessionService.HandleResponseErrors(data, status);
             }

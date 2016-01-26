@@ -81,6 +81,13 @@ body {
     text-rendering:optimizeLegibility;
     height: 100%;
 }
+select, select option {
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  -ms-transition: none !important;
+  transition: none !important;
+}
 ul li {
     list-style:none;
 }

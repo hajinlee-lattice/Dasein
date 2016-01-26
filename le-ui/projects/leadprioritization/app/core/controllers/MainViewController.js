@@ -14,7 +14,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ModelCreationHistoryController',
     'mainApp.models.controllers.ActivateModelController',
     'mainApp.core.services.FeatureFlagService',
-    'mainApp.setup.controllers.SetupController'
+    'mainApp.setup.controllers.SetupController',
+    'mainApp.setup.controllers.DeploymentWizardController',
+    'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
@@ -23,7 +25,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
         createUpdatePasswordView();
     } else {
-        createModelViewAndRefreshFeatures();
+        createMainContentViewAndRefreshFeatures();
     }
 
     // Handle Initial View
@@ -131,9 +133,14 @@ angular.module('mainApp.core.controllers.MainViewController', [
         createModelListView();
     });
 
-    function createModelViewAndRefreshFeatures() {
+    function createMainContentViewAndRefreshFeatures() {
         FeatureFlagService.GetAllFlags().then(function() {
-            createModelListView();
+            var flags = FeatureFlagService.Flags();
+            if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
+                createDeploymentWizardView();
+            } else {
+                createModelListView();
+            }
         });
     }
 
@@ -148,7 +155,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         });
     }
 
-    // Handle when the Model List link is clicked
+    // Handle when the Model Detail link is clicked
     $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
         createModelDetailView(data);
     });
@@ -192,6 +199,38 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/SetupView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+
+    // Handle the deployment wizard nav event
+    $scope.$on(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT, function (event, data) {
+        createDeploymentWizardView();
+    });
+
+    function createDeploymentWizardView() {
+        // Set the hash
+        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+
+        // Fetch the view and make it Angular aware
+        $http.get('./app/setup/views/DeploymentWizardView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+
+    // Handle the lead enrichment nav event
+    $scope.$on(NavUtility.LEAD_ENRICHMENT_NAV_EVENT, function (event, data) {
+        createLeadEnrichmentView();
+    });
+
+    function createLeadEnrichmentView() {
+        // Set the hash
+        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+
+        // Fetch the view and make it Angular aware
+        $http.get('./app/setup/views/LeadEnrichmentView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });

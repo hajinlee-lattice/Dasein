@@ -20,8 +20,19 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
             $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
             $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
+            $scope.showDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE);
+            $scope.redirectToDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE);
+            $scope.showLeadEnrichment = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
         });
     }
+
+    $scope.logoClicked = function ($event) {
+        if ($scope.redirectToDeploymentWizard && $('#finishDeploymentBtn:visible').length === 0) {
+            $scope.deploymentWizardClicked($event);
+        } else {
+            $scope.modelListClicked($event);
+        }
+    };
 
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
@@ -91,6 +102,22 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         }
 
         $rootScope.$broadcast(NavUtility.SETUP_NAV_EVENT);
+    };
+
+    $scope.deploymentWizardClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $rootScope.$broadcast(NavUtility.DEPLOYMENT_WIZARD_NAV_EVENT);
+    };
+
+    $scope.leadEnrichmentClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $rootScope.$broadcast(NavUtility.LEAD_ENRICHMENT_NAV_EVENT);
     };
 
     $scope.logoutClicked = function ($event) {

@@ -12,8 +12,19 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "grunt",
-    "env": "env",
-    "nodemon": "nodemon app.js"
+    "//": "environmental",
+    "qa": "npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
+    "dev": "npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
+    "prod": "npm run sass && grunt prod",
+    
+    "//": "concurrent projects",
+    "sass": "concurrent -r \"npm run pdsass\"",
+    "sentry": "concurrent -r \"npm run pdsentry\"",
+    
+    "//": "individual projects",
+    "pdsass": "cd projects/prospectdiscovery/ && grunt sass",
+    "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
+    "lpsass": "cd projects/leadprioritization/ && grunt sass",
+    "lpsentry": "cd projects/leadprioritization/ && grunt sentry"
   }
 }

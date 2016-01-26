@@ -8,6 +8,36 @@ angular.module('mainApp.setup.services.MetadataService', [
 
 .service('MetadataService', function ($http, $q, _, BrowserStorageUtility, RightsUtility, ResourceUtility, SessionService) {
 
+    this.GetOptions = function () {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/vdbmetadata/options?' + new Date().getTime(),
+            headers: {
+                'Content-Type': "application/json"
+            }
+        })
+        .success(function (data) {
+            var result = {
+                Success: true,
+                ResultObj: data,
+                ResultErrors: null
+            };
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_OPTIONS_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.GetFields = function () {
         var deferred = $q.defer();
 
@@ -111,6 +141,78 @@ angular.module('mainApp.setup.services.MetadataService', [
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.IsBuildModelGroupRunning = function () {
+        var deferred = $q.defer();
+
+        var groupName = 'CreateAnalyticPlay';
+        $http({
+            method: 'GET',
+            url: '/pls/vdbmetadata/runninggroups/' + groupName + '?' + new Date().getTime(),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.BuildModel = function () {
+        var deferred = $q.defer();
+
+        var groupName = 'CreateAnalyticPlay';
+        $http({
+            method: 'POST',
+            url: '/pls/vdbmetadata/executegroup/' + groupName,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = data.Result;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR')
             };
             deferred.resolve(result);
         });

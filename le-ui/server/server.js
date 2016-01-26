@@ -69,11 +69,11 @@ class Server {
     }
 
     setAppRoutes(routes) {
-        console.log('<!> WEB ROOT:',this.options.root);
+        console.log('> WEB ROOT:',this.options.root);
         routes.forEach(route => {
             const dir = this.options.root + route.path;
             var displayString = '';
-            console.log('\n<!> PATH:\t'+route.path);
+            console.log('> PATH:\t'+route.path);
             // set up the static routes for app files
             if (route.folders) {
                 Object.keys(route.folders).forEach(folder => {
@@ -85,7 +85,7 @@ class Server {
                 });
             }
 
-            console.log('<!> STATIC:\t'+displayString);
+            console.log('\t[ '+displayString+' ]');
 
             displayString = '';
             // users will see the desired render page when entering these routes
@@ -136,9 +136,9 @@ class Server {
         const options = this.options;
         const server = this.app.listen(options.USE_PORT, () => {
             console.log(
-                '\n<!> HOST: http://localhost:' + options.USE_PORT + '/' + 
+                '> HOST: http://localhost:' + options.USE_PORT + '/' + 
                 '\tENV:', options.ENV, '\n' +
-                '<!> API:', options.API_URL
+                '> API:', options.API_URL
             );
         });
     }

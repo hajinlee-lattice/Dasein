@@ -9,6 +9,13 @@ var Login = function() {
     this.loginButton = element(by.id('loginButton'));
 
     this.loginUser = function(name, password, tenantId) {
+        this.login(name, password, tenantId);
+        browser.wait(function(){
+            return element(by.css('div.page-title')).isPresent();
+        }, 100000, 'page title should appear with in 100 sec.');
+    };
+
+    this.login = function(name, password, tenantId) {
         tenantId = tenantId || browser.params.tenantId;
         getWebApp();
         browser.driver.sleep(2000);
@@ -23,9 +30,6 @@ var Login = function() {
                 }
             });
         });
-        browser.wait(function(){
-            return element(by.css('div.page-title')).isPresent();
-        }, 100000, 'page title should appear with in 100 sec.');
     };
 
     function getWebApp() {

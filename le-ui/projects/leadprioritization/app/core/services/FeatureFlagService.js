@@ -33,7 +33,10 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         SYSTEM_SETUP_PAGE: 'SystemSetupPage',
         ACTIVATE_MODEL_PAGE: 'ActivateModelPage',
 
-        SETUP_PAGE: 'SetupPage'
+        SETUP_PAGE: 'SetupPage',
+        DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
+        REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
+        LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
     };
     this.Flags = function(){ return flags; };
 
@@ -75,6 +78,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
             SetFlag(flags.SETUP_PAGE, false);
             SetFlag(flags.ACTIVATE_MODEL_PAGE, false);
             SetFlag(flags.SYSTEM_SETUP_PAGE, false);
+            SetFlag(flags.DEPLOYMENT_WIZARD_PAGE, false);
+            SetFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
+            SetFlag(flags.LEAD_ENRICHMENT_PAGE, false);
 
             // update user-level flags
             UpdateFlagsBasedOnRights();
@@ -110,10 +116,13 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         UpdateFlag(flags.ADMIN_PAGE, RightsUtility.currentUserMay("View", "Reporting"));
         UpdateFlag(flags.MODEL_HISTORY_PAGE, RightsUtility.currentUserMay("View", "Reporting"));
-        UpdateFlag(flags.SYSTEM_SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
-        UpdateFlag(flags.ACTIVATE_MODEL_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
+        UpdateFlag(flags.SYSTEM_SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.ACTIVATE_MODEL_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
 
-        UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configuration"));
+        UpdateFlag(flags.SETUP_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.LEAD_ENRICHMENT_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
     }
 
 });

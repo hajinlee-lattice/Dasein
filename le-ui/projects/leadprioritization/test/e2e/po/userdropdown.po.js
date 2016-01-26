@@ -9,13 +9,14 @@ var UserDropdown = function() {
     this.updatePassword = element(by.linkText('Update Password'));
     this.modelCreationHistory = element(by.linkText('Model Creation History'));
     this.SetupLink = element(by.linkText('Manage Fields'));
+    this.TenantDeploymentWizard = element(by.linkText('Deployment Wizard'));
 
     this.getUserLink = function(name) {
         return element(by.linkText(name));
     };
 
     this.toggleDropdown = function() {
-        element(by.css('a.nav-personal')).click();
+        element(by.className('nav-personal')).click();
         browser.waitForAngular();
     };
 };

@@ -99,42 +99,42 @@ describe('system setup tests', function () {
         loginPage.logout();
     });
 
-    it('should validate that you can enter SFDC sandbox credentials', function () {
-        //==================================================
-        // Login
-        //==================================================
-        loginPage.loginAsSuperAdmin();
-
-        //==================================================
-        // Select System Setup Tab
-        //==================================================
-        userDropdown.toggleDropdown();
-        browser.waitForAngular();
-        userDropdown.SystemSetupLink.click();
-        browser.waitForAngular();
-        systemSetup.waitForSfdcCredentials();
-
-        //==================================================
-        // Enter Bad SFDC Sandbox Credentials
-        //==================================================
-        element(by.css('a[href="#formSandbox"]')).click();
-        systemSetup.waitForSfdcSandboxCredentials();
-        systemSetup.enterBadSfdcSandboxCredentials();
-        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
-
-        browser.driver.sleep(2000);
-
-        //==================================================
-        // Enter Valid SFDC Sandbox Credentials
-        //==================================================
-        systemSetup.enterValidSfdcSandboxCredentials();
-        expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
-
-        //==================================================
-        // Logout
-        //==================================================
-        loginPage.logout();
-    });
+    //it('should validate that you can enter SFDC sandbox credentials', function () {
+    //    //==================================================
+    //    // Login
+    //    //==================================================
+    //    loginPage.loginAsSuperAdmin();
+    //
+    //    //==================================================
+    //    // Select System Setup Tab
+    //    //==================================================
+    //    userDropdown.toggleDropdown();
+    //    browser.waitForAngular();
+    //    userDropdown.SystemSetupLink.click();
+    //    browser.waitForAngular();
+    //    systemSetup.waitForSfdcCredentials();
+    //
+    //    //==================================================
+    //    // Enter Bad SFDC Sandbox Credentials
+    //    //==================================================
+    //    element(by.css('a[href="#formSandbox"]')).click();
+    //    systemSetup.waitForSfdcSandboxCredentials();
+    //    systemSetup.enterBadSfdcSandboxCredentials();
+    //    expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("Credentials are invalid.");
+    //
+    //    browser.driver.sleep(2000);
+    //
+    //    //==================================================
+    //    // Enter Valid SFDC Sandbox Credentials
+    //    //==================================================
+    //    systemSetup.enterValidSfdcSandboxCredentials();
+    //    expect(element(by.css('#formSandbox .alert-danger')).getText()).toBe("");
+    //
+    //    //==================================================
+    //    // Logout
+    //    //==================================================
+    //    loginPage.logout();
+    //});
 
     it('should validate SFDC production credentials', function () {
         //==================================================
@@ -193,9 +193,9 @@ describe('system setup tests', function () {
         systemSetup.verifyEloquaCredentialsSaved();
         systemSetup.verifySfdcProductionCredentialsSaved();
 
-        element(by.css('a[href="#formSandbox"]')).click();
-        systemSetup.waitForSfdcSandboxCredentials();
-        systemSetup.verifySfdcSandboxCredentialsSaved();
+        //element(by.css('a[href="#formSandbox"]')).click();
+        //systemSetup.waitForSfdcSandboxCredentials();
+        //systemSetup.verifySfdcSandboxCredentialsSaved();
 
         //==================================================
         // Logout

@@ -29,14 +29,9 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     $scope.saveInProgress = false;
     $scope.approvedUsagesToSelect = $scope.$parent.ApprovedUsageOptions;
     $scope.categoriesToSelect = $scope.$parent.CategoryOptions;
-    $scope.tagsToSelect = $scope.$parent.TagsOptions;
     $scope.fundamentalTypesToSelect = $scope.$parent.FundamentalTypeOptions;
     $scope.statisticalTypesToSelect = $scope.$parent.StatisticalTypeOptions;
     $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
-
-    $scope.tagsChanged = function($event) {
-        $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
-    };
 
     $scope.saveClicked = function($event) {
         if ($event != null) {
