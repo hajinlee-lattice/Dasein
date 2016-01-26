@@ -1,5 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
+import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,11 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,8 +48,8 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
-import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 @Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
@@ -68,12 +74,17 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private DefaultConfigOverwritter overwritter;
 
-    @Autowired
-    private UserService userService;
+    @Value("${pls.api.hostport}")
+    private String plsEndHost;
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private ProductAndExternalAdminInfo prodAndExternalAminInfo;
+
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
+
+    protected RestTemplate restTemplate = new RestTemplate();
 
     public TenantServiceImpl() {
     }
@@ -180,8 +191,14 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private boolean checkExternalAdminUserExistence(String externalEmail) {
-        User user = userService.findByEmail(externalEmail);
-        return user != null;
+
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        URI attrUrl = UriComponentsBuilder.fromUriString(plsEndHost + "/pls/admin/users")
+                .queryParam("userEmail", externalEmail).build().toUri();
+        log.info("Url Value " + attrUrl.toString());
+        Boolean externalUserExists = restTemplate.getForObject(attrUrl, Boolean.class);
+        return externalUserExists.booleanValue();
     }
 
     @Override

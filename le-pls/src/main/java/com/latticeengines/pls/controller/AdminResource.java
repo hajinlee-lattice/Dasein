@@ -159,10 +159,11 @@ public class AdminResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/restTempPassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/resetTempPassword", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset temporary password")
-    public String restTempPassword(@RequestBody User user) {
+    public String restTempPassword(@RequestBody User user, HttpServletRequest request) {
+        checkHeader(request);
         String username = user.getUsername();
         String tempPass = null;
         try {
@@ -172,6 +173,16 @@ public class AdminResource extends InternalResourceBase {
         }
         LOGGER.info("Resetting temporary password successful.");
         return tempPass;
+    }
+
+    @RequestMapping(value = "/users", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Check whether a user exists by email")
+    public Boolean checkUserExistenceByEmail(@RequestParam(value = "userEmail") String userEmail,
+            HttpServletRequest request) {
+        checkHeader(request);
+        User user = userService.findByEmail(userEmail);
+        return user != null;
     }
 
 }

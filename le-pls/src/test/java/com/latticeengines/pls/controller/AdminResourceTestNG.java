@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -153,7 +155,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(existingUser.toString(), headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/restTempPassword",
+        ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/admin/resetTempPassword",
                 HttpMethod.PUT, requestEntity, String.class);
         assertNotNull(result.getBody());
     }
@@ -174,6 +176,12 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(result);
 
         assertNotNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
+
+        URI attrUrl = UriComponentsBuilder.fromUriString(getRestAPIHostPort() + "/pls/admin/users")
+                .queryParam("userEmail", "ron@lattice-engines.com").build().toUri();
+        System.out.println("Url Value " + attrUrl.toString());
+        Boolean addAdminUserSuccessful = restTemplate.getForObject(attrUrl, Boolean.class);
+        assertTrue(addAdminUserSuccessful);
     }
 
     @Test(groups = "functional", dataProvider = "userRegistrationDataProviderBadArgs")
@@ -185,6 +193,12 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
                 userRegistrationWithTenant, Boolean.class);
         assertFalse(result);
         assertNull(globalUserManagementService.getUserByEmail("ron@lattice-engines.com"));
+
+        URI attrUrl = UriComponentsBuilder.fromUriString(getRestAPIHostPort() + "/pls/admin/users")
+                .queryParam("userEmail", "ron@lattice-engines.com").build().toUri();
+        System.out.println("Url Value " + attrUrl.toString());
+        Boolean addAdminUserSuccessful = restTemplate.getForObject(attrUrl, Boolean.class);
+        assertFalse(addAdminUserSuccessful);
     }
 
     @SuppressWarnings("rawtypes")
