@@ -80,7 +80,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     @Value("${propdata.password.encrypted}")
     protected String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number:8}")
+    @Value("${propdata.collection.sqoop.mapper.number:4}")
     protected int numMappers;
 
     public P findRunningJob() {

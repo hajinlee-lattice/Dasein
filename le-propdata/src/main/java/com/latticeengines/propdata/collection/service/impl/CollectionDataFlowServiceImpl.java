@@ -53,9 +53,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     @Autowired
     private HGData hgData;
 
-    @Value("${propdata.collection.mapred.reduce.tasks:4}")
-    private int reduceTasks;
-
     @Value("${propdata.collection.cascading.platform:tez}")
     protected String cascadingPlatform;
 

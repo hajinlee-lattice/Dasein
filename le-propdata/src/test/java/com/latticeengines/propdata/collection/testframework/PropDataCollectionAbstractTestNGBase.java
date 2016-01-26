@@ -41,7 +41,7 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
     @Value("${propdata.password.encrypted}")
     private String dbPassword;
 
-    @Value("${propdata.collection.sqoop.mapper.number}")
+    @Value("${propdata.collection.sqoop.mapper.number:4}")
     private int numMappers;
 
     @Autowired
