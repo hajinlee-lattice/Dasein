@@ -1,0 +1,26 @@
+<style>
+    .chart rect {
+      stroke: none;
+    }
+    
+    .chart line {
+      stroke: #c1c1c1;
+    }
+    
+    .chart .rule {
+      fill: #000;
+    }
+</style>
+
+<div>
+    
+</div>
+<div data-ng-controller="TopPredictorAttributeWidgetController" class="attribute-hover">
+    <div>
+        <div data-ng-if="showtitle" data-ng-bind-html="generateAttributeName()" class="attribute-hover-header">
+        </div>
+        <div id="attributeChart" class="attribute-chart">
+            
+        </div>
+    </div>
+</div>

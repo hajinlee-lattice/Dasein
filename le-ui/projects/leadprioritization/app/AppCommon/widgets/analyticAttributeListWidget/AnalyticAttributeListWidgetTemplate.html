@@ -1,0 +1,27 @@
+<div data-ng-controller="AnalyticAttributeListWidgetController">
+    <div data-ng-show="!hasAttributes">
+        <div class="empty-analytic-list-container">
+            <span class="empty-analytic-list-description">
+                {{ResourceUtility.getString('DANTE_LEAD_NO_INSIGHTS_DESCRIPTION')}}&nbsp;
+                <a class="tooltip" href="#" title="{{learnMoreTooltip}}" data-ng-click="learnMoreClicked($event)">
+                    {{ResourceUtility.getString('ANALYTIC_ATTRIBUTE_LEARN_MORE_LABEL')}}
+                </a>
+            </span>
+        </div>
+    </div>
+    <div class="analytic-attribute-list-header" data-ng-show="hasAttributes">
+        <div class="analytic-attribute-header-label float-left">
+            {{ResourceUtility.getString('ANALYTIC_ATTRIBUTE_HEADER_LABEL')}}
+        </div>
+        <a class="analytic-attribute-header-label 
+                  analytic-attribute-lift-header-label 
+                  float-right
+                  {{liftDescending ? 'lift-descending' : 'lift-ascending'}}"
+                  data-ng-click="liftSortClicked($event)">
+            {{liftLabel}}
+        </a>
+    </div>
+    <div class="js-analytic-attribute-list analytic-attribute-list">
+        
+    </div>
+</div>
