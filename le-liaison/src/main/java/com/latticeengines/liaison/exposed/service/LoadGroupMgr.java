@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
 
+import org.w3c.dom.Element;
+
 import com.latticeengines.liaison.exposed.exception.UnknownDataLoaderObjectException;
 
 public interface LoadGroupMgr {
@@ -14,19 +16,33 @@ public interface LoadGroupMgr {
 
     Boolean hasLoadGroup(String groupName);
 
-    // getLoadGroupFunctionality(...)
+    // getLoadGroupFunctionalityXML(...)
     //
     // Returns an xml representation of the requested load group functionality.
 
-    String getLoadGroupFunctionality(String groupName, String functionality)
+    String getLoadGroupFunctionalityXML(String groupName, String functionality)
             throws UnknownDataLoaderObjectException, TransformerException;
 
-    // setLoadGroupFunctionality(...)
+    // getLoadGroupFunctionality(...)
+    //
+    // Returns an DOM Element representation of the requested load group functionality.
+
+    Element getLoadGroupFunctionality(String groupName, String functionality)
+            throws UnknownDataLoaderObjectException;
+
+    // setLoadGroupFunctionalityXML(...)
     //
     // Sets load group functionality from an xml representation
 
-    void setLoadGroupFunctionality(String groupName, String xmlConfig)
+    void setLoadGroupFunctionalityXML(String groupName, String xmlConfig)
             throws UnknownDataLoaderObjectException, RuntimeException;
+
+    // setLoadGroupFunctionality(...)
+    //
+    // Sets load group functionality from a DOM Element representation
+
+    void setLoadGroupFunctionality(String groupName, Element elem)
+            throws UnknownDataLoaderObjectException;
 
     // commit()
     //

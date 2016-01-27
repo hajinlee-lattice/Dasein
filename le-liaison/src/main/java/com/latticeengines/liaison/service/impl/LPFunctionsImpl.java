@@ -2,17 +2,21 @@ package com.latticeengines.liaison.service.impl;
 
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Element;
 
 import com.latticeengines.liaison.exposed.exception.DefinitionException;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.LPFunctions;
+import com.latticeengines.liaison.exposed.service.LoadGroupMgr;
 
 @Component
 public class LPFunctionsImpl implements LPFunctions {
@@ -60,7 +64,72 @@ public class LPFunctionsImpl implements LPFunctions {
     @Override
     public Boolean addLDCMatch(ConnectionMgr conn_mgr, String source, String lp_template_version)
             throws IOException, RuntimeException {
-        return Boolean.FALSE;
+
+        final Set<String> matchFieldsNotUsed = new HashSet<String>(Arrays.asList("Name","City","State","Country"));
+
+        LoadGroupMgr lg_mgr = conn_mgr.getLoadGroupMgr();
+        String matchName = String.format("PD_Enrichment_%s", source);
+
+        if (!lg_mgr.hasLoadGroup("PropDataMatch_Step1")) {
+            return Boolean.FALSE;
+        }
+
+        Element pdm1_pdmatches = lg_mgr.getLoadGroupFunctionality("PropDataMatch_Step1", "pdmatches");
+        Element enrichment_match = null;
+        Element matchToRemove = null;
+
+        for (int i = 0; i < pdm1_pdmatches.getElementsByTagName("pdmatch").getLength(); i++) {
+            Element pdmatch = (Element) pdm1_pdmatches.getElementsByTagName("pdmatch").item(i);
+            if (pdmatch.getAttribute("n").equals("PD")) {
+                enrichment_match = (Element) pdmatch.cloneNode(Boolean.TRUE);
+            }
+            else if (pdmatch.getAttribute("n").equals(matchName)) {
+                matchToRemove = pdmatch;
+            }
+        }
+
+        if (matchToRemove != null) {
+            pdm1_pdmatches.removeChild(matchToRemove);
+        }
+
+        if (enrichment_match == null) {
+            return Boolean.FALSE;
+        }
+
+        enrichment_match.setAttribute("n", matchName);
+
+        Set<Element> scsChildrenToRemove = new HashSet<>();
+        Element scs = (Element) enrichment_match.getElementsByTagName("scs").item(0);
+        for (int i = 0; i < scs.getElementsByTagName("c").getLength(); i++) {
+            Element c = (Element) scs.getElementsByTagName("c").item(i);
+            if (matchFieldsNotUsed.contains(c.getAttribute("mcn"))) {
+                scsChildrenToRemove.add(c);
+            }
+        }
+
+        for (Element c : scsChildrenToRemove) {
+            scs.removeChild(c);
+        }
+
+        Set<Element> luosChildrenToRemove = new HashSet<>();
+        Element luos = (Element) enrichment_match.getElementsByTagName("luos").item(0);
+        Element luoNew = (Element) luos.getElementsByTagName("luo").item(0).cloneNode(Boolean.TRUE);
+        for (int i = 0; i < luos.getElementsByTagName("luo").getLength(); i++) {
+            Element luo = (Element) luos.getElementsByTagName("luo").item(i);
+            luosChildrenToRemove.add(luo);
+        }
+
+        for (Element luo : luosChildrenToRemove) {
+            luos.removeChild(luo);
+        }
+
+        luoNew.setAttribute("n", source);
+        luos.appendChild(luoNew);
+
+        pdm1_pdmatches.appendChild(enrichment_match);
+        lg_mgr.setLoadGroupFunctionality("PropDataMatch_Step1", pdm1_pdmatches);
+
+        return Boolean.TRUE;
     }
 
     @Override

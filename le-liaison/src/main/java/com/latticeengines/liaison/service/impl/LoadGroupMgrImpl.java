@@ -54,8 +54,19 @@ public class LoadGroupMgrImpl implements LoadGroupMgr {
     }
 
     @Override
-    public String getLoadGroupFunctionality(String groupName, String functionality)
+    public String getLoadGroupFunctionalityXML(String groupName, String functionality)
             throws UnknownDataLoaderObjectException, TransformerException {
+
+        Element f = getLoadGroupFunctionality(groupName, functionality);
+        StreamResult result = new StreamResult(new StringWriter());
+        DOMSource source = new DOMSource(f);
+        transformer.transform(source, result);
+        return result.getWriter().toString();
+    }
+
+    @Override
+    public Element getLoadGroupFunctionality(String groupName, String functionality)
+            throws UnknownDataLoaderObjectException {
 
         if (!hasLoadGroup(groupName)) {
             throw new UnknownDataLoaderObjectException(String.format("Unknown LoadGroup: %s", groupName));
@@ -76,16 +87,13 @@ public class LoadGroupMgrImpl implements LoadGroupMgr {
         }
         if (group.getElementsByTagName(functionality).getLength() > 0) {
             Element f = (Element) group.getElementsByTagName(functionality).item(0);
-            StreamResult result = new StreamResult(new StringWriter());
-            DOMSource source = new DOMSource(f);
-            transformer.transform(source, result);
-            return result.getWriter().toString();
+            return f;
         }
-        return String.format("<%s />", functionality);
+        return doc.createElement(functionality);
     }
 
     @Override
-    public void setLoadGroupFunctionality(String groupName, String xmlConfig)
+    public void setLoadGroupFunctionalityXML(String groupName, String xmlConfig)
             throws UnknownDataLoaderObjectException, RuntimeException {
 
         if (!hasLoadGroup(groupName)) {
@@ -105,8 +113,19 @@ public class LoadGroupMgrImpl implements LoadGroupMgr {
             throw new RuntimeException(String.format("Exception when building Document from XML: %s", ex.getMessage()));
         }
 
-        Element f_new = fcndoc.getDocumentElement();
-        String functionality = f_new.getTagName();
+        Element elem = fcndoc.getDocumentElement();
+        setLoadGroupFunctionality(groupName, elem);
+    }
+
+    @Override
+    public void setLoadGroupFunctionality(String groupName, Element elem)
+            throws UnknownDataLoaderObjectException {
+
+        if (!hasLoadGroup(groupName)) {
+            throw new UnknownDataLoaderObjectException(String.format("Unknown LoadGroup: %s", groupName));
+        }
+
+        String functionality = elem.getTagName();
         if (!functionalities.contains(functionality)) {
             throw new UnknownDataLoaderObjectException(String.format("Unknown DataLoader functionality: %s", functionality));
         }
@@ -122,10 +141,10 @@ public class LoadGroupMgrImpl implements LoadGroupMgr {
         }
         if (group.getElementsByTagName(functionality).getLength() > 0) {
             Element f_old = (Element) group.getElementsByTagName(functionality).item(0);
-            group.replaceChild(f_new, f_old);
+            group.replaceChild(elem, f_old);
         }
         else {
-            group.appendChild(f_new);
+            group.appendChild(elem);
         }
     }
 
