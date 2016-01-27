@@ -36,11 +36,13 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         this.dataLoaderService = dataLoaderService;
     }
 
+    @Override
     public Query getQuery(String queryName) throws IOException, RuntimeException {
         String spec = getSpec(queryName);
         return new QueryVDBImpl(queryName, spec);
     }
 
+    @Override
     public Map<String, Map<String, String>> getMetadata(String queryName) throws IOException,
             RuntimeException {
 
@@ -139,20 +141,45 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         return columns;
     }
 
+    @Override
     public void setQuery(Query query) throws IOException, RuntimeException {
         setSpec(query.getName(), "SpecLatticeNamedElements((" + query.definition() + "))");
     }
 
+    @Override
     public LoadGroupMgr getLoadGroupMgr() throws IOException, RuntimeException {
         if (this.lg_mgr == null) {
-            String configfile = "Not implemented";
+            String configfile = dataLoaderService.getDLConfig(tenantName, dlURL);
             this.lg_mgr = new LoadGroupMgrImpl(this, configfile);
         }
         return this.lg_mgr;
     }
 
+    @Override
     public void installDLConfigFile(String config) throws IOException, RuntimeException {
-        
+        InstallResult getInstallResult = dataLoaderService.installDataLoaderConfigFile(
+                new InstallTemplateRequest(tenantName, config), dlURL);
+
+        if (getInstallResult.getStatus() == 5) {
+            throw new RuntimeException(
+                    String.format("XML string error when installing config file for tenant \"%s\" at DataLoader URL %s;\nMesg: \"%s\"",
+                            tenantName, dlURL, getInstallResult.getErrorMessage()));
+        }
+
+        if (getInstallResult.getStatus() != 3) {
+            throw new RuntimeException(
+                    String.format("Failed to set config for tenant \"%s\" at DataLoader URL %s",
+                            tenantName, dlURL));
+        }
+
+        List<ValueResult> vrs = getInstallResult.getValueResult();
+        ValueResult status2 = vrs.get(0);
+
+        if (!status2.getValue().equals("Succeed")) {
+            throw new RuntimeException(String.format(
+                    "DataLoader error setting config for tenant \"%s\" at DataLoader URL %s",
+                    tenantName, dlURL));
+        }
     }
 
     public String getSpec(String specName) throws IOException, RuntimeException {

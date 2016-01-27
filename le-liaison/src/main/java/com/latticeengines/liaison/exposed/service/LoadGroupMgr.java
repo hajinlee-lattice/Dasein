@@ -2,6 +2,8 @@ package com.latticeengines.liaison.exposed.service;
 
 import java.io.IOException;
 
+import javax.xml.transform.TransformerException;
+
 import com.latticeengines.liaison.exposed.exception.UnknownDataLoaderObjectException;
 
 public interface LoadGroupMgr {
@@ -17,14 +19,14 @@ public interface LoadGroupMgr {
     // Returns an xml representation of the requested load group functionality.
 
     String getLoadGroupFunctionality(String groupName, String functionality)
-            throws UnknownDataLoaderObjectException;
+            throws UnknownDataLoaderObjectException, TransformerException;
 
     // setLoadGroupFunctionality(...)
     //
     // Sets load group functionality from an xml representation
 
     void setLoadGroupFunctionality(String groupName, String xmlConfig)
-            throws UnknownDataLoaderObjectException;
+            throws UnknownDataLoaderObjectException, RuntimeException;
 
     // commit()
     //

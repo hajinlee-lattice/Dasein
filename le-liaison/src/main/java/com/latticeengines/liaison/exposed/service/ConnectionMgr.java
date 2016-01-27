@@ -15,4 +15,8 @@ public interface ConnectionMgr {
     LoadGroupMgr getLoadGroupMgr() throws IOException, RuntimeException;
 
     void installDLConfigFile(String config) throws IOException, RuntimeException;
+
+    String getSpec(String specName) throws IOException, RuntimeException;
+
+    void setSpec(String objName, String specLatticeNamedElements) throws IOException, RuntimeException;
 }

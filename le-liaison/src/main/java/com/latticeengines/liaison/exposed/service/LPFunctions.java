@@ -19,7 +19,7 @@ public interface LPFunctions {
     // RuntimeException is thrown.
 
     AbstractMap.SimpleImmutableEntry<String, String> getLPTemplateTypeAndVersion(
-            ConnectionMgr conn_mgr) throws IOException, RuntimeException;
+            ConnectionMgr conn_mgr);
 
     // addLDCMatch(...)
     //
@@ -69,6 +69,6 @@ public interface LPFunctions {
     // from "column_name_in_propdata" according to the lp_template_type.
 
     Boolean setLDCWritebackAttributesDefaultName(ConnectionMgr conn_mgr, String source,
-            Set<String> column_names_in_propdata, String lp_template_type, 
+            Set<String> column_names_in_propdata, String lp_template_type,
             String lp_template_version) throws IOException, RuntimeException;
 }
