@@ -32,6 +32,11 @@
             <filtered>true</filtered>
         </file>
         <file>
+            <source>../le-proxy/conf/env/prodcluster/proxy.properties</source>
+            <outputDirectory>.</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>../le-dataplatform/conf/env/qacluster/dataplatform.properties</source>
             <outputDirectory>.</outputDirectory>
             <filtered>true</filtered>
