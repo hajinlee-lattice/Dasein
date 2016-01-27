@@ -58,10 +58,12 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         Map<String, AmAttribute> attrMap = new HashMap<String, AmAttribute>();
         for (AmAttribute attr : attrs) {
             attr.setProperty("CompanyCount", "0");
-            for (int i = 0; i < countAttrs.length; i++)
+            for (int i = 0; i < countAttrs.length; i++) {
                 attr.setProperty(countAttrs[i], "0");
-            for (int i = 0; i < liftAttrs.length; i++)
+            }
+            for (int i = 0; i < liftAttrs.length; i++) {
                 attr.setProperty(liftAttrs[i], "0");
+            }
             attr.setProperty("SubCategoryCount", "0");
             attrMap.put(attr.getAttrValue(), attr);
         }

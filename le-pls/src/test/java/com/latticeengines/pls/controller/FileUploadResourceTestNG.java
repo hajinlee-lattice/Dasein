@@ -22,6 +22,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
@@ -30,6 +32,9 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     
     @Autowired
     private Configuration yarnConfiguration;
+    
+    @Autowired
+    private SourceFileEntityMgr sourceFileEntityMgr;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -55,12 +60,16 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     public void uploadFile() throws Exception {
         switchToExternalAdmin();
         assertTrue(submitFile().isSuccess());
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
-                String.format( //
-                        "/Pods/Default/Contracts/%sPLSTenant1/Tenants/%sPLSTenant1/Spaces/Production/Data/Files/file1.csv", //
-                        contractId, contractId));
+        String path = String.format( //
+                "/Pods/Default/Contracts/%sPLSTenant1/Tenants/%sPLSTenant1/Spaces/Production/Data/Files/file1.csv", //
+                contractId, contractId); 
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
+        
+        SourceFile sourceFile = sourceFileEntityMgr.findAll().get(0);
+        assertEquals(sourceFile.getPath(), path);
+        assertEquals(sourceFile.getName(), "file1.csv");
     }
 
     @Test(groups = "functional")
