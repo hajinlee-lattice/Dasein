@@ -93,8 +93,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         if (numRows <= BLOCK_SIZE && availableClients.contains(MatchClient.PD126)) {
             return MatchClient.PD126;
         }
-        if (numRows >= BIG_MATCH_THRESHOLD && availableClients.contains(MatchClient.PD131)) {
-            return MatchClient.PD131;
+        if (numRows >= BIG_MATCH_THRESHOLD && availableClients.contains(MatchClient.PD144)) {
+            return MatchClient.PD144;
         }
         roundRobinPos = (roundRobinPos + 1) % availableClients.size();
         return availableClients.get(roundRobinPos);

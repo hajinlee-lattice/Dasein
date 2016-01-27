@@ -153,6 +153,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected Properties getJobProperties() {
         Properties jobProperties = new Properties();
         jobProperties.put("mapred.mapper.new-api", "false");
+        jobProperties.put("mapreduce.job.user.classpath.first", "true");
         return jobProperties;
     }
 

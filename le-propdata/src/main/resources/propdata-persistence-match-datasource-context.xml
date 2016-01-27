@@ -9,7 +9,7 @@
                 <entry key="PD126" value-ref="pd126ClientDataSource" />
                 <entry key="PD127" value-ref="pd127ClientDataSource" />
                 <entry key="PD128" value-ref="pd128ClientDataSource" />
-                <entry key="PD131" value-ref="pd131ClientDataSource" />
+                <entry key="PD144" value-ref="pd144ClientDataSource" />
                 <entry key="PD130" value-ref="pd130ClientDataSource" />
                 <entry key="PD238" value-ref="pd238ClientDataSource" />
             </map>
@@ -38,9 +38,9 @@
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
-    <bean id="pd131ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="pd144ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://10.51.15.131:1433;databaseName=PropDataMatchDB;" />
+        <property name="url" value="jdbc:sqlserver://10.51.15.144:1433;databaseName=PropDataMatchDB;" />
         <property name="username" value="${propdata.user}" />
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
