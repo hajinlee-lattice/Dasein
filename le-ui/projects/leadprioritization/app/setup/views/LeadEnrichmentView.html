@@ -1,0 +1,71 @@
+<div id="leadEnrichment" data-ng-controller="LeadEnrichmentController">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="showLoadingError" class="global-error local-error">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{loadingError}}</span>
+    </div>
+    <div data-ng-show="saveInProgress">
+        <div class="loader"></div>
+        <h2 class="text-center">{{ResourceUtility.getString('LEAD_ENRICHMENT_SAVE_ATTRIBUTES_WAIT')}}</h2>
+    </div>
+    <div data-ng-show="showSaveAttributesError" class="global-error local-error">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{saveAttributessErrorMessage}}</span>
+        <button class="close btn btn-link" data-ng-click="showSaveAttributesError = false;"><i class="fa fa-times fa-inverse"></i></button>
+    </div>
+    <div data-ng-hide="loading || showLoadingError || saveInProgress || showSaveAttributesError">
+        <div class="title">
+            <h2>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_TITLE')}}</h2>
+        </div>
+        <div class="content" data-ng-show="!showAttributesDetails">
+            <div data-ng-show="showAttributesExcessAlert" class="alert alert-warning warning">
+                <span><i class="fa fa-exclamation-circle"></i>&nbsp;{{attributesExcessAlert}}</span>
+                <button class="close btn btn-link" data-ng-click="showAttributesExcessAlert = false;"><i class="fa fa-times"></i></button>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="sub-title">{{ResourceUtility.getString('LEAD_ENRICHMENT_LIBRARY_ATTRIBUTES_LABEL')}}</div>
+                    <ul id="availableAttributesList" class="list-group" data-ng-dblclick="addAttributeButtonClicked($event)">
+                        <li class="list-group-item"
+                            data-ng-repeat="a in availableAttributes"
+                            data-ng-mouseenter="attributeItemMouseEnter($event, true)"
+                            data-ng-mouseleave="attributeItemMouseLeave($event)"
+                            data-ng-mousedown="attributeItemMouseDown($event, true)"
+                            fn="{{a.FieldName}}">{{a.DisplayName}}</li>
+                    </ul>
+                </div>
+                <div class="col-toggle">
+                    <div class="btn-area-middle">
+                        <button id="addLeadEnrichmentAttribute" class="btn btn-right" data-ng-click="addAttributeButtonClicked($event)"
+                                data-ng-class="{'disabled': attributesToAdd.length === 0 || selectedAttributes.length >= 20}"><i class="fa fa-chevron-right fa-2"></i></button>
+                        <button id="reomveLeadEnrichmentAttribute" class="btn btn-left" data-ng-click="removeAttributeButtonClicked($event)"
+                                data-ng-class="{'disabled': attributesToRemove.length === 0}"><i class="fa fa-chevron-left fa-2"></i></button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div id="selectedAttributesLabel" class="sub-title"
+                        data-ng-mouseenter="selectedAttributesLabelMouseEnter($event)"
+                        data-ng-mouseleave="selectedAttributesLabelMouseLeave($event)"
+                        data-ng-class="{'warning': selectedAttributes.length >= maxSelectedAttributes}">{{ResourceUtility.getString('LEAD_ENRICHMENT_SELECTED_ATTRIBUTES_LABEL', [selectedAttributes.length])}}</div>
+                    <ul id="selectedAttributesList" class="list-group" data-ng-dblclick="removeAttributeButtonClicked($event)">
+                        <li class="list-group-item"
+                            data-ng-repeat="a in selectedAttributes"
+                            data-ng-mouseenter="attributeItemMouseEnter($event, false)"
+                            data-ng-mouseleave="attributeItemMouseLeave($event)"
+                            data-ng-mousedown="attributeItemMouseDown($event, false)"
+                            fn="{{a.FieldName}}">{{a.DisplayName}}</li>
+                    </ul>
+                    <button id="saveLeadEnrichmentAttributesButton" data-ng-click="saveAttributesButtonClicked($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                </div>
+            </div>
+            <div id="leadEnrichmentAttributeHover" class="bottom fade popover in hide">
+                <div class="arrow"></div>
+                <div class="popover-inner">
+                    <div class="popover-content ng-binding">{{tooltip}}</div>
+                </div>
+            </div>
+        </div>
+        <div id="leadEnrichmentAttributesDetails" data-ng-show="showAttributesDetails" class="content"></div>
+    </div>
+</div>

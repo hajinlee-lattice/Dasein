@@ -1,0 +1,77 @@
+<div id="importAndEnrichData" data-ng-controller="ImportAndEnrichDataController">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="!loading" class="form-deployment">
+        <div class="form-title">
+            <h1>{{ResourceUtility.getString('SETUP_DEPLOYMENT_WIZARD_NAV_IMPORT_AND_ENRICH_DATA')}}</h1>
+        </div>
+        <div>
+            <div data-ng-show="importInfo != null" class="alert" data-ng-class="{'alert-info': importStatus === SetupUtility.STATUS_IN_PROGRESS, 'alert-success': importStatus === SetupUtility.STATUS_SUCCESS, 'alert-danger': importStatus === SetupUtility.STATUS_FAIL}">{{importInfo}}</div>
+            <div data-ng-if="showImportProgress">
+                <span><i class="fa fa-refresh fa-spin"></i>{{ResourceUtility.getString('SETUP_IMPORTING_DATA_LABEL')}}</span>
+                <span class="link-area"><a href="#" data-ng-click="cancelClicked($event)" step="{{SetupUtility.STEP_IMPORT_DATA}}">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a></span>
+            </div>
+            <div data-ng-if="showImportComplete">
+                <span class="complete-label"><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_IMPORT_COMPLETE_LABEL')}}</span>
+                <span data-ng-show="importCompleteTime != null" class="complete-time">{{importCompleteTime}}</span>
+                <span data-ng-show="importCompleteTime != null" class="link-area large">
+                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/profilesummarycsv" filename="DataProfileSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_IMPORT_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_PROFILE_SUMMARY_CSV')}}</span></a>
+                </span>
+                <span data-ng-show="getImportCompleteTimeError != null" class="link-area"><i class="fa fa-exclamation-circle"></i>&nbsp;{{getImportCompleteTimeError}}</span>
+            </div>
+            <div data-ng-if="showImportError">
+                <span><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_IMPORTING_DATA_LABEL')}}</span>
+                <span class="link-area"><a href="#" data-ng-click="retryImportDataClicked($event)">{{ResourceUtility.getString('BUTTON_RETRY_LABEL')}}</a></span>
+            </div>
+            <div data-ng-show="getObjectsError != null" class="objects">
+                <span><i class="fa fa-exclamation-circle"></i>&nbsp;{{getObjectsError}}</span>
+            </div>
+            <div data-ng-show="tables != null" class="objects">
+                <div class="title">{{ResourceUtility.getString('SETUP_OBJECTS_TITLE')}}</div>
+                <div data-ng-repeat="table in tables">
+                    <span class="name">{{table.name}}</span>
+                    <span class="info">{{table.info}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="step-area">
+            <div data-ng-show="enrichInfo != null" class="alert" data-ng-class="{'alert-info': enrichStatus === SetupUtility.STATUS_IN_PROGRESS, 'alert-success': enrichStatus === SetupUtility.STATUS_SUCCESS, 'alert-danger': enrichStatus === SetupUtility.STATUS_FAIL}">{{enrichInfo}}</div>
+            <div data-ng-if="showEnrichProgress">
+                <span><i class="fa fa-refresh fa-spin"></i>{{ResourceUtility.getString('SETUP_ENRICHING_DATA_LABEL')}}</span>
+                <span class="link-area"><a href="#" data-ng-click="cancelClicked($event)" step="{{SetupUtility.STEP_ENRICH_DATA}}">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a></span>
+            </div>
+            <div data-ng-if="showEnrichComplete">
+                <span class="complete-label"><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_ENRICH_COMPLETE_LABEL')}}</span>
+                <span data-ng-show="enrichCompleteTime != null" class="complete-time">{{enrichCompleteTime}}</span>
+                <span data-ng-show="false" class="link-area large">
+                    <a href="#" data-ng-click="downloadLinkClicked($event)" url="/pls/tenantdeployments/enrichmentsummarycsv" filename="DataEnrichmentSummary.csv" filetype="text/csv" step="{{SetupUtility.STEP_ENRICH_DATA}}" data-ng-class="{'disabled' : deployment.Status === SetupUtility.STATUS_IN_PROGRESS}"><span class="csv"></span><span>{{ResourceUtility.getString('SETUP_DATA_ENRICHMENT_SUMMARY_CSV')}}</span></a>
+                </span>
+                <span data-ng-show="getEnrichCompleteTimeError != null" class="link-area"><i class="fa fa-exclamation-circle"></i>&nbsp;{{getEnrichCompleteTimeError}}</span>
+            </div>
+            <div data-ng-if="showEnrichError">
+                <span><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_ENRICHING_DATA_LABEL')}}</span>
+                <span class="link-area"><a href="#" data-ng-click="retryEnrichDataClicked($event)">{{ResourceUtility.getString('BUTTON_RETRY_LABEL')}}</a></span>
+            </div>
+            <div data-ng-show="enrichProgress != null" class="enrich-progress">{{enrichProgress}}</div>
+        </div>
+        <div class="step-area">
+            <div data-ng-show="validationInfo != null" class="alert" data-ng-class="{'alert-info': validationStatus === SetupUtility.STATUS_IN_PROGRESS, 'alert-success': validationStatus === SetupUtility.STATUS_SUCCESS, 'alert-danger': validationStatus === SetupUtility.STATUS_FAIL}">{{validationInfo}}</div>
+            <div data-ng-if="showValidationComplete">
+                <span><i class="fa fa-check green"></i>{{ResourceUtility.getString('SETUP_METADATA_VALIDATION_COMPLETE_LABEL')}}</span>
+            </div>
+            <div data-ng-if="showValidationError">
+                <span data-ng-show="missingData"><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_MISSING_DATA_LABEL')}}</span>
+                <span data-ng-show="!missingData"><i class="fa fa-times-circle red"></i>{{ResourceUtility.getString('SETUP_ERROR_VALIDATE_METADATA_LABEL')}}</span>
+                <span class="link-area"><a href="#" data-ng-click="retryValidationDataClicked($event)">{{ResourceUtility.getString('SETUP_RERUN_VALIDATION_LABEL')}}</a></span>
+            </div>
+        </div>
+        <div class="step-footer">
+            <button id="finishDeploymentBtn" data-ng-if="showValidationComplete" class="btn btn-primary" type="button" data-ng-click="finishDeploymentBtnClicked($event)">{{ResourceUtility.getString('BUTTON_DONE_LABEL')}}</button>
+            <div class="clear-link">
+                <a href="#" id="clearDeploymentLink" data-ng-show="showClearDeploymentLink" data-ng-class="{'disabled': disableClearDeploymentLink}" data-ng-click="clearDeploymentLinkClicked($event)">{{ResourceUtility.getString('SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_TITLE')}}</a>
+            </div>
+        </div>
+    </div>
+</div>

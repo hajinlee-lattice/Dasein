@@ -1,0 +1,34 @@
+<div data-ng-controller="LeadEnrichmentAttributesDetailsController" id="leadEnrichmentAttributesDetails">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="showLoadingError" class="global-error local-error">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{loadingError}}</span>
+    </div>
+    <div data-ng-hide="loading || saveInProgress">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="data-table">
+                    <table>
+                        <thead>
+                          <tr>
+                            <th>{{ResourceUtility.getString('ATTRIBUTE_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('ATTRIBUTE_FIELD_NAME')}}</th>
+                            <th>{{ResourceUtility.getString('ATTRIBUTE_FIELD_TYPE')}}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-ng-repeat="attribute in attributes" data-ng-class="{shaded: $index % 2}">
+                                <td>{{attribute.DisplayName}}</td>
+                                <td>{{attribute.FieldName}}</td>
+                                <td>{{attribute.FieldType}}</td>
+                            </tr>
+                         </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <button id="returnLeadEnrichmentButton" data-ng-click="$parent.load()" class="btn btn-secondary right">{{ResourceUtility.getString('BUTTON_RETURN_LABEL')}}</button>
+    </div>
+</div>

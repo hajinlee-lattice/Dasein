@@ -1,0 +1,23 @@
+<div id="deploymentWizard" data-ng-controller="DeploymentWizardController">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div class="global-error local-error" data-ng-show="getDeploymentError != null">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{getDeploymentError}}</span>
+    </div>
+    <div id="deploymentWizardTab" class="wizard-header hide">
+        <ul class="nav nav-pills">
+          <li data-ng-repeat="tab in tabs" data-ng-click="tabClicked($event, tab)" data-ng-class="{'active': tab.active, 'disabled': tab.disabled}">
+                <a href="#"><span class="badge">{{$index + 1}}</span>{{tab.title}}</a>
+          </li>
+        </ul>
+    </div>
+    <div id="deploymentWizardContent" data-ng-show="!loading" class="wizard-content">
+        <div class="triangle-down hide" data-ng-class="{'import': importTab.active, 'build': buildTab.active, 'publish': publishTab.active}"></div>
+        <div data-ng-show="importTab.active">
+            <data-credentials data-ng-if="showEnterCredentials"></data-credentials>
+            <data-import-and-enrich-data data-ng-if="showImportAndEnrichData" deployment="deployment"></data-import-and-enrich-data>
+        </div>
+    </div>
+</div>
