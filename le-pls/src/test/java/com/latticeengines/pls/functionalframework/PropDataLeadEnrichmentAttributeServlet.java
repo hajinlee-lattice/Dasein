@@ -2,6 +2,7 @@ package com.latticeengines.pls.functionalframework;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.StatisticalType;
+import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
 import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
@@ -20,7 +21,7 @@ import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
 @WebServlet("/propdata/metadata/predefined/leadenrichment")
 public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -6068276954643550403L;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -32,7 +33,7 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setDisplayName("Add This");
         column.setDataType("NVARCHAR(50)");
         column.setMatchDestination("BuiltWithPivoted");
-        column.setTags("LeadEnrichment");
+        column.setTagList(Collections.singletonList("LeadEnrichment"));
         column.setFundamentalType(FundamentalType.BOOLEAN);
         column.setStatisticalType(StatisticalType.ORDINAL);
         column.setDescription("Tech Indicator Add This");
@@ -43,11 +44,11 @@ public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
         column.setDisplayName("Remove This");
         column.setDataType("NVARCHAR(100)");
         column.setMatchDestination("HGData");
-        column.setTags("LeadEnrichment");
+        column.setTagList(Collections.singletonList("LeadEnrichment"));
         column.setFundamentalType(FundamentalType.ALPHA);
         column.setStatisticalType(StatisticalType.INTERVAL);
         column.setDescription("Tech Indicator Remove This");
-        column.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_MODELINSIGHTS));
+        column.setApprovedUsageList(Collections.singletonList(ApprovedUsage.MODEL_MODELINSIGHTS));
         columns[1] = column;
         String json = JsonUtils.serialize(columns);
         resp.getWriter().write(json);

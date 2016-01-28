@@ -111,3 +111,15 @@ FIELDS TERMINATED BY '\t'  ENCLOSED BY ';'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID,ExternalColumnID,SourceName,SourceColumn,Priority);
+
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE ExternalColumn
+SET StatisticalType = NULL
+WHERE StatisticalType = '';
+
+UPDATE ExternalColumn
+SET FundamentalType = NULL
+WHERE FundamentalType = '';
+
+SET SQL_SAFE_UPDATES = 1;

@@ -36,7 +36,7 @@ public class ColumnMetadataResourceDeploymentTest extends PropDataApiDeploymentT
 	    Assert.assertNotNull(columnMetadataList);
         Assert.assertTrue(columnMetadataList.size() >= 1);
 	    for (ColumnMetadata columnMetadata : columnMetadataList) {
-	        Assert.assertTrue(columnMetadata.getTags().contains("LeadEnrichment"));
+	        Assert.assertTrue(columnMetadata.getTagList().contains("LeadEnrichment"));
 	    }
 	}
 

@@ -35,11 +35,11 @@ public class SQLInitializer {
 
     public void initialize() {
         if (SQLDialect.MYSQL.equals(dataSourceService.getSqlDialect(Database.MANAGE))) {
-            uploadSourceColumn();
+            initializeMySqlDB();
         }
     }
 
-    private void uploadSourceColumn() {
+    private void initializeMySqlDB() {
         if (!initialized) {
             truncateMySqlTable(jdbcTemplateManageDB, "SourceColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "SourceColumn");
@@ -47,6 +47,8 @@ public class SQLInitializer {
             truncateMySqlTable(jdbcTemplateManageDB, "ExternalColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "ExternalColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "ColumnMapping");
+
+            fixEmptyStringsInMySql();
 
             initialized = true;
         }
@@ -83,6 +85,26 @@ public class SQLInitializer {
         }
 
         jdbcTemplate.execute(sql);
+    }
+
+    private void fixEmptyStringsInMySql() {
+
+        log.info("Fixing empty strings in LDC_ManageDB ...");
+
+        jdbcTemplateManageDB.execute("SET SQL_SAFE_UPDATES = 0");
+
+        String sql = "UPDATE LDC_ManageDB.ExternalColumn " +
+                "SET StatisticalType = NULL " +
+                "WHERE StatisticalType = ''";
+        jdbcTemplateManageDB.execute(sql);
+
+        sql = "UPDATE LDC_ManageDB.ExternalColumn " +
+                "SET FundamentalType = NULL " +
+                "WHERE FundamentalType = ''";
+        jdbcTemplateManageDB.execute(sql);
+
+        jdbcTemplateManageDB.execute("SET SQL_SAFE_UPDATES = 1");
+
     }
 
     private void truncateMySqlTable(JdbcTemplate jdbcTemplate, String tableName) {

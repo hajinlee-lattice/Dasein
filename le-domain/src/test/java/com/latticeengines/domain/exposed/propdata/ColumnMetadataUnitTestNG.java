@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
 import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
+import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
 
 public class ColumnMetadataUnitTestNG {
 

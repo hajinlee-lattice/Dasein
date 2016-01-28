@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.propdata.StatisticalType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnMetadata {
@@ -97,12 +96,12 @@ public class ColumnMetadata {
     }
 
     @JsonIgnore
-    public String getTags() {
+    private String getTags() {
         return tags;
     }
 
     @JsonIgnore
-    public void setTags(String tags) {
+    private void setTags(String tags) {
         this.tags = tags;
     }
 

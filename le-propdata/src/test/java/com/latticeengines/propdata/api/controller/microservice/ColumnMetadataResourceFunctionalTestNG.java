@@ -25,7 +25,7 @@ public class ColumnMetadataResourceFunctionalTestNG extends PropDataApiFunctiona
 		try {
 			for (Map<String, Object> obj : metadataObjs) {
 				ColumnMetadata metadata = mapper.treeToValue(mapper.valueToTree(obj), ColumnMetadata.class);
-				Assert.assertTrue(metadata.getTags().contains("LeadEnrichment"));
+				Assert.assertTrue(metadata.getTagList().contains("LeadEnrichment"));
 			}
 		}
 		catch (IOException e) {
