@@ -71,7 +71,7 @@ public abstract class AbstractCollectionArchiveService
     }
 
     private String constructWhereClauseByDates(String timestampColumn, Date startDate, Date endDate) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         return String.format("\"%s > '%s' AND %s <= '%s'\"", timestampColumn, dateFormat.format(startDate),
                 timestampColumn, dateFormat.format(endDate));
     }
