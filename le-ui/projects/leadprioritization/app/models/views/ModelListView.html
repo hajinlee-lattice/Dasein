@@ -13,7 +13,7 @@
         <div class="no-models text-center"  data-ng-show="showNoModels">
             <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
         </div>
-        <div class="row">
+        <div class="row" data-ng-hide="showNoModels || loading">
             <div class="col-md-12">
                 <div class="pull-left">Displaying 4 of 4</div>
                 <div class="pull-right">
