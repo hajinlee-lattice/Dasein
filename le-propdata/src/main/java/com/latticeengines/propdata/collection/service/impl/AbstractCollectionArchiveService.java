@@ -92,11 +92,15 @@ public abstract class AbstractCollectionArchiveService
                         + whereClause.substring(1, whereClause.lastIndexOf("\"")),
                 Date.class);
 
+        LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earlist);
+
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
                         + whereClause.substring(1, whereClause.lastIndexOf("\"")),
                 Date.class);
+
+        LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
 
         progress.setStartDate(earlist);
         progress.setEndDate(latest);
@@ -104,16 +108,18 @@ public abstract class AbstractCollectionArchiveService
         whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
                 progress.getStartDate(), progress.getEndDate());
 
-        if (!importFromCollectionDB(getSource().getCollectedTableName(), targetDir, getSource().getDownloadSplitColumn(),
+        long rowsToDownload = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
+                + getSource().getCollectedTableName() + " WHERE "
+                + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
+
+        if (rowsToDownload > 0 &&
+                !importFromCollectionDB(getSource().getCollectedTableName(), targetDir, getSource().getDownloadSplitColumn(),
                 whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
-        long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
-                + getSource().getCollectedTableName() + " WHERE "
-                + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
-        progress.setRowsDownloadedToHdfs(rowsDownloaded);
+        progress.setRowsDownloadedToHdfs(rowsToDownload);
 
         hdfsSourceEntityMgr.setLatestTimestamp(getSource(), latest);
 

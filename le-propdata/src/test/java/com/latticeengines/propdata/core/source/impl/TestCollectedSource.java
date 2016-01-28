@@ -15,9 +15,6 @@ public class TestCollectedSource implements DomainBased, CollectedSource {
     public String getSourceName() { return "TestCollected"; }
 
     @Override
-    public String getRefreshServiceBean() { return "testArchiveService"; }
-
-    @Override
     public String getDomainField() {  return "URL"; }
 
     @Override

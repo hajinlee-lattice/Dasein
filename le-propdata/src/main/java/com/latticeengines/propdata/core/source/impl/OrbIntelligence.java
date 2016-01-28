@@ -8,30 +8,34 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
-@Component("feature")
-public class Feature implements MostRecentSource, DomainBased {
+@Component("orbIntelligence")
+public class OrbIntelligence implements MostRecentSource, DomainBased, HasSqlPresence {
 
-    private static final long serialVersionUID = 3483355190999074200L;
+    private static final long serialVersionUID = -7492688545254273100L;
 
-    @Value("${propdata.job.feature.refresh.schedule:}")
+    @Value("${propdata.job.orb.refresh.schedule:}")
     String cronExpression;
 
     @Autowired
-    FeatureRaw baseSource;
+    OrbIntelligenceRaw baseSource;
 
     @Override
-    public String getSourceName() { return "Feature"; }
+    public String getSourceName() { return "OrbIntelligence"; }
 
     @Override
-    public String[] getPrimaryKey() { return new String[]{ "URL", "Feature" }; }
+    public String getSqlTableName() { return "OrbIntelligence_MostRecent"; }
+
+    @Override
+    public String[] getPrimaryKey() { return new String[]{ "Domain" }; }
 
     @Override
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
 
     @Override
-    public String getDomainField() {  return "URL"; }
+    public String getDomainField() {  return "Domain"; }
 
     @Override
     public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
@@ -41,5 +45,8 @@ public class Feature implements MostRecentSource, DomainBased {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlMatchDestination() { return "OrbIntelligence_Source"; }
 
 }

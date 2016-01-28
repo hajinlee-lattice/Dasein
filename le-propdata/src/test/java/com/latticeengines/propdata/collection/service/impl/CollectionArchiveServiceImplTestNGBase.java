@@ -35,21 +35,22 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
 
     @BeforeMethod(groups = "functional.source")
     public void setUp() throws Exception {
-        setUpPod("FunctionalArchiveCollected");
+        source = getSource();
+        setUpPod("FunctionalArchiveCollected" + source.getSourceName());
     }
 
     void setUpPod(String podID) {
+        source = getSource();
         hdfsPathBuilder.changeHdfsPodId(podID);
         collectedArchiveService = getCollectedArchiveService();
         progressEntityMgr = getProgressEntityMgr();
         dates = getDates();
-        source = getSource();
     }
 
     @AfterMethod(groups = "functional.source")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "functional.source", enabled = false)
+    @Test(groups = "functional.source", enabled = true)
     public void testWholeProgress() {
         purgeRawData();
 

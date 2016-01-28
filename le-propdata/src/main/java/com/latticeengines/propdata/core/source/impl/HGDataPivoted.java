@@ -27,9 +27,6 @@ public class HGDataPivoted implements PivotedSource, DomainBased, HasSqlPresence
     public String getSqlTableName() { return "HGData_Pivoted_Source"; }
 
     @Override
-    public String getRefreshServiceBean() { return "hgDataPivotService"; }
-
-    @Override
     public String[] getPrimaryKey() { return new String[]{ "Domain" }; }
 
     @Override

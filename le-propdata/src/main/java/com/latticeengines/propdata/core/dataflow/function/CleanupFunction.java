@@ -16,10 +16,11 @@ abstract public class CleanupFunction extends BaseOperation implements Function
     private boolean removeNull;
 
     public CleanupFunction(Fields fieldDeclaration, boolean removeNull) {
-        super(0, fieldDeclaration);
+        super(1, fieldDeclaration);
         this.removeNull = removeNull;
     }
 
+    @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall )
     {
         TupleEntry arguments = functionCall.getArguments();

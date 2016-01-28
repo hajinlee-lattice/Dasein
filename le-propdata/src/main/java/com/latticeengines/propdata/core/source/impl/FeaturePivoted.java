@@ -27,9 +27,6 @@ public class FeaturePivoted implements PivotedSource, DomainBased, HasSqlPresenc
     public String getSqlTableName() { return "Feature_Pivoted_Source"; }
 
     @Override
-    public String getRefreshServiceBean() { return "featurePivotService"; }
-
-    @Override
     public String[] getPrimaryKey() { return new String[]{ "URL" }; }
 
     @Override

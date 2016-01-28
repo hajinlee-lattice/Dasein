@@ -26,10 +26,12 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -73,6 +75,7 @@ public class PropDataAdminTool {
 
     private Command command;
     private SourceService sourceService;
+    private ProgressOrchestrator progressOrchestrator;
     private PropDataRawSource sourceToBeArchived;
     private PropDataDerivedSource sourceToBeRefreshed;
 
@@ -293,6 +296,7 @@ public class PropDataAdminTool {
             validateArguments(ns);
             applicationContext = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
             sourceService = (SourceService) applicationContext.getBean("sourceService");
+            progressOrchestrator = (ProgressOrchestrator) applicationContext.getBean("progressOrchestrator");
 
             switch (command) {
                 case ARCHIVE:
@@ -336,8 +340,7 @@ public class PropDataAdminTool {
             baseVersions = StringUtils.join(versions, "|");
         }
 
-        RefreshService refreshService =
-                (RefreshService) applicationContext.getBean(source.getRefreshServiceBean());
+        RefreshService refreshService = progressOrchestrator.getRefreshService(source);
 
         System.out.println("\n\n========================================");
         System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
@@ -347,9 +350,10 @@ public class PropDataAdminTool {
     }
 
     private void executeArchiveCommand(Namespace ns) {
+        RawSource source = (RawSource) applicationContext.getBean(sourceToBeArchived.getName());
         if (ns.getString(NS_RAW_TYPE).equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
             CollectedArchiveService collectedArchiveService =
-                    (CollectedArchiveService) applicationContext.getBean(sourceToBeArchived.getServiceBean());
+                    (CollectedArchiveService) progressOrchestrator.getArchiveService(source);
 
             System.out.println("\n\n========================================");
             System.out.println("Archiving Collection Source: " + sourceToBeArchived.getName());
@@ -357,8 +361,7 @@ public class PropDataAdminTool {
             System.out.println(fullDateRange);
             executeArchiveByRanges(collectedArchiveService);
         } else {
-            BulkArchiveService archiveService =
-                    (BulkArchiveService) applicationContext.getBean(sourceToBeArchived.getServiceBean());
+            BulkArchiveService archiveService = (BulkArchiveService) progressOrchestrator.getArchiveService(source);
 
             System.out.println("\n\n========================================");
             System.out.println("Archiving Bulk Source: " + sourceToBeArchived.getName());
@@ -476,7 +479,7 @@ public class PropDataAdminTool {
         }
         String sourceName = refreshProgress.getSourceName();
         DerivedSource source = (DerivedSource) sourceService.findBySourceName(sourceName);
-        RefreshService refreshService = (RefreshService) applicationContext.getBean(source.getRefreshServiceBean());
+        RefreshService refreshService = progressOrchestrator.getRefreshService(source);
 
         refreshProgress.setStatus(ProgressStatus.FAILED);
         switch (refreshProgress.getStatusBeforeFailed()) {
@@ -513,23 +516,21 @@ public class PropDataAdminTool {
     }
 
     enum PropDataRawSource {
-        FEATURE("FeatureRaw", "featureArchiveService", RAW_TYPE_COLLECTED),
-        BUILTWITH("BuiltWithRaw", "builtWithArchiveService", RAW_TYPE_COLLECTED),
-        HGDATARAW("HGDataRaw", "hgDataRawArchiveService", RAW_TYPE_BULK);
+        ORB("OrbIntelligenceRaw", RAW_TYPE_COLLECTED),
+        FEATURE("FeatureRaw", RAW_TYPE_COLLECTED),
+        BUILTWITH("BuiltWithRaw", RAW_TYPE_COLLECTED),
+        HGDATARAW("HGDataRaw", RAW_TYPE_BULK);
 
         private static Map<String, PropDataRawSource> nameMap;
 
         private final String name;
-        private final String serviceBean;
         private final String sourceType;
-        PropDataRawSource(String name, String archiveJobBean, String sourceType) {
+        PropDataRawSource(String name, String sourceType) {
             this.name = name;
-            this.serviceBean = archiveJobBean;
             this.sourceType = sourceType;
         }
 
         String getName() { return this.name; }
-        String getServiceBean() { return this.serviceBean; }
         String getSourceType() { return this.sourceType; }
 
         static {
@@ -552,6 +553,7 @@ public class PropDataAdminTool {
     }
 
     enum PropDataDerivedSource {
+        ORB("OrbIntelligence"),
         FEATURE("Feature"),
         FEATURE_PIVOTED("FeaturePivoted"),
         BUILTWITH("BuiltWith"),

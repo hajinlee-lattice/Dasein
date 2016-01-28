@@ -17,9 +17,6 @@ public class FeatureRaw implements CollectedSource {
     public String getSourceName() { return "FeatureRaw"; }
 
     @Override
-    public String getRefreshServiceBean() { return "featureArchiveService"; }
-
-    @Override
     public String getDownloadSplitColumn() { return "LE_Last_Upload_Date"; }
 
     @Override

@@ -30,6 +30,7 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGData;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -51,6 +52,9 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
+    private OrbIntelligence orbIntelligence;
+
+    @Autowired
     private HGData hgData;
 
     @Value("${propdata.collection.cascading.platform:tez}")
@@ -58,27 +62,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Override
     public void executeMergeRawData(MostRecentSource source, String uid) {
-        String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
-
-        CollectedSource baseSource = source.getBaseSources()[0];
-        Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
-        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
-
-        Map<String, Table> sources = new HashMap<>();
-        Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);
-        sources.put(baseSource.getSourceName(), table);
-
-        MostRecentDataFlowParameters parameters = new MostRecentDataFlowParameters();
-        parameters.setDomainField(((DomainBased) source).getDomainField());
-        parameters.setTimestampField(source.getTimestampField());
-        parameters.setGroupbyFields(source.getPrimaryKey());
-        parameters.setSourceTable(baseSource.getSourceName());
-        parameters.setEarliest(earliestToArchive);
-
-        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
-        DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
-        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, "mostRecentFlow");
+        executeMergeRawData(source, uid, "mostRecentFlow");
     }
 
     @Override
@@ -110,6 +94,12 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
 
+
+    @Override
+    public void executeRefreshOrbIntelligence(String uid) {
+        executeMergeRawData(orbIntelligence, uid, "orbIntelligenceRefreshFlow");
+    }
+
     @Override
     public void executeRefreshHGData(String baseVersion, String uid) {
         String flowName = CollectionDataFlowKeys.TRANSFORM_FLOW;
@@ -122,6 +112,30 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         DataFlowContext ctx = dataFlowContext(hgData, sources, new DataFlowParameters(), targetPath);
         ctx.setProperty("FLOWNAME", hgData.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "hgDataRefreshFlow");
+    }
+
+    public void executeMergeRawData(MostRecentSource source, String uid, String dataFlowBean) {
+        String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
+
+        CollectedSource baseSource = source.getBaseSources()[0];
+        Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
+        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
+
+        Map<String, Table> sources = new HashMap<>();
+        Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);
+        sources.put(baseSource.getSourceName(), table);
+
+        MostRecentDataFlowParameters parameters = new MostRecentDataFlowParameters();
+        parameters.setDomainField(((DomainBased) source).getDomainField());
+        parameters.setTimestampField(source.getTimestampField());
+        parameters.setGroupbyFields(source.getPrimaryKey());
+        parameters.setSourceTable(baseSource.getSourceName());
+        parameters.setEarliest(earliestToArchive);
+
+        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
+        DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
+        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
 
     private DataFlowContext dataFlowContext(Source source,
@@ -153,7 +167,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected Properties getJobProperties() {
         Properties jobProperties = new Properties();
         jobProperties.put("mapred.mapper.new-api", "false");
-        jobProperties.put("mapreduce.job.user.classpath.first", "true");
         return jobProperties;
     }
 

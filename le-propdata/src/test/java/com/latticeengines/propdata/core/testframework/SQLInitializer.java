@@ -82,7 +82,6 @@ public class SQLInitializer {
             sql = sql.replace("LOAD DATA INFILE", "LOAD DATA LOCAL INFILE");
         }
 
-        System.out.println("\n" + sql + "\n");
         jdbcTemplate.execute(sql);
     }
 

@@ -11,4 +11,6 @@ public interface CollectionDataFlowService {
 
     void executeRefreshHGData(String baseVersion, String uid);
 
+    void executeRefreshOrbIntelligence(String uid);
+
 }

@@ -1,0 +1,287 @@
+Accounting & Financial Services|Accounting|Accounting|Accounting| |
+Defense, Aviation & Aeorospace|Airlines/Aviation|Airlines/Aviation|Airlines/Aviation| |
+Other|Alternative Dispute Resolution|Alternative Dispute Resolution|Alternative Dispute Resolution| |
+Health, Wellness and Fitness|Alternative Medicine|Alternative Medicine|Alternative Medicine| |
+Other|Animation|Animation|Animation| |
+Retail/Wholesale|Apparel & Fashion|Apparel & Fashion|Apparel & Fashion| |
+Retail/Wholesale|Apparel & Fashion| | | |
+Retail/Wholesale|Apparel & Fashion| | | |
+Design, Architecture & Planning|Architecture & Planning|Architecture & Planning|Architecture & Planning| |
+Other|Arts and Crafts|Arts and Crafts|Arts and Crafts|Crafts/Directories|
+Transportation|Automotive| | |Automotive/Sales|
+Transportation|Automotive| | |Automotive/Parts and Accessories|
+Transportation|Automotive| | |Automotive/Marketing and Advertising|
+Transportation|Automotive| | |Automotive/Parts and Supplies|
+Transportation|Automotive| | |Parts and Accessories/Trucks, Vans, and Sport Utility|
+Transportation|Automotive| | |Business and Economy/Automotive|
+Transportation|Automotive|Automotive|Automotive| |
+Defense, Aviation & Aeorospace|Aviation & Aerospace|Aviation & Aerospace|Aviation & Aerospace| |
+Accounting & Financial Services|Banking|Banking|Banking| |
+Pharmaceuticals & Biotech|Biotechnology|Biotechnology|Biotechnology| |
+Media|Broadcast Media|Broadcast Media|Broadcast Media| |
+Construction, Engineering & Mfg|Building Materials|Building Materials|Building Materials|Business and Economy/Business Services|
+Business Services|Business Services| | | |
+Business Services|Business Supplies and Equipment|Business Supplies and Equipment|Business Supplies and Equipment| |
+Accounting & Financial Services|Capital Markets|Capital Markets|Capital Markets| |
+Chemicals, Mining & Metals|Chemicals|Chemicals|Chemicals| |
+Civic & Social Organization|Civic & Social Organization|Civic & Social Organization|Civic & Social Organization| |
+Construction, Engineering & Mfg|Civil Engineering|Civil Engineering|Civil Engineering|Business and Economy/Real Estate|
+Real Estate|Commercial Real Estate|Commercial Real Estate|Commercial Real Estate| |
+Technology|Computer & Network Security|Computer & Network Security|Computer & Network Security|Massive Multiplayer Online/Clans and Guilds|
+Technology|Computer Games|Computer Games|Computer Games| |
+Technology|Computer Hardware| |arc.com| |
+Technology|Computer Hardware|Computer Hardware|Computer Hardware| |
+Technology|Computer Networking|Computer Networking|Computer Networking| |
+Technology|Computer Software|Computer Software|Computer Software|Construction and Maintenance/Builders|
+Construction, Engineering & Mfg|Construction| | | |
+Construction, Engineering & Mfg|Construction| | | |
+Construction, Engineering & Mfg|Construction| | |Business and Economy/Construction and Maintenance|
+Construction, Engineering & Mfg|Construction|Construction|Construction| |
+Technology|Consumer Electronics|Consumer Electronics|Consumer Electronics| |
+Consumer|Consumer Goods|Consumer Goods|Consumer Goods| |
+Consumer|Consumer Services|Consumer Services|Consumer Services| |
+Consumer|Cosmetics|Cosmetics|Cosmetics| |
+Accounting & Financial Services|Credit Unions|Credit Unions| | |
+Food Services|Dairy|Dairy|Dairy| |
+Defense, Aviation & Aeorospace|Defense & Space|Defense & Space|Defense & Space| |
+Design, Architecture & Planning|Design|Design|Design|Designers/Full Service|
+Design, Architecture & Planning|Design| | | |
+Education|Education Management|Education Management|Education Management| |
+Education|E-Learning|E-Learning|E-Learning| |
+Construction, Engineering & Mfg|Electrical/Electronic Manufacturing|Electrical/Electronic Manufacturing|Electrical/Electronic Manufacturing| |
+Entertainment, Restaurant & Hospitality|Entertainment|Entertainment|Entertainment| |
+Environmental Services|Environmental Services|Environmental Services|Environmental Services| |
+Business Services|Events Services|Events Services|Events Services| |
+Other|Executive Office|Executive Office|Executive Office| |
+Business Services|Facilities Services|Facilities Services|Facilities Services| |
+Food Services|Farming|Farming|Farming| |
+Accounting & Financial Services|Finance|Finance| | |
+Accounting & Financial Services|Financial Services| | | |
+Accounting & Financial Services|Financial Services| | | |
+Accounting & Financial Services|Financial Services| | |Business and Economy/Financial Services|
+Accounting & Financial Services|Financial Services|Financial Services|Financial Services| |
+Other|Fine Art|Fine Art|Fine Art| |
+Other|Fishery|Fishery|Fishery| |
+Food Services|Food & Beverages| | |Food/Specialty and Gourmet|
+Food Services|Food & Beverages| | |Coffee and Tea/Coffee|
+Food Services|Food & Beverages| | |Coffee and Tea/Tea|
+Food Services|Food & Beverages| | |Confectionery/Chocolate|
+Food Services|Food & Beverages| | |Beverages/Wine|
+Food Services|Food & Beverages| | |Beverages/Wine|
+Food Services|Food & Beverages|Food & Beverages|Food & Beverages| |
+Food Services|Food Production|Food Production|Food Production| |
+Non-profit|Fund-Raising|Fund-Raising|.org| |
+Non-profit|Fund-Raising| |Fund-Raising| |
+Construction, Engineering & Mfg|Furniture|Furniture|Furniture| |
+Entertainment, Restaurant & Hospitality|Gambling & Casinos|Gambling & Casinos|Gambling & Casinos| |
+Other|Glass, Ceramics & Concrete|Glass, Ceramics & Concrete|Glass, Ceramics & Concrete| |
+Government|Government Administration|Government Administration|Government Administration| |
+Government|Government Relations|Government Relations|Government Relations| |
+Design, Architecture & Planning|Graphic Design| | | |
+Design, Architecture & Planning|Graphic Design| | | |
+Design, Architecture & Planning|Graphic Design| | | |
+Design, Architecture & Planning|Graphic Design|Graphic Design|Graphic Design|Nutrition/Supplements|
+Health, Wellness and Fitness|Health, Wellness and Fitness| | |Business and Economy/Beauty and Cosmetic Services|
+Health, Wellness and Fitness|Health, Wellness and Fitness| | |Health/Nutrition|
+Health, Wellness and Fitness|Health, Wellness and Fitness| | | |
+Health, Wellness and Fitness|Health, Wellness and Fitness|Health, Wellness and Fitness|Health, Wellness and Fitness| |
+Health, Wellness and Fitness|Health, Wellness and Fitness""|Health, Wellness and Fitness""| | |
+Education|Higher Education|Higher Education|Higher Education| |
+Health, Wellness and Fitness|Hospital & Health Care| | |Health/Hospitals|
+Health, Wellness and Fitness|Hospital & Health Care| | | |
+Health, Wellness and Fitness|Hospital & Health Care| | | |
+Health, Wellness and Fitness|Hospital & Health Care|Hospital & Health Care|Hospital & Health Care| |
+Entertainment, Restaurant & Hospitality|Hospitality| | |Lodging/Bed and Breakfast|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Hotels and Motels/Chains|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Lodging/Hotels and Motels|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Lodging/Hotel Casinos|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Lodging/Resorts|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Lodging/Hotels|
+Entertainment, Restaurant & Hospitality|Hospitality| | |Travel and Tourism/Lodging|
+Entertainment, Restaurant & Hospitality|Hospitality|Hospitality|Hospitality| |
+Business Services|Human Resources|Human Resources|Human Resources| |
+International|Import and Export|Import and Export|Import and Export| |
+Civic & Social Organization|Individual & Family Services|Individual & Family Services|Individual & Family Services|Business and Economy/Industrial|
+Construction, Engineering & Mfg|Industrial Automation|Industrial Automation|Industrial Automation| |
+Publishing|Information Services|Information Services|Information Services| |
+Technology|Information Technology and Services|Information Technology and Services|Information Technology and Services|Financial Services/Insurance|
+Accounting & Financial Services|Insurance| | |Carriers/Life and Health|
+Accounting & Financial Services|Insurance| | | |
+Accounting & Financial Services|Insurance| | | |
+Accounting & Financial Services|Insurance|Insurance|Insurance| |
+International|International Affairs|International Affairs|International Affairs| |
+International|International Trade and Development|International Trade and Development|International Trade and Development| |
+Technology|Internet| |.htm| |
+Technology|Internet| |TV.com| |
+Technology|Internet| |BuzzZ.com| |
+Technology|Internet| |Jobs.com| |
+Technology|Internet| |Jobs.com.au| |
+Technology|Internet| |Portage.com| |
+Technology|Internet| | |Computers and Internet/Software|
+Technology|Internet| | |Business and Economy/Computers and Internet|
+Technology|Internet| | |Web Design and Development/Hosting|
+Technology|Internet| | |Computers and Internet/Web Design and Development|
+Technology|Internet| | |Computers and Internet/Access Providers|
+Technology|Internet| | |On the Web/Web Portals, Companies/Yahoo Inc., Business and Economy/Computers and Internet|
+Technology|Internet| | |E-Commerce/Shopping Carts|
+Technology|Internet| | |Web Applications/Photo Sharing|
+Technology|Internet| | |Computers and Internet/Consultants|
+Technology|Internet| | |Tin h?c/Internet|
+Technology|Internet| | |Internet Service Providers/DSL|
+Technology|Internet|Internet|.com| |
+Accounting & Financial Services|Investment Banking|Investment Banking|Investment Banking| |
+Accounting & Financial Services|Investment Management| | | |
+Accounting & Financial Services|Investment Management| | |Investing/Money Managers|
+Accounting & Financial Services|Investment Management|Investment Management|Investment Management| |
+Legal|Judiciary|Judiciary|Judiciary| |
+Legal|Law Enforcement|Law Enforcement|Law Enforcement| |
+Legal|Law Practice|Law Practice|Law Practice|Business and Economy/Legal Services|
+Legal|Legal Services|Legal Services|Legal Services| |
+Government|Legislative Office|Legislative Office|Legislative Office| |
+Leisure, Travel & Tourism|Leisure, Travel & Tourism| | |Travel Services/Tour Operators|
+Leisure, Travel & Tourism|Leisure, Travel & Tourism| | |Travel and Tourism/Travel Services|
+Leisure, Travel & Tourism|Leisure, Travel & Tourism| | |Travel and Tourism/Travel Guides|
+Leisure, Travel & Tourism|Leisure, Travel & Tourism|Leisure, Travel & Tourism|Leisure, Travel & Tourism| |
+Leisure, Travel & Tourism|Leisure, Travel & Tourism""|Leisure, Travel & Tourism""| | |
+Other|Libraries|Libraries|Libraries| |
+Local Business|Local Business|Local Business| | |
+Machinery|Logistics and Supply Chain|Logistics and Supply Chain|Logistics and Supply Chain| |
+Consumer|Luxury Goods & Jewelry|Luxury Goods & Jewelry|Luxury Goods & Jewelry| |
+Machinery|Machinery|Machinery|Machinery| |
+Business Services|Management Consulting|Management Consulting|Management Consulting|Industrial/Manufacturing|
+Construction, Engineering & Mfg|Manufacturing| | | |
+Construction, Engineering & Mfg|Manufacturing|Manufacturing| | |
+Transportation|Maritime|Maritime|Maritime| |
+Business Services|Market Research|Market Research|Market Research|Business and Economy/Advertising and Marketing|
+Marketing and Advertising|Marketing and Advertising| | | |
+Marketing and Advertising|Marketing and Advertising| | | |
+Marketing and Advertising|Marketing and Advertising| | |Opportunities/Networking-MLM|
+Marketing and Advertising|Marketing and Advertising|Marketing and Advertising|Marketing and Advertising| |
+Machinery|Mechanical or Industrial Engineering|Mechanical or Industrial Engineering|Mechanical or Industrial Engineering| |
+Media|Media Production|Media Production|Media Production| |
+Medical|Medical Devices|Medical Devices|Medical Devices| |
+Medical|Medical Practice|Medical Practice|Medical Practice| |
+Medical|Mental Health Care|Mental Health Care|Mental Health Care|Health/Dentistry|
+Medical|Dental| | | |
+Government|Military|Military|Military| |
+Chemicals, Mining & Metals|Mining & Metals|Mining & Metals|Mining & Metals| |
+Entertainment, Restaurant & Hospitality|Motion Pictures and Film|Motion Pictures and Film|Motion Pictures and Film| |
+Other|Museums and Institutions|Museums and Institutions|Museums and Institutions| |
+Media|Music|Music|Music| |
+Technology|Nanotechnology|Nanotechnology|Nanotechnology| |
+Media|Newspapers|Newspapers|Newspapers| |
+Non-profit|Nonprofit Organization Management|Nonprofit Organization Management|Nonprofit Organization Management| |
+Energy|Oil & Energy|Oil & Energy|Oil & Energy| |
+Media|Online Media|Online Media|Online Media| |
+Business Services|Outsourcing/Offshoring|Outsourcing/Offshoring|Outsourcing/Offshoring| |
+Shipping|Package/Freight Delivery|Package/Freight Delivery|Package/Freight Delivery| |
+Shipping|Packaging and Containers|Packaging and Containers|Packaging and Containers| |
+Business Services|Paper & Forest Products|Paper & Forest Products| | |
+Other|Performing Arts|Performing Arts|Performing Arts| |
+Pharmaceuticals & Biotech|Pharmaceuticals|Pharmaceuticals|Pharmaceuticals| |
+Other|Philanthropy|Philanthropy|Philanthropy| |
+Media|Photography|Photography|Photography| |
+Construction, Engineering & Mfg|Plastics|Plastics|Plastics| |
+Government|Political Organization|Political Organization|Political Organization|Education/K-12|
+Education|Primary/Secondary Education| | |Education/School Districts|
+Education|Primary/Secondary Education| | |K-12/School Districts|
+Education|Primary/Secondary Education| | | |
+Education|Primary/Secondary Education|Primary/Secondary Education|Primary/Secondary Education| |
+Business Services|Printing|Printing|Printing| |
+Other|Professional Training & Coaching|Professional Training & Coaching|Professional Training & Coaching| |
+Business Services|Program Development|Program Development|Program Development| |
+Government|Public Policy|Public Policy|Public Policy| |
+Marketing and Advertising|Public Relations and Communications|Public Relations and Communications|Public Relations and Communications| |
+Safety|Public Safety|Public Safety|Public Safety|News and Media/Magazines and E-zines|
+Publishing|Publishing| | |Business and Economy/Publishing|
+Publishing|Publishing|Publishing|Publishing| |
+Transportation|Railroad Manufacture|Railroad Manufacture|Railroad Manufacture| |
+Other|Ranching|Ranching|Ranching| |
+Real Estate|Real Estate|Real Estate|Real Estate|Real Estate/Residential|
+Real Estate|Real Estate| | |Real Estate/Agents and Agencies|
+Real Estate|Real Estate| | |Real Estate/Commercial|
+Real Estate|Real Estate| | |Business and Economy/Real Estate, Business and Economy/Real Estate|
+Real Estate|Real Estate| | |Real Estate/Rentals|
+Real Estate|Real Estate| | |Real Estate/Real Estate Investment Trusts|
+Real Estate|Real Estate| | | |
+Leisure, Travel & Tourism|Recreational Facilities and Services|Recreational Facilities and Services|Recreational Facilities and Services|Society and Culture/Religion|
+Religion|Religious Institutions|Religious Institutions|Religious Institutions| |
+Environmental Services|Renewables & Environment|Renewables & Environment|Renewables & Environment| |
+Research|Research|Research|Research| |
+Entertainment, Restaurant & Hospitality|Restaurants| | |Business and Economy/Restaurants and Bars|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/American|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Sandwich and Deli|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/Mexican|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Pizza|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/Pizza|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Bakeries|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/Guides and Directories|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Family, Business and Economy/Restaurants and Bars|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/Bakeries|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Mexican|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurants and Bars/Seafood|
+Entertainment, Restaurant & Hospitality|Restaurants| | |Restaurant Chains/Italian, Business and Economy/Restaurants and Bars|
+Entertainment, Restaurant & Hospitality|Restaurants| | | |
+Entertainment, Restaurant & Hospitality|Restaurants|Restaurants|Restaurants| |
+Retail/Wholesale|Retail| | |Shopping/Food|
+Retail/Wholesale|Retail| | |Shopping/General Merchandise|
+Retail/Wholesale|Retail| | |Business and Economy/Home and Garden|
+Retail/Wholesale|Retail| | |Business and Economy/Shopping|
+Retail/Wholesale|Retail| | |Shopping/Clothing|
+Retail/Wholesale|Retail| | |Shopping/Consumer Electronics|
+Retail/Wholesale|Retail| | |Shopping/Sporting Goods|
+Retail/Wholesale|Retail| | |Shopping/Auctions, ???????/????????|
+Retail/Wholesale|Retail| | |Shopping/Jewelry|
+Retail/Wholesale|Retail| | |Shopping/Books|
+Retail/Wholesale|Retail| | |Shopping/Furniture|
+Retail/Wholesale|Retail| | |Shopping/Weddings|
+Retail/Wholesale|Retail| | |Shopping/Stores|
+Retail/Wholesale|Retail| | |Shopping/Jewellery|
+Retail/Wholesale|Retail| | |Shopping/Office Products|
+Retail/Wholesale|Retail| | |Supplies/Children, Shopping/General Merchandise|
+Retail/Wholesale|Retail| | |Shopping/Sex Toys and Supplies|
+Retail/Wholesale|Retail| | |Shopping/Tools|
+Retail/Wholesale|Retail| | |Shopping/Holidays|
+Retail/Wholesale|Retail| | |Shopping/Flowers|
+Retail/Wholesale|Retail| | |Wedding/Rings, Shopping/Jewelry|
+Retail/Wholesale|Retail| | |Shopping/Ecclesiastical Goods|
+Retail/Wholesale|Retail| | |Shopping/Music|
+Retail/Wholesale|Retail| | |Clothing/Women's|
+Retail/Wholesale|Retail| | |General Merchandise/Major Retailers|
+Retail/Wholesale|Retail| | |Clothing/Casual|
+Retail/Wholesale|Retail| | |Retail Trade/Retailers|
+Retail/Wholesale|Retail| | |Swimwear/Women's|
+Retail/Wholesale|Retail| | |Home and Garden/Varied Merchandise|
+Retail/Wholesale|Retail| | |Baby/Varied Merchandise|
+Retail/Wholesale|Retail| | |Hardware/Retailers|
+Retail/Wholesale|Retail| | |Clothing/Footwear|
+Retail/Wholesale|Retail| | |Clothing/Children's|
+Retail/Wholesale|Retail| | |Undergarments/Socks and Hosiery|
+Retail/Wholesale|Retail| | |Sports/Apparel|
+Retail/Wholesale|Retail| | |Shopping/Flowers and Gifts|
+Retail/Wholesale|Retail| | | |
+Retail/Wholesale|Retail| | | |
+Retail/Wholesale|Retail| | | |
+Retail/Wholesale|Retail| | | |
+Retail/Wholesale|Retail|Retail|Retail| |
+Legal|Security and Investigations|Security and Investigations|Security and Investigations| |
+Technology|Semiconductors|Semiconductors|Semiconductors| |
+Transportation|Shipbuilding|Shipbuilding|Shipbuilding| |
+Sports & Sporting Goods|Sporting Goods|Sporting Goods|Sporting Goods| |
+Sports & Sporting Goods|Sports|Sports|Sports|Business and Economy/Employment|
+Business Services|Staffing and Recruiting|Staffing and Recruiting|Staffing and Recruiting|Access Providers/Cable, Computers and Internet/Access Providers|
+Food Services|Supermarkets|Supermarkets|Supermarkets| |
+Telecommunications|Telecommunications|Telecommunications|Telecommunications| |
+Construction, Engineering & Mfg|Textiles|Textiles|Textiles| |
+Other|Think Tanks|Think Tanks|Think Tanks| |
+Other|Tobacco|Tobacco|Tobacco| |
+Technology|Translation and Localization|Translation and Localization|Translation and Localization| |
+Transportation|Transportation/Trucking/Railroad|Transportation/Trucking/Railroad|Transportation/Trucking/Railroad| |
+Utilities|Utilities|Utilities|Utilities| |
+Accounting & Financial Services|Venture Capital & Private Equity|Venture Capital & Private Equity|Venture Capital & Private Equity| |
+Other|Veterinary|Veterinary|Veterinary| |
+Warehousing|Warehousing|Warehousing|Warehousing| |
+Retail/Wholesale|Wholesale|Wholesale|Wholesale| |
+Food Services|Wine and Spirits|Wine and Spirits|Wine and Spirits| |
+Technology|Wireless|Wireless|Wireless| |
+Publishing|Writing and Editing|Writing and Editing|Writing and Editing| |

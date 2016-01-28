@@ -38,13 +38,12 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
 
     @BeforeMethod(groups = "functional.source")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId(testPod);
-
-        getBaseSourceTestBean().setUpPod(testPod);
+        source = getSource();
+        hdfsPathBuilder.changeHdfsPodId(testPod + source.getSourceName());
+        getBaseSourceTestBean().setUpPod(testPod + source.getSourceName());
 
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
-        source = getSource();
         baseSource = source.getBaseSources()[0];
         dates = getBaseSourceTestBean().getDates();
     }
@@ -64,7 +63,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         getBaseSourceTestBean().importFromDB(archiveProgress);
         getBaseSourceTestBean().finish(archiveProgress);
 
-        progress = createNewProgress(new Date());
+        progress = createNewProgress(dates[1]);
         progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);
@@ -73,7 +72,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         getBaseSourceTestBean().importFromDB(archiveProgress);
         getBaseSourceTestBean().finish(archiveProgress);
 
-        progress = createNewProgress(new Date());
+        progress = createNewProgress(dates[2]);
         progress = transformData(progress);
         progress = exportToDB(progress);
         finish(progress);

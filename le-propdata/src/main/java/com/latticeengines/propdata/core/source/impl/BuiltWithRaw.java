@@ -4,9 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 
 @Component("builtWithRaw")
-public class BuiltWithRaw implements CollectedSource {
+public class BuiltWithRaw implements CollectedSource, HasSqlPresence {
 
     private static final long serialVersionUID = -1192390855705582815L;
 
@@ -15,9 +16,6 @@ public class BuiltWithRaw implements CollectedSource {
 
     @Override
     public String getSourceName() { return "BuiltWithRaw"; }
-
-    @Override
-    public String getRefreshServiceBean() { return "builtWithArchiveService"; }
 
     @Override
     public String getDownloadSplitColumn() { return "LE_Last_Upload_Date"; }
@@ -33,5 +31,11 @@ public class BuiltWithRaw implements CollectedSource {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlTableName() { return getCollectedTableName(); }
+
+    @Override
+    public String getSqlMatchDestination() { return "BuiltWith_Source"; }
 
 }

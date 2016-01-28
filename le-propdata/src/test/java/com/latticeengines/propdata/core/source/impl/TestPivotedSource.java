@@ -19,9 +19,6 @@ public class TestPivotedSource implements PivotedSource, DomainBased {
     public String getSourceName() { return "TestPivoted"; }
 
     @Override
-    public String getRefreshServiceBean() { return "testPivotService"; }
-
-    @Override
     public String[] getPrimaryKey() { return new String[]{ "URL" }; }
 
     @Override

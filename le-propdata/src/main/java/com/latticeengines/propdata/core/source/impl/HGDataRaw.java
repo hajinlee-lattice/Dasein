@@ -18,9 +18,6 @@ public class HGDataRaw implements BulkSource {
     public String getSourceName() {  return "HGDataRaw"; }
 
     @Override
-    public String getRefreshServiceBean() {  return "hgDataRawArchiveService"; }
-
-    @Override
     public String getBulkStageTableName() { return "HG_Data_Customers"; }
 
     @Override

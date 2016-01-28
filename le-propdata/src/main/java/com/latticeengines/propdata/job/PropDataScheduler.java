@@ -17,14 +17,14 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
-import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component
@@ -46,10 +46,10 @@ public class PropDataScheduler {
     List<DerivedSource> derivedSourceList;
 
     @Autowired
-    ApplicationContext applicationContext;
+    ZkConfigurationService zkConfigurationService;
 
     @Autowired
-    ZkConfigurationService zkConfigurationService;
+    ProgressOrchestrator progressOrchestrator;
 
     @PostConstruct
     private void registerJobs() throws SchedulerException {
@@ -75,28 +75,29 @@ public class PropDataScheduler {
     }
 
     private void registerArchiveJob(RawSource source) throws SchedulerException {
-        String beanName = source.getRefreshServiceBean();
-        ArchiveService service = (ArchiveService) applicationContext.getBean(beanName);
+        ArchiveService service = progressOrchestrator.getArchiveService(source);
+        if (service != null) {
+            JobDetail job = JobBuilder.newJob(ArchiveScheduler.class)
+                    .usingJobData("dryrun", dryrun)
+                    .build();
+            job.getJobDataMap().put("archiveService", service);
+            job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
 
-        JobDetail job = JobBuilder.newJob(ArchiveScheduler.class)
-                .usingJobData("dryrun", dryrun)
-                .build();
-        job.getJobDataMap().put("archiveService", service);
-        job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
-
-        scheduler.scheduleJob(job, cronTriggerForSource(source));
+            scheduler.scheduleJob(job, cronTriggerForSource(source));
+        }
     }
 
     private void registerRefreshJob(DerivedSource source) throws SchedulerException {
-        String beanName = source.getRefreshServiceBean();
-        RefreshService service = (RefreshService) applicationContext.getBean(beanName);
-        JobDetail job = JobBuilder.newJob(RefreshScheduler.class)
-                .usingJobData("dryrun", dryrun)
-                .build();
-        job.getJobDataMap().put("refreshService", service);
-        job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
+        RefreshService service = progressOrchestrator.getRefreshService(source);
+        if (service != null) {
+            JobDetail job = JobBuilder.newJob(RefreshScheduler.class)
+                    .usingJobData("dryrun", dryrun)
+                    .build();
+            job.getJobDataMap().put("refreshService", service);
+            job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
 
-        scheduler.scheduleJob(job, cronTriggerForSource(source));
+            scheduler.scheduleJob(job, cronTriggerForSource(source));
+        }
     }
 
     private Trigger cronTriggerForSource(Source source) {

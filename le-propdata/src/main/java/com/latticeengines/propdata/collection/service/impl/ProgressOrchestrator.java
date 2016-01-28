@@ -2,6 +2,7 @@ package com.latticeengines.propdata.collection.service.impl;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,8 +26,8 @@ import com.latticeengines.propdata.collection.service.RefreshJobExecutor;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
-import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("progressOrchestrator")
@@ -40,6 +41,12 @@ public class ProgressOrchestrator {
 
     @Autowired
     private SourceService sourceService;
+
+    @Autowired
+    private List<ArchiveService> archiveServiceList;
+
+    @Autowired
+    private List<RefreshService> refreshServiceList;
 
     @Value("${propdata.job.schedule.dryrun:true}")
     Boolean dryrun;
@@ -55,20 +62,22 @@ public class ProgressOrchestrator {
     @PostConstruct
     private void constructMaps() {
         for (Source source: sourceService.getSources()) {
-            Object service = ac.getBean(source.getRefreshServiceBean());
-            if (service != null) {
-                if (source instanceof RawSource) {
-                    archiveServiceMap.put((RawSource) source, (ArchiveService) service);
-                    executorMap.put(source.getSourceName(),
-                            new ArchiveExecutor((ArchiveService) service));
-                } else if (source instanceof DerivedSource) {
-                    refreshServiceMap.put((DerivedSource) source, (RefreshService) service);
-                    executorMap.put(source.getSourceName(),
-                            new RefreshExecutor((RefreshService) service));
+            if (source instanceof RawSource) {
+                for (ArchiveService archiveService: archiveServiceList) {
+                    if (source.equals(archiveService.getSource())) {
+                        archiveServiceMap.put((RawSource) source, archiveService);
+                        executorMap.put(source.getSourceName(), new ArchiveExecutor(archiveService));
+                    }
+                }
+            } else if (source instanceof DerivedSource) {
+                for (RefreshService refreshService: refreshServiceList) {
+                    if (source.equals(refreshService.getSource())) {
+                        refreshServiceMap.put((DerivedSource) source, refreshService);
+                        executorMap.put(source.getSourceName(), new RefreshExecutor(refreshService));
+                    }
                 }
             }
         }
-
     }
 
     public synchronized void executeRefresh() {
@@ -159,6 +168,22 @@ public class ProgressOrchestrator {
                         Map<DerivedSource, RefreshService> pivotServiceMap) {
         this.archiveServiceMap = archiveServiceMap;
         this.refreshServiceMap = pivotServiceMap;
+    }
+
+    public ArchiveService getArchiveService(RawSource source) {
+        if (archiveServiceMap.containsKey(source)) {
+            return archiveServiceMap.get(source);
+        } else {
+            return null;
+        }
+    }
+
+    public RefreshService getRefreshService(DerivedSource source) {
+        if (refreshServiceMap.containsKey(source)) {
+            return refreshServiceMap.get(source);
+        } else {
+            return null;
+        }
     }
 
 }

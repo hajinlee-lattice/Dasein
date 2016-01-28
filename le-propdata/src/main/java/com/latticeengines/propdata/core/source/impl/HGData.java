@@ -27,9 +27,6 @@ public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
     public String getSqlTableName() { return "HGData_Source"; }
 
     @Override
-    public String getRefreshServiceBean() { return "hgDataRefreshService"; }
-
-    @Override
     public String[] getPrimaryKey() {
         return new String[]{"URL", "Supplier_Name", "Segment_Name",
                 "HG_Category_1", "HG_Category_2", "HG_Category_1_Parent", "HG_Category_2_Parent"};

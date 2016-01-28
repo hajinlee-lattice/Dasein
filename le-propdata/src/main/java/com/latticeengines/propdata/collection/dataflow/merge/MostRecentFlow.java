@@ -3,8 +3,8 @@ package com.latticeengines.propdata.collection.dataflow.merge;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.propdata.core.dataflow.function.DomainCleanupFunction;
 import com.latticeengines.propdata.collection.dataflow.function.OldDataCleanupFunction;
+import com.latticeengines.propdata.core.dataflow.function.DomainCleanupFunction;
 
 @Component("mostRecentFlow")
 public class MostRecentFlow extends TypesafeDataFlowBuilder<MostRecentDataFlowParameters>  {
@@ -12,6 +12,10 @@ public class MostRecentFlow extends TypesafeDataFlowBuilder<MostRecentDataFlowPa
     @Override
     public Node construct(MostRecentDataFlowParameters parameters) {
         Node source = addSource(parameters.getSourceTable());
+        return findMostRecent(source, parameters);
+    }
+
+    protected Node findMostRecent(Node source, MostRecentDataFlowParameters parameters){
         String[] groupbyFields = parameters.getGroupbyFields();
         String timestampField = parameters.getTimestampField();
         String domainField = parameters.getDomainField();

@@ -1,0 +1,153 @@
+Accounting|Accounting & Financial Services
+Finance|Accounting & Financial Services
+Capital Markets|Accounting & Financial Services
+Investment Banking|Accounting & Financial Services
+Venture Capital & Private Equity|Accounting & Financial Services
+Credit Unions|Accounting & Financial Services
+Investment Management|Accounting & Financial Services
+Banking|Accounting & Financial Services
+Financial Services|Accounting & Financial Services
+Insurance|Accounting & Financial Services
+Business Supplies and Equipment|Business Services
+Events Services|Business Services
+Facilities Services|Business Services
+Management Consulting|Business Services
+Market Research|Business Services
+Outsourcing/Offshoring|Business Services
+Paper & Forest Products|Business Services
+Printing|Business Services
+Program Development|Business Services
+Staffing and Recruiting|Business Services
+Human Resources|Business Services
+Chemicals|Chemicals, Mining & Metals
+Mining & Metals|Chemicals, Mining & Metals
+Civic & Social Organization|Civic & Social Organization
+Individual & Family Services|Civic & Social Organization
+Building Materials|Construction, Engineering & Mfg
+Civil Engineering|Construction, Engineering & Mfg
+Construction|Construction, Engineering & Mfg
+Electrical/Electronic Manufacturing|Construction, Engineering & Mfg
+Industrial Automation|Construction, Engineering & Mfg
+Manufacturing|Construction, Engineering & Mfg
+Textiles|Construction, Engineering & Mfg
+Furniture|Construction, Engineering & Mfg
+Plastics|Construction, Engineering & Mfg
+Cosmetics|Consumer
+Consumer Goods|Consumer
+Consumer Services|Consumer
+Luxury Goods & Jewelry|Consumer
+Aviation & Aerospace|Defense, Aviation & Aeorospace
+Airlines/Aviation|Defense, Aviation & Aeorospace
+Defense & Space|Defense, Aviation & Aeorospace
+Architecture & Planning|Design, Architecture & Planning
+Design|Design, Architecture & Planning
+Graphic Design|Design, Architecture & Planning
+Primary/Secondary Education|Education
+E-Learning|Education
+Higher Education|Education
+Education Management|Education
+Oil & Energy|Energy
+Motion Pictures and Film|Entertainment, Restaurant & Hospitality
+Gambling & Casinos|Entertainment, Restaurant & Hospitality
+Entertainment|Entertainment, Restaurant & Hospitality
+Hospitality|Entertainment, Restaurant & Hospitality
+Restaurants|Entertainment, Restaurant & Hospitality
+Environmental Services|Environmental Services
+Renewables & Environment|Environmental Services
+Food Production|Food Services
+Dairy|Food Services
+Supermarkets|Food Services
+Wine and Spirits|Food Services
+Farming|Food Services
+Food & Beverages|Food Services
+Legislative Office|Government
+Military|Government
+Public Policy|Government
+Political Organization|Government
+Government Relations|Government
+Government Administration|Government
+Health, Wellness and Fitness|Health, Wellness and Fitness
+Alternative Medicine|Health, Wellness and Fitness
+Hospital & Health Care|Health, Wellness and Fitness
+Health, Wellness and Fitness|Health, Wellness and Fitness
+Import and Export|International
+International Affairs|International
+International Trade and Development|International
+Judiciary|Legal
+Law Enforcement|Legal
+Security and Investigations|Legal
+Law Practice|Legal
+Legal Services|Legal
+Leisure, Travel & Tourism|Leisure, Travel & Tourism
+Leisure, Travel & Tourism|Leisure, Travel & Tourism
+Recreational Facilities and Services|Leisure, Travel & Tourism
+Local Business|Local Business
+Logistics and Supply Chain|Machinery
+Machinery|Machinery
+Mechanical or Industrial Engineering|Machinery
+Public Relations and Communications|Marketing and Advertising
+Marketing and Advertising|Marketing and Advertising
+Broadcast Media|Media
+Online Media|Media
+Media Production|Media
+Photography|Media
+Music|Media
+Newspapers|Media
+Medical Practice|Medical
+Medical Devices|Medical
+Mental Health Care|Medical
+Fund-Raising|Non-profit
+Nonprofit Organization Management|Non-profit
+Libraries|Other
+Ranching|Other
+Fishery|Other
+Tobacco|Other
+Alternative Dispute Resolution|Other
+Animation|Other
+Glass, Ceramics & Concrete|Other
+Think Tanks|Other
+Executive Office|Other
+Fine Art|Other
+Museums and Institutions|Other
+Philanthropy|Other
+Arts and Crafts|Other
+Professional Training & Coaching|Other
+Performing Arts|Other
+Veterinary|Other
+Biotechnology|Pharmaceuticals & Biotech
+Pharmaceuticals|Pharmaceuticals & Biotech
+Writing and Editing|Publishing
+Publishing|Publishing
+Information Services|Publishing
+Commercial Real Estate|Real Estate
+Real Estate|Real Estate
+Religious Institutions|Religion
+Research|Research
+Apparel & Fashion|Retail/Wholesale
+Retail|Retail/Wholesale
+Wholesale|Retail/Wholesale
+Public Safety|Safety
+Packaging and Containers|Shipping
+Package/Freight Delivery|Shipping
+Sports|Sports & Sporting Goods
+Sporting Goods|Sports & Sporting Goods
+Nanotechnology|Technology
+Translation and Localization|Technology
+Wireless|Technology
+Computer Games|Technology
+Semiconductors|Technology
+Computer Hardware|Technology
+Consumer Electronics|Technology
+Computer & Network Security|Technology
+Computer Networking|Technology
+Computer Software|Technology
+Internet|Technology
+Information Technology and Services|Technology
+Telecommunications|Telecommunications
+Railroad Manufacture|Transportation
+Shipbuilding|Transportation
+Maritime|Transportation
+Automotive|Transportation
+Transportation/Trucking/Railroad|Transportation
+Utilities|Utilities
+Warehousing|Warehousing

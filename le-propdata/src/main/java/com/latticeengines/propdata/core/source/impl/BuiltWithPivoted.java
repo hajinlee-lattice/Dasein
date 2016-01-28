@@ -27,9 +27,6 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPrese
     public String getSqlTableName() { return "BuiltWith_Pivoted_Source"; }
 
     @Override
-    public String getRefreshServiceBean() { return "builtWithPivotService"; }
-
-    @Override
     public String[] getPrimaryKey() { return new String[]{ "Domain" }; }
 
     @Override

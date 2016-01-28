@@ -6,8 +6,6 @@ public interface Source extends Serializable {
 
     String getSourceName();
 
-    String getRefreshServiceBean();
-
     String getTimestampField();
 
     String[] getPrimaryKey();

@@ -21,6 +21,7 @@ public class DomainCleanupFunction extends CleanupFunction implements Function
         this.domainField = domainField;
     }
 
+    @Override
     protected Tuple cleanupArguments(TupleEntry arguments) {
         String url = arguments.getString(domainField);
         try {
