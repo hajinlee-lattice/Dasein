@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller.match;
+package com.latticeengines.propdata.api.controller.microservice;
 
 import java.util.List;
 
@@ -15,26 +15,28 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.ColumnInDerivedPackageRequest;
+import com.latticeengines.domain.exposed.propdata.DataColumnMap;
 import com.latticeengines.domain.exposed.propdata.DerivedPackageRequest;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourceContractPackageMap;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackageMap;
-import com.latticeengines.domain.exposed.propdata.EntitlementSourcePackages;
-import com.latticeengines.propdata.api.service.EntitlementSourceService;
+import com.latticeengines.domain.exposed.propdata.EntitlementColumnMap;
+import com.latticeengines.domain.exposed.propdata.EntitlementContractPackageMap;
+import com.latticeengines.domain.exposed.propdata.EntitlementPackages;
+import com.latticeengines.propdata.api.service.EntitlementDerivedService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "sourceEntitlment", description = "REST resource for source entitlement package management")
+@Api(value = "derivedEntitlment", description = "REST resource for derived entitlement package management")
 @RestController
-@RequestMapping("/entitlements/source")
-public class EntitlementSourceResource {
+@RequestMapping("/entitlements/derived")
+public class EntitlementDerivedResource {
 
     @Autowired
-    EntitlementSourceService entitlementService;
+    EntitlementDerivedService entitlementService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get all source entitlement packages")
-    public List<EntitlementSourcePackages> getDerivedAttributePackagesAll(
+    @ApiOperation(value = "Get all derived entitlement packages")
+    public List<EntitlementPackages> getDerivedAttributePackagesAll(
             @RequestParam(value="contractId", required = false) String contractId){
         try {
             if (StringUtils.isEmpty(contractId)) {
@@ -43,81 +45,84 @@ public class EntitlementSourceResource {
                 return entitlementService.getEntitlementPackagesForCustomer(contractId);
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Create source entitlement package")
-    public EntitlementSourcePackages createDerivedAttributePackage(@RequestBody DerivedPackageRequest newRequest) {
+    @ApiOperation(value = "Create derived entitlement package")
+    public EntitlementPackages createDerivedAttributePackage(@RequestBody DerivedPackageRequest newRequest) {
         try {
             String packageName = newRequest.getPackageName();
             String packageDesc = newRequest.getPackageDescription();
             Boolean isDefault = newRequest.getIsDefault();
             return entitlementService.createDerivedPackage(packageName, packageDesc, isDefault);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
     @RequestMapping(value = "/{packageID}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get source entitlement package")
-    public EntitlementSourcePackages getDerivedAttributePackage(@PathVariable Long packageID) {
+    @ApiOperation(value = "Get derived entitlement package")
+    public EntitlementPackages getDerivedAttributePackage(@PathVariable Long packageID) {
         try {
             return entitlementService.getEntitlementPackage(packageID);
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
-    @RequestMapping(value = "/{packageID}/sources", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{packageID}/columns", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get package sources")
-    public List<EntitlementSourcePackageMap> getPackageSources(@PathVariable Long packageID) {
+    @ApiOperation(value = "Get package columns")
+    public List<DataColumnMap> getDerivedAttributePackageColumns(@PathVariable Long packageID) {
         try {
-            return entitlementService.getSourceEntitlementContents(packageID);
+            return entitlementService.getDerivedColumns(packageID);
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
 
-    @RequestMapping(value = "/{packageID}/sources/{lookupId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{packageID}/columns", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Add source to entitlement package")
-    public EntitlementSourcePackageMap addSourceToPackage(@PathVariable Long packageID,
-                                                                             @PathVariable String lookupId){
+    @ApiOperation(value = "Add derived column to entitlement package")
+    public EntitlementColumnMap assignColumnToDerivedAttributePackage(
+            @PathVariable Long packageID, @RequestBody ColumnInDerivedPackageRequest newRequest){
         try {
-            return entitlementService.addSourceToPackage(packageID, lookupId);
+            String extensionName = newRequest.getExtensionName();
+            String sourceTableName = newRequest.getSourceTableName();
+            return entitlementService.addDerivedColumnToPackage(packageID, extensionName, sourceTableName);
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
-    @RequestMapping(value = "/{packageID}/sources/{lookupId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/{packageID}/columns", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Remove source from entitlement package")
-    public SimpleBooleanResponse removeSourceFromPackage(@PathVariable Long packageID,
-                                                                         @PathVariable String lookupId){
+    @ApiOperation(value = "Remove dervied column from entitlement package")
+    public SimpleBooleanResponse removeColumnFromDerivedAttributePackage(@PathVariable Long packageID,
+                                                         @RequestParam(value="extensionName", required=true) String extensionName,
+                                                         @RequestParam(value="sourceTableName", required=true) String sourceTableName){
         try {
-            entitlementService.removeSourceFromPackage(packageID, lookupId);
+            entitlementService.removeDerivedColumnFromPackage(packageID, extensionName, sourceTableName);
             return SimpleBooleanResponse.successResponse();
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
     @RequestMapping(value = "/{packageID}/customers/{contractID}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Assign entitlement to customer")
-    public EntitlementSourceContractPackageMap assignCustomerToDerivedAttributePackage(@PathVariable Long packageID,
+    public EntitlementContractPackageMap assignCustomerToDerivedAttributePackage(@PathVariable Long packageID,
                                                                                  @PathVariable String contractID){
         try {
             return entitlementService.grantEntitlementPackageToCustomer(packageID, contractID);
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 
@@ -130,7 +135,7 @@ public class EntitlementSourceResource {
             entitlementService.revokeEntitlementPackageToCustomer(packageID, contractID);
             return SimpleBooleanResponse.successResponse();
         }  catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25002, e);
+            throw new LedpException(LedpCode.LEDP_25001, e);
         }
     }
 }
