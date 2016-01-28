@@ -22,7 +22,7 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     Feature baseSource;
 
     @Override
-    public String getSourceName() { return "Feature"; }
+    public String getSourceName() { return "FeatureMostRecent"; }
 
     @Override
     public String[] getPrimaryKey() { return new String[]{ "URL", "Feature" }; }
