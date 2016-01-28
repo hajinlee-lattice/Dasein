@@ -8,4 +8,5 @@ cd ../le-eai && eaidpl
 cd ../le-dataflow && dfdpl
 cd ../le-dataflowapi && dfapidpl
 cd ../le-workflowapi && wfapidpl
+cd ../le-swlib && swlibdpl
 cd ../le-microservice && microservicedpl
