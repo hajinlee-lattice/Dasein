@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +27,9 @@ public class ColumnMetadata {
     private String matchDestination;
 
     @JsonProperty("ColumnName")
-    public String getColumnName() { return columnName; }
+    public String getColumnName() {
+        return columnName;
+    }
 
     @JsonProperty("ColumnName")
     public void setColumnName(String columnName) {
@@ -156,9 +157,11 @@ public class ColumnMetadata {
     @JsonIgnore
     public List<ApprovedUsage> getApprovedUsageList() {
         List<ApprovedUsage> approvedUsages = new ArrayList<>();
-        if (StringUtils.isEmpty(approvedUsage)) {  return approvedUsages; }
+        if (StringUtils.isEmpty(approvedUsage)) {
+            return approvedUsages;
+        }
         List<String> tokens = Arrays.asList(approvedUsage.split(","));
-        for (String token: tokens) {
+        for (String token : tokens) {
             approvedUsages.add(ApprovedUsage.fromName(token));
         }
         return approvedUsages;
@@ -167,7 +170,7 @@ public class ColumnMetadata {
     @JsonIgnore
     public void setApprovedUsageList(List<ApprovedUsage> approvedUsages) {
         List<String> tokens = new ArrayList<>();
-        for (ApprovedUsage usage: approvedUsages) {
+        for (ApprovedUsage usage : approvedUsages) {
             tokens.add(usage.getName());
         }
         this.approvedUsage = StringUtils.join(tokens, ",");
@@ -177,8 +180,10 @@ public class ColumnMetadata {
     private List<String> getApprovedUsageJson() {
         List<String> tokens = new ArrayList<>();
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
-        if (approvedUsages.isEmpty()) {  return tokens; }
-        for (ApprovedUsage approvedUsage: approvedUsages) {
+        if (approvedUsages.isEmpty()) {
+            return tokens;
+        }
+        for (ApprovedUsage approvedUsage : approvedUsages) {
             tokens.add(approvedUsage.getName());
         }
         return tokens;
@@ -187,7 +192,7 @@ public class ColumnMetadata {
     @JsonProperty("ApprovedUsage")
     private void setApprovedUsageJson(List<String> tokens) {
         List<ApprovedUsage> approvedUsages = new ArrayList<>();
-        for (String token: tokens) {
+        for (String token : tokens) {
             approvedUsages.add(ApprovedUsage.fromName(token));
         }
         setApprovedUsageList(approvedUsages);
@@ -196,7 +201,9 @@ public class ColumnMetadata {
     @JsonProperty("Tags")
     public List<String> getTagList() {
         List<String> tags = new ArrayList<>();
-        if (StringUtils.isEmpty(this.tags)) {  return tags; }
+        if (StringUtils.isEmpty(this.tags)) {
+            return tags;
+        }
         tags = Arrays.asList(this.tags.split(","));
         return tags;
     }
@@ -204,27 +211,26 @@ public class ColumnMetadata {
     @JsonProperty("Tags")
     public void setTagList(List<String> tags) {
         List<String> tokens = new ArrayList<>();
-        for (String tag: tags) {
+        for (String tag : tags) {
             tokens.add(tag);
         }
         this.tags = StringUtils.join(tokens, ",");
     }
 
-public ColumnMetadata() {
-    	
+    public ColumnMetadata() {
+
     }
 
     public ColumnMetadata(ExternalColumn extenalColumn) {
-    	this.setColumnName(extenalColumn.getDefaultColumnName());
-    	this.setDescription(extenalColumn.getDescription());
-    	this.setDataType(extenalColumn.getDataType());
-    	this.setDisplayName(extenalColumn.getDisplayName());
-    	this.setCategory(extenalColumn.getCategory());
-		this.setStatisticalType(extenalColumn.getStatisticalType());
-		this.setFundamentalType(extenalColumn.getFundamentalType());
-		this.setApprovedUsageList(extenalColumn.getApprovedUsageList());
-		this.setTagList(extenalColumn.getTagList());
-		this.setDiscretizationStrategy(extenalColumn.getDiscretizationStrategy());
-		this.setMatchDestination(extenalColumn.getColumnMappings().get(0).getSourceName());		// To be modified in ExternalColumnResource
+        this.setColumnName(extenalColumn.getDefaultColumnName());
+        this.setDescription(extenalColumn.getDescription());
+        this.setDataType(extenalColumn.getDataType());
+        this.setDisplayName(extenalColumn.getDisplayName());
+        this.setCategory(extenalColumn.getCategory());
+        this.setStatisticalType(extenalColumn.getStatisticalType());
+        this.setFundamentalType(extenalColumn.getFundamentalType());
+        this.setApprovedUsageList(extenalColumn.getApprovedUsageList());
+        this.setTagList(extenalColumn.getTagList());
+        this.setDiscretizationStrategy(extenalColumn.getDiscretizationStrategy());
     }
 }
