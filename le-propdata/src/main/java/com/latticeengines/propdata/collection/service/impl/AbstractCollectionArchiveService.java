@@ -86,14 +86,14 @@ public abstract class AbstractCollectionArchiveService
         String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
                 progress.getStartDate(), progress.getEndDate());
 
-        Date earlist = jdbcTemplateCollectionDB.queryForObject(
+        Date earliest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
                         + whereClause.replace(">=", ">")
                             .substring(1, whereClause.lastIndexOf("\"")),
                 Date.class);
 
-        LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earlist);
+        LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earliest);
 
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
@@ -104,7 +104,7 @@ public abstract class AbstractCollectionArchiveService
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
 
-        progress.setStartDate(earlist);
+        progress.setStartDate(earliest);
         progress.setEndDate(latest);
         getProgressEntityMgr().updateProgress(progress);
         whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
