@@ -513,8 +513,8 @@ public class PropDataAdminTool {
     }
 
     enum PropDataRawSource {
-        FEATURE("Feature", "featureArchiveService", RAW_TYPE_COLLECTED),
-        BUILTWITH("BuiltWith", "builtWithArchiveService", RAW_TYPE_COLLECTED),
+        FEATURE("FeatureRaw", "featureArchiveService", RAW_TYPE_COLLECTED),
+        BUILTWITH("BuiltWithRaw", "builtWithArchiveService", RAW_TYPE_COLLECTED),
         HGDATARAW("HGDataRaw", "hgDataRawArchiveService", RAW_TYPE_BULK);
 
         private static Map<String, PropDataRawSource> nameMap;
@@ -552,9 +552,9 @@ public class PropDataAdminTool {
     }
 
     enum PropDataDerivedSource {
-        FEATURE("FeatureMostRecent"),
+        FEATURE("Feature"),
         FEATURE_PIVOTED("FeaturePivoted"),
-        BUILTWITH("BuiltWithMostRecent"),
+        BUILTWITH("BuiltWith"),
         BUILTWITH_PIVOTED("BuiltWithPivoted"),
         HGDATA("HGData"),
         HGDATA_PIVOTED("HGDataPivoted");

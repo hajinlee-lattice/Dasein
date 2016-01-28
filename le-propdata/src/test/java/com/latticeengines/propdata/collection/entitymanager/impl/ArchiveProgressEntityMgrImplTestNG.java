@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.core.source.impl.Feature;
+import com.latticeengines.propdata.core.source.impl.FeatureRaw;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 
@@ -22,7 +22,7 @@ public class ArchiveProgressEntityMgrImplTestNG extends PropDataCollectionFuncti
     private ArchiveProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    Feature source;
+    FeatureRaw source;
 
     @Test(groups = "functional")
     public void testInsertNew() throws IOException {

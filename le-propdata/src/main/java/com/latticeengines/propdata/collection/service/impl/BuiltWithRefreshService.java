@@ -9,7 +9,7 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.impl.BuiltWithMostRecent;
+import com.latticeengines.propdata.core.source.impl.BuiltWith;
 
 @Component("builtWithRefreshService")
 public class BuiltWithRefreshService extends AbstractMostRecentService implements RefreshService {
@@ -23,7 +23,7 @@ public class BuiltWithRefreshService extends AbstractMostRecentService implement
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    BuiltWithMostRecent source;
+    BuiltWith source;
 
     @Override
     public MostRecentSource getSource() {

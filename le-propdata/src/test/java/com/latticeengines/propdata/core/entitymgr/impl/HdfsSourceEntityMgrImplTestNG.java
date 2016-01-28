@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.source.impl.Feature;
+import com.latticeengines.propdata.core.source.impl.FeatureRaw;
 import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;
 
 
@@ -22,7 +22,7 @@ public class HdfsSourceEntityMgrImplTestNG extends PropDataCoreFunctionalTestNGB
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Autowired
-    Feature testSource;
+    FeatureRaw testSource;
 
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {

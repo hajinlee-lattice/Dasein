@@ -18,7 +18,7 @@ public class FeaturePivoted implements PivotedSource, DomainBased, HasSqlPresenc
     String cronExpression;
 
     @Autowired
-    FeatureMostRecent baseSource;
+    Feature baseSource;
 
     @Override
     public String getSourceName() { return "FeaturePivoted"; }

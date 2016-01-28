@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.Feature;
+import com.latticeengines.propdata.core.source.impl.FeatureRaw;
 
 @Component("featureArchiveService")
 public class FeatureArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {
@@ -19,7 +19,7 @@ public class FeatureArchiveService extends AbstractCollectionArchiveService impl
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    Feature source;
+    FeatureRaw source;
 
     @Override
     public CollectedSource getSource() { return source; }

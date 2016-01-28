@@ -10,7 +10,7 @@ import org.testng.Assert;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.Feature;
+import com.latticeengines.propdata.core.source.impl.FeatureRaw;
 import com.latticeengines.propdata.core.util.DateRange;
 
 @Component
@@ -20,7 +20,7 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
     FeatureArchiveService collectedArchiveService;
 
     @Autowired
-    Feature source;
+    FeatureRaw source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;

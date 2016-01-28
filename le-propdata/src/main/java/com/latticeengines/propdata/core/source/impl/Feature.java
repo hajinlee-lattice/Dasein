@@ -1,38 +1,55 @@
 package com.latticeengines.propdata.core.source.impl;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
+import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
+import com.latticeengines.propdata.core.source.MostRecentSource;
 
 @Component("feature")
-public class Feature implements CollectedSource {
+public class Feature implements MostRecentSource, DomainBased, HasSqlPresence {
 
-    private static final long serialVersionUID = 2079061038810691592L;
+    private static final long serialVersionUID = 3483355190999074200L;
 
-    @Value("${propdata.job.feature.archive.schedule:}")
+    @Value("${propdata.job.feature.refresh.schedule:}")
     String cronExpression;
+
+    @Autowired
+    FeatureRaw baseSource;
 
     @Override
     public String getSourceName() { return "Feature"; }
 
     @Override
-    public String getRefreshServiceBean() { return "featureArchiveService"; }
+    public String getSqlTableName() { return "Feature_MostRecent"; }
 
     @Override
-    public String getDownloadSplitColumn() { return "LE_Last_Upload_Date"; }
+    public String getRefreshServiceBean() { return "featureRefreshService"; }
 
     @Override
-    public String getCollectedTableName() {
-        return "Feature";
-    }
+    public String[] getPrimaryKey() { return new String[]{ "URL", "Feature" }; }
 
     @Override
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
 
     @Override
-    public String[] getPrimaryKey() { return new String[] { "URL", "Feature", "LE_Last_Upload_Date"  };  }
+    public String getDomainField() {  return "URL"; }
+
+    @Override
+    public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
+
+    @Override
+    public Long periodToKeep() {  return TimeUnit.DAYS.toMillis(365); }
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public String getSqlMatchDestination() { return "Feature_Source"; }
+
 }

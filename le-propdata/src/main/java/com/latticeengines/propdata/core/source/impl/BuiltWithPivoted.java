@@ -18,7 +18,7 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPrese
     String cronExpression;
 
     @Autowired
-    BuiltWithMostRecent baseSource;
+    BuiltWith baseSource;
 
     @Override
     public String getSourceName() { return "BuiltWithPivoted"; }

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.BuiltWith;
+import com.latticeengines.propdata.core.source.impl.BuiltWithRaw;
 
 @Component
 public class BuiltWithArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
@@ -18,7 +18,7 @@ public class BuiltWithArchiveServiceImplTestNG extends CollectionArchiveServiceI
     BuiltWithArchiveService collectedArchiveService;
 
     @Autowired
-    BuiltWith source;
+    BuiltWithRaw source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.impl.BuiltWithMostRecent;
+import com.latticeengines.propdata.core.source.impl.BuiltWith;
 
 @Component
 public class BuiltWithRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBase {
@@ -18,7 +18,7 @@ public class BuiltWithRefreshServiceImplTestNG extends MostRecentServiceImplTest
     BuiltWithArchiveServiceImplTestNG archiveServiceImplDeploymentTestNG;
 
     @Autowired
-    BuiltWithMostRecent source;
+    BuiltWith source;
 
     @Autowired
     RefreshProgressEntityMgr progressEntityMgr;
