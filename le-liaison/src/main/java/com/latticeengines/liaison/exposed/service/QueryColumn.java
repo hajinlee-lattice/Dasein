@@ -162,12 +162,6 @@ public abstract class QueryColumn {
         this.expression = expression;
         this.metadata = new HashMap<>();
         setMetadata(metadata);
-        if (!this.metadata.containsKey("Tags")) {
-            setTags("Internal");
-        }
-        if (this.metadata.get("Tags").equals("Internal") && !this.metadata.containsKey("Category")) {
-            setCategory("Lead Information");
-        }
     }
 
     public abstract void initFromDefinition(String defn) throws DefinitionException;

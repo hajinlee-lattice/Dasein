@@ -148,7 +148,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             metadata = {}
             metadata['DisplayName']     = col_data['DisplayName']
             metadata['Description']     = col_data['Description']
-            metadata['Tags']            = 'Internal'
+            metadata['Tags']            = None
             if col_data['Tags'] is not None and len(col_data['Tags']) > 0:
                 metadata['Tags']          = col_data['Tags'][-1]
             metadata['FundamentalType'] = col_data['FundamentalType']

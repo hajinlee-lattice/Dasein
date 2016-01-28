@@ -80,7 +80,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
             if (colData.getTags() != null && colData.getTags().size() > 0) {
                 metadata.put("Tags", colData.getTags().get(colData.getTags().size() - 1));
             } else {
-                metadata.put("Tags", "Internal");
+                metadata.put("Tags", "<NULL>");
             }
 
             if (colData.getFundamentalType() != null) {
@@ -105,11 +105,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
                 }
             }
             if (!metadata.containsKey("Category")) {
-                if (metadata.containsKey("Tags") && metadata.get("Tags").equals("Internal")) {
-                    metadata.put("Category", "Lead Information");
-                } else {
-                    metadata.put("Category", "<NULL>");
-                }
+                metadata.put("Category", "<NULL>");
             }
             if (!metadata.containsKey("DataType")) {
                 metadata.put("DataType", "<NULL>");
@@ -120,7 +116,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
                     && !colData.getDataSource().get(0).equals("")) {
                 metadata.put("DataSource", colData.getDataSource().get(0));
             } else {
-                metadata.put("DataSource", "Lattice Data Science");
+                metadata.put("DataSource", "<NULL>");
             }
 
             if (colData.getApprovedUsage() != null && colData.getApprovedUsage().size() > 0) {
@@ -182,6 +178,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         }
     }
 
+    @Override
     public String getSpec(String specName) throws IOException, RuntimeException {
 
         GetSpecResult getSpecResult = dataLoaderService.getSpecDetails(new GetSpecRequest(
@@ -200,6 +197,7 @@ public class ConnectionMgrVDBImpl implements ConnectionMgr {
         return getSpecResult.getSpecDetails();
     }
 
+    @Override
     public void setSpec(String objName, String specLatticeNamedElements) throws IOException,
             RuntimeException {
 
