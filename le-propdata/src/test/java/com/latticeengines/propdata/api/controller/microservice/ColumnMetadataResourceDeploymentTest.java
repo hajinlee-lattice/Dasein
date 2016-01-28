@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.propdata.api.controller.microservice;
 
 import java.util.List;
 
@@ -11,10 +11,11 @@ import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNG
 import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
 
 public class ColumnMetadataResourceDeploymentTest extends PropDataApiDeploymentTestNGBase{
+
 	@Autowired
 	private ColumnMetadataProxy columnMetadataProxy;
 
-	@Test(groups = "deployment", enabled = true)
+	@Test(groups = "api.deployment", enabled = true)
 	public void testLeadEnrichment() {
 	    /*
 		List<Map<String, Object>> metadataObjs = columnMetadataProxy.columnSelection("leadenrichment");

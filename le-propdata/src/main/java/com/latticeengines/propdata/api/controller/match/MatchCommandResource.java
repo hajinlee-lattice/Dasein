@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.propdata.api.controller.match;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.propdata.api.controller.microservice;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,11 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
-public class ColumnMetadataResourceFunctionalTest extends PropDataApiFunctionalTestNGBase {
+public class ColumnMetadataResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
 	private static final String PROPDATA_METADATA_PREDEFINED = "propdata/metadata/predefined";
 
 	@SuppressWarnings("unchecked")
-    @Test(groups = "functional")
+    @Test(groups = "api.functional")
 	public void testLeadEnrichment() {
 		String url = getRestAPIHostPort() + PROPDATA_METADATA_PREDEFINED + "/leadenrichment";
 		List<Map<String, Object>> metadataObjs = restTemplate.getForObject(url, List.class);

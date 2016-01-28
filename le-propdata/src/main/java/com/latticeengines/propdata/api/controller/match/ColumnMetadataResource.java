@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.propdata.api.controller.match;
 
 import java.util.ArrayList;
 import java.util.List;
