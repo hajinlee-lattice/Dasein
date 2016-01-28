@@ -1,12 +1,8 @@
 <div data-ng-controller="AdminInfoController">
-    <header class="header">
-        <div class="page-title">
-            <div class="wrapper"><a href="#" ng-click="onBackClicked()" class="model-admin-back-button"><i class="fa fa-angle-double-left"></i> {{ResourceUtility.getString('ADMIN_INFO_PAGE_BACK_TO_MODEL')}}</a></div>
-            <div class="wrapper text-center">
-                <h1>{{ResourceUtility.getString('ADMIN_INFO_PAGE_TITLE')}} - {{displayName}}</h1>
-            </div>
-        </div>
-    </header>
+    <div class="summary blue-fire">
+        <div class="pull-left"><a href="#" ng-click="onBackClicked()" class="model-admin-back-button"><i class="fa fa-angle-double-left"></i> {{ResourceUtility.getString('ADMIN_INFO_PAGE_BACK_TO_MODEL')}}</a></div>
+        <h1>{{ResourceUtility.getString('ADMIN_INFO_PAGE_TITLE')}} - {{displayName}}</h1>
+    </div>
 
     <div data-ng-show="loading">
         <div class="loader"> </div>

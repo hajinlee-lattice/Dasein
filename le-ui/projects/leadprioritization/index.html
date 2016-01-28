@@ -21,32 +21,79 @@
     <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
     /build -->
     <!-- build:remove:dist -->
-    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
-    <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css"/>
-    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/css/jquery.qtip.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.css"/>
 
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.mobile.all.min.css">
 
     <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
     <!-- /build -->
 
+    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css">
+    
+
 </head>
-<body data-ng-controller="MainController" class="blue-background">
-<!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-<div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-<div class="content-wrap">
-    <div id="mainView">
-        <div id="mainHeaderView"></div>
-        <div data-ng-view class="container"></div>
-    </div>
-</div>
-<div class="footer" data-ng-show="showFooter">
-    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-</div>
+<body data-ng-controller="MainController">
+
+    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+
+    <div id="outer-wrap">
+        <div id="inner-wrap">
+            
+            <nav id="nav" class="primary-nav" role="navigation">
+                <div ui-view="navigation">
+                    <!--<ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>-->
+
+                    <a href="#/" class="logo"><img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" /></a>
+                    
+                    <ul class="menu">
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="fingerprints"><span class="ico ico-fingerprint"></span>Analyze Your Customer Fingerprints</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="markets.list"><span class="ico ico-bullseye"></span>Manage Target Markets</a>
+                            <ul>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.create">Create a Target Market</a></li>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.dashboard">Performance Dashboard</a></li>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_schedule">Prospecting Schedule</a></li>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_list">Prospecting History</a></li>
+                            </ul>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="jobs.status"><span class="ico ico-cog"></span>Jobs <!--<span class="loading pull-right"></span>--></a>
+                            <ul>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="jobs.import.credentials">Import Data</a></li>
+                            </ul>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="users"><span class="ico ico-user"></span>Manage Users</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+            <section id="main" role="main" class="main-content">
+                <div class="content-wrap">
+                    <div id="mainView">
+                        <div id="mainHeaderView"></div>
+                        <div data-ng-view class="container"></div>
+                    </div>
+                </div>
+                <div class="footer" data-ng-show="showFooter">
+                    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
+                </div>
+            </section>
+
+        </div><!-- End #inner-wrap -->
+    </div><!-- End #outer-wrap -->
 
 <!--
 This div will be added to the DOM if the browser is IE
@@ -74,26 +121,26 @@ Use DOMUtil.isIE() to detect internet explorer.
 </script>
 
 <!-- 3rd-party libraries -->
-<script src="lib/js/jquery.js"></script>
+<script src="/lib/js/jquery.js"></script>
 
-<script src="lib/js/angular/angular.js"></script>
-<script src="lib/js/angular/angular-sanitize.js"></script>
-<script src="lib/js/angular/angular-resource.js"></script>
-<script src="lib/js/angular/angular-route.js"></script>
+<script src="/lib/js/angular/angular.js"></script>
+<script src="/lib/js/angular/angular-sanitize.js"></script>
+<script src="/lib/js/angular/angular-resource.js"></script>
+<script src="/lib/js/angular/angular-route.js"></script>
 
-<script src="lib/js/crypto/core.js"></script>
-<script src="lib/js/crypto/sha256.js"></script>
+<script src="/lib/js/crypto/core.js"></script>
+<script src="/lib/js/crypto/sha256.js"></script>
 
-<script src="lib/js/ui-bootstrap.js"></script>
-<script src="lib/js/ui-bootstrap-tpls.js"></script>
-<script src="lib/js/jquery.qtip.js"></script>
-<script src="lib/js/underscore.js"></script>
-<script src="lib/js/bootstrap.js"></script>
-<script src="lib/js/d3.js"></script>
-<script src="lib/js/jstorage.js"></script>
-<script src="lib/js/alasql.min.js"></script>
-<script src="lib/js/FileSaver.js"></script>
-<script src="lib/js/kendo.all.min.js"></script>
+<script src="/lib/js/ui-bootstrap.js"></script>
+<script src="/lib/js/ui-bootstrap-tpls.js"></script>
+<script src="/lib/js/jquery.qtip.js"></script>
+<script src="/lib/js/underscore.js"></script>
+<script src="/lib/js/bootstrap.js"></script>
+<script src="/lib/js/d3.js"></script>
+<script src="/lib/js/jstorage.js"></script>
+<script src="/lib/js/alasql.min.js"></script>
+<script src="/lib/js/FileSaver.js"></script>
+<script src="/lib/js/kendo.all.min.js"></script>
 
 <!-- self-host vendors -->
 <script src="app/AppCommon/vendor/date.format.js"></script>

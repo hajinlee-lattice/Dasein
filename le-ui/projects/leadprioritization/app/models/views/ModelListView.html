@@ -1,11 +1,10 @@
 <div data-ng-controller="ModelListController">
-    <header class="header">
-        <div class="page-title">
-            <div class="wrapper text-center">
-                <h1>{{ResourceUtility.getString('MODEL_LIST_TITLE')}}</h1>
-            </div>
-        </div>
-    </header>
+    
+    <div class="summary blue-fire">
+        <h1>{{ResourceUtility.getString('MODEL_LIST_TITLE')}}</h1>
+        <p>Completed models are shown here. To create a new model, go back to the model creation section.</p>
+    </div>
+
     <section id="main-content" class="wrapper">
         <div data-ng-show="loading">
             <div class="loader"> </div>
@@ -24,4 +23,5 @@
             </section>
         </div>
     </section>
+    
 </div>

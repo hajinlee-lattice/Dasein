@@ -1,16 +1,19 @@
-<header data-ng-controller="MainHeaderController" class="header">
-    <div class="header-wrap clearfix">
-        <div class="brand">
-            <a class="logo" href="#" data-ng-click="logoClicked($event)" data-ng-hide="mandatePasswordChange"> <img src="assets/images/logo_lattice.png" alt=""> </a>
-            <span class="logo" data-ng-show="mandatePasswordChange"> <img src="assets/images/logo_lattice.png" alt=""> </span>
-        </div>
-        <ul class="top-nav">
-            <li class="dropdown li-nav-personal">
-                <a data-toggle="dropdown" class="dropdown-toggle nav-personal" href="#" data-ng-click="dropdownClicked($event)">
-                    <span class="username">{{userDisplayName}}</span> <i class="fa fa-caret-down"></i></b>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-2">
-                    <li><a href="#" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
+<header data-ng-controller="MainHeaderController">
+    <div class="secondary-nav">
+
+        <button id="toggleNav" class="nav-button" data-ng-click="handleSidebarToggle($event)">
+            <span class="fa fa-bars"></span>
+        </button>
+
+        <img class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
+
+        <div class="profile-nav dropdown">
+            <a class="pd-header-dropdown-container"  ng-click="isReplyFormOpen = !isReplyFormOpen" href="javascript:void(0)" title="" data-ng-click="handleClick($event, 'dropdown')">
+                <span class="pd-header-username">{{userDisplayName}}</span>
+                <span class="pd-header-downarrow fa fa-angle-down"></span>
+            </a>
+            <ul>
+                <li><a href="#" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
                     <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
                     <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>
                     <li data-ng-if="showModelCreationHistoryDropdown" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a></li>
@@ -19,8 +22,8 @@
                     <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
                     <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
                     <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
-                </ul>
-            </li>
-        </ul>
+            </ul>
+        </div>
+
     </div>
 </header>
