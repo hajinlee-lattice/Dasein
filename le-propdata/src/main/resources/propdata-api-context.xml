@@ -10,8 +10,6 @@
         <context:exclude-filter type="aspectj" expression="com.latticeengines.propdata.api.controller.*" />
     </context:component-scan>
 
-    <mvc:annotation-driven />
-
     <import resource="classpath:propdata-core-context.xml" />
     <import resource="classpath:propdata-persistence-context.xml" />
     <import resource="classpath:propdata-persistence-entitlements-context.xml" />
