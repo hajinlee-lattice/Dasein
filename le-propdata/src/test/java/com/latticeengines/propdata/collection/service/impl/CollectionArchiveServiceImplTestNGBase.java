@@ -50,7 +50,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     @AfterMethod(groups = "functional.source")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "functional.source", enabled = true)
+    @Test(groups = "functional.source", enabled = false)
     public void testWholeProgress() {
         purgeRawData();
 
