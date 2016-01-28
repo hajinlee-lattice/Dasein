@@ -1,4 +1,4 @@
-angular.module('mainApp.setup.modals.LeadEnrichmentAttributesDetailsModel', [
+angular.module('mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -8,9 +8,12 @@ angular.module('mainApp.setup.modals.LeadEnrichmentAttributesDetailsModel', [
 ])
 
 .service('LeadEnrichmentAttributesDetailsModel', function ($compile, $rootScope, $http) {
-    this.show = function($parentScope) {
+    this.show = function($parentScope, title, attributes) {
         $http.get('./app/setup/views/LeadEnrichmentAttributesDetailsView.html').success(function (html) {
             var scope = $parentScope.$new();
+            scope.title = title;
+            scope.attributes = attributes;
+            scope.hasAttributes = (attributes != null && attributes.length > 0);
             var contentContainer = $('#leadEnrichmentAttributesDetails');
             $compile(contentContainer.html(html))(scope);
         });
@@ -18,17 +21,14 @@ angular.module('mainApp.setup.modals.LeadEnrichmentAttributesDetailsModel', [
 })
 
 .controller('LeadEnrichmentAttributesDetailsController', function ($scope, $rootScope, $http, _, ResourceUtility, BrowserStorageUtility, NavUtility, SessionService, LeadEnrichmentService) {
-    $scope.$parent.setAttributesDetails(true);
     $scope.ResourceUtility = ResourceUtility;
-
-    $scope.loading = true;
-    LeadEnrichmentService.GetSavedAttributes().then(function (data) {
-        if (!data.Success) {
-            $scope.loadingError = data.ResultErrors;
-            $scope.showLoadingError = true;
-        } else {
-            $scope.attributes = data.ResultObj;
+    $scope.$parent.setAttributesDetails(true);
+    $scope.backButtonClicked = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
         }
-        $scope.loading = false;
-    });
+
+        $scope.attributes = null;
+        $scope.$parent.setAttributesDetails(false);
+    };
 });

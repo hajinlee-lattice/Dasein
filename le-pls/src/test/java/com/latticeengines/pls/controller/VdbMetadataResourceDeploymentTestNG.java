@@ -4,24 +4,18 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.security.exposed.Constants;
 
 public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -59,9 +53,6 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         switchToInternalUser();
         assertGetFieldsGet403();
 
-        switchToExternalAdmin();
-        assertGetFieldsGet403();
-
         switchToExternalUser();
         assertGetFieldsGet403();
     }
@@ -79,9 +70,6 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         switchToInternalUser();
         assertUpdateFieldGet403(fieldToUpdate);
 
-        switchToExternalAdmin();
-        assertUpdateFieldGet403(fieldToUpdate);
-
         switchToExternalUser();
         assertUpdateFieldGet403(fieldToUpdate);
     }
@@ -97,9 +85,6 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         assertUpdateFieldsSuccess(fieldsToUpdate);
 
         switchToInternalUser();
-        assertUpdateFieldsGet403(fieldsToUpdate);
-
-        switchToExternalAdmin();
         assertUpdateFieldsGet403(fieldsToUpdate);
 
         switchToExternalUser();
@@ -131,7 +116,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
 
     private void assertUpdateFieldSuccess(VdbMetadataField fieldToUpdate) {
         String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields/" + fieldToUpdate.getColumnName();
-        restTemplate.put(url, fieldToUpdate, SimpleBooleanResponse.class);
+        restTemplate.put(url, fieldToUpdate, Boolean.class);
 
         List<VdbMetadataField> fields = getFields();
         VdbMetadataField fieldUpdated = getField(fields, fieldToUpdate.getColumnName());
@@ -142,7 +127,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         boolean exception = false;
         try {
             String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields/" + fieldToUpdate.getColumnName();
-            restTemplate.put(url, fieldToUpdate, SimpleBooleanResponse.class);
+            restTemplate.put(url, fieldToUpdate, Boolean.class);
         } catch (Exception e) {
             String code = e.getMessage();
             exception = true;
@@ -165,7 +150,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
 
     private void assertUpdateFieldsSuccess(List<VdbMetadataField> fieldsToUpdate) {
         String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields";
-        restTemplate.put(url, fieldsToUpdate, SimpleBooleanResponse.class);
+        restTemplate.put(url, fieldsToUpdate, Boolean.class);
 
         List<VdbMetadataField> fields = getFields();
         for (VdbMetadataField field : fieldsToUpdate) {
@@ -178,7 +163,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         boolean exception = false;
         try {
             String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields";
-            restTemplate.put(url, fields, SimpleBooleanResponse.class);
+            restTemplate.put(url, fields, Boolean.class);
         } catch (Exception e) {
             String code = e.getMessage();
             exception = true;
@@ -187,25 +172,11 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         assertTrue(exception);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private List<VdbMetadataField> getFields() {
         String url = getRestAPIHostPort() + "/pls/vdbmetadata/fields";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        headers.add(Constants.INTERNAL_SERVICE_HEADERNAME, Constants.INTERNAL_SERVICE_HEADERVALUE);
-        HttpEntity<String> request = new HttpEntity<>("", headers);
-        ParameterizedTypeReference responseType = new ParameterizedTypeReference<ResponseDocument<List<VdbMetadataField>>>() {};
-        ResponseEntity<ResponseDocument<List<VdbMetadataField>>> responseEntity = restTemplate.exchange(
-                url, HttpMethod.GET, request, responseType);
-        ResponseDocument<List<VdbMetadataField>> response = responseEntity.getBody();
-
-        Assert.assertNotNull(response);
-        Assert.assertTrue(response.isSuccess());
-        List<VdbMetadataField> fields = response.getResult();
-        Assert.assertTrue(fields != null && fields.size() > 0);
-
-        return fields;
+        VdbMetadataField[] fields = restTemplate.getForObject(url, VdbMetadataField[].class);
+        Assert.assertTrue(fields != null && fields.length > 0);
+        return Arrays.asList(fields);
     }
 
     protected VdbMetadataField getField(List<VdbMetadataField> fields, String columnName) {

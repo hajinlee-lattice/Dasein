@@ -14,7 +14,7 @@
         <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{saveAttributessErrorMessage}}</span>
         <button class="close btn btn-link" data-ng-click="showSaveAttributesError = false;"><i class="fa fa-times fa-inverse"></i></button>
     </div>
-    <div data-ng-hide="loading || showLoadingError || saveInProgress || showSaveAttributesError">
+    <div data-ng-hide="loading || showLoadingError || saveInProgress || showAttributesDetails">
         <div class="title">
             <h2>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_TITLE')}}</h2>
         </div>
@@ -25,14 +25,17 @@
             </div>
             <div class="row">
                 <div class="col-md-4">
-                    <div class="sub-title">{{ResourceUtility.getString('LEAD_ENRICHMENT_LIBRARY_ATTRIBUTES_LABEL')}}</div>
+                    <div class="sub-title">
+                        <span>{{ResourceUtility.getString('LEAD_ENRICHMENT_LIBRARY_ATTRIBUTES_LABEL')}}</span>
+                        <a href="#" data-ng-click="showAllAttributes($event)">{{ResourceUtility.getString('LEAD_ENRICHMENT_SHOW_ALL_ATTRIBUTES')}}</a>
+                    </div>
                     <ul id="availableAttributesList" class="list-group" data-ng-dblclick="addAttributeButtonClicked($event)">
                         <li class="list-group-item"
                             data-ng-repeat="a in availableAttributes"
                             data-ng-mouseenter="attributeItemMouseEnter($event, true)"
                             data-ng-mouseleave="attributeItemMouseLeave($event)"
                             data-ng-mousedown="attributeItemMouseDown($event, true)"
-                            fn="{{a.FieldName}}">{{a.DisplayName}}</li>
+                            fn="{{a.FieldName}}">{{a.DisplayName}}&nbsp;({{a.DataSource}})</li>
                     </ul>
                 </div>
                 <div class="col-toggle">
@@ -54,7 +57,7 @@
                             data-ng-mouseenter="attributeItemMouseEnter($event, false)"
                             data-ng-mouseleave="attributeItemMouseLeave($event)"
                             data-ng-mousedown="attributeItemMouseDown($event, false)"
-                            fn="{{a.FieldName}}">{{a.DisplayName}}</li>
+                            fn="{{a.FieldName}}">{{a.DisplayName}}&nbsp;({{a.DataSource}})</li>
                     </ul>
                     <button id="saveLeadEnrichmentAttributesButton" data-ng-click="saveAttributesButtonClicked($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
                 </div>
@@ -66,6 +69,6 @@
                 </div>
             </div>
         </div>
-        <div id="leadEnrichmentAttributesDetails" data-ng-show="showAttributesDetails" class="content"></div>
     </div>
+    <div id="leadEnrichmentAttributesDetails" data-ng-show="showAttributesDetails"></div>
 </div>

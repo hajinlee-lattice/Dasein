@@ -28,6 +28,7 @@ var Config = function() {
                 specBasePath + '/internaladmin_spec.js',
                 specBasePath + '/managefields_spec.js',
                 specBasePath + '/tenantdeployment_spec.js',
+                //specBasePath + '/leadenrichment_spec.js',
                 specBasePath + '/systemsetup_spec.js'
             ],
 

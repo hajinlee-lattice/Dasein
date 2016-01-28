@@ -10,6 +10,7 @@ var UserDropdown = function() {
     this.modelCreationHistory = element(by.linkText('Model Creation History'));
     this.SetupLink = element(by.linkText('Manage Fields'));
     this.TenantDeploymentWizard = element(by.linkText('Deployment Wizard'));
+    this.LeadEnrichment = element(by.linkText('Lead Enrichment'));
 
     this.getUserLink = function(name) {
         return element(by.linkText(name));

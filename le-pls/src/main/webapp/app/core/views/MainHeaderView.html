@@ -17,7 +17,7 @@
                     <li data-ng-if="showActivateModel" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="activateModelClicked($event)">{{ResourceUtility.getString('HEADER_ACTIVATE_MODEL')}}</a></li>
                     <li data-ng-if="showSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="setupClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_FIELDS')}}</a></li>
                     <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
-                    <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
+                    <li data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
                     <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
                 </ul>
             </li>

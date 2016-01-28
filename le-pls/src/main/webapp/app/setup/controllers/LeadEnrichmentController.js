@@ -4,15 +4,18 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.SessionService',
-    'mainApp.setup.modals.LeadEnrichmentAttributesDetailsModel',
+    'mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel',
+    'mainApp.setup.controllers.SaveAttributesModel',
     'mainApp.setup.services.LeadEnrichmentService'
 ])
 
-.controller('LeadEnrichmentController', function ($scope, $rootScope, $http, _, ResourceUtility, BrowserStorageUtility, NavUtility, SessionService, LeadEnrichmentAttributesDetailsModel, LeadEnrichmentService) {
+.controller('LeadEnrichmentController', function ($scope, $rootScope, $http, _, ResourceUtility, BrowserStorageUtility, NavUtility, SessionService, LeadEnrichmentAttributesDetailsModel, SaveAttributesModel, LeadEnrichmentService) {
     $scope.ResourceUtility = ResourceUtility;
     if (BrowserStorageUtility.getClientSession() == null) { return; }
 
-    $scope.load = function () {
+    load(false);
+
+    function load(showSavingConfirmation) {
         initialize();
         LeadEnrichmentService.GetAvariableAttributes().then(function (avariableAttributesData) {
             if (!avariableAttributesData.Success) {
@@ -20,27 +23,36 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
                 return;
             }
 
-            $scope.allAvariableAttributes = avariableAttributesData.ResultObj;
-            LeadEnrichmentService.GetSavedAttributes().then(function (savedAttributesData) {
+            LeadEnrichmentService.GetAttributes().then(function (savedAttributesData) {
                 if (!savedAttributesData.Success) {
                     handleLoadError(savedAttributesData);
                     return;
                 }
 
                 var availableAttributes = [];
+                var selectedAttributes = [];
                 var savedAttributes = savedAttributesData.ResultObj;
-                for (var i = 0; i < $scope.allAvariableAttributes.length; i++) {
-                    var attr = $scope.allAvariableAttributes[i];
-                    if (getAttribute(savedAttributes, attr.FieldName) == null) {
+                var allAvariableAttributes = avariableAttributesData.ResultObj;
+                for (var i = 0; i < allAvariableAttributes.length; i++) {
+                    var attr = allAvariableAttributes[i];
+                    if (getAttribute(savedAttributes, attr.FieldName) != null) {
+                        selectedAttributes.push(attr);
+                    } else {
                         availableAttributes.push(attr);
                     }
                 }
+                $scope.allAvariableAttributes = sortAttributes(allAvariableAttributes);
                 $scope.availableAttributes = sortAttributes(availableAttributes);
-                $scope.selectedAttributes = sortAttributes(savedAttributes);
+                $scope.selectedAttributes = sortAttributes(selectedAttributes);
                 $scope.loading = false;
+
+                if (showSavingConfirmation) {
+                    var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_SAVED_ATTRIBUTES_TITLE');
+                    LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.selectedAttributes);
+                }
             });
         });
-    };
+    }
 
     function initialize() {
         $scope.loading = true;
@@ -65,7 +77,14 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
         $scope.loading = false;
     }
 
-    $scope.load();
+    $scope.showAllAttributes = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_ALL_ATTRIBUTES_TITLE');
+        LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.allAvariableAttributes);
+    };
 
     $scope.selectedAttributesLabelMouseEnter = function ($event) {
         if ($scope.selectedAttributes.length >= $scope.maxSelectedAttributes) {
@@ -122,6 +141,9 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
     };
 
     $scope.attributeItemMouseDown = function ($event, isAvailableAttribute) {
+        if ($event.which === 3) {
+            return;
+        }
         if ($event != null) {
             $event.preventDefault();
         }
@@ -207,7 +229,8 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
                 }
             }
         } else {
-            var attr = getAttribute($scope.allAvariableAttributes, getFieldName(currentItem));
+            var attributes = isAvailableAttribute ? $scope.availableAttributes : $scope.selectedAttributes;
+            var attr = getAttribute(attributes, getFieldName(currentItem));
             if (attr != null && attr.Description != null && attr.Description.length > 0) {
                 $scope.tooltip = attr.Description;
                 showAttributeHover(currentItem, $event);
@@ -228,7 +251,33 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
             $event.preventDefault();
         }
 
-        LeadEnrichmentAttributesDetailsModel.show($scope);
+        $scope.showSaveAttributesError = false;
+        if ($scope.selectedAttributes.length > $scope.maxSelectedAttributes) {
+            $scope.attributesExcessAlert = ResourceUtility.getString('LEAD_ENRICHMENT_CANNOT_SAVE_FOR_EXCESS_ATTRIBUTES', $scope.maxSelectedAttributes);
+            $scope.showAttributesExcessAlert = true;
+            return;
+        }
+
+        SaveAttributesModel.show($scope);
+    };
+
+    $scope.saveAttributes = function () {
+        $scope.saveInProgress = true;
+        var attributes = [];
+        for (var i = 0; i < $scope.selectedAttributes.length; i++) {
+            var attribute = $scope.selectedAttributes[i];
+            attributes[i] = { FieldName: attribute.FieldName, DataSource: attribute.DataSource };
+        }
+        LeadEnrichmentService.SaveAttributes(attributes).then(function (data) {
+            if (data.Success) {
+                $scope.saveInProgress = false;
+                load(true);
+            } else {
+                $scope.saveAttributessErrorMessage = data.ResultErrors;
+                $scope.showSaveAttributesError = true;
+                $scope.saveInProgress = false;
+            }
+        });
     };
 
     $scope.setAttributesDetails = function (value) {
@@ -267,31 +316,27 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
 
     function showAttributeHover(target, $event) {
         $scope.attributeHoverTimeout = setTimeout(function() {
-            if (target.offset().top <= 0) {
+            var offset = target.offset();
+            if (offset.top <= 0) {
+                return;
+            }
+
+            var container = $scope.leadEnrichment;
+            var top = offset.top + target.height() + container.scrollTop() - container.position().top + 10;
+            if (top <= 0) {
                 return;
             }
 
             var hover = $scope.attributeHover;
             hover[0].style.opacity = 0;
             hover.removeClass('hide');
-
-            var container = $scope.leadEnrichment;
-            var top = target.offset().top + target.height() + container.scrollTop() - container.position().top + 10;
-            if (top < 0) {
-                top = 0;
-            }
             hover.css('top', top);
-
             var left = $event.pageX + container.scrollLeft() - parseInt(hover.width() / 3);
-            var minLeft = target.offset().left + 20;
-            if (minLeft < 0) {
-                minLeft = 0;
-            }
+            var minLeft = offset.left + 20;
             if (left < minLeft) {
                 left = minLeft;
             }
             hover.css('left', left);
-
             hover[0].style.opacity = 1;
         }, 400);
     }

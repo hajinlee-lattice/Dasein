@@ -157,6 +157,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
         Boolean hasDlTenant = hasDataloaderFunctionalities(tenantId);
         updateFlag(flags, PlsFeatureFlag.SYSTEM_SETUP_PAGE.getName(), hasDlTenant);
         updateFlag(flags, PlsFeatureFlag.ACTIVATE_MODEL_PAGE.getName(), hasDlTenant);
+        updateFlag(flags, PlsFeatureFlag.LEAD_ENRICHMENT_PAGE.getName(), hasDlTenant);
         return new FeatureFlagValueMap(flags);
     }
 

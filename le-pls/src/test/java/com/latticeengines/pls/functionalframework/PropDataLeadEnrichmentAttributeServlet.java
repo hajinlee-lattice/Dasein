@@ -1,0 +1,57 @@
+package com.latticeengines.pls.functionalframework;
+
+import java.io.IOException;
+import java.util.Arrays;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.http.HttpStatus;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.propdata.StatisticalType;
+import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
+
+@WebServlet("/propdata/metadata/predefined/leadenrichment")
+public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("application/json");
+
+        ColumnMetadata[] columns = new ColumnMetadata[2];
+        ColumnMetadata column = new ColumnMetadata();
+        column.setColumnName("TechIndicator_AddThis");
+        column.setDisplayName("Add This");
+        column.setDataType("NVARCHAR(50)");
+        column.setMatchDestination("BuiltWithPivoted");
+        column.setTags("LeadEnrichment");
+        column.setFundamentalType(FundamentalType.BOOLEAN);
+        column.setStatisticalType(StatisticalType.ORDINAL);
+        column.setDescription("Tech Indicator Add This");
+        column.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL));
+        columns[0] = column;
+        column = new ColumnMetadata();
+        column.setColumnName("TechIndicator_RemoveThis");
+        column.setDisplayName("Remove This");
+        column.setDataType("NVARCHAR(100)");
+        column.setMatchDestination("HGData");
+        column.setTags("LeadEnrichment");
+        column.setFundamentalType(FundamentalType.ALPHA);
+        column.setStatisticalType(StatisticalType.INTERVAL);
+        column.setDescription("Tech Indicator Remove This");
+        column.setApprovedUsageList(Arrays.asList(ApprovedUsage.MODEL_MODELINSIGHTS));
+        columns[1] = column;
+        String json = JsonUtils.serialize(columns);
+        resp.getWriter().write(json);
+
+        resp.setStatus(HttpStatus.OK_200);
+    }
+}
