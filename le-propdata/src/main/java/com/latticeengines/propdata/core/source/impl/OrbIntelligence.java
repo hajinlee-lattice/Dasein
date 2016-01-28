@@ -1,52 +1,49 @@
 package com.latticeengines.propdata.core.source.impl;
 
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.DomainBased;
-import com.latticeengines.propdata.core.source.HasSqlPresence;
-import com.latticeengines.propdata.core.source.MostRecentSource;
 
-@Component("orbIntelligence")
-public class OrbIntelligence implements MostRecentSource, DomainBased, HasSqlPresence {
+@Component
+public class OrbIntelligence implements CollectedSource {
 
-    private static final long serialVersionUID = -7492688545254273100L;
+    private static final long serialVersionUID = 3359238491845056238L;
 
-    @Value("${propdata.job.orb.refresh.schedule:}")
+    @Value("${propdata.job.orb.archive.schedule:}")
     String cronExpression;
-
-    @Autowired
-    OrbIntelligenceRaw baseSource;
 
     @Override
     public String getSourceName() { return "OrbIntelligence"; }
 
     @Override
-    public String getSqlTableName() { return "OrbIntelligence_MostRecent"; }
+    public String getDownloadSplitColumn() {
+        return "LE_Last_Upload_Date";
+    }
 
     @Override
-    public String[] getPrimaryKey() { return new String[]{ "Domain" }; }
+    public String getCollectedTableName() {
+        return "OrbIntelligenceV2";
+    }
 
     @Override
-    public String getTimestampField() { return "LE_Last_Upload_Date"; }
+    public String getTimestampField() {
+        return "LE_Last_Upload_Date";
+    }
 
     @Override
-    public String getDomainField() {  return "Domain"; }
+    public String[] getPrimaryKey() {
+        return new String[]{
+                "domain",
+                "address_city",
+                "address_state",
+                "address_country",
+                "LE_Last_Upload_Date"
+        };
+    }
 
     @Override
-    public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
-
-    @Override
-    public Long periodToKeep() {  return TimeUnit.DAYS.toMillis(365); }
-
-    @Override
-    public String getDefaultCronExpression() { return cronExpression; }
-
-    @Override
-    public String getSqlMatchDestination() { return "OrbIntelligence_Source"; }
-
+    public String getDefaultCronExpression() {
+        return cronExpression;
+    }
 }

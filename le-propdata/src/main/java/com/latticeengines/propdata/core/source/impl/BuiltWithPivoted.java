@@ -9,7 +9,7 @@ import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("builtWithPivoted")
+@Component
 public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = -7458296774400816711L;
@@ -18,7 +18,7 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPrese
     String cronExpression;
 
     @Autowired
-    BuiltWith baseSource;
+    BuiltWithMostRecent baseSource;
 
     @Override
     public String getSourceName() { return "BuiltWithPivoted"; }

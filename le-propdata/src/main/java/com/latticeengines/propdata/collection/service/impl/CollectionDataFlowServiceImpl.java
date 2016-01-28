@@ -30,7 +30,7 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGData;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -52,7 +52,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
-    private OrbIntelligence orbIntelligence;
+    private OrbIntelligenceMostRecent orbIntelligenceMostRecent;
 
     @Autowired
     private HGData hgData;
@@ -97,7 +97,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
     @Override
     public void executeRefreshOrbIntelligence(String uid) {
-        executeMergeRawData(orbIntelligence, uid, "orbIntelligenceRefreshFlow");
+        executeMergeRawData(orbIntelligenceMostRecent, uid, "orbIntelligenceRefreshFlow");
     }
 
     @Override

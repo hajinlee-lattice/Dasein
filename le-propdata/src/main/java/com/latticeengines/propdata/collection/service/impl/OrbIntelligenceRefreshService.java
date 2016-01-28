@@ -10,7 +10,7 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
 
 @Component("orbIntelligenceRefreshService")
 public class OrbIntelligenceRefreshService extends AbstractMostRecentService implements RefreshService {
@@ -24,7 +24,7 @@ public class OrbIntelligenceRefreshService extends AbstractMostRecentService imp
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    OrbIntelligence source;
+    OrbIntelligenceMostRecent source;
 
     @Override
     public MostRecentSource getSource() {

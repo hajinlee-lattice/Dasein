@@ -10,7 +10,7 @@ import org.testng.Assert;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligenceRaw;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
 import com.latticeengines.propdata.core.util.DateRange;
 
 @Component
@@ -20,7 +20,7 @@ public class OrbIntelligenceArchiveServiceImplTestNG extends CollectionArchiveSe
     OrbIntelligenceArchiveService collectedArchiveService;
 
     @Autowired
-    OrbIntelligenceRaw source;
+    OrbIntelligence source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;

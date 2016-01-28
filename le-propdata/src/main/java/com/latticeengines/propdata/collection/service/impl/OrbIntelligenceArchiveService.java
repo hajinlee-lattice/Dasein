@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligenceRaw;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
 
 @Component("orbIntelligenceArchiveService")
 public class OrbIntelligenceArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {
@@ -19,7 +19,7 @@ public class OrbIntelligenceArchiveService extends AbstractCollectionArchiveServ
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    OrbIntelligenceRaw source;
+    OrbIntelligence source;
 
     @Override
     public CollectedSource getSource() { return source; }

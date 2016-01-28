@@ -516,9 +516,9 @@ public class PropDataAdminTool {
     }
 
     enum PropDataRawSource {
-        ORB("OrbIntelligenceRaw", RAW_TYPE_COLLECTED),
-        FEATURE("FeatureRaw", RAW_TYPE_COLLECTED),
-        BUILTWITH("BuiltWithRaw", RAW_TYPE_COLLECTED),
+        ORB("OrbIntelligence", RAW_TYPE_COLLECTED),
+        FEATURE("Feature", RAW_TYPE_COLLECTED),
+        BUILTWITH("BuiltWith", RAW_TYPE_COLLECTED),
         HGDATARAW("HGDataRaw", RAW_TYPE_BULK);
 
         private static Map<String, PropDataRawSource> nameMap;
@@ -553,10 +553,10 @@ public class PropDataAdminTool {
     }
 
     enum PropDataDerivedSource {
-        ORB("OrbIntelligence"),
-        FEATURE("Feature"),
+        ORB("OrbIntelligenceMostRecent"),
+        FEATURE("FeatureMostRecent"),
         FEATURE_PIVOTED("FeaturePivoted"),
-        BUILTWITH("BuiltWith"),
+        BUILTWITH("BuiltWithMostRecent"),
         BUILTWITH_PIVOTED("BuiltWithPivoted"),
         HGDATA("HGData"),
         HGDATA_PIVOTED("HGDataPivoted");

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
+import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
 
 @Component
 public class OrbIntelligenceRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBase {
@@ -18,7 +18,7 @@ public class OrbIntelligenceRefreshServiceImplTestNG extends MostRecentServiceIm
     OrbIntelligenceArchiveServiceImplTestNG archiveServiceImplDeploymentTestNG;
 
     @Autowired
-    OrbIntelligence source;
+    OrbIntelligenceMostRecent source;
 
     @Autowired
     RefreshProgressEntityMgr progressEntityMgr;

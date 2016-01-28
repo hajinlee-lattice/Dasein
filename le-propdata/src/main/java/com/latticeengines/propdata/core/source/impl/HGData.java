@@ -9,7 +9,7 @@ import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("hgData")
+@Component
 public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
 
     private static final long serialVersionUID = 603829385601451984L;

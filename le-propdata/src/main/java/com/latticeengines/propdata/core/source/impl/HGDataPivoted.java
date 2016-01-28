@@ -9,7 +9,7 @@ import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component("hgDataPivoted")
+@Component
 public class HGDataPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = 5193097838348800451L;

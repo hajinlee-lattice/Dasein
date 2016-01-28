@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.core.source.StageServer;
 
-@Component("hgDataCustomers")
+@Component
 public class HGDataRaw implements BulkSource {
 
     private static final long serialVersionUID = -1724598948350731339L;
