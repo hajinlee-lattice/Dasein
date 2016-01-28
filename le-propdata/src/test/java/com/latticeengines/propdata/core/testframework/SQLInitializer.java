@@ -31,6 +31,8 @@ public class SQLInitializer {
 
     private Log log = LogFactory.getLog(SQLInitializer.class);
 
+    private static boolean initialized = false;
+
     public void initialize() {
         if (SQLDialect.MYSQL.equals(dataSourceService.getSqlDialect(Database.MANAGE))) {
             uploadSourceColumn();
@@ -38,16 +40,15 @@ public class SQLInitializer {
     }
 
     private void uploadSourceColumn() {
-        if (mysqlTableIsEmpty(jdbcTemplateManageDB, "SourceColumn")) {
+        if (!initialized) {
             truncateMySqlTable(jdbcTemplateManageDB, "SourceColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "SourceColumn");
-        }
 
-        if (mysqlTableIsEmpty(jdbcTemplateManageDB, "ExternalColumn") ||
-                mysqlTableIsEmpty(jdbcTemplateManageDB, "ColumnMapping")) {
             truncateMySqlTable(jdbcTemplateManageDB, "ExternalColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "ExternalColumn");
             uploadTableByTabDelimited(jdbcTemplateManageDB, "ColumnMapping");
+
+            initialized = true;
         }
     }
 
