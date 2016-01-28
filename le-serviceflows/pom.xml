@@ -29,6 +29,7 @@
     <modules>
         <module>core</module>
         <module>prospectdiscovery</module>
+        <module>leadprioritization</module>
     </modules>
 
     <!-- Override parent functional profile in order to always run in local mode -->
