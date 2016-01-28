@@ -164,12 +164,15 @@ public enum LedpCode {
     LEDP_18068("Could not copy HDFS file {0} to local."), //
     LEDP_18069("Target market with name {0} already exists."), //
     LEDP_18070("Default target market already exists."), //
-    LEDP_18071("Report with name {0} already exists."), //
+    LEDP_18071("Failed to get status of load group {0}, error: {1}."), //
     LEDP_18072("Failed to run load group {0}, error: {1}."), //
     LEDP_18073("Failed to synchronize modeling and scoring, error: {0}."), //
     LEDP_18074("Tenant {0} is not found."), //
     LEDP_18075("Failed to parse attribute query {0}."), //
     LEDP_18076("Default target market already has a fit model workflow in progress."), //
+    LEDP_18077("Failed to get available attributes: {0}."), //
+    LEDP_18078("Failed to get saved attributes: {0}."), //
+    LEDP_18079("Failed to save attributes: {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
