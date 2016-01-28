@@ -35,10 +35,15 @@ public class QueryColumnVDBImpl extends QueryColumn {
         super(definition);
     }
 
+    public QueryColumnVDBImpl(String name, String expression, Map<String, String> metadata) {
+        super(name, expression, metadata);
+    }
+
     public QueryColumnVDBImpl(QueryColumnVDBImpl other) {
         super(other);
     }
 
+    @Override
     public void initFromDefinition(String defn) throws DefinitionException {
 
         String name = "NOT SET";
@@ -136,6 +141,7 @@ public class QueryColumnVDBImpl extends QueryColumn {
         initFromValues(name, expression, metadata);
     }
 
+    @Override
     public String definition() {
 
         if (getName().equals("EntityFunctionBoundary")) {

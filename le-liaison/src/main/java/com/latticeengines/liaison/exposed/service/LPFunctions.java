@@ -60,7 +60,8 @@ public interface LPFunctions {
     // If the DL REST API connection does not return success, then a
     // RuntimeException is thrown.
 
-    Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr)
+    Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
+            String lp_template_version)
             throws IOException, RuntimeException;
 
     // setLDCWritebackAttributesDefaultName(...)
@@ -71,4 +72,11 @@ public interface LPFunctions {
     Boolean setLDCWritebackAttributesDefaultName(ConnectionMgr conn_mgr, String source,
             Set<String> column_names_in_propdata, String lp_template_type,
             String lp_template_version) throws IOException, RuntimeException;
+
+    // removeLDCWritebackAttributes(...)
+    //
+    // Removes all the attributes to be written back to teh customer.
+
+    void removeLDCWritebackAttributes(ConnectionMgr conn_mgr, String lp_template_version)
+            throws IOException, RuntimeException;
 }

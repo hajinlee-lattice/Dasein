@@ -17,6 +17,8 @@ import com.latticeengines.liaison.exposed.exception.DefinitionException;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.LPFunctions;
 import com.latticeengines.liaison.exposed.service.LoadGroupMgr;
+import com.latticeengines.liaison.exposed.service.Query;
+import com.latticeengines.liaison.exposed.service.QueryColumn;
 
 @Component
 public class LPFunctionsImpl implements LPFunctions {
@@ -133,10 +135,30 @@ public class LPFunctionsImpl implements LPFunctions {
     }
 
     @Override
-    public Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr)
+    public Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr,
+            String source, String lp_template_version)
             throws IOException, RuntimeException {
+
         Map<String, String> result = new HashMap<>();
-        result.put("column_name_in_propdata", "column_name_in_customer_system");
+        LoadGroupMgr lg_mgr = conn_mgr.getLoadGroupMgr();
+        int sourceStrLength = source.length();
+        String ptld = "PushLeadsLastScoredToDestination";
+
+        if (lg_mgr.hasLoadGroup(ptld)) {
+            Element ptld_targetQueries = lg_mgr.getLoadGroupFunctionality(ptld, "targetQueries");
+            Element targetQuery = (Element) ptld_targetQueries.getElementsByTagName("targetQuery").item(0);
+            Element fsColumnMappings = (Element) targetQuery.getElementsByTagName("fsColumnMappings").item(0);
+            for (int j = 0; j < fsColumnMappings.getElementsByTagName("fsColumnMapping").getLength(); j++) {
+                Element fsColumnMapping = (Element) fsColumnMappings.getElementsByTagName("fsColumnMapping").item(j);
+                String queryColumnName = fsColumnMapping.getAttribute("queryColumnName");
+                String fsColumnName = fsColumnMapping.getAttribute("fsColumnName");
+                if (queryColumnName.length() > 4+sourceStrLength &&
+                        queryColumnName.substring(0,4+sourceStrLength).equals(String.format("LDC_%s", source))) {
+                    result.put(queryColumnName.substring(5+sourceStrLength), fsColumnName);
+                }
+            }
+        }
+
         return result;
     }
 
@@ -144,13 +166,115 @@ public class LPFunctionsImpl implements LPFunctions {
     public Boolean setLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
             Map<String, String> attributes, String lp_template_version)
             throws IOException, RuntimeException {
-        return Boolean.FALSE;
+
+        final Set<String> loadGroupsToModify = new HashSet<String>(Arrays.asList(
+                "PushLeadsInDanteToDestination","PushLeadsLastScoredToDestination"));
+        Boolean result = Boolean.FALSE;
+
+        LoadGroupMgr lg_mgr = conn_mgr.getLoadGroupMgr();
+        Set<String> queryNames = new HashSet<>();
+        int sourceStrLength = source.length();
+
+        for (String ptld : loadGroupsToModify) {
+            if (lg_mgr.hasLoadGroup(ptld)) {
+                Element ptld_targetQueries = lg_mgr.getLoadGroupFunctionality(ptld, "targetQueries");
+                for (int i = 0; i < ptld_targetQueries.getElementsByTagName("targetQuery").getLength(); i++) {
+                    Element targetQuery = (Element) ptld_targetQueries.getElementsByTagName("targetQuery").item(i);
+                    if (ptld.equals("PushLeadsLastScoredToDestination")) {
+                        queryNames.add(targetQuery.getAttribute("name"));
+                    }
+                    Element fsColumnMappings = (Element) targetQuery.getElementsByTagName("fsColumnMappings").item(0);
+                    Element firstMapping = null;
+                    Set<Element> mappingsToRemove = new HashSet<>();
+                    for (int j = 0; j < fsColumnMappings.getElementsByTagName("fsColumnMapping").getLength(); j++) {
+                        Element fsColumnMapping = (Element) fsColumnMappings.getElementsByTagName("fsColumnMapping").item(j);
+                        if (firstMapping == null) {
+                            firstMapping = fsColumnMapping;
+                        }
+                        if (fsColumnMapping.getAttribute("queryColumnName").length() > 4+sourceStrLength &&
+                                fsColumnMapping.getAttribute("queryColumnName").substring(0,4+sourceStrLength)
+                                .equals(String.format("LDC_%s", source))) {
+                            mappingsToRemove.add(fsColumnMapping);
+                        }
+                    }
+                    for (Element fsColumnMapping : mappingsToRemove) {
+                        fsColumnMappings.removeChild(fsColumnMapping);
+                    }
+                    if (firstMapping != null) {
+                        for (Map.Entry<String, String> att : attributes.entrySet()) {
+                            String ldcCol = att.getKey();
+                            String customerCol = att.getValue();
+                            Element fsColumnMapping = (Element) firstMapping.cloneNode(Boolean.TRUE);
+                            fsColumnMapping.setAttribute("queryColumnName", String.format("LDC_%s_%s", source, ldcCol));
+                            fsColumnMapping.setAttribute("fsColumnName", customerCol);
+                            fsColumnMappings.appendChild(fsColumnMapping);
+                        }
+                    }
+                }
+                lg_mgr.setLoadGroupFunctionality(ptld, ptld_targetQueries);
+            }
+        }
+
+        for (String queryName : queryNames) {
+            Query q = conn_mgr.getQuery(queryName);
+            Set<String> colsToRemove = new HashSet<>();
+            for (String colName : q.getColumnNames()) {
+                if (colName.length() > 4+sourceStrLength &&
+                        colName.substring(0,4+sourceStrLength).equals(String.format("LDC_%s", source))) {
+                    colsToRemove.add(colName);
+                }
+            }
+            for (String colName : colsToRemove) {
+                q.removeColumn(colName);
+            }
+            for (Map.Entry<String, String> att : attributes.entrySet()) {
+                String ldcCol = att.getKey();
+                String specstr = String.format("LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName(\"PD_%s\")), ContainerElementName(\"%s\")))", source, ldcCol);
+                Map<String, String> metadata = new HashMap<>();
+                QueryColumn qc = new QueryColumnVDBImpl(String.format("LDC_%s_%s", source, ldcCol), specstr, metadata);
+                qc.setApprovedUsage("None");
+                qc.setTags("External");
+                qc.setCategory("Lead Enrichment");
+                q.appendColumn(qc);
+            }
+            conn_mgr.setQuery(q);
+            result = Boolean.TRUE;
+        }
+
+        return result;
     }
 
     @Override
     public Boolean setLDCWritebackAttributesDefaultName(ConnectionMgr conn_mgr, String source,
             Set<String> column_names_in_propdata, String lp_template_type,
             String lp_template_version) throws IOException, RuntimeException {
-        return Boolean.FALSE;
+
+        Map<String, String> attributes = new HashMap<>();
+
+        for (String ldcCol : column_names_in_propdata) {
+            if (lp_template_type.equals("SFDC")) {
+                String customerCol = String.format("Lattice_%s__c", ldcCol);
+                attributes.put(ldcCol, customerCol);
+            }
+            else if (lp_template_type.equals("ELQ")) {
+                String customerCol = String.format("C_Lattice_%s1", ldcCol);
+                attributes.put(ldcCol, customerCol);
+            }
+            else if (lp_template_type.equals("MKTO")) {
+                String customerCol = String.format("Lattice_%s", ldcCol);
+                attributes.put(ldcCol, customerCol);
+            }
+        }
+
+        return setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version);
+    }
+
+    @Override
+    public void removeLDCWritebackAttributes(ConnectionMgr conn_mgr, String lp_template_version)
+            throws IOException, RuntimeException {
+
+        String source = "";
+        Map<String, String> attributes = new HashMap<>();
+        setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version);
     }
 }
