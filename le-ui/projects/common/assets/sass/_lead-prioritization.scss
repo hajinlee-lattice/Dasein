@@ -1,0 +1,18 @@
+.model {
+	background-image: url(../images/bkg-active-model-lp.jpg);
+	background-color: #fff;
+	background-position: center center;
+	background-size: 160px;
+	border: #dcdcdc solid 2px;
+	min-height: 310px;
+	&.inactive {
+        background-color: #f1f1f1;
+        background-image: url(../images/bkg-inactive-model-lp.jpg);
+        background-repeat: no-repeat;
+        background-position: center center;
+    }
+	.status {
+		background: none;
+		border-top: none;
+	}
+}
