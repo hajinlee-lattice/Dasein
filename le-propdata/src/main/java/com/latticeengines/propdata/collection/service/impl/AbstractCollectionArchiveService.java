@@ -72,7 +72,7 @@ public abstract class AbstractCollectionArchiveService
 
     private String constructWhereClauseByDates(String timestampColumn, Date startDate, Date endDate) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return String.format("\"%s > '%s' AND %s <= '%s'\"", timestampColumn, dateFormat.format(startDate),
+        return String.format("\"%s >= '%s' AND %s <= '%s'\"", timestampColumn, dateFormat.format(startDate),
                 timestampColumn, dateFormat.format(endDate));
     }
 
@@ -89,7 +89,8 @@ public abstract class AbstractCollectionArchiveService
         Date earlist = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.substring(1, whereClause.lastIndexOf("\"")),
+                        + whereClause.replace(">=", ">")
+                            .substring(1, whereClause.lastIndexOf("\"")),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earlist);
@@ -97,7 +98,8 @@ public abstract class AbstractCollectionArchiveService
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.substring(1, whereClause.lastIndexOf("\"")),
+                        + whereClause.replace(">=", ">")
+                            .substring(1, whereClause.lastIndexOf("\"")),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
