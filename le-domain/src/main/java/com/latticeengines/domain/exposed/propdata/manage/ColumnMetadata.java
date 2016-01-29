@@ -229,7 +229,10 @@ public class ColumnMetadata {
         this.setStatisticalType(extenalColumn.getStatisticalType());
         this.setFundamentalType(extenalColumn.getFundamentalType());
         this.setApprovedUsageList(extenalColumn.getApprovedUsageList());
-        this.setTagList(extenalColumn.getTagList());
+        List<String> tags = new ArrayList<String>();
+        tags.add("External");
+        tags.addAll(extenalColumn.getTagList());
+        this.setTagList(tags);
         this.setDiscretizationStrategy(extenalColumn.getDiscretizationStrategy());
     }
 }

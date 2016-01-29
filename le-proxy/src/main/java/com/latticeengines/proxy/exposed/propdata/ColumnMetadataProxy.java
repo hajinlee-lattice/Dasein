@@ -9,20 +9,22 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component
-public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface{
+public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
 
     public ColumnMetadataProxy() {
         super("propdata/metadata");
     }
 
-    @SuppressWarnings({ "unchecked"})
+    @SuppressWarnings({ "unchecked" })
     @Override
-    public List<ColumnMetadata> columnSelection(String selectName) {
-        String url = constructUrl("/predefined/{selectName}", selectName);
+    public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName) {
+        String url = constructUrl("/predefined/{selectName}",
+                String.valueOf(ColumnSelection.Predefined.LEAD_ENRICHMENT));
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
         if (metadataObjs == null) {
             return null;
@@ -34,14 +36,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 ColumnMetadata metadata = mapper.treeToValue(mapper.valueToTree(obj), ColumnMetadata.class);
                 metadataList.add(metadata);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             return null;
         }
         return metadataList;
-
-        //Class<List<ColumnMetadata>> clazz = (Class) List.class;
-        //return get("columnSelection", url, clazz);
     }
 
 }

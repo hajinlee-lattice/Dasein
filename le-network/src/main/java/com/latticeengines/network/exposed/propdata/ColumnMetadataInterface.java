@@ -3,7 +3,8 @@ package com.latticeengines.network.exposed.propdata;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public interface ColumnMetadataInterface {
-    List<ColumnMetadata> columnSelection(String selectName);
+    List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName);
 }

@@ -7,37 +7,24 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
 
-public class ColumnMetadataResourceDeploymentTest extends PropDataApiDeploymentTestNGBase{
+public class ColumnMetadataResourceDeploymentTest extends PropDataApiDeploymentTestNGBase {
 
-	@Autowired
-	private ColumnMetadataProxy columnMetadataProxy;
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
 
-	@Test(groups = "api.deployment", enabled = true)
-	public void testLeadEnrichment() {
-	    /*
-		List<Map<String, Object>> metadataObjs = columnMetadataProxy.columnSelection("leadenrichment");
-		Assert.assertNotNull(metadataObjs);
-		Assert.assertTrue(metadataObjs.size() >= 1);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			for (Map<String, Object> obj : metadataObjs) {
-				ColumnMetadata metadata = mapper.treeToValue(mapper.valueToTree(obj), ColumnMetadata.class);
-				Assert.assertTrue(metadata.getTags().contains("LeadEnrichment"));
-			}
-		}
-		catch (IOException e) {
-            Assert.fail();
+    @Test(groups = "api.deployment", enabled = true)
+    public void testLeadEnrichment() {
+        List<ColumnMetadata> columnMetadataList = columnMetadataProxy
+                .columnSelection(ColumnSelection.Predefined.LEAD_ENRICHMENT);
+        Assert.assertNotNull(columnMetadataList);
+        for (ColumnMetadata columnMetadata : columnMetadataList) {
+            Assert.assertTrue(
+                    columnMetadata.getTagList().contains(ColumnSelection.Predefined.LEAD_ENRICHMENT.getName()),
+                    "Column " + columnMetadata.getColumnName() + " does not have the tage LeadEnrichment");
         }
-        */
-	    List<ColumnMetadata> columnMetadataList = columnMetadataProxy.columnSelection("leadenrichment");
-	    Assert.assertNotNull(columnMetadataList);
-        Assert.assertTrue(columnMetadataList.size() >= 1);
-	    for (ColumnMetadata columnMetadata : columnMetadataList) {
-	        Assert.assertTrue(columnMetadata.getTagList().contains("LeadEnrichment"));
-	    }
-	}
-
+    }
 }

@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
@@ -47,7 +48,8 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
     public List<LeadEnrichmentAttribute> getAvailableAttributes() {
         try {
             List<LeadEnrichmentAttribute> attributes = new ArrayList<LeadEnrichmentAttribute>();
-            List<ColumnMetadata> columns = columnMetadataProxy.columnSelection(SELECT_NAME);
+            List<ColumnMetadata> columns = columnMetadataProxy
+                    .columnSelection(ColumnSelection.Predefined.LEAD_ENRICHMENT);
             for (ColumnMetadata column : columns) {
                 LeadEnrichmentAttribute attribute = toLeadEnrichmentAttribute(column);
                 attributes.add(attribute);
@@ -84,9 +86,9 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             if (!sourceMap.isEmpty()) {
                 String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
                 String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
-                ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr(CONNECTION_MGR_TYPE,
-                        tenantName, dlUrl);
-                AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions.getLPTemplateTypeAndVersion(connMgr);
+                ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr(CONNECTION_MGR_TYPE, tenantName, dlUrl);
+                AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions
+                        .getLPTemplateTypeAndVersion(connMgr);
                 for (String source : sourceMap.keySet()) {
                     Map<String, String> map = lpFunctions.getLDCWritebackAttributes(connMgr, source,
                             typeAndVersions.getValue());
@@ -111,7 +113,8 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
             ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr(CONNECTION_MGR_TYPE, tenantName, dlUrl);
-            AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions.getLPTemplateTypeAndVersion(connMgr);
+            AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions
+                    .getLPTemplateTypeAndVersion(connMgr);
 
             if (attributes != null && attributes.size() > 0) {
                 Map<String, Set<String>> map = new HashMap<String, Set<String>>();
