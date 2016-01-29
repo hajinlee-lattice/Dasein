@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -119,5 +120,19 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         Assert.assertTrue(hasException, "Should raise exception due to undefined flag.");
 
         undefineFeatureFlagByRestCall(FLAG_ID);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "functional")
+    public void testGetProducts() {
+        List<String> products = null;
+        try {
+            String url = getRestHostPort() + "/admin/tenants/products";
+            products = restTemplate.getForObject(url, List.class);
+        } catch (Exception e) {
+            Assert.assertTrue(true, "Should Not raise any exception.");
+        }
+        Assert.assertNotNull(products);
+        Assert.assertEquals(products.size(), LatticeProduct.values().length);
     }
 }

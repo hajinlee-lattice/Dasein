@@ -34,6 +34,7 @@ public class TestLatticeComponent extends LatticeComponent {
             register();
         Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
         productSet.add(LatticeProduct.LPA);
+        productSet.add(LatticeProduct.LPA3);
         productSet.add(LatticeProduct.PD);
         super.setAssociatedProducts(productSet);
     }

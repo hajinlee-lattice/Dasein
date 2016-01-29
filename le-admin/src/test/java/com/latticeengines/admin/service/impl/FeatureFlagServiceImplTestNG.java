@@ -55,6 +55,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(createDefaultFeatureFlag);
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
+                && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
         Assert.assertTrue(!quotaFeatureFlag.getConfigurable()
                 && quotaFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)
@@ -78,8 +79,9 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(newDefinition);
         Assert.assertEquals(newDefinition.getDisplayName(), definition.getDisplayName());
         Assert.assertEquals(newDefinition.getDocumentation(), definition.getDocumentation());
-        Assert.assertEquals(newDefinition.getAvailableProducts().size(), 2);
+        Assert.assertEquals(newDefinition.getAvailableProducts().size(), 3);
         Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.LPA));
+        Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.LPA3));
         Assert.assertTrue(newDefinition.getAvailableProducts().contains(LatticeProduct.PD));
         Assert.assertTrue(newDefinition.getConfigurable());
 

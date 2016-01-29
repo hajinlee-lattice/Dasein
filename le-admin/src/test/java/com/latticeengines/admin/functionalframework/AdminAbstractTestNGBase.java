@@ -234,6 +234,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         definition.setDocumentation("This flag is for functional test.");
         Set<LatticeProduct> testProdSet = new HashSet<LatticeProduct>();
         testProdSet.add(LatticeProduct.LPA);
+        testProdSet.add(LatticeProduct.LPA3);
         testProdSet.add(LatticeProduct.PD);
         definition.setAvailableProducts(testProdSet);
         definition.setConfigurable(true);

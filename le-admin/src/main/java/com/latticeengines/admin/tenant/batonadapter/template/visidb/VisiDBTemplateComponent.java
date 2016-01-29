@@ -47,6 +47,7 @@ public class VisiDBTemplateComponent extends LatticeComponent {
         dependencies = Collections.singleton(visiDBDLComponent);
         Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
         productSet.add(LatticeProduct.LPA);
+        productSet.add(LatticeProduct.LPA3);
         super.setAssociatedProducts(productSet);
     }
 

@@ -45,6 +45,7 @@ public class VisiDBDLComponent extends LatticeComponent {
     public void setProducts() {
         Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
         productSet.add(LatticeProduct.LPA);
+        productSet.add(LatticeProduct.LPA3);
         super.setAssociatedProducts(productSet);
     }
 

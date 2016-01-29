@@ -46,6 +46,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     $scope.featureFlagDefinitions = [];
     $scope.selectedFeatureFlags = [];
     $scope.selectedComponents = [];
+    $scope.twoLPsAreSelected = false;
     updateAvailableProducts();
     updateSpaceConfigurationOptions();
     getAvailableFeatureFlags();
@@ -98,6 +99,10 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
             TenantUtility.constructTenantRegistration($scope.selectedComponents,
                 $scope.tenantId, $scope.contractId, infos, $scope.spaceConfig, $scope.featureFlags);
 
+        var passedCheck = preSaveCheck();
+        if (!passedCheck) {
+            return;
+        }
         popInstallConfirmationModal();
     };
 
@@ -132,12 +137,19 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
     };
 
     $scope.LPAisSelected = function LPAisSelected(selectedProducts) {
+        LPASelected = false;
+        $scope.twoLPsAreSelected = false;
+        var selectedLPAnum = 0;
         for (var i = 0; i < selectedProducts.length; i++) {
-            if (selectedProducts[i].name === "Lead Prioritization") {
-                return true;
+            if (selectedProducts[i].name.includes( "Lead Prioritization")) {
+                LPASelected = true;
+                selectedLPAnum += 1;
             }
         }
-        return false;
+        if (selectedLPAnum == 2) {
+            $scope.twoLPsAreSelected = true;
+        }
+        return LPASelected;
     };
     
     function getSelecetedFeatureFlags(selectedProducts) {
@@ -362,6 +374,14 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
                 contractId: function () { return $scope.contractId; }
             }
         });
+    }
+    
+    function preSaveCheck() {
+         if ($scope.twoLPsAreSelected) {
+             alert("Cannot choose two LPA products at the same time!");
+             return false;
+         }
+         return true;
     }
 
     function popDeleteConfirmationModal() {
