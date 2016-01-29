@@ -1,7 +1,7 @@
 [
   {
-    "Url" : "jdbc:mysql://localhost:3306/LDC_SourceDB",
-    "Username": "root",
-    "Password": "KPpl2JWz+k79LWvYIKz6cA=="
+    "Url" : "jdbc:sqlserver://bodcprodvsql225.prod.lattice.local:1433;databaseName=LDC_SourceDB;",
+    "Username": "DLTransfer",
+    "Password": "Q1nh4HIYGkg4OnQIEbEuiw=="
   }
 ]

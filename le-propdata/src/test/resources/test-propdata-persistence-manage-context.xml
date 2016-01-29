@@ -8,7 +8,7 @@
 
     <bean id="propDataManage" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://bodcprodvsql225.prod.lattice.local:1433;databaseName=CollectionDB_Dev;" />
+        <property name="url" value="jdbc:sqlserver://bodcprodvsql225.prod.lattice.local:1433;databaseName=LDC_ManageDB;" />
         <property name="username" value="DLTransfer" />
         <property name="password" value="free&amp;NSE" />
     </bean>

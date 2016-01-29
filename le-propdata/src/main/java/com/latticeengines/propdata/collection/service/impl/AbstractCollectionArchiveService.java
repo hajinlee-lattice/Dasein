@@ -89,8 +89,7 @@ public abstract class AbstractCollectionArchiveService
         Date earliest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.replace(">=", ">")
-                            .substring(1, whereClause.lastIndexOf("\"")),
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earliest);
@@ -98,8 +97,7 @@ public abstract class AbstractCollectionArchiveService
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
                         + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.replace(">=", ">")
-                            .substring(1, whereClause.lastIndexOf("\"")),
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
