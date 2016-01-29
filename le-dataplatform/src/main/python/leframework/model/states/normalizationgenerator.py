@@ -30,7 +30,7 @@ class NormalizationGenerator(State, JsonGenBase):
  
     # score list contains probabilities (probability model) or revenue (revenue model) values
     def buildMappingFunctionData(self, scoreList):
-        bins = self.createIndexSequence(len(scoreList), min((len(scoreList)-1), 100))
+        bins = self.__createIndexSequence(len(scoreList), min((len(scoreList)-1), 100))
          
         if len(bins) > 1:
             orderedScores = sorted(scoreList, reverse = False)
@@ -45,7 +45,7 @@ class NormalizationGenerator(State, JsonGenBase):
         return[{"Start" : startScore[i], "End" : endScore[i], "CumulativePercentage" : cumulativePercent[i]} for i in range(len(startScore))]
  
  
-    def createIndexSequence(self, number, rawSplits):
+    def __createIndexSequence(self, number, rawSplits):
         if number == 0:
             return []
          
@@ -60,7 +60,7 @@ class NormalizationGenerator(State, JsonGenBase):
         sp[numBins] = number
         minSize = min(sp[i + 1] - sp[i] for i in range(len(sp) - 1))
         if minSize < 2:
-            sp = self.createIndexSequence(number, rawSplits - 2)
+            sp = self.__createIndexSequence(number, rawSplits - 2)
         return tuple(sp)
  
     @overrides(JsonGenBase)

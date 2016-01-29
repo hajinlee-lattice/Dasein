@@ -45,8 +45,6 @@ class Finalize(State):
     def writeRevenueStatisticsText(self, mediator):
         if (mediator.revenueColumn is not None and mediator.revenueStatistics is not None):
             numpy.savetxt(mediator.modelLocalDir + mediator.name + "_revenue_statistics.txt", mediator.revenueStatistics, delimiter=",", fmt="%s")
-        
-        
 
     def writeJson(self, mediator):
         stateMachine = self.getStateMachine()

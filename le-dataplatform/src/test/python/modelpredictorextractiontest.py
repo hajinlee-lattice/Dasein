@@ -2,9 +2,8 @@ import os
 from testbase import TestBase
 
 
-class ModelPredictorExtractiontTest(TestBase):
+class ModelPredictorExtractionTest(TestBase):
     def testMapBinaryValue(self):
-        
         os.symlink("../resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
         execfile("modelpredictorextraction.py", globals())
         predictor = dict()
@@ -40,12 +39,9 @@ class ModelPredictorExtractiontTest(TestBase):
         os.symlink("../resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
         execfile("modelpredictorextraction.py", globals())
         buckets = []
-        buckets.append({"Count": 2, "Lift":0.5})
-        buckets.append({"Count": 4, "Lift":0.7})
+        buckets.append({"Count": 2, "Lift": 0.5})
+        buckets.append({"Count": 4, "Lift": 0.7})
         
         mergedBucket = globals()["mergePredictorElements"](buckets, 0.5)
         self.assertEqual(mergedBucket["Count"], 6)
         self.assertEqual(int(mergedBucket["Lift"] * 100), 63)
-        
-        
-        

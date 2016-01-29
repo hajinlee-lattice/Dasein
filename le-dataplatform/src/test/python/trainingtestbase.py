@@ -1,5 +1,6 @@
 import base64
 import csv
+import glob
 import gzip
 import json
 import os
@@ -42,9 +43,9 @@ class TrainingTestBase(TestBase):
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copy("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
-        shutil.copy("../../main/python/pipeline/pipelinesteps.py", pipelinefwkdir + "/pipelinesteps.py")
-        shutil.copy("../../main/python/pipeline/aggregatedmodel.py", pipelinefwkdir + "/aggregatedmodel.py")
+        
+        for filename in glob.glob(os.path.join("../../main/python/pipeline", "*.py")):
+            shutil.copy(filename, pipelinefwkdir)
         
         sys.path.append(pipelinefwkdir)
 

@@ -16,15 +16,15 @@ class DataCompositionGenerator(State):
 
         if self.mediator.schema["config_metadata"] != None:
             # TODO Need to handle derived fields.
-            fields = OrderedDict(self._get_fields())
-            transforms = list(self._get_transforms(fields))
+            fields = OrderedDict(self.__get_fields())
+            transforms = list(self.__get_transforms(fields))
 
             structure["fields"] = fields
             structure["transforms"] = transforms
 
         self.getMediator().data_composition = structure
     
-    def _get_fields(self):
+    def __get_fields(self):
         schema = self.getMediator().schema
         config_metadata = schema["config_metadata"]["Metadata"]
         
@@ -65,33 +65,23 @@ class DataCompositionGenerator(State):
 
         return result
 
-    def _get_transforms(self, fields):
+    def __get_transforms(self, fields):
         pipeline = self.getMediator().pipeline.getPipeline()
-        # TODO Create a better mechanism for retrieving this step.
-        step = next(x for x in pipeline if x.__class__.__name__ == "ImputationStep")
-        imputations = step.enumMappings_
-    
         result = list()
-        for name, details in fields.iteritems():
-            if details["interpretation"] != "FEATURE":
-                continue
-                
-            if details["type"] == "STRING":
-                result.append(self._make_transform(
-                    "encode_string", name, "INTEGER", [("column", name)]))
+        for step in pipeline:
+            columns = step.getOutputColumns()
+            rtsModule = step.getRTSMainModule()
             
-            if details["type"] != "FLOAT":
-                result.append(self._make_transform(
-                    "make_float", name, "FLOAT", [("column", name)]))
-            
-            if name in imputations:
-                result.append(self._make_transform(
-                    "replace_null_value", name, "FLOAT",
-                    [("column", name), ("value", imputations[name])]))
+            for column in columns:
+                name = column[0]["name"]
+                if name not in fields or fields[name]["interpretation"] != "FEATURE":
+                    continue
+                result.append(self.__make_transform(
+                    rtsModule, name, column[0]["type"], [("column", k) for k in column[1]]))
 
         return result
     
-    def _make_transform(self, name, output, data_type, arguments):
+    def __make_transform(self, name, output, data_type, arguments):
         result = OrderedDict()
         result["name"] = name
         result["output"] = output

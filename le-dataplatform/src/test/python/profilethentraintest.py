@@ -41,8 +41,6 @@ class ProfilingThenTrainTest(TrainingTestBase):
         traininglauncher = Launcher("model-badlift-training.json")
         traininglauncher.execute(False)
 
-        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
-
     def assertProfilingData(self):
         diagnosticsJsonDict = json.loads(open("./results/diagnostics.json").read())
         self.assertEqual(diagnosticsJsonDict["Summary"]["NumberOfSkippedRows"], 0)

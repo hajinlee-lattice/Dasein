@@ -50,7 +50,16 @@ class ModelGenerator(State, JsonGenBase):
                 continue
             filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
             model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
+        
+        for step in pipeline.getPipeline():
+            rtsArtifacts = step.getRTSArtifacts()
             
+            if len(rtsArtifacts) == 0:
+                continue
+            for key, filePath in rtsArtifacts:
+                filePkl = self.__getSerializedFile(self.__compressFile(filePath))
+                model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": key })
+
         self.model = model
     
     def __getPipeline(self, mediator):

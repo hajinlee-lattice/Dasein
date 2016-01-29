@@ -13,14 +13,14 @@ from collections import OrderedDict
 logger = get_logger("evpipeline")
     
 class EnumeratedColumnTransformStep(PipelineStep):
-    enumMappings_ = {}
+    columns = {}
     
     def __init__(self, enumMappings):
-        self.enumMappings_ = enumMappings
+        self.columns = enumMappings
             
     def transform(self, dataFrame):
         outputFrame = dataFrame
-        for column, encoder in self.enumMappings_.iteritems():
+        for column, encoder in self.columns.iteritems():
             if hasattr(encoder, 'classes_'):
                 classSet = set(encoder.classes_.flat)
                 outputFrame[column] = outputFrame[column].map(lambda s: 'NULL' if s not in classSet else s)
@@ -48,7 +48,7 @@ class ColumnTypeConversionStep(PipelineStep):
         return dataFrame
         
 class ImputationStep(PipelineStep):
-    enumMappings_ = OrderedDict()
+    columns = OrderedDict()
     imputationValues = {}
     targetColumn = ""    
     scalingArray = []
@@ -56,7 +56,7 @@ class ImputationStep(PipelineStep):
     componentMatrix = []
       
     def __init__(self, enumMappings, imputationValues, scalingArray, meanColumn, componentMatrix, targetCol):
-        self.enumMappings_ = enumMappings
+        self.columns = enumMappings
         self.imputationValues = imputationValues
         self.targetColumn = targetCol
         self.scalingArray = scalingArray
@@ -71,7 +71,7 @@ class ImputationStep(PipelineStep):
             calculateImputationValues = False
 
         outputFrame, nullValues = self.generateTransformedBooleanColumns(dataFrame, calculateImputationValues)
-        outputFrame = self.imputeValues(outputFrame, nullValues, calculateImputationValues)
+        outputFrame = self.__computeImputationValues(outputFrame, nullValues, calculateImputationValues)
           
         return outputFrame
    
@@ -95,16 +95,16 @@ class ImputationStep(PipelineStep):
         outputFrame = dataFrame
         nullColsFrame = pd.DataFrame()
      
-        if len(self.enumMappings_) > 0:
-            for column in self.enumMappings_:
+        if len(self.columns) > 0:
+            for column in self.columns:
                 if column in outputFrame:
-                    isNullColumn, nullCount = self.getIsNullColumn(outputFrame[column])
+                    isNullColumn, nullCount = self.__getIsNullColumn(outputFrame[column])
                     nullValues[column] = nullCount
                     nullColsFrame[column + "_isNull"] = pd.Series(isNullColumn)
 
         return nullColsFrame, nullValues
                  
-    def getIsNullColumn(self, dataColumn):
+    def __getIsNullColumn(self, dataColumn):
         nullCount = 0
         isNullColumn = []
         for i in range(len(dataColumn)):
@@ -157,19 +157,19 @@ class ImputationStep(PipelineStep):
 
         return (scaling_array, np.mean(inputScaled, axis=0), componentsMatrix[ : numberOfColumnsThreshold, :])
         
-    def imputeValues(self, dataFrame, nullValues, calculateImputationValues):
+    def __computeImputationValues(self, dataFrame, nullValues, calculateImputationValues):
         outputFrame = dataFrame
-        if len(self.enumMappings_) > 0:
+        if len(self.columns) > 0:
             expectedLabelValue = 0.0
             if self.targetColumn in outputFrame and calculateImputationValues == True:
-                expectedLabelValue = self.getExpectedLabelValue(outputFrame, self.targetColumn) 
+                expectedLabelValue = self.__getExpectedLabelValue(outputFrame, self.targetColumn) 
                  
-            for column, value in self.enumMappings_.iteritems():
+            for column, value in self.columns.iteritems():
                 if column in outputFrame:
                     try:
                         if nullValues[column] > 0 and calculateImputationValues == True:
-                            imputationBins = self.createBins(outputFrame[column], outputFrame[self.targetColumn])
-                            imputationValue = self.matchValue(expectedLabelValue, imputationBins)
+                            imputationBins = self.__createBins(outputFrame[column], outputFrame[self.targetColumn])
+                            imputationValue = self.__matchValue(expectedLabelValue, imputationBins)
                             self.imputationValues[column] = imputationValue
          
                         outputFrame[column] = outputFrame[column].fillna(self.imputationValues[column])
@@ -178,7 +178,7 @@ class ImputationStep(PipelineStep):
                         outputFrame[column] = outputFrame[column].fillna(self.imputationValues[column])
         return outputFrame
         
-    def getExpectedLabelValue(self, dataFrame, targetColumn):
+    def __getExpectedLabelValue(self, dataFrame, targetColumn):
         zeroLabels = (dataFrame[targetColumn] == 0).sum()
         oneLabels = (dataFrame[targetColumn] == 1).sum()
         expectedLabelValue = float(oneLabels) / (oneLabels + zeroLabels)
@@ -193,7 +193,7 @@ class ImputationStep(PipelineStep):
             transformedMatrix = np.dot(centeredMatrix, componentMatrix.T)
         return transformedMatrix
         
-    def createIndexSequence(self, number, rawSplits):
+    def __createIndexSequence(self, number, rawSplits):
         if number == 0:
             return []
               
@@ -203,12 +203,12 @@ class ImputationStep(PipelineStep):
         sp[numBins] = number
         return tuple(sp)
          
-    def meanValuePair(self, x, tupleSize=2):
+    def __meanValuePair(self, x, tupleSize=2):
         def mean(k):  return sum([float(y[k]) for y in x]) / len(x) / 1.0
         if tupleSize > 1: return [mean(k) for k in range(tupleSize)]
         return [sum(x) / 1.0 / len(x)]
      
-    def createBins(self, x, y, numBins=20):
+    def __createBins(self, x, y, numBins=20):
         if len(x) != len(y):
              print "Warning: Number of records and number of labels are different."
      
@@ -221,12 +221,12 @@ class ImputationStep(PipelineStep):
         if numBins > len(pairs) - 1 and len(pairs) != 0:
             numBins = len(pairs) - 1
      
-        indBins = self.createIndexSequence(len(pairs), numBins)
+        indBins = self.__createIndexSequence(len(pairs), numBins)
         def mvPair(k):
-            return self.meanValuePair([pairs[i] for i in range(indBins[k], indBins[k + 1])])
+            return self.__meanValuePair([pairs[i] for i in range(indBins[k], indBins[k + 1])])
         return pd.Series([mvPair(b) for b in range(len(indBins) - 1)])
      
-    def matchValue(self, yvalue, binPairs):
+    def __matchValue(self, yvalue, binPairs):
         def absFn(x): return(x if x > 0 else (-x))
         def sgnFn(x):
             if x == 0:
@@ -254,15 +254,15 @@ class ImputationStep(PipelineStep):
         return valuePair[0] + adjValue
   
 class RevenueColumnTransformStep(PipelineStep):
-    enumMappings_ = OrderedDict()
+    columns = OrderedDict()
 
     def __init__(self, enumMappings):
-         self.enumMappings_ = enumMappings
+         self.columns = enumMappings
          
     def transform(self, dataFrame):
-        if len(self.enumMappings_) == 0:
+        if len(self.columns) == 0:
             return dataFrame
-        for column in self.enumMappings_:
+        for column in self.columns:
                 if column not in dataFrame:
                     continue
                 if re.match("Product_.*_Revenue$|Product_.*_RevenueRollingSum6$|Product_.*_Units$", column):

@@ -23,7 +23,7 @@ def encodeCategoricalColumnsForMetadata(metadata):
     for _, values in metadata.iteritems():
         for value in values:
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
-                value["hashValue"] = encoder.transform(value["hashValue"])
+                value["hashValue"] = encoder.encode(value["hashValue"])
    
 def setupPipeline(metadata, stringColumns, targetColumn):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)

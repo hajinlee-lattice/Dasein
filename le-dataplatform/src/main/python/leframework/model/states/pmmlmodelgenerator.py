@@ -38,7 +38,7 @@ class PMMLModelGenerator(State):
             tb = traceback.format_exc()
             self.logger.warning(tb)
 
-     # builds a PMML file of the aggregate model from all available PMML files in current directory (.xml extension)
+    # builds a PMML file of the aggregate model from all available PMML files in current directory (.xml extension)
     def extractAggregateModel(self, aggregateModel, modelInputColumns):
         dataDictionaryList = [E.DataField(name=x, optype='continuous', dataType='double') for x in modelInputColumns]
         segmentList = [E.Segment(E.True(), self.extractRF(x, modelInputColumns, True)) for x in aggregateModel.models]

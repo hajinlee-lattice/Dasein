@@ -402,13 +402,15 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
 
 def getKurtosisAndSkewness(columnData):
     try:
-        n, (minInData, maxInData), mean, variance, skewness, kurtosis = stats.describe(columnData.data)
+        _, (_, _), _, _, skewness, kurtosis = stats.describe(columnData.data)
         return skewness, kurtosis
     except ValueError:
         logger.warn("Skewness and Kurtosis could not be calculated because of ValueError thrown.")
         return None, None
     except IndexError:
         logger.warn("Skewness and Kurtosis could not be calculated because of IndexError thrown.")
+        return None, None
+    except Exception:
         return None, None
 
 def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colName, otherMetadata, index):

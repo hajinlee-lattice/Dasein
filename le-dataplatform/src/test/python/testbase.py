@@ -40,7 +40,7 @@ def removeLinks():
             os.unlink(f)
 
 def removeFiles(curDir):
-    removeFilesWithTypes(curDir, [".*.py.gz.*", ".*.p.gz.*"])
+    removeFilesWithTypes(curDir, [".*.py.gz.*", ".*.p.gz.*", ".*.txt.gz"])
 
 def removeFilesWithTypes(curDir, fileTypes):
     if os.path.exists(curDir):

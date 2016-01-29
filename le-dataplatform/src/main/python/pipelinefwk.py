@@ -12,21 +12,24 @@ def get_logger(name):
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     return logger
+
+def create_column(name, dataType):
+    return { "name": name, "type": dataType}
  
 class Pipeline:
-    pipelineSteps_ = []
+    pipelineSteps = []
     def __init__(self, pipelineSteps):
-        self.pipelineSteps_ = pipelineSteps
+        self.pipelineSteps = pipelineSteps
      
     def getPipeline(self):
-        return self.pipelineSteps_
+        return self.pipelineSteps
      
     def predict(self, dataFrame):
         transformed = dataFrame
-        for step in self.pipelineSteps_:
+        for step in self.pipelineSteps:
             transformed = step.transform(transformed)
         return transformed
- 
+    
 class PipelineStep:
     modelStep_ = False
     props_ = {}
@@ -47,7 +50,21 @@ class PipelineStep:
          
     def getProperty(self, propertyName):
         return self.props_[propertyName]
- 
+    
+    def getInputColumns(self):
+        return []
+    
+    # Returns a list of a map to array of strings, where key is the output column name
+    # and value is a list of column names as input
+    def getOutputColumns(self):
+        return []
+    
+    def getRTSMainModule(self):
+        return None 
+
+    def getRTSArtifacts(self):
+        return []
+    
 class ModelStep(PipelineStep):
     model_ = None
     modelInputColumns_ = []
@@ -67,7 +84,7 @@ class ModelStep(PipelineStep):
         self.setModelStep(True)
          
     def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
-         return ModelStep(model, modelInputColumns, scoreColumnName)
+        return ModelStep(model, modelInputColumns, scoreColumnName)
     
     def transform(self, dataFrame):
         dataFrame = dataFrame.convert_objects(convert_numeric=True)

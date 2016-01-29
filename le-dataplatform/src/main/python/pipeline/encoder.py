@@ -16,9 +16,9 @@ class HashEncoder(Encoder):
         Encoder.__init__(self, "HashEncoder")
     
     def transform(self, dataFrame):
-        return dataFrame.apply(lambda x: transform(x))
+        return dataFrame.apply(lambda x: encode(x))
     
-def transform(x):
+def encode(x):
     '''
         This uses the sdbm algorithm targeted for uniqueness, not as a secure hash like SHA or MD5. 
         Collisions are possible especially since we are only getting the first 4 bytes
@@ -36,3 +36,10 @@ def transform(x):
     except Exception:
         print("Error with type = %s and value = %s" % (type(x), x))
         raise
+    
+def transform(args, record):
+    column = args["column"]
+    value = record[column]
+
+    return int(encode(value))
+    

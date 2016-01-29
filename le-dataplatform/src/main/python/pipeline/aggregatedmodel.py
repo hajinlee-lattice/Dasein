@@ -133,7 +133,7 @@ class AggregatedModel(object):
         if getattr(X, "dtype", None) != DTYPE or X.ndim != 2:
             X = array2d(X, dtype=DTYPE)
 
-        jobs, individual_models, starts = self.__partition_individual_models(self)
+        jobs, _, starts = self.__partition_individual_models(self)
 
         if isPredictPossibility:
             all_values = Parallel(n_jobs=1)(
