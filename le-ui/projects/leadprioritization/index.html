@@ -8,75 +8,45 @@
     <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
     <title>Lead Prioritization - Lattice Engines</title>
 
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.4/simplex/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/2.2.1/jquery.qtip.min.css"/>
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2015.2.805/styles/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2015.2.805/styles/kendo.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2015.2.805/styles/kendo.dataviz.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2015.2.805/styles/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/2015.2.805/styles/kendo.mobile.all.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/styles/production_1454016574376.min.css"/>
-    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css">
-    
+    <!-- build:template:dist
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
+    /build -->
+    <!-- build:remove:dist -->
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
+
+    <link href="assets/styles/production.css" rel="stylesheet" type="text/css" />
+    <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController">
-
-    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-
-    <div id="outer-wrap">
-        <div id="inner-wrap">
-            
-            <nav id="nav" class="primary-nav" role="navigation">
-                <div ui-view="navigation">
-                    <!--<ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>-->
-
-                    <a href="#/" class="logo"><img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" /></a>
-                    
-                    <ul class="menu">
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="fingerprints"><span class="ico ico-fingerprint"></span>Analyze Your Customer Fingerprints</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="markets.list"><span class="ico ico-bullseye"></span>Manage Target Markets</a>
-                            <ul>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.create">Create a Target Market</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.dashboard">Performance Dashboard</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_schedule">Prospecting Schedule</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_list">Prospecting History</a></li>
-                            </ul>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="jobs.status"><span class="ico ico-cog"></span>Jobs <!--<span class="loading pull-right"></span>--></a>
-                            <ul>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="jobs.import.credentials">Import Data</a></li>
-                            </ul>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="ico ico-user"></span>Manage Users</a>
-                        </li>
-                    </ul>
-
-                </div>
-            </nav>
-
-            <section id="main" role="main" class="main-content">
-                <div class="content-wrap">
-                    <div id="mainView">
-                        <div id="mainHeaderView"></div>
-                        <div data-ng-view class="container"></div>
-                    </div>
-                </div>
-                <div class="footer" data-ng-show="showFooter">
-                    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-                </div>
-            </section>
-
-        </div><!-- End #inner-wrap -->
-    </div><!-- End #outer-wrap -->
+<body data-ng-controller="MainController" class="blue-background">
+<!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+<div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+<div class="content-wrap">
+    <div id="mainView">
+        <div id="mainHeaderView"></div>
+        <div data-ng-view class="container"></div>
+    </div>
+</div>
+<div class="footer" data-ng-show="showFooter">
+    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
+</div>
 
 <!--
 This div will be added to the DOM if the browser is IE
@@ -91,113 +61,210 @@ Use DOMUtil.isIE() to detect internet explorer.
     };
 </script>
 
-
-<script>
-var JsLoader = function(){
-
-    this.toLinkedList = function(pairs) {
-        if (pairs.length < 1) return null;
-
-        var tail = {};
-        var head = tail;
-
-        for (var i = 0; i < pairs.length; i++) {
-            tail.path = pairs[i].path;
-            tail.fallback = pairs[i].fallback;
-            tail.next = {};
-            tail = tail.next;
-        }
-
-        return head;
-    };
-
-    this.loadScriptByObj = loadScriptByObj;
-
-    function loadScriptByObj(obj) {
-        var callback = function(){ };
-
-        if (obj.hasOwnProperty("next") && obj.next !== null &&
-            obj.next.hasOwnProperty("path") && obj.next.hasOwnProperty("fallback")) {
-            callback = function(){ loadScriptByObj(obj.next); };
-        }
-
-        var async = obj.async || false;
-        loadScript(obj.path, obj.fallback, callback, async);
-    }
-
-    function loadScript(path, fallback, callback, async) {
-        var done = false;
-        var js = document.createElement('script');
-        js.onload = handleLoad;
-        js.onreadystatechange = handleReadyStateChange;
-        js.onerror = handleError;
-        js.src = path;
-        js.async = async;
-        js.type = 'text/javascript';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(js, s);
-
-        function handleLoad() {
-            if (!done) {
-                done = true;
-                callback();
-            }
-        }
-
-        function handleReadyStateChange() {
-            var state;
-
-            if (!done) {
-                state = js.readyState;
-                if (state === "complete")
-                    handleLoad();
-            }
-        }
-
-        function handleError() {
-            if (!done) {
-                done = true;
-                console.log("Failed to load resource at " + path);
-                if (fallback !== null) {
-                    loadScript(fallback, null, callback, async);
-                } else {
-                    callback();
-                }
-            }
-        }
-    }
-};
-
-
-</script>
-
+<!-- build:remove:dist -->
 <script type="text/javascript">
-var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
-var jslist = [
-{path:cdnroot + "jquery/2.1.3/jquery.min.js", fallback:"lib/js/jquery.js"},
-{path:cdnroot + "angular.js/1.4.2/angular.min.js", fallback:"lib/js/angular/angular.js"},
-{path:cdnroot + "angular.js/1.4.2/angular-sanitize.min.js", fallback:"lib/js/angular/angular-sanitize.js"},
-{path:cdnroot + "angular.js/1.4.2/angular-resource.min.js", fallback:"lib/js/angular/angular-resource.js"},
-{path:cdnroot + "angular.js/1.4.2/angular-route.min.js", fallback:"lib/js/angular/angular-route.js"},
-{path:cdnroot + "crypto-js/3.1.2/components/core-min.js", fallback:"lib/js/crypto/core.js"},
-{path:cdnroot + "crypto-js/3.1.2/components/sha256-min.js", fallback:"lib/js/crypto/sha256.js"},
-{path:cdnroot + "angular-ui-bootstrap/0.12.1/ui-bootstrap.min.js", fallback:"lib/js/ui-bootstrap.js"},
-{path:cdnroot + "angular-ui-bootstrap/0.12.1/ui-bootstrap-tpls.min.js", fallback:"lib/js/ui-bootstrap-tpls.js"},
-{path:cdnroot + "qtip2/2.2.1/jquery.qtip.min.js", fallback:"lib/js/jquery.qtip.js"},
-{path:cdnroot + "underscore.js/1.8.2/underscore-min.js", fallback:"lib/js/underscore.js"},
-{path:cdnroot + "twitter-bootstrap/3.3.4/js/bootstrap.min.js", fallback:"lib/js/bootstrap.js"},
-{path:cdnroot + "d3/3.5.6/d3.min.js", fallback:"lib/js/d3.js"},
-{path:cdnroot + "jStorage/0.4.12/jstorage.min.js", fallback:"lib/js/jstorage.js"},
-{path:cdnroot + "alasql/0.2.0/alasql.min.js", fallback:"lib/js/alasql.min.js"},
-{path:cdnroot + "FileSaver.js/2014-11-29/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
-{path:"//kendo.cdn.telerik.com/2015.2.805/js/kendo.all.min.js", fallback:"lib/js/kendo.all.min.js"},
-{path:cdnroot + "webfont/1.5.16/webfontloader.js", fallback:"lib/js/webfontloader.js"},
-{path:"app/production_1454016574376.min.js", fallback:"app/production_1454016574376.min.js"}
-];
-var jsLoader = new JsLoader();
-var head = jsLoader.toLinkedList(jslist);
-jsLoader.loadScriptByObj(head);
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = 'lib/js/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
 </script>
+
+<!-- 3rd-party libraries -->
+
+<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="/bower_components/angular/angular.min.js"></script>
+<script src="/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+<script src="/bower_components/angular-resource/angular-resource.min.js"></script>
+<script src="/bower_components/angular-animate/angular-animate.min.js"></script>
+<script src="/bower_components/angular-route/angular-route.min.js"></script>
+<!--
+<script src="/bower_components/crypto/crypto.min.js"></script>
+-->
+<script src="/lib/js/crypto/core.js"></script>
+<script src="/lib/js/crypto/sha256.js"></script>
+<script src="/lib/js/ui-bootstrap.js"></script>
+<script src="/lib/js/ui-bootstrap-tpls.js"></script>
+<script src="/bower_components/qtip2/jquery.qtip.min.js"></script>
+<script src="/bower_components/underscore/underscore-min.js"></script>
+<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="/bower_components/jstorage/jstorage.min.js"></script>
+<script src="/bower_components/d3/d3.min.js"></script>
+<script src="/lib/js/alasql.min.js"></script>
+<script src="/lib/js/FileSaver.js"></script>
+<script src="/lib/js/kendo.all.min.js"></script>
+
+<!-- self-host vendors -->
+<script src="/app/vendor/date.format.js"></script>
+<script src="/app/vendor/ui-bootstrap-jpls-0.13.0.js"></script>
+
+<!-- common -->
+<script src="/app/directives/charts/ArcChartDirective.js"></script>
+<script src="/app/directives/helperMarkDirective.js"></script>
+<script src="/app/directives/ngQtipDirective.js"></script>
+<script src="/app/directives/ngEnterDirective.js"></script>
+<script src="/app/utilities/FaultUtility.js"></script>
+<script src="/app/utilities/ConfigConstantUtility.js"></script>
+<script src="/app/utilities/URLUtility.js"></script>
+<script src="/app/utilities/ResourceUtility.js"></script>
+<script src="/app/utilities/EvergageUtility.js"></script>
+<script src="/app/utilities/TimestampIntervalUtility.js"></script>
+<script src="/app/utilities/MetadataUtility.js"></script>
+<script src="/app/utilities/SortUtility.js"></script>
+<script src="/app/utilities/UnderscoreUtility.js"></script>
+<script src="/app/utilities/StringUtility.js"></script>
+<script src="/app/utilities/ExceptionOverrideUtility.js"></script>
+<script src="/app/utilities/AuthenticationUtility.js"></script>
+<script src="/app/utilities/WidgetConfigUtility.js"></script>
+<script src="/app/utilities/AnimationUtility.js"></script>
+<script src="/app/utilities/DateTimeFormatUtility.js"></script>
+<script src="/app/utilities/NumberUtility.js"></script>
+<script src="/app/utilities/AnalyticAttributeUtility.js"></script>
+<script src="/app/utilities/TrackingConstantsUtility.js"></script>
+<script src="/app/utilities/UnderscoreUtility.js"></script>
+<script src="/app/utilities/TenantIdParsingUtility.js"></script>
+<script src="/app/modals/SimpleModal.js"></script>
+<script src="/app/services/WidgetFrameworkService.js"></script>
+<script src="/app/services/PlayTileService.js"></script>
+<script src="/app/services/TopPredictorService.js"></script>
+<script src="/app/services/ThresholdExplorerService.js"></script>
+<script src="/app/services/ModelSummaryValidationService.js"></script>
+<script src="/app/services/ModelAlertsService.js"></script>
+<script src="/app/services/ManageFieldsService.js"></script>
+
+<!-- widgets -->
+<script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
+<script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
+<script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
+<script src="app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js"></script>
+<script src="app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
+<script src="app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js"></script>
+<script src="app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
+<script src="app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js"></script>
+<script src="app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js"></script>
+<script src="app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js"></script>
+<script src="app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js"></script>
+<script src="app/AppCommon/widgets/tabWidget/TabWidget.js"></script>
+<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js"></script>
+<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js"></script>
+<script src="app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js"></script>
+<script src="app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js"></script>
+<script src="app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js"></script>
+<script src="app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js"></script>
+<script src="app/AppCommon/widgets/performanceTabWidget/ThresholdExplorer.js"></script>
+<script src="app/AppCommon/widgets/performanceTabWidget/LiftChart.js"></script>
+<script src="app/AppCommon/widgets/performanceTabWidget/DataTable.js"></script>
+<script src="app/AppCommon/widgets/performanceTabWidget/PerformanceTabWidget.js"></script>
+<script src="app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js"></script>
+<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js"></script>
+<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js"></script>
+<script src="app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js"></script>
+<script src="app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js"></script>
+<script src="app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidget.js"></script>
+<script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
+<script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
+<script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
+
+<!-- app specific -->
+<script src="app/app.js"></script>
+<script src="app/core/utilities/BrowserStorageUtility.js"></script>
+<script src="app/core/utilities/RightsUtility.js"></script>
+<script src="app/core/utilities/PasswordUtility.js"></script>
+<script src="app/core/utilities/ServiceErrorUtility.js"></script>
+<script src="app/core/utilities/NavUtility.js"></script>
+
+<script src="app/core/services/HelpService.js"></script>
+<script src="app/core/services/ResourceStringsService.js"></script>
+<script src="app/core/services/SessionService.js"></script>
+<script src="app/core/services/WidgetService.js"></script>
+<script src="app/core/services/FeatureFlagService.js"></script>
+<script src="app/login/services/LoginService.js"></script>
+<script src="app/config/services/ConfigService.js"></script>
+<script src="app/models/services/ModelService.js"></script>
+<script src="app/userManagement/services/UserManagementService.js"></script>
+<script src="app/setup/services/MetadataService.js"></script>
+
+<script src="app/login/controllers/LoginController.js"></script>
+<script src="app/login/controllers/UpdatePasswordController.js"></script>
+<script src="app/core/controllers/MainViewController.js"></script>
+<script src="app/core/controllers/MainHeaderController.js"></script>
+<script src="app/core/controllers/SalesforceCredentialController.js"></script>
+<script src="app/config/controllers/ManageCredentialsController.js"></script>
+<script src="app/config/modals/EnterCredentialsModal.js"></script>
+<script src="app/userManagement/controllers/UserManagementController.js"></script>
+<script src="app/models/controllers/ModelListController.js"></script>
+<script src="app/models/controllers/ModelDetailController.js"></script>
+<script src="app/models/controllers/AdminInfoController.js"></script>
+<script src="app/models/controllers/ModelCreationHistoryController.js"></script>
+<script src="app/models/controllers/ActivateModelController.js"></script>
+<script src="app/models/modals/DeleteModelModal.js"></script>
+<script src="app/models/modals/StaleModelModal.js"></script>
+<script src="app/models/modals/ImportModelModal.js"></script>
+<script src="app/models/modals/AddSegmentModal.js"></script>
+
+<script src="app/login/modals/TenantSelectionModal.js"></script>
+<script src="app/userManagement/modals/AddUserModal.js"></script>
+<script src="app/userManagement/modals/DeleteUserModal.js"></script>
+<script src="app/userManagement/modals/EditUserModal.js"></script>
+
+<script src="app/setup/utilities/SetupUtility.js"></script>
+<script src="app/setup/controllers/SetupController.js"></script>
+<script src="app/setup/controllers/DeploymentWizardController.js"></script>
+<script src="app/setup/controllers/CredentialsController.js"></script>
+<script src="app/setup/controllers/ImportAndEnrichDataController.js"></script>
+<script src="app/setup/controllers/ManageFieldsController.js"></script>
+<script src="app/setup/controllers/LeadEnrichmentController.js"></script>
+<script src="app/setup/services/TenantDeploymentService.js"></script>
+<script src="app/setup/services/LeadEnrichmentService.js"></script>
+<script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
+<script src="app/setup/modals/EditFieldModel.js"></script>
+<script src="app/setup/modals/CancelDeploymentStepModel.js"></script>
+<script src="app/setup/modals/ClearDeploymentModel.js"></script>
+<script src="app/setup/modals/LeadEnrichmentAttributesDetailsModel.js"></script>
+<!-- /build -->
+
+<!-- build:js inline -->
+<script src="app/loadjs.js"></script>
+<!-- /build -->
+
+<!-- build:template:dist
+<script type="text/javascript">
+    var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
+    var jslist = [
+        {path:cdnroot + "jquery/<%= version.jquery %>/jquery.min.js", fallback:"lib/js/jquery.js"},
+
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular.min.js", fallback:"lib/js/angular/angular.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-sanitize.min.js", fallback:"lib/js/angular/angular-sanitize.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-resource.min.js", fallback:"lib/js/angular/angular-resource.js"},
+        {path:cdnroot + "angular.js/<%= version.angular %>/angular-route.min.js", fallback:"lib/js/angular/angular-route.js"},
+
+        {path:cdnroot + "crypto-js/<%= version.crypto %>/components/core-min.js", fallback:"lib/js/crypto/core.js"},
+        {path:cdnroot + "crypto-js/<%= version.crypto %>/components/sha256-min.js", fallback:"lib/js/crypto/sha256.js"},
+
+        {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js", fallback:"lib/js/ui-bootstrap.js"},
+        {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js", fallback:"lib/js/ui-bootstrap-tpls.js"},
+        {path:cdnroot + "qtip2/<%= version.qtip2 %>/jquery.qtip.min.js", fallback:"lib/js/jquery.qtip.js"},
+        {path:cdnroot + "underscore.js/<%= version.underscore %>/underscore-min.js", fallback:"lib/js/underscore.js"},
+        {path:cdnroot + "twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js", fallback:"lib/js/bootstrap.js"},
+        {path:cdnroot + "d3/<%= version.d3 %>/d3.min.js", fallback:"lib/js/d3.js"},
+        {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"lib/js/jstorage.js"},
+        {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"lib/js/alasql.min.js"},
+        {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"lib/js/FileSaver.js"},
+        {path:"//kendo.cdn.telerik.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"lib/js/kendo.all.min.js"},
+
+        {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"lib/js/webfontloader.js"},
+
+        {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
+    ];
+
+    var jsLoader = new JsLoader();
+    var head = jsLoader.toLinkedList(jslist);
+    jsLoader.loadScriptByObj(head);
+</script>
+/build -->
 
 <script>
     // Create global variable for Evergage to use

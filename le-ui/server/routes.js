@@ -6,7 +6,8 @@ module.exports = [
         folders: {
             '/app': '/app',
             '/assets': '/assets',
-            '/lib': '/lib'
+            '/lib': '/lib',
+            '/bower_components': '/bower_components'
         }
     },{
         path: '/projects/login',

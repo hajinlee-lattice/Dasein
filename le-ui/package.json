@@ -13,10 +13,12 @@
   "devDependencies": {},
   "scripts": {
     "//": "environmental",
-    "qa": "npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
-    "dev": "npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
-    "prod": "npm run sass && grunt prod",
+    "qa": "npm run commoninit && npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
+    "dev": "npm run commoninit && npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
+    "prod": "npm run commoninit && npm run sass && npm run sass && grunt prod",
     
+    "commoninit": "cd projects/common/ && npm install",
+
     "//": "concurrent projects",
     "sass": "concurrent -r \"npm run pdsass\"",
     "sentry": "concurrent -r \"npm run pdsentry\"",

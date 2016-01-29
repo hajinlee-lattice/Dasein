@@ -48,11 +48,11 @@
 
                 <div class="carousel">
                     <div class="nav-prev" ng-if="carousel.pagesize < carousel.links.length">
-                        <a  ng-click="carousel.previous()" 
+                        <div ng-click="carousel.previous()" 
                             href="#" class="prev button icon-button white-button" title="Previous">
                             
                             <i class="fa fa-angle-left"></i>
-                        </a>
+                        </div>
                     </div>
                     <div 
                         ng-repeat="link in carousel.links | startFrom: (carousel.current - 1) * carousel.pagesize | limitTo: carousel.pagesize"
@@ -73,11 +73,11 @@
                         </a>
                     </div>
                     <div class="nav-next" ng-if="carousel.pagesize < carousel.links.length">
-                        <a  ng-click="carousel.next()" 
+                        <div ng-click="carousel.next()" 
                             href="#" class="next button icon-button white-button" title="Next">
                             
                             <i class="fa fa-angle-right"></i>
-                        </a>
+                        </div>
                     </div>
                 </div>
 

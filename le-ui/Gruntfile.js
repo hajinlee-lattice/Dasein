@@ -76,25 +76,25 @@ module.exports = function (grunt) {
     var devText = 'Run Express Server, using Local API Endpoints';
     grunt.registerTask('dev', devText, [
         'env:dev',
-        'run:nodemon'
+        'run:node'
     ]);
 
     var integrationText = 'Run Express Server, using 53 API Endpoints';
     grunt.registerTask('integration', integrationText, [
         'env:integration',
-        'run:nodemon'
+        'run:node'
     ]);
 
     var qaText = 'Run Express Server, using API Endpoints on 52';
     grunt.registerTask('stage', qaText, [
         'env:stage',
-        'run:nodemon'
+        'run:node'
     ]);
 
     var qaText = 'Run Express Server, using API Endpoints on 52';
     grunt.registerTask('qa', qaText, [
         'env:qa',
-        'run:nodemon'
+        'run:node'
     ]);
 
     var text = 'Kill all node.exe on windows';
