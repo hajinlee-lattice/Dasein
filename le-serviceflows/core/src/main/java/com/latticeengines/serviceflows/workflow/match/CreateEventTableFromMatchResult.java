@@ -75,7 +75,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         Table table = preMatchEventTable;
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT Source_Id");
-        sb.append(", " + IS_MATCHED_COLUMN + " IsMatched");
+        sb.append(", IsMatched");
         for (Attribute attr : table.getAttributes()) {
             sb.append(", Source_" + attr.getName() + " AS " + attr.getName()).append("\n");
         }
