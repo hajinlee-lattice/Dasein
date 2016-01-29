@@ -1,0 +1,14 @@
+{
+  "name": "le-ui_common",
+  "version": "1.0.0",
+  "description": "shared libraries and resources for le-ui web apps",
+  "main": "index.js",
+  "scripts": {
+	"postinstall": "bower install"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bower": "^1.7.7"
+  }
+}
