@@ -11,7 +11,6 @@
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <le.common.version>2.0.20-SNAPSHOT</le.common.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
-        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
 
     <parent>
@@ -59,7 +58,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.4.1</version>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

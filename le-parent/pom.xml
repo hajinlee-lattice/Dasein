@@ -12,6 +12,7 @@
 
     <properties>
         <branchPath>trunk</branchPath>
+        <argLine />
         <svnrepourl />
         <nexusrepourl />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,6 +44,8 @@
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <log4j.version>1.2.17</log4j.version>
         <guava.version>16.0</guava.version>
+        <jackson.fasterxml.version>2.7.0</jackson.fasterxml.version>
+        <sqljdbc4.version>4.1</sqljdbc4.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
@@ -768,7 +771,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>15.0</version>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>

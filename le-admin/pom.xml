@@ -16,7 +16,6 @@
         <le.camille.version>2.0.20-SNAPSHOT</le.camille.version>
 	    <le.db.version>2.0.20-SNAPSHOT</le.db.version>
         <le.security.version>2.0.20-SNAPSHOT</le.security.version>
-        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
@@ -315,7 +314,7 @@
 	    <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
-            <version>4.0</version>
+            <version>${sqljdbc4.version}</version>
         </dependency>
          <dependency>
 	         <groupId>com.sun.mail</groupId>

@@ -16,7 +16,6 @@
 
     <properties>
         <component-name>propdata</component-name>
-        <argLine>""</argLine>
         <le.cassandra.version>2.0.20-SNAPSHOT</le.cassandra.version>
         <le.db.version>2.0.20-SNAPSHOT</le.db.version>
         <le.dataflow.version>2.0.20-SNAPSHOT</le.dataflow.version>

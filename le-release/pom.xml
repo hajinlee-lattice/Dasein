@@ -12,7 +12,6 @@
 
     <properties>
         <le.common.version>2.0.20-SNAPSHOT</le.common.version>
-        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
 
     <build>
