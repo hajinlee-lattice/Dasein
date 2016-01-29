@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,9 +22,9 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -31,22 +33,22 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasApplicationId {
-    
+public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields {
+
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
     private String name;
-    
+
     @JsonProperty("description")
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
-    
+
     @JsonProperty("tenant")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
-    
+
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
@@ -57,19 +59,19 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @JsonProperty("file_path")
     @Column(name = "PATH", nullable = false)
     private String path;
-    
-    @JsonProperty("application_id")
-    @Column(name = "APPLICATION_ID", nullable = true)
-    private String applicationId;
-    
-    @JsonProperty("model_id")
-    @Column(name = "MODELSUMMARY_ID")
-    private String modelId;
-    
+
+    @JsonProperty("created")
+    @Column(name = "CREATED")
+    private Date created;
+
+    @JsonProperty("updated")
+    @Column(name = "UPDATED")
+    private Date updated;
+
     @Override
     public String getName() {
         return name;
@@ -113,30 +115,31 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.pid = pid;
     }
 
-    @Override
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-    
     public void setPath(String path) {
         this.path = path;
     }
-   
+
     public String getPath() {
         return path;
     }
 
-    public String getModelId() {
-        return modelId;
+    @Override
+    public Date getCreated() {
+        return created;
     }
 
-    public void setModelId(String modelId) {
-        this.modelId = modelId;
+    @Override
+    public void setCreated(Date created) {
+        this.created = created;
     }
 
+    @Override
+    public Date getUpdated() {
+        return updated;
+    }
+
+    @Override
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
 }

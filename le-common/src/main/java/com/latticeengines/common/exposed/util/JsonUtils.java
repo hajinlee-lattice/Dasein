@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.util;
 import java.io.StringWriter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,6 +31,20 @@ public class JsonUtils {
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return deserializedSchema;
+    }
+
+    public static <T> T deserialize(String jsonStr, TypeReference<T> typeRef) {
+        if (jsonStr == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        T deserializedSchema;
+        try {
+            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

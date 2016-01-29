@@ -1,7 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.rmi.server.UID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -29,15 +30,19 @@ public class FileUploadResource {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public SimpleBooleanResponse uploadFile(@RequestParam("name") String name, @RequestParam("file") MultipartFile file) {
-        if (!file.isEmpty()) {
-            try {
-                fileUploadService.uploadFile(name, new ByteArrayInputStream(file.getBytes()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    public ResponseDocument<SourceFile> uploadFile(@RequestParam("name") String name,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            return new ResponseDocument<>(fileUploadService.uploadFile(name, new ByteArrayInputStream(file.getBytes())));
+        } catch (Exception e) {
+            return new ResponseDocument<>(e);
         }
-        return SimpleBooleanResponse.successResponse();
     }
 
+    @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
+    public ResponseDocument<SourceFile> uploadFile(@RequestParam("file") MultipartFile file) {
+        return uploadFile(new UID().toString().replace("-", "").replace(":", ""), file);
+    }
 }

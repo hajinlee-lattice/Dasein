@@ -2,7 +2,9 @@ package com.latticeengines.pls.service;
 
 import java.io.InputStream;
 
+import com.latticeengines.domain.exposed.pls.SourceFile;
+
 public interface FileUploadService {
 
-    void uploadFile(String outputFileName, InputStream fileInputStream);
+    SourceFile uploadFile(String outputFileName, InputStream fileInputStream);
 }

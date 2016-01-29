@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,6 +17,16 @@ public class ResponseDocument<ResultType> {
     private ResultType result;
 
     public ResponseDocument() {
+    }
+
+    public ResponseDocument(ResultType result) {
+        setSuccess(true);
+        setResult(result);
+    }
+
+    public ResponseDocument(Exception e) {
+        setSuccess(false);
+        setErrors(Arrays.asList(e.getMessage()));
     }
 
     @JsonProperty("Errors")

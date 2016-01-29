@@ -21,18 +21,18 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private SourceFileEntityMgr sourceFileEntityMgr;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
-    public void uploadFile(String outputFileName, InputStream inputStream) {
+    public SourceFile uploadFile(String outputFileName, InputStream inputStream) {
         try {
             Tenant tenant = SecurityContextUtils.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
@@ -44,6 +44,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setPath(outputPath + "/" + outputFileName);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileEntityMgr.create(file);
+            return file;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18053, e);
         }
