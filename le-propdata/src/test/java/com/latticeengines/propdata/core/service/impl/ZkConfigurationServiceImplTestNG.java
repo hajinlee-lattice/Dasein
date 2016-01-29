@@ -22,13 +22,15 @@ public class ZkConfigurationServiceImplTestNG extends PropDataCoreFunctionalTest
 
     @Test(groups = "functional")
     public void testConnectionPool() throws SQLException {
-        List<DataSourceConnection> connectionList =
-                zkConfigurationService.getConnectionsInPool(DataSourcePool.SourceDB);
+        for (DataSourcePool pool: DataSourcePool.values()) {
+            List<DataSourceConnection> connectionList =
+                    zkConfigurationService.getConnectionsInPool(pool);
 
-        for (DataSourceConnection connection: connectionList) {
-            DriverManagerDataSource dataSource = DataSourceUtils.getDataSource(connection);
-            Connection conn = dataSource.getConnection();
-            conn.close();
+            for (DataSourceConnection connection: connectionList) {
+                DriverManagerDataSource dataSource = DataSourceUtils.getDataSource(connection);
+                Connection conn = dataSource.getConnection();
+                conn.close();
+            }
         }
 
     }

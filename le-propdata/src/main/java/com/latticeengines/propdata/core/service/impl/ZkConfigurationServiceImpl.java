@@ -46,6 +46,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     @Value("${propdata.source.db.json:source_dbs_dev.json}")
     private String sourceDbsJson;
 
+    @Value("${propdata.target.db.json:target_dbs_dev.json}")
+    private String targetDbsJson;
+
     @PostConstruct
     private void postConstruct() throws Exception {
         camille = CamilleEnvironment.getCamille();
@@ -62,6 +65,12 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         String json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + sourceDbsJson));
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
+        camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        log.info("Uploading target db connection pool to ZK using " + sourceDbsJson + " ...");
+        json = IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + targetDbsJson));
+        poolPath = dbPoolPath(DataSourcePool.TargetDB);
         camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 

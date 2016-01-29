@@ -1,3 +1,3 @@
 package com.latticeengines.propdata.core.datasource;
 
-public enum DataSourcePool { SourceDB }
+public enum DataSourcePool { SourceDB, TargetDB }
