@@ -48,6 +48,10 @@ Page Summary / Sub-Nav Headers
         color: #222;
       }
     }
+    .black-summary-list.stats h3.summary-title {
+      color: #fff;
+      text-align: left;
+    }
   }
   &.blue-steel {
     background-image: url("../images/bkg-blue-steel.jpg");
@@ -159,10 +163,18 @@ Summary Cards
 /* 
 Statistic Displays
 ====================================================== */
+.stats-group:after {
+  display: table;
+  content: "";
+  clear: both;
+}
 .stats-group dl {
-	border-left: $palladium solid 1px;
-	padding: 0 1em;
+	border-left: #999 solid 1px;
+	padding: 0 0.75em;
 	float: left;
+}
+.four .stats-group dl, .two .stats-group dl {
+  padding: 0 0.5em
 }
 .stats-group dl:first-of-type {
 	border-left: 0;
@@ -179,6 +191,10 @@ Statistic Displays
 .stats dd {
 	font-size: 2em;
 	line-height: 1;
+}
+.black-summary-list.stats dd {
+  color: #fff;
+  font-size: 1em;
 }
 
 

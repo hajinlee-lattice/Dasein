@@ -1,72 +1,75 @@
 
 <div data-ng-controller="ModelDetailsWidgetController">
-    <header class="header">
-        <div class="page-title">
-            <div class="meta primary">
-                <div class="wrapper">
-                    <a href="#" class="back-button" data-ng-click="backButtonClick($event)">&nbsp;</a>
+
+    <div class="secondary-nav">
+        <a href="#" class="back-button pull-left" data-ng-click="backButtonClick($event)">&nbsp;</a>
+        <h1 id="detail-display-name">{{displayName}}</h1>
+    </div>
+
+    <div class="summary blue-fire">
+
+        <div class="container row">
+            <div class="two columns">
+                <div class="stats black-summary-list stats-group">
+                    <h3 class="summary-title">Overview</h3>
                     <dl>
-                        <dt>{{ResourceUtility.getString('MODEL_DETAIL_BACK_LABEL')}}</dt>
-                        <dd><h1 id="detail-display-name">{{displayName}}</h1></dd>
+                        <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
+                        <dd id="detail-status">{{status}}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
+                        <dd id="detail-created">{{createdDate}}</dd>
                     </dl>
                 </div>
-            </div>
-            <div class="meta secondary">
-                <div class="wrapper">
-                    <div class="meta-group">
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
-                            <dd id="detail-status">{{status}}</dd>
-                        </dl>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
-                            <dd id="detail-created">{{createdDate}}</dd>
-                        </dl>
-                  </div>
-                  <a id="detail-toggle" href="#" class="toggleDetails {{dataExpanded ? 'less' : ''}}" data-ng-click="showMoreClicked($event)">{{showMoreLabel}}</a>
+            </div><!-- End .three.columns -->
+
+            <div class="four columns">
+                <div class="stats black-summary-list stats-group">
+                    <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_LEADS_TITLE')}}</h3>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</dt>
+                        <dd id="detail-total-leads">{{totalLeads}}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAILS_TEST_SET_LABEL')}}</dt>
+                        <dd id="detail-test-leads">{{testSet}}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAILS_TRAINING_SET_LABEL')}}</dt>
+                        <dd id="detail-train-leads">{{trainingSet}}</dd>
+                    </dl>
                 </div>
-            </div>
-            <div id="moreDataPoints" class="meta tertiary">
-                <div class="wrapper">
-                    <div class="meta-group">
-                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_LEADS_TITLE')}}</h3>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</dt>
-                            <dd id="detail-total-leads">{{totalLeads}}</dd>
-                        </dl>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TEST_SET_LABEL')}}</dt>
-                            <dd id="detail-test-leads">{{testSet}}</dd>
-                        </dl>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TRAINING_SET_LABEL')}}</dt>
-                            <dd id="detail-train-leads">{{trainingSet}}</dd>
-                        </dl>
-                    </div>
-                    <div class="meta-group">
-                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</dt>
-                            <dd id="detail-conversions">{{totalSuccessEvents}}</dd>
-                        </dl>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_CONVERSION_RATE_LABEL')}}</dt>
-                            <dd id="detail-conversion-rate">{{conversionRate}}%</dd>
-                        </dl>
-                    </div>
-                    <div class="meta-group">
-                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_TILE_EXTERNAL_LABEL')}}</dt>
-                            <dd id="detail-external-attributes">{{externalAttributes}}</dd>
-                        </dl>
-                        <dl>
-                            <dt>{{ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</dt>
-                            <dd id="detail-internal-attributes">{{internalAttributes}}</dd>
-                        </dl>
-                    </div>
+            </div><!-- End .three.columns -->
+
+            <div class="three columns">
+                <div class="stats black-summary-list stats-group">
+                    <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</dt>
+                        <dd id="detail-conversions">{{totalSuccessEvents}}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAILS_CONVERSION_RATE_LABEL')}}</dt>
+                        <dd id="detail-conversion-rate">{{conversionRate}}%</dd>
+                    </dl>
                 </div>
-            </div>
-        </div>
-    </header>
+            </div><!-- End .three.columns -->
+
+            <div class="three columns">
+                <div class="stats black-summary-list stats-group">
+                    <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_TILE_EXTERNAL_LABEL')}}</dt>
+                        <dd id="detail-external-attributes">{{externalAttributes}}</dd>
+                    </dl>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</dt>
+                        <dd id="detail-internal-attributes">{{internalAttributes}}</dd>
+                    </dl>
+                </div>
+            </div><!-- End .three.columns -->
+        </div><!-- End .container.row -->
+
+
+    </div><!-- End .summary -->
 </div>

@@ -16,3 +16,22 @@
 		border-top: none;
 	}
 }
+
+.model-details {
+	.back-button {
+	    padding: 20px 50px 20px 0;
+	    margin-left: 20px;
+	    background: url(../images/bg_back_button.png) no-repeat left center;
+	    color: #999;
+	    &:hover {
+	    	background: url(../images/bg_back_button_hover.png) no-repeat left center;
+	    }
+	}
+    h1 {
+    	float: left;
+        padding: 20px 50px 20px 0;
+        line-height: 1;
+        font-size: 28px;
+        font-family:'ProximaNova-Bold','Open Sans',sans-serif;
+    }
+}

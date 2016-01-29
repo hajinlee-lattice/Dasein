@@ -553,10 +553,10 @@ Model List
     margin-top: 20px;
 }
 .model {
-    background: #fff url(../images/bg_model_active.png) no-repeat center bottom;
-    border: #fff solid 2px;
+    background: #fff url(../images/bg_model_active.png) no-repeat center center;
+    border: #e0e3e6 solid 2px;
     position: relative;
-    min-height: 225px;
+    min-height: 300px;
     margin-bottom: 2em;
     display: block;
     -webkit-border-radius: 4px; 
@@ -567,7 +567,7 @@ Model List
         border-color: #486d99;
     }
     .model.inactive {
-        background: #f3f7fb url(../images/bg_model_inactive.png) no-repeat center bottom;       
+        background: #fff url(../images/bg_model_inactive.png) no-repeat center bottom;       
     }
         .model-title {
             position: absolute;
@@ -648,8 +648,6 @@ Model List
                     position: absolute;
                 }
         .status {
-            background: rgba(255, 255, 255, 0.85);
-            border-top: #e0e3e6 solid 1px;
             position: absolute;
             bottom: 0;
             padding: 8px;
