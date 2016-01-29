@@ -31,7 +31,6 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateEventTableFromMatchResult.class);
-    private static final String IS_MATCHED_COLUMN = "IsMatched";
 
     @Override
     public void execute() {
@@ -75,7 +74,6 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         Table table = preMatchEventTable;
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT Source_Id");
-        sb.append(", IsMatched");
         for (Attribute attr : table.getAttributes()) {
             sb.append(", Source_" + attr.getName() + " AS " + attr.getName()).append("\n");
         }
