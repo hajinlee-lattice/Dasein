@@ -30,7 +30,6 @@ import com.latticeengines.proxy.exposed.propdata.ColumnMetadataProxy;
 public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
 
     private static final String CONNECTION_MGR_TYPE = "visiDB";
-    private static final String SELECT_NAME = "leadenrichment";
 
     @Autowired
     private TenantConfigService tenantConfigService;
