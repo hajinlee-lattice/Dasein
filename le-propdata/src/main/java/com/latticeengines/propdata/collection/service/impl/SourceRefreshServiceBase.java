@@ -22,7 +22,7 @@ import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.entitymgr.SourceColumnEntityMgr;
-import com.latticeengines.propdata.core.service.DataSourceService;
+import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;

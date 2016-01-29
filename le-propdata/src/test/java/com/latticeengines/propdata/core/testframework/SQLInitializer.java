@@ -15,9 +15,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
-import com.latticeengines.propdata.core.service.DataSourceService;
-import com.latticeengines.propdata.core.service.Database;
-import com.latticeengines.propdata.core.service.SQLDialect;
+import com.latticeengines.propdata.core.datasource.DataSourceService;
+import com.latticeengines.propdata.core.datasource.Database;
+import com.latticeengines.propdata.core.datasource.SQLDialect;
 
 @Component
 public class SQLInitializer {
@@ -34,7 +34,7 @@ public class SQLInitializer {
     private static boolean initialized = false;
 
     public void initialize() {
-        if (SQLDialect.MYSQL.equals(dataSourceService.getSqlDialect(Database.MANAGE))) {
+        if (SQLDialect.MYSQL.equals(dataSourceService.getSqlDialect(Database.ManageDB))) {
             initializeMySqlDB();
         }
     }

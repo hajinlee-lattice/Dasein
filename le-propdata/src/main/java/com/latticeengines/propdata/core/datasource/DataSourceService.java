@@ -1,26 +1,14 @@
 package com.latticeengines.propdata.core.datasource;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.core.service.ZkConfigurationService;
+import com.latticeengines.propdata.core.datasource.Database;
+import com.latticeengines.propdata.core.datasource.SQLDialect;
 
-@Component
-public class DataSourceService {
+public interface DataSourceService {
 
-    private static int roundRobinPos = 0;
+    SQLDialect getSqlDialect(Database db);
 
-    @Autowired
-    private ZkConfigurationService zkConfigurationService;
-
-    public JdbcTemplate getJdbcTemplateFromDbPool(DataSourcePool pool) {
-        List<DataSourceConnection> connectionList = zkConfigurationService.getConnectionsInPool(pool);
-        DataSourceConnection connection = connectionList.get(roundRobinPos);
-        roundRobinPos = (roundRobinPos + 1) % connectionList.size();
-        return DataSourceUtils.getJdbcTemplate(connection);
-    }
+    JdbcTemplate getJdbcTemplateFromDbPool(DataSourcePool pool);
 
 }
