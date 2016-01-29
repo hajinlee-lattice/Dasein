@@ -21,6 +21,7 @@ public class ColumnMetadataResourceDeploymentTest extends PropDataApiDeploymentT
         List<ColumnMetadata> columnMetadataList = columnMetadataProxy
                 .columnSelection(ColumnSelection.Predefined.LEAD_ENRICHMENT);
         Assert.assertNotNull(columnMetadataList);
+        System.out.println("Total number of available LeadEnrichment attributes: " + columnMetadataList.size());
         for (ColumnMetadata columnMetadata : columnMetadataList) {
             Assert.assertTrue(
                     columnMetadata.getTagList().contains(ColumnSelection.Predefined.LEAD_ENRICHMENT.getName()),

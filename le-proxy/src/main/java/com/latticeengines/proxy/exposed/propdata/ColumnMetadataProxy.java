@@ -23,8 +23,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @SuppressWarnings({ "unchecked" })
     @Override
     public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName) {
-        String url = constructUrl("/predefined/{selectName}",
-                String.valueOf(ColumnSelection.Predefined.LEAD_ENRICHMENT));
+        String url = constructUrl("/predefined/{selectName}", selectName);
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
         if (metadataObjs == null) {
             return null;

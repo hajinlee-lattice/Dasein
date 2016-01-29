@@ -22,6 +22,7 @@ public class ColumnMetadataResourceFunctionalTestNG extends PropDataApiFunctiona
                 + String.valueOf(ColumnSelection.Predefined.LEAD_ENRICHMENT);
         List<Map<String, Object>> metadataObjs = restTemplate.getForObject(url, List.class);
         Assert.assertNotNull(metadataObjs);
+        System.out.println("Total number of available LeadEnrichment attributes: " + metadataObjs.size());
         ObjectMapper mapper = new ObjectMapper();
         try {
             for (Map<String, Object> obj : metadataObjs) {
