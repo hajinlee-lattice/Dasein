@@ -1,6 +1,5 @@
 package com.latticeengines.common.exposed.jython;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,12 +45,12 @@ public class JythonEngine {
             return returnType.cast(x.toString());
         } else if (x instanceof PyInteger) {
             Integer value = ((PyInteger) x).getValue();
-            if (returnType == BigInteger.class) {
-                return returnType.cast(BigInteger.valueOf(value));
+            if (returnType == Long.class) {
+                return returnType.cast(Long.valueOf(value));
             }
             return returnType.cast(((PyInteger) x).getValue());
         } else if (x instanceof PyLong) {
-            return returnType.cast(((PyLong) x).getValue());
+            return returnType.cast(((PyLong) x).getValue().longValue());
         }
 
         return null;

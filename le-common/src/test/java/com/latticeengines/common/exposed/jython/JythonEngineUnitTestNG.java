@@ -2,7 +2,6 @@ package com.latticeengines.common.exposed.jython;
 
 import static org.testng.Assert.assertNotNull;
 
-import java.math.BigInteger;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +19,8 @@ public class JythonEngineUnitTestNG {
     @DataProvider(name = "functions")
     public Object[][] functions() {
         return new Object[][] { //
-                new Object[] { "encoder", "stringcol", "xyz", BigInteger.class }, //
-                new Object[] { "encoder", "stringcol", "my dear aunt sally", BigInteger.class }, //
+                new Object[] { "encoder", "stringcol", "xyz", Long.class }, //
+                new Object[] { "encoder", "stringcol", "my dear aunt sally", Long.class }, //
                 new Object[] { "make_float", "string_must_be_float", "1234.0", Double.class }, //
                 new Object[] { "returnstring", "stringcol", "", String.class }, //
                 new Object[] { "returnint", "intcol", "", Integer.class }, //
