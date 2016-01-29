@@ -1,3 +1,6 @@
+create schema if not exists `LDC_ManageDB`;
+create schema if not exists `LDC_SourceDB`;
+
 use `LDC_ManageDB`;
 
 drop table if exists `ArchiveProgress`;

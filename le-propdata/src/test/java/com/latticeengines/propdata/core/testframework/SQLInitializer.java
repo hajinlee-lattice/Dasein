@@ -111,11 +111,6 @@ public class SQLInitializer {
         jdbcTemplate.execute("DELETE FROM `" + tableName + "`;");
     }
 
-    private boolean mysqlTableIsEmpty(JdbcTemplate jdbcTemplate, String tableName) {
-        return !(jdbcTemplate.queryForObject(
-                "SELECT EXISTS (SELECT 1 FROM `" + tableName + "` LIMIT 1)", Boolean.class));
-    }
-
     private String readFirstLineOfResource(String resource) {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
         if (is == null) {
