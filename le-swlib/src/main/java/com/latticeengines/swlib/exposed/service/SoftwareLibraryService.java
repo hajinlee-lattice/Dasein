@@ -6,14 +6,16 @@ import java.util.List;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 
 public interface SoftwareLibraryService {
-    
+
     public static final String TOPLEVELPATH = "/app/swlib";
 
     void installPackage(SoftwarePackage swPackage, File localFile);
-    
+
     List<SoftwarePackage> getInstalledPackages(String module);
 
     List<SoftwarePackage> getLatestInstalledPackages(String module);
+
+    List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version);
 
     void installPackage(String fsDefaultFS, SoftwarePackage swPackage, File localFile);
 

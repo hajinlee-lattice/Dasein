@@ -1,4 +1,14 @@
 #!/bin/bash
+
+JARFILE=`ls /tmp/app/dataplatform/lib/le-dataplatform*-shaded.jar`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
 chmod 755 /tmp/app/dataplatform/scripts
 chmod 755 /tmp/app/dataplatform/lib
 chmod 755 /tmp/app/dataplatform/scripts/algorithm
@@ -12,21 +22,21 @@ rm /tmp/app/playmaker/evmodel/*.pyc
 rm /tmp/app/playmaker/evmodel/*.pyo
 rm /tmp/datascientist/*.pyc
 rm /tmp/datascientist/*.pyo
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/playmaker'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/$VERSION/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/$VERSION/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/$VERSION/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/$VERSION/dataplatform'
+su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/$VERSION/playmaker'
 su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/datascientist/* /datascientist'
 for microservice in 'dataflowapi' 'eai' 'workflowapi'
 do
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$microservice/lib"
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$microservice"
+    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$VERSION/$microservice/lib"
+    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$VERSION/$microservice"
 done
 for service in 'db' 'security' 'eai' 'dataflowapi' 'workflowapi' 'workflow'
 do
-    su -l yarn -c "hdfs dfs -rm -r -f /app/$service/$service.properties"
-    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$service"
+    su -l yarn -c "hdfs dfs -rm -r -f /app/$VERSION/$service/$service.properties || true"
+    su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$VERSION/$service"
 done
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker

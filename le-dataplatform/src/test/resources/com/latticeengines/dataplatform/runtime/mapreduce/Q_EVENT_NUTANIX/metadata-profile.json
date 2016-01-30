@@ -136,8 +136,8 @@
   "algorithm_properties": "",
   "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/TrainingAll-r-00000.avro",
   "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/TestingSet-r-00000.avro",
-  "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
-  "python_pipeline_script":"/app/dataplatform/scripts/pipeline.py",
-  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",
+  "python_script": "/app/$$VERSION$$/dataplatform/scripts/algorithm/data_profile.py",
+  "python_pipeline_script":"/app/$$VERSION$$/dataplatform/scripts/pipeline.py",
+  "python_pipeline_lib":"/app/$$VERSION$$/dataplatform/scripts/lepipeline.tar.gz",
   "name": null
 }

@@ -86,9 +86,11 @@ public class SqoopJobServiceImpl {
     }
 
     protected ApplicationId exportData(SqoopExporter exporter, String jobName, MetadataService metadataService,
-                                       Configuration defaultConfiguration) {
+            Configuration defaultConfiguration) {
         Configuration yarnConfiguration = exporter.getYarnConfiguration();
-        if (yarnConfiguration == null) { yarnConfiguration = defaultConfiguration; }
+        if (yarnConfiguration == null) {
+            yarnConfiguration = defaultConfiguration;
+        }
         int numMappers = exporter.getNumMappers();
         if (numMappers < 1) {
             numMappers = yarnConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
@@ -150,21 +152,23 @@ public class SqoopJobServiceImpl {
             Properties props, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
-            boolean sync) {
+            boolean sync, //
+            String version) {
 
         return importDataWithWhereCondition(table, query, targetDir, creds, queue, jobName, splitCols, //
                 columnsToInclude, "", numMappers, driver, props, //
-                metadataService, yarnConfiguration, sync);
+                metadataService, yarnConfiguration, sync, version);
     }
 
     protected ApplicationId importData(SqoopImporter importer, //
-                                       String jobName,
-                                       MetadataService metadataService, //
-                                       Configuration defaultConfiguration) {
-
+            String jobName, MetadataService metadataService, //
+            Configuration defaultConfiguration, //
+            String version) {
 
         Configuration yarnConfiguration = importer.getYarnConfiguration();
-        if (yarnConfiguration == null) { yarnConfiguration = defaultConfiguration; }
+        if (yarnConfiguration == null) {
+            yarnConfiguration = defaultConfiguration;
+        }
 
         int numMappers = importer.getNumMappers();
         if (numMappers < 1) {
@@ -172,8 +176,8 @@ public class SqoopJobServiceImpl {
         }
 
         String table = importer.getTable();
-        if (importer.getSplitColumn() == null || importer.getSplitColumn().isEmpty() ||
-                (StringUtils.isNotEmpty(table) && table.startsWith("Play"))) {
+        if (importer.getSplitColumn() == null || importer.getSplitColumn().isEmpty()
+                || (StringUtils.isNotEmpty(table) && table.startsWith("Play"))) {
             numMappers = 1;
         }
 
@@ -256,7 +260,7 @@ public class SqoopJobServiceImpl {
                 }
             }
         }
-        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration);
+        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
         for (String jarFilePath : jarFilePaths) {
             try {
                 DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);
@@ -292,7 +296,8 @@ public class SqoopJobServiceImpl {
             Properties props, //
             MetadataService metadataService, //
             Configuration yarnConfiguration, //
-            boolean sync) {
+            boolean sync, //
+            String version) {
 
         if (table != null && table.startsWith("Play")) {
             numMappers = 1;
@@ -371,7 +376,7 @@ public class SqoopJobServiceImpl {
                 }
             }
         }
-        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration);
+        List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
         for (String jarFilePath : jarFilePaths) {
             try {
                 DistributedCache.addCacheFile(new URI(jarFilePath), yarnConfiguration);

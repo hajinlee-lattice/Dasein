@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
@@ -58,6 +59,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+    
+    @Autowired
+    private VersionManager versionManager;
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
@@ -80,8 +84,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier1Min.setTestDataHdfsPath("/test/nn_test.dat");
         classifier1Min.setDataProfileHdfsPath("/training/a.avro");
         classifier1Min.setConfigMetadataHdfsPath("/training/a.avsc");
-        classifier1Min.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
-        classifier1Min.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
+        classifier1Min.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier1Min.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
 
         classifier2Mins = new Classifier();
         classifier2Mins.setName("IrisClassifier");
@@ -95,8 +99,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier2Mins.setTestDataHdfsPath("/test/nn_test.dat");
         classifier2Mins.setDataProfileHdfsPath("/training/a.avro");
         classifier2Mins.setConfigMetadataHdfsPath("/training/a.avsc");
-        classifier2Mins.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
-        classifier2Mins.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
+        classifier2Mins.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier2Mins.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
 
         classifier4Mins = new Classifier();
         classifier4Mins.setName("IrisClassifier");
@@ -110,8 +114,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier4Mins.setTestDataHdfsPath("/test/nn_test.dat");
         classifier4Mins.setDataProfileHdfsPath("/training/a.avro");
         classifier4Mins.setConfigMetadataHdfsPath("/training/a.avsc");
-        classifier4Mins.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
-        classifier4Mins.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
+        classifier4Mins.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier4Mins.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 

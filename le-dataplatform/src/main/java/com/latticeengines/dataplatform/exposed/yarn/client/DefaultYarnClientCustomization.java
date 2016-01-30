@@ -20,6 +20,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.version.VersionManager;
 
 public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
@@ -27,17 +28,21 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     protected Configuration yarnConfiguration;
 
+    protected VersionManager versionManager;
+
     private String hdfsJobBaseDir;
 
     private String webHdfs;
-    
-    public DefaultYarnClientCustomization(Configuration yarnConfiguration, String hdfsJobBaseDir, String webHdfs) {
+
+    public DefaultYarnClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
+            String hdfsJobBaseDir, String webHdfs) {
         super();
         this.yarnConfiguration = yarnConfiguration;
+        this.versionManager = versionManager;
         this.hdfsJobBaseDir = hdfsJobBaseDir;
         this.webHdfs = webHdfs;
     }
-    
+
     @Override
     public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
         return new DefaultResourceLocalizer(yarnConfiguration, getHdfsEntries(containerProperties),
@@ -63,18 +68,18 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
         return getHdfsEntries(containerProperties, false);
     }
-    
+
     protected Collection<TransferEntry> getHdfsEntries(Properties containerProperties, boolean excludeDataplatformLib) {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/*.properties", //
+                String.format("/app/%s/dataplatform/*.properties", versionManager.getCurrentVersion()), //
                 false));
-        
+
         if (!excludeDataplatformLib) {
             hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                     LocalResourceVisibility.PUBLIC, //
-                    "/app/dataplatform/lib/*.jar", //
+                    String.format("/app/%s/dataplatform/lib/*.jar", versionManager.getCurrentVersion()), //
                     false));
         }
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
@@ -116,15 +121,14 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public String getContainerLauncherContextFile(Properties properties) {
         return "/default/dataplatform-default-appmaster-context.xml";
     }
-    
-    
+
     @VisibleForTesting
     String getXmxSetting(Properties containerProperties) {
         int minAllocationInMb = yarnConfiguration.getInt("yarn.scheduler.minimum-allocation-mb", -1);
-        
+
         if (containerProperties != null) {
             String requestedMemoryStr = containerProperties.getProperty(ContainerProperty.MEMORY.name());
-            
+
             if (requestedMemoryStr != null) {
                 int requestedMemory = Integer.parseInt(requestedMemoryStr);
                 if (requestedMemory > minAllocationInMb) {
@@ -132,10 +136,13 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
                 }
             }
         }
-        
-        // -Xmx is just a heap setting, so must set the heap max value to be less than the total requested/allocated memory.
-        // This will ensure that garbage collection kicks in and reduces the memory utilization. If we still run into an
-        // OOM error, then that means the requested memory is really less than what can be handled.
+
+        // -Xmx is just a heap setting, so must set the heap max value to be
+        // less than the total requested/allocated memory.
+        // This will ensure that garbage collection kicks in and reduces the
+        // memory utilization. If we still run into an
+        // OOM error, then that means the requested memory is really less than
+        // what can be handled.
         String xmx = minAllocationInMb > 0 ? String.format("-Xmx%dm", minAllocationInMb - 512) : "-Xmx1024m";
         return xmx;
     }
@@ -154,8 +161,9 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
         }
         String parameter = setupParameters(containerProperties);
 
-        return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
-                //"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+        return Arrays.<String> asList(new String[] {
+                "$JAVA_HOME/bin/java", //
+                // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 getXmxSetting(containerProperties),
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
@@ -193,11 +201,11 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
         return environment;
     }
-    
+
     public String getHdfsJobBaseDir() {
         return hdfsJobBaseDir;
     }
-    
+
     public void setHdfsJobBaseDir(String hdfsJobBaseDir) {
         this.hdfsJobBaseDir = hdfsJobBaseDir;
     }
@@ -209,7 +217,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     public void setWebHdfs(String webHdfs) {
         this.webHdfs = webHdfs;
     }
-    
+
     public Configuration getConfiguration() {
         return yarnConfiguration;
     }

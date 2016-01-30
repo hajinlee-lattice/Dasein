@@ -19,6 +19,7 @@
         class="com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRJob">
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
+        <constructor-arg ref="versionManager" />
     </bean>
 
 </beans>

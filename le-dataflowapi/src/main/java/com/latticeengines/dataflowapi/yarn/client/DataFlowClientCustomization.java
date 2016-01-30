@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -17,11 +18,11 @@ public class DataFlowClientCustomization extends SingleContainerClientCustomizat
     private static final Log log = LogFactory.getLog(DataFlowClientCustomization.class);
 
     @Autowired
-    public DataFlowClientCustomization(Configuration yarnConfiguration,
+    public DataFlowClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             SoftwareLibraryService softwareLibraryService,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 
     @Override

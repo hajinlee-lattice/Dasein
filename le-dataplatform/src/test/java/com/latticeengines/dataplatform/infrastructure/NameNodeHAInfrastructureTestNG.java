@@ -31,7 +31,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
 
             log.info("Get directory list from nn1");
             result = executeCommand(hdfs + "hadoop fs -ls -R /app");
-            directoryListPrimary = result.substring(result.indexOf("/app/dataplatform"));
+            directoryListPrimary = result.substring(result.indexOf("/app"));
             log.info("directoryListPrimary: " + directoryListPrimary);
 
             log.info("Failover nn1 to nn2");
@@ -44,7 +44,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
 
             log.info("Get directory list from nn2");
             result = executeCommand(hdfs + "dfs -ls -R /app");
-            directoryListSecondary = result.substring(result.indexOf("/app/dataplatform"));
+            directoryListSecondary = result.substring(result.indexOf("/app"));
             log.info("directoryListSecondary: " + directoryListSecondary);
 
             log.info("Failover from nn2 to nn1");

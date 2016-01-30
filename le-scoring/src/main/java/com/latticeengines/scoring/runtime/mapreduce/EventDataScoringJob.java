@@ -22,6 +22,7 @@ import org.apache.hadoop.util.ToolRunner;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
@@ -37,20 +38,23 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
-    private static final String dependencyPath = "/app/scoring";
+    private VersionManager versionManager;
 
-    private static final String jarDependencyPath = dependencyPath + "/lib";
+    private static final String dependencyPath = "/app/";
 
-    private static final String scoringPythonPath = dependencyPath + "/scripts/scoring.py";
+    private static final String jarDependencyPath = "/scoring/lib";
+
+    private static final String scoringPythonPath = "/scoring/scripts/scoring.py";
 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
     }
 
-    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry, VersionManager versionManager) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
+        this.versionManager = versionManager;
     }
 
     @Override
@@ -105,10 +109,10 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             mrJob.setNumReduceTasks(0);
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
-            mrJob.addCacheFile(new URI(scoringPythonPath));
+            mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersion() + scoringPythonPath));
             mrJob.addCacheFile(new URI(dataTypeFilePath));
             List<String> jarFilePaths = HdfsUtils
-                    .getFilesForDir(mrJob.getConfiguration(), jarDependencyPath, ".*.jar$");
+                    .getFilesForDir(mrJob.getConfiguration(), dependencyPath + versionManager.getCurrentVersion() + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {
                 mrJob.addFileToClassPath(new Path(jarFilePath));
             }

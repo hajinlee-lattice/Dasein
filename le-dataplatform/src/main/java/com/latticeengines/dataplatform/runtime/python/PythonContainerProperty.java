@@ -13,6 +13,7 @@ public enum PythonContainerProperty {
     METADATA, //
     METADATA_CONTENTS, //
     DATAPROFILE, //
-    CONFIGMETADATA
+    CONFIGMETADATA, //
+    VERSION
 
 }

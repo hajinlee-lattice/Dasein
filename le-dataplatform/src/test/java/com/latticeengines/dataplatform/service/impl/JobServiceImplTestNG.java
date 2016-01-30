@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
@@ -65,6 +66,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
+    @Autowired
+    private VersionManager versionManager;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -230,8 +234,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setDataFormat("csv");
         classifier.setDataProfileHdfsPath(baseDir + "/datascientist1/EventMetadata");
         classifier.setConfigMetadataHdfsPath(baseDir + "/datascientist1/EventMetadata");
-        classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
@@ -274,7 +278,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
         mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
         ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
@@ -301,7 +305,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "{Dell}");
         properties.setProperty(MapReduceProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));
         String newDir = ClassLoader.getSystemResource(

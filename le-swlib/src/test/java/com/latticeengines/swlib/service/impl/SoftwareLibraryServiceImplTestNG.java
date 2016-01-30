@@ -21,19 +21,19 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.swlib.functionalframework.SWLibFunctionalTestNGBase;
 
 public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase {
-    
+
     @Autowired
     private SoftwareLibraryServiceImpl softwareLibraryService;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     private SoftwarePackage pkgVersion1;
-    
+
     private SoftwarePackage pkgVersion2;
-    
+
     private String jarFile;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         jarFile = ClassLoader.getSystemResource("com/latticeengines/swlib/service/impl/a.jar").getPath();
@@ -50,8 +50,8 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
         pkgVersion2.setVersion("1.0.1");
         pkgVersion2.setModule("dataflow");
         pkgVersion2.setInitializerClass("abc");
-}
-    
+    }
+
     @Test(groups = "functional")
     public void createSoftwareLibDirExpectedToFail() {
         boolean exception = false;
@@ -64,20 +64,20 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
         }
         assertTrue(exception);
     }
-    
+
     @Test(groups = "functional")
     public void validateInitialSetup() throws Exception {
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, SoftwareLibraryService.TOPLEVELPATH));
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "validateInitialSetup" })
     public void installPackage() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, SoftwareLibraryService.TOPLEVELPATH + "/dataflow");
         softwareLibraryService.installPackage(pkgVersion1, new File(jarFile));
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, 
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration,
                 String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, pkgVersion1.getHdfsPath("json")));
         SoftwarePackage deserializedPkg = JsonUtils.deserialize(contents, SoftwarePackage.class);
-        
+
         assertEquals(deserializedPkg.getGroupId(), pkgVersion1.getGroupId());
         assertEquals(deserializedPkg.getArtifactId(), pkgVersion1.getArtifactId());
         assertEquals(deserializedPkg.getVersion(), pkgVersion1.getVersion());
@@ -100,10 +100,10 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = { "installPackage" })
     public void getInstalledPackages() throws Exception {
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("dataflow");
-        
+
         assertEquals(packages.size(), 1);
         SoftwarePackage deserializedPkg = packages.get(0);
-        
+
         assertEquals(deserializedPkg.getGroupId(), pkgVersion1.getGroupId());
         assertEquals(deserializedPkg.getArtifactId(), pkgVersion1.getArtifactId());
         assertEquals(deserializedPkg.getVersion(), pkgVersion1.getVersion());
@@ -114,7 +114,7 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
     @Test(groups = "functional")
     public void getInstalledPackagesMissingModule() throws Exception {
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("xyz");
-        
+
         assertEquals(packages.size(), 0);
     }
 
@@ -122,23 +122,30 @@ public class SoftwareLibraryServiceImplTestNG extends SWLibFunctionalTestNGBase 
     public void getLatestInstalledPackages() throws Exception {
         softwareLibraryService.installPackage(pkgVersion2, new File(jarFile));
         assertEquals(softwareLibraryService.getInstalledPackages("dataflow").size(), 2);
-        
+
         List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages("dataflow");
         assertEquals(packages.size(), 1);
         assertEquals(packages.get(0).getVersion(), "1.0.1");
     }
 
     @Test(groups = "functional", dependsOnMethods = { "getLatestInstalledPackages" })
+    public void getInstalledPackagesByVersion() throws Exception {
+        assertEquals(softwareLibraryService.getInstalledPackages("dataflow").size(), 2);
+
+        List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion("dataflow", "1.0.0");
+        assertEquals(packages.size(), 1);
+        assertEquals(packages.get(0).getVersion(), "1.0.0");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "getInstalledPackagesByVersion" })
     public void getInstalledPackagesNonSWPackageJsonFile() throws Exception {
         String[] pkgTokens = pkgVersion1.getHdfsPath("json").split("/");
-        pkgTokens[pkgTokens.length-1] = "a.json";
+        pkgTokens[pkgTokens.length - 1] = "a.json";
         String filePath = String.format("%s/%s", SoftwareLibraryService.TOPLEVELPATH, StringUtils.join(pkgTokens, "/"));
         HdfsUtils.writeToFile(yarnConfiguration, filePath, "xyz");
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackages("dataflow");
-        
+
         assertEquals(packages.size(), 2);
     }
-    
+
 }
-
-

@@ -1,8 +1,18 @@
 #!/bin/bash
+
+JARFILE=`ls /tmp/app/scoring/lib/le-scoring*-shaded.jar`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
 chmod 755 -R /tmp/app/scoring
 rm /tmp/app/scoring/scripts/*.pyc
 rm /tmp/app/scoring/scripts/*.pyo
 
-su -l yarn -c 'hadoop dfs -mkdir /app'
-su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/scoring /app/scoring'
+su -l yarn -c 'hadoop dfs -mkdir /app/$VERSION' || true
+su -l yarn -c 'hadoop dfs -copyFromLocal /tmp/app/scoring /app/$VERSION/scoring'
 rm -rf /tmp/app/scoring

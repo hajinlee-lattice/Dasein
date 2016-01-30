@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -23,12 +24,15 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WorkflowClientCustomization.class);
 
+    private VersionManager versionManager;
+
     @Autowired
-    public WorkflowClientCustomization(Configuration yarnConfiguration,
+    public WorkflowClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             SoftwareLibraryService softwareLibraryService,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
+        this.versionManager = versionManager;
     }
 
     @Override
@@ -39,10 +43,10 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
         Collection<TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
-        
+
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/app/workflow/workflow.properties", //
+                String.format("/app/%s/workflow/workflow.properties", versionManager.getCurrentVersion()),//
                 false));
         return hdfsEntries;
     }

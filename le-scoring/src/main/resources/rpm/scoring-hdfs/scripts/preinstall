@@ -1,3 +1,13 @@
 #!/bin/bash
+
+RPMFILE=`ls /tmp/le-scoring-hdfs-*.rpm`
+VERSION=`echo $RPMFILE | cut -d \- -f 4`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 5`
+
+if [[ $SNAPSHOT = SNAPSHOT* ]]
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
 rm -rf /tmp/app/scoring
-hadoop fs -rm -f -r /app/scoring
+hadoop fs -rm -f -r /app/$VERSION/scoring || true

@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
@@ -25,14 +26,18 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
+    private VersionManager versionManager;
+
     public PythonMRJob(Configuration config) {
         setConf(config);
     }
 
-    public PythonMRJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+    public PythonMRJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry,
+            VersionManager versionManager) {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
+        this.versionManager = versionManager;
     }
 
     @Override
@@ -87,6 +92,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         if (reduceMemorySize != null) {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
+        config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {

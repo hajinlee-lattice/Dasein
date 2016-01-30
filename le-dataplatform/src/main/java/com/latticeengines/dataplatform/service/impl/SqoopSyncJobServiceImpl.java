@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -40,6 +41,9 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
 
     @Autowired
     protected YarnClient defaultYarnClient;
+
+    @Autowired
+    private VersionManager versionManager;
 
     private static final int MAX_SQOOP_RETRY = 3;
 
@@ -117,7 +121,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                         props, //
                         metadataService, //
                         hadoopConfiguration, //
-                        false);
+                        false, //
+                        versionManager.getCurrentVersion());
                 long time2 = System.currentTimeMillis();
                 log.info(String.format("Time for %s load submission = %d ms.", table, (time2 - time1)));
                 return appId;
@@ -144,7 +149,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
         int retryCount = 0;
         while (retryCount < MAX_SQOOP_RETRY) {
             try {
-                ApplicationId appId = super.importData(importer, jobName, metadataService, hadoopConfiguration);
+                ApplicationId appId = super.importData(importer, jobName, metadataService, hadoopConfiguration,
+                        versionManager.getCurrentVersion());
                 long time2 = System.currentTimeMillis();
                 if (importer.isSync() && SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
                     log.info(String.format("Time for importin %s = %d ms.", importer.getTable(), (time2 - time1)));
@@ -197,7 +203,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
     }
 
     @Override
-    public ApplicationId exportData(String table, //
+    public ApplicationId exportData(
+            String table, //
             String sourceDir, DbCreds creds, String queue, String customer, int numMappers,
             String javaColumnTypeMappings) {
 
@@ -253,7 +260,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 null, //
                 metadataService, //
                 hadoopConfiguration, //
-                true);
+                true, //
+                versionManager.getCurrentVersion());
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
         return appId;
@@ -279,7 +287,8 @@ public class SqoopSyncJobServiceImpl extends SqoopJobServiceImpl implements Sqoo
                 null, //
                 metadataService, //
                 hadoopConfiguration, //
-                true);
+                true, //
+                versionManager.getCurrentVersion());
         long time2 = System.currentTimeMillis();
         log.info(String.format("Time for load submission = %d ms.", (time2 - time1)));
         return appId;

@@ -18,14 +18,14 @@ public class MRJobUtil {
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
-    public static String getPlatformShadedJarPath(Configuration yarnConfiguration) {
-         List<String> jarFilePaths = getPlatformShadedJarPathList(yarnConfiguration);
+    public static String getPlatformShadedJarPath(Configuration yarnConfiguration, String version) {
+         List<String> jarFilePaths = getPlatformShadedJarPathList(yarnConfiguration, version);
          return commaJoiner.join(jarFilePaths);
     }
 
-    public static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration) {
+    public static List<String> getPlatformShadedJarPathList(Configuration yarnConfiguration, String version) {
         try {
-            return HdfsUtils.getFilesForDir(yarnConfiguration, "/app/dataplatform/lib", ".*.jar$");
+            return HdfsUtils.getFilesForDir(yarnConfiguration, String.format("/app/%s/dataplatform/lib", version), ".*.jar$");
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }

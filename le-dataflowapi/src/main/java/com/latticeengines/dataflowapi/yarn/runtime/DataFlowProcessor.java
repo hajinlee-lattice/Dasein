@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
@@ -45,6 +46,9 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     @Autowired
     private MetadataProxy proxy;
 
+    @Autowired
+    private VersionManager versionManager;
+
     @Value("${dataflowapi.checkpoint:false}")
     private boolean checkpoint;
 
@@ -58,7 +62,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     @Override
     public String process(DataFlowConfiguration dataFlowConfig) throws Exception {
         log.info("Running processor.");
-        appContext = loadSoftwarePackages("dataflowapi", softwareLibraryService, appContext);
+        appContext = loadSoftwarePackages("dataflowapi", softwareLibraryService, appContext, versionManager);
         Map<String, String> sources = new HashMap<>();
         Map<String, Table> sourceTables = new HashMap<>();
 

@@ -17,22 +17,22 @@ import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
 
-    public static String setupArchiveFilePath(Classifier classifier) {
+    public static String setupArchiveFilePath(Classifier classifier, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(classifier.getPythonPipelineLibHdfsPath());
-        paths.add("/app/dataplatform/scripts/leframework.tar.gz");
+        paths.add(String.format("/app/%s/dataplatform/scripts/leframework.tar.gz", version));
 
         return StringUtils.join(paths, ",");
     }
 
-    public static String setupProfilingCacheFiles(Classifier classifier, String dependencyCacheFiles) {
+    public static String setupProfilingCacheFiles(Classifier classifier, String dependencyCacheFiles, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(dependencyCacheFiles);
         paths.add(classifier.getTrainingDataHdfsPath());
-        return setupCacheFiles(paths, classifier);
+        return setupCacheFiles(paths, classifier, version);
     }
 
-    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets, String dependencyCacheFiles) {
+    public static String setupModelingCacheFiles(Classifier classifier, List<String> trainingSets, String dependencyCacheFiles, String version) {
         List<String> paths = new ArrayList<String>();
         paths.add(dependencyCacheFiles);
         paths.add(classifier.getDataProfileHdfsPath());
@@ -44,19 +44,23 @@ public class PythonMRUtils {
             paths.add(trainingHdfsDir + "/" + trainingSet);
         }
 
-        return setupCacheFiles(paths, classifier);
+        return setupCacheFiles(paths, classifier, version);
     }
 
-    private static String setupCacheFiles(List<String> paths, Classifier classifier) {
-        paths.add("/app/dataplatform/hadoop-metrics2.properties");
-        paths.add("/app/dataplatform/scripts/launcher.py");
-        paths.add("/app/dataplatform/scripts/pipelinefwk.py");
+    private static String setupCacheFiles(List<String> paths, Classifier classifier, String version) {
+        paths.add(String.format("/app/%s/dataplatform/hadoop-metrics2.properties", version));
+        paths.add(String.format("/app/%s/dataplatform/scripts/launcher.py", version));
+        paths.add(String.format("/app/%s/dataplatform/scripts/pipelinefwk.py", version));
         paths.add("/datascientist/modelpredictorextraction.py");
         paths.add(classifier.getTestDataHdfsPath());
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());
         paths.add(classifier.getPythonPipelineScriptHdfsPath());
-        paths.add(new AggregationAlgorithm().getScript());
+        
+        String script = new AggregationAlgorithm().getScript();
+        String afterPart = StringUtils.substringAfter(script, "/app");
+        script = "/app/" + version + afterPart;
+        paths.add(script);
 
         String configMetadata = classifier.getConfigMetadataHdfsPath();
         if (configMetadata.endsWith(".avsc")) {

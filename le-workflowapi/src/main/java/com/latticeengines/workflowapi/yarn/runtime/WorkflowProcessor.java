@@ -7,6 +7,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -38,6 +39,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
     @Autowired
     private YarnAppWorkflowIdEntityMgr yarnAppWorkflowIdEntityMgr;
 
+    @Autowired
+    private VersionManager versionManager;
+
     public WorkflowProcessor() {
         super();
         log.info("Construct WorkflowProcessor");
@@ -50,7 +54,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
         }
         log.info(String.format("Running WorkflowProcessor with workflowName:%s and config:%s",
                 workflowConfig.getWorkflowName(), workflowConfig.toString()));
-        appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext);
+        appContext = loadSoftwarePackages("workflowapi", softwareLibraryService, appContext, versionManager);
 
         WorkflowExecutionId workflowId;
         if (workflowConfig.isRestart()) {

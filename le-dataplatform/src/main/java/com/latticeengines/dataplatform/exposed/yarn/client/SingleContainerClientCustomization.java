@@ -15,6 +15,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -23,24 +24,25 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     private static final Log log = LogFactory.getLog(SingleContainerClientCustomization.class);
 
     private SoftwareLibraryService softwareLibraryService;
-    
-    
+
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
+            VersionManager versionManager, //
             String hdfsJobBaseDir, //
             String webHdfs) {
-        super(yarnConfiguration, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
     }
 
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
+            VersionManager versionManager, //
             SoftwareLibraryService softwareLibraryService, //
             String hdfsJobBaseDir, //
             String webHdfs) {
-        this(yarnConfiguration, hdfsJobBaseDir, webHdfs);
+        this(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
         this.softwareLibraryService = softwareLibraryService;
     }
 
     public abstract String getModuleName();
-    
+
     @Override
     public String getClientId() {
         return getModuleName() + "Client";
@@ -79,23 +81,23 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/%s.properties", module, module), //
+                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersion(), module,  module), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/app/db/db.properties", //
+                String.format("/app/%s/db/db.properties", versionManager.getCurrentVersion()), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/app/security/security.properties", //
+                String.format("/app/%s/security/security.properties", versionManager.getCurrentVersion()), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/lib/*", module), //
+                String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersion(), module), //
                 false));
         if (softwareLibraryService != null) {
-            List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages(module);
-            
+            List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
+
             for (SoftwarePackage pkg : packages) {
                 String hdfsJar = String.format("%s/%s", //
                         SoftwareLibraryService.TOPLEVELPATH, pkg.getHdfsPath());
@@ -106,7 +108,7 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                         false));
             }
         }
-        
+
         return hdfsEntries;
     }
 

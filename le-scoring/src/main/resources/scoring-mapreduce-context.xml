@@ -16,5 +16,6 @@
     <bean id="scoringCustomization" class="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringJob">
         <constructor-arg ref="hadoopConfiguration" />
         <constructor-arg ref="mapReduceCustomizationRegistry" />
+        <constructor-arg ref="versionManager"/>
     </bean>
 </beans>

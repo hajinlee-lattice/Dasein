@@ -20,6 +20,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
@@ -34,11 +35,14 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
+    private VersionManager versionManager;
+
     @Autowired
-    public PythonClientCustomization(Configuration yarnConfiguration,
+    public PythonClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
+        this.versionManager = versionManager;
     }
 
     @Override
@@ -74,6 +78,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             FileUtils.writeStringToFile(metadataFile, metadata);
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
+            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

@@ -1,23 +1,33 @@
 #!/bin/bash
+
+RPMFILE=`ls /tmp/le-dataplatform-hdfs-*.rpm`
+VERSION=`echo $RPMFILE | cut -d \- -f 4`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 5`
+
+if [[ $SNAPSHOT = SNAPSHOT* ]]
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
 rm -rf /tmp/app/dataplatform
 rm -rf /tmp/app/playmaker
 rm -rf /tmp/datascientist
 
-hdfs dfs -rm -f -r /app/dataflowapi
-hdfs dfs -rm -f -r /app/dataplatform
-hdfs dfs -rm -f -r /app/db
-hdfs dfs -rm -f -r /app/eai
-hdfs dfs -rm -f -r /app/playmaker
-hdfs dfs -rm -f -r /app/security
-hdfs dfs -rm -f -r /app/workflowapi
+hdfs dfs -rm -f -r /app/$VERSION/dataflowapi || true
+hdfs dfs -rm -f -r /app/$VERSION/dataplatform || true
+hdfs dfs -rm -f -r /app/$VERSION/db || true
+hdfs dfs -rm -f -r /app/$VERSION/eai || true
+hdfs dfs -rm -f -r /app/$VERSION/playmaker || true
+hdfs dfs -rm -f -r /app/$VERSION/security || true
+hdfs dfs -rm -f -r /app/$VERSION/workflowapi || true
 hdfs dfs -rm -f -r /datascientist
 
-hdfs dfs -mkdir -p /app/dataflowapi/lib
-hdfs dfs -mkdir -p /app/dataplatform
-hdfs dfs -mkdir -p /app/dataplatform/lib
-hdfs dfs -mkdir -p /app/db
-hdfs dfs -mkdir -p /app/eai/lib
-hdfs dfs -mkdir -p /app/playmaker
-hdfs dfs -mkdir -p /app/security
-hdfs dfs -mkdir -p /app/workflowapi/lib
+hdfs dfs -mkdir -p /app/$VERSION/dataflowapi/lib
+hdfs dfs -mkdir -p /app/$VERSION/dataplatform
+hdfs dfs -mkdir -p /app/$VERSION/dataplatform/lib
+hdfs dfs -mkdir -p /app/$VERSION/db
+hdfs dfs -mkdir -p /app/$VERSION/eai/lib
+hdfs dfs -mkdir -p /app/$VERSION/playmaker
+hdfs dfs -mkdir -p /app/$VERSION/security
+hdfs dfs -mkdir -p /app/$VERSION/workflowapi/lib
 hdfs dfs -mkdir -p /datascientist

@@ -16,6 +16,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -23,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -44,6 +46,9 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Value("${dataplatform.fs.web.defaultFS}")
     private String webFS;
+
+    @Autowired
+    private VersionManager versionManager;
 
     private String customer = "Nutanix";
     private String localDir = "com/latticeengines/dataplatform/runtime/mapreduce/Q_EVENT_NUTANIX";
@@ -100,6 +105,7 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional" }, enabled = true)
     public void testProfiling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-profile.json");
+        setVersion(classifier, versionManager.getCurrentVersion());
         int linesPerMap = createProfilingInputConfig(classifier.getFeatures(), profileDir);
         Properties property = setupProperty(linesPerMap, profileDir, metadataDir,
                 PythonMRJobType.PROFILING_JOB.jobType());
@@ -111,9 +117,16 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, metadataDir + "/" + FileAggregator.DIAGNOSTICS_JSON));
     }
 
+    private void setVersion(Classifier classifier, String currentVersion) {
+        classifier.setPythonScriptHdfsPath(classifier.getPythonScriptHdfsPath().replaceAll("\\$\\$" + PythonContainerProperty.VERSION.name() + "\\$\\$", currentVersion));
+        classifier.setPythonPipelineScriptHdfsPath(classifier.getPythonPipelineScriptHdfsPath().replaceAll("\\$\\$" + PythonContainerProperty.VERSION.name() + "\\$\\$", currentVersion));
+        classifier.setPythonPipelineLibHdfsPath(classifier.getPythonPipelineLibHdfsPath().replaceAll("\\$\\$" + PythonContainerProperty.VERSION.name() + "\\$\\$", currentVersion));
+    }
+
     @Test(groups = { "functional" }, dependsOnMethods = { "testProfiling" })
     public void testModeling() throws Exception {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-learn.json");
+        setVersion(classifier, versionManager.getCurrentVersion());
         String modelInputDir = modelDir + "/modelName";
         int linesPerMap = createModelingInputConfig(sampleDir, modelInputDir);
         Properties property = setupProperty(linesPerMap, modelInputDir, modelDir,
@@ -130,14 +143,16 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
 
         String cacheFilePath = null;
         if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
-            cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
+            cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, 
+                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()), versionManager.getCurrentVersion());
         } else {
             List<String> trainingSets = new ArrayList<String>();
             trainingSets.add(trainingSet);
-            cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingSets, MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
+            cacheFilePath = PythonMRUtils.setupModelingCacheFiles(classifier, trainingSets,
+                    MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()), versionManager.getCurrentVersion());
         }
 
-        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);
+        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersion());
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 
         property.put(MapReduceProperty.INPUT.name(), hdfsInDir);

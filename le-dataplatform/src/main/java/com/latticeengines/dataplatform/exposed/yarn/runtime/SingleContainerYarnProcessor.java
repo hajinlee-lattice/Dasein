@@ -32,6 +32,7 @@ import org.springframework.yarn.integration.ip.mind.MindRpcSerializer;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -62,8 +63,8 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     }
 
     public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
-            ApplicationContext context) {
-        List<SoftwarePackage> packages = softwareLibraryService.getLatestInstalledPackages(module);
+            ApplicationContext context, VersionManager versionManager) {
+        List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
         log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
         log.info(String.format("Found %d of software packages from the software library for this module.",
                 packages.size()));

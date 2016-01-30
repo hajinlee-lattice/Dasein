@@ -36,6 +36,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
@@ -98,6 +99,9 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private MetadataService metadataService;
+
+    @Autowired
+    private VersionManager versionManager;
 
     @Resource(name = "ParallelDispatchService")
     private ParallelDispatchService parallelDispatchService;
@@ -175,7 +179,7 @@ public class ModelingServiceImpl implements ModelingService {
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
-                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration));
+                MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
 
         return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(config.isParallelEnabled()),
                 properties);
@@ -344,15 +348,20 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setFeatures(model.getFeaturesList());
         classifier.setTargets(model.getTargetsList());
         classifier.setKeyCols(model.getKeyColsList());
-        classifier.setPythonScriptHdfsPath(algorithm.getScript());
+        String script = algorithm.getScript();
+        String afterPart = StringUtils.substringAfter(script, "/app");
+        script = "/app/" + versionManager.getCurrentVersion() + afterPart;
+        classifier.setPythonScriptHdfsPath(script);
 
         String pipelineLibScript = algorithm.getPipelineLibScript();
         if (StringUtils.isEmpty(pipelineLibScript)) {
-            pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
+            pipelineLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz",
+                    versionManager.getCurrentVersion());
         }
         String pipelineScript = algorithm.getPipelineScript();
         if (StringUtils.isEmpty(pipelineScript)) {
-            pipelineScript = "/app/dataplatform/scripts/pipeline.py";
+            pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py",
+                    versionManager.getCurrentVersion());
         }
 
         classifier.setPythonPipelineLibHdfsPath(pipelineLibScript);

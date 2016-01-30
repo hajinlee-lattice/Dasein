@@ -10,7 +10,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCust
 public class RClientCustomization extends DefaultYarnClientCustomization {
 
     public RClientCustomization() {
-        super(null, null, null);
+        super(null, null, null, null);
     }
 
     @Override

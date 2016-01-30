@@ -22,6 +22,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
@@ -45,6 +46,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     @Autowired
     private ModelingJobService modelingJobService;
+    
+    @Autowired
+    private VersionManager versionManager;
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -152,8 +156,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         classifier.setTestDataHdfsPath(baseDir + "/test/nn_test.dat");
         classifier.setDataProfileHdfsPath(baseDir + "/training/a.avro");
         classifier.setConfigMetadataHdfsPath(baseDir + "/training/a.avsc");
-        classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
 
         return classifier;
     }

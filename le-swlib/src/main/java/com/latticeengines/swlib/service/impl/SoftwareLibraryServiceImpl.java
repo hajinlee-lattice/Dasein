@@ -91,7 +91,7 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
                             return file.getPath().toString().endsWith(".json");
                         }
                     });
-            
+
             for (String file : files) {
                 try {
                     packages.add(JsonUtils.deserialize(HdfsUtils.getHdfsFileContents(yarnConfiguration, file),
@@ -105,24 +105,24 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         }
         return packages;
     }
-    
+
     @Override
     public List<SoftwarePackage> getLatestInstalledPackages(String module) {
         List<SoftwarePackage> packages = getInstalledPackages(module);
-        
+
         Map<String, List<SoftwarePackage>> packagesByGroupAndArtifact = new HashMap<>();
-        
+
         for (SoftwarePackage pkg : packages) {
             String key = String.format("%s.%s", pkg.getGroupId(), pkg.getArtifactId());
             List<SoftwarePackage> list = packagesByGroupAndArtifact.get(key);
-            
+
             if (list == null) {
                 list = new ArrayList<>();
                 packagesByGroupAndArtifact.put(key, list);
             }
             list.add(pkg);
         }
-        
+
         Collection<List<SoftwarePackage>> values = packagesByGroupAndArtifact.values();
         packages = new ArrayList<>();
         for (List<SoftwarePackage> value : values) {
@@ -132,12 +132,26 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
                 public int compare(SoftwarePackage o1, SoftwarePackage o2) {
                     return o2.getVersion().compareTo(o1.getVersion());
                 }
-                
+
             });
             packages.add(value.get(0));
         }
-        
+
         return packages;
+    }
+
+    @Override
+    public List<SoftwarePackage> getInstalledPackagesByVersion(String module, String version) {
+        List<SoftwarePackage> packages = getInstalledPackages(module);
+
+        List<SoftwarePackage> versionMatchedPackages = new ArrayList<>();
+
+        for (SoftwarePackage pkg : packages) {
+            if (pkg.getVersion().equals(version)) {
+                versionMatchedPackages.add(pkg);
+            }
+        }
+        return versionMatchedPackages;
     }
 
 }

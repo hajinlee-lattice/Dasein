@@ -32,8 +32,8 @@ public class PythonMRJobUnitTestNG {
         String inputDir = inputUrl.getPath();
 
         classifier = PythonMRTestUtils.setupDummyClassifier();
-        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, "/app/dataplatform/lib/le-dataplatform-shaded.jar");
-        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier);
+        String cacheFilePath = PythonMRUtils.setupProfilingCacheFiles(classifier, "/app/dataplatform/lib/le-dataplatform-shaded.jar", "1.0.1");
+        String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, "1.0.1");
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 
         property = new Properties();

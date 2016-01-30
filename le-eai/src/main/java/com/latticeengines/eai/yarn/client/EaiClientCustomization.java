@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.client.SingleContainerClientCustomization;
 
 @Component("eaiClientCustomization")
@@ -16,10 +17,10 @@ public class EaiClientCustomization extends SingleContainerClientCustomization {
     private static final Log log = LogFactory.getLog(EaiClientCustomization.class);
 
     @Autowired
-    public EaiClientCustomization(Configuration yarnConfiguration,
+    public EaiClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
-        super(yarnConfiguration, hdfsJobBaseDir, webHdfs);
+        super(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
         yarnConfiguration.setBoolean("mapreduce.job.user.classpath.first", true);
     }
 

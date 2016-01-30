@@ -387,6 +387,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
             <classifier>intf</classifier>

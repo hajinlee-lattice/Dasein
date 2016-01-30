@@ -39,6 +39,7 @@
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:swlib-context.xml"/>
+    <import resource="classpath:common-component-context.xml"/>
 
     <bean id="sqoopJobTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${dataplatform.sqoopjob.core.pool.size}" />

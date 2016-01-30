@@ -13,14 +13,16 @@ import org.springframework.stereotype.Component;
 @Component("hdfsRcMBean")
 @ManagedResource(objectName = "Diagnostics:name=HDFSResourceCheck")
 public class HDFSResourceMBean {
+
     @Autowired
     private Configuration yarnConfiguration;
+
 
     @ManagedOperation(description = "Check Resources(properties and python scripts) are deployed to HDFS")
     public String checkHDFSResource() {
         try {
             FileSystem fs = FileSystem.get(yarnConfiguration);
-            Path path = new Path("/app/dataplatform");
+            Path path = new Path("/app");
             RemoteIterator<LocatedFileStatus> ri = fs.listFiles(path, true);
             StringBuilder sb = new StringBuilder();
             while (ri.hasNext()) {

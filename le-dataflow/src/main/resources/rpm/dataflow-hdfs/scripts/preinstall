@@ -1,5 +1,15 @@
 #!/bin/bash
 echo 'Running Preinstall'
+
+RPMFILE=`ls /tmp/le-dataflow-hdfs-*.rpm`
+VERSION=`echo $RPMFILE | cut -d \- -f 4`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 5`
+
+if [[ $SNAPSHOT = SNAPSHOT* ]]
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
 if [ -d "/tmp/app/dataflow" ]; then
     rm -rf /tmp/app/dataflow/le-dataflow*-shaded.jar
     rm -rf /tmp/app/dataflow/le-propdata*-shaded.jar
@@ -7,9 +17,9 @@ if [ -d "/tmp/app/dataflow" ]; then
 else
     mkdir -p /tmp/app/dataflow
 fi
-hdfs dfs -mkdir -p /app/dataflow/lib
-hdfs dfs -rm -f /app/dataflow/lib/le-dataflow*-shaded.jar
-hdfs dfs -rm -f /app/dataflow/lib/le-propdata*-shaded.jar
-hdfs dfs -rm -f /app/dataflow/lib/le-dellebi*-shaded.jar
-hdfs dfs -rm -f /app/dataflow/dataflow.properties
+hdfs dfs -mkdir -p /app/$VERSION/dataflow/lib || true
+hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-dataflow*-shaded.jar || true
+hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-propdata*-shaded.jar || true
+hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-dellebi*-shaded.jar || true
+hdfs dfs -rm -f /app/$VERSION/dataflow/dataflow.properties || true
 
