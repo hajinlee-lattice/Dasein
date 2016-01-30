@@ -19,6 +19,7 @@ hdfs dfs -rm -f -r /app/$VERSION/db || true
 hdfs dfs -rm -f -r /app/$VERSION/eai || true
 hdfs dfs -rm -f -r /app/$VERSION/playmaker || true
 hdfs dfs -rm -f -r /app/$VERSION/security || true
+hdfs dfs -rm -f -r /app/$VERSION/workflow || true
 hdfs dfs -rm -f -r /app/$VERSION/workflowapi || true
 hdfs dfs -rm -f -r /datascientist
 
@@ -29,5 +30,6 @@ hdfs dfs -mkdir -p /app/$VERSION/db
 hdfs dfs -mkdir -p /app/$VERSION/eai/lib
 hdfs dfs -mkdir -p /app/$VERSION/playmaker
 hdfs dfs -mkdir -p /app/$VERSION/security
+hdfs dfs -mkdir -p /app/$VERSION/workflow
 hdfs dfs -mkdir -p /app/$VERSION/workflowapi/lib
 hdfs dfs -mkdir -p /datascientist
