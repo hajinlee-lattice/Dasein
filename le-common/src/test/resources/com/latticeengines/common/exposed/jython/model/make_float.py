@@ -4,5 +4,7 @@ def transform(args, record):
 
     if value is None:
         return None
-    return float(value)
+    return tofloat(value)
 
+def tofloat(value):
+    return float(value)

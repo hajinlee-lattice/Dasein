@@ -1,6 +1,8 @@
 package com.latticeengines.common.exposed.jython;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -41,5 +43,12 @@ public class JythonEngineUnitTestNG {
         record.put(column, value);
         Object retval = engine.invoke(functionName, arguments, record, returnType);
         assertNotNull(retval);
+    }
+    
+    @Test(groups = "unit")
+    public void invokeAnyMethod() {
+        Object result = engine.invoke("com.latticeengines.common.exposed.jython.model", "make_float", "tofloat", new Object[] { "123.45" });
+        assertTrue(result instanceof Double);
+        assertEquals((Double) result, 123.45);
     }
 }
