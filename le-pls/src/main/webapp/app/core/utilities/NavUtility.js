@@ -11,6 +11,7 @@ angular.module('mainApp.core.utilities.NavUtility', [])
     this.ACTIVATE_MODEL = "/ActivateModel";
     this.SETUP_HASH = "/ManageFields";
     this.DEPLOYMENT_WIZARD_HASH = "/DeploymentWizard";
+    this.LEAD_ENRICHMENT_HASH = "/LeadEnrichment";
 
     // Navigation Event Constants
     this.MANAGE_CREDENTIALS_NAV_EVENT = "ManageCredentialsNavEvent";

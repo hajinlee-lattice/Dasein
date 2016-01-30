@@ -227,7 +227,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createLeadEnrichmentView() {
         // Set the hash
-        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+        window.location.hash = NavUtility.LEAD_ENRICHMENT_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/LeadEnrichmentView.html').success(function (html) {
