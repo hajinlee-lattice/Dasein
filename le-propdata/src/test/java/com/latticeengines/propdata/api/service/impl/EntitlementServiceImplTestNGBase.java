@@ -26,22 +26,22 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
 
     abstract protected Logger getLogger();
 
-    @BeforeClass(groups = "api.functional")
+    @BeforeClass(groups = "api")
     public void setup() {
         entitlementService = getEntitlementService();
     }
 
-    @AfterClass(groups = "api.functional")
+    @AfterClass(groups = "api")
     public void teardown() {
         removePackageByName(packageName);
     }
 
-    @BeforeMethod(groups = "api.functional")
+    @BeforeMethod(groups = "api")
     public void beforeMethod() {
         teardown();
     }
 
-    @Test(groups = "api.functional", enabled = false)
+    @Test(groups = "api", enabled = false)
     public void testCreatePackage() {
         getLogger().info("Testing package creation ... ");
         Assert.assertNull(entitlementService.findEntitilementPackageByName(packageName),
@@ -53,7 +53,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
                 "Test package should exist after creation.");
     }
 
-    @Test(groups = "api.functional")
+    @Test(groups = "api")
     public void testGrantPackageToCustomer() {
         getLogger().info("Testing grant package to customer ... ");
 
@@ -67,7 +67,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
         Assert.assertFalse(customerHasPackage(contractId, packageName));
     }
 
-    @Test(groups = "api.functional")
+    @Test(groups = "api")
     public void testAddContentToPackage() {
         getLogger().info("Testing add content to customer ... ");
 
@@ -81,7 +81,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
         Assert.assertFalse(packageHasContent(packageId));
     }
 
-    @Test(groups = "api.functional")
+    @Test(groups = "api")
     public void testDeletionCascade() {
         getLogger().info("Testing cascading on deletion ... ");
 

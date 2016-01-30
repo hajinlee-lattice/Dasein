@@ -7,7 +7,7 @@
       http://www.springframework.org/schema/tx
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.latticeengines.propdata.api.datasource" />
+    <context:component-scan base-package="com.latticeengines.propdata.match.datasource" />
 
     <import resource="classpath:propdata-persistence-match-datasource-context.xml" />
 
@@ -29,7 +29,7 @@
     </bean>
     <tx:annotation-driven transaction-manager="transactionManagerPropDataMatch" />
 
-    <bean id="commandDao" class="com.latticeengines.propdata.api.dao.impl.CommandDaoImpl">
+    <bean id="commandDao" class="com.latticeengines.propdata.match.dao.impl.CommandDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
     </bean>
 

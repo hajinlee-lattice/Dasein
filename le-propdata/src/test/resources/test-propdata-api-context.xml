@@ -12,10 +12,7 @@
 
     <mvc:annotation-driven />
 
-    <import resource="classpath:propdata-core-context.xml" />
-    <import resource="classpath:test-propdata-persistence-context.xml" />
-    <import resource="classpath:test-propdata-properties-context.xml"/>
+    <import resource="classpath:test-propdata-match-context.xml" />
     <import resource="classpath:propdata-persistence-entitlements-context.xml" />
-    <import resource="classpath:propdata-persistence-match-context.xml" />
 
 </beans>

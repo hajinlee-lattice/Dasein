@@ -27,22 +27,23 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
     abstract BulkSource getSource();
 
-    @BeforeMethod(groups = "functional.source")
+    @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
-        setUpPod("FunctionalArchiveBulk");
+        source = getSource();
+        setUpPod("FunctionalArchiveBulk" + source.getSourceName());
     }
 
     void setUpPod(String podId) {
+        source = getSource();
         hdfsPathBuilder.changeHdfsPodId(podId);
         archiveService = getArchiveService();
         progressEntityMgr = getProgressEntityMgr();
-        source = getSource();
     }
 
-    @AfterMethod(groups = "functional.source")
+    @AfterMethod(groups = "collection")
     public void tearDown() throws Exception { }
 
-    @Test(groups = "functional.source", enabled = false)
+    @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
         run();
         cleanupProgressTables();

@@ -14,4 +14,5 @@ public interface ZkConfigurationService {
 
     List<DataSourceConnection> getConnectionsInPool(DataSourcePool pool);
 
+    Integer maxRealTimeInput();
 }

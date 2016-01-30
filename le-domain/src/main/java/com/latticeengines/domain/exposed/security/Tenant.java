@@ -24,6 +24,10 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     private Long pid;
     private Long registeredTime;
 
+    public Tenant() {}
+
+    public Tenant(String id) { setId(id); }
+
     @Override
     @JsonProperty("DisplayName")
     @Column(name = "NAME", nullable = false, unique = true)

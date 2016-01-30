@@ -73,7 +73,7 @@ public class ColumnSelection {
     }
 
     public enum Predefined {
-        LEAD_ENRICHMENT("LeadEnrichment"), DERIVED_COLUMNS("DerivedColumns");
+        LeadEnrichment("LeadEnrichment"), DerivedColumns("DerivedColumns"), Model("Model");
 
         private final String name;
         private static Map<String, Predefined> nameMap;

@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="propDataMatchDataSource" class="com.latticeengines.propdata.api.datasource.MatchClientRoutingDataSource">
+    <bean id="propDataMatchDataSource" class="com.latticeengines.propdata.match.datasource.MatchClientRoutingDataSource">
         <property name="targetDataSources">
             <map key-type="com.latticeengines.domain.exposed.propdata.MatchClient">
                 <entry key="PD126" value-ref="pd126ClientDataSource" />

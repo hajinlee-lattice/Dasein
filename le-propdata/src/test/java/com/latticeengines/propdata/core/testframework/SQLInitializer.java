@@ -103,6 +103,11 @@ public class SQLInitializer {
                 "WHERE FundamentalType = ''";
         jdbcTemplateManageDB.execute(sql);
 
+        sql = "UPDATE LDC_ManageDB.ExternalColumn " +
+                "SET DataType = NULL " +
+                "WHERE DataType = ''";
+        jdbcTemplateManageDB.execute(sql);
+
         jdbcTemplateManageDB.execute("SET SQL_SAFE_UPDATES = 1");
 
     }

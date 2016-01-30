@@ -40,6 +40,8 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     private static final String DATASOURCES = "DataSources";
 
+    private static final String MAX_REALTIME_MATCH_INPUT = "MaxRealTimeMatchInput";
+
     @Autowired
     List<Source> sources;
 
@@ -72,6 +74,12 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + targetDbsJson));
         poolPath = dbPoolPath(DataSourcePool.TargetDB);
         camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        log.info("Read or initializing max real time input ...");
+        if (!camille.exists(maxRealTimeInputPath())) {
+            camille.create(maxRealTimeInputPath(), new Document("1000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        }
+
     }
 
     @Override
@@ -87,6 +95,16 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             return connections;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @Override
+    public Integer maxRealTimeInput() {
+        try {
+            return Integer.valueOf(camille.get(maxRealTimeInputPath()).getData());
+        } catch (Exception e) {
+            log.warn("Failed to retrieve max real time input size from zk, using default value of 1000 instead");
+            return 1000;
         }
     }
 
@@ -136,6 +154,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);
         Path sourcePath = propDataPath.append(SOURCES).append(source.getSourceName());
         return sourcePath.append(JOB_CRON);
+    }
+
+    private Path maxRealTimeInputPath() {
+        Path propDataPath = PathBuilder.buildServicePath(podId, PROPDATA_SERVICE);
+        return propDataPath.append(MAX_REALTIME_MATCH_INPUT);
     }
 
 }

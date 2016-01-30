@@ -10,6 +10,10 @@
     <import resource="classpath:propdata-persistence-context.xml" />
     <import resource="classpath:dataflow-context.xml" />
 
+    <bean id="sourceColumnDao" class="com.latticeengines.propdata.core.collection.impl.SourceColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+    </bean>
+
     <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
     </bean>

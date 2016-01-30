@@ -32,7 +32,7 @@ public class LeadEnrichmentServiceImplTestNG extends PlsFunctionalTestNGBase {
         httpServer = new StandaloneHttpServer();
         httpServer.init();
         httpServer.addServlet(new PropDataLeadEnrichmentAttributeServlet(),
-                "/propdata/metadata/predefined/" + ColumnSelection.Predefined.LEAD_ENRICHMENT);
+                "/propdata/metadata/predefined/" + ColumnSelection.Predefined.LeadEnrichment);
         httpServer.start();
     }
 

@@ -33,7 +33,7 @@ public class EntitlementSourceServiceImplTestNG extends EntitlementServiceImplTe
         return entitlementService;
     }
 
-    @BeforeClass(groups = "api.functional")
+    @BeforeClass(groups = "api")
     public void setup() {
         packageName = testEnv + packageName + "Source";
         contractId = testEnv + contractId + "Source";

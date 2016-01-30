@@ -124,4 +124,8 @@ UPDATE ExternalColumn
 SET FundamentalType = NULL
 WHERE FundamentalType = '';
 
+UPDATE ExternalColumn
+SET DataType = NULL
+WHERE DataType = '';
+
 SET SQL_SAFE_UPDATES = 1;

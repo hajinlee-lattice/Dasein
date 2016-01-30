@@ -1,6 +1,6 @@
 [
   {
-    "Url" : "jdbc:sqlserver://10.41.1.250\\\\QACLUSTER:55568;databaseName=LDC_SourceDB;",
+    "Url" : "jdbc:sqlserver://10.41.1.250\\\\QACLUSTER:62836;databaseName=LDC_SourceDB;",
     "Username": "DLTransfer",
     "Password": "Q1nh4HIYGkg4OnQIEbEuiw=="
   }

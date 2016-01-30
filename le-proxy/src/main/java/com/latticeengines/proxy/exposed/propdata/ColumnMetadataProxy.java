@@ -23,20 +23,19 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     @SuppressWarnings({ "unchecked" })
     @Override
     public List<ColumnMetadata> columnSelection(ColumnSelection.Predefined selectName) {
-        String url = constructUrl("/predefined/{selectName}", selectName);
+        String url = constructUrl("/predefined/{selectName}", String.valueOf(selectName.name()));
         List<Map<String, Object>> metadataObjs = get("columnSelection", url, List.class);
-        if (metadataObjs == null) {
-            return null;
-        }
+        List<ColumnMetadata> metadataList = new ArrayList<>();
+        if (metadataObjs == null) { return metadataList; }
+
         ObjectMapper mapper = new ObjectMapper();
-        List<ColumnMetadata> metadataList = new ArrayList<ColumnMetadata>();
         try {
             for (Map<String, Object> obj : metadataObjs) {
                 ColumnMetadata metadata = mapper.treeToValue(mapper.valueToTree(obj), ColumnMetadata.class);
                 metadataList.add(metadata);
             }
         } catch (IOException e) {
-            return null;
+            return new ArrayList<>();
         }
         return metadataList;
     }

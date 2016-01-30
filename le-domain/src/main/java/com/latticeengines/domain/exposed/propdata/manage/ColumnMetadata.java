@@ -169,6 +169,7 @@ public class ColumnMetadata {
     @JsonIgnore
     public void setApprovedUsageList(List<ApprovedUsage> approvedUsages) {
         List<String> tokens = new ArrayList<>();
+        if (approvedUsages == null) { approvedUsages = new ArrayList<>(); }
         for (ApprovedUsage usage : approvedUsages) {
             tokens.add(usage.getName());
         }
@@ -210,6 +211,7 @@ public class ColumnMetadata {
     @JsonProperty("Tags")
     public void setTagList(List<String> tags) {
         List<String> tokens = new ArrayList<>();
+        if (tags == null) { tags = new ArrayList<>(); }
         for (String tag : tags) {
             tokens.add(tag);
         }
@@ -220,19 +222,19 @@ public class ColumnMetadata {
 
     }
 
-    public ColumnMetadata(ExternalColumn extenalColumn) {
-        this.setColumnName(extenalColumn.getDefaultColumnName());
-        this.setDescription(extenalColumn.getDescription());
-        this.setDataType(extenalColumn.getDataType());
-        this.setDisplayName(extenalColumn.getDisplayName());
-        this.setCategory(extenalColumn.getCategory());
-        this.setStatisticalType(extenalColumn.getStatisticalType());
-        this.setFundamentalType(extenalColumn.getFundamentalType());
-        this.setApprovedUsageList(extenalColumn.getApprovedUsageList());
+    public ColumnMetadata(ExternalColumn externalColumn) {
+        this.setColumnName(externalColumn.getDefaultColumnName());
+        this.setDescription(externalColumn.getDescription());
+        this.setDataType(externalColumn.getDataType());
+        this.setDisplayName(externalColumn.getDisplayName());
+        this.setCategory(externalColumn.getCategory());
+        this.setStatisticalType(externalColumn.getStatisticalType());
+        this.setFundamentalType(externalColumn.getFundamentalType());
+        this.setApprovedUsageList(externalColumn.getApprovedUsageList());
         List<String> tags = new ArrayList<String>();
         tags.add("External");
-        tags.addAll(extenalColumn.getTagList());
+        tags.addAll(externalColumn.getTagList());
         this.setTagList(tags);
-        this.setDiscretizationStrategy(extenalColumn.getDiscretizationStrategy());
+        this.setDiscretizationStrategy(externalColumn.getDiscretizationStrategy());
     }
 }

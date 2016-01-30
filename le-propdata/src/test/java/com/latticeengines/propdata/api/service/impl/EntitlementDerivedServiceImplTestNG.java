@@ -35,7 +35,7 @@ public class EntitlementDerivedServiceImplTestNG extends EntitlementServiceImplT
         return entitlementService;
     }
 
-    @BeforeClass(groups = "api.functional")
+    @BeforeClass(groups = "api")
     public void setup() {
         packageName = testEnv + packageName + "Derived";
         contractId = testEnv + contractId + "Derived";

@@ -1,10 +1,7 @@
 package com.latticeengines.propdata.core.datasource.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +24,10 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Qualifier(value = "propDataManage")
     private DataSource manageDataSource;
 
-    private Map<Database, SQLDialect> dialectMap;
-
     private static int roundRobinPos = 0;
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
-
-    @PostConstruct
-    private void postConstruct() {
-        dialectMap = new HashMap<>();
-        dialectMap.put(Database.ManageDB, DataSourceUtils.getSqlDialect(manageDataSource));
-    }
 
     @Override
     public JdbcTemplate getJdbcTemplateFromDbPool(DataSourcePool pool) {
@@ -49,6 +38,13 @@ public class DataSourceServiceImpl implements DataSourceService {
     }
 
     @Override
-    public SQLDialect getSqlDialect(Database db) { return dialectMap.get(db); }
+    public SQLDialect getSqlDialect(Database db) {
+        switch (db) {
+            case ManageDB:
+                return DataSourceUtils.getSqlDialect(manageDataSource);
+            default:
+                return SQLDialect.SQLSERVER;
+        }
+    }
 
 }

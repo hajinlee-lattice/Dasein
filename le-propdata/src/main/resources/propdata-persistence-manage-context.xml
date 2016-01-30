@@ -34,16 +34,5 @@
     <bean id="propDataManageJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="propDataManage" />
 
-    <bean id="sourceColumnDao" class="com.latticeengines.propdata.core.dao.impl.SourceColumnDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
-    </bean>
-
-    <bean id="externalColumnDao" class="com.latticeengines.propdata.core.dao.impl.ExternalColumnDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
-    </bean>
-
-    <bean id="columnMappingDao" class="com.latticeengines.propdata.core.dao.impl.ColumnMappingDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
-    </bean>
 
 </beans>

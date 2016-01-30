@@ -31,22 +31,22 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
     abstract DerivedSource getSource();
     abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
-    @BeforeMethod(groups = "functional.source")
+    @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("FunctionalRefresh");
-        getBaseSourceTestBean().setUpPod("FunctionalRefresh");
+        source = getSource();
+        hdfsPathBuilder.changeHdfsPodId("FunctionalRefresh" + source.getSourceName());
+        getBaseSourceTestBean().setUpPod("FunctionalRefresh" + source.getSourceName());
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
-        source = getSource();
         baseSource = (BulkSource) source.getBaseSources()[0];
     }
 
-    @AfterMethod(groups = "functional.source")
+    @AfterMethod(groups = "collection")
     public void tearDown() throws Exception {
         getBaseSourceTestBean().tearDown();
     }
 
-    @Test(groups = "functional.source")
+    @Test(groups = "collection")
     public void testWholeProgress() {
         ArchiveProgress archiveProgress;
         RefreshProgress progress;
