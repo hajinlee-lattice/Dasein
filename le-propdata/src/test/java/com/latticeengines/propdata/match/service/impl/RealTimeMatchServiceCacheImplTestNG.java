@@ -29,7 +29,6 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
     @Test(groups = "functional")
     public void testInputValidationForRealtime() {
         MatchInput input = new MatchInput();
-        input.setMatchType(MatchInput.MatchType.REALTIME);
         boolean failed = false;
         try {
             matchService.validateMatchInput(input);
@@ -37,6 +36,16 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
             failed = true;
         }
         Assert.assertTrue(failed, "Should failed on missing tenant.");
+
+        failed = false;
+        try {
+            matchService.validateMatchInput(input);
+        } catch (Exception e) {
+            failed = true;
+        }
+        Assert.assertTrue(failed, "Should failed on missing match type.");
+
+        input.setMatchType(MatchInput.MatchType.RealTime);
 
         failed = false;
         input.setTenant(new Tenant("PD_Test"));

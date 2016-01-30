@@ -35,7 +35,7 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
 
     static MatchInput prepareSimpleMatchInput(Object[][] data) {
         MatchInput input = new MatchInput();
-        input.setMatchType(MatchInput.MatchType.REALTIME);
+        input.setMatchType(MatchInput.MatchType.RealTime);
         input.setTenant(new Tenant("PD_Test"));
         input.setKeys(Arrays.asList(MatchKey.Domain, MatchKey.Name));
         List<List<Object>> mockData = new ArrayList<>();

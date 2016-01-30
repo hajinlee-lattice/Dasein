@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchInput {
 
-    private MatchType matchType = MatchType.BULK;
+    private MatchType matchType;
     private List<MatchKey> keys;
     private List<List<Object>> data;
     private Tenant tenant;
@@ -93,5 +93,5 @@ public class MatchInput {
         this.customSelection = customSelection;
     }
 
-    public enum MatchType { REALTIME, BULK }
+    public enum MatchType { RealTime, Bulk }
 }

@@ -269,7 +269,7 @@ public enum LedpCode {
     LEDP_25004("Match client {0} is not available"), //
     LEDP_25005("Column selection type {0} is not supported"), //
     LEDP_25006("Failed to get metadata for predefined column selection [{0}]"), //
-    LEDP_25007("Real time match failed."), //
+    LEDP_25007("Propdata match failed."), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

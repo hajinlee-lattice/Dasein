@@ -38,15 +38,20 @@ public class MatchResource implements MatchInterface {
 
     )
     public MatchOutput match(@RequestBody MatchInput input,
-                             @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
-        if (MatchInput.MatchType.REALTIME.equals(input.getMatchType())) {
-            try {
-                return realTimeMatchService.match(input, returnUnmatched);
-            } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_25007, e);
+                             @RequestParam(value = "unmatched",
+                                     required = false,
+                                     defaultValue = "true") Boolean returnUnmatched) {
+        try {
+            if (input.getMatchType() == null) {
+                throw new IllegalArgumentException("Must specify match type.");
             }
-        } else {
-            throw new UnsupportedOperationException("Match type " + MatchInput.MatchType.BULK + " is not supported.");
+            if (MatchInput.MatchType.RealTime.equals(input.getMatchType())) {
+                return realTimeMatchService.match(input, returnUnmatched);
+            } else {
+                throw new UnsupportedOperationException("Match type " + MatchInput.MatchType.Bulk + " is not supported.");
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25007, e);
         }
     }
 
