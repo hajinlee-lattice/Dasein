@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.propdata.manage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -12,6 +11,7 @@ import java.util.TimeZone;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.Period;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -97,11 +97,12 @@ public class MatchStatistics {
     private void setReadableTimeElapsed(String timeElapsedInMsec) {
         try {
             String[] token = timeElapsedInMsec.split(":");
-            String javaFormat = "PT" + token[0] + "H" + token[1] + "M" + token[2] + "S";
-            this.timeElapsedInMsec = Duration.parse(javaFormat).toMillis() + Long.valueOf(token[3]);
+            Period period = new Period(Integer.valueOf(token[0]), Integer.valueOf(token[1]),
+                    Integer.valueOf(token[2]), Integer.valueOf(token[3]));
+            this.timeElapsedInMsec = period.toStandardDuration().getMillis();
         } catch (Exception e) {
             log.error("Cannot parse string " + timeElapsedInMsec + " into a java duration. " +
-                    "It has to be in the format of " + durationFormat);
+                    "It has to be in the format of " + durationFormat, e);
             this.timeElapsedInMsec = null;
         }
 
