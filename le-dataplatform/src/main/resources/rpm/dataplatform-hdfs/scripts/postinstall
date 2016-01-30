@@ -22,12 +22,12 @@ rm /tmp/app/playmaker/evmodel/*.pyc
 rm /tmp/app/playmaker/evmodel/*.pyo
 rm /tmp/datascientist/*.pyc
 rm /tmp/datascientist/*.pyo
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/$VERSION/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/$VERSION/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/$VERSION/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/$VERSION/dataplatform'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/$VERSION/playmaker'
-su -l yarn -c 'hdfs dfs -copyFromLocal /tmp/datascientist/* /datascientist'
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/dataplatform.properties /app/$VERSION/dataplatform"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/hadoop-metrics2.properties /app/$VERSION/dataplatform"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/$VERSION/dataplatform"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/$VERSION/dataplatform"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/$VERSION/playmaker"
+su -l yarn -c "hdfs dfs -copyFromLocal /tmp/datascientist/* /datascientist"
 for microservice in 'dataflowapi' 'eai' 'workflowapi'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$VERSION/$microservice/lib"
