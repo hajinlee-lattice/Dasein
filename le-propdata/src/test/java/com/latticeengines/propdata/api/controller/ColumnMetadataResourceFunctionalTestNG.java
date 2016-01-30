@@ -18,7 +18,7 @@ public class ColumnMetadataResourceFunctionalTestNG extends PropDataApiFunctiona
     private static final String PROPDATA_METADATA_PREDEFINED = "propdata/metadata/predefined";
 
     @SuppressWarnings("unchecked")
-    @Test(groups = { "functional.api" }, enabled = true)
+    @Test(groups = { "api" }, enabled = true)
     public void testPredefined() {
         for (ColumnSelection.Predefined predefined: ColumnSelection.Predefined.values()) {
             String url = getRestAPIHostPort() + PROPDATA_METADATA_PREDEFINED + "/" + predefined.name();

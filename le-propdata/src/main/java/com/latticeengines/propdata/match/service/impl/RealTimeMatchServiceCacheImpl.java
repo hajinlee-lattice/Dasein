@@ -125,13 +125,17 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
 
         validateKeys(input.getKeys());
 
-        if (input.getData() == null || input.getData().isEmpty()) {
-            throw new IllegalArgumentException("Empty input data.");
-        }
+        if (MatchInput.MatchType.REALTIME.equals(input.getMatchType())) {
+            if (input.getData() == null || input.getData().isEmpty()) {
+                throw new IllegalArgumentException("Empty input data.");
+            }
 
-        if (input.getData().size() > zkConfigurationService.maxRealTimeInput()) {
-            throw new IllegalArgumentException("Too many input data, maximum rows = "
-                    + zkConfigurationService.maxRealTimeInput());
+            if (input.getData().size() > zkConfigurationService.maxRealTimeInput()) {
+                throw new IllegalArgumentException("Too many input data, maximum rows = "
+                        + zkConfigurationService.maxRealTimeInput());
+            }
+        } else {
+            throw new UnsupportedOperationException("Match type " + MatchInput.MatchType.BULK + " is not supported.");
         }
 
         log.info("Finished validating match input for " + input.getData().size()

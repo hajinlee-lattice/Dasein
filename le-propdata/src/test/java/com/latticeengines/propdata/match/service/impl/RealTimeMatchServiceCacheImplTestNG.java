@@ -27,9 +27,9 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
     private RealTimeMatchServiceCacheImpl matchService;
 
     @Test(groups = "functional")
-    public void testInputValidation() {
+    public void testInputValidationForRealtime() {
         MatchInput input = new MatchInput();
-
+        input.setMatchType(MatchInput.MatchType.REALTIME);
         boolean failed = false;
         try {
             matchService.validateMatchInput(input);

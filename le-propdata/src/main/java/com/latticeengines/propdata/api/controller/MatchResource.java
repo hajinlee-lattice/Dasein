@@ -13,20 +13,21 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
 import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
+import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "match", description = "REST resource for propdata match")
+@Api(value = "match", description = "REST resource for propdata matches")
 @RestController
-@RequestMapping("/match")
-public class MatchResource {
+@RequestMapping("/matches")
+public class MatchResource implements MatchInterface {
 
     @Autowired
     @Qualifier(value = "realTimeMatchServiceCache")
     private RealTimeMatchService realTimeMatchService;
 
-    @RequestMapping(value = "/realtime", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. " +
             "Each input row contains one or more match keys. " +
@@ -36,12 +37,16 @@ public class MatchResource {
             "The url flag \"unmatched\" toggles whether to return the unmatched records."
 
     )
-    public MatchOutput matchSync(@RequestBody MatchInput input,
-            @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
-        try {
-            return realTimeMatchService.match(input, returnUnmatched);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, e);
+    public MatchOutput match(@RequestBody MatchInput input,
+                             @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
+        if (MatchInput.MatchType.REALTIME.equals(input.getMatchType())) {
+            try {
+                return realTimeMatchService.match(input, returnUnmatched);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_25007, e);
+            }
+        } else {
+            throw new UnsupportedOperationException("Match type " + MatchInput.MatchType.BULK + " is not supported.");
         }
     }
 
