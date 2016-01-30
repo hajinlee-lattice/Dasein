@@ -95,7 +95,7 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
             uniqueDomains.add(domain);
         }
 
-        MatchContext context = matchService.prepare(input, true, true);
+        MatchContext context = matchService.prepare(input, true);
         Assert.assertEquals(context.getStatus(), MatchStatus.NEW);
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 

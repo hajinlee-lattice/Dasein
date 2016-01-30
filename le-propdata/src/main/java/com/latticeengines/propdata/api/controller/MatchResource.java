@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,14 +29,17 @@ public class MatchResource {
     @RequestMapping(value = "/realtime", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. " +
-            "Each input row contains one or many match keys. " +
+            "Each input row contains one or more match keys. " +
             "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. " +
             "Domain can be anything that can be parsed to a domain, such as website, email, etc. " +
-            "When domain is not provided, Name, State, Country must be provided. Country is default to USA."
+            "When domain is not provided, Name, State, Country must be provided. Country is default to USA. " +
+            "The url flag \"unmatched\" toggles whether to return the unmatched records."
+
     )
-    public MatchOutput matchSync(@RequestBody MatchInput input) {
+    public MatchOutput matchSync(@RequestBody MatchInput input,
+            @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
         try {
-            return realTimeMatchService.match(input, true, true, true);
+            return realTimeMatchService.match(input, returnUnmatched);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);
         }

@@ -4,5 +4,5 @@ import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
 import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
 
 public interface RealTimeMatchService {
-    MatchOutput match(MatchInput input, boolean returnMetadata, boolean returnStatistics, boolean returnUnmatched);
+    MatchOutput match(MatchInput input, boolean returnUnmatched);
 }

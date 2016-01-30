@@ -59,11 +59,10 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
-    public MatchOutput match(MatchInput input, boolean returnMetadata,
-                             boolean returnStatistics, boolean returnUnmatched) {
+    public MatchOutput match(MatchInput input, boolean returnUnmatched) {
         Long startTime = System.currentTimeMillis();
         validateMatchInput(input);
-        MatchContext matchContext = prepare(input, returnStatistics, returnUnmatched);
+        MatchContext matchContext = prepare(input, returnUnmatched);
 
         matchContext.setStatus(MatchStatus.FETCHING);
         matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(ColumnSelection.Predefined.Model));
@@ -85,28 +84,24 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
 
         matchContext.setStatus(MatchStatus.PROCESSING);
         Long beforeProcessing = System.currentTimeMillis();
-        matchContext = parseResult(matchContext, MODEL, results, returnUnmatched, returnStatistics);
+        matchContext = parseResult(matchContext, MODEL, results, returnUnmatched);
 
-        if (returnMetadata) {
-            List<ColumnMetadata> allFields =
-                    columnMetadataService.fromPredefinedSelection(ColumnSelection.Predefined.Model);
-            List<ColumnMetadata> filtered = new ArrayList<>();
-            Set<String> columnSet = new HashSet<>(targetColumns);
-            for (ColumnMetadata field: allFields) {
-                if (columnSet.contains(field.getColumnName())) {
-                    filtered.add(field);
-                }
+        List<ColumnMetadata> allFields =
+                columnMetadataService.fromPredefinedSelection(ColumnSelection.Predefined.Model);
+        List<ColumnMetadata> filtered = new ArrayList<>();
+        Set<String> columnSet = new HashSet<>(targetColumns);
+        for (ColumnMetadata field: allFields) {
+            if (columnSet.contains(field.getColumnName())) {
+                filtered.add(field);
             }
-            matchContext.getOutput().setMetadata(filtered);
         }
+        matchContext.getOutput().setMetadata(filtered);
 
-        if (returnStatistics) {
-            Calendar calendar = GregorianCalendar.getInstance();
-            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-            calendar.setTime(new Date());
-            matchContext.getOutput().getStatistics().setResultGeneratedAt(calendar.getTime());
-            matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
-        }
+        Calendar calendar = GregorianCalendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.setTime(new Date());
+        matchContext.getOutput().getStatistics().setResultGeneratedAt(calendar.getTime());
+        matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
 
         log.info("Processed " + results.size() + " results into MatchOutput. Duration="
                 + (System.currentTimeMillis() - beforeProcessing));
@@ -161,7 +156,7 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
     }
 
     @VisibleForTesting
-    MatchContext prepare(MatchInput input, boolean returnStatistics, boolean returnUnmatched) {
+    MatchContext prepare(MatchInput input, boolean returnUnmatched) {
         Long startTime = System.currentTimeMillis();
 
         MatchContext context = new MatchContext();
@@ -169,11 +164,9 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
         MatchOutput output = new MatchOutput();
         context.setStatus(MatchStatus.NEW);
 
-        if (returnStatistics) {
-            MatchStatistics statistics = new MatchStatistics();
-            statistics.setRowsRequested(input.getData().size());
-            output.setStatistics(statistics);
-        }
+        MatchStatistics statistics = new MatchStatistics();
+        statistics.setRowsRequested(input.getData().size());
+        output.setStatistics(statistics);
 
         List<OutputRecord> records = new ArrayList<>();
         Set<String> domainSet = new HashSet<>();
@@ -223,7 +216,7 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
         context.setDomains(domainSet);
         context.setOutput(output);
 
-        log.info("Finished preparing match context for " + output.getStatistics().getRowsRequested()
+        log.info("Finished preparing match context for " + input.getData().size()
                 + " rows. Duration=" + (System.currentTimeMillis() - startTime));
         return context;
     }
@@ -235,7 +228,7 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
     }
 
     private MatchContext parseResult(MatchContext matchContext, String sourceName, List<Map<String, Object>> results,
-                                     boolean returnUnmatched, boolean returnStatistics) {
+                                     boolean returnUnmatched) {
         List<String> targetColumns = matchContext.getSourceColumnsMap().get(sourceName);
         Integer[] columnMatchCount = new Integer[targetColumns.size()];
 
@@ -250,17 +243,16 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
                 List<Object> output = domainMap.get(record.getMatchedDomain());
                 record.setOutput(output);
 
-                if (returnStatistics) {
-                    matched++;
-                    for (int i = 0; i < output.size(); i++) {
-                        if (columnMatchCount[i] == null) {
-                            columnMatchCount[i] = 0;
-                        }
-                        if (output.get(i) != null) {
-                            columnMatchCount[i]++;
-                        }
+                matched++;
+                for (int i = 0; i < output.size(); i++) {
+                    if (columnMatchCount[i] == null) {
+                        columnMatchCount[i] = 0;
+                    }
+                    if (output.get(i) != null) {
+                        columnMatchCount[i]++;
                     }
                 }
+
                 outputRecords.add(record);
             } else if (returnUnmatched) {
                 if (StringUtils.isEmpty(record.getErrorMessage())) {
