@@ -11,10 +11,11 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;
 
-public class DataSourceUtilsUnitTestNG {
+public class DataSourceUtilsTestNG extends PropDataCoreFunctionalTestNGBase {
 
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testGetDataSource() throws SQLException, IOException {
         InputStream is =
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/test_source_dbs.json");
