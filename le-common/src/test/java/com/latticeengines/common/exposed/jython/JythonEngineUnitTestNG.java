@@ -47,7 +47,7 @@ public class JythonEngineUnitTestNG {
     
     @Test(groups = "unit")
     public void invokeAnyMethod() {
-        Object result = engine.invoke("com.latticeengines.common.exposed.jython.model", "make_float", "tofloat", new Object[] { "123.45" });
+        Object result = new JythonEngine(null).invoke("com.latticeengines.common.exposed.jython.model", "make_float", "tofloat", new Object[] { "123.45" });
         assertTrue(result instanceof Double);
         assertEquals((Double) result, 123.45);
     }

@@ -21,6 +21,10 @@ public class JythonEngine {
     private Map<String, String> functionScriptMap = new HashMap<>();
     
     public JythonEngine(String modelPath) {
+        if (modelPath == null) {
+            interpreter = new PythonInterpreter();
+            return;
+        }
         PySystemState pystate = new PySystemState();
         pystate.path.add(modelPath);
         interpreter = new PythonInterpreter(new PyDictionary(), pystate);
