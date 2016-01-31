@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.jython;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ public class JythonEngine {
         return interpreter;
     }
     
-    public Object invoke(String packageName, String module, String function, Object[] params) {
+    public Object invoke(String packageName, String module, String function, Object[] params, Class<?> returnType) {
         String script = functionScriptMap.get(packageName + "." + module + "." + function);
         if (script == null) {
             List<String> l = new ArrayList<>();
@@ -58,8 +59,19 @@ public class JythonEngine {
         } else if (x instanceof PyString) {
             return x.toString();
         } else if (x instanceof PyInteger) {
+            if (returnType == Long.class) {
+                return (long) ((PyInteger) x).getValue();
+            }
             return ((PyInteger) x).getValue();
         } else if (x instanceof PyLong) {
+            Object value = ((PyLong) x).getValue();
+            if (value instanceof BigInteger) {
+                if (returnType == Long.class) {
+                    return ((BigInteger) value).longValue();
+                } else if (returnType == Integer.class) {
+                    return ((BigInteger) value).intValue();
+                }
+            }
             return ((PyLong) x).getValue().longValue();
         }
         return null;
