@@ -12,6 +12,8 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.Period;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,7 +34,14 @@ public class MatchStatistics {
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-    private static final String durationFormat = "HH:mm:ss:SSS";
+    private static final String durationFormat = "HH:mm:ss.SSS";
+    private static final PeriodFormatter periodFormatter =
+            new PeriodFormatterBuilder()
+                    .appendHours().appendLiteral(":")
+                    .appendMinutes().appendLiteral(":")
+                    .appendSeconds().appendLiteral(".")
+                    .appendMillis3Digit()
+                    .toFormatter();
 
     static  {
         formatter.setCalendar(calendar);
@@ -96,10 +105,8 @@ public class MatchStatistics {
     @JsonProperty("TimeElapsed")
     private void setReadableTimeElapsed(String timeElapsedInMsec) {
         try {
-            String[] token = timeElapsedInMsec.split(":");
-            Period period = new Period(Integer.valueOf(token[0]), Integer.valueOf(token[1]),
-                    Integer.valueOf(token[2]), Integer.valueOf(token[3]));
-            this.timeElapsedInMsec = period.toStandardDuration().getMillis();
+            this.timeElapsedInMsec = Period.parse(timeElapsedInMsec, periodFormatter)
+                    .toStandardDuration().getMillis();
         } catch (Exception e) {
             log.error("Cannot parse string " + timeElapsedInMsec + " into a java duration. " +
                     "It has to be in the format of " + durationFormat, e);

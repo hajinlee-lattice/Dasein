@@ -10,20 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchOutput {
 
-    List<String> columns;
     List<OutputRecord> result;
     List<ColumnMetadata> metadata;
     MatchStatistics statistics;
-
-    @JsonProperty("Columns")
-    public List<String> getColumns() {
-        return columns;
-    }
-
-    @JsonProperty("Columns")
-    public void setColumns(List<String> columns) {
-        this.columns = columns;
-    }
 
     @JsonProperty("Result")
     public List<OutputRecord> getResult() {
