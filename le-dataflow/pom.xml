@@ -187,6 +187,11 @@
             <artifactId>le-scheduler</artifactId>
             <version>${le.scheduler.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>11.0.2</version>
+        </dependency>
     </dependencies>
 
 </project>

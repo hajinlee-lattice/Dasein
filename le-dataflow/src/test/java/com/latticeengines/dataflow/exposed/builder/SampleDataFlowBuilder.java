@@ -11,6 +11,11 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
 @Component("sampleDataFlowBuilder")
 public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
+    
+    @Override
+    public boolean isLocal() {
+        return false;
+    }
 
     /**
      * SELECT Domain, MaxRevenue, TotalEmployees FROM ( SELECT Domain,
@@ -49,10 +54,11 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         // TotalEmployees, HashCode(Domain) DomainHashCode
         // FROM T GROUP BY Domain
         String domainConverted = addJythonFunction(checkpoint, //
-                "com/latticeengines/domain/exposed/transforms/python/encoder.py", //
-                "transform", //
+                "com.latticeengines.dataflow.exposed.builder", //
+                "encoder", //
+                "encode", //
                 new FieldList("Domain"), //
-                new FieldMetadata("DomainHashCode", Integer.class));
+                new FieldMetadata("DomainHashCode", Long.class));
 
         return domainConverted;
     }

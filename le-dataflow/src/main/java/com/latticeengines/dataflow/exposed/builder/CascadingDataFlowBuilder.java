@@ -22,34 +22,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
 
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.BooleanType;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.Table;
-
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
@@ -93,6 +65,34 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
+
+import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.BooleanType;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -270,10 +270,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addRowId(identifier, targetFieldName), builder);
         }
 
-        public Node addJythonFunction(String scriptName, String functionName, FieldList fieldsToApply,
+        public Node addJythonFunction(String packageName, String moduleName, String functionName, FieldList fieldsToApply,
                 FieldMetadata targetField) {
             return new Node(
-                    builder.addJythonFunction(identifier, scriptName, functionName, fieldsToApply, targetField),
+                    builder.addJythonFunction(identifier, packageName, moduleName, functionName, fieldsToApply, targetField),
                     builder);
         }
 
@@ -1230,18 +1230,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(each, newFm);
     }
 
-    protected String addJythonFunction(String prior, String scriptName, String functionName, FieldList fieldsToApply,
+    protected String addJythonFunction(String prior, String packageName, String moduleName, String functionName, FieldList fieldsToApply,
             FieldMetadata targetField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         return addFunction(prior, //
-                new JythonFunction(scriptName, //
+                new JythonFunction(packageName, //
+                        moduleName, //
                         functionName, //
-                        targetField.getJavaType(), //
                         convertToFields(fieldsToApply.getFields()), //
-                        convertToFields(targetField.getFieldName())), //
+                        convertToFields(targetField.getFieldName()), //
+                        targetField.getJavaType()), //
                 fieldsToApply, //
                 targetField, null);
     }
