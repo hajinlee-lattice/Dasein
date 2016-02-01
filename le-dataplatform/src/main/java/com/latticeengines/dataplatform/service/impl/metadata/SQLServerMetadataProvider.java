@@ -39,7 +39,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String getDriverName() {
-        return "Microsoft JDBC Driver 6.0 for SQL Server";
+        return "Microsoft JDBC Driver 4.0 for SQL Server";
     }
 
     @Override
