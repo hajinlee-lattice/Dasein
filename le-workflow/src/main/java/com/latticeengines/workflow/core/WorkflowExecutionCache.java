@@ -3,6 +3,7 @@ package com.latticeengines.workflow.core;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,8 +29,11 @@ import com.google.common.cache.CacheBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 
@@ -52,10 +57,8 @@ public class WorkflowExecutionCache {
 
     @PostConstruct
     public void init() {
-         cache = CacheBuilder.newBuilder()
-                     .maximumSize(MAX_CACHE_SIZE)
-                     .build();
-         executorService = Executors.newFixedThreadPool(Integer.parseInt(numJobThreads));
+        cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
+        executorService = Executors.newFixedThreadPool(Integer.parseInt(numJobThreads));
     }
 
     public List<Job> getJobs(List<WorkflowExecutionId> workflowIds) throws Exception {
@@ -90,6 +93,9 @@ public class WorkflowExecutionCache {
         job.setStartTimestamp(workflowStatus.getStartTime());
         job.setJobType(jobInstance.getJobName());
         job.setSteps(getJobSteps(jobExecution));
+        job.setReports(getReports(jobExecution));
+        job.setSourceFiles(getSourceFiles(jobExecution));
+        job.setOutputs(getOutputs(jobExecution));
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());
             cache.put(job.getId(), job);
@@ -132,6 +138,24 @@ public class WorkflowExecutionCache {
         }
 
         return steps;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Report> getReports(JobExecution jobExecution) {
+        ExecutionContext context = jobExecution.getExecutionContext();
+        return (List<Report>) context.get(WorkflowContextConstants.REPORTS);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<SourceFile> getSourceFiles(JobExecution jobExecution) {
+        ExecutionContext context = jobExecution.getExecutionContext();
+        return (List<SourceFile>) context.get(WorkflowContextConstants.SOURCE_FILES);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, String> getOutputs(JobExecution jobExecution) {
+        ExecutionContext context = jobExecution.getExecutionContext();
+        return (Map<String, String>) context.get(WorkflowContextConstants.OUTPUTS);
     }
 
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {

@@ -1,9 +1,9 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.workflow.exposed.entitymgr;
 
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.workflow.Report;
 
 public interface ReportEntityMgr {
 

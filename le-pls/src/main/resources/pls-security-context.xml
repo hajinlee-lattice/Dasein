@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:context="http://www.springframework.org/schema/context"
-    xmlns:security="http://www.springframework.org/schema/security"
-    xsi:schemaLocation="
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="
   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
     <import resource="classpath:proxy-context.xml"/>
     <import resource="classpath:db-context.xml"/>
-    <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
+    <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
     <import resource="classpath:security-email-settings-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
-    <import resource="classpath:liaison-context.xml" />
+    <import resource="classpath:liaison-context.xml"/>
+    <import resource="classpath:workflow-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.pls">
-        <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig" />
+        <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig"/>
     </context:component-scan>
 
     <security:http use-expressions="true"
@@ -27,56 +28,56 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/targetmarkets/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/quotas/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/prospectdiscoveryconfigs/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/jobs/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/datafiles/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/credentials/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
     <security:http use-expressions="true"
                    pattern="/pls/config/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -84,7 +85,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -92,7 +93,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -100,7 +101,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -108,7 +109,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -116,7 +117,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -124,7 +125,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -132,7 +133,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
     <security:http use-expressions="true"
@@ -140,7 +141,7 @@
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">
-        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
     </security:http>
 
 </beans>

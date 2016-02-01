@@ -1,10 +1,10 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -17,16 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
 
 public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -42,11 +41,6 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
         setUpMarketoEloquaTestEnvironment();
-    }
-
-    @BeforeMethod
-    public void beforeMethod() {
-        sourceFileEntityMgr.deleteAll();
     }
 
     @SuppressWarnings("unchecked")
@@ -83,9 +77,16 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
 
-        SourceFile sourceFile = sourceFileEntityMgr.findAll().get(0);
-        assertEquals(sourceFile.getPath(), path);
-        assertEquals(sourceFile.getName(), "file1.csv");
+        List<SourceFile> files = sourceFileEntityMgr.findAll();
+        boolean found = false;
+        for (SourceFile file : files) {
+            if (file.getPath().equals(path)) {
+                assertEquals(file.getName(), "file1.csv");
+                found = true;
+            }
+        }
+
+        assertTrue(found);
     }
 
     @Test(groups = "functional")
@@ -98,9 +99,17 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
 
-        SourceFile sourceFile = sourceFileEntityMgr.findAll().get(0);
-        assertEquals(sourceFile.getPath(), path);
-        assertNotNull(sourceFile.getName());
+        List<SourceFile> files = sourceFileEntityMgr.findAll();
+        boolean found = false;
+        for (SourceFile file : files) {
+            if (file.getPath().equals(path)) {
+                String[] split = path.split("/");
+                assertEquals(file.getName(), split[split.length - 1]);
+                found = true;
+            }
+        }
+
+        assertTrue(found);
     }
 
     @Test(groups = "functional")

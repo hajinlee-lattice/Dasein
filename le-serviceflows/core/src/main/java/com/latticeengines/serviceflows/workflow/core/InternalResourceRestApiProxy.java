@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
@@ -71,6 +71,16 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void registerReport(String targetMarketName, Report report, String tenantId) {
         try {
             String url = constructUrl("pls/internal/targetmarkets", targetMarketName, "reports", tenantId);
+            log.info(String.format("Posting to %s", url));
+            restTemplate.postForObject(url, report, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("registerReport: Remote call failure", e);
+        }
+    }
+
+    public void registerReport(Report report, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/reports", tenantId);
             log.info(String.format("Posting to %s", url));
             restTemplate.postForObject(url, report, Void.class);
         } catch (Exception e) {

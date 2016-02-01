@@ -2,8 +2,8 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 

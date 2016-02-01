@@ -16,14 +16,14 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("targetMarketService")
 public class TargetMarketServiceImpl implements TargetMarketService {

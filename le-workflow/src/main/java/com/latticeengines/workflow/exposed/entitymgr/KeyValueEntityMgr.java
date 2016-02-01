@@ -1,9 +1,9 @@
-package com.latticeengines.pls.entitymanager;
+package com.latticeengines.workflow.exposed.entitymgr;
 
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
-import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 
 public interface KeyValueEntityMgr extends BaseEntityMgr<KeyValue> {

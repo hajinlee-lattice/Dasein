@@ -12,12 +12,12 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {

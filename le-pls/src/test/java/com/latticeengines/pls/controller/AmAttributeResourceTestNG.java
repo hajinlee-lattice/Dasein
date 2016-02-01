@@ -21,9 +21,9 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {

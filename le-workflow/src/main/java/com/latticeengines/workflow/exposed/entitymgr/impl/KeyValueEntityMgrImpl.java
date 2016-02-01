@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.workflow.exposed.entitymgr.impl;
 
 import java.util.List;
 
@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.pls.dao.KeyValueDao;
-import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.workflow.exposed.dao.KeyValueDao;
+import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
 
 @Component("keyValueEntityMgr")
 public class KeyValueEntityMgrImpl extends BaseEntityMgrImpl<KeyValue> implements KeyValueEntityMgr {

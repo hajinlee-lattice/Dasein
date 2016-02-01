@@ -24,10 +24,10 @@ import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.util.ModelIdUtils;
 
 @Component("modelSummaryParser")
@@ -38,7 +38,7 @@ public class ModelSummaryParser {
     public static final String NAME = "Name";
 
     public static final String MODEL_SUMMARY_PREDICTORS = "Predictors";
-    
+
     public static final String MODEL_SUMMARY_SEGMENTATIONS = "Segmentations";
 
     public static final String DEFAULT_PREDICTOR_NAME = "DefaultPredictorName";
@@ -166,12 +166,12 @@ public class ModelSummaryParser {
     @SuppressWarnings("unchecked")
     private void setLiftStatistics(JsonNode json, ModelSummary summary) {
         List<Map<String, ?>> segmentations = JsonUtils.getOrDefault(json, List.class, new ArrayList<>());
-        
+
         if (segmentations.size() == 0) {
             return;
         }
         List<Map<String, Integer>> segments = (List<Map<String, Integer>>) segmentations.get(0).get("Segments");
-        
+
         long totalRowCount = 0;
         long totalConvertedCount = 0;
         int i = 1;
@@ -182,18 +182,18 @@ public class ModelSummaryParser {
         for (Map<String, Integer> segment : segments) {
             int rowCount = segment.get("Count");
             int convertedCount = segment.get("Converted");
-            
+
             totalRowCount += rowCount;
             totalConvertedCount += convertedCount;
-            
+
             if (i == 10) {
-                top10PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+                top10PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
             }
             if (i == 20) {
-                top20PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+                top20PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
             }
             if (i == 30) {
-                top30PctLift = ((double) totalConvertedCount/(double) totalRowCount)/averageProbability;
+                top30PctLift = ((double) totalConvertedCount / (double) totalRowCount) / averageProbability;
             }
             i++;
         }

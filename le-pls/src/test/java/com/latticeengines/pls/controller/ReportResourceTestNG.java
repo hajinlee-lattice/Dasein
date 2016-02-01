@@ -12,9 +12,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class ReportResourceTestNG extends PlsFunctionalTestNGBase {

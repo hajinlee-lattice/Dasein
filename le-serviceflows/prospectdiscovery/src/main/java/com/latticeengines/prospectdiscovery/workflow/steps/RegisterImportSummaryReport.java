@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.MathUtils;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.prospectdiscovery.dataflow.CreateImportSummary;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -24,7 +24,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
         registerImportSummary.setRestTemplate(restTemplate);
         registerImportSummary.execute("CreateImportSummary", ReportPurpose.IMPORT_SUMMARY, null);
     }
-    
+
     public RegisterReport getReportRegistrator() {
         return registerImportSummary;
     }
@@ -38,10 +38,8 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
             // accounts
             ObjectNode accounts = json.putObject("accounts");
             accounts.put("total", (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS));
-            accounts.put("with_contacts",
-                    (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_CONTACTS));
-            accounts.put("with_opportunities",
-                    (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_OPPORTUNITIES));
+            accounts.put("with_contacts", (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_CONTACTS));
+            accounts.put("with_opportunities", (Long) stats.get(CreateImportSummary.TOTAL_ACCOUNTS_WITH_OPPORTUNITIES));
             accounts.put("unique", (Long) stats.get(CreateImportSummary.TOTAL_UNIQUE_ACCOUNTS));
 
             long eventTableMatched = ((Long) stats.get(CreateImportSummary.TOTAL_MATCHED_ACCOUNTS));
@@ -64,8 +62,7 @@ public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketSt
             // opportunities
             leads.put("total", (Long) stats.get(CreateImportSummary.TOTAL_OPPORTUNITIES));
             leads.put("closed", (Long) stats.get(CreateImportSummary.TOTAL_CLOSED_OPPORTUNITIES));
-            leads.put("closed_won",
-                    (Long) stats.get(CreateImportSummary.TOTAL_CLOSED_WON_OPPORTUNITIES));
+            leads.put("closed_won", (Long) stats.get(CreateImportSummary.TOTAL_CLOSED_WON_OPPORTUNITIES));
 
             // date range
             List<Long> mins = new ArrayList<>();

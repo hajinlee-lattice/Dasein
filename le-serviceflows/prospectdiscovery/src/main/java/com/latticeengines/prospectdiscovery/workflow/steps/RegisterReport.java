@@ -11,26 +11,26 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 public abstract class RegisterReport {
     private Configuration yarnConfiguration = new Configuration();
     private TargetMarketStepConfiguration configuration;
     private RestTemplate restTemplate;
-    
+
     public abstract ObjectNode buildJson(List<GenericRecord> records, Object[] params);
 
     public void setConfiguration(TargetMarketStepConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
-    
+
     public void execute(String reportName, ReportPurpose purpose, Object[] params) {
         List<GenericRecord> records = retrieveStats(reportName);
         ObjectNode json = buildJson(records, params);

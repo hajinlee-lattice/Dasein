@@ -10,14 +10,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.domain.exposed.pls.ReportPurpose;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.ReportService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.service.ReportService;
 
 public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -34,6 +35,9 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantService tenantService;
 
+    @Autowired
+    private TargetMarketEntityMgr targetMarketEntityMgr;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         deleteReports();
@@ -45,6 +49,11 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void deleteReports() {
+        setupSecurityContext(tenantService.findByTenantId(TENANT1));
+        targetMarketEntityMgr.deleteAll();
+        setupSecurityContext(tenantService.findByTenantId(TENANT2));
+        targetMarketEntityMgr.deleteAll();
+
         List<Report> reports = reportEntityMgr.getAll();
 
         for (Report report : reports) {

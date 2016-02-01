@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.workflow;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.Filter;

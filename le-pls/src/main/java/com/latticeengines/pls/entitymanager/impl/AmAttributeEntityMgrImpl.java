@@ -17,14 +17,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.AmAttribute;
-import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.dao.AmAttributeDao;
 import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("amAttributeEntityMgr")
-public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> implements
-        AmAttributeEntityMgr {
+public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> implements AmAttributeEntityMgr {
 
     private static final Log log = LogFactory.getLog(AmAttributeEntityMgrImpl.class);
 
@@ -44,8 +43,7 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AmAttribute> findAttributes(String key, String parentKey, String parentValue,
-            boolean populate) {
+    public List<AmAttribute> findAttributes(String key, String parentKey, String parentValue, boolean populate) {
         List<AmAttribute> attrs = amAttributeDao.findAttributes(key, parentKey, parentValue);
         if (populate == true) {
             collectProperties(attrs, key, parentKey, parentValue);
@@ -53,8 +51,7 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         return attrs;
     }
 
-    private void collectProperties(List<AmAttribute> attrs, String key, String parentKey,
-            String parentValue) {
+    private void collectProperties(List<AmAttribute> attrs, String key, String parentKey, String parentValue) {
         Map<String, AmAttribute> attrMap = new HashMap<String, AmAttribute>();
         for (AmAttribute attr : attrs) {
             attr.setProperty("CompanyCount", "0");
@@ -76,8 +73,7 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
     }
 
     @SuppressWarnings("rawtypes")
-    private void collectCompanyCount(Map<String, AmAttribute> attrMap, String key,
-            String parentKey, String parentValue) {
+    private void collectCompanyCount(Map<String, AmAttribute> attrMap, String key, String parentKey, String parentValue) {
         List<List> list = amAttributeDao.findCompanyCount(key, parentKey, parentValue);
         for (int i = 0; i < list.size(); i++) {
             List property = (List) list.get(i);
@@ -87,8 +83,8 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
     }
 
     @SuppressWarnings("rawtypes")
-    private void collectSubCategoryCount(Map<String, AmAttribute> attrMap, String key,
-            String parentKey, String parentValue) {
+    private void collectSubCategoryCount(Map<String, AmAttribute> attrMap, String key, String parentKey,
+            String parentValue) {
 
         List<List> list = amAttributeDao.findSubCategoryCount(key, parentKey, parentValue);
         for (int i = 0; i < list.size(); i++) {
@@ -98,8 +94,7 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
         }
     }
 
-    private void collectCustomerData(Map<String, AmAttribute> attrMap, String key,
-            String parentKey, String parentValue) {
+    private void collectCustomerData(Map<String, AmAttribute> attrMap, String key, String parentKey, String parentValue) {
 
         List<Report> reports = reportEntityMgr.findAll();
         HashMap<String, String> reportMap = new HashMap<String, String>();
@@ -124,8 +119,7 @@ public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> imp
 
     }
 
-    private void collectValueFromReport(Map<String, AmAttribute> attrMap, String reportName,
-            String[] attrs) {
+    private void collectValueFromReport(Map<String, AmAttribute> attrMap, String reportName, String[] attrs) {
 
         log.info("Process report " + reportName);
         Report report = reportEntityMgr.findByName(reportName);

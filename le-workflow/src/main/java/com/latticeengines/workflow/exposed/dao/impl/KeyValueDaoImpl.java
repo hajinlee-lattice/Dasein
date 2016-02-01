@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.workflow.exposed.dao.impl;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.pls.dao.KeyValueDao;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 
 @Component("keyValueDao")
 public class KeyValueDaoImpl extends BaseDaoImpl<KeyValue> implements KeyValueDao {

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.workflow.exposed.entitymgr.impl;
 
 import java.util.List;
 
@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.KeyValue;
-import com.latticeengines.domain.exposed.pls.Report;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.dao.KeyValueDao;
-import com.latticeengines.pls.dao.ReportDao;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.workflow.exposed.dao.KeyValueDao;
+import com.latticeengines.workflow.exposed.dao.ReportDao;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("reportEntityMgr")
 public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements ReportEntityMgr {

@@ -1,17 +1,17 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.workflow.exposed.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
-import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.dao.SourceFileDao;
-import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.workflow.exposed.dao.SourceFileDao;
+import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
 
 @Component("sourceFileEntityMgr")
 public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> implements SourceFileEntityMgr {
-    
+
     @Autowired
     private SourceFileDao sourceFileDao;
 

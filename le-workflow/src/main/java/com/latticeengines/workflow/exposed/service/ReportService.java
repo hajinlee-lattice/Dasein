@@ -1,8 +1,8 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.workflow.exposed.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.workflow.Report;
 
 public interface ReportService {
 
@@ -11,7 +11,7 @@ public interface ReportService {
     Report getReportByName(String name);
 
     List<Report> getAll();
-    
+
     List<Report> findAll();
 
     void createOrUpdateReport(Report report);

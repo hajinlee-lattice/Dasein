@@ -1,8 +1,11 @@
 package com.latticeengines.serviceflows.workflow.core;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,10 +86,11 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
         }
 
     }
-    
+
     protected String getHdfsDir(String path) {
         String[] tokens = StringUtils.split(path, "/");
-        String[] newTokens = null;;
+        String[] newTokens = null;
+        ;
         if (path.endsWith("avro")) {
             newTokens = new String[tokens.length - 1];
         } else {
@@ -118,13 +122,31 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
         return bldr;
     }
 
+    @SuppressWarnings("unchecked")
+    protected void putOutputValue(String key, String val) {
+        Map<String, String> map = getObjectFromContext(WorkflowContextConstants.OUTPUTS, Map.class);
+        if (map == null) {
+            map = new HashMap<>();
+        }
+        map.put(key, val);
+        putObjectInContext(WorkflowContextConstants.OUTPUTS, map);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <V> V getObjectFromContext(String key, Class<V> clazz) {
+        return (V) executionContext.get(key);
+    }
+
+    protected <V> void putObjectInContext(String key, V val) {
+        executionContext.put(key, val);
+    }
+
     protected String getStringValueFromContext(String key) {
         try {
             return executionContext.getString(key);
         } catch (ClassCastException e) {
             return null;
         }
-        
     }
 
     protected Double getDoubleValueFromContext(String key) {
@@ -133,7 +155,7 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
         } catch (ClassCastException e) {
             return null;
         }
-        
+
     }
 
 }

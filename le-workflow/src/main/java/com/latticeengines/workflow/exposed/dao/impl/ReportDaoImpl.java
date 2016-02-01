@@ -1,10 +1,10 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.workflow.exposed.dao.impl;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.pls.dao.ReportDao;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.workflow.exposed.dao.ReportDao;
 
 @Component("reportDao")
 public class ReportDaoImpl extends BaseDaoImpl<Report> implements ReportDao {

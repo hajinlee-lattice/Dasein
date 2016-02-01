@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.Report;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.network.exposed.pls.TargetMarketInterface;
-import com.latticeengines.pls.service.ReportService;
+import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.util.WorkflowSubmitter;
 import com.wordnik.swagger.annotations.Api;

@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;

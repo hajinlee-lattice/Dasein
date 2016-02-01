@@ -1,9 +1,9 @@
-package com.latticeengines.pls.dao;
+package com.latticeengines.workflow.exposed.dao;
 
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 public interface KeyValueDao extends BaseDao<KeyValue> {
 

@@ -1,17 +1,17 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.workflow.exposed.service.impl;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.pls.Report;
-import com.latticeengines.pls.entitymanager.ReportEntityMgr;
-import com.latticeengines.pls.service.ReportService;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.service.ReportService;
 
 @Component("reportService")
 public class ReportServiceImpl implements ReportService {
-    
+
     @Autowired
     private ReportEntityMgr reportEntityMgr;
 
@@ -22,7 +22,7 @@ public class ReportServiceImpl implements ReportService {
             reportEntityMgr.delete(report);
         }
         reportEntityMgr.create(report);
-       
+
     }
 
     @Override

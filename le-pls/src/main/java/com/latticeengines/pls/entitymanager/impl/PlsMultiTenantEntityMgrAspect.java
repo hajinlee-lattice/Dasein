@@ -93,7 +93,7 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ReportEntityMgrImpl.find*(..))")
+    @Before("execution(* com.latticeengines.workflow.exposed.entitymgr.impl.ReportEntityMgrImpl.find*(..))")
     public void findReport(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
