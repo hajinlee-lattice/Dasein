@@ -42,13 +42,13 @@ public class MatchResource implements MatchInterface {
                                      required = false,
                                      defaultValue = "true") Boolean returnUnmatched) {
         try {
-            if (input.getMatchType() == null) {
+            if (input.getMatchEngine() == null) {
                 throw new IllegalArgumentException("Must specify match type.");
             }
-            if (MatchInput.MatchType.RealTime.equals(input.getMatchType())) {
+            if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
                 return realTimeMatchService.match(input, returnUnmatched);
             } else {
-                throw new UnsupportedOperationException("Match type " + MatchInput.MatchType.Bulk + " is not supported.");
+                throw new UnsupportedOperationException("Match engine " + MatchInput.MatchEngine.Bulk + " is not supported.");
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);

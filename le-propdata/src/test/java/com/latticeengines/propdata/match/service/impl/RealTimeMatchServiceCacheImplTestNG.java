@@ -45,7 +45,7 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
         }
         Assert.assertTrue(failed, "Should failed on missing match type.");
 
-        input.setMatchType(MatchInput.MatchType.RealTime);
+        input.setMatchEngine(MatchInput.MatchEngine.RealTime);
 
         failed = false;
         input.setTenant(new Tenant("PD_Test"));

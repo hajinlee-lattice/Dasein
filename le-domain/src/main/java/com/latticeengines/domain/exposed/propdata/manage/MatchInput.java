@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchInput {
 
-    private MatchType matchType;
+    private MatchEngine matchEngine;
     private List<MatchKey> keys;
     private List<List<Object>> data;
     private Tenant tenant;
@@ -23,14 +23,14 @@ public class MatchInput {
     // if not provided, pick latest
     private String predefinedVersion;
 
-    @JsonProperty("MatchType")
-    public MatchType getMatchType() {
-        return matchType;
+    @JsonProperty("MatchEngine")
+    public MatchEngine getMatchEngine() {
+        return matchEngine;
     }
 
-    @JsonProperty("MatchType")
-    public void setMatchType(MatchType matchType) {
-        this.matchType = matchType;
+    @JsonProperty("MatchEngine")
+    public void setMatchEngine(MatchEngine matchEngine) {
+        this.matchEngine = matchEngine;
     }
 
     @JsonProperty("Keys")
@@ -93,5 +93,5 @@ public class MatchInput {
         this.customSelection = customSelection;
     }
 
-    public enum MatchType { RealTime, Bulk }
+    public enum MatchEngine { RealTime, Bulk }
 }
