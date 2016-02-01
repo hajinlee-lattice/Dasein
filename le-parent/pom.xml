@@ -44,7 +44,7 @@
         <mysql.connector.version>5.1.30</mysql.connector.version>
         <log4j.version>1.2.17</log4j.version>
         <guava.version>16.0</guava.version>
-        <jackson.fasterxml.version>2.6.3</jackson.fasterxml.version>
+        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <sqljdbc4.version>4.1</sqljdbc4.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
