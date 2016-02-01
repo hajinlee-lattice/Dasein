@@ -14,7 +14,7 @@ print ''
 
 (checkOnly, tenantFileName, resultsFileName) = appsequence.AppArgs.get(sys.argv)
 sequence = []
-sequence.append(appsequence.LPCheckVersion('2.2.1'))
+sequence.append(appsequence.LPCheckVersion('2.2.2'))
 sequence.append(lp020300.LP_020300_Refine_PushToLeadDestination_Validation())
 sequence.append(lp020300.LP_020300_NewSpecs())
 sequence.append(appsequence.LPSetVersion('2.3.0'))
