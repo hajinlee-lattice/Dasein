@@ -19,6 +19,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.workflow.Report;
 
 @Entity
 @Table(name = "TARGET_MARKET_REPORT_MAP")
