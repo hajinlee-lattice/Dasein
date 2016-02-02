@@ -45,4 +45,4 @@ def transform(args, record):
     
 # Metadata for this method
 def metadata():
-    return { type: "LONG", ApprovedUsage: "Model", StatisticalType: "ratio" }
+    return { "type": "LONG", "ApprovedUsage": "Model", "StatisticalType": "ratio" }

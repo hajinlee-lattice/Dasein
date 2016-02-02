@@ -17,6 +17,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -177,6 +178,30 @@ public abstract class DataFlowBuilder {
                 }
                 attribute.setCleanedUpEnumValuesAsString(fm.getPropertyValue("enumValues"));
 
+                for (Map.Entry<String, String> entry : fm.getProperties().entrySet()) {
+                    String key = entry.getKey();
+                    String value = entry.getValue();
+                    if (key.equals("ApprovedUsage")) {
+                        attribute.setApprovedUsage(value);
+                    } else if (key.equals("StatisticalType")) {
+                        attribute.setStatisticalType(value);
+                    } else if (key.equals("DisplayDiscretizationStrategy")) {
+                        attribute.setDisplayDiscretizationStrategy(value);
+                    } else if (key.equals("Category")) {
+                        attribute.setCategory(value);
+                    } else if (key.equals("Tags")) {
+                        attribute.setTags(Arrays.asList(StringUtils.split(value, ",")));
+                    } else if (key.equals("FundamentalType")) {
+                        attribute.setFundamentalType(value);
+                    } else if (key.equals("RTSModuleName")) {
+                        attribute.setRTSModuleName(value);
+                    } else if (key.equals("RTSArguments")) {
+                        attribute.setRTSArguments(value);
+                    } else if (key.equals("RTSAttribute")) {
+                        attribute.setRTS(Boolean.valueOf(value));
+                    }
+                }
+                
                 table.addAttribute(attribute);
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Failed to convert field %s to output metadata format",

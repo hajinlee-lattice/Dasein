@@ -67,7 +67,10 @@ import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -99,6 +102,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private static final Log log = LogFactory.getLog(CascadingDataFlowBuilder.class);
+    private static JythonEngine engine = new JythonEngine(null);
 
     protected static class Node {
         private String identifier;
@@ -1231,12 +1235,23 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(each, newFm);
     }
 
+    @SuppressWarnings("unchecked")
     protected String addJythonFunction(String prior, String packageName, String moduleName, String functionName, FieldList fieldsToApply,
             FieldMetadata targetField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
+        Map<String, String> properties = (Map<String, String>) engine.invoke(packageName, moduleName, "metadata", new Object[] {}, Map.class);
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            if (entry.getKey().equals("type")) {
+                continue;
+            }
+            targetField.setPropertyValue(entry.getKey(), entry.getValue());
+        }
+        // For now, assume that all Jython functions are to be used within RTS
+        setRTSProperties(targetField, moduleName, fieldsToApply);
+        
         return addFunction(prior, //
                 new JythonFunction(packageName, //
                         moduleName, //
@@ -1246,6 +1261,28 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         targetField.getJavaType()), //
                 fieldsToApply, //
                 targetField, null);
+    }
+    
+    private void setRTSProperties(FieldMetadata targetField, String moduleName, FieldList fieldsToApply) {
+        // Add as an RTS function
+        targetField.setPropertyValue("RTSAttribute", "true");
+        targetField.setPropertyValue("RTSModuleName", moduleName);
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> args = new HashMap<>();
+        String[] fields = fieldsToApply.getFields(); 
+        if (fields.length == 1) {
+            args.put("column", fieldsToApply.getFields()[0]);
+        } else {
+            int i = 1;
+            for (String field : fields) {
+                args.put("column" + i++, field);
+            }
+        }
+        try {
+            targetField.setPropertyValue("RTSArguments", mapper.writeValueAsString(args));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected String addStopListFilter(String lhs, String rhs, String lhsJoinField, String rhsJoinField) {
