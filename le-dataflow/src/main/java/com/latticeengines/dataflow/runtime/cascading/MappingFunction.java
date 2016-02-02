@@ -11,6 +11,7 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
+@SuppressWarnings("rawtypes")
 public class MappingFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -29618409583081242L;

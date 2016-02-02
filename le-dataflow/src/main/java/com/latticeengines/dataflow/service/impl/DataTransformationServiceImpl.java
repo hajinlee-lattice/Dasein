@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -22,6 +23,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     @Autowired
     private ApplicationContext appContext;
+
+    @Autowired
+    private VersionManager versionManager;
 
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
@@ -45,7 +49,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         dataFlow.setLocal(configuration == null || configuration.get("fs.defaultFS").equals("file:///"));
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.setEnforceGlobalOrdering(true);
-        return dataFlow.runFlow(context);
+        return dataFlow.runFlow(context, versionManager.getCurrentVersion());
     }
 
     @Override

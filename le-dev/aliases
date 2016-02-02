@@ -1,7 +1,7 @@
-
+alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 alias dpbld='mvn -DskipTests clean assembly:single package dependency:copy-dependencies'
 alias sfdpl='mvn install && mvn -DskipTests clean install'
-alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/dataflow && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -copyFromLocal target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -copyFromLocal conf/env/dev/dataflow.properties /app/dataflow'
+alias dfdpl='mvn -Pshaded-yarn -DskipTests clean package && hdfs dfs -rm -r -f /app/`leversion`/dataflow/* && hdfs dfs -mkdir -p /app/`leversion`/dataflow/lib && hdfs dfs -put target/le-dataflow*shaded.jar /app/`leversion`/dataflow/lib && hdfs dfs -put conf/env/dev/dataflow.properties /app/`leversion`/dataflow'
 alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/dataflowapi && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
 alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/workflowapi && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
 alias pddpl='mvn -Pshaded-yarn -DskipTests clean deploy && hadoop fs -copyFromLocal target/le-propdata*shaded.jar /app/dataflow/lib'

@@ -15,12 +15,41 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.joda.time.DateTime;
+
+import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.Operation;
+import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
+import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
+import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
+import com.latticeengines.domain.exposed.dataflow.BooleanType;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -65,34 +94,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
-
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.query.Sort;
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
-import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
-import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
-import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
-import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.BooleanType;
-import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
@@ -1276,7 +1277,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    public Table runFlow(DataFlowContext dataFlowCtx) {
+    public Table runFlow(DataFlowContext dataFlowCtx, String artifactVersion) {
         reset();
         setDataFlowCtx(dataFlowCtx);
 
@@ -1321,7 +1322,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
         try {
-            List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
+            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ?
+                    "/app/dataflow/lib/" : "/app/" + artifactVersion + "/dataflow//lib/";
+            log.info("Using dataflow lib path = " + dataFlowLibDir);
+            List<String> files = HdfsUtils.getFilesForDir(config, dataFlowLibDir);
             for (String file : files) {
                 flowDef.addToClassPath(file);
             }

@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -32,7 +32,7 @@ public abstract class DataFlowBuilder {
     private boolean enforceGlobalOrdering;
     private DataFlowContext dataFlowCtx;
 
-    public abstract Table runFlow(DataFlowContext dataFlowCtx);
+    public abstract Table runFlow(DataFlowContext dataFlowCtx, String artifactVersion);
 
     public boolean isLocal() {
         return local;
