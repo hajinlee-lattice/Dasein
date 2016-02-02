@@ -69,7 +69,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
         camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-        log.info("Uploading target db connection pool to ZK using " + sourceDbsJson + " ...");
+        log.info("Uploading target db connection pool to ZK using " + targetDbsJson + " ...");
         json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + targetDbsJson));
         poolPath = dbPoolPath(DataSourcePool.TargetDB);
