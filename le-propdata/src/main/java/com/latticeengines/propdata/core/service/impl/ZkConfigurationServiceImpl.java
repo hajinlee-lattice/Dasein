@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.zookeeper.ZooDefs;
@@ -50,6 +51,9 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
 
     @Value("${propdata.target.db.json:target_dbs_dev.json}")
     private String targetDbsJson;
+
+    @Value("${propdata.job.default.schedule:}")
+    String defaultCron;
 
     @PostConstruct
     private void postConstruct() throws Exception {
@@ -130,9 +134,12 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         try {
             if (camille.exists(cronPath)) {
                 return String.valueOf(camille.get(cronPath).getData());
-            } else {
+            } else if (StringUtils.isNotEmpty(source.getDefaultCronExpression())) {
                 camille.create(cronPath, new Document(source.getDefaultCronExpression()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
                 return source.getDefaultCronExpression();
+            } else {
+                camille.create(cronPath, new Document(defaultCron), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                return defaultCron;
             }
         } catch (Exception e) {
             return null;

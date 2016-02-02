@@ -12,9 +12,12 @@ public class RefreshHeartBeat extends QuartzJobBean {
 
     private ProgressOrchestrator orchestrator;
 
+    private PropDataScheduler scheduler;
+
     @Override
     public void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         orchestrator.executeRefresh();
+        scheduler.reschedule();
     }
 
     //==============================
@@ -23,5 +26,7 @@ public class RefreshHeartBeat extends QuartzJobBean {
     public void setOrchestrator(ProgressOrchestrator progressOrchestrator) {
         this.orchestrator = progressOrchestrator;
     }
+
+    public void setScheduler(PropDataScheduler scheduler) { this.scheduler = scheduler; }
 
 }
