@@ -73,6 +73,8 @@ public class JythonEngine {
                 }
             }
             return ((PyLong) x).getValue().longValue();
+        } else if (x instanceof PyDictionary) {
+            return ((PyDictionary) x).__tojava__(Map.class);
         }
         return null;
     }
