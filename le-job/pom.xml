@@ -72,7 +72,7 @@
                         <version>${jetty.version}</version>
                         <configuration>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${TEZ_CONF_DIR}</extraClasspath>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}</extraClasspath>
                             </webAppConfig>
                         </configuration>
                         <dependencies>
