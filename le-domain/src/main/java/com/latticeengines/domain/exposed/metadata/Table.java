@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,7 +33,9 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -41,6 +44,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -294,6 +299,29 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         metadata.setAttributeMetadata(attrMetadata);
         return metadata;
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Transient
+    public List<TransformDefinition> getRealTimeTransformationMetadata() {
+        List<TransformDefinition> rtsTransforms = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (Attribute attr : getAttributes()) {
+            if (!attr.getRTS()) {
+                continue;
+            }
+            Class<?> javaType = AvroUtils.getJavaType(Schema.Type.valueOf(attr.getPhysicalDataType().toUpperCase()));
+            Map<String, Object> args;
+            try {
+                args = mapper.readValue(attr.getRTSArguments(), Map.class);
+                TransformDefinition transform = new TransformDefinition(attr.getRTSModuleName(), //
+                        attr.getName(), FieldType.getFromJavaType(javaType), args);
+                rtsTransforms.add(transform);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return rtsTransforms;
     }
 
     @Transient

@@ -466,6 +466,46 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (String) properties.get("SemanticType");
     }
 
+    @Transient
+    @JsonIgnore
+    public void setRTSModuleName(String rtsModuleName) {
+        properties.put("RTSModuleName", rtsModuleName);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getRTSModuleName() {
+        return (String) properties.get("RTSModuleName");
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setRTSArguments(String rtsArguments) {
+        properties.put("RTSArguments", rtsArguments);
+    }
+
+    @Transient
+    @JsonIgnore
+    public String getRTSArguments() {
+        return (String) properties.get("RTSArguments");
+    }
+    
+    @Transient
+    @JsonIgnore
+    public Boolean getRTS() {
+        Boolean rts = (Boolean) properties.get("RTSAttribute");
+        if (rts == null) {
+            return false;
+        }
+        return rts;
+    }
+    
+    @Transient
+    @JsonIgnore
+    public void setRTS(Boolean rts) {
+        properties.put("RTSAttribute", rts);
+    }
+
     @Override
     @Transient
     @JsonIgnore
