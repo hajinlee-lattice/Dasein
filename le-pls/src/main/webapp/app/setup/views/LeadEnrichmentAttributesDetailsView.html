@@ -4,6 +4,7 @@
             <a href="#" class="" data-ng-click="backButtonClicked($event)" id="backLeadEnrichmentButton"><i class="fa fa-angle-double-left"></i>&nbsp;{{ResourceUtility.getString('LEAD_ENRICHMENT_BACK')}}</a>
             <span>{{title}}</span>
         </h2>
+        <h5>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_INSTRUCTION')}}</h5>
     </div>
     <div class="content">
         <div data-ng-show="hasAttributes" class="panel panel-default">
@@ -20,7 +21,7 @@
                         <tbody>
                             <tr data-ng-repeat="attribute in attributes" data-ng-class="{shaded: $index % 2}">
                                 <td>{{attribute.DisplayName}}</td>
-                                <td>{{attribute.FieldName}}</td>
+                                <td>Lattice_{{attribute.FieldName}}</td>
                                 <td>{{attribute.FieldType}}</td>
                             </tr>
                          </tbody>

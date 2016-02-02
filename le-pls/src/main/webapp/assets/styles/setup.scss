@@ -627,16 +627,20 @@
 
 #leadEnrichment .title {
   padding: 10px 40px 0 40px;
-  width: 900px;
+  width: 940px;
 }
 
 #leadEnrichment .title h2 {
-  margin: 16px 0 16px 0;
+  margin: 16px 0 2px 0;
+}
+
+#leadEnrichment .title h5 {
+  margin: 0 0 16px 0;
 }
 
 #leadEnrichment .content {
   padding: 8px 40px;
-  width: 900px;
+  width: 940px;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
@@ -679,13 +683,13 @@
 
 #leadEnrichment .col-md-4 {
   float: left;
-  width: 400px;
+  width: 420px;
 }
 
 #leadEnrichment .col-toggle {
   float: left;
   width: 30px;
-  height: 437px;
+  height: 448px;
 }
 
 #leadEnrichment .btn-area-middle {

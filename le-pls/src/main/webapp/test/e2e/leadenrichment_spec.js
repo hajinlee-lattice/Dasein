@@ -28,6 +28,28 @@ describe('manage fields tests', function () {
         loginPage.logout();
     });
 
+    it('should validate that you can click all attributes link', function () {
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Show All Attributes
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.LeadEnrichment.isPresent().then(function (present){
+            if (present) {
+                clickLeadEnrichmentLink();
+                element(by.id('saveLeadEnrichmentAttributesButton')).isDisplayed().then(function (displayed) {
+                    if (displayed) {
+                        leadEnrichment.testClickAllAttributes();
+                    }
+                });
+            }
+        });
+
+        loginPage.logout();
+    });
+
     it('should validate that you can add attributes', function () {
         loginPage.loginAsSuperAdmin();
 
@@ -64,6 +86,28 @@ describe('manage fields tests', function () {
                 element(by.id('saveLeadEnrichmentAttributesButton')).isDisplayed().then(function (displayed) {
                     if (displayed) {
                         leadEnrichment.testRemoveAttributes();
+                    }
+                });
+            }
+        });
+
+        loginPage.logout();
+    });
+
+    it('should validate that you can save attributes', function () {
+        loginPage.loginAsSuperAdmin();
+
+        //==================================================
+        // Save Attributes
+        //==================================================
+        userDropdown.toggleDropdown();
+        browser.waitForAngular();
+        userDropdown.LeadEnrichment.isPresent().then(function (present){
+            if (present) {
+                clickLeadEnrichmentLink();
+                element(by.id('saveLeadEnrichmentAttributesButton')).isDisplayed().then(function (displayed) {
+                    if (displayed) {
+                        leadEnrichment.testSaveAttributes();
                     }
                 });
             }

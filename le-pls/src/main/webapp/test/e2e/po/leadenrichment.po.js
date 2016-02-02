@@ -3,6 +3,20 @@
 var LeadEnrichment = function() {
     var helper = require('./helper.po');
 
+    this.testClickAllAttributes = function () {
+        var allAttributesLink = element(by.id('showAllAttributesButton'));
+        helper.elementExists(allAttributesLink, true);
+        allAttributesLink.click();
+        sleep(1000);
+        var backLeadEnrichment = element(by.id('backLeadEnrichmentButton'));
+        helper.elementExists(backLeadEnrichment, true);
+        backLeadEnrichment.click();
+        sleep(1000);
+        element(by.id('showAllAttributesButton')).isDisplayed().then(function (displayed){
+            expect(displayed).toBe(true);
+        });
+    };
+
     this.testAddAttributes = function () {
         var availableAttributesList = element(by.id("availableAttributesList"));
         var availableAttributeItems = availableAttributesList.all(by.tagName('li'));
@@ -38,6 +52,27 @@ var LeadEnrichment = function() {
                     expect(newCount).toEqual(count - 1);
                 });
             }
+        });
+    };
+
+    this.testSaveAttributes = function () {
+        var saveButton = element(by.id('saveLeadEnrichmentAttributesButton'));
+        saveButton.click();
+        sleep(500);
+        var noBotton = element(by.id('save-attributes-no'));
+        helper.elementExists(noBotton, true);
+        noBotton.click();
+        sleep(500);
+        helper.elementExists(element(by.id('save-attributes-no')), false);
+
+        saveButton.click();
+        sleep(500);
+        var yesBotton = element(by.id('save-attributes-yes'));
+        helper.elementExists(yesBotton, true);
+        yesBotton.click();
+        sleep(20000);
+        element(by.id('backLeadEnrichmentButton')).isDisplayed().then(function (displayed){
+            expect(displayed).toBe(true);
         });
     };
 

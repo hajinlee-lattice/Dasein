@@ -17,6 +17,7 @@
     <div data-ng-hide="loading || showLoadingError || saveInProgress || showAttributesDetails">
         <div class="title">
             <h2>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_TITLE')}}</h2>
+            <h5>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_INSTRUCTION')}}</h5>
         </div>
         <div class="content" data-ng-show="!showAttributesDetails">
             <div data-ng-show="showAttributesExcessAlert" class="alert alert-warning warning">
@@ -27,7 +28,7 @@
                 <div class="col-md-4">
                     <div class="sub-title">
                         <span>{{ResourceUtility.getString('LEAD_ENRICHMENT_LIBRARY_ATTRIBUTES_LABEL')}}</span>
-                        <a href="#" data-ng-click="showAllAttributes($event)">{{ResourceUtility.getString('LEAD_ENRICHMENT_SHOW_ALL_ATTRIBUTES')}}</a>
+                        <a id="showAllAttributesButton" href="#" data-ng-click="showAllAttributes($event)">{{ResourceUtility.getString('LEAD_ENRICHMENT_SHOW_ALL_ATTRIBUTES')}}</a>
                     </div>
                     <ul id="availableAttributesList" class="list-group" data-ng-dblclick="addAttributeButtonClicked($event)">
                         <li class="list-group-item"

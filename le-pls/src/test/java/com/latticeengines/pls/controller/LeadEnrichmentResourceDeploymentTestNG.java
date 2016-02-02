@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -58,7 +59,7 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         assertTrue(exception);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testGetAttributes() {
         switchToSuperAdmin();
         assertGetAttributesSuccess();
@@ -99,10 +100,25 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     @Test(groups = "deployment", enabled = false)
     public void testSaveAttributes() {
         switchToSuperAdmin();
-        String url = getRestAPIHostPort() + "/pls/leadenrichment/attributes";
-        LeadEnrichmentAttribute[] attributes = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
-        if (attributes != null && attributes.length > 0) {
-            assertSaveAttributesSuccess(url, attributes);
+        String avariableUrl = getRestAPIHostPort() + "/pls/leadenrichment/avariableattributes";
+        LeadEnrichmentAttribute[] avariableAttributes = restTemplate.getForObject(avariableUrl, LeadEnrichmentAttribute[].class);
+        if (avariableAttributes != null && avariableAttributes.length > 0) {
+            Map<String, LeadEnrichmentAttribute> avariableAttrsMap = new HashMap<String, LeadEnrichmentAttribute>();
+            for (LeadEnrichmentAttribute attribute : avariableAttributes) {
+                avariableAttrsMap.put(attribute.getFieldName(), attribute);
+            }
+            String url = getRestAPIHostPort() + "/pls/leadenrichment/attributes";
+            LeadEnrichmentAttribute[] attributes = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
+            for (LeadEnrichmentAttribute attribute : attributes) {
+                String key = attribute.getFieldName();
+                if (avariableAttrsMap.containsKey(key)) {
+                    attribute.setDataSource(avariableAttrsMap.get(key).getDataSource());
+                } else {
+                    return;
+                }
+            }
+
+            assertSaveAttributesSuccess(url, attributes, avariableAttributes);
 
             switchToInternalUser();
             assertSaveAttributesGet403(url, attributes);
@@ -112,34 +128,21 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         }
     }
 
-    private void assertSaveAttributesSuccess(String url, LeadEnrichmentAttribute[] attributes) {
-        if (attributes.length > 1) {
-            LeadEnrichmentAttribute[] attrsToSave = new LeadEnrichmentAttribute[attributes.length - 1];
-            System.arraycopy(attributes, 1, attrsToSave, 0, attrsToSave.length);
+    private void assertSaveAttributesSuccess(String url, LeadEnrichmentAttribute[] attributes,
+            LeadEnrichmentAttribute[] avariableAttributes) {
+        if (attributes != null && attributes.length > 0) {
+            LeadEnrichmentAttribute[] attrsToSave = new LeadEnrichmentAttribute[0];
             restTemplate.put(url, attrsToSave, new HashMap<>());
             LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
             assertEquals(attrsToSave.length, attrsSaved.length);
             restTemplate.put(url, attributes, new HashMap<>());
         } else {
-            String avariableUrl = getRestAPIHostPort() + "/pls/leadenrichment/avariableattributes";
-            LeadEnrichmentAttribute[] attrs = restTemplate.getForObject(avariableUrl, LeadEnrichmentAttribute[].class);
-            if (attrs != null && attrs.length > 0) {
-                LeadEnrichmentAttribute[] attrsToSave = null;
-                for (LeadEnrichmentAttribute attr : attrs) {
-                    if (!attr.getFieldName().equals(attributes[0].getFieldName())) {
-                        attrsToSave = new LeadEnrichmentAttribute[2];
-                        attrsToSave[0] = attributes[0];
-                        attrsToSave[1] = attr;
-                        break;
-                    }
-                }
-                if (attrsToSave != null) {
-                    restTemplate.put(url, attrsToSave, new HashMap<>());
-                    LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
-                    assertEquals(attrsToSave.length, attrsSaved.length);
-                    restTemplate.put(url, attributes, new HashMap<>());
-                }
-            }
+            LeadEnrichmentAttribute[] attrsToSave = new LeadEnrichmentAttribute[1];
+            attrsToSave[0] = avariableAttributes[0];
+            restTemplate.put(url, attrsToSave, new HashMap<>());
+            LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
+            assertEquals(attrsToSave.length, attrsSaved.length);
+            restTemplate.put(url, attributes, new HashMap<>());
         }
     }
 

@@ -495,6 +495,7 @@ SETUP_CLEAR_TENANT_DEPLOYMENT_CONFIRM_ERROR=We are unable to clear tenant deploy
 LEAD_ENRICHMENT_SETUP_TITLE=Lead Enrichment Setup
 LEAD_ENRICHMENT_SETUP_ALL_ATTRIBUTES_TITLE=Lead Enrichment Setup - All Attriubtes
 LEAD_ENRICHMENT_SETUP_SAVED_ATTRIBUTES_TITLE=Lead Enrichment Setup - Saved Attributes
+LEAD_ENRICHMENT_SETUP_INSTRUCTION=NOTE: Attributes in the "HG Data" source are premium attributes. Please ensure that these attributes have been contracted before enabling.
 LEAD_ENRICHMENT_SAVE_ATTRIBUTES_WAIT=Saving attributes ...
 LEAD_ENRICHMENT_LIBRARY_ATTRIBUTES_LABEL=Library
 LEAD_ENRICHMENT_SELECTED_ATTRIBUTES_LABEL=({0}) Selected for Lead Enrichment
