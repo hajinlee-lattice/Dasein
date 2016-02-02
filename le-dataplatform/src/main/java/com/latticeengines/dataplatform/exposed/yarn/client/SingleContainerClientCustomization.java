@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -97,6 +98,9 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 false));
         if (softwareLibraryService != null) {
             List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
+            if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
+                packages = softwareLibraryService.getLatestInstalledPackages(module);
+            }
 
             for (SoftwarePackage pkg : packages) {
                 String hdfsJar = String.format("%s/%s", //

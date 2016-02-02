@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.exposed.yarn.runtime;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -65,6 +66,9 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
             ApplicationContext context, VersionManager versionManager) {
         List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
+        if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
+            packages = softwareLibraryService.getLatestInstalledPackages(module);
+        }
         log.info(String.format("Classpath = %s", System.getenv("CLASSPATH")));
         log.info(String.format("Found %d of software packages from the software library for this module.",
                 packages.size()));
