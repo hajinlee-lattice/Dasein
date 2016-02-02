@@ -66,7 +66,7 @@ public class RefreshExecutor implements RefreshJobExecutor {
                 log.error(e);
             }
         }
-        log.fatal("Failed to find a chance to kick off a refresh of " + refreshService.getSource().getSourceName()
+        log.error("Failed to find a chance to kick off a refresh of " + refreshService.getSource().getSourceName()
             + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
     }
 
@@ -87,6 +87,7 @@ public class RefreshExecutor implements RefreshJobExecutor {
                     resumeStatus = ProgressStatus.NEW;
             }
             progress.setStatus(resumeStatus);
+            progress.setNumRetries(progress.getNumRetries() + 1);
         }
         return progress;
     }
