@@ -1323,7 +1323,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
         try {
             String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ?
-                    "/app/dataflow/lib/" : "/app/" + artifactVersion + "/dataflow//lib/";
+                    "/app/dataflow/lib/" : "/app/" + artifactVersion + "/dataflow/lib/";
             log.info("Using dataflow lib path = " + dataFlowLibDir);
             List<String> files = HdfsUtils.getFilesForDir(config, dataFlowLibDir);
             for (String file : files) {
