@@ -1,5 +1,11 @@
 {
-  "name": "LE-WebApps",
+  "name": "le-ui",
+  "description": "Converged Platform",
+  "license": "ISC",
+  "repository" : { 
+    "type" : "svn",
+    "url" : "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
+  },
   "version": "0.0.1",
   "dependencies": {
     "express": "^4.13.3",
@@ -12,21 +18,36 @@
   },
   "devDependencies": {},
   "scripts": {
-    "//": "environmental",
-    "qa": "npm run commoninit && npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
-    "dev": "npm run commoninit && npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
-    "prod": "npm run commoninit && npm run sass && npm run sass && grunt prod",
-    
-    "commoninit": "cd projects/common/ && npm install",
+    "install": "npm run InstallProduction",
+    "postinstall": "npm run sass",
 
-    "//": "concurrent projects",
-    "sass": "concurrent -r \"npm run pdsass\"",
-    "sentry": "concurrent -r \"npm run pdsentry\"",
+    "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD",
+    "InstallDev": "concurrent -kr \"npm run InstallDevCommon\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
+
+    "//": "start express server",
+    "qa": "npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
+    "dev": "npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
+    "prod": "grunt prod",
+
+    "//": "all projects",
+    "sass": "concurrent -r \"npm run pdsass\" \"npm run commonsass\"",
+    "sentry": "concurrent -r \"npm run pdsentry\" \"npm run commonsentry\"",
     
     "//": "individual projects",
+    "InstallCommon": "cd projects/common/ && npm install --production",
+    "InstallPD": "cd projects/prospectdiscovery/ && npm install --production",
+    "InstallLP": "cd projects/leadprioritization/ && npm install --production",
+
+    "InstallDevCommon": "cd projects/common/ && npm install",
+    "InstallDevPD": "cd projects/prospectdiscovery/ && npm install",
+    "InstallDevLP": "cd projects/leadprioritization/ && npm install",
+
+    "commonsass": "cd projects/common/ && grunt sass",
     "pdsass": "cd projects/prospectdiscovery/ && grunt sass",
-    "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
     "lpsass": "cd projects/leadprioritization/ && grunt sass",
+
+    "commonsentry": "cd projects/common/ && grunt sentry",
+    "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
     "lpsentry": "cd projects/leadprioritization/ && grunt sentry"
   }
 }
