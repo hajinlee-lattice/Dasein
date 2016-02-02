@@ -2,6 +2,7 @@ package com.latticeengines.workflow.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,7 +72,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Autowired
     private WorkflowExecutionCache workflowExecutionCache;
-    
+
     @Override
     public List<String> getNames() {
         return new ArrayList<String>(jobRegistry.getJobNames());
@@ -185,7 +186,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
         return workflowExecutionCache.getJob(workflowId);
     }
-    
+
     @Override
     public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
@@ -193,7 +194,31 @@ public class WorkflowServiceImpl implements WorkflowService {
         try {
             jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
         } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(), e.getMessage()));
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
+                    e.getMessage()));
+        }
+
+        return jobs;
+    }
+
+    @Override
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds,
+            String type) {
+        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
+
+        try {
+            jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
+            if (type != null) {
+                Iterator<com.latticeengines.domain.exposed.workflow.Job> iter = jobs.iterator();
+                while (iter.hasNext()) {
+                    if (!iter.next().getJobType().equals(type)) {
+                        iter.remove();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
+                    e.getMessage()));
         }
 
         return jobs;

@@ -31,4 +31,6 @@ public interface WorkflowService {
     Job getJob(WorkflowExecutionId workflowId);
 
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds);
+
+    List<Job> getJobs(List<WorkflowExecutionId> workflowIds, String type);
 }

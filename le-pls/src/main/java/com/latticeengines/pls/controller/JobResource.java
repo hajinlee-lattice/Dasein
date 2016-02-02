@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,19 +47,33 @@ public class JobResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @ApiOperation(value = "Retrieve all jobs")
     public List<Job> findAll() {
-        Tenant tenant = SecurityContextUtils.getTenant();
-        Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
+        Tenant tenantWithPid = getTenant();
         log.info("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
-        if (workflowProxy == null) {
-            log.info("restApiProxy is not set");
-        }
-
         List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid());
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
         return jobs;
+    }
+
+    @RequestMapping(value = "/find", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Find jobs with the provided job type")
+    public List<Job> findAllWithType(@RequestParam("type") String type) {
+        Tenant tenantWithPid = getTenant();
+        log.info("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid.getPid(), type);
+        if (jobs == null) {
+            jobs = Collections.emptyList();
+        }
+        return jobs;
+    }
+
+    private Tenant getTenant() {
+        Tenant tenant = SecurityContextUtils.getTenant();
+        return tenantEntityMgr.findByTenantId(tenant.getId());
     }
 
     @RequestMapping(value = "/{jobId}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")

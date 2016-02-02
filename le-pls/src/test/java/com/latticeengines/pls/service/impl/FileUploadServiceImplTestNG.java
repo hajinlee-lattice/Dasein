@@ -13,38 +13,42 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.workflow.SourceFileSchema;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
 
 public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
-    
+
     @Autowired
     private FileUploadService fileUploadService;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     private InputStream fileInputStream;
-    
+
     private File dataFile;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant2", contractId));
         setUpMarketoEloquaTestEnvironment();
         switchToSuperAdmin();
-        dataFile = new File(ClassLoader.getSystemResource("com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath());
+        dataFile = new File(ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath());
         fileInputStream = new FileInputStream(dataFile);
     }
-    
+
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("file1.csv", fileInputStream);
-        
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, //
-                String.format( //
-                        "/Pods/Default/Contracts/%sPLSTenant2/Tenants/%sPLSTenant2/Spaces/Production/Data/Files/file1.csv", //
-                        contractId, contractId));
+        fileUploadService.uploadFile("file1.csv", SourceFileSchema.SalesforceAccount, fileInputStream);
+
+        String contents = HdfsUtils
+                .getHdfsFileContents(
+                        yarnConfiguration, //
+                        String.format( //
+                                "/Pods/Default/Contracts/%sPLSTenant2/Tenants/%sPLSTenant2/Spaces/Production/Data/Files/file1.csv", //
+                                contractId, contractId));
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
     }

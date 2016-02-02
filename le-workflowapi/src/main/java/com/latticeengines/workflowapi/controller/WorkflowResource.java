@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -129,6 +130,24 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
+        List<WorkflowExecutionId> workflowIds = getWorkflowExecutions(tenantPid);
+
+        List<Job> jobs = workflowService.getJobs(workflowIds);
+        return jobs;
+    }
+
+    @RequestMapping(value = "/jobs/{tenantPid}/find", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
+    @Override
+    public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
+        List<WorkflowExecutionId> workflowIds = getWorkflowExecutions(tenantPid);
+
+        List<Job> jobs = workflowService.getJobs(workflowIds, type);
+        return jobs;
+    }
+
+    private List<WorkflowExecutionId> getWorkflowExecutions(@PathVariable long tenantPid) {
         Tenant tenant = new Tenant();
         tenant.setPid(tenantPid);
         Tenant tenantWithPid = tenantEntityMgr.findByKey(tenant);
@@ -144,9 +163,7 @@ public class WorkflowResource implements WorkflowInterface {
         for (WorkflowAppContext workflowAppContext : workflowAppContexts) {
             workflowIds.add(workflowAppContext.getAsWorkflowId());
         }
-
-        List<Job> jobs = workflowService.getJobs(workflowIds);
-        return jobs;
+        return workflowIds;
     }
 
     @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")

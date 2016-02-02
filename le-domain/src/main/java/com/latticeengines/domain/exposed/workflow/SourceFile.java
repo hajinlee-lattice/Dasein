@@ -72,6 +72,10 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "UPDATED")
     private Date updated;
 
+    @JsonProperty("schema")
+    @Column(name = "SCHEMA", nullable = false)
+    private SourceFileSchema schema;
+
     @Override
     public String getName() {
         return name;
@@ -141,5 +145,21 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    public SourceFileSchema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(SourceFileSchema schema) {
+        this.schema = schema;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

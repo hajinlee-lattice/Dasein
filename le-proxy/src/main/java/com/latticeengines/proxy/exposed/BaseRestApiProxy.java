@@ -48,7 +48,7 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-    protected void delete (String method, String url) {
+    protected void delete(String method, String url) {
         log.info(String.format("Invoking %s by deleting from url %s", method, url));
         try {
             restTemplate.delete(new URI(url));

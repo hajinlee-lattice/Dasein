@@ -1,4 +1,5 @@
 package com.latticeengines.proxy.exposed.workflowapi;
+
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -58,6 +59,13 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
     @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
+        return get("getWorkflowExecutionsForTenant", url, List.class);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type) {
+        String url = constructUrl("/jobs/{tenantPid}/find?type={type}", tenantPid, type);
         return get("getWorkflowExecutionsForTenant", url, List.class);
     }
 

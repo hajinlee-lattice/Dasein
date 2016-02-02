@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileSchema;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
 
@@ -43,6 +45,11 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         setUpMarketoEloquaTestEnvironment();
     }
 
+    @BeforeMethod
+    public void beforeMethod() {
+        sourceFileEntityMgr.deleteAll();
+    }
+
     @SuppressWarnings("unchecked")
     private ResponseDocument<SourceFile> submitFile(boolean unnamed) throws Exception {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
@@ -53,13 +60,16 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + "/pls/fileuploads/unnamed",
-                    HttpMethod.POST, requestEntity, String.class);
+            String path = String.format("/pls/fileuploads/unnamed?schema=%s", SourceFileSchema.SalesforceAccount);
+            ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
+                    requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
-            ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort()
-                    + "/pls/fileuploads?name=file1.csv", HttpMethod.POST, requestEntity, String.class);
+            String path = String
+                    .format("/pls/fileuploads?name=file1.csv&schema=%s", SourceFileSchema.SalesforceAccount);
+            ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
+                    requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         }
@@ -82,6 +92,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         for (SourceFile file : files) {
             if (file.getPath().equals(path)) {
                 assertEquals(file.getName(), "file1.csv");
+                assertEquals(file.getSchema(), SourceFileSchema.SalesforceAccount);
                 found = true;
             }
         }
@@ -105,6 +116,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             if (file.getPath().equals(path)) {
                 String[] split = path.split("/");
                 assertEquals(file.getName(), split[split.length - 1]);
+                assertEquals(file.getSchema(), SourceFileSchema.SalesforceAccount);
                 found = true;
             }
         }

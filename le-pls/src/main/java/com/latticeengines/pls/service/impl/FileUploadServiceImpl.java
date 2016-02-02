@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileSchema;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -32,7 +33,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Override
-    public SourceFile uploadFile(String outputFileName, InputStream inputStream) {
+    public SourceFile uploadFile(String outputFileName, SourceFileSchema schema, InputStream inputStream) {
         try {
             Tenant tenant = SecurityContextUtils.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
@@ -42,6 +43,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setTenant(tenant);
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
+            file.setSchema(schema);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileEntityMgr.create(file);
             return file;

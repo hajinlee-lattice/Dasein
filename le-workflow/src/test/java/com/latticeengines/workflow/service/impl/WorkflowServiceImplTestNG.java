@@ -4,12 +4,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
@@ -47,13 +49,24 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     @Autowired
     private SuccessfulStep successfulStep;
 
-
     @Test(groups = "functional", enabled = true)
     public void testStart() throws Exception {
         failableStep.setFail(false);
         WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), null);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testGetJobs() throws Exception {
+        failableStep.setFail(false);
+        WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), null);
+        workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        List<Job> jobs = workflowService.getJobs(Arrays.asList(workflowId), failableWorkflow.name());
+        assertEquals(jobs.size(), 1);
+        Job job = jobs.get(0);
+        assertEquals(job.getId().longValue(), workflowId.getId());
+        assertEquals(job.getJobType(), failableWorkflow.name());
     }
 
     @Test(groups = "functional", enabled = true)

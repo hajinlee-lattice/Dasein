@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileSchema;
 import com.latticeengines.pls.service.FileUploadService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -31,9 +32,10 @@ public class FileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public ResponseDocument<SourceFile> uploadFile(@RequestParam("name") String name,
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("schema") SourceFileSchema schema, @RequestParam("file") MultipartFile file) {
         try {
-            return new ResponseDocument<>(fileUploadService.uploadFile(name, new ByteArrayInputStream(file.getBytes())));
+            return new ResponseDocument<>(fileUploadService.uploadFile(name, schema,
+                    new ByteArrayInputStream(file.getBytes())));
         } catch (Exception e) {
             return new ResponseDocument<>(e);
         }
@@ -42,7 +44,10 @@ public class FileUploadResource {
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
-    public ResponseDocument<SourceFile> uploadFile(@RequestParam("file") MultipartFile file) {
-        return uploadFile(new UID().toString().replace("-", "").replace(":", ""), file);
+    public ResponseDocument<SourceFile> uploadFile(@RequestParam("schema") SourceFileSchema schema,
+            @RequestParam("file") MultipartFile file) {
+        String filename = new UID().toString().replace("-", "").replace(":", "") + ".tmp";
+        return uploadFile(filename, schema, file);
     }
+
 }
