@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRTestUtils;
 import com.latticeengines.dataplatform.runtime.mapreduce.python.PythonMRUtils;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
@@ -75,6 +76,7 @@ public class FileAggregatorUnitTestNG {
         Classifier classifier = PythonMRTestUtils.setupDummyClassifier();
         String metadata = JsonUtils.serialize(classifier);
         config.set(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
+        config.set(MapReduceProperty.VERSION.name(), "");
 
         ModelPickleAggregator aggregator = new ModelPickleAggregator();
         try {
@@ -86,7 +88,7 @@ public class FileAggregatorUnitTestNG {
         Classifier classifierNew = JsonUtils.deserialize(metadataNew, Classifier.class);
 
         assertNotEquals(metadataNew, metadata);
-        assertEquals(classifierNew.getPythonScriptHdfsPath(), new AggregationAlgorithm().getScript());
+        assertEquals(classifierNew.getPythonScriptHdfsPath().replaceAll("//", "/"), new AggregationAlgorithm().getScript());
         FileUtils.deleteQuietly(new File(PythonMRUtils.METADATA_JSON_PATH));
     }
 

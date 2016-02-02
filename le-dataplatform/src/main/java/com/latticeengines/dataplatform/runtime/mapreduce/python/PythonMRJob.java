@@ -9,6 +9,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
@@ -37,6 +38,11 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         setConf(config);
         this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
         this.mapReduceCustomizationRegistry.register(this);
+        this.versionManager = versionManager;
+    }
+
+    @VisibleForTesting
+    void setVersionManager(VersionManager versionManager) {
         this.versionManager = versionManager;
     }
 

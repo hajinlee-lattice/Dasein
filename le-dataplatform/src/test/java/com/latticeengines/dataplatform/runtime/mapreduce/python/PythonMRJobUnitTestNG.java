@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MRPathFilter;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
@@ -57,6 +58,7 @@ public class PythonMRJobUnitTestNG {
     @Test(groups = "unit")
     public void testMRJob() throws Exception {
         PythonMRJob customizer = new PythonMRJob(new Configuration());
+        customizer.setVersionManager(new VersionManager(""));
         customizer.customize(job, property);
 
         Configuration conf = job.getConfiguration();
