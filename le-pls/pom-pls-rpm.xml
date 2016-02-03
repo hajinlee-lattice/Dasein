@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-pls-rpm</artifactId>
@@ -32,6 +32,7 @@
                 <pls.properties.path>conf/env/buildmachine</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/buildmachine</workflow.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -50,6 +51,7 @@
                 <pls.properties.path>conf/env/devcluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/devcluster</workflow.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -67,6 +69,7 @@
                 <pls.properties.path>conf/env/qacluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -84,6 +87,7 @@
                 <pls.properties.path>conf/env/prodcluster</pls.properties.path>
                 <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -101,6 +105,7 @@
                 <pls.properties.path>conf/env/stage</pls.properties.path>
                 <security.properties.path>../le-securityconf/env/stage</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/stage</proxy.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/stage</workflow.properties.path>
                 <bin.env.path>bin/env/stage</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -150,6 +155,9 @@
                                 </source>
                                 <source>
                                     <location>${proxy.properties.path}/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>${workflow.properties.path}/workflow.properties</location>
                                 </source>
                                 <source>
                                     <location>certificates/${jks.name}</location>
