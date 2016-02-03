@@ -18,10 +18,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TargetMarketDao;
 import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("targetMarketEntityMgr")
 public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> implements TargetMarketEntityMgr {
@@ -84,7 +84,9 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteTargetMarketByName(String name) {
         TargetMarket targetMarket = targetMarketDao.findTargetMarketByName(name);
-        targetMarketDao.delete(targetMarket);
+        if (targetMarket != null) {
+            targetMarketDao.delete(targetMarket);
+        }
     }
 
     @Override

@@ -127,4 +127,9 @@ public class TargetMarketServiceImpl implements TargetMarketService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void deleteAll() {
+        targetMarketEntityMgr.deleteAll();
+    }
 }

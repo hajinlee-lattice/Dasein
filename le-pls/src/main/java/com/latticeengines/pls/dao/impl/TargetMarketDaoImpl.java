@@ -59,4 +59,12 @@ public class TargetMarketDaoImpl extends BaseDaoImpl<TargetMarket> implements Ta
         }
         return targetMarkets.get(0);
     }
+
+    @Override
+    public void deleteAll() {
+        List<TargetMarket> all = findAll();
+        for (TargetMarket market : all) {
+            delete(market);
+        }
+    }
 }

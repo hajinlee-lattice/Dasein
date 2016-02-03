@@ -23,4 +23,6 @@ public interface TargetMarketService {
 
     Boolean resetDefaultTargetMarket();
 
+    void deleteAll();
+
 }

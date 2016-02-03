@@ -28,18 +28,20 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TenantService;
 
 public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
-    
+
     private static final Log log = LogFactory.getLog(ProspectDiscoveryEndToEndDeploymentTestNG.class);
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
@@ -52,12 +54,18 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     @Value("${pls.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
-    
+
     @Autowired
     private MetadataProxy metadataProxy;
 
     @Autowired
     private WorkflowProxy workflowProxy;
+
+    @Autowired
+    private TargetMarketService targetMarketService;
+
+    @Autowired
+    private TenantService tenantService;
 
     private static String tenant;
     private static Tenant tenantToAttach;
@@ -102,18 +110,26 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
     }
 
     private void deleteAndCreateTwoTenants() throws Exception {
-        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(),
-                contractId + "PLSTenant1").toString());
-        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(),
-                contractId + "PLSTenant2").toString());
+        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId + "PLSTenant1")
+                .toString());
+        deleteFromCamille(PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId + "PLSTenant2")
+                .toString());
         turnOffSslChecking();
         setTestingTenants();
-        for (Tenant tenant: testingTenants) {
+        for (Tenant tenant : testingTenants) {
+            if (tenantService.hasTenantId(tenant.getId())) {
+                deleteTargetMarkets(tenant);
+            }
             deleteTenantByRestCall(tenant.getId());
             createTenantByRestCall(tenant);
         }
     }
-    
+
+    private void deleteTargetMarkets(Tenant tenant) {
+        setupSecurityContext(tenant);
+        targetMarketService.deleteAll();
+    }
+
     private void deleteFromCamille(String path) {
         Camille camille = CamilleEnvironment.getCamille();
         String podId = CamilleEnvironment.getPodId();
@@ -122,7 +138,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         } catch (Exception e) {
             log.warn("Path " + path + " doesn't exist.");
         }
-        
+
     }
 
     @Test(groups = "deployment.pd")
@@ -132,11 +148,11 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         crmCredential.setPassword(salesforcePasswd);
         crmCredential.setSecurityToken(salesforceSecurityToken);
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=" +  customerSpace.toString() + "&isProduction=true&verifyOnly=true",
+                + "/pls/credentials/sfdc?tenantId=" + customerSpace.toString() + "&isProduction=true&verifyOnly=true",
                 crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000ZhOVEA0");
     }
-    
+
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
     public void createDefaultTargetMarket() throws Exception {
@@ -145,10 +161,10 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         TargetMarket targetMarket = restTemplate.getForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + TargetMarket.DEFAULT_NAME, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
-        
+
         System.out.println("Workflow app id = " + targetMarket.getApplicationId());
         waitForWorkflowStatus(targetMarket.getApplicationId(), true);
-        
+
         boolean exception = false;
         try {
             restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null, Map.class);
@@ -159,16 +175,17 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
         WorkflowStatus completedStatus = waitForWorkflowStatus(targetMarket.getApplicationId(), false);
         assertEquals(completedStatus.getStatus().name(), BatchStatus.COMPLETED.name());
-        
-        List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports",
-                List.class);
-        
+
+        List<?> reports = restTemplate.getForObject(getRestAPIHostPort() + "/pls/reports", List.class);
+
         assertTrue(reports.size() > 0);
         for (Object r : reports) {
             Map<String, String> map = (Map<String, String>) r;
-            Report report = restTemplate.getForObject(String.format("%s/pls/reports/%s", getRestAPIHostPort(), map.get("name")), Report.class);
+            Report report = restTemplate.getForObject(
+                    String.format("%s/pls/reports/%s", getRestAPIHostPort(), map.get("name")), Report.class);
             String reportContent = new String(report.getJson().getPayload());
-            System.out.println(String.format("Report %s:%s with payload:\n%s\n", report.getName(), report.getPurpose(), reportContent));
+            System.out.println(String.format("Report %s:%s with payload:\n%s\n", report.getName(), report.getPurpose(),
+                    reportContent));
         }
     }
 
@@ -178,8 +195,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             if (status == null) {
                 continue;
             }
-            if ((running && status.getStatus().isRunning()) 
-                    || (!running && !status.getStatus().isRunning())) {
+            if ((running && status.getStatus().isRunning()) || (!running && !status.getStatus().isRunning())) {
                 return status;
             }
             try {
