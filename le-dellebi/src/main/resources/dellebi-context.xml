@@ -38,6 +38,7 @@
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:remote-context.xml" />
     <import resource="classpath:swlib-context.xml" />
+    <import resource="classpath:common-component-context.xml"/>
 
     <import
         resource="classpath:dellebi-quartz-${DELLEBI_QUARTZ_ENABLED:disabled}-context.xml" />
