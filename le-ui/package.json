@@ -2,19 +2,20 @@
   "name": "le-ui",
   "description": "Converged Platform",
   "license": "ISC",
-  "repository" : { 
-    "type" : "svn",
-    "url" : "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
+  "repository": {
+    "type": "svn",
+    "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
   "version": "0.0.1",
   "dependencies": {
+    "concurrently": "^1.0.0",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "request": "^2.65.0",
     "grunt": "^0.4.5",
     "grunt-env": "^0.4.4",
     "grunt-run": "^0.5.2",
-    "nodemon": "^1.8.1"
+    "nodemon": "^1.8.1",
+    "request": "^2.65.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -30,8 +31,8 @@
     "prod": "grunt prod",
 
     "//": "all projects",
-    "sass": "concurrent -r \"npm run pdsass\" \"npm run commonsass\"",
-    "sentry": "concurrent -r \"npm run pdsentry\" \"npm run commonsentry\"",
+    "sass": "concurrent -r \"npm run commonsass\" \"npm run pdsass\" \"npm run lpsass\" ",
+    "sentry": "concurrent -r \"npm run commonsentry\" \"npm run pdsentry\" \"npm run lpsentry\"",
     
     "//": "individual projects",
     "InstallCommon": "cd projects/common/ && npm install --production",

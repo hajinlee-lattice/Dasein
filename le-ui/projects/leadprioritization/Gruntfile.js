@@ -13,6 +13,7 @@ module.exports = function (grunt) {
             jquery: '2.1.3',
             angular: '1.4.2',
             "angular-ui-bootstrap": '0.12.1',
+            "angular-ui-router": '0.2.15',
             underscore: '1.8.2',
             qtip2: '2.2.1',
             webfont: '1.5.16',
@@ -94,6 +95,7 @@ module.exports = function (grunt) {
                     'jquery/<%= pls.version.jquery %>/jquery.js',
                     'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
                     'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.js',
+                    'angular-ui-router/<%= pls.version["angular-ui-router"] %>/angular-ui-router.js',
                     'qtip2/<%= pls.version.qtip2 %>/jquery.qtip.js',
                     'underscore.js/<%= pls.version.underscore %>/underscore.js',
                     'webfont/<%= pls.version.webfont %>/webfontloader.js',
@@ -103,7 +105,7 @@ module.exports = function (grunt) {
                     'alasql/<%= pls.version.alasql %>/alasql.min.js',
                     'FileSaver.js/<%= pls.version.FileSaver %>/FileSaver.js'
                 ],
-                dest: '<%= pls.app %>/lib/js'
+                dest: '<%= pls.app %>/../common/lib/js'
             },
 
             angular: {
@@ -117,7 +119,7 @@ module.exports = function (grunt) {
                     'angular-sanitize.js',
                     'angular-mocks.js'
                 ],
-                dest: '<%= pls.app %>/lib/js/angular'
+                dest: '<%= pls.app %>/../common/lib/js/angular'
             },
 
             crypto: {
@@ -128,7 +130,7 @@ module.exports = function (grunt) {
                     'core.js',
                     'sha256.js'
                 ],
-                dest: '<%= pls.app %>/lib/js/crypto'
+                dest: '<%= pls.app %>/../common/lib/js/crypto'
             },
 
             css: {
@@ -141,7 +143,7 @@ module.exports = function (grunt) {
                     'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css',
                     'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css.map'
                 ],
-                dest: '<%= pls.app %>/lib/css'
+                dest: '<%= pls.app %>/../common/lib/css'
             },
 
             fonts: {
@@ -156,7 +158,7 @@ module.exports = function (grunt) {
                     'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff',
                     'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
                 ],
-                dest: '<%= pls.app %>/lib/fonts'
+                dest: '<%= pls.app %>/../common/lib/fonts'
             },
 
             kendojs: {
@@ -164,7 +166,7 @@ module.exports = function (grunt) {
                     baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/js/'
                 },
                 src: ['kendo.all.min.js', 'kendo.all.min.js'],
-                dest: '<%= pls.app %>/lib/js'
+                dest: '<%= pls.app %>/../common/lib/js'
             },
 
             kendocss: {
@@ -178,7 +180,7 @@ module.exports = function (grunt) {
                     'kendo.dataviz.bootstrap.min.css',
                     'kendo.mobile.all.min.css'
                 ],
-                dest: '<%= pls.app %>/lib/css'
+                dest: '<%= pls.app %>/../common/lib/css'
             },
 
             kendofonts: {
@@ -186,7 +188,7 @@ module.exports = function (grunt) {
                     baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/images/'
                 },
                 src: ['kendoui.woff', 'kendoui.woff'],
-                dest: '<%= pls.app %>/lib/css/images'
+                dest: '<%= pls.app %>/../common/lib/css/images'
             },
 
             kendoimages: {
@@ -194,7 +196,7 @@ module.exports = function (grunt) {
                     baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/'
                 },
                 src: ['Bootstrap/sprite.png', 'Bootstrap/loading-image.gif'],
-                dest: '<%= pls.app %>/lib/css/Bootstrap'
+                dest: '<%= pls.app %>/../common/lib/css/Bootstrap'
             }
         },
 
@@ -204,7 +206,7 @@ module.exports = function (grunt) {
             lib: {
                 files:   [{
                     dot: true,
-                    src: ['<%= pls.app %>/lib']
+                    src: ['<%= pls.app %>/../common/lib']
                 }],
                 options: {
                     force: true
@@ -278,7 +280,7 @@ module.exports = function (grunt) {
         // Compiles Sass to CSS
         sass: {
             options: {
-                sourcemap: 'none',
+                sourcemap: 'auto',
                 style:     'compressed'
             },
             dist:    {
@@ -323,7 +325,7 @@ module.exports = function (grunt) {
                     expand: true,
                     cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
                     src: ['**/*'],
-                    dest: 'src/main/webapp/'
+                    dest: './'
                 }]
             }
         },
@@ -333,9 +335,9 @@ module.exports = function (grunt) {
             dist: {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
-                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/test/**/*.js'
+                    '!<%= pls.app %>/../common/app/widgets/talkingPointWidget/TalkingPointParser.js',
+                    '!<%= pls.app %>/../common/app/vendor/**/*.js',
+                    '!<%= pls.app %>/../common/app/test/**/*.js'
                 ],
                 options: {
                     eqnull: true,
@@ -348,15 +350,15 @@ module.exports = function (grunt) {
         karma: {
             options: {
                 files:      [
-                    '<%= pls.app %>/app/AppCommon/vendor/*jquery-2.1.1.js',
-                    '<%= pls.app %>/app/AppCommon/vendor/angular/*angular.js',
-                    '<%= pls.app %>/app/AppCommon/vendor/angular/*angular-mocks.js',
-                    '<%= pls.app %>/app/AppCommon/vendor/*underscore.js',
-                    '<%= pls.app %>/app/AppCommon/test/testData/**/*.js',
-                    '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
-                    '<%= pls.app %>/app/**/*.js',
+                    '<%= pls.app %>/../common/app/vendor/*jquery-2.1.1.js',
+                    '<%= pls.app %>/../common/app/vendor/angular/*angular.js',
+                    '<%= pls.app %>/../common/app/vendor/angular/*angular-mocks.js',
+                    '<%= pls.app %>/../common/app/vendor/*underscore.js',
+                    '<%= pls.app %>/../common/app/test/testData/**/*.js',
+                    '<%= pls.app %>/../common/app/test/unit/**/*.js',
+                    '<%= pls.app %>/../common/app/**/*.js',
                     '<%= pls.app %>/test/unit/**/*.js',
-                    '<%= pls.app %>/lib/js/kendo.all.min.js'
+                    '<%= pls.app %>/../common/lib/js/kendo.all.min.js'
                 ],
                 frameworks: ['jasmine']
 
@@ -370,7 +372,7 @@ module.exports = function (grunt) {
                 },
 
                 preprocessors:    {
-                    'src/main/webapp/**/!(angular|vendor|test)/!(*Spec).js': 'coverage'
+                    '/../common/app/**/!(angular|vendor|test)/!(*Spec).js': 'coverage'
                 },
                 coverageReporter: {
                     dir:       'target/jscoverage',
@@ -525,21 +527,17 @@ module.exports = function (grunt) {
             }
         },
 
-        nodemon: {
-          dev: {
-            script: sourceDir + '/server.js'
-          }
-        },
-
         // Watches for changes in the given directories. Scripts watches for javaScript
         // changes, and reruns linting / unit tests. Css watches for changes in sass files
         // and recompiles production.css
         watch: {
             scripts: {
-                files: ['<%= pls.app %>/app/**/*.js',
+                files: [
+                    '<%= pls.app %>/../common/app/**/*.js',
+                    '<%= pls.app %>/app/**/*.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/test/**/*.js',
-                    '!<%= pls.app %>/app/AppCommon/vendor/**/*.js'],
+                    '!<%= pls.app %>/../common/app/vendor/**/*.js'],
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
@@ -588,7 +586,8 @@ module.exports = function (grunt) {
             wget:    ['wget:angular', 'wget:crypto', 'wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
             test:    ['jshint:dist', 'karma:unit'],
             mac:     ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
-            windows: ['e2eChrome']
+            windows: ['e2eChrome'],
+            watch:   ['karma:watch', 'watch:scripts', 'watch:css']
         }
 
     });
@@ -597,26 +596,24 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
-    /*
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-processhtml');
-    grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-ng-annotate');
-    grunt.loadNpmTasks('grunt-protractor-runner');
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-rename');
     grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-http');
+    /*
     grunt.loadNpmTasks('grunt-protractor-coverage');
     grunt.loadNpmTasks('grunt-istanbul');
-    grunt.loadNpmTasks('grunt-nodemon');
+    grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-protractor-runner');
     */
-    
+
     grunt.registerTask('init', [
         'clean:lib',
         'concurrent:wget'
@@ -624,7 +621,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dist', [
         'clean:dist',
-        'concurrent:test',
+        //'concurrent:test',
         'uglify:dist',
         'sass:dist',
         'processhtml:dist'
@@ -709,9 +706,8 @@ module.exports = function (grunt) {
 
     var sentryText = 'Watches for changes in any javascript file, and automatically re-runs linting and karma unit tests. If your computer can handle the strain, this should be running during active develpment';
     grunt.registerTask('sentry', sentryText, [
-        'karma:watch',
-        'nodemon:dev',
-        'watch:scripts',
+        //'karma:watch',
+        //'watch:scripts',
         'watch:css'
     ]);
 
@@ -728,5 +724,4 @@ module.exports = function (grunt) {
         'instrument',
         'copy:instrumented'
     ]);
-
 };

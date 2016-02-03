@@ -336,8 +336,8 @@ module.exports = function (grunt) {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
                     '!<%= pls.app %>/../common/app/widgets/talkingPointWidget/TalkingPointParser.js',
-                    '!<%= pls.app %>/../common/app/AppCommon/vendor/**/*.js',
-                    '!<%= pls.app %>/../common/app/AppCommon/test/**/*.js'
+                    '!<%= pls.app %>/../common/app/vendor/**/*.js',
+                    '!<%= pls.app %>/../common/app/test/**/*.js'
                 ],
                 options: {
                     eqnull: true,
@@ -537,14 +537,11 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/**/*.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/test/**/*.js',
-                    '!<%= pls.app %>/../common/app/AppCommon/vendor/**/*.js'],
+                    '!<%= pls.app %>/../common/app/vendor/**/*.js'],
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
-                files: [
-                    '<%= pls.app %>/assets/styles/**/*.scss',
-                    '<%= pls.app %>/app/**/*.scss'
-                ],
+                files: ['<%= pls.app %>/app/**/*.scss'],
                 tasks: ['sass:dev']
             }
         },
@@ -569,7 +566,7 @@ module.exports = function (grunt) {
         },
 
         instrument: {
-            files: '../common/app/**/**[!vendor]/*[!Spec].js',
+            files: '../common/app/**[!vendor]/*[!Spec].js',
             options: {
             	lazy: true,
                 basePath: "target/protractor_coverage/instrumented"
@@ -599,7 +596,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
     /*
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-concat');
