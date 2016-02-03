@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
-import com.latticeengines.domain.exposed.propdata.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 
 @Component("orbIntelligenceRefreshFlow")
 public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {

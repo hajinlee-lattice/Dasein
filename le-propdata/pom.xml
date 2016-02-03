@@ -257,7 +257,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-propdata</artifactId>
             <version>${project.version}</version>
-            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

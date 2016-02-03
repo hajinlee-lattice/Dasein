@@ -6,19 +6,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.MostRecentDataFlowParameters;
-import com.latticeengines.domain.exposed.propdata.PivotDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.CountFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
@@ -31,6 +36,7 @@ import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGData;
 import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
+import com.latticeengines.propdata.dataflow.common.CountFlow;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("collectionDataFlowService")
@@ -113,6 +119,46 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         DataFlowContext ctx = dataFlowContext(hgData, sources, new DataFlowParameters(), targetPath);
         ctx.setProperty("FLOWNAME", hgData.getSourceName() + "-" + flowName);
         dataTransformationService.executeNamedTransformation(ctx, "hgDataRefreshFlow");
+    }
+
+    @Override
+    public Long executeCountFlow(Table sourceTable) {
+        String uuid = UUID.randomUUID().toString();
+        String targetPath = hdfsPathBuilder.constructCountFlowDir().append(uuid).toString();
+
+        CountFlowParameters parameters = new CountFlowParameters("Source");
+        Map<String, Table> sources = new HashMap<>();
+        sources.put("Source", sourceTable);
+
+        DataFlowContext ctx = new DataFlowContext();
+        if ("mr".equalsIgnoreCase(cascadingPlatform)) {
+            ctx.setProperty("ENGINE", "MR");
+        } else {
+            ctx.setProperty("ENGINE", "TEZ");
+        }
+
+        ctx.setProperty("PARAMETERS", parameters);
+        ctx.setProperty("SOURCETABLES", sources);
+        ctx.setProperty("CUSTOMER", "PropDataCount");
+        ctx.setProperty("RECORDNAME", "PropDataCount");
+        ctx.setProperty("TARGETTABLENAME", "PropDataCount");
+        ctx.setProperty("TARGETPATH", targetPath);
+
+        ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("JOBPROPERTIES", getJobProperties());
+        ctx.setProperty("FLOWNAME", "countFlow");
+        dataTransformationService.executeNamedTransformation(ctx, "countFlow");
+
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, targetPath + "/*.avro");
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, targetPath);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to cleanup CountFlow temp dir.", e);
+        }
+
+        return (Long) records.get(0).get(CountFlow.COUNT);
     }
 
     public void executeMergeRawData(MostRecentSource source, String uid, String dataFlowBean) {

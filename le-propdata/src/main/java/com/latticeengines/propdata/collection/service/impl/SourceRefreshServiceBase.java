@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -15,15 +16,17 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
-import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
+import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -92,24 +95,25 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     }
 
     protected boolean checkProgressStatus(P progress, ProgressStatus expectedStatus, ProgressStatus inProgress) {
-        if (progress == null) { return false; }
+        if (progress == null) {
+            return false;
+        }
 
         if (inProgress.equals(progress.getStatus())) {
             return false;
         }
 
-        if (ProgressStatus.FAILED.equals(progress.getStatus()) && (
-                inProgress.equals(progress.getStatusBeforeFailed()) ||
-                        expectedStatus.equals(progress.getStatusBeforeFailed())
-        ) ) {
+        if (ProgressStatus.FAILED.equals(progress.getStatus()) && (inProgress.equals(progress.getStatusBeforeFailed())
+                || expectedStatus.equals(progress.getStatusBeforeFailed()))) {
             return true;
         }
 
         if (!expectedStatus.equals(progress.getStatus())) {
-            LoggingUtils.logError(getLogger(),
-                    progress, "Progress is not in the status " + expectedStatus + " but rather " +
-                    progress.getStatus() + " before "
-                    + inProgress + ".", new IllegalStateException());
+            LoggingUtils
+                    .logError(getLogger(),
+                            progress, "Progress is not in the status " + expectedStatus + " but rather "
+                                    + progress.getStatus() + " before " + inProgress + ".",
+                            new IllegalStateException());
             return false;
         }
 
@@ -120,11 +124,10 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         if (progress.getStatus().equals(ProgressStatus.FAILED)) {
             int numRetries = progress.getNumRetries() + 1;
             progress.setNumRetries(numRetries);
-            LoggingUtils.logInfo(getLogger(), progress, String.format("Retry [%d] from [%s].",
-                    progress.getNumRetries(), progress.getStatusBeforeFailed()));
+            LoggingUtils.logInfo(getLogger(), progress,
+                    String.format("Retry [%d] from [%s].", progress.getNumRetries(), progress.getStatusBeforeFailed()));
         }
     }
-
 
     protected String snapshotDirInHdfs(P progress) {
         return hdfsPathBuilder.constructSnapshotDir(getSource(), getVersionString(progress)).toString();
@@ -148,7 +151,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     protected void extractSchema(P progress) throws Exception {
         String version = getVersionString(progress);
-        String avscPath =  hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
+        String avscPath = hdfsPathBuilder.constructSchemaFile(getSource(), version).toString();
         if (HdfsUtils.fileExists(yarnConfiguration, avscPath)) {
             HdfsUtils.rmdir(yarnConfiguration, avscPath);
         }
@@ -166,8 +169,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         }
     }
 
-    protected boolean importFromCollectionDB(String table, String targetDir, String splitColumn,
-                                             String whereClause, P progress) {
+    protected boolean importFromCollectionDB(String table, String targetDir, String splitColumn, String whereClause,
+            P progress) {
         try {
             String customer = getSqoopCustomerName(progress);
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, customer, splitColumn, whereClause);
@@ -197,24 +200,34 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     }
 
     protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String customer,
-                                                    String splitColumn, String whereClause) {
+            String splitColumn, String whereClause) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
 
-        SqoopImporter.Builder builder =  new SqoopImporter.Builder()
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
-                .setCustomer(customer + "-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setSplitColumn(splitColumn)
-                .setTable(sqlTable).setTargetDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .setSync(true);
+        SqoopImporter.Builder builder = new SqoopImporter.Builder()
+                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()).setCustomer(customer + "-" + sqlTable)
+                .setNumMappers(numMappers).setSplitColumn(splitColumn).setTable(sqlTable).setTargetDir(avroDir)
+                .setDbCreds(new DbCreds(credsBuilder)).setSync(true);
 
         if (StringUtils.isNotEmpty(whereClause)) {
             builder = builder.addExtraOption("--where").addExtraOption(whereClause);
         }
 
         return builder.build();
+    }
+
+    protected Long countSourceTable(Source source, String version, Date earliest) {
+        if (StringUtils.isEmpty(version)) {
+            version = hdfsSourceEntityMgr.getCurrentVersion(source);
+        }
+        Table sourceTable;
+        if (source instanceof CollectedSource) {
+            sourceTable = hdfsSourceEntityMgr.getCollectedTableSince((CollectedSource) source, earliest);
+        } else {
+            sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, version);
+        }
+
+        return collectionDataFlowService.executeCountFlow(sourceTable);
     }
 
 }

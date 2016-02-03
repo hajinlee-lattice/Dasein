@@ -3,7 +3,7 @@ package com.latticeengines.propdata.dataflow.merge;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
-import com.latticeengines.domain.exposed.propdata.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 import com.latticeengines.propdata.dataflow.function.OldDataCleanupFunction;
 import com.latticeengines.propdata.dataflow.function.DomainCleanupFunction;
 

@@ -18,8 +18,8 @@ import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
-public abstract class AbstractRefreshService
-        extends SourceRefreshServiceBase<RefreshProgress> implements RefreshService {
+public abstract class AbstractRefreshService extends SourceRefreshServiceBase<RefreshProgress>
+        implements RefreshService {
 
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
 
@@ -60,7 +60,6 @@ public abstract class AbstractRefreshService
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMED);
     }
 
-
     @Override
     public RefreshProgress exportToDB(RefreshProgress progress) {
         // check request context
@@ -83,10 +82,10 @@ public abstract class AbstractRefreshService
                 return progress;
             }
 
-            long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable, Long.class);
-            progress.setRowsGenerated(rowsUploaded);
-            LoggingUtils.logInfoWithDuration(getLogger(),
-                    progress, "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
+            long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable,
+                    Long.class);
+            LoggingUtils.logInfoWithDuration(getLogger(), progress,
+                    "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
         }
 
         // finish
@@ -97,8 +96,8 @@ public abstract class AbstractRefreshService
 
     @Override
     public RefreshProgress finish(RefreshProgress progress) {
-        getLogger().info(String.format("Refreshing %s successful, generated Rows=%d",
-                progress.getSourceName(), progress.getRowsGenerated()));
+        getLogger().info(String.format("Refreshing %s successful, generated Rows=%d", progress.getSourceName(),
+                progress.getRowsGenerated()));
         return finishProgress(progress);
     }
 
@@ -151,6 +150,17 @@ public abstract class AbstractRefreshService
             updateStatusToFailed(progress, "Failed to extract schema of " + getSource().getSourceName() + " avsc.", e);
             return false;
         }
+
+        // count output
+        try {
+            Long count = countSourceTable(getSource(), getVersionString(progress), null);
+            progress.setRowsGenerated(count);
+            getLogger().info(
+                    String.format("Generated %d rows for " + getSource().getSourceName(), progress.getRowsGenerated()));
+        } catch (Exception e) {
+            updateStatusToFailed(progress, "Failed to count generated rows " + getSource().getSourceName(), e);
+            return false;
+        }
         return true;
     }
 
@@ -178,7 +188,7 @@ public abstract class AbstractRefreshService
             updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
             return false;
         } finally {
-            FileUtils.deleteQuietly(new File(stageTableName+".java"));
+            FileUtils.deleteQuietly(new File(stageTableName + ".java"));
         }
 
         try {
@@ -206,7 +216,9 @@ public abstract class AbstractRefreshService
         LoggingUtils.logInfo(getLogger(), progress, String.format("Rename %s to %s.", srcTable, destTable));
     }
 
-    protected String getStageTableName() { return ((HasSqlPresence) getSource()).getSqlTableName() + "_stage"; }
+    protected String getStageTableName() {
+        return ((HasSqlPresence) getSource()).getSqlTableName() + "_stage";
+    }
 
     protected void createStageTable() {
         String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());
@@ -216,26 +228,19 @@ public abstract class AbstractRefreshService
     }
 
     protected void createIndicesOnStageTable() {
-        jdbcTemplateCollectionDB.execute(
-                "CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] " +
-                        "([" + getSource().getTimestampField() + "])");
+        jdbcTemplateCollectionDB.execute("CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] " + "(["
+                + getSource().getTimestampField() + "])");
     }
 
     protected SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
 
-        return new SqoopExporter.Builder()
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
-                .setCustomer(customer + "-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setTable(sqlTable).setSourceDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
+        return new SqoopExporter.Builder().setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
+                .setCustomer(customer + "-" + sqlTable).setNumMappers(numMappers).setTable(sqlTable)
+                .setSourceDir(avroDir).setDbCreds(new DbCreds(credsBuilder))
                 .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1")
-                .addExtraOption("--batch")
-                .setSync(true)
-                .build();
+                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").setSync(true).build();
     }
 
 }

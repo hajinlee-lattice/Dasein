@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
-import com.latticeengines.domain.exposed.propdata.PivotDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
 
 import cascading.operation.Buffer;

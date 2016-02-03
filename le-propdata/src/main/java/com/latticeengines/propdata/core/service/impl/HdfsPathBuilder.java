@@ -82,6 +82,11 @@ public class HdfsPathBuilder {
         return baseDir.append(dateFormat.format(archiveDate));
     }
 
+    public Path constructCountFlowDir() {
+        Path baseDir = propDataDir();
+        return baseDir.append("CountFlows");
+    }
+
     public Path predefinedColumnSelectionDir(ColumnSelection.Predefined predefined) {
         return propDataDir().append("ColumnSelections").append(predefined.getName());
     }
@@ -94,5 +99,7 @@ public class HdfsPathBuilder {
         return predefinedColumnSelectionDir(predefined).append(versionFile);
     }
 
-    public void changeHdfsPodId(String podId) { this.podId = podId; }
+    public void changeHdfsPodId(String podId) {
+        this.podId = podId;
+    }
 }
