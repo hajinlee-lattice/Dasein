@@ -56,7 +56,6 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         }
 
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "Transformed.", startTime);
-        progress.setNumRetries(0);
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMED);
     }
 
@@ -90,7 +89,6 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
 
         // finish
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "Uploaded.", startTime);
-        progress.setNumRetries(0);
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADED);
     }
 
@@ -155,8 +153,6 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         try {
             Long count = countSourceTable(getSource(), getVersionString(progress), null);
             progress.setRowsGenerated(count);
-            getLogger().info(
-                    String.format("Generated %d rows for " + getSource().getSourceName(), progress.getRowsGenerated()));
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to count generated rows " + getSource().getSourceName(), e);
             return false;

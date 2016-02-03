@@ -14,8 +14,8 @@ import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.core.source.StageServer;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
-public abstract class AbstractBulkArchiveService
-        extends SourceRefreshServiceBase<ArchiveProgress> implements BulkArchiveService {
+public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBase<ArchiveProgress>
+        implements BulkArchiveService {
 
     private Log log;
     private ArchiveProgressEntityMgr entityMgr;
@@ -65,14 +65,14 @@ public abstract class AbstractBulkArchiveService
             return progress;
         }
 
-
         LoggingUtils.logInfoWithDuration(log, progress, "Downloaded.", startTime);
-        progress.setNumRetries(0);
         return entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADED);
     }
 
     @Override
-    public ArchiveProgress finish(ArchiveProgress progress) { return finishProgress(progress); }
+    public ArchiveProgress finish(ArchiveProgress progress) {
+        return finishProgress(progress);
+    }
 
     private boolean importBulkRawDataAndUpdateProgress(ArchiveProgress progress) {
         String targetDir = snapshotDirInHdfs(progress);
@@ -81,18 +81,14 @@ public abstract class AbstractBulkArchiveService
             return false;
         }
         if (StageServer.COLLECTION_DB.equals(getSource().getBulkStageServer())) {
-            if (!importFromCollectionDB(getSource().getBulkStageTableName(), targetDir, getSrcTableSplitColumn(),
-                    null, progress)) {
-                updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
+            if (!importFromCollectionDB(getSource().getBulkStageTableName(), targetDir, getSrcTableSplitColumn(), null,
+                    progress)) {
+                updateStatusToFailed(progress, "Failed to import bulk data from DB.", null);
                 return false;
             }
         } else {
             return false;
         }
-
-        long rowsDownloaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
-                + getSource().getBulkStageTableName(), Long.class);
-        progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
         // update current version
         try {
@@ -101,6 +97,9 @@ public abstract class AbstractBulkArchiveService
             updateStatusToFailed(progress, "Failed to copy pivoted data to Snapshot folder.", e);
             return false;
         }
+
+        long rowsDownloaded = countSourceTable(getSource(), getVersionString(progress), null);
+        progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
         return true;
     }

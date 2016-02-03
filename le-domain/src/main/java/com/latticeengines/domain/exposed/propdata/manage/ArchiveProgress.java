@@ -27,32 +27,32 @@ public class ArchiveProgress implements Progress {
     @Column(name = "SourceName", nullable = false)
     protected String sourceName;
 
-    @Column(name = "StartDate", nullable = false)
+    @Column(name = "StartDate", nullable = true)
     protected Date startDate;
 
-    @Column(name = "EndDate", nullable = false)
+    @Column(name = "EndDate", nullable = true)
     protected Date endDate;
 
-    @Column(name = "RowsDownloadedToHDFS", nullable = false)
+    @Column(name = "RowsDownloadedToHDFS", nullable = true)
     protected long rowsDownloadedToHdfs;
 
-    @Column(name = "RowsUploadedToSQL", nullable = false)
+    @Column(name = "RowsUploadedToSQL", nullable = true)
     protected long rowsUploadedToSql;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
+    @Column(name = "Status", nullable = true)
     protected ProgressStatus status;
 
-    @Column(name = "LatestStatusUpdate", nullable = false)
+    @Column(name = "LatestStatusUpdate", nullable = true)
     protected Date latestStatusUpdate;
 
     @Column(name = "RootOperationUID", unique = true, nullable = false)
     protected String rootOperationUID;
 
-    @Column(name = "CreatedBy", nullable = false)
+    @Column(name = "CreatedBy", nullable = true)
     protected String createdBy;
 
-    @Column(name = "CreateTime", nullable = false)
+    @Column(name = "CreateTime", nullable = true)
     protected Date createTime = new Date();
 
     @Enumerated(EnumType.STRING)
@@ -76,9 +76,13 @@ public class ArchiveProgress implements Progress {
     }
 
     @Override
-    public String getSourceName() { return sourceName; }
+    public String getSourceName() {
+        return sourceName;
+    }
 
-    public void setSourceName(String sourceName) { this.sourceName = sourceName; }
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
 
     public Date getStartDate() {
         return startDate;
@@ -133,35 +137,59 @@ public class ArchiveProgress implements Progress {
     }
 
     @Override
-    public Date getLatestStatusUpdate() { return latestStatusUpdate; }
+    public Date getLatestStatusUpdate() {
+        return latestStatusUpdate;
+    }
 
-    private void setLatestStatusUpdate(Date latestStatusUpdate) { this.latestStatusUpdate = latestStatusUpdate; }
+    private void setLatestStatusUpdate(Date latestStatusUpdate) {
+        this.latestStatusUpdate = latestStatusUpdate;
+    }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    @Override
-    public Date getCreateTime() { return createTime; }
-
-    public void setCreateTime(Date createTime) { this.createTime = createTime; }
-
-    @Override
-    public ProgressStatus getStatusBeforeFailed() { return statusBeforeFailed; }
-
-    @Override
-    public void setStatusBeforeFailed(ProgressStatus statusBeforeFailed) { this.statusBeforeFailed = statusBeforeFailed; }
-
-    public String getErrorMessage() { return errorMessage; }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
     @Override
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
     @Override
-    public int getNumRetries() { return numRetries; }
+    public ProgressStatus getStatusBeforeFailed() {
+        return statusBeforeFailed;
+    }
 
     @Override
-    public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
+    public void setStatusBeforeFailed(ProgressStatus statusBeforeFailed) {
+        this.statusBeforeFailed = statusBeforeFailed;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public int getNumRetries() {
+        return numRetries;
+    }
+
+    @Override
+    public void setNumRetries(int numRetries) {
+        this.numRetries = numRetries;
+    }
 
     public static ArchiveProgress constructByDates(String sourceName, Date startDate, Date endDate)
             throws InstantiationException, IllegalAccessException {

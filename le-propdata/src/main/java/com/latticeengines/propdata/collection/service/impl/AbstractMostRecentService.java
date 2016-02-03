@@ -16,21 +16,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
 
     @Override
     protected void executeDataFlow(RefreshProgress progress) {
-        collectionDataFlowService.executeMergeRawData(
-                getSource(),
-                progress.getRootOperationUID()
-        );
-    }
-
-    @Override
-    protected void createStageTable() {
-        String sql = "SELECT TOP 0 * INTO [" + getStageTableName() + "] FROM ["
-                + rawCollectedSourceTableName(getSource()) + "]";
-        jdbcTemplateCollectionDB.execute(sql);
-    }
-
-    private String rawCollectedSourceTableName(MostRecentSource source) {
-        return source.getBaseSources()[0].getCollectedTableName();
+        collectionDataFlowService.executeMergeRawData(getSource(), progress.getRootOperationUID());
     }
 
     @Override

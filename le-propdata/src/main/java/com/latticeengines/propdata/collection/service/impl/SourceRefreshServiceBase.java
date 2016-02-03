@@ -227,7 +227,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, version);
         }
 
-        return collectionDataFlowService.executeCountFlow(sourceTable);
+        Long count = collectionDataFlowService.executeCountFlow(sourceTable);
+        getLogger().info(String.format("There are %d rows in " + getSource().getSourceName(), count));
+        return count;
     }
 
 }

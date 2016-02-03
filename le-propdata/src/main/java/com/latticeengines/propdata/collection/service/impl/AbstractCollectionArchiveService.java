@@ -15,9 +15,8 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
-public abstract class AbstractCollectionArchiveService
-        extends SourceRefreshServiceBase<ArchiveProgress> implements CollectedArchiveService {
-
+public abstract class AbstractCollectionArchiveService extends SourceRefreshServiceBase<ArchiveProgress>
+        implements CollectedArchiveService {
 
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
 
@@ -27,8 +26,8 @@ public abstract class AbstractCollectionArchiveService
     @Override
     public ArchiveProgress startNewProgress(Date startDate, Date endDate, String creator) {
         ArchiveProgress progress = getProgressEntityMgr().insertNewProgress(getSource(), startDate, endDate, creator);
-        LoggingUtils.logInfo(getLogger(), progress, "Started a new progress with StartDate=" + startDate
-                + " endDate=" + endDate);
+        LoggingUtils.logInfo(getLogger(), progress,
+                "Started a new progress with StartDate=" + startDate + " endDate=" + endDate);
         return progress;
     }
 
@@ -51,7 +50,6 @@ public abstract class AbstractCollectionArchiveService
         }
 
         LoggingUtils.logInfoWithDuration(getLogger(), progress, "Downloaded.", startTime);
-        progress.setNumRetries(0);
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.DOWNLOADED);
     }
 
@@ -63,7 +61,9 @@ public abstract class AbstractCollectionArchiveService
     }
 
     @Override
-    public ArchiveProgress finish(ArchiveProgress progress) { return finishProgress(progress); }
+    public ArchiveProgress finish(ArchiveProgress progress) {
+        return finishProgress(progress);
+    }
 
     private String incrementalDataDirInHdfs(ArchiveProgress progress) {
         Path incrementalDataDir = hdfsPathBuilder.constructRawIncrementalDir(getSource(), progress.getEndDate());
@@ -83,21 +83,19 @@ public abstract class AbstractCollectionArchiveService
             return false;
         }
 
-        String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
-                progress.getStartDate(), progress.getEndDate());
+        String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
+                progress.getEndDate());
 
         Date earliest = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT MIN([" + getSource().getTimestampField() + "]) FROM "
-                        + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
+                "SELECT MIN([" + getSource().getTimestampField() + "]) FROM " + getSource().getCollectedTableName()
+                        + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earliest);
 
         Date latest = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT MAX([" + getSource().getTimestampField() + "]) FROM "
-                        + getSource().getCollectedTableName() + " WHERE "
-                        + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
+                "SELECT MAX([" + getSource().getTimestampField() + "]) FROM " + getSource().getCollectedTableName()
+                        + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
         LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
@@ -105,16 +103,15 @@ public abstract class AbstractCollectionArchiveService
         progress.setStartDate(earliest);
         progress.setEndDate(latest);
         getProgressEntityMgr().updateProgress(progress);
-        whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(),
-                progress.getStartDate(), progress.getEndDate());
+        whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
+                progress.getEndDate());
 
-        long rowsToDownload = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM "
-                + getSource().getCollectedTableName() + " WHERE "
-                + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
+        long rowsToDownload = jdbcTemplateCollectionDB
+                .queryForObject("SELECT COUNT(*) FROM " + getSource().getCollectedTableName() + " WHERE "
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
 
-        if (rowsToDownload > 0 &&
-                !importFromCollectionDB(getSource().getCollectedTableName(), targetDir, getSource().getDownloadSplitColumn(),
-                whereClause, progress)) {
+        if (rowsToDownload > 0 && !importFromCollectionDB(getSource().getCollectedTableName(), targetDir,
+                getSource().getDownloadSplitColumn(), whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }

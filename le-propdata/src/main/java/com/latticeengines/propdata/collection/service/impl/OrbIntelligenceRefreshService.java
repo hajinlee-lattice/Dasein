@@ -42,14 +42,6 @@ public class OrbIntelligenceRefreshService extends AbstractMostRecentService imp
     }
 
     @Override
-    protected void createStageTable() {
-        String[] statements = sourceColumnEntityMgr.generateCreateTableSqlStatements(getSource(), getStageTableName());
-        for (String statement : statements) {
-            jdbcTemplateCollectionDB.execute(statement);
-        }
-    }
-
-    @Override
     protected void executeDataFlow(RefreshProgress progress) {
         collectionDataFlowService.executeRefreshOrbIntelligence(progress.getRootOperationUID());
     }
