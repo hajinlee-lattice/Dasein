@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.madison.service.impl;
+package com.latticeengines.propdata.dataflow.madison;
 
 import java.util.ArrayList;
 import java.util.List;
