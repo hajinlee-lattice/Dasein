@@ -6,5 +6,6 @@
 
     <import resource="classpath:propdata-madison-context.xml"/>
     <import resource="classpath:propdata-madison-properties-context.xml"/>
+    <import resource="classpath:dataflow-context.xml"/>
 
 </beans>
