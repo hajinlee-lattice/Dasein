@@ -15,7 +15,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
+import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
 import com.latticeengines.skald.CombinationElement;
 import com.latticeengines.skald.CombinationRetriever;
 import com.latticeengines.skald.ProprietaryDataMatcher;

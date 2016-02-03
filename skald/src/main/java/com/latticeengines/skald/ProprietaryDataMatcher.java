@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.skald.model.FieldInterpretation;
-import com.latticeengines.domain.exposed.skald.model.FieldSchema;
-import com.latticeengines.domain.exposed.skald.model.FieldSource;
-import com.latticeengines.domain.exposed.skald.model.FieldType;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 
 @Service
 public class ProprietaryDataMatcher {

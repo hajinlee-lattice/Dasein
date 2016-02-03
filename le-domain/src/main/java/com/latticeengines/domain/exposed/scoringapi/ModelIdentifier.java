@@ -1,24 +1,22 @@
-package com.latticeengines.domain.exposed.skald.model;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class TargetedModel {
-    public TargetedModel(FilterDefinition filter, String model) {
-        this.filter = filter;
-        this.model = model;
+public class ModelIdentifier {
+    public ModelIdentifier(String name, int version) {
+        this.name = name;
+        this.version = version;
     }
 
-    // Serialization constructor.
-    public TargetedModel() {
+    // Serialization Constructor.
+    public ModelIdentifier() {
     }
 
-    // Target filter that applies to this model.
-    public FilterDefinition filter;
+    public String name;
 
-    // Model name, not yet bound to a version.
-    public String model;
+    public int version;
 
     @Override
     public int hashCode() {

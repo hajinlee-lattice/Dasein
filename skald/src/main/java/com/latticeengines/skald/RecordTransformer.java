@@ -7,7 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.domain.exposed.skald.model.TransformDefinition;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 @Service
 public class RecordTransformer {

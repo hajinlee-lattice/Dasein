@@ -1,9 +1,9 @@
 package com.latticeengines.skald;
 
-import com.latticeengines.domain.exposed.skald.model.DataComposition;
-import com.latticeengines.domain.exposed.skald.model.FilterDefinition;
-import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
-import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
+import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.FilterDefinition;
+import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 public class CombinationElement {
     public CombinationElement(FilterDefinition filter, DataComposition data, ModelIdentifier model, ScoreDerivation derivation) {
         this.filter = filter;

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.skald.model;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import java.util.ArrayList;
 

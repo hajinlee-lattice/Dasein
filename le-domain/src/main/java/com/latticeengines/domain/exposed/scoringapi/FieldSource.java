@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.skald.model;
+package com.latticeengines.domain.exposed.scoringapi;
 
 public enum FieldSource {
     // Provided along with the scoring request.

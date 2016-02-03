@@ -17,8 +17,8 @@ import org.jpmml.manager.PMMLManager;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.latticeengines.domain.exposed.skald.model.BucketRange;
-import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
+import com.latticeengines.domain.exposed.scoringapi.BucketRange;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.skald.exposed.ScoreType;
 
 public class ModelEvaluator {
@@ -70,7 +70,7 @@ public class ModelEvaluator {
         if (derivation.percentiles != null) {
             for (int index = 0; index < derivation.percentiles.size(); index++) {
                 if (withinRange(derivation.percentiles.get(index), predicted)) {
-                    result.put(ScoreType.PERCENTILE, index);
+                    result.put(ScoreType.PERCENTILE, index);    // TODO Bernard should this be the percentile value, not the index?
                     break;
                 }
             }

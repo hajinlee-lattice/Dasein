@@ -1,18 +1,24 @@
-package com.latticeengines.domain.exposed.skald.model;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-public class BucketRange {
-    // The user facing display name of this bucket.
-    public String name;
+public class TargetedModel {
+    public TargetedModel(FilterDefinition filter, String model) {
+        this.filter = filter;
+        this.model = model;
+    }
 
-    // Lower inclusive probability bound for this bucket.
-    public Double lower;
+    // Serialization constructor.
+    public TargetedModel() {
+    }
 
-    // Upper exclusive probability bound for this bucket.
-    public Double upper;
+    // Target filter that applies to this model.
+    public FilterDefinition filter;
+
+    // Model name, not yet bound to a version.
+    public String model;
 
     @Override
     public int hashCode() {

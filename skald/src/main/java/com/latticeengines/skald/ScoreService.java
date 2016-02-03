@@ -22,10 +22,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.latticeengines.common.exposed.rest.DetailedErrors;
 import com.latticeengines.common.exposed.util.LogContext;
-import com.latticeengines.domain.exposed.skald.model.FieldInterpretation;
-import com.latticeengines.domain.exposed.skald.model.FieldSchema;
-import com.latticeengines.domain.exposed.skald.model.FieldSource;
-import com.latticeengines.domain.exposed.skald.model.FieldType;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.skald.exposed.ScoreRequest;
 import com.latticeengines.skald.exposed.ScoreType;
 

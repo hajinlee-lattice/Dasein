@@ -1,7 +1,7 @@
 package com.latticeengines.skald.exposed;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.skald.model.ModelCombination;
+import com.latticeengines.domain.exposed.scoringapi.ModelCombination;
 
 public class SetModelCombinationRequest {
     public CustomerSpace space;

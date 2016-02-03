@@ -11,14 +11,14 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import com.latticeengines.domain.exposed.skald.model.FieldSchema;
-import com.latticeengines.domain.exposed.skald.model.FieldType;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 
 public class RecordReader {
     private String path;
     private CSVParser parser;
     private Map<String,FieldSchema> fields;
-    
+
     public RecordReader(String path, Map<String,FieldSchema> fields) throws Exception {
         try {
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
@@ -30,13 +30,13 @@ public class RecordReader {
             throw new RuntimeException("Failed to open record file " + path + " for CSV parsing.", e);
         }
     }
-    
+
     public List<Map<String,Object>> read() throws Exception {
         try {
             List<Map<String,Object>> records = new ArrayList<Map<String,Object>>();
             for (CSVRecord csvrecord : parser.getRecords()) {
                 Map<String,Object> record = new HashMap<String,Object>();
-                
+
                 Iterator<Map.Entry<String,String>> it = csvrecord.toMap().entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry<String, String> pair = it.next();
@@ -47,10 +47,10 @@ public class RecordReader {
                         record.put(fieldname, value);
                     }
                 }
-                
+
                 records.add(record);
             }
-            
+
             return records;
         }
         catch (Exception e) {

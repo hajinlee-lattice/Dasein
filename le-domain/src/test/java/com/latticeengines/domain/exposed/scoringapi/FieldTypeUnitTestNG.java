@@ -1,7 +1,9 @@
-package com.latticeengines.domain.exposed.skald.model;
+package com.latticeengines.domain.exposed.scoringapi;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 
 public class FieldTypeUnitTestNG {
     @Test(groups = "unit")

@@ -14,12 +14,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
-import com.latticeengines.domain.exposed.skald.model.DataComposition;
-import com.latticeengines.domain.exposed.skald.model.ModelCombination;
-import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
-import com.latticeengines.domain.exposed.skald.model.ModelTags;
-import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
-import com.latticeengines.domain.exposed.skald.model.TargetedModel;
+import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.ModelCombination;
+import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
+import com.latticeengines.domain.exposed.scoringapi.ModelTags;
+import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.scoringapi.TargetedModel;
 
 // Retrieves and caches active model structures, transform definitions, and score derivations.
 @Service

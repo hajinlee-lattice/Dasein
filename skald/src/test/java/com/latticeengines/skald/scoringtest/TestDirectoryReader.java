@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.domain.exposed.skald.model.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.skald.CombinationElement;
 import com.latticeengines.skald.exposed.ScoreType;
 
