@@ -277,7 +277,6 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         return results;
     }
 
-    @SuppressWarnings("unchecked")
     private <T> T getenv(String variable, T dflt, Class<T> clazz) {
         String value = System.getenv(variable);
         log.info(variable + ": " + value);
