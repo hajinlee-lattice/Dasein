@@ -1,12 +1,14 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
-import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
@@ -18,10 +20,19 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     @Test(groups = "deployment", enabled = true)
     public void testPredefined() {
-
-        Object[][] data = new Object[][] { { "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
-
+        List<List<Object>> data = MatchResourceTestUtils.getGoodInputData();
         MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = matchProxy.match(input, true);
+        Assert.assertNotNull(output);
+
+        output = matchProxy.match(input, false);
+        Assert.assertNotNull(output);
+    }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testAutoResolvedKeyMap() {
+        List<List<Object>> data = MatchResourceTestUtils.getGoodInputData();
+        MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data, false);
         MatchOutput output = matchProxy.match(input, true);
         Assert.assertNotNull(output);
 

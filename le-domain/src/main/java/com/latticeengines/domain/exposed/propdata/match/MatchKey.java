@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.propdata.match;
 
 public enum MatchKey {
     Domain, // anything can be parsed to domain, email, website, etc.
@@ -11,5 +11,6 @@ public enum MatchKey {
 
     DUNS,
 
-    LatticeAccountID, // internal id for quicker lookup in curated AccountMaster
+    LatticeAccountID; // internal id for quicker lookup in curated AccountMaster
+
 }

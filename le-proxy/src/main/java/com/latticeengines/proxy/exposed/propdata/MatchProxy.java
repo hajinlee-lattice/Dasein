@@ -2,8 +2,8 @@ package com.latticeengines.proxy.exposed.propdata;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
-import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 

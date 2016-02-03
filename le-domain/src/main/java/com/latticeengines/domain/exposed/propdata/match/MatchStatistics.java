@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.propdata.match;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

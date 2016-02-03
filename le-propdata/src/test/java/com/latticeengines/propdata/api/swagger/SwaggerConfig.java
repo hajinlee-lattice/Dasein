@@ -16,25 +16,20 @@ public class SwaggerConfig {
 
     @Autowired
     public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
-       this.springSwaggerConfig = springSwaggerConfig;
+        this.springSwaggerConfig = springSwaggerConfig;
     }
 
     @Bean
-    public SwaggerSpringMvcPlugin customImplementation(){
-       return new SwaggerSpringMvcPlugin(springSwaggerConfig) //
-               .apiInfo(apiInfo());
+    public SwaggerSpringMvcPlugin customImplementation() {
+        return new SwaggerSpringMvcPlugin(springSwaggerConfig) //
+                .apiInfo(apiInfo());
     }
-    
+
     private ApiInfo apiInfo() {
-        ApiInfo apiInfo = new ApiInfo(
-                "Lattice Engines PropData REST API",
-                "This is the REST API exposed for the different Lattice Engines data services.",
-                "termsofservice.html",
-                "rgonzalez@lattice-engines.com",
-                "License",
-                "http://www.apache.org/licenses/LICENSE-2.0"
-          );
+        ApiInfo apiInfo = new ApiInfo("Lattice Engines PropData REST API",
+                "This is the REST API exposed for the different Lattice Engines data services.", "termsofservice.html",
+                "rgonzalez@lattice-engines.com", "License", "http://www.apache.org/licenses/LICENSE-2.0");
         return apiInfo;
-      }
-    
+    }
+
 }

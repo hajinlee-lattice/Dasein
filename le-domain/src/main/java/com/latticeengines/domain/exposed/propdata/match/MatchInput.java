@@ -1,10 +1,12 @@
-package com.latticeengines.domain.exposed.propdata.manage;
+package com.latticeengines.domain.exposed.propdata.match;
 
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -12,9 +14,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class MatchInput {
 
     private MatchEngine matchEngine;
-    private List<MatchKey> keys;
-    private List<List<Object>> data;
     private Tenant tenant;
+
+    private List<String> fields;
+    private List<List<Object>> data;
+
+    // optional, but better to provide. if not, will be resolved from the fields
+    private Map<MatchKey, String> keyMap;
 
     // only one of these is needed, custom selection has higher priority
     private ColumnSelection.Predefined predefinedSelection;
@@ -33,14 +39,24 @@ public class MatchInput {
         this.matchEngine = matchEngine;
     }
 
-    @JsonProperty("Keys")
-    public List<MatchKey> getKeys() {
-        return keys;
+    @JsonProperty("KeyMap")
+    public Map<MatchKey, String> getKeyMap() {
+        return keyMap;
     }
 
-    @JsonProperty("Keys")
-    public void setKeys(List<MatchKey> keys) {
-        this.keys = keys;
+    @JsonProperty("KeyMap")
+    public void setKeyMap(Map<MatchKey, String> keyMap) {
+        this.keyMap = keyMap;
+    }
+
+    @JsonProperty("Fields")
+    public List<String> getFields() {
+        return fields;
+    }
+
+    @JsonProperty("Fields")
+    public void setFields(List<String> fields) {
+        this.fields = fields;
     }
 
     @JsonProperty("Data")
@@ -93,5 +109,7 @@ public class MatchInput {
         this.customSelection = customSelection;
     }
 
-    public enum MatchEngine { RealTime, Bulk }
+    public enum MatchEngine {
+        RealTime, Bulk
+    }
 }

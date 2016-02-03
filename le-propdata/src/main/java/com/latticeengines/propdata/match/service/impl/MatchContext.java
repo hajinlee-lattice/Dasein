@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.manage.MatchStatus;
+import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 
 public class MatchContext {
 

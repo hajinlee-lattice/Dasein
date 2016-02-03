@@ -3,8 +3,8 @@ package com.latticeengines.propdata.api.controller;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
-import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
@@ -14,7 +14,8 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
     public void testPredefined() {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 
-        Object[][] data = new Object[][] { { "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
+        Object[][] data = new Object[][] {
+                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
 
         MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
