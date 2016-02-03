@@ -6,7 +6,14 @@
         </h2>
         <h5>{{ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_INSTRUCTION')}}</h5>
     </div>
-    <div class="content">
+    <div data-ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="showLoadingError" class="global-error local-error">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{loadingError}}</span>
+    </div>
+    <div data-ng-hide="loading || showLoadingError" class="content">
         <div data-ng-show="hasAttributes" class="panel panel-default">
             <div class="panel-body">
                 <div class="data-table">
@@ -15,14 +22,14 @@
                           <tr>
                             <th>{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_NAME')}}</th>
                             <th>{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_FIELD_NAME')}}</th>
-                            <th>{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_FIELD_TYPE')}}</th>
+                            <th class="field-type-col">{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_FIELD_TYPE')}}</th>
                           </tr>
                         </thead>
                         <tbody>
                             <tr data-ng-repeat="attribute in attributes" data-ng-class="{shaded: $index % 2}">
-                                <td>{{attribute.DisplayName}}</td>
-                                <td>Lattice_{{attribute.FieldName}}</td>
-                                <td>{{attribute.FieldType}}</td>
+                                <td>{{attribute.name}}</td>
+                                <td>{{attribute.fieldName}}</td>
+                                <td>{{attribute.fieldType}}</td>
                             </tr>
                          </tbody>
                     </table>

@@ -139,4 +139,18 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             throw new LedpException(LedpCode.LEDP_18079, ex, new String[] { ex.getMessage() });
         }
     }
+
+    @Override
+    public String getTemplateType(Tenant tenant) {
+        try {
+            String tenantName = CustomerSpace.parse(tenant.getId()).getTenantId();
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenant.getId());
+            ConnectionMgr connMgr = connectionMgrFactory.getConnectionMgr(CONNECTION_MGR_TYPE, tenantName, dlUrl);
+            AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions
+                    .getLPTemplateTypeAndVersion(connMgr);
+            return typeAndVersions.getKey();
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18080, ex, new String[] { ex.getMessage() });
+        }
+    }
 }

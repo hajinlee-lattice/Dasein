@@ -12,4 +12,6 @@ public interface LeadEnrichmentService {
     List<LeadEnrichmentAttribute> getAttributes(Tenant tenant);
 
     public void saveAttributes(Tenant tenant, List<LeadEnrichmentAttribute> attributes);
+
+    public String getTemplateType(Tenant tenant);
 }

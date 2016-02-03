@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.LeadEnrichmentService;
@@ -54,5 +55,14 @@ public class LeadEnrichmentResource {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         leadEnrichmentService.saveAttributes(tenant, attributes);
         return true;
+    }
+
+    @RequestMapping(value = "/templatetype", method=RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get template type")
+    public String getTemplateType(HttpServletRequest request) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        String type = leadEnrichmentService.getTemplateType(tenant);
+        return JsonUtils.serialize(type);
     }
 }

@@ -503,6 +503,7 @@ LEAD_ENRICHMENT_SHOW_ALL_ATTRIBUTES=Show All Attributes
 LEAD_ENRICHMENT_GET_AVAILABLE_ATTRIBUTES_ERROR=We are unable to get available attributes at this time.
 LEAD_ENRICHMENT_GET_SELECTED_ATTRIBUTES_ERROR=We are unable to get selected attributes at this time.
 LEAD_ENRICHMENT_SAVE_SELECTED_ATTRIBUTES_ERROR=We are unable to save selected attributes at this time.
+LEAD_ENRICHMENT_GET_TEMPLATE_TYPE_ERROR=We are unable to get template type at this time.
 LEAD_ENRICHMENT_MAX_SELECTED_ATTRIBUTES_TOOLTIP=Once {0} attributes are selected, user cannot select any more.
 LEAD_ENRICHMENT_EXCESS_ATTRIBUTES_ALERT=We cannot add {0} attributes that will let all selected attributes' count is large than the maximum {1}.
 LEAD_ENRICHMENT_CANNOT_SAVE_FOR_EXCESS_ATTRIBUTES=Unable to save attributes more than {0}.

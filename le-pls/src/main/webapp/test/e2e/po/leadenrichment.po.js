@@ -70,7 +70,7 @@ var LeadEnrichment = function() {
         var yesBotton = element(by.id('save-attributes-yes'));
         helper.elementExists(yesBotton, true);
         yesBotton.click();
-        sleep(20000);
+        sleep(24000);
         element(by.id('backLeadEnrichmentButton')).isDisplayed().then(function (displayed){
             expect(displayed).toBe(true);
         });
