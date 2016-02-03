@@ -137,6 +137,10 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
                     String column = rset.getString(1);
                     String metadataName = rset.getString(2);
                     String metadataValue = rset.getString(3);
+                    
+                    if (metadataValue != null) {
+                        metadataValue = metadataValue.trim();
+                    }
 
                     Attribute attr = map.get(column);
 
