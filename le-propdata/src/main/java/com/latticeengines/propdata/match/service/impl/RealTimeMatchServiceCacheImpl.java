@@ -89,12 +89,15 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
         List<ColumnMetadata> allFields = columnMetadataService
                 .fromPredefinedSelection(ColumnSelection.Predefined.Model);
         List<ColumnMetadata> filtered = new ArrayList<>();
+        List<String> outputFields = new ArrayList<>();
         Set<String> columnSet = new HashSet<>(targetColumns);
         for (ColumnMetadata field : allFields) {
             if (columnSet.contains(field.getColumnName())) {
                 filtered.add(field);
+                outputFields.add(field.getColumnName());
             }
         }
+        matchContext.getOutput().setOutputFields(outputFields);
         matchContext.getOutput().setMetadata(filtered);
 
         Calendar calendar = GregorianCalendar.getInstance();
