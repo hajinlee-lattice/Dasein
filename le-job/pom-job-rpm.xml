@@ -52,6 +52,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/buildmachine
                 </proxy.properties.path>
+                <workflow.properties.path>
+                    ../le-workflow/conf/env/buildmachine
+                </workflow.properties.path>
                 <security.properties.path>
                     ../le-security/conf/env/buildmachine
                 </security.properties.path>
@@ -97,6 +100,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/devcluster
                 </proxy.properties.path>
+                <workflow.properties.path>
+                    ../le-workflow/conf/env/devcluster
+                </workflow.properties.path>
                 <camille.properties.path>
                     ../le-camille/conf/env/devcluster
                 </camille.properties.path>
@@ -138,6 +144,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/qacluster
                 </proxy.properties.path>
+                <workflow.properties.path>
+                    ../le-workflow/conf/env/qacluster
+                </workflow.properties.path>
                 <camille.properties.path>
                     ../le-camille/conf/env/qacluster
                 </camille.properties.path>
@@ -179,6 +188,9 @@
                 <proxy.properties.path>
                     ../le-proxy/conf/env/prodcluster
                 </proxy.properties.path>
+                <workflow.properties.path>
+                    ../le-workflow/conf/env/prodcluster
+                </workflow.properties.path>
                 <camille.properties.path>
                     ../le-camille/conf/env/prodcluster
                 </camille.properties.path>
@@ -248,6 +260,9 @@
                                 </source>
                                 <source>
                                     <location>${proxy.properties.path}/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>${workflow.properties.path}/workflow.properties</location>
                                 </source>
                                 <source>
                                     <location>${camille.properties.path}/camille.properties</location>
