@@ -29,18 +29,18 @@ public class RefreshExecutor implements RefreshJobExecutor {
         RefreshProgress refreshProgress = (RefreshProgress) progress;
         refreshProgress = retryJob(refreshProgress);
         switch (refreshProgress.getStatus()) {
-            case NEW:
-                refreshProgress = refreshService.transform(refreshProgress);
-                break;
-            case TRANSFORMED:
-                refreshProgress = refreshService.exportToDB(refreshProgress);
-                break;
-            case UPLOADED:
-                refreshProgress = refreshService.finish(refreshProgress);
-                break;
-            default:
-                log.warn(String.format("Illegal starting status %s for progress %s",
-                        refreshProgress.getStatus(), refreshProgress.getRootOperationUID()));
+        case NEW:
+            refreshProgress = refreshService.transform(refreshProgress);
+            break;
+        case TRANSFORMED:
+            refreshProgress = refreshService.exportToDB(refreshProgress);
+            break;
+        case UPLOADED:
+            refreshProgress = refreshService.finish(refreshProgress);
+            break;
+        default:
+            log.warn(String.format("Illegal starting status %s for progress %s", refreshProgress.getStatus(),
+                    refreshProgress.getRootOperationUID()));
         }
         if (refreshProgress.getStatus().equals(ProgressStatus.FAILED)) {
             logJobFailed(refreshProgress);
@@ -54,20 +54,24 @@ public class RefreshExecutor implements RefreshJobExecutor {
         int retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
-                String baseVersion =  refreshService.findBaseVersionForNewProgress();
+                String baseVersion = refreshService.findBaseVersionForNewProgress();
 
                 if (baseVersion != null) {
                     refreshService.startNewProgress(new Date(), baseVersion, jobSubmitter);
                     return;
                 }
-
-                Thread.sleep(1800 * 1000L);
             } catch (Exception e) {
                 log.error(e);
+            } finally {
+                try {
+                    Thread.sleep(1800 * 1000L);
+                } catch (InterruptedException e) {
+                    log.error(e);
+                }
             }
         }
         log.error("Failed to find a chance to kick off a refresh of " + refreshService.getSource().getSourceName()
-            + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
+                + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
     }
 
     private RefreshProgress retryJob(RefreshProgress progress) {
@@ -75,16 +79,16 @@ public class RefreshExecutor implements RefreshJobExecutor {
             log.info("Found a job to retry: " + progress);
             ProgressStatus resumeStatus;
             switch (progress.getStatusBeforeFailed()) {
-                case NEW:
-                case TRANSFORMING:
-                    resumeStatus = ProgressStatus.NEW;
-                    break;
-                case TRANSFORMED:
-                case UPLOADING:
-                    resumeStatus = ProgressStatus.TRANSFORMED;
-                    break;
-                default:
-                    resumeStatus = ProgressStatus.NEW;
+            case NEW:
+            case TRANSFORMING:
+                resumeStatus = ProgressStatus.NEW;
+                break;
+            case TRANSFORMED:
+            case UPLOADING:
+                resumeStatus = ProgressStatus.TRANSFORMED;
+                break;
+            default:
+                resumeStatus = ProgressStatus.NEW;
             }
             progress.setStatus(resumeStatus);
             progress.setNumRetries(progress.getNumRetries() + 1);
@@ -93,12 +97,12 @@ public class RefreshExecutor implements RefreshJobExecutor {
     }
 
     private void logJobSucceed(RefreshProgress progress) {
-        log.info("Refreshing " + progress.getSourceName() + " finished for date " +
-                progress.getPivotDate() + " RootOperationUID=" + progress.getRootOperationUID());
+        log.info("Refreshing " + progress.getSourceName() + " finished for date " + progress.getPivotDate()
+                + " RootOperationUID=" + progress.getRootOperationUID());
     }
 
     private void logJobFailed(RefreshProgress progress) {
-        log.error("Refreshing " + progress.getSourceName() + " finished for date " +
-                progress.getPivotDate() +" RootOperationUID=" + progress.getRootOperationUID());
+        log.error("Refreshing " + progress.getSourceName() + " finished for date " + progress.getPivotDate()
+                + " RootOperationUID=" + progress.getRootOperationUID());
     }
 }
