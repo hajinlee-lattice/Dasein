@@ -140,7 +140,7 @@ console.log('LoginController init');
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
 
             if (!scope.isLoggedInWithTempPassword) {
-                window.open("/pd/#/jobs/import/credentials", "_self");
+                //window.open("/pd/#/jobs/import/credentials", "_self");
             }
 
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
