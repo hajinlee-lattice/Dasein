@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-scoringapi</artifactId>
+    <packaging>war</packaging>
+    <name>${component-name}</name>
+    <description>LE Scoring API</description>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.20-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <properties>
+        <component-name>scoringapi</component-name>
+        <le.common.version>2.0.20-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.20-SNAPSHOT</le.domain.version>
+        <jpmml.version>2.0.0</jpmml.version>
+        <le.camille.version>2.0.20-SNAPSHOT</le.camille.version>
+        <jackson.version>2.4.1</jackson.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <attachClasses>true</attachClasses>
+                    <classesClassifier>classes</classesClassifier>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+   <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                        <exclude>${deployment.classes.include}</exclude>
+                                        <exclude>${infrastructure.classes.include}</exclude>
+                                    </excludes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <useTestClasspath>true</useTestClasspath>
+                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
+                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
+                            <webAppConfig>
+                                <extraClasspath>
+                                    ${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                </extraClasspath>
+                            </webAppConfig>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>com.latticeengines.registerBootstrappers</name>
+                                    <value>true</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.ow2.asm</groupId>
+                                <artifactId>asm-commons</artifactId>
+                                <version>5.0.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
+       <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>apache-log4j-extras</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+	    <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+        <dependency>
+            <groupId>org.jpmml</groupId>
+            <artifactId>pmml-evaluator</artifactId>
+            <version>${jpmml.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.mangofactory</groupId>
+            <artifactId>swagger-springmvc</artifactId>
+            <version>0.9.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ajar</groupId>
+            <artifactId>swagger-spring-mvc-ui</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

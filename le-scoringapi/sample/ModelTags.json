@@ -1,0 +1,4 @@
+{
+	"space": {"contractId": "<<contract_id>>", "tenantId": "<<tenant_id>>", "spaceId": "<<space_id>>"},
+	"tags": {"<<model_name>>": {"active": 1}}
+}

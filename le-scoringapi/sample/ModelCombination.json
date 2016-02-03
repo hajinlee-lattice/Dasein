@@ -1,0 +1,5 @@
+{
+	"space": {"contractId": "<<contract_id>>", "tenantId": "<<tenant_id>>", "spaceId": "<<space_id>>"},
+	"name": "realtime",
+	"combination": [{"filter": null, "model": "<<model_name>>"}]
+}
