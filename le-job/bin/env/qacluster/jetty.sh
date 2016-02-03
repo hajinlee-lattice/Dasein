@@ -80,6 +80,7 @@ NAME=$(echo $(basename $0) | sed -e 's/^[SK][0-9]*//' -e 's/\.sh$//')
 #   have shell access, e.g. /bin/false
 #
 
+
 JETTY_HOME=/opt/jetty
 JETTY_USER=yarn
 JETTY_HOST=0.0.0.0
@@ -87,10 +88,8 @@ JETTY_LOGS=logs
 JETTY_ARGS="jetty.host=0.0.0.0 jetty.port=8070"
 HADOOP_HOME=/usr/hdp/current/hadoop-client
 HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
-HADOOP_CONF=--lib=/etc/hadoop/conf
+HADOOP_CONF=--lib=/etc/hadoop/conf:/etc/tez/conf
 SQOOP_HOME=/usr/hdp/current/sqoop-server
-TEZ_CONF=/etc/tez/conf
-TEZ_CONF_DIR=/etc/tez/conf
 JAVA_HOME=/usr/java/default
 
 JAVA_OPTIONS=(-Xms1g -Xmx6g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty:/etc/tez/conf)

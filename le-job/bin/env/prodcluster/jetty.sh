@@ -87,11 +87,9 @@ JETTY_LOGS=logs
 JETTY_ARGS="jetty.host=0.0.0.0 jetty.port=8070"
 HADOOP_HOME=/usr/hdp/current/hadoop-client
 HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
-HADOOP_CONF=--lib=/etc/hadoop/conf
+HADOOP_CONF=--lib=/etc/hadoop/conf:/etc/tez/conf
 SQOOP_HOME=/usr/hdp/current/sqoop-server
 JAVA_HOME=/usr/java/default
-TEZ_CONF=/etc/tez/conf
-TEZ_CONF_DIR=/etc/tez/conf
 
 JAVA_OPTIONS=(-Xms1g -Xmx22g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true)
 JAVA_OPTIONS+=(-Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty:/etc/tez/conf)
