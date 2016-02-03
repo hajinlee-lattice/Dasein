@@ -6,17 +6,16 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.match"/>
 
-    <import resource="classpath:propdata-core-context.xml" />
-    <import resource="classpath:propdata-persistence-context.xml" />
-    <import resource="classpath:propdata-persistence-match-context.xml" />
-    <import resource="classpath:dataflow-context.xml" />
+    <import resource="classpath:propdata-core-context.xml"/>
+    <import resource="classpath:propdata-persistence-match-context.xml"/>
+    <import resource="classpath:dataflow-context.xml"/>
 
     <bean id="externalColumnDao" class="com.latticeengines.propdata.match.dao.impl.ExternalColumnDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
     <bean id="columnMappingDao" class="com.latticeengines.propdata.match.dao.impl.ColumnMappingDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage" />
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
 </beans>
