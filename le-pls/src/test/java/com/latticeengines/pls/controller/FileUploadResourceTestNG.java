@@ -50,7 +50,6 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         sourceFileEntityMgr.deleteAll();
     }
 
-    @SuppressWarnings("unchecked")
     private ResponseDocument<SourceFile> submitFile(boolean unnamed) throws Exception {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", new ClassPathResource(PATH));
