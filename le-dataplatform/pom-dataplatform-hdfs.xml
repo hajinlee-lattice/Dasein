@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-dataplatform-hdfs</artifactId>
+    <artifactId>le-dataplatform-hdfs-rpm</artifactId>
     <packaging>rpm</packaging>
     <description>LE DATAPLATFORM NO DEPENDENCY RPM</description>
 
