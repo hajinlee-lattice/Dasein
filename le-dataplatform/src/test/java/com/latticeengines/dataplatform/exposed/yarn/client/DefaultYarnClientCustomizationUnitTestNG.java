@@ -46,11 +46,11 @@ public class DefaultYarnClientCustomizationUnitTestNG {
     @DataProvider(name = "settings")
     public Object[][] getSettings() {
         return new Object[][] {
-                { 1024, "2048", "-Xmx" + (2048 - 512) + "m"}, //
-                { -1, "2048", "-Xmx" + (2048 - 512) + "m"}, //
-                { 2048, "1024", "-Xmx" + (2048 - 512) + "m"}, //
-                { 2048, null, "-Xmx" + (2048 - 512) + "m"}, //
-                { -1, null, "-Xmx1024m"}, //
+                { 1024, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
+                { -1, "2048", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
+                { 2048, "1024", "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
+                { 2048, null, "-Xmx" + (2048 - 512) + "m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
+                { -1, null, "-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m"}, //
         };
     }
 }
