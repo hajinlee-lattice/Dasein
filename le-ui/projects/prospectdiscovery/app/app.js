@@ -1,8 +1,6 @@
 //Initial load of the application    
 var mainApp = angular.module('mainApp', [
-    'ui.router',
     'ui.bootstrap',
-    'ngAnimate',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',

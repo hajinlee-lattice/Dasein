@@ -42,7 +42,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createManageCredentialsView() {
         // Set the hash
-        window.location.hash = NavUtility.MANAGE_CREDENTIALS_HASH;
+        //window.location.hash = NavUtility.MANAGE_CREDENTIALS_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/config/views/ManageCredentialsView.html').success(function (html) {
@@ -62,7 +62,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createUpdatePasswordView() {
         // Set the hash
-        window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
+        //window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
@@ -75,7 +75,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createUpdatePasswordSuccessView() {
         // Set the hash
-        window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
+        //window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
         $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
@@ -89,7 +89,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createUserManagementView() {
         // Set the hash
-        window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
+        //window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/userManagement/views/UserManagementView.html').success(function (html) {
@@ -105,7 +105,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createAdminInfoView(data) {
         // Set the hash
-        window.location.hash = NavUtility.ADMIN_INFO_HASH;
+        //window.location.hash = NavUtility.ADMIN_INFO_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
@@ -120,7 +120,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     });
 
     function modelCreationHistoryView() {
-        window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
+        //window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
 
         $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -146,7 +146,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createModelListView() {
         // Set the hash
-        window.location.hash = NavUtility.MODEL_LIST_HASH;
+        //window.location.hash = NavUtility.MODEL_LIST_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelListView.html').success(function (html) {
@@ -162,7 +162,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createModelDetailView(data) {
         // Set the hash
-        window.location.hash = NavUtility.MODEL_DETAIL_HASH;
+        //window.location.hash = NavUtility.MODEL_DETAIL_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelDetailView.html').success(function (html) {
@@ -179,7 +179,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createActivateModelView() {
         // Set the hash
-        window.location.hash = NavUtility.ACTIVATE_MODEL;
+        //window.location.hash = NavUtility.ACTIVATE_MODEL;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ActivateModelView.html').success(function (html) {
@@ -195,7 +195,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createSetupView() {
         // Set the hash
-        window.location.hash = NavUtility.SETUP_HASH;
+        //window.location.hash = NavUtility.SETUP_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/SetupView.html').success(function (html) {
@@ -211,7 +211,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createDeploymentWizardView() {
         // Set the hash
-        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+        //window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/DeploymentWizardView.html').success(function (html) {
@@ -227,7 +227,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createLeadEnrichmentView() {
         // Set the hash
-        window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
+        //window.location.hash = NavUtility.DEPLOYMENT_WIZARD_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/LeadEnrichmentView.html').success(function (html) {
