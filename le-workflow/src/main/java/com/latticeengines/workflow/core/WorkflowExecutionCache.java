@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -140,22 +141,60 @@ public class WorkflowExecutionCache {
         return steps;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Report> getReports(JobExecution jobExecution) {
         ExecutionContext context = jobExecution.getExecutionContext();
-        return (List<Report>) context.get(WorkflowContextConstants.REPORTS);
+        Object contextObj = context.get(WorkflowContextConstants.REPORTS);
+        List<Report> reports = new ArrayList<>();
+        if (contextObj instanceof List) {
+            for (Object obj : (List) contextObj) {
+                if (obj instanceof Report) {
+                    reports.add((Report) obj);
+                } else {
+                    throw new RuntimeException("Failed to convert context object to List<Report>.");
+                }
+            }
+        } else {
+            throw new RuntimeException("Failed to convert context object to List<Report>.");
+        }
+        return reports;
     }
 
-    @SuppressWarnings("unchecked")
     private List<SourceFile> getSourceFiles(JobExecution jobExecution) {
         ExecutionContext context = jobExecution.getExecutionContext();
-        return (List<SourceFile>) context.get(WorkflowContextConstants.SOURCE_FILES);
+        Object contextObj = context.get(WorkflowContextConstants.SOURCE_FILES);
+        List<SourceFile> sourceFiles = new ArrayList<>();
+        if (contextObj instanceof List) {
+            for (Object obj : (List) contextObj) {
+                if (obj instanceof SourceFile) {
+                    sourceFiles.add((SourceFile) obj);
+                } else {
+                    throw new RuntimeException("Failed to convert context object to List<SourceFile>.");
+                }
+            }
+        } else {
+            throw new RuntimeException("Failed to convert context object to List<SourceFile>.");
+        }
+        return sourceFiles;
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, String> getOutputs(JobExecution jobExecution) {
         ExecutionContext context = jobExecution.getExecutionContext();
-        return (Map<String, String>) context.get(WorkflowContextConstants.OUTPUTS);
+        Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
+        Map<String, String> outputs = new HashMap<>();
+        if (contextObj instanceof Map) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) contextObj).entrySet()) {
+                if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
+                    outputs.put((String) entry.getKey(), (String) entry.getValue());
+                } else {
+                    throw new RuntimeException("Failed to convert context object to Map<String, String>.");
+                }
+            }
+        } else {
+            throw new RuntimeException("Failed to convert context object to Map<String, String>.");
+        }
+        return outputs;
+
     }
 
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {
