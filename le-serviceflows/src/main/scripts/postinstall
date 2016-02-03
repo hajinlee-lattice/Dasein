@@ -7,6 +7,7 @@ if test $SNAPSHOT = "SNAPSHOT"
     then
         VERSION=$VERSION-"SNAPSHOT"
 fi
+
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
     -m dataflowapi \
@@ -15,3 +16,12 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -v $VERSION \
     -i com.latticeengines.prospectdiscovery.Initializer \
     -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
+
+java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
+    -o install \
+    -m propdata \
+    -g com.latticeengines \
+    -a le-serviceflows \
+    -v $VERSION \
+    -i com.latticeengines.propdata.Initializer \
+    -f /tmp/le-serviceflows-propdata-*-shaded.jar

@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.propdata.manage.OutputRecord;
 import com.latticeengines.propdata.core.datasource.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
-import com.latticeengines.propdata.core.util.DomainUtils;
+import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;

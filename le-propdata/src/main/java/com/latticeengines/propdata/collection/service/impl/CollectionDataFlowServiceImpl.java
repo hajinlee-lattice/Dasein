@@ -17,12 +17,12 @@ import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.propdata.collection.dataflow.merge.MostRecentDataFlowParameters;
-import com.latticeengines.propdata.collection.dataflow.pivot.PivotDataFlowParameters;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.domain.exposed.propdata.MostRecentDataFlowParameters;
+import com.latticeengines.domain.exposed.propdata.PivotDataFlowParameters;
 import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
@@ -74,7 +74,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         List<String> baseTables = new ArrayList<>();
         String[] versions = baseVersion.split("\\|");
         int i = 0;
-        for (Source baseSource: source.getBaseSources()) {
+        for (Source baseSource : source.getBaseSources()) {
             String version = versions[i];
             Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
             sources.put(baseSource.getSourceName(), baseTable);
@@ -90,10 +90,11 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        if (StringUtils.isEmpty(flowBean)) { flowBean = "pivotFlow"; }
+        if (StringUtils.isEmpty(flowBean)) {
+            flowBean = "pivotFlow";
+        }
         dataTransformationService.executeNamedTransformation(ctx, flowBean);
     }
-
 
     @Override
     public void executeRefreshOrbIntelligence(String uid) {
@@ -107,7 +108,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(hgData.getBaseSources()[0], baseVersion);
         Map<String, Table> sources = new HashMap<>();
-        sources.put(CollectionDataFlowKeys.SOURCE, baseTable);
+        sources.put("Source", baseTable);
 
         DataFlowContext ctx = dataFlowContext(hgData, sources, new DataFlowParameters(), targetPath);
         ctx.setProperty("FLOWNAME", hgData.getSourceName() + "-" + flowName);
@@ -138,10 +139,8 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
 
-    private DataFlowContext dataFlowContext(Source source,
-                                            Map<String, Table> sources,
-                                            DataFlowParameters parameters,
-                                            String outputDir) {
+    private DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
+            String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
         if ("mr".equalsIgnoreCase(cascadingPlatform)) {

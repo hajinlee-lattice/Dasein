@@ -16,14 +16,6 @@
 
     <properties>
         <component-name>propdata</component-name>
-        <le.cassandra.version>2.0.20-SNAPSHOT</le.cassandra.version>
-        <le.db.version>2.0.20-SNAPSHOT</le.db.version>
-        <le.dataflow.version>2.0.20-SNAPSHOT</le.dataflow.version>
-        <le.dataplatform.version>2.0.20-SNAPSHOT</le.dataplatform.version>
-        <le.propdata.version>2.0.20-SNAPSHOT</le.propdata.version>
-        <le.network.version>2.0.20-SNAPSHOT</le.network.version>
-        <le.proxy.version>2.0.20-SNAPSHOT</le.proxy.version>
-        <le.camille.version>2.0.20-SNAPSHOT</le.camille.version>
     </properties>
 
     <profiles>
@@ -78,7 +70,8 @@
                                 <port>8080</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                </extraClasspath>
                             </webAppConfig>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
@@ -94,11 +87,6 @@
                                 <groupId>org.ow2.asm</groupId>
                                 <artifactId>asm-commons</artifactId>
                                 <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>com.sun.mail</groupId>
-                                <artifactId>javax.mail</artifactId>
-                                <version>1.5.4</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -171,19 +159,19 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-cassandra</artifactId>
-            <version>${le.cassandra.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-cassandra</artifactId>
-            <version>${le.cassandra.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <version>${project.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -195,7 +183,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
-            <version>${le.dataflow.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -221,7 +209,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
-            <version>${le.dataplatform.version}</version>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
@@ -264,6 +252,35 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-propdata</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${project.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
@@ -333,34 +350,6 @@
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-network</artifactId>
-            <version>${le.network.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-proxy</artifactId>
-            <version>${le.proxy.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${tez.guava.version}</version>
         </dependency>
     </dependencies>
 

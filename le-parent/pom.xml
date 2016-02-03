@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
@@ -12,9 +12,9 @@
 
     <properties>
         <branchPath>trunk</branchPath>
-        <argLine />
-        <svnrepourl />
-        <nexusrepourl />
+        <argLine/>
+        <svnrepourl/>
+        <nexusrepourl/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -47,6 +47,7 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
+        <joda.version>2.3</joda.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
@@ -144,15 +145,15 @@
                                 <configuration>
                                     <transformers>
                                         <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>META-INF/spring.handlers</resource>
                                         </transformer>
                                         <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                             <resource>META-INF/spring.schemas</resource>
                                         </transformer>
                                         <transformer
-                                            implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     </transformers>
                                 </configuration>
                             </execution>
@@ -282,7 +283,8 @@
                                     <groups>${functional.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
+                                        </additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
@@ -327,7 +329,8 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <argLine>${maxpermsize}
-                                        ${argLine}</argLine>
+                                        ${argLine}
+                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
@@ -335,7 +338,8 @@
                                     <groups>${deployment.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
+                                        </additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                     <runOrder>
@@ -389,7 +393,8 @@
                                 <phase>integration-test</phase>
                                 <configuration>
                                     <argLine>${maxpermsize}
-                                        ${argLine}</argLine>
+                                        ${argLine}
+                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${infrastructure.classes.include}</include>
@@ -397,7 +402,8 @@
                                     <groups>${infrastructure.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
+                                        </additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>
@@ -490,32 +496,32 @@
                                 <configuration>
                                     <target>
                                         <!-- Execute an ant task within maven -->
-                                        <echo message="Generating jacoco reports..." />
+                                        <echo message="Generating jacoco reports..."/>
                                         <taskdef name="report" classname="org.jacoco.ant.ReportTask">
                                             <classpath
-                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                                    path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar"/>
                                         </taskdef>
-                                        <mkdir dir="${jacoco.coverage.dir}/site/jacoco" />
+                                        <mkdir dir="${jacoco.coverage.dir}/site/jacoco"/>
                                         <report>
                                             <executiondata>
                                                 <fileset dir="${jacoco.coverage.dir}/jacoco">
-                                                    <include name="*.exec" />
+                                                    <include name="*.exec"/>
                                                 </fileset>
                                             </executiondata>
                                             <structure name="Jacoco Multi-Run Coverage Project">
                                                 <group name="jacoco-multi-run-coverage">
                                                     <classfiles>
                                                         <fileset
-                                                            dir="${project.build.directory}/classes" />
+                                                                dir="${project.build.directory}/classes"/>
                                                     </classfiles>
                                                     <sourcefiles encoding="UTF-8">
-                                                        <fileset dir="${project.build.sourceDirectory}" />
+                                                        <fileset dir="${project.build.sourceDirectory}"/>
                                                     </sourcefiles>
                                                 </group>
                                             </structure>
-                                            <html destdir="${jacoco.coverage.dir}/site/jacoco" />
-                                            <xml destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
-                                            <csv destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
+                                            <html destdir="${jacoco.coverage.dir}/site/jacoco"/>
+                                            <xml destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml"/>
+                                            <csv destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv"/>
                                         </report>
                                     </target>
                                 </configuration>
@@ -710,7 +716,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute />
+                                        <execute/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -784,7 +790,7 @@
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.3</version>
+            <version>${joda.version}</version>
         </dependency>
 
         <dependency>

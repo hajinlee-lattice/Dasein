@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-serviceflows</artifactId>
@@ -28,6 +28,7 @@
 
     <modules>
         <module>core</module>
+        <module>propdata</module>
         <module>prospectdiscovery</module>
         <module>leadprioritization</module>
     </modules>
@@ -75,7 +76,8 @@
                                     <groups>${functional.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <classpathDependencyExcludes>
-                                        <classpathDependencyExcludes>${env.HADOOP_HOME}/etc/hadoop</classpathDependencyExcludes>
+                                        <classpathDependencyExcludes>${env.HADOOP_HOME}/etc/hadoop
+                                        </classpathDependencyExcludes>
                                         <classpathDependencyExcludes>${env.TEZ_CONF_DIR}</classpathDependencyExcludes>
                                     </classpathDependencyExcludes>
                                 </configuration>
@@ -127,7 +129,8 @@
                                     <groups>${functional.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop
+                                        </additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                     </additionalClasspathElements>
                                 </configuration>

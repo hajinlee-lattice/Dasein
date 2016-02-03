@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.MatchInput;
 import com.latticeengines.domain.exposed.propdata.manage.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
@@ -20,14 +19,11 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Test(groups = "deployment", enabled = true)
     public void testPredefined() {
 
-        Object[][] data = new Object[][]{
-                {"chevron.com", "Chevron"}
-        };
+        Object[][] data = new Object[][] { { "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
 
-        MatchInput input = MatchResourceFunctionalTestNG.prepareSimpleMatchInput(data);
+        MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
         MatchOutput output = matchProxy.match(input, true);
         Assert.assertNotNull(output);
-        System.out.println(JsonUtils.serialize(output));
 
         output = matchProxy.match(input, false);
         Assert.assertNotNull(output);

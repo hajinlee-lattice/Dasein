@@ -257,7 +257,8 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         });
     }
 
-    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right, String rightId) {
+    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right,
+            String rightId) {
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 
@@ -276,6 +277,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
         return results;
     }
 
+    @SuppressWarnings("unchecked")
     private <T> T getenv(String variable, T dflt, Class<T> clazz) {
         String value = System.getenv(variable);
         log.info(variable + ": " + value);
@@ -283,7 +285,7 @@ public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpr
             return dflt;
         }
         try {
-            return clazz.getConstructor(new Class[] { String.class }).newInstance(value);
+            return (T) clazz.getConstructor(new Class[] { String.class }).newInstance(value);
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to parse %s as a %s", value, clazz.getSimpleName()));
         }
