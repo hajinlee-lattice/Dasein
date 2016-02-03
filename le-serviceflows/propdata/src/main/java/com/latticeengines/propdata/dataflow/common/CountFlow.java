@@ -19,6 +19,7 @@ public class CountFlow extends TypesafeDataFlowBuilder<CountFlowParameters> {
         source = source.addRowID("ID");
         source = removeCountField(source);
         source = source.aggregate(new Aggregation("ID", COUNT, Aggregation.AggregationType.COUNT));
+        source = source.retain(new FieldList(COUNT));
         return source;
     }
 
