@@ -2,8 +2,6 @@ package com.latticeengines.propdata.match.service.impl;
 
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 
-import cascading.operation.Debug;
-
 public class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;

@@ -13,7 +13,6 @@ import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 @Component
 public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
     @Autowired
     private RealTimeMatchServiceCacheImpl matchService;
 

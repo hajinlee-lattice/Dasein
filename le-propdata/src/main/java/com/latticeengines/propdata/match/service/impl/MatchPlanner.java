@@ -1,16 +1,13 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
