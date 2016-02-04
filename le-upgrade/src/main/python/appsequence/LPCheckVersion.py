@@ -107,6 +107,7 @@ class LPCheckVersion( StepBase ):
     return s.group(1)
 
   def parseScoreField(self, str, type, version):
+    s = None
     if version < 2.1:
       if type == 'MKTO':
         s = re.search('<cm scn=\"Score\" tcn=\"(.*?)\"/>', str)
@@ -132,6 +133,9 @@ class LPCheckVersion( StepBase ):
     return s.group(1)
 
   def parseScoreDateField(self, str, type, version):
+
+    s = None
+
     if type == 'MKTO':
       s = re.search('queryColumnName=\"Score_Date_Time\" fsColumnName=\"(.*?)\"', str)
     elif type == 'ELQ':
