@@ -30,7 +30,7 @@ public class MatchOutput {
     private Tenant submittedBy;
     private Date receivedAt;
     private Date finishedAt;
-    private String rootOperationUID = UUID.randomUUID().toString();
+    private String rootOperationUID = UUID.randomUUID().toString().toUpperCase();
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
