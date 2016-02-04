@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.match;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,7 +16,7 @@ public class OutputRecord {
     private List<Object> input;
     private String matchedDomain;
     private List<Object> output;
-    private String errorMessage;
+    private List<String> errorMessages;
 
     @JsonProperty("RowNumber")
     public Integer getRowNumber() {
@@ -68,12 +69,23 @@ public class OutputRecord {
     }
 
     @JsonProperty("ErrorMessage")
-    public String getErrorMessage() {
-        return errorMessage;
+    public List<String> getErrorMessages() {
+        return errorMessages;
     }
 
     @JsonProperty("ErrorMessage")
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setErrorMessages(List<String> errorMessages) {
+        this.errorMessages = errorMessages;
+    }
+
+    public void addErrorMessage(String errorMessage) {
+        List<String> msgs;
+        if (this.errorMessages == null) {
+            msgs = new ArrayList<>();
+        } else {
+            msgs = new ArrayList<>(this.errorMessages);
+        }
+        msgs.add(errorMessage);
+        this.errorMessages = msgs;
     }
 }

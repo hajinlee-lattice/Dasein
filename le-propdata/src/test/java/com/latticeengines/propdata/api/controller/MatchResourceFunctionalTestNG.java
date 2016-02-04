@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
+import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
     private static final String MATCH_ENDPOINT = "propdata/matches";
@@ -17,7 +18,7 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
 
-        MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
     }

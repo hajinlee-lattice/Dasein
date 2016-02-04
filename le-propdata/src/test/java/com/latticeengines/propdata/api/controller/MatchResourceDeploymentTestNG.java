@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
 @Component
@@ -20,8 +21,8 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     @Test(groups = "deployment", enabled = true)
     public void testPredefined() {
-        List<List<Object>> data = MatchResourceTestUtils.getGoodInputData();
-        MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
+        List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = matchProxy.match(input, true);
         Assert.assertNotNull(output);
 
@@ -31,8 +32,8 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     @Test(groups = "deployment", enabled = true)
     public void testAutoResolvedKeyMap() {
-        List<List<Object>> data = MatchResourceTestUtils.getGoodInputData();
-        MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data, false);
+        List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
         MatchOutput output = matchProxy.match(input, true);
         Assert.assertNotNull(output);
 

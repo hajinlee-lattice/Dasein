@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
 @Component
@@ -93,7 +94,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
         @Override
         public MatchOutput call() {
             List<List<Object>> data = getGoodAccounts(numAccounts);
-            MatchInput input = MatchResourceTestUtils.prepareSimpleMatchInput(data);
+            MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
             MatchOutput output = matchProxy.match(input, true);
             log.info("[" + Thread.currentThread().getName() + "] " + output.getStatistics().getRowsMatched()
                     + " out of " + output.getStatistics().getRowsRequested() + " accounts are matched, time elapsed = "

@@ -13,6 +13,7 @@ public class MatchContext {
     private Set<String> domains;
     private MatchOutput output;
     private Map<String, List<String>> sourceColumnsMap;
+    private List<InternalOutputRecord> internalResults;
 
     public MatchStatus getStatus() {
         return status;
@@ -44,5 +45,13 @@ public class MatchContext {
 
     public void setSourceColumnsMap(Map<String, List<String>> sourceColumnsMap) {
         this.sourceColumnsMap = sourceColumnsMap;
+    }
+
+    public List<InternalOutputRecord> getInternalResults() {
+        return internalResults;
+    }
+
+    public void setInternalResults(List<InternalOutputRecord> internalResults) {
+        this.internalResults = internalResults;
     }
 }

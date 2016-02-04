@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 public class MatchInputValidator {
     private static Log log = LogFactory.getLog(MatchInputValidator.class);
 
-    public static void validate(MatchInput input, Integer maxRealTimeInput) {
+    static void validate(MatchInput input, Integer maxRealTimeInput) {
         if (input.getTenant() == null) {
             throw new IllegalArgumentException("Must provide tenant to run a match.");
         }

@@ -3,16 +3,13 @@ package com.latticeengines.propdata.match.service.impl;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -21,14 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.propdata.core.datasource.DataSourcePool;
@@ -60,9 +53,10 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
 
     public MatchOutput match(MatchInput input, boolean returnUnmatched) {
         Long startTime = System.currentTimeMillis();
+
         validateMatchInput(input);
 
-        MatchContext matchContext = prepare(input, returnUnmatched);
+        MatchContext matchContext = prepare(input);
 
         matchContext.setStatus(MatchStatus.FETCHING);
         matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(ColumnSelection.Predefined.Model));
@@ -98,10 +92,7 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
         matchContext.getOutput().setOutputFields(outputFields);
         matchContext.getOutput().setMetadata(allFields);
 
-        Calendar calendar = GregorianCalendar.getInstance();
-        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(new Date());
-        matchContext.getOutput().getStatistics().setResultGeneratedAt(calendar.getTime());
+        matchContext.getOutput().setFinishedAt(new Date());
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
 
         log.info("Processed " + results.size() + " results into MatchOutput. Duration="
@@ -119,73 +110,10 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
                 + (System.currentTimeMillis() - startTime));
     }
 
-    @VisibleForTesting
-    MatchContext prepare(MatchInput input, boolean returnUnmatched) {
+    private MatchContext prepare(MatchInput input) {
         Long startTime = System.currentTimeMillis();
 
-        MatchContext context = new MatchContext();
-
-        MatchOutput output = new MatchOutput();
-        context.setStatus(MatchStatus.NEW);
-        output.setInputFields(input.getFields());
-        output.setKeyMap(input.getKeyMap());
-
-        MatchStatistics statistics = new MatchStatistics();
-        statistics.setRowsRequested(input.getData().size());
-        output.setStatistics(statistics);
-
-        List<OutputRecord> records = new ArrayList<>();
-        Set<String> domainSet = new HashSet<>();
-
-        boolean hasDomain = false;
-        Map<MatchKey, Integer> posMap = new HashMap<>();
-        Set<MatchKey> keySet = input.getKeyMap().keySet();
-        for (int pos = 0; pos < input.getFields().size(); pos++) {
-            String field = input.getFields().get(pos);
-            for (MatchKey key : keySet) {
-                if (field.equals(input.getKeyMap().get(key))) {
-                    posMap.put(key, pos);
-                }
-                if (MatchKey.Domain.equals(key)) {
-                    hasDomain = true;
-                }
-            }
-        }
-
-        int domainPos = hasDomain ? posMap.get(MatchKey.Domain) : -1;
-        for (int i = 0; i < input.getData().size(); i++) {
-            OutputRecord record = new OutputRecord();
-            record.setRowNumber(i);
-            List<Object> row = input.getData().get(i);
-            record.setInput(row);
-            record.setMatched(true);
-
-            if (row.size() != input.getFields().size()) {
-                record.setMatched(false);
-                record.setErrorMessage("The number of objects in this row [" + row.size()
-                        + "] does not match the number of fields claimed [" + input.getFields().size() + "]");
-            } else if (hasDomain) {
-                try {
-                    String originalDomain = (String) row.get(domainPos);
-                    String cleanDomain = DomainUtils.parseDomain(originalDomain);
-                    record.setMatchedDomain(cleanDomain);
-                    domainSet.add(cleanDomain);
-                } catch (Exception e) {
-                    record.setMatched(false);
-                    record.setErrorMessage("Error when cleanup domain field: " + e.getMessage());
-                }
-            }
-
-            if (record.isMatched() || returnUnmatched) {
-                record.setMatched(false); // change back to unmatched before
-                                          // matching
-                records.add(record);
-            }
-        }
-
-        output.setResult(records);
-        context.setDomains(domainSet);
-        context.setOutput(output);
+        MatchContext context = MatchPlanner.plan(input);
 
         log.info("Finished preparing match context for " + input.getData().size() + " rows. Duration="
                 + (System.currentTimeMillis() - startTime));
@@ -204,13 +132,13 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
 
         Map<String, List<Object>> domainMap = domainResults(results, targetColumns);
 
-        List<OutputRecord> recordsToMatch = matchContext.getOutput().getResult();
+        List<InternalOutputRecord> recordsToMatch = matchContext.getInternalResults();
         List<OutputRecord> outputRecords = new ArrayList<>();
         int matched = 0;
-        for (OutputRecord record : recordsToMatch) {
-            if (StringUtils.isEmpty(record.getErrorMessage()) && domainMap.containsKey(record.getMatchedDomain())) {
+        for (InternalOutputRecord record : recordsToMatch) {
+            if (domainMap.containsKey(record.getParsedDomain())) {
                 record.setMatched(true);
-                List<Object> output = domainMap.get(record.getMatchedDomain());
+                List<Object> output = domainMap.get(record.getParsedDomain());
                 record.setOutput(output);
 
                 matched++;
@@ -222,15 +150,15 @@ public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
                         columnMatchCount[i]++;
                     }
                 }
-
+                record.setMatchedDomain(record.getParsedDomain());
                 outputRecords.add(record);
-            } else if (returnUnmatched) {
-                if (StringUtils.isEmpty(record.getErrorMessage())) {
-                    record.setErrorMessage("Could not find a match for domain [" + record.getMatchedDomain()
-                            + "] in table " + CACHE_TABLE);
-                }
+            } else {
+                record.addErrorMessage("Could not find a match for domain [" + record.getMatchedDomain() + "] in table "
+                        + CACHE_TABLE);
                 record.setMatchedDomain(null);
-                outputRecords.add(record);
+                if (returnUnmatched) {
+                    outputRecords.add(record);
+                }
             }
         }
 

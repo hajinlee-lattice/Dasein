@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.api.controller;
+package com.latticeengines.propdata.match.testframework;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,15 +9,16 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class MatchResourceTestUtils {
+public class TestMatchInputUtils {
 
-    static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData) {
+    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData) {
         return prepareSimpleMatchInput(mockData, true);
     }
 
-    static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
+    public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
         input.setMatchEngine(MatchInput.MatchEngine.RealTime);
+        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         input.setTenant(new Tenant("PD_Test"));
         List<String> fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");
         input.setFields(fields);
@@ -25,11 +26,10 @@ public class MatchResourceTestUtils {
             input.setKeyMap(MatchKeyUtils.resolveKeyMap(fields));
         }
         input.setData(mockData);
-        input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         return input;
     }
 
-    static MatchInput prepareSimpleMatchInput(Object[][] data) {
+    public static MatchInput prepareSimpleMatchInput(Object[][] data) {
         List<List<Object>> mockData = new ArrayList<>();
         for (Object[] row : data) {
             mockData.add(Arrays.asList(row));
@@ -37,7 +37,7 @@ public class MatchResourceTestUtils {
         return prepareSimpleMatchInput(mockData);
     }
 
-    static List<List<Object>> getGoodInputData() {
+    public static List<List<Object>> getGoodInputData() {
         Object[][] data = new Object[][] { { 0, "moyanne.com", "Moyanne", "Lynchburg", "Virginia", "USA" },
                 { 1, "jhip.com", "Jacobson Holman PLLC", "Washington", "Washington D.C.", "USA" },
                 { 2, "culturaltourismdc.org", "Captive Insurance Co", "Washington", "Washington D.C.", "USA" },
