@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps.report;
+package com.latticeengines.serviceflows.workflow.report;
 
 import java.util.ArrayList;
 import java.util.List;

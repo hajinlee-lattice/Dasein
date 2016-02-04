@@ -12,7 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.OneToOne;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -25,13 +25,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@javax.persistence.Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
+        "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields {
 
@@ -60,9 +62,13 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @JsonProperty("file_path")
+    @JsonProperty("path")
     @Column(name = "PATH", nullable = false)
     private String path;
+
+    @JsonProperty("errors_path")
+    @Column(name = "ERRORS_PATH", nullable = true)
+    private String errorsPath;
 
     @JsonProperty("created")
     @Column(name = "CREATED")
@@ -72,9 +78,10 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "UPDATED")
     private Date updated;
 
-    @JsonProperty("schema")
-    @Column(name = "SCHEMA", nullable = false)
-    private SourceFileSchema schema;
+    @JsonProperty("table")
+    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @JoinColumn(name = "TABLE_ID", nullable = true)
+    private Table table;
 
     @Override
     public String getName() {
@@ -147,12 +154,12 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.updated = updated;
     }
 
-    public SourceFileSchema getSchema() {
-        return schema;
+    public Table getTable() {
+        return table;
     }
 
-    public void setSchema(SourceFileSchema schema) {
-        this.schema = schema;
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     public String getDescription() {
@@ -161,5 +168,13 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getErrorsPath() {
+        return errorsPath;
+    }
+
+    public void setErrorsPath(String errorsPath) {
+        this.errorsPath = errorsPath;
     }
 }

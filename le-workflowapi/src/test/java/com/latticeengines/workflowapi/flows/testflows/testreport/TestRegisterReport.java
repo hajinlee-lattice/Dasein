@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
-import com.latticeengines.workflowapi.steps.report.BaseReportStep;
+import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("registerReport")
 public class TestRegisterReport extends BaseReportStep<MicroserviceStepConfiguration> {

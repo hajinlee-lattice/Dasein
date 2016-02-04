@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum ReportPurpose {
+    /**
+     * Prospect Discovery
+     */
     IMPORT_SUMMARY("ImportSummary"), //
     MODEL_SUMMARY("ModelSummary"), //
     INDUSTRY_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry"), //
@@ -13,28 +16,33 @@ public enum ReportPurpose {
     INDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry_Probability"), //
     SUBINDUSTRY_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessIndustry2_Probability"), //
     REVENUE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessRevenueRange_Probability"), //
-    EMPLOYEE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange_Probability");
-    
+    EMPLOYEE_LIFT_ATTR_LEVEL_SUMMARY("CreateAttributeLevelSummary_BusinessEmployeesRange_Probability"), //
+
+    /**
+     * Lead Prioritization
+     */
+    EVENT_TABLE_IMPORT_SUMMARY("EventTableImportSummary");
+
     private String key;
-    
+
     private static Map<String, ReportPurpose> map = new HashMap<>();
-    
+
     static {
         for (ReportPurpose reportPurpose : ReportPurpose.values()) {
             map.put(reportPurpose.getKey(), reportPurpose);
         }
     }
-    
+
     ReportPurpose(String key) {
         this.key = key;
     }
-    
+
     public String getKey() {
         return key;
     }
-    
+
     public static ReportPurpose getReportPurpose(String key) {
         return map.get(key);
     }
-    
+
 }

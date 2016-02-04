@@ -117,17 +117,9 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
         turnOffSslChecking();
         setTestingTenants();
         for (Tenant tenant : testingTenants) {
-            if (tenantService.hasTenantId(tenant.getId())) {
-                deleteTargetMarkets(tenant);
-            }
             deleteTenantByRestCall(tenant.getId());
             createTenantByRestCall(tenant);
         }
-    }
-
-    private void deleteTargetMarkets(Tenant tenant) {
-        setupSecurityContext(tenant);
-        targetMarketService.deleteAll();
     }
 
     private void deleteFromCamille(String path) {

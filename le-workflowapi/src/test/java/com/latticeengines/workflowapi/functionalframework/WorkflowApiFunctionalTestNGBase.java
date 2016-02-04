@@ -13,6 +13,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamReader;
 
+import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -64,6 +65,11 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     @Value("${workflowapi.modelingservice.basedir}")
     protected String modelingServiceHdfsBaseDir;
 
+    @Value("${security.test.pls.api.hostport}")
+    protected String internalResourceHostPort;
+
+    protected InternalResourceRestApiProxy internalResourceProxy;
+
     protected RestTemplate restTemplate = new RestTemplate();
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -81,6 +87,8 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setYarnClient(defaultYarnClient);
         Tenant t = tenantEntityMgr.findByTenantId(WFAPITEST_CUSTOMERSPACE.toString());

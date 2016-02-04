@@ -22,7 +22,7 @@ public class ModelingResource {
 
     @RequestMapping(value = "/validations/{filename}", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Run a validation workflow on the provided validated file. This will generate a report. Returns the job id.")
+    @ApiOperation(value = "Run a validation workflow on the provided uploaded file. This will generate a report. Returns the job id.")
     public ResponseDocument<String> validateFile(@RequestBody SourceFile file) {
         // TODO
         return new ResponseDocument<>("LosLobosKickYourAss");

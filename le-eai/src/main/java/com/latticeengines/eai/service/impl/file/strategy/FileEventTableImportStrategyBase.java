@@ -38,7 +38,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -54,7 +54,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         DbCreds creds = getCreds(ctx);
         Properties props = getProperties(ctx, table);
-        
+
         try {
             ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
                     ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
@@ -71,7 +71,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             FileUtils.deleteQuietly(new File("." + table.getName() + ".csv.crc"));
         }
     }
-    
+
     private DbCreds getCreds(ImportContext ctx) {
         String url = createJdbcUrl(ctx);
         String driver = "org.relique.jdbc.csv.CsvDriver";
@@ -79,7 +79,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         builder.jdbcUrl(url).driverClass(driver);
         return new DbCreds(builder);
     }
-    
+
     private Properties getProperties(ImportContext ctx, Table table) {
         List<String> types = new ArrayList<>();
         for (Attribute attr : table.getAttributes()) {
@@ -89,7 +89,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         Properties props = new Properties();
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
-        
+
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         String fileName = createLocalFileForClassGeneration(hdfsFileToImport);
         table.setName(fileName);
@@ -97,12 +97,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         return props;
     }
-    
+
     private String createLocalFileForClassGeneration(String hdfsFileToImport) {
         try {
             String[] tokens = hdfsFileToImport.split("/");
-            String[] fileNameTokens = tokens[tokens.length-1].split("\\.");
-            String fileName = fileNameTokens[fileNameTokens.length-2] + //
+            String[] fileNameTokens = tokens[tokens.length - 1].split("\\.");
+            String fileName = fileNameTokens[fileNameTokens.length - 2] + //
                     "-" + UUID.randomUUID();
             fileName = fileName.replaceAll("-", "_");
             HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFileToImport, //
@@ -117,10 +117,15 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         String metadataFile = ctx.getProperty(ImportProperty.METADATAFILE, String.class);
         String contents;
-        try {
-            contents = FileUtils.readFileToString(new File(metadataFile));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+        if (metadataFile != null) {
+            try {
+                contents = FileUtils.readFileToString(new File(metadataFile));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            contents = ctx.getProperty(ImportProperty.METADATA, String.class);
         }
         ModelingMetadata metadata = JsonUtils.deserialize(contents, ModelingMetadata.class);
 

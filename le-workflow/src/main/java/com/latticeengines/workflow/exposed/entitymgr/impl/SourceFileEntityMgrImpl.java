@@ -21,13 +21,7 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     }
 
     @Override
-    public SourceFile findByKey(Class<SourceFile> entityClz, Long key) {
-        return null;
+    public SourceFile findByName(String name) {
+        return sourceFileDao.findByName(name);
     }
-
-    @Override
-    public <F> SourceFile findByField(String fieldName, F value) {
-        return null;
-    }
-
 }

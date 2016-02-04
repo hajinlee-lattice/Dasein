@@ -39,16 +39,16 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
-import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -60,6 +60,8 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -107,6 +109,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -167,6 +172,16 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
+    @RequestMapping(value = "/targetmarkets/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a target market")
+    public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        targetMarketService.deleteAll();
+    }
+
     @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market report")
@@ -187,6 +202,17 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         reportService.createOrUpdateReport(report);
+    }
+
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve a SourceFile")
+    public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return sourceFileService.findByName(sourceFileName);
     }
 
     @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")

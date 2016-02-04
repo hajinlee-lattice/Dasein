@@ -29,6 +29,8 @@ public class FileImportServiceImpl extends ImportService {
         ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.FILE, "EventTable");
         context.setProperty(ImportProperty.METADATAFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.METADATAFILE));
+        context.setProperty(ImportProperty.METADATA, //
+                srcImportConfig.getProperties().get(ImportProperty.METADATA));
         for (Table table : tables) {
             Table newTable = strategy.importMetadata(null, table, null, context);
             newTables.add(newTable);
@@ -42,6 +44,8 @@ public class FileImportServiceImpl extends ImportService {
                 srcImportConfig.getProperties().get(ImportProperty.HDFSFILE));
         context.setProperty(ImportProperty.METADATAFILE, //
                 srcImportConfig.getProperties().get(ImportProperty.METADATAFILE));
+        context.setProperty(ImportProperty.METADATA, //
+                srcImportConfig.getProperties().get(ImportProperty.METADATA));
         context.setProperty(ImportProperty.FILEURLPROPERTIES, //
                 srcImportConfig.getProperties().get(ImportProperty.FILEURLPROPERTIES));
 

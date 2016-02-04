@@ -1,11 +1,16 @@
 package com.latticeengines.domain.exposed.security;
 
+import java.util.List;
+
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Entity
 @Table(name = "TENANT")
@@ -23,10 +29,14 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     private String name;
     private Long pid;
     private Long registeredTime;
+    private List<TargetMarket> targetMarkets;
 
-    public Tenant() {}
+    public Tenant() {
+    }
 
-    public Tenant(String id) { setId(id); }
+    public Tenant(String id) {
+        setId(id);
+    }
 
     @Override
     @JsonProperty("DisplayName")
@@ -83,6 +93,18 @@ public class Tenant implements HasName, HasId<String>, HasPid {
 
     public void setRegisteredTime(Long registeredTime) {
         this.registeredTime = registeredTime;
+    }
+
+    // TODO: Note - this is a terrible hack to avoid DP-2243
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
+    public List<TargetMarket> getTargetMarkets() {
+        return targetMarkets;
+    }
+
+    @JsonIgnore
+    public void setTargetMarkets(List<TargetMarket> targetMarkets) {
+        this.targetMarkets = targetMarkets;
     }
 
     @Override

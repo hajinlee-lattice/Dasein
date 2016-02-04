@@ -62,11 +62,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     @Value("${workflowapi.test.sfdc.securitytoken}")
     private String salesforceSecurityToken;
 
-    @Value("${security.test.pls.api.hostport}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
     private TargetMarket defaultTargetMarket;
 
     protected void setupForFitModel() throws Exception {
@@ -79,7 +74,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         createImportTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
         copyStopListToHdfs();
 
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
         defaultTargetMarket = internalResourceProxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME,
                 DEMO_CUSTOMERSPACE.toString());
         if (defaultTargetMarket != null) {

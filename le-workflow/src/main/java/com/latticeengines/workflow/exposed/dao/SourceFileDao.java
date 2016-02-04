@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.workflow.SourceFile;
 
 public interface SourceFileDao extends BaseDao<SourceFile> {
 
+    SourceFile findByName(String name);
+
 }

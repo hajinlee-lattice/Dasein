@@ -17,18 +17,18 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TargetMarketService;
+import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -118,7 +118,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         assertNull(targetMarket);
     }
-    
+
     @Test(groups = { "functional" }, dependsOnMethods = { "testNotVisibleInAlternateTenant" })
     public void testFindAllInAlternativeTenantReturnsEmpty() {
         setupSecurityContext(ALTERNATIVE_TESTING_TENANT);

@@ -14,4 +14,9 @@ public class SourceFileDaoImpl extends BaseDaoImpl<SourceFile> implements Source
         return SourceFile.class;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public SourceFile findByName(String name) {
+        return findByField("name", name);
+    }
 }

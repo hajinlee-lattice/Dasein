@@ -9,6 +9,7 @@ public class ImportStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotNull
     private SourceType sourceType;
+    private String sourceFileName;
 
     @JsonProperty("source_type")
     public SourceType getSourceType() {
@@ -20,4 +21,13 @@ public class ImportStepConfiguration extends MicroserviceStepConfiguration {
         this.sourceType = sourceType;
     }
 
+    @JsonProperty("source_file_name")
+    public String getSourceFileName() {
+        return sourceFileName;
+    }
+
+    @JsonProperty("source_file_name")
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
+    }
 }

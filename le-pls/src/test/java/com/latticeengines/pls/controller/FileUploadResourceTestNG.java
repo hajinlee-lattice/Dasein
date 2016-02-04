@@ -91,7 +91,6 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         for (SourceFile file : files) {
             if (file.getPath().equals(path)) {
                 assertEquals(file.getName(), "file1.csv");
-                assertEquals(file.getSchema(), SourceFileSchema.SalesforceAccount);
                 found = true;
             }
         }
@@ -115,7 +114,6 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             if (file.getPath().equals(path)) {
                 String[] split = path.split("/");
                 assertEquals(file.getName(), split[split.length - 1]);
-                assertEquals(file.getSchema(), SourceFileSchema.SalesforceAccount);
                 found = true;
             }
         }

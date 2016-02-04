@@ -145,6 +145,9 @@ public class WorkflowExecutionCache {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.REPORTS);
         List<Report> reports = new ArrayList<>();
+        if (contextObj == null) {
+            return reports;
+        }
         if (contextObj instanceof List) {
             for (Object obj : (List) contextObj) {
                 if (obj instanceof Report) {
@@ -163,6 +166,9 @@ public class WorkflowExecutionCache {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.SOURCE_FILES);
         List<SourceFile> sourceFiles = new ArrayList<>();
+        if (contextObj == null) {
+            return sourceFiles;
+        }
         if (contextObj instanceof List) {
             for (Object obj : (List) contextObj) {
                 if (obj instanceof SourceFile) {
@@ -182,6 +188,9 @@ public class WorkflowExecutionCache {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
         Map<String, String> outputs = new HashMap<>();
+        if (contextObj == null) {
+            return outputs;
+        }
         if (contextObj instanceof Map) {
             for (Map.Entry<?, ?> entry : ((Map<?, ?>) contextObj).entrySet()) {
                 if (entry.getKey() instanceof String && entry.getValue() instanceof String) {

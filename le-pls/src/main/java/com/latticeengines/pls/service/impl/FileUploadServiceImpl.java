@@ -43,7 +43,6 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setTenant(tenant);
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
-            file.setSchema(schema);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileEntityMgr.create(file);
             return file;

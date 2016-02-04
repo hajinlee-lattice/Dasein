@@ -4,8 +4,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
@@ -59,6 +60,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public void deleteAllTargetMarkets(String tenantId) {
+        try {
+            restTemplate.delete(constructUrl("pls/internal/targetmarkets/", tenantId));
+        } catch (Exception e) {
+            throw new RuntimeException("deleteAllTargetMarkets: Remote call failure", e);
+        }
+    }
+
     public ModelSummary getModelSummaryFromApplicationId(String applicationId, String tenantId) {
         try {
             return restTemplate.getForObject(constructUrl("pls/internal/modelsummaries", applicationId, tenantId),
@@ -85,6 +94,16 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             restTemplate.postForObject(url, report, Void.class);
         } catch (Exception e) {
             throw new RuntimeException("registerReport: Remote call failure", e);
+        }
+    }
+
+    public SourceFile findSourceFileByName(String name, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/sourcefiles", name, tenantId);
+            log.info(String.format("Getting from %s", url));
+            return restTemplate.getForObject(url, SourceFile.class);
+        } catch (Exception e) {
+            throw new RuntimeException("findSourceFileByName: Remote call failure", e);
         }
     }
 }
