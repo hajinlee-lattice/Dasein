@@ -1,12 +1,14 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.propdata.match.service.RealTimeMatchService;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
@@ -14,7 +16,8 @@ import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
-    private RealTimeMatchServiceCacheImpl matchService;
+    @Qualifier(value = "realTimeMatchServiceCache")
+    private RealTimeMatchService matchService;
 
     @Test(groups = "functional")
     public void testSimpleMatch() {

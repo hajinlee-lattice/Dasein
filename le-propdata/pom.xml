@@ -18,6 +18,39 @@
         <component-name>propdata</component-name>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>1.8</version>
+                <configuration>
+                    <showWeaveInfo>true</showWeaveInfo>
+                    <source>${compiler.version}</source>
+                    <target>${compiler.version}</target>
+                    <Xlint>ignore</Xlint>
+                    <complianceLevel>${compiler.version}</complianceLevel>
+                    <encoding>UTF-8</encoding>
+                    <verbose>false</verbose>
+                    <weaveDirectories>
+                        <weaveDirectory>
+                            ${project.build.directory}/classes/com/latticeengines/propdata/match/service/impl
+                        </weaveDirectory>
+                    </weaveDirectories>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Compile and weave aspects after all classes compiled by javac -->
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <profiles>
         <profile>
             <id>api.functional</id>

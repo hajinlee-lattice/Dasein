@@ -30,10 +30,12 @@ import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.propdata.core.datasource.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.util.LoggingUtils;
+import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.service.MatchExecutor;
 
-@Component
-class RealTimeMatchExecutor {
+@Component("realTimeMatchExecutor")
+class RealTimeMatchExecutor implements MatchExecutor {
 
     private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
     private static final String CACHE_TABLE = "DerivedColumnsCache";
@@ -47,14 +49,15 @@ class RealTimeMatchExecutor {
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    MatchContext executeMatch(MatchContext matchContext) {
+    @Override
+    public MatchContext executeMatch(MatchContext matchContext) {
         matchContext = fetchData(matchContext);
         matchContext = mangleResults(matchContext);
         return matchContext;
     }
 
+    @MatchStep
     private MatchContext fetchData(MatchContext context) {
-        Long startTime = System.currentTimeMillis();
         context.setStatus(MatchStatus.FETCHING);
 
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
@@ -79,16 +82,11 @@ class RealTimeMatchExecutor {
 
         context.setResultsBySource(resultMap);
         context.setStatus(MatchStatus.FETCHED);
-
-        LoggingUtils.logInfoWithDuration(log,
-                "Finished fetching data for " + context.getOutput().getStatistics().getRowsRequested() + " rows from "
-                        + sourceColumnsMap.keySet().size() + " sources.",
-                context, startTime);
         return context;
     }
 
+    @MatchStep
     private MatchContext mangleResults(MatchContext matchContext) {
-        Long startTime = System.currentTimeMillis();
         matchContext.setStatus(MatchStatus.PROCESSING);
 
         List<Map<String, Object>> results = matchContext.getResultsBySource().get(MODEL);
@@ -112,8 +110,6 @@ class RealTimeMatchExecutor {
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - receiveTime);
 
         matchContext.setStatus(MatchStatus.PROCESSED);
-        log.info("Processed " + results.size() + " results into MatchOutput. Duration="
-                + (System.currentTimeMillis() - startTime));
         return matchContext;
     }
 

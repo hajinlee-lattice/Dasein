@@ -25,16 +25,11 @@ final public class LoggingUtils {
     }
 
     public static <P extends Progress> void logInfoWithDuration(Log log, P progress, String message, long startTime) {
-        log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime));
+        log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime) + " ms");
     }
 
     private static <P extends Progress> String progressLogPrefix(P progress) {
         return "Source=" + progress.getSourceName() + " RootOperationUID=" + progress.getRootOperationUID() + " ";
-    }
-
-    public static void logInfoWithDuration(Log log, String message, MatchContext matchContext, Long startTime) {
-        log.info(message + " Duration=" + (System.currentTimeMillis() - startTime) + " RootOperationUID="
-                + matchContext.getOutput().getRootOperationUID());
     }
 
     public static void logError(Log log, String message, MatchContext matchContext, Exception e) {

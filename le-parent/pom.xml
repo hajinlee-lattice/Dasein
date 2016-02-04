@@ -17,6 +17,7 @@
         <nexusrepourl/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <compiler.version>1.7</compiler.version>
 
         <maven.jar.version>2.3.2</maven.jar.version>
         <maven.surefire.version>2.12.3</maven.surefire.version>
@@ -27,6 +28,7 @@
         <jetty.version>9.1.1.v20140108</jetty.version>
         <spring.version>4.0.0.RELEASE</spring.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
+        <aspectj.version>1.8.2</aspectj.version>
 
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
         <hive.version>1.1.0</hive.version>
@@ -593,8 +595,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.5.1</version>
                     <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
+                        <source>${compiler.version}</source>
+                        <target>${compiler.version}</target>
                         <compilerArguments>
                             <Werror/>
                             <Xlint:all/>
@@ -894,12 +896,12 @@
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
-            <version>1.8.2</version>
+            <version>${aspectj.version}</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.8.2</version>
+            <version>${aspectj.version}</version>
         </dependency>
 
         <!-- TEST dependencies -->
