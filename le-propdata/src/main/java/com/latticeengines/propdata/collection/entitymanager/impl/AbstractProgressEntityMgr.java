@@ -15,8 +15,10 @@ import com.latticeengines.propdata.core.source.Source;
 public abstract class AbstractProgressEntityMgr<P extends Progress> implements ProgressEntityMgr<P> {
 
     protected abstract ProgressDao<P> getProgressDao();
+
     protected abstract Log getLog();
-    private static final int MAX_RETRIES = 2;
+
+    private static final int MAX_RETRIES = 3;
 
     @Override
     @Transactional(value = "propDataManage")
@@ -47,12 +49,11 @@ public abstract class AbstractProgressEntityMgr<P extends Progress> implements P
         return getProgressDao().findByRootOperationUid(rootOperationUid);
     }
 
-
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
     public P findEarliestFailureUnderMaxRetry(Source source) {
         List<P> progresses = getProgressDao().findFailedProgresses(source);
-        for (P progress: progresses) {
+        for (P progress : progresses) {
             if (progress.getNumRetries() < MAX_RETRIES) {
                 return progress;
             }
@@ -80,6 +81,5 @@ public abstract class AbstractProgressEntityMgr<P extends Progress> implements P
             return null;
         }
     }
-
 
 }
