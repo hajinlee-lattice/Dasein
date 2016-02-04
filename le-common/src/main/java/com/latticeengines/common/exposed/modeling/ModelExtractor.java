@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.util.Base64;
@@ -72,15 +73,12 @@ public class ModelExtractor {
     }
     
     private String decodeValue(String value) throws IOException {
-        int BUFFERSIZE = 1000;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] decoded = Base64.decodeBase64(value);
-        try (GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(new ByteArrayInputStream(decoded))) {
-            byte[] data = new byte[BUFFERSIZE];
-            while (gzipInputStream.read(data, 0, BUFFERSIZE) != -1) {
-                baos.write(data);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] data = Base64.decodeBase64(value);
+            try (GzipCompressorInputStream gzipInputStream = new GzipCompressorInputStream(new ByteArrayInputStream(data))) {
+                IOUtils.copy(gzipInputStream, baos);
+                return new String((baos.toByteArray()));
             }
         }
-        return new String((baos.toByteArray()));
     }
 }
