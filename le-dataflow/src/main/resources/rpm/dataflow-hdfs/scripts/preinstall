@@ -2,8 +2,8 @@
 echo 'Running Preinstall'
 
 RPMFILE=`ls /tmp/le-dataflow-hdfs-*.rpm`
-VERSION=`echo $RPMFILE | cut -d \- -f 4`
-SNAPSHOT=`echo $RPMFILE | cut -d \- -f 5`
+VERSION=`echo $RPMFILE | cut -d \- -f 5`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
 
 if [[ $SNAPSHOT = SNAPSHOT* ]]
     then
