@@ -32,6 +32,7 @@ class MatchInputValidator {
         }
     }
 
+
     private static void validateColumnSelection(MatchInput input) {
         if (input.getPredefinedSelection() == null && input.getCustomSelection() == null) {
             throw new IllegalArgumentException("Must specify predefined or custom column selection.");

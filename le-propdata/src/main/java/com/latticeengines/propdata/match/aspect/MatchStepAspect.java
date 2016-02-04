@@ -22,11 +22,7 @@ public class MatchStepAspect {
     @Around("@annotation(com.latticeengines.propdata.match.annotation.MatchStep)")
     public Object logMatchStep(ProceedingJoinPoint joinPoint) throws Throwable {
         if (joinPoint.getKind().contains("execution")) {
-            try {
-                return logMatchStepMetrics(joinPoint);
-            } finally {
-                tracker.remove();
-            }
+            return logMatchStepMetrics(joinPoint);
         } else {
             return joinPoint.proceed();
         }
@@ -55,12 +51,13 @@ public class MatchStepAspect {
         }
 
         String trackId = tracker.get();
-        if (trackId == null) {
-            trackId = getRootOperationUID(allObjs);
-            tracker.set(trackId);
+        String uid = getRootOperationUID(allObjs);
+        if (uid != null && !uid.equals(tenantId)) {
+            trackId = uid;
         }
         if (trackId != null) {
             logMsg += " RootOperationUID=" + trackId;
+            tracker.set(trackId);
         }
 
         log.info(logMsg);

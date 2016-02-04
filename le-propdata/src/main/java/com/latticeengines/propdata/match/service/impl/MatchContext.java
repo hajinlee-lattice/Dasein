@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 
@@ -11,11 +12,21 @@ public class MatchContext {
 
     private MatchStatus status;
     private Set<String> domains;
+    private MatchInput input;
     private MatchOutput output;
     private Map<String, List<String>> sourceColumnsMap;
+    private Map<String, List<String>> columnPriorityMap;
     private Map<String, List<Map<String, Object>>> resultsBySource;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
+
+    public MatchInput getInput() {
+        return input;
+    }
+
+    public void setInput(MatchInput input) {
+        this.input = input;
+    }
 
     public MatchStatus getStatus() {
         return status;
@@ -47,6 +58,14 @@ public class MatchContext {
 
     public void setSourceColumnsMap(Map<String, List<String>> sourceColumnsMap) {
         this.sourceColumnsMap = sourceColumnsMap;
+    }
+
+    public Map<String, List<String>> getColumnPriorityMap() {
+        return columnPriorityMap;
+    }
+
+    public void setColumnPriorityMap(Map<String, List<String>> columnPriorityMap) {
+        this.columnPriorityMap = columnPriorityMap;
     }
 
     public Map<String, List<Map<String, Object>>> getResultsBySource() {

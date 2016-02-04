@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.propdata.core.service.ZkConfigurationService;
+import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 
 @Component
@@ -27,6 +29,10 @@ class MatchPlanner {
     @Autowired
     private ColumnSelectionService columnSelectionService;
 
+    @Autowired
+    private ZkConfigurationService zkConfigurationService;
+
+    @MatchStep
     MatchContext plan(MatchInput input) {
         if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
             return planForRealTime(input);
@@ -37,36 +43,24 @@ class MatchPlanner {
     }
 
     private MatchContext planForRealTime(MatchInput input) {
-        MatchContext context = new MatchContext();
-        context.setStatus(MatchStatus.NEW);
-
-        MatchOutput output = initializeMatchOutput(input);
-        context.setOutput(output);
-
+        MatchContext context = validateMatchInput(input);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
         return context;
     }
 
-    private static MatchOutput initializeMatchOutput(MatchInput input) {
-        MatchOutput output = new MatchOutput();
-        output.setReceivedAt(new Date());
-        output.setInputFields(input.getFields());
-        output.setKeyMap(input.getKeyMap());
-        output.setSubmittedBy(input.getTenant());
-
-        MatchStatistics statistics = initializeStatistics(input);
-        output.setStatistics(statistics);
-
-        return output;
+    @MatchStep
+    private MatchContext validateMatchInput(MatchInput input) {
+        MatchInputValidator.validate(input, zkConfigurationService.maxRealTimeInput());
+        MatchContext context = new MatchContext();
+        context.setStatus(MatchStatus.NEW);
+        context.setInput(input);
+        MatchOutput output = initializeMatchOutput(input);
+        context.setOutput(output);
+        return context;
     }
 
-    private static MatchStatistics initializeStatistics(MatchInput input) {
-        MatchStatistics statistics = new MatchStatistics();
-        statistics.setRowsRequested(input.getData().size());
-        return statistics;
-    }
-
+    @MatchStep
     private static MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, Integer> keyPositionMap = getKeyPositionMap(input);
 
@@ -83,6 +77,33 @@ class MatchPlanner {
         context.setDomains(domainSet);
 
         return context;
+    }
+
+    @MatchStep
+    private MatchContext sketchExecutionPlan(MatchContext matchContext) {
+        ColumnSelection.Predefined predefined = matchContext.getInput().getPredefinedSelection();
+        if (predefined != null) {
+            matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(predefined));
+            matchContext.setColumnPriorityMap(columnSelectionService.getColumnPriorityMap(predefined));
+        }
+        return matchContext;
+    }
+
+    private static MatchOutput initializeMatchOutput(MatchInput input) {
+        MatchOutput output = new MatchOutput();
+        output.setReceivedAt(new Date());
+        output.setInputFields(input.getFields());
+        output.setKeyMap(input.getKeyMap());
+        output.setSubmittedBy(input.getTenant());
+        MatchStatistics statistics = initializeStatistics(input);
+        output.setStatistics(statistics);
+        return output;
+    }
+
+    private static MatchStatistics initializeStatistics(MatchInput input) {
+        MatchStatistics statistics = new MatchStatistics();
+        statistics.setRowsRequested(input.getData().size());
+        return statistics;
     }
 
     private static InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
@@ -124,11 +145,6 @@ class MatchPlanner {
             }
         }
         return posMap;
-    }
-
-    private MatchContext sketchExecutionPlan(MatchContext matchContext) {
-        matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(ColumnSelection.Predefined.Model));
-        return matchContext;
     }
 
 }
