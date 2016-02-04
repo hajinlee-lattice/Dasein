@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,10 +17,15 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
-public class MatchPlannerUnitTestNG {
+@Component
+public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
 
-    @Test(groups = "unit")
+    @Autowired
+    MatchPlanner matchPlanner;
+
+    @Test(groups = "functional")
     public void testPrepareOutput() {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
@@ -43,7 +50,7 @@ public class MatchPlannerUnitTestNG {
             uniqueDomains.add(domain);
         }
 
-        MatchContext context = MatchPlanner.plan(input);
+        MatchContext context = matchPlanner.plan(input);
         Assert.assertEquals(context.getStatus(), MatchStatus.NEW);
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 

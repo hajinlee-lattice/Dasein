@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -76,9 +77,9 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
 
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
-        return new Object[][] { { 1, 1, 1, 5000L }, { 1, 1, 10, 5000L }, { 1, 1, 100, 5000L }, { 2, 2, 100, 5000L },
-                { 4, 4, 100, 5000L }, { 8, 8, 100, 5000L }, { 16, 16, 100, 15000L }, { 32, 32, 100, 20000L },
-                { 64, 64, 100, 20000L } };
+        return new Object[][] { { 1, 1, 1, 3000L }, { 1, 1, 10, 3000L }, { 1, 1, 100, 3000L }, { 2, 2, 100, 5000L },
+                { 4, 4, 100, 5000L }, { 8, 8, 100, 7500L }, { 16, 16, 100, 15000L }, { 32, 32, 100, 20000L },
+                { 64, 64, 100, 25000L } };
     }
 
     static class MatchCallable implements Callable<MatchOutput> {
@@ -131,16 +132,19 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
             CSVParser parser = CSVParser.parse(new File(url.getFile()), Charset.forName("UTF-8"), CSVFormat.EXCEL);
             accountPool = new ArrayList<>();
             boolean firstLine = true;
+            int rowNum = 0;
             for (CSVRecord csvRecord : parser) {
                 if (firstLine) {
                     firstLine = false;
                     continue;
                 }
-                List<Object> record = new ArrayList<>();
+                List<Object> record = new ArrayList<>(Collections.singleton((Object) rowNum));
                 for (String field : csvRecord) {
                     record.add(field);
                 }
                 accountPool.add(record);
+
+                rowNum++;
             }
             log.info("Loaded " + accountPool.size() + " accounts into account pool.");
         } catch (IOException e) {

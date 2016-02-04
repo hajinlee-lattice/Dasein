@@ -4,6 +4,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
+import com.latticeengines.propdata.match.service.impl.MatchContext;
 
 final public class LoggingUtils {
 
@@ -15,8 +16,7 @@ final public class LoggingUtils {
         log.info(progressLogPrefix(progress) + message);
     }
 
-    public static <P extends Progress> void logError(Log log, P progress, String message,
-                                                                       Exception e) {
+    public static <P extends Progress> void logError(Log log, P progress, String message, Exception e) {
         if (e == null) {
             log.error(progressLogPrefix(progress) + message);
         } else {
@@ -24,13 +24,24 @@ final public class LoggingUtils {
         }
     }
 
-    public static <P extends Progress> void logInfoWithDuration(Log log, P progress,
-                                                                                  String message, long startTime) {
+    public static <P extends Progress> void logInfoWithDuration(Log log, P progress, String message, long startTime) {
         log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime));
     }
 
     private static <P extends Progress> String progressLogPrefix(P progress) {
-        return "Source=" + progress.getSourceName()
-                + " RootOperationUID=" + progress.getRootOperationUID() + " ";
+        return "Source=" + progress.getSourceName() + " RootOperationUID=" + progress.getRootOperationUID() + " ";
+    }
+
+    public static void logInfoWithDuration(Log log, String message, MatchContext matchContext, Long startTime) {
+        log.info(message + " Duration=" + (System.currentTimeMillis() - startTime) + " RootOperationUID="
+                + matchContext.getOutput().getRootOperationUID());
+    }
+
+    public static void logError(Log log, String message, MatchContext matchContext, Exception e) {
+        if (e == null) {
+            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID());
+        } else {
+            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID(), e);
+        }
     }
 }

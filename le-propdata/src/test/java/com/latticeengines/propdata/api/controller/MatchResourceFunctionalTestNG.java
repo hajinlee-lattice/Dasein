@@ -21,6 +21,8 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
 }

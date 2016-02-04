@@ -9,16 +9,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.propdata.match.service.ColumnSelectionService;
 
-public class MatchPlanner {
+@Component
+class MatchPlanner {
 
-    static MatchContext plan(MatchInput input) {
+    @Autowired
+    private ColumnSelectionService columnSelectionService;
+
+    MatchContext plan(MatchInput input) {
         if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
             return planForRealTime(input);
         } else {
@@ -27,7 +36,7 @@ public class MatchPlanner {
         }
     }
 
-    private static MatchContext planForRealTime(MatchInput input) {
+    private MatchContext planForRealTime(MatchInput input) {
         MatchContext context = new MatchContext();
         context.setStatus(MatchStatus.NEW);
 
@@ -35,7 +44,7 @@ public class MatchPlanner {
         context.setOutput(output);
 
         context = scanInputData(input, context);
-
+        context = sketchExecutionPlan(context);
         return context;
     }
 
@@ -115,6 +124,11 @@ public class MatchPlanner {
             }
         }
         return posMap;
+    }
+
+    private MatchContext sketchExecutionPlan(MatchContext matchContext) {
+        matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(ColumnSelection.Predefined.Model));
+        return matchContext;
     }
 
 }

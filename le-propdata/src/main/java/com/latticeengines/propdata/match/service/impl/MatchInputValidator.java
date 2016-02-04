@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 
-public class MatchInputValidator {
+class MatchInputValidator {
     private static Log log = LogFactory.getLog(MatchInputValidator.class);
 
     static void validate(MatchInput input, Integer maxRealTimeInput) {

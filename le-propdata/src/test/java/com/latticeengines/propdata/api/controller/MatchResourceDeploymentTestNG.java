@@ -28,6 +28,8 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
         output = matchProxy.match(input, false);
         Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -39,6 +41,8 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
         output = matchProxy.match(input, false);
         Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
 }

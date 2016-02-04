@@ -13,7 +13,9 @@ public class MatchContext {
     private Set<String> domains;
     private MatchOutput output;
     private Map<String, List<String>> sourceColumnsMap;
+    private Map<String, List<Map<String, Object>>> resultsBySource;
     private List<InternalOutputRecord> internalResults;
+    private boolean returnUnmatched;
 
     public MatchStatus getStatus() {
         return status;
@@ -47,11 +49,27 @@ public class MatchContext {
         this.sourceColumnsMap = sourceColumnsMap;
     }
 
+    public Map<String, List<Map<String, Object>>> getResultsBySource() {
+        return resultsBySource;
+    }
+
+    public void setResultsBySource(Map<String, List<Map<String, Object>>> resultsBySource) {
+        this.resultsBySource = resultsBySource;
+    }
+
     public List<InternalOutputRecord> getInternalResults() {
         return internalResults;
     }
 
     public void setInternalResults(List<InternalOutputRecord> internalResults) {
         this.internalResults = internalResults;
+    }
+
+    public boolean isReturnUnmatched() {
+        return returnUnmatched;
+    }
+
+    public void setReturnUnmatched(boolean returnUnmatched) {
+        this.returnUnmatched = returnUnmatched;
     }
 }

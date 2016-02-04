@@ -23,5 +23,7 @@ public class RealTimeMatchServiceCacheImplTestNG extends PropDataMatchFunctional
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = matchService.match(input, true);
         Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 }

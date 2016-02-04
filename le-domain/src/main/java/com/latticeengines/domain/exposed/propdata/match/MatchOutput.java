@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -29,7 +30,7 @@ public class MatchOutput {
     private Tenant submittedBy;
     private Date receivedAt;
     private Date finishedAt;
-    private String rootOperationUID;
+    private String rootOperationUID = UUID.randomUUID().toString();
 
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -157,12 +158,12 @@ public class MatchOutput {
     }
 
     @JsonProperty("RootOperationUID")
-    private String getRootOperationUID() {
+    public String getRootOperationUID() {
         return rootOperationUID;
     }
 
     @JsonProperty("RootOperationUID")
-    private void setRootOperationUID(String rootOperationUID) {
+    public void setRootOperationUID(String rootOperationUID) {
         this.rootOperationUID = rootOperationUID;
     }
 
