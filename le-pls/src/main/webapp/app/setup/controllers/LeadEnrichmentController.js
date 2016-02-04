@@ -44,12 +44,14 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
                 $scope.allAvariableAttributes = sortAttributes(allAvariableAttributes);
                 $scope.availableAttributes = sortAttributes(availableAttributes);
                 $scope.selectedAttributes = sortAttributes(selectedAttributes);
-                $scope.loading = false;
 
                 if (showSavingConfirmation) {
+                    $scope.showAttributesDetails = true;
                     var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_SAVED_ATTRIBUTES_TITLE');
                     LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.selectedAttributes);
                 }
+
+                $scope.loading = false;
             });
         });
     }
@@ -82,6 +84,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
             $event.preventDefault();
         }
 
+        $scope.showAttributesDetails = true;
         var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_ALL_ATTRIBUTES_TITLE');
         LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.allAvariableAttributes);
     };

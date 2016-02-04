@@ -115,6 +115,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpFunctions
                     .getLPTemplateTypeAndVersion(connMgr);
 
+            lpFunctions.removeLDCWritebackAttributes(connMgr, typeAndVersions.getValue());
             if (attributes != null && attributes.size() > 0) {
                 Map<String, Set<String>> map = new HashMap<String, Set<String>>();
                 for (LeadEnrichmentAttribute attribute : attributes) {
@@ -131,8 +132,6 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
                     lpFunctions.setLDCWritebackAttributesDefaultName(connMgr, source, entry.getValue(),
                             typeAndVersions.getKey(), typeAndVersions.getValue());
                 }
-            } else {
-                lpFunctions.removeLDCWritebackAttributes(connMgr, typeAndVersions.getValue());
             }
             connMgr.getLoadGroupMgr().commit();
         } catch (Exception ex) {

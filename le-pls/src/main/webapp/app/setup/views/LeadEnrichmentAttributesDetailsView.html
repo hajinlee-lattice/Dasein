@@ -20,7 +20,8 @@
                     <table>
                         <thead>
                           <tr>
-                            <th>{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_NAME')}}</th>
+                            <th class="name-col">{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_NAME')}}</th>
+                            <th class="data-source-col">{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_DATA_SOURCE')}}</th>
                             <th>{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_FIELD_NAME')}}</th>
                             <th class="field-type-col">{{ResourceUtility.getString('LEAD_ENRICHMENT_ATTRIBUTE_FIELD_TYPE')}}</th>
                           </tr>
@@ -28,6 +29,7 @@
                         <tbody>
                             <tr data-ng-repeat="attribute in attributes" data-ng-class="{shaded: $index % 2}">
                                 <td>{{attribute.name}}</td>
+                                <td>{{attribute.dataSource}}</td>
                                 <td>{{attribute.fieldName}}</td>
                                 <td>{{attribute.fieldType}}</td>
                             </tr>

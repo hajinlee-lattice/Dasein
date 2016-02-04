@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,20 +131,34 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     private void assertSaveAttributesSuccess(String url, LeadEnrichmentAttribute[] attributes,
             LeadEnrichmentAttribute[] avariableAttributes) {
-        if (attributes != null && attributes.length > 0) {
-            LeadEnrichmentAttribute[] attrsToSave = new LeadEnrichmentAttribute[0];
-            restTemplate.put(url, attrsToSave, new HashMap<>());
-            LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
-            assertEquals(attrsToSave.length, attrsSaved.length);
-            restTemplate.put(url, attributes, new HashMap<>());
-        } else {
-            LeadEnrichmentAttribute[] attrsToSave = new LeadEnrichmentAttribute[1];
-            attrsToSave[0] = avariableAttributes[0];
-            restTemplate.put(url, attrsToSave, new HashMap<>());
-            LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
-            assertEquals(attrsToSave.length, attrsSaved.length);
-            restTemplate.put(url, attributes, new HashMap<>());
+        // Clear attributes
+        List<LeadEnrichmentAttribute> attrsToSave = new ArrayList<LeadEnrichmentAttribute>();
+        restTemplate.put(url, attrsToSave, new HashMap<>());
+        LeadEnrichmentAttribute[] attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
+        assertEquals(attrsToSave.size(), attrsSaved.length);
+
+        // Get 2 attributes with 2 different attributes.
+        for (LeadEnrichmentAttribute attr : avariableAttributes) {
+            if (attrsToSave.size() == 0) {
+                attrsToSave.add(attr);
+            } else if (!attr.getDataSource().equals(attrsToSave.get(0).getDataSource())) {
+                attrsToSave.add(attr);
+                break;
+            }
         }
+        if (attrsToSave.size() == 2) {
+            restTemplate.put(url, attrsToSave, new HashMap<>());
+            attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
+            assertEquals(attrsToSave.size(), attrsSaved.length);
+            // Test we cannot remove one of 2 attributes with 2 different data source
+            attrsToSave.remove(0);
+            restTemplate.put(url, attrsToSave, new HashMap<>());
+            attrsSaved = restTemplate.getForObject(url, LeadEnrichmentAttribute[].class);
+            assertEquals(attrsToSave.size(), attrsSaved.length);
+        }
+
+        // Roll back
+        restTemplate.put(url, attributes, new HashMap<>());
     }
 
     private void assertSaveAttributesGet403(String url, LeadEnrichmentAttribute[] attributes) {

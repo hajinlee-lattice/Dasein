@@ -22,8 +22,6 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel',
 
 .controller('LeadEnrichmentAttributesDetailsController', function ($scope, $rootScope, $http, _, ResourceUtility, BrowserStorageUtility, NavUtility, SessionService, ConfigService, LeadEnrichmentService) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.$parent.setAttributesDetails(true);
-
     if ($scope.hasAttributes) {
         var templateType = $('#leadEnrichmentAttributesDetails').attr('templatetype');
         if (templateType != null && templateType !== '') {
@@ -49,6 +47,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel',
             var attribute = {};
             var originalAttribute = $scope.originalAttributes[i];
             attribute.name = originalAttribute.DisplayName;
+            attribute.dataSource = originalAttribute.DataSource;
             attribute.fieldName = 'Lattice_' + originalAttribute.FieldName;
             attribute.fieldType = convertFieldType(templateType, originalAttribute.FieldType);
             attributes[i] = attribute;
@@ -59,16 +58,25 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel',
     function convertFieldType(templateType, fieldType) {
         var dataType = fieldType;
         if (dataType != null) {
-            if (templateType != null && templateType.toLowerCase() === 'mkto') {
-                dataType = dataType.replace(/NVARCHAR/i, 'String');
-                dataType = dataType.replace(/VARCHAR/i, 'String');
-                dataType = dataType.replace(/INT/i, 'Integer');
-                dataType = dataType.replace(/FLOAT/i, 'Float');
+            var dataTypeUpperCase = dataType.toUpperCase();
+            if (templateType != null && templateType.toUpperCase() === 'MKTO') {
+                if (dataTypeUpperCase.indexOf('NVARCHAR') > -1) {
+                    dataType = dataType.replace(/NVARCHAR/i, 'String');
+                } else if (dataTypeUpperCase.indexOf('VARCHAR') > -1) {
+                    dataType = dataType.replace(/VARCHAR/i, 'String');
+                } else if (dataTypeUpperCase.indexOf('FLOAT') > -1) {
+                    dataType = 'Float';
+                } else if (dataTypeUpperCase === 'INT') {
+                    dataType = 'Integer';
+                }
             } else {
-                dataType = dataType.replace(/NVARCHAR/i, 'Text');
-                dataType = dataType.replace(/VARCHAR/i, 'Text');
-                dataType = dataType.replace(/INT/i, 'Number');
-                dataType = dataType.replace(/FLOAT/i, 'Number');
+                if (dataTypeUpperCase.indexOf('NVARCHAR') > -1) {
+                    dataType = dataType.replace(/NVARCHAR/i, 'Text');
+                } else if (dataTypeUpperCase.indexOf('VARCHAR') > -1) {
+                    dataType = dataType.replace(/VARCHAR/i, 'Text');
+                } else if (dataTypeUpperCase.indexOf('FLOAT') > -1 || dataTypeUpperCase === 'INT') {
+                    dataType = 'Number';
+                }
             }
         }
         return dataType;

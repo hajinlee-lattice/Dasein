@@ -639,11 +639,8 @@
 }
 
 #leadEnrichment .content {
-  padding: 8px 40px;
+  padding: 8px 0 8px 40px;
   width: 940px;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
 }
 
 #leadEnrichment .content .sub-title {
@@ -654,6 +651,12 @@
 #leadEnrichment .content .sub-title a {
   margin-left: 10px;
   font-size: .8em;
+}
+
+#leadEnrichment .unselectable {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
 }
 
 #leadEnrichment .list-group {
@@ -763,11 +766,6 @@
   box-shadow: none;
 }
 
-#leadEnrichment th,
-#leadEnrichment td {
-  font-size: 13px;
-}
-
 #saveLeadEnrichmentAttributesButton {
   float: right;
   margin-top: 10px;
@@ -776,6 +774,24 @@
 #backLeadEnrichmentButton {
   font-size: .75em;
   margin-right: 10px;
+}
+
+#leadEnrichmentAttributesDetails th,
+#leadEnrichmentAttributesDetails td {
+  font-size: 13px;
+}
+
+#leadEnrichmentAttributesDetails table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
+#leadEnrichmentAttributesDetails .name-col {
+  width: 24%;
+}
+
+#leadEnrichmentAttributesDetails .data-source-col {
+  width: 21%;
 }
 
 #leadEnrichmentAttributesDetails .field-type-col {
