@@ -59,6 +59,12 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     @Override
     @MatchStep
+    public List<String> getTargetColumns(ColumnSelection.Predefined predefined) {
+        return getSourceColumnMap(predefined).get(ColumnSelection.Predefined.Model.getName());
+    }
+
+    @Override
+    @MatchStep
     public Map<String, List<String>> getSourceColumnMap(ColumnSelection.Predefined predefined) {
         try {
             if (ColumnSelection.Predefined.Model.equals(predefined)) {

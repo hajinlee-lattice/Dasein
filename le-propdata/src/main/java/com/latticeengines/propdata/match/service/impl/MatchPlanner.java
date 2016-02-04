@@ -85,6 +85,7 @@ class MatchPlanner {
         if (predefined != null) {
             matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(predefined));
             matchContext.setColumnPriorityMap(columnSelectionService.getColumnPriorityMap(predefined));
+            matchContext.getOutput().setOutputFields(columnSelectionService.getTargetColumns(predefined));
         }
         return matchContext;
     }

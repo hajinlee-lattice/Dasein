@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.DomainUtils;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
@@ -52,7 +51,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
         matchContext = fetchData(matchContext);
-        matchContext = mangleResults(matchContext);
+        matchContext = combineResults(matchContext);
         return matchContext;
     }
 
@@ -86,23 +85,16 @@ class RealTimeMatchExecutor implements MatchExecutor {
     }
 
     @MatchStep
-    private MatchContext mangleResults(MatchContext matchContext) {
+    private MatchContext combineResults(MatchContext matchContext) {
         matchContext.setStatus(MatchStatus.PROCESSING);
 
-        List<Map<String, Object>> results = matchContext.getResultsBySource().get(MODEL);
-        matchContext = parseResult(matchContext, MODEL, results);
+        List<InternalOutputRecord> internalOutputRecords = distributeResults(matchContext.getInternalResults(),
+                matchContext.getResultsBySource());
+        matchContext.setInternalResults(internalOutputRecords);
+        matchContext = mergeResults(matchContext);
 
         List<ColumnMetadata> allFields = columnMetadataService
                 .fromPredefinedSelection(ColumnSelection.Predefined.Model);
-        List<String> outputFields = new ArrayList<>();
-        List<String> targetColumns = matchContext.getSourceColumnsMap().get(MODEL);
-        Set<String> columnSet = new HashSet<>(targetColumns);
-        for (ColumnMetadata field : allFields) {
-            if (columnSet.contains(field.getColumnName())) {
-                outputFields.add(field.getColumnName());
-            }
-        }
-        matchContext.getOutput().setOutputFields(outputFields);
         matchContext.getOutput().setMetadata(allFields);
 
         matchContext.getOutput().setFinishedAt(new Date());
@@ -113,73 +105,100 @@ class RealTimeMatchExecutor implements MatchExecutor {
         return matchContext;
     }
 
-    private MatchContext parseResult(MatchContext matchContext, String sourceName, List<Map<String, Object>> results) {
-        List<String> targetColumns = matchContext.getSourceColumnsMap().get(sourceName);
-        Integer[] columnMatchCount = new Integer[targetColumns.size()];
+    @VisibleForTesting
+    List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
+            Map<String, List<Map<String, Object>>> resultsMap) {
+        for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
+            String sourceName = result.getKey();
+            if (isDomainSource(sourceName)) {
+                String domainField = getDomainField(sourceName);
+                for (InternalOutputRecord record : records) {
+                    String parsedDomain = record.getParsedDomain();
+                    if (StringUtils.isEmpty(parsedDomain)) {
+                        continue;
+                    }
 
-        Map<String, List<Object>> domainMap = parseDomainBasedResults(results, targetColumns, "Domain");
+                    for (Map<String, Object> row : result.getValue()) {
+                        if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
+                            record.getResultsInSource().put(sourceName, row);
+                        }
+                    }
+                }
+            }
+        }
+        return records;
+    }
 
-        List<InternalOutputRecord> recordsToMatch = matchContext.getInternalResults();
-        List<OutputRecord> outputRecords = new ArrayList<>();
-        int matched = 0;
+    @VisibleForTesting
+    @MatchStep
+    MatchContext mergeResults(MatchContext matchContext) {
+        List<InternalOutputRecord> records = matchContext.getInternalResults();
+        List<String> outputFields = matchContext.getOutput().getOutputFields();
+        Map<String, List<String>> columnPriorityMap = matchContext.getColumnPriorityMap();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
-        for (InternalOutputRecord record : recordsToMatch) {
-            if (domainMap.containsKey(record.getParsedDomain())) {
-                record.setMatched(true);
-                List<Object> output = domainMap.get(record.getParsedDomain());
-                record.setOutput(output);
 
-                matched++;
-                for (int i = 0; i < output.size(); i++) {
-                    if (columnMatchCount[i] == null) {
-                        columnMatchCount[i] = 0;
-                    }
-                    if (output.get(i) != null) {
-                        columnMatchCount[i]++;
+        List<OutputRecord> outputRecords = new ArrayList<>();
+        Integer[] columnMatchCount = new Integer[outputFields.size()];
+        for (int i = 0; i < outputFields.size(); i++) {
+            columnMatchCount[i] = 0;
+        }
+
+        int totalMatched = 0;
+
+        for (InternalOutputRecord record : records) {
+            List<Object> output = new ArrayList<>();
+            Map<String, Map<String, Object>> results = record.getResultsInSource();
+            boolean matchedAnyColumn = false;
+            for (int i = 0; i < outputFields.size(); i++) {
+                String field = outputFields.get(i);
+                Object value = null;
+                boolean matched = false;
+                if (columnPriorityMap.containsKey(field)) {
+                    for (String targetSource : columnPriorityMap.get(field)) {
+                        if (results.containsKey(targetSource)) {
+                            matched = true;
+                            Object objInResult = results.get(targetSource).get(field);
+                            value = (objInResult == null ? value : objInResult);
+                        }
                     }
                 }
-                record.setMatchedDomain(record.getParsedDomain());
+
+                output.add(value);
+
+                if (matchContext.getInput().getPredefinedSelection().equals(ColumnSelection.Predefined.Model)) {
+                    columnMatchCount[i] += (value == null ? 0 : 1);
+                } else {
+                    columnMatchCount[i] += (matched ? 1 : 0);
+                }
+
+                matchedAnyColumn = matchedAnyColumn || matched;
+            }
+
+            record.setOutput(output);
+
+            if (matchedAnyColumn) {
+                totalMatched++;
+                record.setMatched(true);
+            }
+
+            if (returnUnmatched || matchedAnyColumn) {
                 outputRecords.add(record);
-            } else {
-                record.addErrorMessage("Could not find a match for domain [" + record.getMatchedDomain()
-                        + "] in source " + sourceName);
-                record.setMatchedDomain(null);
-                if (returnUnmatched) {
-                    outputRecords.add(record);
-                }
             }
         }
 
         matchContext.getOutput().setResult(outputRecords);
+        matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
         matchContext.getOutput().getStatistics().setColumnMatchCount(Arrays.asList(columnMatchCount));
-        matchContext.getOutput().getStatistics().setRowsMatched(matched);
+
         return matchContext;
     }
 
-    private Map<String, List<Object>> parseDomainBasedResults(List<Map<String, Object>> results,
-            List<String> targetColumns, String sourceDomainField) {
-        Map<String, Integer> posMap = new HashMap<>();
-        int pos = 0;
-        for (String column : targetColumns) {
-            posMap.put(column, pos);
-            pos++;
-        }
+    private boolean isDomainSource(String sourceName) {
+        return true;
+    }
 
-        Map<String, List<Object>> toReturn = new HashMap<>();
-        for (Map<String, Object> record : results) {
-            String domain = DomainUtils.parseDomain((String) record.get(sourceDomainField));
-            if (StringUtils.isNotEmpty(domain) && !toReturn.containsKey(domain)) {
-                Object[] data = new Object[targetColumns.size()];
-                for (Map.Entry<String, Object> entry : record.entrySet()) {
-                    if (posMap.containsKey(entry.getKey())) {
-                        data[posMap.get(entry.getKey())] = entry.getValue();
-                    }
-                }
-                toReturn.put(domain, Arrays.asList(data));
-            }
-        }
-
-        return toReturn;
+    private String getDomainField(String sourceName) {
+        return "Domain";
     }
 
     private MatchCallable getMatchCallable(String sourceName, List<String> targetColumns, MatchContext matchContext) {
