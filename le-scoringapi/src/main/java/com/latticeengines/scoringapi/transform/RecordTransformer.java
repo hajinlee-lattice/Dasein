@@ -7,23 +7,31 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.jython.JythonEngine;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
 @Service
 public class RecordTransformer {
-    public Map<String, Object> transform(List<TransformDefinition> definitions, Map<String, Object> record) {
+    
+    public Map<String, Object> transform(String modelPath, List<TransformDefinition> definitions, Map<String, Object> record) {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
+        
+        JythonEngine engine = retriever.getTransform(modelPath);
 
         for (TransformDefinition entry : definitions) {
-            JythonTransform transform = retriever.getTransform(entry.name);
-            Object value = transform.invoke(entry.arguments, result, entry.type.type());
+            Object value = null;
+            try {
+                value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
+            } catch (Exception e) {
+                value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
+            }
             result.put(entry.output, value);
         }
 
         return result;
     }
-
+    
     @Autowired
     private TransformRetriever retriever;
 }

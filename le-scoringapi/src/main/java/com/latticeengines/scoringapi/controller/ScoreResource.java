@@ -148,8 +148,9 @@ public class ScoreResource {
                 throw new RuntimeException("Failed to serialize data totality", ex);
             }
 
-            Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
+            //Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
 
+            Map<String, Object> transformed = null;
             ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model);
 
             Map<ScoreType, Object> result = evaluator.evaluate(transformed, selected.derivation);
