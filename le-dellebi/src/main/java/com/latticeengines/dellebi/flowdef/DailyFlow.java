@@ -14,6 +14,7 @@ import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
 import cascading.flow.planner.PlannerException;
 import cascading.property.AppProps;
 
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
@@ -62,6 +63,9 @@ public class DailyFlow {
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     @Autowired
+    private VersionManager versionManager;
+
+    @Autowired
     private MailSender mailSender;
 
     private ArrayList<FlowDef> flowList;
@@ -100,18 +104,16 @@ public class DailyFlow {
 
         } catch (PlannerException e) {
             log.error("Cascading failed!", e);
-            mailSender.sendEmail(mailReceiveList,
-                    "Dell EBI daily refresh just failed! file=" + fileName,
-                    "check " + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
+                    + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
 
         } catch (Exception e) {
             log.error("Daily flow failed!", e);
-            mailSender.sendEmail(mailReceiveList,
-                    "Dell EBI daily refresh just failed! file=" + fileName,
-                    "check " + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
+                    + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
@@ -131,7 +133,7 @@ public class DailyFlow {
     private FlowDef getFlowFromFile(DataFlowContext context) {
         for (FlowDef flow : flowList) {
             if (flow.getName().equals(dellEbiFlowService.getFileType(context).getType())) {
-                HadoopFileSystemOperations.addClasspath(flow);
+                HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersion());
                 return flow;
             }
         }

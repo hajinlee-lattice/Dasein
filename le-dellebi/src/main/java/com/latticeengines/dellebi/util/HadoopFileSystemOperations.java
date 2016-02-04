@@ -84,11 +84,11 @@ public class HadoopFileSystemOperations {
         return false;
     }
 
-    public static void addClasspath(FlowDef flow) {
+    public static void addClasspath(FlowDef flow, String artifactVersion) {
 
         try {
             Configuration config = new Configuration();
-            List<String> files = HdfsUtils.getFilesForDir(config, "/app/dataflow/lib/");
+            List<String> files = HdfsUtils.getFilesForDir(config, String.format("/app/%s/dataflow/lib/", artifactVersion));
             for (String file : files) {
                 flow.addToClassPath(file);
             }
