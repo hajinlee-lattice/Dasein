@@ -32,7 +32,7 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod("Functional" + source.getSourceName());
+        prepareCleanPod(source);
         setupBeans();
     }
 

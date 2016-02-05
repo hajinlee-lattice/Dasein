@@ -22,8 +22,6 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 
 abstract public class MostRecentServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
-    private static final String testPod = "FunctionalMostRecent";
-
     RefreshService refreshService;
     RefreshProgressEntityMgr progressEntityMgr;
     MostRecentSource source;
@@ -42,7 +40,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod(testPod + source.getSourceName());
+        prepareCleanPod(source);
         getBaseSourceTestBean().setupBeans();
 
         refreshService = getRefreshService();

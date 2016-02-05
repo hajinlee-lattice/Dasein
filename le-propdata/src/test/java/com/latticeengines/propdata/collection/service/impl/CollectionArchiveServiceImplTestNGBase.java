@@ -39,7 +39,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod("Functional" + source.getSourceName());
+        prepareCleanPod(source);
         setupBeans();
     }
 

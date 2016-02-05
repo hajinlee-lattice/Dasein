@@ -77,12 +77,6 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
     }
 
     private boolean importIncrementalRawDataAndUpdateProgress(ArchiveProgress progress) {
-        String targetDir = incrementalDataDirInHdfs(progress);
-        if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
-            return false;
-        }
-
         String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
                 progress.getEndDate());
 
@@ -110,13 +104,20 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
                 .queryForObject("SELECT COUNT(*) FROM " + getSource().getCollectedTableName() + " WHERE "
                         + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
 
+        String targetDir = incrementalDataDirInHdfs(progress);
+        if (!cleanupHdfsDir(targetDir, progress)) {
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
+            return false;
+        }
+
         if (rowsToDownload > 0 && !importFromCollectionDB(getSource().getCollectedTableName(), targetDir,
                 getSource().getDownloadSplitColumn(), whereClause, progress)) {
             updateStatusToFailed(progress, "Failed to import incremental data from DB.", null);
             return false;
         }
 
-        progress.setRowsDownloadedToHdfs(rowsToDownload);
+        long rowsDownloaded = countSourceTable(progress);
+        progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
         hdfsSourceEntityMgr.setLatestTimestamp(getSource(), latest);
 

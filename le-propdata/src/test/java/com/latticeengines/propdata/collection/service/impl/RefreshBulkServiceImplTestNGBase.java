@@ -38,7 +38,7 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod("Functional" + source.getSourceName());
+        prepareCleanPod(source);
         getBaseSourceTestBean().setupBeans();
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();

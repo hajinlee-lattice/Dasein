@@ -42,7 +42,7 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        prepareCleanPod("Functional" + source.getSourceName());
+        prepareCleanPod(source);
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         baseSource = source.getBaseSources()[0];

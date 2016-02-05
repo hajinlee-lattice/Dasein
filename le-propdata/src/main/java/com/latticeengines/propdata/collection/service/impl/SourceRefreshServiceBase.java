@@ -16,6 +16,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ProgressEntityMgr;
@@ -24,6 +25,7 @@ import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -216,7 +218,12 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     protected Long countSourceTable(P progress) {
         Long startTime = System.currentTimeMillis();
         Source source = getSource();
-        Long count = hdfsSourceEntityMgr.count(source, getVersionString(progress));
+        String version = getVersionString(progress);
+        if ((progress instanceof ArchiveProgress) && (source instanceof CollectedSource)) {
+            ArchiveProgress archiveProgress = (ArchiveProgress) progress;
+            version = HdfsPathBuilder.dateFormat.format(archiveProgress.getEndDate());
+        }
+        Long count = hdfsSourceEntityMgr.count(source, version);
         LoggingUtils.logInfoWithDuration(getLogger(), progress,
                 String.format("There are %d rows in " + getSource().getSourceName(), count), startTime);
         return count;

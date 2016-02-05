@@ -155,7 +155,8 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 throw new RuntimeException("Cannot find avro dir " + avroDir);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to count source " + source.getSourceName() + " at version " + version);
+            throw new RuntimeException("Failed to count source " + source.getSourceName() + " at version " + version,
+                    e);
         }
     }
 
