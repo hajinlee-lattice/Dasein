@@ -136,7 +136,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(doc);
         restTemplate.setErrorHandler(statusErrorHandler);
-        int numOfRetries = 300;
+        int numOfRetries = 600;
         List response;
         do {
             response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
