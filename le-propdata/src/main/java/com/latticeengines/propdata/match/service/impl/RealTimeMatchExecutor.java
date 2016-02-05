@@ -50,13 +50,13 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
-        matchContext = fetchData(matchContext);
-        matchContext = combineResults(matchContext);
+        matchContext = fetch(matchContext);
+        matchContext = complete(matchContext);
         return matchContext;
     }
 
     @MatchStep
-    private MatchContext fetchData(MatchContext context) {
+    private MatchContext fetch(MatchContext context) {
         context.setStatus(MatchStatus.FETCHING);
 
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
@@ -85,7 +85,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     }
 
     @MatchStep
-    private MatchContext combineResults(MatchContext matchContext) {
+    private MatchContext complete(MatchContext matchContext) {
         matchContext.setStatus(MatchStatus.PROCESSING);
 
         List<InternalOutputRecord> internalOutputRecords = distributeResults(matchContext.getInternalResults(),
