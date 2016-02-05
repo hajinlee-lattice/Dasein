@@ -37,6 +37,7 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     }
 
     void setupBeans() {
+        source = getSource();
         archiveService = getArchiveService();
         progressEntityMgr = getProgressEntityMgr();
     }

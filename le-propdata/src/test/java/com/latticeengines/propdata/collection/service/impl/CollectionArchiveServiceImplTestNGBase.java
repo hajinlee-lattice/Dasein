@@ -44,6 +44,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     }
 
     void setupBeans() {
+        source = getSource();
         collectedArchiveService = getCollectedArchiveService();
         progressEntityMgr = getProgressEntityMgr();
         dates = getDates();
