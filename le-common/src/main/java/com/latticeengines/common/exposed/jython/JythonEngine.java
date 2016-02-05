@@ -26,9 +26,9 @@ public class JythonEngine {
             interpreter = new PythonInterpreter();
             return;
         }
-        PySystemState pystate = new PySystemState();
-        pystate.path.add(modelPath);
-        interpreter = new PythonInterpreter(new PyDictionary(), pystate);
+        PySystemState sys = new PySystemState();
+        sys.path.append(new PyString(modelPath));
+        interpreter = new PythonInterpreter(null, sys);
         interpreter.exec(String.format("import os;os.chdir('%s')", modelPath));
     }
     
@@ -99,9 +99,16 @@ public class JythonEngine {
             if (returnType == Long.class) {
                 return returnType.cast(Long.valueOf(value));
             }
+            if (returnType == Double.class) {
+                return returnType.cast(Double.valueOf((double) value));
+            }
             return returnType.cast(((PyInteger) x).getValue());
         } else if (x instanceof PyLong) {
-            return returnType.cast(((PyLong) x).getValue().longValue());
+            Long value = ((PyLong) x).getValue().longValue();
+            if (returnType == Double.class) {
+                return returnType.cast(Double.valueOf((double) value));
+            }
+            return returnType.cast(value);
         }
 
         return null;
