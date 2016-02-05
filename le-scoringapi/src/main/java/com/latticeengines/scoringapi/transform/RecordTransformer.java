@@ -17,8 +17,14 @@ public class RecordTransformer {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
         
+        Integer recId = (Integer) record.get("Nutanix_EventTable_Clean");
+        if (recId == 49692) {
+            System.out.println("");
+        }
+        
+        
         JythonEngine engine = retriever.getTransform(modelPath);
-
+        
         for (TransformDefinition entry : definitions) {
             Object value = null;
             try {
