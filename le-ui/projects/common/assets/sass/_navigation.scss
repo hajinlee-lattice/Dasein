@@ -145,10 +145,41 @@ Secondary Nav (Hamburger and Profile Nav)
       background-size: 30px 30px;
       background-repeat: no-repeat; 
       background-position: 12px 50%;
+      &:hover {
+        background-color: #efefef;
+        text-decoration: none;
+      }
+      &.open {
+        background-color: #222;
+        color: #fff;
+      }
     }
-  }
-  button:hover, .profile-nav:hover {
-    background: #efefef;
+    ul {
+      display: block;
+      z-index: 2;
+      text-align: left;
+      position: absolute;
+      right: 0;
+      & > li {
+        text-align: left;
+        border-bottom: none;
+        & > a {
+          display: block;
+          padding: 4px 28px;
+          background: #222;
+          color: #fff;
+          &:first-of-type {
+            padding-top: 8px;
+          }
+          &:last-child {
+            padding-bottom: 8px;
+          }
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
   }
   &:after {
     display: table;

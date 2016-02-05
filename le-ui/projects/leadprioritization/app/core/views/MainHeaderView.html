@@ -7,12 +7,12 @@
 
         <img class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
 
-        <div class="profile-nav dropdown">
-            <a class="pd-header-dropdown-container" href="javascript:void(0)" title="" data-ng-click="handleClick($event, 'dropdown')">
+        <div class="profile-nav">
+            <a ng-click="showDiv = !showDiv" ng-class="{'open' : showDiv}">
                 <span class="pd-header-username">{{userDisplayName}}</span>
                 <span class="pd-header-downarrow fa fa-angle-down"></span>
             </a>
-            <ul>
+            <ul ng-show="showDiv">
                 <li><a href="#" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
                     <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
                     <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>

@@ -21,9 +21,8 @@
     <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
     /build -->
     <!-- build:remove:dist -->
-    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="lib/css/jquery.qtip.css" />
-    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css" />
+    <link rel="stylesheet" type="text/css" href="/lib/css/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="/lib/css/jquery.qtip.css" />
 
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css" />
@@ -33,11 +32,12 @@
 
     <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
 
+    <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css" />
     <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController">
+<body data-ng-controller="MainController" class="lp">
 
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
