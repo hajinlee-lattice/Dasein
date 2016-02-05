@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.propdata.match;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -9,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,6 +22,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchOutput {
+
+    private static Log log = LogFactory.getLog(MatchOutput.class);
 
     private List<String> inputFields;
     private Map<MatchKey, String> keyMap;
@@ -128,7 +132,8 @@ public class MatchOutput {
     private void setReceivedAtByString(String requestSubmittedAt) {
         try {
             this.receivedAt = formatter.parse(requestSubmittedAt);
-        } catch (ParseException e) {
+        } catch (Exception e) {
+            log.error("Failed to parse timestamp ReceviedAt [" + requestSubmittedAt + "]", e);
             this.receivedAt = null;
         }
     }
@@ -152,7 +157,8 @@ public class MatchOutput {
     private void setFinishedAtByString(String resultGeneratedAt) {
         try {
             this.finishedAt = formatter.parse(resultGeneratedAt);
-        } catch (ParseException e) {
+        } catch (Exception e) {
+            log.error("Failed to parse timestamp FinishedAt [" + resultGeneratedAt + "]", e);
             this.finishedAt = null;
         }
     }
