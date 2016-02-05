@@ -33,7 +33,7 @@ public class RefreshProgress implements Progress {
     @Column(name = "BaseSourceVersion")
     protected String baseSourceVersion;
 
-    @Column(name = "RowsGeneratedInHDSF")
+    @Column(name = "RowsGeneratedInHDFS")
     protected long rowsGeneratedInHdfs = 0;
 
     @Column(name = "RowsUploadedToSQL")
