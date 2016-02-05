@@ -1,6 +1,6 @@
 package com.latticeengines.eai.service.impl.file.strategy;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +23,7 @@ public class FileEventTableImportStrategyBaseUnitTestNG {
         ctx.setProperty(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
 
         String url = new FileEventTableImportStrategyBase().createJdbcUrl(ctx);
-        assertEquals(url, "jdbc:relique:csv:./?timestampFormat=HH:mm:ss&dateFormat=MM-DD-YYYY");
+        assertTrue(url.equals("jdbc:relique:csv:./?timestampFormat=HH:mm:ss&dateFormat=MM-DD-YYYY")
+                || url.equals("jdbc:relique:csv:./?dateFormat=MM-DD-YYYY&timestampFormat=HH:mm:ss"));
     }
 }
