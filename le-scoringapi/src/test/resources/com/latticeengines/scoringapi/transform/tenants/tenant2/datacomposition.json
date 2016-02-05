@@ -1,0 +1,2430 @@
+{
+    "fields": {
+        "DS_PD_MonthsSincePatentGranted": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessSocialPresence": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_ClickEmail_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_Email": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_UCCFilingsPresent_D": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesAds": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsIndividualContributor": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LeadSourceAsset": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesSsl": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesOpenSourceAdoption": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CRM_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessTechnologiesOpenSourceAdoption": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "TMPL_LSD_WebReferral": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ProjectMgnt_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsManager": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesServer": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_Training": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Len_Domain_MKTOLead": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessVCFunded": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_UCCFilingsPresent_N": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsIT": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_OpenEmail_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesSeoMeta": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessTechnologiesFirstDetected_MonthsSince": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesJavascript": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesMx": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesAnalytics": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_HardwareBasic_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessSocialPresence": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "TotalParticipantsSOY": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_TechUsed_Google": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_PatentGranted_MonthsSince": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsIT": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_WebOrntdArch_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_EnterpriseApplications_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_VerticalMarkets_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Domains_Count": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_SalesGenerated": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessTechnologiesSocialMediaPresence": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsIndividualContributor": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DerogatoryIndicator": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_brighttalkORwebinar": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_PrimarySIC1": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "FundingAmount": {
+            "source": "PROPRIETARY", 
+            "type": "FLOAT", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BankruptcyFiled": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsTechLead": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesEncoding": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_MarketingPerfMgmt_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesFeeds": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesSocialMediaPresence": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessEstimatedEmployees": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsAcademic": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_GooglePlusUrl_OnRecord": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessEstimatedAnnualSales_k": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessECommerceSite": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesShop": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_SoftwareBasic_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessEstablishedYear": {
+            "source": "PROPRIETARY", 
+            "type": "FLOAT", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CloudService_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Cloud_Account_Enabled__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "SpamIndicator": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesDocinfo": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_Analystreport": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Medical": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_PercentileModel_ConvertedToNum": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ProductivitySltns_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_LinkedInUrl_OnRecord": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessFirmographicsParentRevenue": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsPublicDomain": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "RetirementAssetsEOY": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Free_Email_Address__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessLastSocialActivity_OnRecord": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Interest_tcat__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesNs": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "FundingFinanceRound": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_EnterpriseContent_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "RetirementAssetsYOY": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessTechnologiesMarketingAutomation": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_VisitWeb_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "MKTOLead_SpamIndicator": {
+            "source": "REQUEST", 
+            "type": "BOOLEAN", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesWebServer": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CloudService_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsManager": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessECommerceSite": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "Email_Domain_IsPublic": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_WebOrntdArch_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_TechUsed_Amazon": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_DataCenterSolutions_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_SpamIndicator": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Industrial": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesCdn": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ITGovernance_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_ClickLink_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_Other": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "TMPL_LSD_WebDirect": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Convert_Interest_tcat__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_WebOrganic": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CommTech_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_NetworkComputing_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesMapping": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessTwitter_OnRecord": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesHosting": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_UnsubscrbEmail_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_TechUsed_Wordpress": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_SoftwareBasic_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsSales": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_FacebookUrl_OnRecord": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_ExperianCreditRating_ConvertedToNum": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_SalesGenerated": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_Other": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesCms": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Education": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_PatentApplied_MonthsSince": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CRM_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_ListPurchase": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_PartsRental": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesSeoHeaders": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Law": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_NetworkComputing_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesPayment": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_CommTech_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_PartnerANDEvent": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_EnterpriseApplications_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_JobsTrendString_Numeric": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_searchpaid": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_DataCenterSolutions_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ITGovernance_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_UCCFilings_ConvertedToNum": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesParked": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_paidNOTsearchpaid": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_MarketingPerfMgmt_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Convert_Free_Email_Address__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Convert_Cloud_Account_Enabled__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_EnterpriseContent_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "JobsRecentJobs": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "ExperianCreditRating": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_lbORlpORlb": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_HardwareBasic_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesMedia": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsSales": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ProjectMgnt_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_ModelAction_Numeric": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Intelliscore": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSD_EventNOTPartner": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_RelatedLinks_Count": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_LeasingTrades_ConvertedToNum": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsTechLead": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_VerticalMarkets_One": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_contact": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_UCCFilingsPresent_Y": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessAnnualSalesAbs": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "MKTOLead_TitleHasUnusualChar": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_FinancialServices": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_FundingStage_Numeric": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Utilities": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "FundingStage": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_MonthsSinceFundingAwarded": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesMarketingAutomation": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "Convert_Interest_esb__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "ASR_Trial_Status__c": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "Cloud_Plan__c": {
+            "source": "REQUEST", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "CloudTechnologies_ProductivitySltns_Two": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "IsEmpty": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "CompanyNameLen": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesWidgets": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BankruptcyFiled": {
+            "source": "PROPRIETARY", 
+            "type": "STRING", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesSeoTitle": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "MKTOLead_CompanyNameHasUnusualChar": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Logistics": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Interest_esb__c": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Title_IsAcademic": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "MKTOLead_IsInternalDomain": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesFramework": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_FillOutForm_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_whitepaperORebook": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_PartnerANDEvent": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_Alexa_Categories_Insurance": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "LSA_dmORrORdm": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "MKTOLead_Entropy_Company": {
+            "source": "REQUEST", 
+            "type": "FLOAT", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessTechnologiesWebMaster": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_InterestingMoment_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "Activity_EmailBncedSft_cnt": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "BusinessFirmographicsParentEmployees": {
+            "source": "PROPRIETARY", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }, 
+        "DS_PD_BusinessEstimatedEmployees_ConvertedToNum": {
+            "source": "REQUEST", 
+            "type": "INTEGER", 
+            "interpretation": "FEATURE"
+        }
+    }, 
+    "transforms": [
+        {
+            "name": "encoder", 
+            "output": "DerogatoryIndicator", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "DerogatoryIndicator"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessTechnologiesMarketingAutomation", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessTechnologiesMarketingAutomation"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessECommerceSite", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessECommerceSite"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessTechnologiesSocialMediaPresence", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessTechnologiesSocialMediaPresence"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "ASR_Trial_Status__c", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "ASR_Trial_Status__c"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "MKTOLead_SpamIndicator", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "MKTOLead_SpamIndicator"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "LeadSourceAsset", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "LeadSourceAsset"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "Cloud_Plan__c", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "Cloud_Plan__c"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "DS_PD_PrimarySIC1", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "DS_PD_PrimarySIC1"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessSocialPresence", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessSocialPresence"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "FundingStage", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "FundingStage"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessTechnologiesOpenSourceAdoption", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessTechnologiesOpenSourceAdoption"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BankruptcyFiled", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BankruptcyFiled"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessTechnologiesParked", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessTechnologiesParked"
+            }
+        }, 
+        {
+            "name": "encoder", 
+            "output": "BusinessTechnologiesEncoding", 
+            "type": "LONG", 
+            "arguments": {
+                "column": "BusinessTechnologiesEncoding"
+            }
+        }, 
+        {
+            "name": "make_float", 
+            "output": "ExperianCreditRating", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "ExperianCreditRating"
+            }
+        }, 
+        {
+            "name": "make_float", 
+            "output": "BusinessEstimatedEmployees", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessEstimatedEmployees"
+            }
+        }, 
+        {
+            "name": "make_float", 
+            "output": "Intelliscore", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Intelliscore"
+            }
+        }, 
+        {
+            "name": "make_float", 
+            "output": "FundingFinanceRound", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "FundingFinanceRound"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_MonthsSincePatentGranted", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_MonthsSincePatentGranted"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_ClickEmail_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_ClickEmail_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_Email", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_Email"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesMedia", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesMedia"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesAds", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesAds"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsIndividualContributor", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsIndividualContributor"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesSsl", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesSsl"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessTechnologiesSocialMediaPresence", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessTechnologiesSocialMediaPresence"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CRM_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CRM_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ProjectMgnt_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ProjectMgnt_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsManager", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsManager"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesServer", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesServer"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessTwitter_OnRecord", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessTwitter_OnRecord"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_Training", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_Training"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Len_Domain_MKTOLead", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Len_Domain_MKTOLead"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessVCFunded", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessVCFunded"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsIT", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsIT"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_OpenEmail_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_OpenEmail_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_RelatedLinks_Count", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_RelatedLinks_Count"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesJavascript", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesJavascript"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesMx", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesMx"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesFramework", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesFramework"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_HardwareBasic_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_HardwareBasic_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesSeoMeta", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesSeoMeta"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "TotalParticipantsSOY", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "TotalParticipantsSOY"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_TechUsed_Google", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_TechUsed_Google"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_WebOrntdArch_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_WebOrntdArch_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_SpamIndicator", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_SpamIndicator"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_EnterpriseApplications_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_EnterpriseApplications_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_VerticalMarkets_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_VerticalMarkets_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_SalesGenerated", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_SalesGenerated"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "TMPL_LSD_WebReferral", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "TMPL_LSD_WebReferral"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_TechUsed_Wordpress", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_TechUsed_Wordpress"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BankruptcyFiled", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BankruptcyFiled"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsTechLead", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsTechLead"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesFeeds", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesFeeds"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessEstimatedEmployees", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessEstimatedEmployees"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsAcademic", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsAcademic"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesSeoHeaders", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesSeoHeaders"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_GooglePlusUrl_OnRecord", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_GooglePlusUrl_OnRecord"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessEstimatedAnnualSales_k", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessEstimatedAnnualSales_k"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessECommerceSite", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessECommerceSite"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesShop", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesShop"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_PercentileModel_ConvertedToNum", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_PercentileModel_ConvertedToNum"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_SoftwareBasic_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_SoftwareBasic_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessEstablishedYear", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessEstablishedYear"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CloudService_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CloudService_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Cloud_Account_Enabled__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Cloud_Account_Enabled__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "SpamIndicator", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "SpamIndicator"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesDocinfo", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesDocinfo"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessTechnologiesMarketingAutomation", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessTechnologiesMarketingAutomation"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ProductivitySltns_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ProductivitySltns_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessFirmographicsParentRevenue", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessFirmographicsParentRevenue"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsPublicDomain", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsPublicDomain"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "RetirementAssetsEOY", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "RetirementAssetsEOY"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Free_Email_Address__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Free_Email_Address__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_MarketingPerfMgmt_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_MarketingPerfMgmt_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessLastSocialActivity_OnRecord", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessLastSocialActivity_OnRecord"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Interest_tcat__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Interest_tcat__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesNs", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesNs"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsAcademic", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsAcademic"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_Analystreport", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_Analystreport"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "FundingFinanceRound", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "FundingFinanceRound"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_EnterpriseContent_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_EnterpriseContent_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "RetirementAssetsYOY", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "RetirementAssetsYOY"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "FundingAmount", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "FundingAmount"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_VisitWeb_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_VisitWeb_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_PatentApplied_MonthsSince", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_PatentApplied_MonthsSince"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesWebServer", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesWebServer"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CloudService_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CloudService_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsManager", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsManager"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Email_Domain_IsPublic", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Email_Domain_IsPublic"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_WebOrntdArch_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_WebOrntdArch_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_DataCenterSolutions_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_DataCenterSolutions_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Industrial", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Industrial"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesCdn", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesCdn"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ITGovernance_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ITGovernance_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_ClickLink_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_ClickLink_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_Other", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_Other"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_PatentGranted_MonthsSince", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_PatentGranted_MonthsSince"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesWidgets", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesWidgets"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "TMPL_LSD_WebDirect", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "TMPL_LSD_WebDirect"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_WebOrganic", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_WebOrganic"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CommTech_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CommTech_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_NetworkComputing_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_NetworkComputing_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesMapping", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesMapping"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesHosting", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesHosting"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_UnsubscrbEmail_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_UnsubscrbEmail_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Insurance", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Insurance"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_SoftwareBasic_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_SoftwareBasic_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsSales", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsSales"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_FacebookUrl_OnRecord", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_FacebookUrl_OnRecord"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_ExperianCreditRating_ConvertedToNum", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_ExperianCreditRating_ConvertedToNum"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_SalesGenerated", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_SalesGenerated"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_Other", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_Other"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessTechnologiesFirstDetected_MonthsSince", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessTechnologiesFirstDetected_MonthsSince"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Education", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Education"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CRM_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CRM_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_ListPurchase", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_ListPurchase"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_PartsRental", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_PartsRental"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Medical", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Medical"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_FundingStage_Numeric", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_FundingStage_Numeric"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_LinkedInUrl_OnRecord", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_LinkedInUrl_OnRecord"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_NetworkComputing_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_NetworkComputing_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesPayment", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesPayment"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_CommTech_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_CommTech_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_PartnerANDEvent", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_PartnerANDEvent"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_EnterpriseApplications_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_EnterpriseApplications_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_searchpaid", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_searchpaid"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessSocialPresence", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessSocialPresence"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ITGovernance_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ITGovernance_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_TechUsed_Amazon", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_TechUsed_Amazon"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_JobsTrendString_Numeric", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_JobsTrendString_Numeric"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_DataCenterSolutions_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_DataCenterSolutions_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_paidNOTsearchpaid", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_paidNOTsearchpaid"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_MarketingPerfMgmt_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_MarketingPerfMgmt_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Convert_Free_Email_Address__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Convert_Free_Email_Address__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Convert_Cloud_Account_Enabled__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Convert_Cloud_Account_Enabled__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_UCCFilings_ConvertedToNum", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_UCCFilings_ConvertedToNum"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_EnterpriseContent_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_EnterpriseContent_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "JobsRecentJobs", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "JobsRecentJobs"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "ExperianCreditRating", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "ExperianCreditRating"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessTechnologiesOpenSourceAdoption", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessTechnologiesOpenSourceAdoption"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_lbORlpORlb", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_lbORlpORlb"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_HardwareBasic_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_HardwareBasic_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_BusinessEstimatedEmployees_ConvertedToNum", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_BusinessEstimatedEmployees_ConvertedToNum"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesCms", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesCms"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_contact", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_contact"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "MKTOLead_TitleHasUnusualChar", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "MKTOLead_TitleHasUnusualChar"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ProjectMgnt_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ProjectMgnt_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_ModelAction_Numeric", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_ModelAction_Numeric"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Intelliscore", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Intelliscore"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsIT", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsIT"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_EventNOTPartner", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_EventNOTPartner"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_UCCFilingsPresent_D", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_UCCFilingsPresent_D"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_LeasingTrades_ConvertedToNum", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_LeasingTrades_ConvertedToNum"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsTechLead", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsTechLead"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_VerticalMarkets_One", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_VerticalMarkets_One"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsSales", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsSales"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_UCCFilingsPresent_Y", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_UCCFilingsPresent_Y"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessAnnualSalesAbs", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessAnnualSalesAbs"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_FinancialServices", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_FinancialServices"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSD_brighttalkORwebinar", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSD_brighttalkORwebinar"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Utilities", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Utilities"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Title_IsIndividualContributor", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Title_IsIndividualContributor"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_UCCFilingsPresent_N", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_UCCFilingsPresent_N"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Convert_Interest_esb__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Convert_Interest_esb__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Domains_Count", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Domains_Count"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "MKTOLead_CompanyNameHasUnusualChar", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "MKTOLead_CompanyNameHasUnusualChar"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "IsEmpty", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "IsEmpty"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Law", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Law"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CompanyNameLen", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CompanyNameLen"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_MonthsSinceFundingAwarded", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_MonthsSinceFundingAwarded"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Convert_Interest_tcat__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Convert_Interest_tcat__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesSeoTitle", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesSeoTitle"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "DS_PD_Alexa_Categories_Logistics", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "DS_PD_Alexa_Categories_Logistics"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Interest_esb__c", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Interest_esb__c"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "MKTOLead_IsInternalDomain", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "MKTOLead_IsInternalDomain"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesAnalytics", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesAnalytics"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_FillOutForm_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_FillOutForm_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_whitepaperORebook", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_whitepaperORebook"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessFirmographicsParentEmployees", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessFirmographicsParentEmployees"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "CloudTechnologies_ProductivitySltns_Two", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "CloudTechnologies_ProductivitySltns_Two"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_dmORrORdm", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_dmORrORdm"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "MKTOLead_Entropy_Company", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "MKTOLead_Entropy_Company"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "BusinessTechnologiesWebMaster", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "BusinessTechnologiesWebMaster"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_InterestingMoment_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_InterestingMoment_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "Activity_EmailBncedSft_cnt", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "Activity_EmailBncedSft_cnt"
+            }
+        }, 
+        {
+            "name": "replace_null_value", 
+            "output": "LSA_PartnerANDEvent", 
+            "type": "FLOAT", 
+            "arguments": {
+                "column": "LSA_PartnerANDEvent"
+            }
+        }
+    ]
+}

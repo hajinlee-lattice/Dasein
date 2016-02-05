@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.Reader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.scoringapi.functionalframework.RecordTransformerTestMetadata;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
 import com.latticeengines.scoringapi.model.ModelEvaluator;
 import com.latticeengines.scoringapi.unused.ScoreType;
@@ -45,17 +47,22 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
     }
     
     @DataProvider(name = "tenants")
-    public Object[][] getTenants() {
+    public Object[][] getTenants() throws Exception {
         URL url = ClassLoader.getSystemResource("com/latticeengines/scoringapi/transform/tenants");
         File transformDir = new File(url.getFile());
         
         List<File> tenantList = Arrays.asList(transformDir.listFiles());
         Object[][] tenants = new Object[tenantList.size()][2];
-        
         int i = 0;
+        tenantList = new ArrayList<>();
+        tenantList.add(transformDir.listFiles()[1]);
         for (File tenant : tenantList) {
             tenants[i][0] = tenant.getAbsolutePath();
-            tenants[i][1] = "Nutanix_EventTable_Clean";
+            RecordTransformerTestMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(//
+                    new File(tenant.getAbsolutePath() + "/metadata.json")), //
+                    RecordTransformerTestMetadata.class);
+            tenants[i][1] = metadata.keyColumn;
+            i++;
         }
         
         return tenants;
@@ -100,6 +107,11 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         ModelEvaluator pmmlEvaluator = new ModelEvaluator(pmmlReader);
         Schema schema = AvroUtils.getSchema(config, new Path(avroFile));
         Map<Double, Double> expectedScores = getExpectedScores(expectedScoresPath);
+        int i = 0;
+        
+        long totalTransformTime = 0;
+        long totalEvaluationTime = 0;
+        long time0 = System.currentTimeMillis();
         for (GenericRecord record : reader) {
             Integer recId = (Integer) record.get(keyColumn);
             
@@ -111,15 +123,26 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                 }
                 recordAsMap.put(f.name(), value);
             }
+            long time1 = System.currentTimeMillis();
             Map<String, Object> transformed = recordTransformer.transform(modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
-
+            long time2 = System.currentTimeMillis();
+            totalTransformTime += (time2 - time1);
+            
             Map<ScoreType, Object> evaluation = pmmlEvaluator.evaluate(transformed, derivation);
+            totalEvaluationTime += (System.currentTimeMillis() - time2);
             double expectedScore = expectedScores.get((double) recId);
             double score = (double) evaluation.get(ScoreType.PROBABILITY);
             if (Math.abs(expectedScore - score) > 0.0000001) {
                 System.out.println(String.format("Record id %d has value %f, expected is %f", recId, score, expectedScore));
             }
+            if (i % 1000 == 0) {
+                System.out.println("At record " + i + " in " + (System.currentTimeMillis() - time0) + " ms.");
+            }
+            i++;
         }
+        
+        System.out.println(String.format("Average transform time per record = %.3f", (double) totalTransformTime/ (double) i));
+        System.out.println(String.format("Average evaluation time per record = %.3f", (double) totalEvaluationTime/ (double) i));
     }
     
     private Map<Double, Double> getExpectedScores(String expectedScoresPath) throws Exception {

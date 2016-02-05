@@ -48,9 +48,6 @@ public class ModelEvaluator {
             if (value instanceof Integer) {
                 value = ((Integer) value).doubleValue();
             }
-            if ((Integer) record.get("Nutanix_EventTable_Clean") == 40731) {
-                System.out.println("Preparing " + name + " and " + value);
-            }
             arguments.put(name, evaluator.prepare(name, value));
         }
 
