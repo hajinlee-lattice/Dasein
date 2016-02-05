@@ -101,7 +101,7 @@ FOREIGN KEY (ExternalColumnID)
 REFERENCES `ExternalColumn` (`ExternalColumnID`)
   ON DELETE CASCADE;
 
-LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/ExternalColumn.txt' INTO TABLE `SourceColumn`
+LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/SourceColumn.txt' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY '\t'
 ENCLOSED BY ';'
 LINES TERMINATED BY '\n'
