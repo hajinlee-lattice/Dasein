@@ -14,6 +14,13 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
+import net.sourceforge.argparse4j.inf.Subparsers;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -35,13 +42,6 @@ import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
-
-import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.inf.ArgumentParser;
-import net.sourceforge.argparse4j.inf.ArgumentParserException;
-import net.sourceforge.argparse4j.inf.Namespace;
-import net.sourceforge.argparse4j.inf.Subparser;
-import net.sourceforge.argparse4j.inf.Subparsers;
 
 @SuppressWarnings("unused")
 public class PropDataAdminTool {
@@ -99,87 +99,50 @@ public class PropDataAdminTool {
     }
 
     private static void addArchiveArgs(Subparser parser) {
-        parser.addArgument("-s", "--source")
-                .dest(NS_SOURCE)
-                .required(true)
-                .type(String.class)
-                .choices(PropDataRawSource.allNames())
-                .help("source to archive");
+        parser.addArgument("-s", "--source").dest(NS_SOURCE).required(true).type(String.class)
+                .choices(PropDataRawSource.allNames()).help("source to archive");
 
-        parser.addArgument("-t", "--type")
-                .dest(NS_RAW_TYPE)
-                .required(true)
-                .type(String.class)
-                .choices(new String[]{RAW_TYPE_BULK, RAW_TYPE_COLLECTED})
-                .help("type of the raw source.");
+        parser.addArgument("-t", "--type").dest(NS_RAW_TYPE).required(true).type(String.class)
+                .choices(new String[] { RAW_TYPE_BULK, RAW_TYPE_COLLECTED }).help("type of the raw source.");
 
-        parser.addArgument("-sd", "--start-date")
-                .dest(NS_START_DATE)
-                .required(false)
-                .type(String.class)
+        parser.addArgument("-sd", "--start-date").dest(NS_START_DATE).required(false).type(String.class)
                 .help("start date (inclusive) in yyyy-MM-dd, and after 1900-01-01. (for collected source)");
 
-        parser.addArgument("-ed", "--end-date")
-                .dest(NS_END_DATE)
-                .required(false)
-                .type(String.class)
+        parser.addArgument("-ed", "--end-date").dest(NS_END_DATE).required(false).type(String.class)
                 .help("end date (exclusive) in yyyy-MM-dd, and after start date. (for collected source)");
 
-        parser.addArgument("-m", "--split-mode")
-                .dest(NS_SPLIT_MODE)
-                .required(false)
-                .type(String.class)
-                .choices(new String[]{ MODE_LEN, MODE_NUM })
-                .setDefault(MODE_LEN)
-                .help("mode of splitting date ranges, default is [length]: " +
-                        "length = by the length of one period in days; " +
-                        "number = by the number of periods. (for collected source)");
+        parser.addArgument("-m", "--split-mode").dest(NS_SPLIT_MODE).required(false).type(String.class)
+                .choices(new String[] { MODE_LEN, MODE_NUM }).setDefault(MODE_LEN)
+                .help("mode of splitting date ranges, default is [length]: "
+                        + "length = by the length of one period in days; "
+                        + "number = by the number of periods. (for collected source)");
 
-        parser.addArgument("-l", "--period-length")
-                .dest(NS_PERIOD_LENGTH)
-                .required(false)
-                .type(Integer.class)
+        parser.addArgument("-l", "--period-length").dest(NS_PERIOD_LENGTH).required(false).type(Integer.class)
                 .setDefault(7)
                 .help("period lengths in days. required if the split mode is length. default is [7] days. (for collected source)");
 
-        parser.addArgument("-n", "--num-periods")
-                .dest(NS_NUM_PERIODS)
-                .required(false)
-                .type(Integer.class)
-                .setDefault(1)
+        parser.addArgument("-n", "--num-periods").dest(NS_NUM_PERIODS).required(false).type(Integer.class).setDefault(1)
                 .help("number of periods. required if the split mode is number. default is [1] period. (for collected source)");
     }
 
     private static void addRefreshArgs(Subparser parser) {
-        parser.addArgument("-s", "--source")
-                .dest(NS_SOURCE)
-                .required(true)
-                .type(String.class)
-                .choices(PropDataDerivedSource.allNames())
-                .help("source to refresh");
+        parser.addArgument("-s", "--source").dest(NS_SOURCE).required(true).type(String.class)
+                .choices(PropDataDerivedSource.allNames()).help("source to refresh");
 
-        parser.addArgument("-pd", "--pivot-date")
-                .dest(NS_PIVOT_DATE)
-                .required(false)
-                .type(String.class)
+        parser.addArgument("-pd", "--pivot-date").dest(NS_PIVOT_DATE).required(false).type(String.class)
                 .help("pivot date in the format of yyyy-MM-dd. Default is current time.");
 
-        parser.addArgument("-v", "--base-version")
-                .dest(NS_PIVOT_VERSION)
-                .required(false)
-                .type(String.class)
+        parser.addArgument("-v", "--base-version").dest(NS_PIVOT_VERSION).required(false).type(String.class)
                 .help("the version of the base sources to be pivoted, separated by | if multiple base sources");
     }
 
     private static void addRetryArgs(Subparser parser) {
-        parser.addArgument("-u", "--uuid")
-                .dest(NS_RETRY_UID)
-                .required(true)
-                .type(String.class)
+        parser.addArgument("-u", "--uuid").dest(NS_RETRY_UID).required(true).type(String.class)
                 .help("root operation uid");
     }
 
-    public PropDataAdminTool(){ }
+    public PropDataAdminTool() {
+    }
 
     private void validateArguments(Namespace ns) {
         if (ns == null) {
@@ -188,16 +151,16 @@ public class PropDataAdminTool {
 
         command = Command.fromName(ns.getString(NS_COMMAND));
         switch (command) {
-            case ARCHIVE:
-                validateAndTransformArchiveArgs(ns);
-                break;
-            case REFRESH:
-                validateAndTransformRefreshArgs(ns);
-                break;
-            case RETRY:
-                validateAndTransformRetryArgs(ns);
-                break;
-            default:
+        case ARCHIVE:
+            validateAndTransformArchiveArgs(ns);
+            break;
+        case REFRESH:
+            validateAndTransformRefreshArgs(ns);
+            break;
+        case RETRY:
+            validateAndTransformRetryArgs(ns);
+            break;
+        default:
         }
 
     }
@@ -294,28 +257,25 @@ public class PropDataAdminTool {
         try {
             Namespace ns = parser.parseArgs(args);
             validateArguments(ns);
-            applicationContext = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
-            sourceService = (SourceService) applicationContext.getBean("sourceService");
-            progressOrchestrator = (ProgressOrchestrator) applicationContext.getBean("progressOrchestrator");
 
             switch (command) {
-                case ARCHIVE:
-                    executeArchiveCommand(ns);
-                    break;
-                case REFRESH:
-                    executeRefreshCommand();
-                    break;
-                case RETRY:
-                    executeRetryCommand();
-                    break;
-                default:
+            case ARCHIVE:
+                executeArchiveCommand(ns);
+                break;
+            case REFRESH:
+                executeRefreshCommand();
+                break;
+            case RETRY:
+                executeRetryCommand();
+                break;
+            default:
             }
 
             System.out.println("\n\n========================================\n");
             promptContinue();
             System.exit(0);
 
-        } catch (ArgumentParserException|IllegalArgumentException e) {
+        } catch (ArgumentParserException | IllegalArgumentException e) {
             handleException(e);
         }
     }
@@ -325,16 +285,23 @@ public class PropDataAdminTool {
         System.out.println("Retrying job: " + uidToRetry);
         System.out.println("========================================\n");
 
+        loadApplicationContext();
+
         executeRetry(uidToRetry);
     }
 
     private void executeRefreshCommand() {
+        System.out.println("\n\n========================================");
+        System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
+        System.out.println("========================================\n");
+
+        loadApplicationContext();
         DerivedSource source = (DerivedSource) sourceService.findBySourceName(sourceToBeRefreshed.getName());
-        HdfsSourceEntityMgr hdfsSourceEntityMgr =
-                (HdfsSourceEntityMgr) applicationContext.getBean("hdfsSourceEntityMgr");
+        HdfsSourceEntityMgr hdfsSourceEntityMgr = (HdfsSourceEntityMgr) applicationContext
+                .getBean("hdfsSourceEntityMgr");
         if (!(source instanceof MostRecentSource) && StringUtils.isEmpty(baseVersions)) {
             List<String> versions = new ArrayList<>();
-            for (Source baseSource: source.getBaseSources()) {
+            for (Source baseSource : source.getBaseSources()) {
                 versions.add(hdfsSourceEntityMgr.getCurrentVersion(baseSource));
             }
             baseVersions = StringUtils.join(versions, "|");
@@ -342,49 +309,50 @@ public class PropDataAdminTool {
 
         RefreshService refreshService = progressOrchestrator.getRefreshService(source);
 
-        System.out.println("\n\n========================================");
-        System.out.println("Refreshing Source: " + sourceToBeRefreshed.getName());
-        System.out.println("========================================\n");
-
         executeRefresh(refreshService);
     }
 
     private void executeArchiveCommand(Namespace ns) {
-        RawSource source = (RawSource) applicationContext.getBean(sourceToBeArchived.getName());
         if (ns.getString(NS_RAW_TYPE).equalsIgnoreCase(RAW_TYPE_COLLECTED)) {
-            CollectedArchiveService collectedArchiveService =
-                    (CollectedArchiveService) progressOrchestrator.getArchiveService(source);
-
             System.out.println("\n\n========================================");
             System.out.println("Archiving Collection Source: " + sourceToBeArchived.getName());
             System.out.println("========================================\n");
             System.out.println(fullDateRange);
+
+            System.out.println("Full date range to archive: " + fullDateRange);
+            System.out.println("Split into " + periods.size() + " periods: ");
+
+            int digits = String.valueOf(periods.size()).length();
+            int i = 0;
+            for (DateRange period : periods) {
+                System.out.println(String.format("  Period %" + digits + "d: %s", ++i, period.toString()));
+            }
+
+            promptContinue();
+
+            loadApplicationContext();
+            RawSource source = (RawSource) sourceService.findBySourceName(sourceToBeArchived.getName());
+            CollectedArchiveService collectedArchiveService = (CollectedArchiveService) progressOrchestrator
+                    .getArchiveService(source);
+
             executeArchiveByRanges(collectedArchiveService);
         } else {
-            BulkArchiveService archiveService = (BulkArchiveService) progressOrchestrator.getArchiveService(source);
-
             System.out.println("\n\n========================================");
             System.out.println("Archiving Bulk Source: " + sourceToBeArchived.getName());
             System.out.println("========================================\n");
+
+            loadApplicationContext();
+            RawSource source = (RawSource) sourceService.findBySourceName(sourceToBeArchived.getName());
+            BulkArchiveService archiveService = (BulkArchiveService) progressOrchestrator.getArchiveService(source);
 
             executeArchiveBulk(archiveService);
         }
     }
 
     private void executeArchiveByRanges(CollectedArchiveService collectedArchiveService) {
-        System.out.println("Full date range to archive: " + fullDateRange);
-        System.out.println("Split into " + periods.size() + " periods: ");
-
-        int digits = String.valueOf(periods.size()).length();
-        int i = 0;
-        for (DateRange period : periods) {
-            System.out.println(String.format("  Period %" + digits + "d: %s", ++i, period.toString()));
-        }
-
-        promptContinue();
-
         System.out.println("Start archiving " + sourceToBeArchived.getName() + " ... ");
         long totalStartTime = System.currentTimeMillis();
+        int i = 0;
         for (DateRange period : periods) {
             long startTime = System.currentTimeMillis();
             System.out.println("Archiving data for (" + (++i) + "/" + periods.size() + ") period " + period
@@ -392,14 +360,15 @@ public class PropDataAdminTool {
             System.out.println("");
 
             try {
-                ArchiveProgress progress = collectedArchiveService.startNewProgress(period.getStartDate(), period.getEndDate(), JOB_SUBMITTER);
+                ArchiveProgress progress = collectedArchiveService.startNewProgress(period.getStartDate(),
+                        period.getEndDate(), JOB_SUBMITTER);
                 progress = collectedArchiveService.importFromDB(progress);
                 collectedArchiveService.finish(progress);
-                System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime)
-                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime));
+                System.out.println("Done. Duration=" + LoggingUtils.durationSince(startTime) + " TotalDuration="
+                        + LoggingUtils.durationSince(totalStartTime));
             } catch (Exception e) {
-                System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime)
-                        + " TotalDuration=" + LoggingUtils.durationSince(totalStartTime) + " " + e.getMessage());
+                System.out.println("Failed. Duration=" + LoggingUtils.durationSince(startTime) + " TotalDuration="
+                        + LoggingUtils.durationSince(totalStartTime) + " " + e.getMessage());
             }
         }
     }
@@ -436,8 +405,8 @@ public class PropDataAdminTool {
         long startTime = System.currentTimeMillis();
 
         try {
-            ArchiveProgressEntityMgr archiveProgressEntityMgr =
-                    (ArchiveProgressEntityMgr) applicationContext.getBean("archiveProgressEntityMgr");
+            ArchiveProgressEntityMgr archiveProgressEntityMgr = (ArchiveProgressEntityMgr) applicationContext
+                    .getBean("archiveProgressEntityMgr");
             ArchiveProgress archiveProgress = archiveProgressEntityMgr.findProgressByRootOperationUid(uid);
             if (archiveProgress != null) {
                 executeRetryArchiveProgress(archiveProgress);
@@ -445,8 +414,8 @@ public class PropDataAdminTool {
                 return;
             }
 
-            RefreshProgressEntityMgr refreshProgressEntityMgr =
-                    (RefreshProgressEntityMgr) applicationContext.getBean("refreshProgressEntityMgr");
+            RefreshProgressEntityMgr refreshProgressEntityMgr = (RefreshProgressEntityMgr) applicationContext
+                    .getBean("refreshProgressEntityMgr");
             RefreshProgress refreshProgress = refreshProgressEntityMgr.findProgressByRootOperationUid(uid);
             if (refreshProgress != null) {
                 executeRetryRefreshProgress(refreshProgress);
@@ -483,19 +452,25 @@ public class PropDataAdminTool {
 
         refreshProgress.setStatus(ProgressStatus.FAILED);
         switch (refreshProgress.getStatusBeforeFailed()) {
-            case NEW:
-            case TRANSFORMING:
-                refreshProgress = refreshService.transform(refreshProgress);
-            case TRANSFORMED:
-            case UPLOADING:
+        case NEW:
+        case TRANSFORMING:
+            refreshProgress = refreshService.transform(refreshProgress);
+        case TRANSFORMED:
+        case UPLOADING:
+            refreshProgress = refreshService.exportToDB(refreshProgress);
+            if (refreshProgress.getStatus().equals(ProgressStatus.FAILED)) {
                 refreshProgress = refreshService.exportToDB(refreshProgress);
-                if (refreshProgress.getStatus().equals(ProgressStatus.FAILED)) {
-                    refreshProgress = refreshService.exportToDB(refreshProgress);
-                }
-            default:
-                refreshService.finish(refreshProgress);
+            }
+        default:
+            refreshService.finish(refreshProgress);
         }
 
+    }
+
+    private void loadApplicationContext() {
+        applicationContext = new ClassPathXmlApplicationContext("propdata-tool-context.xml");
+        sourceService = (SourceService) applicationContext.getBean("sourceService");
+        progressOrchestrator = (ProgressOrchestrator) applicationContext.getBean("progressOrchestrator");
     }
 
     private void promptContinue() {
@@ -516,22 +491,26 @@ public class PropDataAdminTool {
     }
 
     enum PropDataRawSource {
-        ORB("OrbIntelligence", RAW_TYPE_COLLECTED),
-        FEATURE("Feature", RAW_TYPE_COLLECTED),
-        BUILTWITH("BuiltWith", RAW_TYPE_COLLECTED),
-        HGDATARAW("HGDataRaw", RAW_TYPE_BULK);
+        ORB("OrbIntelligence", RAW_TYPE_COLLECTED), FEATURE("Feature", RAW_TYPE_COLLECTED), BUILTWITH("BuiltWith",
+                RAW_TYPE_COLLECTED), HGDATARAW("HGDataRaw", RAW_TYPE_BULK);
 
         private static Map<String, PropDataRawSource> nameMap;
 
         private final String name;
         private final String sourceType;
+
         PropDataRawSource(String name, String sourceType) {
             this.name = name;
             this.sourceType = sourceType;
         }
 
-        String getName() { return this.name; }
-        String getSourceType() { return this.sourceType; }
+        String getName() {
+            return this.name;
+        }
+
+        String getSourceType() {
+            return this.sourceType;
+        }
 
         static {
             nameMap = new HashMap<>();
@@ -553,13 +532,9 @@ public class PropDataAdminTool {
     }
 
     enum PropDataDerivedSource {
-        ORB("OrbIntelligenceMostRecent"),
-        FEATURE("FeatureMostRecent"),
-        FEATURE_PIVOTED("FeaturePivoted"),
-        BUILTWITH("BuiltWithMostRecent"),
-        BUILTWITH_PIVOTED("BuiltWithPivoted"),
-        HGDATA("HGData"),
-        HGDATA_PIVOTED("HGDataPivoted");
+        ORB("OrbIntelligenceMostRecent"), FEATURE("FeatureMostRecent"), FEATURE_PIVOTED("FeaturePivoted"), BUILTWITH(
+                "BuiltWithMostRecent"), BUILTWITH_PIVOTED("BuiltWithPivoted"), HGDATA("HGData"), HGDATA_PIVOTED(
+                        "HGDataPivoted");
 
         private static Map<String, PropDataDerivedSource> nameMap;
 
@@ -569,7 +544,9 @@ public class PropDataAdminTool {
             this.name = name;
         }
 
-        String getName() { return this.name; }
+        String getName() {
+            return this.name;
+        }
 
         static {
             nameMap = new HashMap<>();
@@ -591,9 +568,7 @@ public class PropDataAdminTool {
     }
 
     enum Command {
-        ARCHIVE("archive"),
-        REFRESH("refresh"),
-        RETRY("retry");
+        ARCHIVE("archive"), REFRESH("refresh"), RETRY("retry");
 
         private static Map<String, Command> nameMap;
         private final String name;
@@ -602,11 +577,13 @@ public class PropDataAdminTool {
             this.name = name;
         }
 
-        String getName() { return this.name; }
+        String getName() {
+            return this.name;
+        }
 
         static {
             nameMap = new HashMap<>();
-            for (Command cmd: Command.values()) {
+            for (Command cmd : Command.values()) {
                 nameMap.put(cmd.getName(), cmd);
             }
         }
