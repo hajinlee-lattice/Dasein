@@ -19,8 +19,12 @@ public class CountFlowTestNG extends ServiceFlowsFunctionalTestNGBase {
 
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
+        for (GenericRecord record : output) {
+            System.out.println(record);
+        }
         Long count = (Long) output.get(0).get(CountFlow.COUNT);
         Assert.assertEquals(count, (Long) 1269L);
+        Assert.assertEquals(output.size(), 1);
     }
 
     @Override

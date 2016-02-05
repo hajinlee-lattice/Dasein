@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.dataflow.common;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
@@ -16,30 +15,15 @@ public class CountFlow extends TypesafeDataFlowBuilder<CountFlowParameters> {
 
     @Override
     public Node construct(CountFlowParameters parameters) {
+        String uid = UUID.randomUUID().toString();
+        String idField = ID + uid;
+        String countField = COUNT + uid;
         Node source = addSource(parameters.getSourceTable());
-        source = removeCountIdField(source);
-        source = source.addRowID(ID);
-        source = source.retain(new FieldList(ID));
-        source = source.aggregate(new Aggregation(ID, COUNT, Aggregation.AggregationType.COUNT));
-        source = source.retain(new FieldList(COUNT));
-        return source;
-    }
-
-    private Node removeCountIdField(Node source) {
-        List<String> fieldNames = new ArrayList<>();
-        boolean hasCountId = false;
-        for (FieldMetadata fm : source.getSchema()) {
-            if (fm.getFieldName().equals(ID)) {
-                hasCountId = true;
-            } else {
-                fieldNames.add(fm.getFieldName());
-            }
-        }
-
-        if (hasCountId) {
-            source = source.retain(new FieldList(fieldNames.toArray(new String[fieldNames.size()])));
-        }
-
+        source = source.addRowID(idField);
+        source = source.aggregate(new Aggregation(idField, countField, Aggregation.AggregationType.COUNT));
+        source = source.limit(1);
+        source = source.retain(new FieldList(countField));
+        source = source.rename(new FieldList(countField), new FieldList(COUNT));
         return source;
     }
 
