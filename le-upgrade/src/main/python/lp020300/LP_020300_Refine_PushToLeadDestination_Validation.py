@@ -127,36 +127,75 @@ class LP_020300_Refine_PushToLeadDestination_Validation(StepBase):
 
     ptld.set('ng', 'True')
     lgm.setLoadGroup(etree.tostring(ptld))
-    ngsxml = '<ngs><ng n="LoadScoredLeads_Step1"/><ng n="LoadScoredLeads_Step2"/><ng n="PushDataToDante_Hourly"/><ng n="PushLeadsLastScoredToDestination"/><ng n="PushToLeadDestination_TimeStamp"/><ng n="PushToLeadDestination_Validation"/></ngs>'
+    ngsxml = '<ngs><ng n="LoadScoredLeads_Step1"/><ng n="LoadScoredLeads_Step2"/><ng n="PushLeadsLastScoredToDestination"/><ng n="PushToLeadDestination_TimeStamp"/><ng n="PushToLeadDestination_Validation"/></ngs>'
     lgm.setLoadGroupFunctionality('PushToLeadDestination', ngsxml)
 
 # Begin visiDB Query Upgrade
     conn_mgr = appseq.getConnectionMgr()
     filters_new1 = []
+    filters_new2 = []
     if type == 'MKTO':
           #Modify the Filter in Q_Validation_Lead_Status
-          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Validation_Lead_Status")
-          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NotEqual"),LatticeFunctionIdentifier(ContainerElementName("Alias_ID_Lead")),LatticeFunctionExpressionConstantScalar("-111111",DataTypeNVarChar(7))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("LessOrEqual"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToScoring")),ContainerElementName("Time_OfSubmission_PushToScoring"))),LatticeFunctionExpressionConstantScalar("1900/01/01",DataTypeDateTime)),LatticeFunctionExpressionConstantScalar("24",DataTypeInt))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionIdentifier(ContainerElementName("Lead_Status")),LatticeFunctionExpressionConstantScalar("1",DataTypeInt)))),LatticeAddressSetIdentifier(ContainerElementName("Alias_AllLeadID")))')
+          Q_Validation_Lead_Status    = conn_mgr.getQuery("Q_Validation_Lead_Status")
+          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable.filters_ = filters_new1
+          Q_Validation_Lead_Status.filters_ = filters_new1
 
-          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          #Modify the Filter in Q_Summary_Lead_Status
+          Q_Summary_Lead_Status    = conn_mgr.getQuery("Q_Summary_Lead_Status")
+          filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
+          filters_new2.append(filter2)
+          Q_Summary_Lead_Status.filters_ = filters_new2
+
+          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Validation_Lead_Status.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Summary_Lead_Status',Q_Summary_Lead_Status.SpecLatticeNamedElements())
     elif type == 'ELQ':
           #Modify the Filter in Q_Validation_Lead_Status
-          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Validation_Lead_Status")
-          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NotEqual"),LatticeFunctionIdentifier(ContainerElementName("Alias_ID_Lead")),LatticeFunctionExpressionConstantScalar("Lattice System",DataTypeNVarChar(14))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("LessOrEqual"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToScoring")),ContainerElementName("Time_OfSubmission_PushToScoring"))),LatticeFunctionExpressionConstantScalar("1900/01/01",DataTypeDateTime)),LatticeFunctionExpressionConstantScalar("24",DataTypeInt))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionIdentifier(ContainerElementName("Lead_Status")),LatticeFunctionExpressionConstantScalar("1",DataTypeInt)))),LatticeAddressSetIdentifier(ContainerElementName("Alias_AllLeadID")))')
+          Q_Validation_Lead_Status    = conn_mgr.getQuery("Q_Validation_Lead_Status")
+          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable.filters_ = filters_new1
+          Q_Validation_Lead_Status.filters_ = filters_new1
 
-          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          #Modify the Filter in Q_Summary_Lead_Status
+          Q_Summary_Lead_Status    = conn_mgr.getQuery("Q_Summary_Lead_Status")
+          filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
+          filters_new2.append(filter2)
+          Q_Summary_Lead_Status.filters_ = filters_new2
+
+          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Validation_Lead_Status.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Summary_Lead_Status',Q_Summary_Lead_Status.SpecLatticeNamedElements())
     else:
           #Modify the Filter in Q_Validation_Lead_Status
-          Q_Dante_LeadSourceTable    = conn_mgr.getQuery("Q_Validation_Lead_Status")
-          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NotEqual"),LatticeFunctionIdentifier(ContainerElementName("Alias_ID_Lead")),LatticeFunctionExpressionConstantScalar("Lattice System",DataTypeNVarChar(14))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("LessOrEqual"),LatticeFunctionExpressionConstant("Now",DataTypeDateTime),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AddHour"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("IsNull"),LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Timestamp_PushToScoring")),ContainerElementName("Time_OfSubmission_PushToScoring"))),LatticeFunctionExpressionConstantScalar("1900/01/01",DataTypeDateTime)),LatticeFunctionExpressionConstantScalar("24",DataTypeInt))),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionIdentifier(ContainerElementName("Lead_Status")),LatticeFunctionExpressionConstantScalar("1",DataTypeInt)))),LatticeAddressSetIdentifier(ContainerElementName("Alias_AllLeadID")))')
+          Q_Validation_Lead_Status    = conn_mgr.getQuery("Q_Validation_Lead_Status")
+          filter1 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
           filters_new1.append(filter1)
-          Q_Dante_LeadSourceTable.filters_ = filters_new1
+          Q_Validation_Lead_Status.filters_ = filters_new1
 
-          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Dante_LeadSourceTable.SpecLatticeNamedElements())
+          #Modify the Filter in Q_Summary_Lead_Status
+          Q_Summary_Lead_Status    = conn_mgr.getQuery("Q_Summary_Lead_Status")
+          filter2 = liaison.ExpressionVDBImplGeneric('LatticeAddressSetIdentifier(ContainerElementName("Filter_FailedScoring"))')
+          filters_new2.append(filter2)
+          Q_Summary_Lead_Status.filters_ = filters_new2
+
+          conn_mgr.setSpec('Q_Validation_Lead_Status',Q_Validation_Lead_Status.SpecLatticeNamedElements())
+          conn_mgr.setSpec('Q_Summary_Lead_Status',Q_Summary_Lead_Status.SpecLatticeNamedElements())
+
+  # Add the 3 new tables into the consolidation
+    ce_ces_xml = lgm.getLoadGroupFunctionality('ConsolidateExtracts', 'ces')
+    ce_ces = etree.fromstring(ce_ces_xml)
+    ce_ws = ce_ces.find('ws')
+    ce_ce_xml = '''
+    <ws w="Workspace" rt="3" tbr="5">
+          <ce itn="PD_HGData_Pivoted_Source_Import" etr="1" sei="0"/>
+          <ce itn="PD_BuiltWith_Pivoted_Source_Import" etr="1" sei="0"/>
+          <ce itn="PD_OrbIntelligence_Source_Import" etr="1" sei="0"/>
+    </ws>
+  '''
+    ce = etree.fromstring(ce_ce_xml)
+    ce_list = list(ce.iter('ce'))
+    for ce in ce_list:
+      ce_ws.append(ce)
+      lgm.setLoadGroupFunctionality( 'ConsolidateExtracts', etree.tostring(ce_ces) )
 
     success = True
 
