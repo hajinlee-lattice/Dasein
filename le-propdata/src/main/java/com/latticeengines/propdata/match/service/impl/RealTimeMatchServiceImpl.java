@@ -11,8 +11,8 @@ import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
 
-@Component("realTimeMatchServiceCache")
-public class RealTimeMatchServiceCacheImpl implements RealTimeMatchService {
+@Component("realTimeMatchService")
+public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
     @Autowired
     private MatchPlanner matchPlanner;
