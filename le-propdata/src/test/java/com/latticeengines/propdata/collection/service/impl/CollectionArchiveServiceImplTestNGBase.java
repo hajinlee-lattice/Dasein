@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
-import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
+import com.latticeengines.propdata.core.source.CollectedSource;
 
 abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
@@ -29,26 +29,29 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     Set<ArchiveProgress> progresses = new HashSet<>();
 
     abstract CollectedArchiveService getCollectedArchiveService();
+
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
+
     abstract CollectedSource getSource();
+
     abstract Date[] getDates();
 
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        setUpPod("FunctionalArchiveCollected" + source.getSourceName());
+        prepareCleanPod("Functional" + source.getSourceName());
+        setupBeans();
     }
 
-    void setUpPod(String podID) {
-        source = getSource();
-        hdfsPathBuilder.changeHdfsPodId(podID);
+    void setupBeans() {
         collectedArchiveService = getCollectedArchiveService();
         progressEntityMgr = getProgressEntityMgr();
         dates = getDates();
     }
 
     @AfterMethod(groups = "collection")
-    public void tearDown() throws Exception { }
+    public void tearDown() throws Exception {
+    }
 
     @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
@@ -78,7 +81,8 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
         }
     }
 
-    protected void testAutoDetermineDateRange() { }
+    protected void testAutoDetermineDateRange() {
+    }
 
     ArchiveProgress createNewProgress(Date startDate, Date endDate) {
         ArchiveProgress progress = collectedArchiveService.startNewProgress(startDate, endDate, progressCreator);
@@ -112,7 +116,7 @@ abstract public class CollectionArchiveServiceImplTestNGBase extends PropDataCol
     }
 
     void cleanupProgressTables() {
-        for (ArchiveProgress progress: progresses) {
+        for (ArchiveProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
     }

@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.core.source.DerivedSource;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
     RefreshService refreshService;
@@ -26,16 +26,20 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
     Collection<RefreshProgress> progresses = new HashSet<>();
 
     String baseSourceVersion;
+
     abstract RefreshService getRefreshService();
+
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
+
     abstract DerivedSource getSource();
+
     abstract BulkArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        hdfsPathBuilder.changeHdfsPodId("FunctionalRefresh" + source.getSourceName());
-        getBaseSourceTestBean().setUpPod("FunctionalRefresh" + source.getSourceName());
+        prepareCleanPod("Functional" + source.getSourceName());
+        getBaseSourceTestBean().setupBeans();
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
         baseSource = (BulkSource) source.getBaseSources()[0];
@@ -109,11 +113,12 @@ abstract public class RefreshBulkServiceImplTestNGBase extends PropDataCollectio
     }
 
     protected void cleanupProgressTables() {
-        for (RefreshProgress progress: progresses) {
+        for (RefreshProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
         getBaseSourceTestBean().cleanupProgressTables();
     }
 
-    protected void verifyResultTable() { }
+    protected void verifyResultTable() {
+    }
 }

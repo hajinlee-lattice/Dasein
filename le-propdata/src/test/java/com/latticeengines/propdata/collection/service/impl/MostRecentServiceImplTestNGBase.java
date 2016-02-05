@@ -15,10 +15,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class MostRecentServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
@@ -32,15 +32,18 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     Collection<RefreshProgress> progresses = new HashSet<>();
 
     abstract RefreshService getRefreshService();
+
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
+
     abstract MostRecentSource getSource();
+
     abstract CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        hdfsPathBuilder.changeHdfsPodId(testPod + source.getSourceName());
-        getBaseSourceTestBean().setUpPod(testPod + source.getSourceName());
+        prepareCleanPod(testPod + source.getSourceName());
+        getBaseSourceTestBean().setupBeans();
 
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
@@ -80,7 +83,6 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         verifyResultTable();
         cleanupProgressTables();
     }
-
 
     protected RefreshProgress createNewProgress(Date pivotDate) {
         RefreshProgress progress = refreshService.startNewProgress(pivotDate, null, progressCreator);
@@ -125,7 +127,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     }
 
     protected void cleanupProgressTables() {
-        for (RefreshProgress progress: progresses) {
+        for (RefreshProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
         getBaseSourceTestBean().cleanupProgressTables();
@@ -139,16 +141,17 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
     }
 
     protected void verifyUniqueness() {
-        int maxMultiplicity = jdbcTemplateCollectionDB.queryForObject("SELECT TOP 1 COUNT(*) FROM "
-                + ((HasSqlPresence) source).getSqlTableName() + " GROUP BY " + StringUtils.join(getSource().getPrimaryKey(), ",")
-                + " ORDER BY COUNT(*) DESC", Integer.class);
+        int maxMultiplicity = jdbcTemplateCollectionDB.queryForObject(
+                "SELECT TOP 1 COUNT(*) FROM " + ((HasSqlPresence) source).getSqlTableName() + " GROUP BY "
+                        + StringUtils.join(getSource().getPrimaryKey(), ",") + " ORDER BY COUNT(*) DESC",
+                Integer.class);
         Assert.assertEquals(maxMultiplicity, 1, "Each unique key should have one record.");
     }
 
     protected void verifyMostRecent() {
-        String sql = "SELECT COUNT(*) FROM " + ((HasSqlPresence) source).getSqlTableName() + " lhs \n"
-                + "INNER JOIN " + baseSource.getCollectedTableName() + " rhs\n ON ";
-        for (String key: source.getPrimaryKey()) {
+        String sql = "SELECT COUNT(*) FROM " + ((HasSqlPresence) source).getSqlTableName() + " lhs \n" + "INNER JOIN "
+                + baseSource.getCollectedTableName() + " rhs\n ON ";
+        for (String key : source.getPrimaryKey()) {
             sql += "lhs.[" + key + "] = rhs.[" + key + "]\n AND ";
         }
         sql += "lhs.[" + source.getTimestampField() + "] < rhs.[" + source.getTimestampField() + "]";

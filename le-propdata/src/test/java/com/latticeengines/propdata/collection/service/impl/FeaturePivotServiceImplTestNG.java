@@ -26,12 +26,18 @@ public class FeaturePivotServiceImplTestNG extends PivotServiceImplTestNGBase {
     }
 
     @Override
-    RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
+    RefreshProgressEntityMgr getProgressEntityMgr() {
+        return progressEntityMgr;
+    }
 
     @Override
-    PivotedSource getSource() { return source; }
+    PivotedSource getSource() {
+        return source;
+    }
 
     @Override
-    Integer getExpectedRows() { return 70; }
+    Integer getExpectedRows() {
+        return 5;
+    }
 
 }

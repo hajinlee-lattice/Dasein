@@ -487,7 +487,7 @@
 ;486;	;FeaturePivoted;	;JavaScript_Store;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"JavaScript_Store","DefaultValue":0};	;;
 ;487;	;FeaturePivoted;	;Num_Documents_Fetched;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Num_Documents_Fetched","DefaultValue":0};	;;
 ;488;	;FeaturePivoted;	;Num_Documents_Processed;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Num_Documents_Processed","DefaultValue":0};	;;
-;489;	;FeaturePivoted;	;Processed;	;NVARCHAR(1000);	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_ANY;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Processed"};	;;
+;489;	;FeaturePivoted;	;Processed;	;NVARCHAR(4000);	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_ANY;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Processed"};	;;
 ;490;	;FeaturePivoted;	;RefSrc_Bag;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"RefSrc_Bag","DefaultValue":0};	;;
 ;491;	;FeaturePivoted;	;RefSrc_Basket;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"RefSrc_Basket","DefaultValue":0};	;;
 ;492;	;FeaturePivoted;	;RefSrc_Cart;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"RefSrc_Cart","DefaultValue":0};	;;
@@ -570,3 +570,9 @@
 ;569;	;FeaturePivoted;	;Term_Wish_List;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Term_Wish_List","DefaultValue":0};	;;
 ;570;	;FeaturePivoted;	;Term_Your_Account;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Term_Your_Account","DefaultValue":0};	;;
 ;571;	;FeaturePivoted;	;Term_Your_store;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Term_Your_store","DefaultValue":0};	;;
+;572;	;FeaturePivoted;	;Currency_US_Dollar;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_US_Dollar","DefaultValue":0};	;;
+;573;	;FeaturePivoted;	;Currency_Euro;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_Euro","DefaultValue":0};	;;
+;574;	;FeaturePivoted;	;Currency_Japan_Yen;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_Japan_Yen","DefaultValue":0};	;;
+;575;	;FeaturePivoted;	;Currency_UK_Pound;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_UK_Pound","DefaultValue":0};	;;
+;576;	;FeaturePivoted;	;Currency_Swiss_Franc;	;INT;	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_MAX;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_Swiss_Franc","DefaultValue":0};	;;
+;577;	;FeaturePivoted;	;Intl_Commerce;	;NVARCHAR(1);	;FeatureMostRecent;	;;	;1;	;URL;	;PIVOT_EXISTS;	;{"PivotKeyColumn":"Feature","PivotValueColumn":"Value","TargetPivotKeys":"Currency_Euro,Currency_Japan_Yen,Currency_Swiss_Franc,Currency_UK_Pound", "BooleanType":"Y_N","IsNull":"N"};	;;

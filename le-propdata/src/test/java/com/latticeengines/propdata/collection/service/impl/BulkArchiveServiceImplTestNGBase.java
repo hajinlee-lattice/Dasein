@@ -13,8 +13,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
-import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
+import com.latticeengines.propdata.core.source.BulkSource;
 
 abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
@@ -24,24 +24,26 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     Set<ArchiveProgress> progresses = new HashSet<>();
 
     abstract BulkArchiveService getArchiveService();
+
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
+
     abstract BulkSource getSource();
 
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        setUpPod("FunctionalArchiveBulk" + source.getSourceName());
+        prepareCleanPod("Functional" + source.getSourceName());
+        setupBeans();
     }
 
-    void setUpPod(String podId) {
-        source = getSource();
-        hdfsPathBuilder.changeHdfsPodId(podId);
+    void setupBeans() {
         archiveService = getArchiveService();
         progressEntityMgr = getProgressEntityMgr();
     }
 
     @AfterMethod(groups = "collection")
-    public void tearDown() throws Exception { }
+    public void tearDown() throws Exception {
+    }
 
     @Test(groups = "collection", enabled = false)
     public void testWholeProgress() {
@@ -99,7 +101,7 @@ abstract public class BulkArchiveServiceImplTestNGBase extends PropDataCollectio
     }
 
     void cleanupProgressTables() {
-        for (ArchiveProgress progress: progresses) {
+        for (ArchiveProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
     }

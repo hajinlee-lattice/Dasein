@@ -1,6 +1,8 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,10 +17,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
@@ -30,21 +32,25 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     String baseSourceVersion = "current";
 
     abstract PivotService getPivotService();
+
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
+
     abstract PivotedSource getSource();
+
     abstract Integer getExpectedRows();
 
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
-        hdfsPathBuilder.changeHdfsPodId("FunctionalPivot" + source.getSourceName());
+        prepareCleanPod("Functional" + source.getSourceName());
         pivotService = getPivotService();
         progressEntityMgr = getProgressEntityMgr();
         baseSource = source.getBaseSources()[0];
     }
 
     @AfterMethod(groups = "collection")
-    public void tearDown() throws Exception { }
+    public void tearDown() throws Exception {
+    }
 
     @Test(groups = "collection")
     public void testWholeProgress() {
@@ -61,13 +67,19 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     }
 
     private void uploadBaseAvro() {
-        InputStream baseAvroStream = ClassLoader.getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
-        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro").toString();
+        InputStream baseAvroStream = ClassLoader
+                .getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("part-0000.avro")
+                .toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
                 HdfsUtils.rmdir(yarnConfiguration, targetPath);
             }
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                    .toString();
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -116,7 +128,7 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     }
 
     protected void cleanupProgressTables() {
-        for (RefreshProgress progress: progresses) {
+        for (RefreshProgress progress : progresses) {
             progressEntityMgr.deleteProgressByRootOperationUid(progress.getRootOperationUID());
         }
     }
@@ -124,8 +136,8 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     protected void verifyResultTable(RefreshProgress progress) {
         int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
-        Assert.assertTrue(rowsInPivotedTable > 0,
-                String.format("Only %d results in %s.", rowsInPivotedTable, ((HasSqlPresence) source).getSqlTableName()));
+        Assert.assertTrue(rowsInPivotedTable > 0, String.format("Only %d results in %s.", rowsInPivotedTable,
+                ((HasSqlPresence) source).getSqlTableName()));
         Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGeneratedInHdfs());
         if (getExpectedRows() != null) {
             Assert.assertEquals(rowsInPivotedTable, (int) getExpectedRows());
