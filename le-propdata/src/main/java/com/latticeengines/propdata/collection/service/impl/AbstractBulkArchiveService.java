@@ -98,7 +98,7 @@ public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBas
             return false;
         }
 
-        long rowsDownloaded = countSourceTable(getSource(), getVersionString(progress), null);
+        long rowsDownloaded = countSourceTable(progress);
         progress.setRowsDownloadedToHdfs(rowsDownloaded);
 
         return true;

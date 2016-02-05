@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.core.entitymgr;
 
-
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -20,5 +19,7 @@ public interface HdfsSourceEntityMgr {
     Table getTableAtVersion(Source source, String version);
 
     Table getCollectedTableSince(CollectedSource source, Date earliest);
+
+    Long count(Source source, String version);
 
 }

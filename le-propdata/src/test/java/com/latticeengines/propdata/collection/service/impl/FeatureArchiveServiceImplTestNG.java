@@ -30,28 +30,33 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
     }
 
     @Override
-    ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
+    ArchiveProgressEntityMgr getProgressEntityMgr() {
+        return progressEntityMgr;
+    }
 
     @Override
     Date[] getDates() {
         Date[] dates = new Date[3];
 
-        calendar.set(2014, Calendar.OCTOBER, 22);
+        calendar.set(2015, Calendar.NOVEMBER, 1);
         dates[0] = calendar.getTime();
 
-        calendar.set(2014, Calendar.NOVEMBER, 2);
+        calendar.set(2015, Calendar.DECEMBER, 1);
         dates[1] = calendar.getTime();
 
-        calendar.set(2015, Calendar.JANUARY, 1);
+        calendar.set(2016, Calendar.JANUARY, 1);
         dates[2] = calendar.getTime();
 
         return dates;
     }
 
     @Override
-    CollectedSource getSource() { return source; }
+    CollectedSource getSource() {
+        return source;
+    }
 
-    // not every kind of progress need this, we only need to test this on one kind
+    // not every kind of progress need this, we only need to test this on one
+    // kind
     @Override
     protected void testAutoDetermineDateRange() {
         DateRange range = collectedArchiveService.determineNewJobDateRange();
@@ -59,11 +64,9 @@ public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImp
 
         Date cutDate = dates[1];
         Assert.assertTrue(range.getStartDate().before(cutDate),
-                "the auto determined range should start before " + cutDate
-                        + ". But it is " + range.getStartDate());
+                "the auto determined range should start before " + cutDate + ". But it is " + range.getStartDate());
         Assert.assertTrue(range.getEndDate().after(cutDate),
-                "the auto determined range should end after " + cutDate
-                        + ". But it is " + range.getStartDate());
+                "the auto determined range should end after " + cutDate + ". But it is " + range.getStartDate());
     }
 
 }

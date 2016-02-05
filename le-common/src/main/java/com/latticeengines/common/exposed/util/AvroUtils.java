@@ -98,7 +98,6 @@ public class AvroUtils {
         }
     }
 
-
     public static List<GenericRecord> getData(Configuration configuration, List<String> paths) {
         try {
             List<GenericRecord> records = new ArrayList<>();
@@ -119,6 +118,23 @@ public class AvroUtils {
             }
             return data;
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Long count(Configuration configuration, String path) throws Exception {
+        Long count = 0L;
+        try {
+            List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
+            for (String match : matches) {
+                FileReader<GenericRecord> reader = getAvroFileReader(configuration, new Path(match));
+                while (reader.hasNext()) {
+                    reader.next();
+                    count++;
+                }
+            }
+            return count;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

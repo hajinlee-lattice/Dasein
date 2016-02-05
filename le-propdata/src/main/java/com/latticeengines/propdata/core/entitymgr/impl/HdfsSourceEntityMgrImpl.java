@@ -8,6 +8,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
@@ -79,7 +80,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     @Override
     public synchronized void setLatestTimestamp(CollectedSource source, Date timestamp) {
         Date currentTimestamp = getLatestTimestamp(source);
-        if (currentTimestamp != null && currentTimestamp.after(timestamp)) { return; }
+        if (currentTimestamp != null && currentTimestamp.after(timestamp)) {
+            return;
+        }
 
         String timestampFile = hdfsPathBuilder.constructLatestFile(source).toString();
         try {
@@ -126,8 +129,34 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             throw new RuntimeException("Failed to get all incremental raw data dirs for " + source.getSourceName());
         }
-        return TableUtils.createTable(source.getSourceName(),
-                avroPaths.toArray(new String[avroPaths.size()]), source.getPrimaryKey());
+        return TableUtils.createTable(source.getSourceName(), avroPaths.toArray(new String[avroPaths.size()]),
+                source.getPrimaryKey());
+    }
+
+    @Override
+    public Long count(Source source, String version) {
+        try {
+            String avroDir;
+            if (source instanceof CollectedSource) {
+                String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
+                avroDir = rawDir + "/" + version;
+            } else {
+                avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            }
+            if (HdfsUtils.isDirectory(yarnConfiguration, avroDir)) {
+                String success = avroDir + "/_SUCCESS";
+                if (HdfsUtils.fileExists(yarnConfiguration, success)) {
+                    return AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
+                } else {
+                    throw new RuntimeException(
+                            "Cannot find _SUCCESS file in the avro dir, may be it is still being populated.");
+                }
+            } else {
+                throw new RuntimeException("Cannot find avro dir " + avroDir);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to count source " + source.getSourceName() + " at version " + version);
+        }
     }
 
 }

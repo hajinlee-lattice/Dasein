@@ -152,7 +152,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
 
         // count output
         try {
-            Long count = countSourceTable(getSource(), getVersionString(progress), null);
+            Long count = countSourceTable(progress);
             progress.setRowsGeneratedInHdfs(count);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to count generated rows " + getSource().getSourceName(), e);
