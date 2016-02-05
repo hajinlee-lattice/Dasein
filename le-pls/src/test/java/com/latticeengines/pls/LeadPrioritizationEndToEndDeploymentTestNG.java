@@ -75,7 +75,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     private void deleteAndCreateTwoTenants() throws Exception {
         turnOffSslChecking();
         setTestingTenants();
-        for(Tenant tenant: testingTenants) {
+        for (Tenant tenant : testingTenants) {
             deleteTenantByRestCall(tenant.getId());
             createTenantByRestCall(tenant);
         }
@@ -83,8 +83,8 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
 
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table)
             throws Exception {
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(String.format(
-                "com/latticeengines/pls/controller/metadata-%s.avsc", metadata));
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                String.format("com/latticeengines/pls/controller/metadata-%s.avsc", metadata));
         String metadataContents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
 
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
@@ -136,15 +136,19 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(doc);
         restTemplate.setErrorHandler(statusErrorHandler);
-        int numOfRetries = 100;
+        int numOfRetries = 300;
         List response;
         do {
             response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
             numOfRetries--;
             Thread.sleep(1000L);
         } while (numOfRetries > 0 && (response == null || response.size() < 2));
+        if (numOfRetries <= 0) {
+            LOGGER.warn("Probably exited the loop during out of number of retries.");
+        }
         Assert.assertNotNull(response);
-        Assert.assertTrue(response.size() >= 2, String.format("There is only %d models in tenant %s", response.size(), tenant));
+        Assert.assertTrue(response.size() >= 2,
+                String.format("There is only %d models in tenant %s", response.size(), tenant));
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
@@ -155,8 +159,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     @DataProvider(name = "modelMetadataProvider")
     public static Object[][] getModelMetadataProvider() {
         return new Object[][] { //
-            { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
-            { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" }
-        };
+                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
+                { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" } };
     }
 }
