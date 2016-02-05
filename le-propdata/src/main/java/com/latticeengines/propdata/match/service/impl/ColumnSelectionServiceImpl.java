@@ -48,8 +48,12 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         buildColumnPriorityMapCache();
 
         // warm up the caches
-        getSourceColumnMap(ColumnSelection.Predefined.Model);
-        getColumnPriorityMap(ColumnSelection.Predefined.Model);
+        try {
+            getSourceColumnMap(ColumnSelection.Predefined.Model);
+            getColumnPriorityMap(ColumnSelection.Predefined.Model);
+        } catch (Exception e) {
+            log.error("Failed to preload caches using LDC_ManageDB", e);
+        }
     }
 
     @Override
