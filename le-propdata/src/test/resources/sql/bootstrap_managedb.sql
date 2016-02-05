@@ -69,7 +69,7 @@ CREATE TABLE `RefreshProgress` (
   `NumRetries`          INTEGER,
   `PivotDate`           DATETIME,
   `RootOperationUID`    VARCHAR(255) NOT NULL UNIQUE,
-  `RowsGeneratedInHDSF` BIGINT,
+  `RowsGeneratedInHDFS` BIGINT,
   `RowsUploadedToSQL`   BIGINT,
   `SourceName`          VARCHAR(255) NOT NULL,
   `Status`              VARCHAR(255),
