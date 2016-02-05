@@ -83,6 +83,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
 
             long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable,
                     Long.class);
+            progress.setRowsUploadedToSql(rowsUploaded);
             LoggingUtils.logInfoWithDuration(getLogger(), progress,
                     "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
         }
@@ -95,7 +96,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
     @Override
     public RefreshProgress finish(RefreshProgress progress) {
         getLogger().info(String.format("Refreshing %s successful, generated Rows=%d", progress.getSourceName(),
-                progress.getRowsGenerated()));
+                progress.getRowsGeneratedInHdfs()));
         return finishProgress(progress);
     }
 
@@ -152,7 +153,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         // count output
         try {
             Long count = countSourceTable(getSource(), getVersionString(progress), null);
-            progress.setRowsGenerated(count);
+            progress.setRowsGeneratedInHdfs(count);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to count generated rows " + getSource().getSourceName(), e);
             return false;

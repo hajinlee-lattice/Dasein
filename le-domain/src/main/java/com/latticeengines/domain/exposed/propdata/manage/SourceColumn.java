@@ -35,20 +35,20 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "ColumnType", nullable = false, length = 50)
     private String columnType;
 
-    @Column(name = "BaseSource", nullable = true, length = 100)
+    @Column(name = "BaseSource", length = 100)
     private String baseSource;
 
-    @Column(name = "Preparation", nullable = true, length = 1000)
+    @Column(name = "Preparation", length = 1000)
     private String preparation;
 
-    @Column(name = "GroupBy", nullable = true, length = 100)
+    @Column(name = "GroupBy", length = 100)
     private String groupBy;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Calculation", nullable = false, length = 50)
     private Calculation calculation;
 
-    @Column(name = "Arguments", nullable = true, length = 1000)
+    @Column(name = "Arguments", length = 1000)
     private String arguments;
 
     @Column(name = "Priority", nullable = false)
@@ -101,9 +101,13 @@ public class SourceColumn implements HasPid, Serializable {
         this.baseSource = baseSource;
     }
 
-    public String getPreparation() { return preparation; }
+    public String getPreparation() {
+        return preparation;
+    }
 
-    public void setPreparation(String preparation) { this.preparation = preparation; }
+    public void setPreparation(String preparation) {
+        this.preparation = preparation;
+    }
 
     public String getGroupBy() {
         return groupBy;
@@ -137,30 +141,25 @@ public class SourceColumn implements HasPid, Serializable {
         this.priority = priority;
     }
 
-    public String getGroups() { return groups; }
+    public String getGroups() {
+        return groups;
+    }
 
-    public void setGroups(String groups) { this.groups = groups == null ? "" : groups; }
+    public void setGroups(String groups) {
+        this.groups = groups == null ? "" : groups;
+    }
 
     @Override
-    public Long getPid() { return getSourceColumnId(); }
+    public Long getPid() {
+        return getSourceColumnId();
+    }
 
     @Override
-    public void setPid(Long pid) { setSourceColumnId(pid); }
+    public void setPid(Long pid) {
+        setSourceColumnId(pid);
+    }
 
     public enum Calculation {
-        GROUPBY,
-        PIVOT_ANY,
-        PIVOT_MAX,
-        PIVOT_MIN,
-        PIVOT_SUM,
-        PIVOT_COUNT,
-        PIVOT_EXISTS,
-        AGG_MIN,
-        AGG_MAX,
-        AGG_SUM,
-        AGG_COUNT,
-        OTHER,
-        BUILTWITH_TOPATTR,
-        HGDATA_NEWTECH;
+        GROUPBY, PIVOT_ANY, PIVOT_MAX, PIVOT_MIN, PIVOT_SUM, PIVOT_COUNT, PIVOT_EXISTS, AGG_MIN, AGG_MAX, AGG_SUM, AGG_COUNT, OTHER, BUILTWITH_TOPATTR, HGDATA_NEWTECH;
     }
 }

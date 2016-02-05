@@ -126,7 +126,7 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
                 "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
         Assert.assertTrue(rowsInPivotedTable > 0,
                 String.format("Only %d results in %s.", rowsInPivotedTable, ((HasSqlPresence) source).getSqlTableName()));
-        Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGenerated());
+        Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGeneratedInHdfs());
         if (getExpectedRows() != null) {
             Assert.assertEquals(rowsInPivotedTable, (int) getExpectedRows());
         }

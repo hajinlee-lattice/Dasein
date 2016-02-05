@@ -27,29 +27,32 @@ public class RefreshProgress implements Progress {
     @Column(name = "SourceName", nullable = false)
     protected String sourceName;
 
-    @Column(name = "PivotDate", nullable = false)
+    @Column(name = "PivotDate")
     protected Date pivotDate;
 
-    @Column(name = "BaseSourceVersion", nullable = true)
+    @Column(name = "BaseSourceVersion")
     protected String baseSourceVersion;
 
-    @Column(name = "RowsGenerated", nullable = false)
-    protected long rowsGenerated;
+    @Column(name = "RowsGeneratedInHDSF")
+    protected long rowsGeneratedInHdfs = 0;
+
+    @Column(name = "RowsUploadedToSQL")
+    protected long rowsUploadedToSql = 0;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
+    @Column(name = "Status")
     protected ProgressStatus status;
 
-    @Column(name = "LatestStatusUpdate", nullable = false)
+    @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
 
     @Column(name = "RootOperationUID", unique = true, nullable = false)
     protected String rootOperationUID;
 
-    @Column(name = "CreatedBy", nullable = false)
+    @Column(name = "CreatedBy")
     protected String createdBy;
 
-    @Column(name = "CreateTime", nullable = false)
+    @Column(name = "CreateTime")
     protected Date createTime = new Date();
 
     @Enumerated(EnumType.STRING)
@@ -73,9 +76,13 @@ public class RefreshProgress implements Progress {
     }
 
     @Override
-    public String getSourceName() { return sourceName; }
+    public String getSourceName() {
+        return sourceName;
+    }
 
-    public void setSourceName(String sourceName) { this.sourceName = sourceName; }
+    public void setSourceName(String sourceName) {
+        this.sourceName = sourceName;
+    }
 
     public Date getPivotDate() {
         return pivotDate;
@@ -93,12 +100,20 @@ public class RefreshProgress implements Progress {
         this.baseSourceVersion = baseSourceVersion;
     }
 
-    public long getRowsGenerated() {
-        return rowsGenerated;
+    public long getRowsGeneratedInHdfs() {
+        return rowsGeneratedInHdfs;
     }
 
-    public void setRowsGenerated(long rowsGenerated) {
-        this.rowsGenerated = rowsGenerated;
+    public void setRowsGeneratedInHdfs(long rowsGeneratedInHdfs) {
+        this.rowsGeneratedInHdfs = rowsGeneratedInHdfs;
+    }
+
+    public long getRowsUploadedToSql() {
+        return rowsUploadedToSql;
+    }
+
+    public void setRowsUploadedToSql(long rowsUploadedToSql) {
+        this.rowsUploadedToSql = rowsUploadedToSql;
     }
 
     @Override
@@ -122,35 +137,59 @@ public class RefreshProgress implements Progress {
     }
 
     @Override
-    public Date getLatestStatusUpdate() { return latestStatusUpdate; }
+    public Date getLatestStatusUpdate() {
+        return latestStatusUpdate;
+    }
 
-    private void setLatestStatusUpdate(Date latestStatusUpdate) { this.latestStatusUpdate = latestStatusUpdate; }
+    private void setLatestStatusUpdate(Date latestStatusUpdate) {
+        this.latestStatusUpdate = latestStatusUpdate;
+    }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
-
-    @Override
-    public Date getCreateTime() { return createTime; }
-
-    public void setCreateTime(Date createTime) { this.createTime = createTime; }
-
-    @Override
-    public ProgressStatus getStatusBeforeFailed() { return statusBeforeFailed; }
-
-    @Override
-    public void setStatusBeforeFailed(ProgressStatus statusBeforeFailed) { this.statusBeforeFailed = statusBeforeFailed; }
-
-    public String getErrorMessage() { return errorMessage; }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
     @Override
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
 
     @Override
-    public int getNumRetries() { return numRetries; }
+    public ProgressStatus getStatusBeforeFailed() {
+        return statusBeforeFailed;
+    }
 
     @Override
-    public void setNumRetries(int numRetries) { this.numRetries = numRetries; }
+    public void setStatusBeforeFailed(ProgressStatus statusBeforeFailed) {
+        this.statusBeforeFailed = statusBeforeFailed;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public int getNumRetries() {
+        return numRetries;
+    }
+
+    @Override
+    public void setNumRetries(int numRetries) {
+        this.numRetries = numRetries;
+    }
 
     public static RefreshProgress constructByDate(String sourceName, Date pivotDate)
             throws InstantiationException, IllegalAccessException {
@@ -159,7 +198,7 @@ public class RefreshProgress implements Progress {
         progress.setPivotDate(pivotDate);
 
         progress.setRootOperationUID(UUID.randomUUID().toString().toUpperCase());
-        progress.setRowsGenerated(0);
+        progress.setRowsGeneratedInHdfs(0);
         progress.setStatus(ProgressStatus.NEW);
 
         return progress;

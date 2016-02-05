@@ -60,19 +60,20 @@ CREATE TABLE `ExternalColumn` (
   ENGINE = InnoDB;
 
 CREATE TABLE `RefreshProgress` (
-  `ProgressID`         BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
-  `BaseSourceVersion`  VARCHAR(255),
-  `CreateTime`         DATETIME     NOT NULL,
-  `CreatedBy`          VARCHAR(255) NOT NULL,
-  `ErrorMessage`       VARCHAR(255),
-  `LatestStatusUpdate` DATETIME     NOT NULL,
-  `NumRetries`         INTEGER,
-  `PivotDate`          DATETIME     NOT NULL,
-  `RootOperationUID`   VARCHAR(255) NOT NULL UNIQUE,
-  `RowsGenerated`      BIGINT       NOT NULL,
-  `SourceName`         VARCHAR(255) NOT NULL,
-  `Status`             VARCHAR(255) NOT NULL,
-  `StatusBeforeFailed` VARCHAR(255),
+  `ProgressID`          BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
+  `BaseSourceVersion`   VARCHAR(255),
+  `CreateTime`          DATETIME,
+  `CreatedBy`           VARCHAR(255),
+  `ErrorMessage`        VARCHAR(255),
+  `LatestStatusUpdate`  DATETIME,
+  `NumRetries`          INTEGER,
+  `PivotDate`           DATETIME,
+  `RootOperationUID`    VARCHAR(255) NOT NULL UNIQUE,
+  `RowsGeneratedInHDSF` BIGINT,
+  `RowsUploadedToSQL`   BIGINT,
+  `SourceName`          VARCHAR(255) NOT NULL,
+  `Status`              VARCHAR(255),
+  `StatusBeforeFailed`  VARCHAR(255),
   PRIMARY KEY (`ProgressID`),
   UNIQUE (`RootOperationUID`)
 )

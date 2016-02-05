@@ -27,32 +27,32 @@ public class ArchiveProgress implements Progress {
     @Column(name = "SourceName", nullable = false)
     protected String sourceName;
 
-    @Column(name = "StartDate", nullable = true)
+    @Column(name = "StartDate")
     protected Date startDate;
 
-    @Column(name = "EndDate", nullable = true)
+    @Column(name = "EndDate")
     protected Date endDate;
 
-    @Column(name = "RowsDownloadedToHDFS", nullable = true)
+    @Column(name = "RowsDownloadedToHDFS")
     protected long rowsDownloadedToHdfs;
 
-    @Column(name = "RowsUploadedToSQL", nullable = true)
+    @Column(name = "RowsUploadedToSQL")
     protected long rowsUploadedToSql;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = true)
+    @Column(name = "Status")
     protected ProgressStatus status;
 
-    @Column(name = "LatestStatusUpdate", nullable = true)
+    @Column(name = "LatestStatusUpdate")
     protected Date latestStatusUpdate;
 
     @Column(name = "RootOperationUID", unique = true, nullable = false)
     protected String rootOperationUID;
 
-    @Column(name = "CreatedBy", nullable = true)
+    @Column(name = "CreatedBy")
     protected String createdBy;
 
-    @Column(name = "CreateTime", nullable = true)
+    @Column(name = "CreateTime")
     protected Date createTime = new Date();
 
     @Enumerated(EnumType.STRING)

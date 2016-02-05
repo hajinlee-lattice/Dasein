@@ -9,7 +9,7 @@ import com.latticeengines.propdata.match.service.impl.MatchContext;
 final public class LoggingUtils {
 
     public static String durationSince(long startTime) {
-        return DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss:SSS");
+        return DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss.SSS");
     }
 
     public static <P extends Progress> void logInfo(Log log, P progress, String message) {
@@ -25,7 +25,7 @@ final public class LoggingUtils {
     }
 
     public static <P extends Progress> void logInfoWithDuration(Log log, P progress, String message, long startTime) {
-        log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime) + " ms");
+        log.info(progressLogPrefix(progress) + message + " Duration=" + LoggingUtils.durationSince(startTime));
     }
 
     private static <P extends Progress> String progressLogPrefix(P progress) {
