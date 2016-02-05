@@ -11,3 +11,4 @@ sys.path.append( os.path.join(os.path.dirname(__file__),'..','..','..','..','..'
 
 from .LP_020300_Refine_PushToLeadDestination_Validation import LP_020300_Refine_PushToLeadDestination_Validation
 from .LP_020300_NewSpecs import LP_020300_NewSpecs
+from .LP_020300_VDB_ModifiedColumns import LP_020300_VDB_ModifiedColumns

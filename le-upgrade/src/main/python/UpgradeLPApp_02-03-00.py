@@ -17,6 +17,7 @@ sequence = []
 sequence.append(appsequence.LPCheckVersion('2.2.2'))
 sequence.append(lp020300.LP_020300_Refine_PushToLeadDestination_Validation())
 sequence.append(lp020300.LP_020300_NewSpecs())
+sequence.append(lp020300.LP_020300_VDB_ModifiedColumns())
 sequence.append(appsequence.LPSetVersion('2.3.0'))
 app = appsequence.AppSequence(tenantFileName, resultsFileName, sequence, checkOnly)
 app.execute()
