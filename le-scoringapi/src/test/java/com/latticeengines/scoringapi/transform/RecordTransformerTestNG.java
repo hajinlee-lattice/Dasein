@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -54,8 +53,6 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         List<File> tenantList = Arrays.asList(transformDir.listFiles());
         Object[][] tenants = new Object[tenantList.size()][2];
         int i = 0;
-        tenantList = new ArrayList<>();
-        tenantList.add(transformDir.listFiles()[1]);
         for (File tenant : tenantList) {
             tenants[i][0] = tenant.getAbsolutePath();
             RecordTransformerTestMetadata metadata = JsonUtils.deserialize(FileUtils.readFileToString(//
@@ -70,7 +67,18 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
     
     @AfterMethod(groups = "functional")
     public void tearDown() throws Exception {
-        FileUtils.deleteDirectory(modelExtractionDir);
+        if (modelExtractionDir != null) {
+            FileUtils.deleteDirectory(modelExtractionDir);
+        }
+    }
+    
+    private boolean skip(String tenantName) {
+        String tenantToScore = System.getProperty("TENANT");
+        
+        if (tenantToScore != null && tenantToScore.equals(tenantName)) {
+            return false;
+        }
+        return true;
     }
 
     @Test(groups = "functional", dataProvider = "tenants")
@@ -81,7 +89,13 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         String scoreDerivationPath = tenantPath + "/scorederivation.json";
         String pmmlXmlPath = tenantPath + "/rfpmml.xml";
         String expectedScoresPath = tenantPath + "/scored.txt";
-        modelExtractionDir = new File(String.format("/tmp/%s/", new File(tenantPath).getName()));
+        String tenantName = new File(tenantPath).getName();
+        
+        if (skip(tenantName)) {
+            return;
+        }
+        
+        modelExtractionDir = new File(String.format("/tmp/%s/", tenantName));
         modelExtractionDir.mkdir();
         
         new ModelExtractor().extractModelArtifacts(modelFilePath, modelExtractionDir.getAbsolutePath());
@@ -113,7 +127,16 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         long totalEvaluationTime = 0;
         long time0 = System.currentTimeMillis();
         for (GenericRecord record : reader) {
-            Integer recId = (Integer) record.get(keyColumn);
+            Object recId = record.get(keyColumn);
+            Double recIdAsDouble = null;
+            if (recId instanceof Long) {
+                recIdAsDouble = ((Long) recId).doubleValue();
+            } else if (recId instanceof Integer) {
+                recIdAsDouble = (double) recId;
+            } else {
+                throw new RuntimeException("Key not instance of Long or Integer.");
+            }
+        
             
             Map<String, Object> recordAsMap = new HashMap<>();
             for (Field f : schema.getFields()) {
@@ -130,7 +153,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
             
             Map<ScoreType, Object> evaluation = pmmlEvaluator.evaluate(transformed, derivation);
             totalEvaluationTime += (System.currentTimeMillis() - time2);
-            double expectedScore = expectedScores.get((double) recId);
+            double expectedScore = expectedScores.get(recIdAsDouble);
             double score = (double) evaluation.get(ScoreType.PROBABILITY);
             if (Math.abs(expectedScore - score) > 0.0000001) {
                 System.out.println(String.format("Record id %d has value %f, expected is %f", recId, score, expectedScore));
