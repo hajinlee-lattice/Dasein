@@ -16,15 +16,13 @@ angular
         $urlRouterProvider.otherwise('/');
 
         $stateProvider
-            /*
             .state('home', {
                 url: '/',
-                redirectTo: 'model'
+                redirectTo: 'models'
             })
-            */
             .state('model', {
                 url: '/model',
-                redirectTo: "model.list",
+                redirectTo: "models",
                 views: {
                     /*
                     "navigation@": {
@@ -36,16 +34,24 @@ angular
                     */
                 }
             })
+            .state('model.view', {
+                url: '/view',
+                views: {
+                    "main@": {
+                        templateUrl: './app/models/views/ModelDetailView.html'
+                    }
+                }
+            })
             .state('model.activate', {
-                url: '/model/activate',
+                url: '/activate',
                 views: {
                     "main@": {
                         templateUrl: './app/models/views/ActivateModelView.html'
                     }
                 }
             })
-            .state('model.list', {
-                url: '/list',
+            .state('models', {
+                url: '/models',
                 views: {
                     "main@": {
                         templateUrl: './app/models/views/ModelListView.html'
