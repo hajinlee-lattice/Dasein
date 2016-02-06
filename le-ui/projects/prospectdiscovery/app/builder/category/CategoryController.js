@@ -44,7 +44,7 @@ angular
         this.getList = function(args) {
             var deferred = $q.defer(),
                 master = this.getMaster(args);
-console.log('xhr',args);
+            
             if (!args || !args.AttrKey || args.AttrKey == '_OBJECT_') {
                 deferred.reject('<!> Incorrect Parameters for Attributes XHR');
             }

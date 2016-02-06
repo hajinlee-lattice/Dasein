@@ -45,12 +45,16 @@ var mainApp = angular.module('mainApp', [
         var previousSession = BrowserStorageUtility.getClientSession();
         var loginDocument = BrowserStorageUtility.getLoginDocument();
         if (loginDocument && mustUserChangePassword(loginDocument)) {
+            window.open("/login", "_self");
+            return;
             $scope.isLoggedInWithTempPassword = loginDocument.MustChangePassword;
             $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
             createMandatoryChangePasswordViewForLocale(previousSession.Locale);
         } else if (previousSession != null && ! hasSessionTimedOut()) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
+            window.open("/login", "_self");
+            return;
             $scope.showFooter = false;
             // Create the Login View
             $http.get('./app/login/views/LoginView.html').success(function (html) {

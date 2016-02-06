@@ -31,13 +31,12 @@
     <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css" />
 
     <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
-
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css" />
     <!-- /build -->
 
 </head>
-<body data-ng-controller="MainController" class="lp">
+<body data-ng-controller="MainController" class="lp open-nav">
 
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
@@ -48,30 +47,41 @@
             <nav id="nav" class="primary-nav" role="navigation">
                 <div ui-view="navigation">
                     <!--<ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>-->
-
-                    <a href="#/" class="logo"><img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" /></a>
-                    
+                    <div>
+                        <a href="#/" class="logo" style="float: none;padding: 0;">
+                            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
+                        </a>
+                    </div>
                     <ul class="menu">
                         <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="fingerprints"><span class="ico ico-fingerprint"></span>Analyze Your Customer Fingerprints</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="markets.list"><span class="ico ico-bullseye"></span>Manage Target Markets</a>
+                            <a ui-sref="model.list"><span class="ico ico-bullseye"></span>All Models</a>
                             <ul>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.create">Create a Target Market</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.dashboard">Performance Dashboard</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_schedule">Prospecting Schedule</a></li>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="markets.prospect_list">Prospecting History</a></li>
+                                <li role="presentation" ui-sref-active="active"><a ui-sref="model.create">Create a Model</a></li>
                             </ul>
                         </li>
                         <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="jobs.status"><span class="ico ico-cog"></span>Jobs <!--<span class="loading pull-right"></span>--></a>
-                            <ul>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="jobs.import.credentials">Import Data</a></li>
-                            </ul>
+                            <a ui-sref="setup"><span class="fa fa-database"></span>System Setup</a>
                         </li>
                         <li role="presentation" ui-sref-active="active">
                             <a ui-sref="users"><span class="ico ico-user"></span>Manage Users</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="model.history"><span class="fa fa-history"></span>Model Creation History</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="model.activate"><span class="fa fa-rocket"></span>Activate Model</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="users"><span class="fa fa-columns"></span>Manage Fields</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="users"><span class="fa fa-area-chart"></span>Enrichment</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="users"><span class="fa fa-dashboard"></span>Scoring Dashboard</a>
+                        </li>
+                        <li role="presentation" ui-sref-active="active">
+                            <a ui-sref="users"><span class="fa fa-cogs"></span>Jobs</a>
                         </li>
                     </ul>
 
@@ -85,9 +95,11 @@
                         <div data-ng-view class="container"></div>
                     </div>
                 </div>
+                <!--
                 <div class="footer" data-ng-show="showFooter">
                     © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
                 </div>
+                -->
             </section>
 
         </div><!-- End #inner-wrap -->
@@ -119,13 +131,13 @@ Use DOMUtil.isIE() to detect internet explorer.
 
 <!-- 3rd-party libraries -->
 
-<script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/angular/angular.min.js"></script>
-<script src="/bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-<script src="/bower_components/angular-resource/angular-resource.min.js"></script>
-<script src="/bower_components/angular-animate/angular-animate.min.js"></script>
-<script src="/bower_components/angular-route/angular-route.min.js"></script>
-<script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+<script src="/bower_components/jquery/dist/jquery.js"></script>
+<script src="/bower_components/angular/angular.js"></script>
+<script src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+<script src="/bower_components/angular-resource/angular-resource.js"></script>
+<script src="/bower_components/angular-animate/angular-animate.js"></script>
+<script src="/bower_components/angular-route/angular-route.js"></script>
+<script src="/bower_components/angular-ui-router/release/angular-ui-router.js"></script>
 <!--
 <script src="/bower_components/crypto/crypto.min.js"></script>
 -->
@@ -215,6 +227,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 
 <!-- app specific -->
 <script src="app/app.js"></script>
+<script src="app/routes.js"></script>
 <script src="app/core/utilities/BrowserStorageUtility.js"></script>
 <script src="app/core/utilities/RightsUtility.js"></script>
 <script src="app/core/utilities/PasswordUtility.js"></script>

@@ -19,7 +19,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
@@ -139,11 +139,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
             if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
                 createDeploymentWizardView();
             } else {
-                createModelListView();
+                //createModelListView();
+                $state.go('model.list');
             }
         });
     }
-
+/*
     function createModelListView() {
         // Set the hash
         //window.location.hash = NavUtility.MODEL_LIST_HASH;
@@ -154,7 +155,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
-
+*/
     // Handle when the Model Detail link is clicked
     $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
         createModelDetailView(data);
