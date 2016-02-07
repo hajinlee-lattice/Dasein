@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
+import com.latticeengines.security.exposed.GetResponseErrorHandler;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
 public abstract class BaseRestApiProxy {
@@ -24,6 +25,7 @@ public abstract class BaseRestApiProxy {
     public BaseRestApiProxy(String rootpath, Object... urlVariables) {
         this.rootpath = rootpath == null ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
     public BaseRestApiProxy() {
