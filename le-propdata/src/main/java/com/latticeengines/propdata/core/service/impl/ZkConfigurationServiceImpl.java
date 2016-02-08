@@ -60,7 +60,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         camille = CamilleEnvironment.getCamille();
         podId = CamilleEnvironment.getPodId();
 
-        for (Source source: sources) {
+        for (Source source : sources) {
             Path flagPath = jobFlagPath(source);
             if (!camille.exists(flagPath)) {
                 camille.create(flagPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -71,13 +71,17 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         String json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + sourceDbsJson));
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
-        camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (!camille.exists(poolPath)) {
+            camille.create(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        }
 
         log.info("Uploading target db connection pool to ZK using " + targetDbsJson + " ...");
         json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + targetDbsJson));
         poolPath = dbPoolPath(DataSourcePool.TargetDB);
-        camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (!camille.exists(poolPath)) {
+            camille.create(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        }
 
         log.info("Read or initializing max real time input ...");
         if (!camille.exists(maxRealTimeInputPath())) {
@@ -93,7 +97,7 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         try {
             List<DataSourceConnection> connections = new ArrayList<>();
             ArrayNode arrayNode = mapper.readValue(camille.get(poolPath).getData(), ArrayNode.class);
-            for (JsonNode jsonNode: arrayNode) {
+            for (JsonNode jsonNode : arrayNode) {
                 connections.add(mapper.treeToValue(jsonNode, DataSourceConnection.class));
             }
             return connections;
@@ -126,7 +130,6 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             return false;
         }
     }
-
 
     @Override
     public String refreshCronSchedule(Source source) {

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.pivot;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

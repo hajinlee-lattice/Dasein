@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.pivot;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class HGDataNewTechBuffer extends BaseOperation implements Buffer {
     private final String domainField;
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
-    HGDataNewTechBuffer(String domainField, String newTechField) {
+    public HGDataNewTechBuffer(String domainField, String newTechField) {
         super(new Fields(domainField, newTechField));
         this.domainField = domainField;
     }

@@ -1,9 +1,7 @@
-package com.latticeengines.propdata.dataflow.function;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 
 import java.util.Date;
-
-import com.latticeengines.propdata.dataflow.function.CleanupFunction;
 
 import cascading.operation.Function;
 import cascading.tuple.Fields;

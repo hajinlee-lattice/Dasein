@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.pivot;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ public class HGDataBothBuffer extends BaseOperation implements Buffer {
     private static final String BOTH = "Both";
     private final String domainField;
 
-    HGDataBothBuffer(String domainField) {
+    public HGDataBothBuffer(String domainField) {
         super(new Fields(domainField, BOTH));
         this.domainField = domainField;
     }

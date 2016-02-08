@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.dataflow.pivot;
+package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -39,7 +39,7 @@ public class BuiltWithTopAttrBuffer extends BaseOperation implements Buffer {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    protected BuiltWithTopAttrBuffer(Map<String, String> attrMap, Fields fieldDeclaration) {
+    public BuiltWithTopAttrBuffer(Map<String, String> attrMap, Fields fieldDeclaration) {
         this(fieldDeclaration);
         this.attrMap = attrMap;
     }

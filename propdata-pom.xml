@@ -29,10 +29,10 @@
         <module>le-monitor</module>
         <module>le-camille</module>
         <module>le-cassandra</module>
+        <module>le-serviceflows</module>
         <module>le-swlib</module>
         <module>le-network</module>
         <module>le-proxy</module>
         <module>le-security</module>
-        <module>le-serviceflows</module>
     </modules>
 </project>

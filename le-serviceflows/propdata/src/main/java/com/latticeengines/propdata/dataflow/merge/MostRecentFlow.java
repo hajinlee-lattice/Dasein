@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
-import com.latticeengines.propdata.dataflow.function.OldDataCleanupFunction;
-import com.latticeengines.propdata.dataflow.function.DomainCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.OldDataCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 
 @Component("mostRecentFlow")
 public class MostRecentFlow extends TypesafeDataFlowBuilder<MostRecentDataFlowParameters>  {

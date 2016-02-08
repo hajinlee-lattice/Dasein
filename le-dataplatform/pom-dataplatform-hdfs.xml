@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-dataplatform-hdfs-rpm</artifactId>
@@ -39,6 +39,8 @@
                 <dataplatform.properties.path>conf/env/buildmachine</dataplatform.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/buildmachine</workflow.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/buildmachine</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/buildmachine</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/buildmachine</propdata.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
             </properties>
         </profile>
@@ -59,6 +61,8 @@
                 <dataflowapi.properties.path>../le-dataflowapi/conf/env/devcluster</dataflowapi.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/devcluster</workflow.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/devcluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/devcluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/devcluster</propdata.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
             </properties>
         </profile>
@@ -78,6 +82,8 @@
                 <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
             </properties>
         </profile>
@@ -97,6 +103,8 @@
                 <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
                 <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
             </properties>
         </profile>
@@ -126,13 +134,19 @@
                             <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
-                                    <location>../le-dataflowapi/target/le-dataflowapi-${le.rpm.version}-shaded.jar</location>
+                                    <location>../le-dataflowapi/target/le-dataflowapi-${le.rpm.version}-shaded.jar
+                                    </location>
                                 </source>
                                 <source>
                                     <location>../le-eai/target/le-eai-${le.rpm.version}-shaded.jar</location>
                                 </source>
                                 <source>
-                                    <location>../le-workflowapi/target/le-workflowapi-${le.rpm.version}-shaded.jar</location>
+                                    <location>../le-workflowapi/target/le-workflowapi-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
+                                    <location>../le-propdata/target/le-propdata-${le.rpm.version}-shaded.jar
+                                    </location>
                                 </source>
                                 <source>
                                     <location>${hadoop-metrics2.properties.path}/hadoop-metrics2.properties</location>
@@ -157,6 +171,12 @@
                                 </source>
                                 <source>
                                     <location>${security.properties.path}/security.properties</location>
+                                </source>
+                                <source>
+                                    <location>${camille.properties.path}/camille.properties</location>
+                                </source>
+                                <source>
+                                    <location>${propdata.properties.path}/propdata.properties</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -226,7 +246,9 @@
                             <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
-                                    <location>src/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py</location>
+                                    <location>
+                                        src/test/resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py
+                                    </location>
                                 </source>
                             </sources>
                         </mapping>

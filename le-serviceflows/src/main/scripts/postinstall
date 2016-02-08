@@ -19,7 +19,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
 
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
-    -m dataflowapi \
+    -m propdata \
     -g com.latticeengines \
     -a le-serviceflows \
     -v $VERSION \

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
-import com.latticeengines.propdata.dataflow.function.DateToTimestampFunction;
-import com.latticeengines.propdata.dataflow.function.DomainCleanupFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DateToTimestampFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 
 @Component("hgDataRefreshFlow")
 public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameters> {

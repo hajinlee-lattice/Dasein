@@ -28,12 +28,12 @@ su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/scripts /app/$VERSI
 su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/lib /app/$VERSION/dataplatform"
 su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/playmaker/* /app/$VERSION/playmaker"
 su -l yarn -c "hdfs dfs -copyFromLocal /tmp/datascientist/* /datascientist"
-for microservice in 'dataflowapi' 'eai' 'workflowapi'
+for microservice in 'dataflowapi' 'eai' 'workflowapi' 'propdata'
 do
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/le-$microservice*-shaded.jar /app/$VERSION/$microservice/lib"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$microservice.properties /app/$VERSION/$microservice"
 done
-for service in 'db' 'security' 'eai' 'dataflowapi' 'workflowapi' 'workflow'
+for service in 'db' 'security' 'eai' 'dataflowapi' 'workflowapi' 'workflow' 'camille'
 do
     su -l yarn -c "hdfs dfs -rm -r -f /app/$VERSION/$service/$service.properties || true"
     su -l yarn -c "hdfs dfs -copyFromLocal /tmp/app/dataplatform/$service.properties /app/$VERSION/$service"

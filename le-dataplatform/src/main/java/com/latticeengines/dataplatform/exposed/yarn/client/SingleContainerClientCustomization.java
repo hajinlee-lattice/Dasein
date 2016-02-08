@@ -79,10 +79,16 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = getHdfsEntries(containerProperties, true);
+        hdfsEntries = appendModuleHdfsEntries(hdfsEntries);
+        return hdfsEntries;
+    }
+
+    protected Collection<LocalResourcesFactoryBean.TransferEntry> appendModuleHdfsEntries(
+            Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries) {
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersion(), module,  module), //
+                String.format("/app/%s/%s/%s.properties", versionManager.getCurrentVersion(), module, module), //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -97,7 +103,8 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersion(), module), //
                 false));
         if (softwareLibraryService != null) {
-            List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module, versionManager.getCurrentVersion());
+            List<SoftwarePackage> packages = softwareLibraryService.getInstalledPackagesByVersion(module,
+                    versionManager.getCurrentVersion());
             if (StringUtils.isEmpty(versionManager.getCurrentVersion())) {
                 packages = softwareLibraryService.getLatestInstalledPackages(module);
             }
@@ -112,7 +119,6 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                         false));
             }
         }
-
         return hdfsEntries;
     }
 
