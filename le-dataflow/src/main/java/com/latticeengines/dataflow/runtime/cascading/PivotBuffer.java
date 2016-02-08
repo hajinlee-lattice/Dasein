@@ -28,7 +28,6 @@ public class PivotBuffer extends BaseOperation implements Buffer {
 
     protected Map<String, Integer> namePositionMap;
     private PivotStrategy pivotStrategy;
-    private Map<Integer, Set<Comparable<Serializable>>> countContextMap = new HashMap<>();
 
     protected PivotBuffer(Fields fieldDeclaration) {
         super(fieldDeclaration);
@@ -43,7 +42,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
     private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
         Map<String, Integer> positionMap = new HashMap<>();
         int pos = 0;
-        for (Object field: fieldDeclaration) {
+        for (Object field : fieldDeclaration) {
             String fieldName = (String) field;
             positionMap.put(fieldName.toLowerCase(), pos++);
         }
@@ -65,7 +64,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
 
     private void setupTupleForGroup(Tuple result, TupleEntry group) {
         Fields fields = group.getFields();
-        for (Object field: fields) {
+        for (Object field : fields) {
             String fieldName = (String) field;
             Integer loc = namePositionMap.get(fieldName.toLowerCase());
             if (loc != null && loc >= 0) {
@@ -85,28 +84,30 @@ public class PivotBuffer extends BaseOperation implements Buffer {
             pivotResults.addAll(pivotStrategy.pivot(arguments));
         }
 
-        for (PivotResult pivotResult: pivotResults) {
+        Map<Integer, Set<Comparable<Serializable>>> countContextMap = new HashMap<>();
+        for (PivotResult pivotResult : pivotResults) {
             Integer loc = namePositionMap.get(pivotResult.getColumnName().toLowerCase());
-            result.set(loc, aggregateValue(result.getObject(loc), loc, pivotResult));
+            result.set(loc, aggregateValue(result.getObject(loc), loc, pivotResult, countContextMap));
         }
     }
 
-    private Object aggregateValue(Object oldValue, Integer loc, PivotResult result) {
+    private Object aggregateValue(Object oldValue, Integer loc, PivotResult result,
+            Map<Integer, Set<Comparable<Serializable>>> countContextMap) {
         switch (result.getPivotType()) {
-            case ANY:
-                return aggregateAny(oldValue, result.getValue());
-            case MAX:
-                return aggregateMax(oldValue, result.getValue());
-            case MIN:
-                return aggregateMin(oldValue, result.getValue());
-            case SUM:
-                return aggregateSum(oldValue, result.getValue());
-            case COUNT:
-                return aggregateCount(loc, result.getValue());
-            case EXISTS:
-                return aggregateExists(oldValue, result.getValue());
-            default:
-                return result.getValue();
+        case ANY:
+            return aggregateAny(oldValue, result.getValue());
+        case MAX:
+            return aggregateMax(oldValue, result.getValue());
+        case MIN:
+            return aggregateMin(oldValue, result.getValue());
+        case SUM:
+            return aggregateSum(oldValue, result.getValue());
+        case COUNT:
+            return aggregateCount(loc, result.getValue(), countContextMap);
+        case EXISTS:
+            return aggregateExists(oldValue, result.getValue());
+        default:
+            return result.getValue();
         }
     }
 
@@ -162,8 +163,9 @@ public class PivotBuffer extends BaseOperation implements Buffer {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    private Object aggregateCount(Integer loc, Object newValue) {
+    @SuppressWarnings({ "unchecked" })
+    private Object aggregateCount(Integer loc, Object newValue,
+            Map<Integer, Set<Comparable<Serializable>>> countContextMap) {
         Comparable<Serializable> comparable = (Comparable<Serializable>) newValue;
         if (countContextMap.containsKey(loc)) {
             Set<Comparable<Serializable>> valueSet = countContextMap.get(loc);
@@ -186,7 +188,7 @@ public class PivotBuffer extends BaseOperation implements Buffer {
     }
 
     private void populateDefault(Tuple result) {
-        for (Map.Entry<String, Object> entry: pivotStrategy.getDefaultValues().entrySet()) {
+        for (Map.Entry<String, Object> entry : pivotStrategy.getDefaultValues().entrySet()) {
             String column = entry.getKey();
             Integer loc = namePositionMap.get(column.toLowerCase());
             if (loc != null && loc >= 0) {

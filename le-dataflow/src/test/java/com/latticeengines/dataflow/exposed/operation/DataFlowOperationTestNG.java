@@ -111,14 +111,13 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.any(
-                        "Feature", "Value", features, Integer.class, 0);
-                return feature.pivot(new String[]{ "Domain" }, mapper);
+                PivotStrategyImpl mapper = PivotStrategyImpl.any("Feature", "Value", features, Integer.class, 0);
+                return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 1);
@@ -136,7 +135,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
-
     @Test(groups = "functional", enabled = true)
     public void testMaxPivot() throws Exception {
         String avroDir = "/tmp/avro/";
@@ -149,14 +147,13 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.max(
-                        "Feature", "Value", features, Integer.class, null);
-                return feature.pivot(new String[]{ "Domain" }, mapper);
+                PivotStrategyImpl mapper = PivotStrategyImpl.max("Feature", "Value", features, Integer.class, null);
+                return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 2);
@@ -182,15 +179,21 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.count("Feature", "Value", features);
-                return feature.pivot(new String[]{ "Domain" }, mapper);
+                return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        Assert.assertFalse(output.isEmpty());
+        for (GenericRecord record : output) {
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 2);
+                Assert.assertEquals(record.get("f2"), 2);
+                Assert.assertEquals(record.get("f3"), 2);
+                Assert.assertEquals(record.get("f4"), 0);
+            } else if ("dom2.com".equals(record.get("Domain").toString())) {
+                Assert.assertEquals(record.get("f1"), 1);
                 Assert.assertEquals(record.get("f2"), 2);
                 Assert.assertEquals(record.get("f3"), 2);
                 Assert.assertEquals(record.get("f4"), 0);
@@ -213,12 +216,12 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
                 PivotStrategyImpl mapper = PivotStrategyImpl.exists("Feature", features);
-                return feature.pivot(new String[]{ "Domain" }, mapper);
+                return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), true);
@@ -230,7 +233,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
-
 
     @Test(groups = "functional", enabled = true)
     public void testMergingPivot() throws Exception {
@@ -254,16 +256,14 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap(
-                        "Feature", "Value", features, columnMappings,
-                        Integer.class, PivotType.SUM, 0
-                );
-                return feature.pivot(new String[]{ "Domain" }, mapper);
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features, columnMappings,
+                        Integer.class, PivotType.SUM, 0);
+                return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             System.out.println(record);
             if ("dom1.com".equals(record.get("Domain").toString())) {
                 Assert.assertEquals(record.get("f1"), 3);
@@ -277,7 +277,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
-
 
     @Test(groups = "functional")
     public void testSwapTimestamp() throws Exception {
@@ -298,7 +297,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         Long after = System.currentTimeMillis();
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             Long timestamp = (Long) record.get("Timestamp");
             Assert.assertNotNull(timestamp);
             Assert.assertTrue(timestamp > before);
@@ -307,7 +306,6 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
 
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
-
 
     @Test(groups = "functional")
     public void testAddTimestamp() throws Exception {
@@ -328,7 +326,7 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         Long after = System.currentTimeMillis();
 
         List<GenericRecord> output = readOutput();
-        for (GenericRecord record: output) {
+        for (GenericRecord record : output) {
             Long timestamp = (Long) record.get("New_Timestamp");
             Assert.assertNotNull(timestamp);
             Assert.assertTrue(timestamp > before);
@@ -338,62 +336,42 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
-
     private void prepareSimplePivotData(String avroDir, String fileName) {
-        Object[][] data = new Object[][] {
-                {"dom1.com", "f1", 1, 123L},
-                {"dom1.com", "f2", 2, 125L},
-                {"dom1.com", "f3", 3, 124L},
-                {"dom1.com", "k1_low", 3, 124L},
-                {"dom1.com", "k1_high", 5, 124L},
-                {"dom2.com", "f2", 4, 101L},
-                {"dom2.com", "f3", 2, 102L},
-                {"dom2.com", "k1_low", 3, 124L},
-        };
+        Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
+                { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
+                { "dom2.com", "f2", 4, 101L }, { "dom2.com", "f3", 2, 102L }, { "dom2.com", "k1_low", 3, 124L }, };
 
         uploadAvro(data, avroDir, fileName);
     }
 
     private void prepareMaxPivotData(String avroDir, String fileName) {
-        Object[][] data = new Object[][] {
-                {"dom1.com", "f1", 1, 123L},
-                {"dom1.com", "f2", 2, 125L},
-                {"dom1.com", "f3", 4, 124L},
-                {"dom1.com", "f1", 2, 129L},
-                {"dom1.com", "f3", 1, 122L},
-                {"dom1.com", "f2", 3, 121L},
-                {"dom1.com", "f2", 1, 122L},
-        };
+        Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
+                { "dom1.com", "f3", 4, 124L }, { "dom1.com", "f1", 2, 129L }, { "dom1.com", "f3", 1, 122L },
+                { "dom1.com", "f2", 3, 121L }, { "dom1.com", "f2", 1, 122L }, };
 
         uploadAvro(data, avroDir, fileName);
     }
 
     private void prepareCountPivotData(String avroDir, String fileName) {
-        Object[][] data = new Object[][] {
-                {"dom1.com", "f1", 1, 123L},
-                {"dom1.com", "f2", 2, 125L},
-                {"dom1.com", "f3", 4, 124L},
-                {"dom1.com", "f1", 2, 129L},
-                {"dom1.com", "f3", 1, 122L},
-                {"dom1.com", "f2", 3, 121L},
-                {"dom1.com", "f2", 2, 122L},
-        };
+        Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
+                { "dom1.com", "f3", 4, 124L }, { "dom1.com", "f1", 2, 129L }, { "dom1.com", "f3", 1, 122L },
+                { "dom1.com", "f2", 3, 121L }, { "dom1.com", "f2", 2, 122L }, { "dom2.com", "f1", 1, 123L },
+                { "dom2.com", "f2", 2, 125L }, { "dom2.com", "f3", 4, 124L },
+                { "dom2.com", "f3", 1, 122L }, { "dom2.com", "f2", 3, 121L }, { "dom2.com", "f2", 2, 122L } };
 
         uploadAvro(data, avroDir, fileName);
     }
 
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
-        List<GenericRecord> records =  new ArrayList<>();
+        List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," +
-                "\"fields\":[" +
-                "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]}," +
-                "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]}," +
-                "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]}," +
-                "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" +
-                "]}");
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
+                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]},"
+                + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        for (Object[] tuple: data) {
+        for (Object[] tuple : data) {
             builder.set("Domain", tuple[0]);
             builder.set("Feature", tuple[1]);
             builder.set("Value", tuple[2]);
