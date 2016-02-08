@@ -7,14 +7,14 @@ module.exports = function(grunt) {
 					style: 'compressed'
 				},
 				files: {
-					'assets/css/lattice.css' : 'assets/sass/lattice.scss'
+					'./assets/css/lattice.css' : './assets/sass/lattice.scss'
 				}
 			}
 		},
 		watch: {
 			css: {
-				files: '/assets/**/*.scss',
-				tasks: ['sass']
+				files: './assets/sass/*.scss',
+				tasks: ['sass:dist']
 			}
 		}
 	});
@@ -22,5 +22,5 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 
 	grunt.registerTask('default',['watch']);
-	grunt.registerTask('sentry',['watch']);
+	grunt.registerTask('sentry',['watch:css']);
 };
