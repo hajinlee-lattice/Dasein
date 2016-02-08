@@ -130,7 +130,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     // Handle when the Model List link is clicked
     $scope.$on(NavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
-        createModelListView();
+        //createModelListView();
     });
 
     function createMainContentViewAndRefreshFeatures() {
@@ -140,7 +140,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
                 createDeploymentWizardView();
             } else {
                 //createModelListView();
-                $state.go('model.list');
+                $state.go('models');
             }
         });
     }
@@ -158,10 +158,11 @@ angular.module('mainApp.core.controllers.MainViewController', [
 */
     // Handle when the Model Detail link is clicked
     $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
-        createModelDetailView(data);
+        //createModelDetailView(data);
     });
 
     function createModelDetailView(data) {
+        return;
         // Set the hash
         //window.location.hash = NavUtility.MODEL_DETAIL_HASH;
 
@@ -175,10 +176,11 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     // Handle when the Update Password link is clicked
     $scope.$on(NavUtility.ACTIVATE_MODEL, function (event, data) {
-        createActivateModelView();
+        //createActivateModelView();
     });
 
     function createActivateModelView() {
+        return;
         // Set the hash
         //window.location.hash = NavUtility.ACTIVATE_MODEL;
 

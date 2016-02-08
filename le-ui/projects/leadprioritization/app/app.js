@@ -2,7 +2,6 @@
 var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
-    'ngAnimate',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',

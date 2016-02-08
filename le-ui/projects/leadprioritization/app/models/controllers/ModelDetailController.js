@@ -14,12 +14,13 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.ThresholdExplorerService'
 ])
 
-.controller('ModelDetailController', function ($scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetFrameworkService, WidgetService, ModelService, TopPredictorService, ThresholdExplorerService) {
+.controller('ModelDetailController', function ($stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
+    NavUtility, WidgetFrameworkService, WidgetService, ModelService, TopPredictorService, ThresholdExplorerService, Model) {
+    console.log('###',$scope);
     $scope.ResourceUtility = ResourceUtility;
     
-    var modelId = $scope.data.Id;
-    $scope.displayName = $scope.data.DisplayName;
+    var modelId = $stateParams.modelId;
+    //$scope.displayName = $scope.data.DisplayName;
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
@@ -35,35 +36,31 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         return;
     }
 
-    ModelService.GetModelById(modelId).then(function(result) {
-        if (result != null && result.success === true) {
-            var model = result.resultObj;
-            model.ModelId = modelId;
-            model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
-            model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
-            model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
-            model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
-            var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
-            model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
-            model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
+    console.log(modelId, result);
+    var model = Model;
+    model.ModelId = modelId;
+    model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
+    model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
+    model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
+    model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
+    var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
+    model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
+    model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
 
-            thresholdData = ThresholdExplorerService.PrepareData(model);
-            model.ThresholdChartData = thresholdData.ChartData;
-            model.ThresholdDecileData = thresholdData.DecileData;
-            model.ThresholdLiftData = thresholdData.LiftData;
+    thresholdData = ThresholdExplorerService.PrepareData(model);
+    model.ThresholdChartData = thresholdData.ChartData;
+    model.ThresholdDecileData = thresholdData.DecileData;
+    model.ThresholdLiftData = thresholdData.LiftData;
 
-            model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
+    model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
 
-            var contentContainer = $('#modelDetailContainer');
-            WidgetFrameworkService.CreateWidget({
-                element: contentContainer,
-                widgetConfig: screenWidgetConfig,
-                metadata: null,
-                data: model,
-                parentData: model
-            });
-        }
+    angular.extend($scope, {
+        widgetConfig: screenWidgetConfig,
+        metadata: null,
+        data: model,
+        parentData: model
     });
+
     
     function filterHighScoresInBottomLeads(bottomLeads) {
         if (bottomLeads === null) {

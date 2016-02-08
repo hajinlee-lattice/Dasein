@@ -7,6 +7,34 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.core.services.SessionService',
     'mainApp.appCommon.services.ModelSummaryValidationService'
 ])
+.service('ModelStore', function($q, ModelService) {
+    this.models = {};
+
+    // checks if items matching args exists, performs XHR to fetch if they don't
+    this.getModel = function(modelId) {
+        var deferred = $q.defer(),
+            model = this.models[modelId];
+        
+        if (typeof model == 'object') {
+            console.log('exists',modelId,model);
+            deferred.resolve(model);
+        } else {
+            (function(self) {
+                ModelService.GetModelById(modelId).then(function(result) {
+                    if (result != null && result.success === true) {
+                        console.log('fetched',modelId,result.resultObj);
+                        deferred.resolve(result.resultObj);
+                        self.models[modelId] = result.resultObj;
+                    } else {
+                        deferred.reject(result.resultObj);
+                    }
+                });
+            })(this);
+        }
+
+        return deferred.promise;
+    }
+})
 .service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
 
     this.GetAllModels = function (isValidOnly) {

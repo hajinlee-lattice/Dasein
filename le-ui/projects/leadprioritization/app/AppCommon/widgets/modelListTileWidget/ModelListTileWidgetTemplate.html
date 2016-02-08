@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <a ui-sref="model.view" class="model {{isActive ? '' : 'inactive'}}">
+    <a ui-sref="model.attributes({ modelId: '{{ data.Id }}' })" class="model {{isActive ? '' : 'inactive'}}">
         <div class="status">
             <dl>
                 <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>

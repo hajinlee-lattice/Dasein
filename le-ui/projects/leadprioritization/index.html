@@ -46,45 +46,7 @@
             
             <nav id="nav" class="primary-nav" role="navigation">
                 <div ui-view="navigation">
-                    <!--<ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>-->
-                    <div>
-                        <a href="#/" class="logo" style="float: none;padding: 0;">
-                            <img src="/assets/images/logo-lattice-white.png" alt="Lattice Logo" />
-                        </a>
-                    </div>
-                    <ul class="menu">
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="models"><span class="ico ico-bullseye"></span>All Models</a>
-                            <ul>
-                                <li role="presentation" ui-sref-active="active"><a ui-sref="model.create">Create a Model</a></li>
-                            </ul>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="setup"><span class="fa fa-database"></span>System Setup</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="ico ico-user"></span>Manage Users</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="model.history"><span class="fa fa-history"></span>Model Creation History</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="model.activate"><span class="fa fa-rocket"></span>Activate Model</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="fa fa-columns"></span>Manage Fields</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="fa fa-area-chart"></span>Enrichment</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="fa fa-dashboard"></span>Scoring Dashboard</a>
-                        </li>
-                        <li role="presentation" ui-sref-active="active">
-                            <a ui-sref="users"><span class="fa fa-cogs"></span>Jobs</a>
-                        </li>
-                    </ul>
-
+                    <ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>
                 </div>
             </nav>
 
@@ -135,7 +97,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="/lib/bower/angular.js"></script>
 <script src="/lib/bower/angular-sanitize.js"></script>
 <script src="/lib/bower/angular-resource.js"></script>
-<script src="/lib/bower/angular-animate.js"></script>
+<!--script src="/lib/bower/angular-animate.js"></script -->
 <script src="/lib/bower/angular-route.js"></script>
 <script src="/lib/bower/angular-ui-router.js"></script>
 <!--

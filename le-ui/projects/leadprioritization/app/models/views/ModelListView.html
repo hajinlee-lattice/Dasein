@@ -1,15 +1,12 @@
 <div data-ng-controller="ModelListController">
-    
-    <div class="summary blue-fire">
-        <h1>{{ResourceUtility.getString('MODEL_LIST_TITLE')}}</h1>
-        <p>Completed models are shown here. To create a new model, go back to the model creation section.</p>
-    </div>
 
     <section id="main-content" class="wrapper">
+        <!--
         <div data-ng-show="loading">
             <div class="loader"> </div>
             <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
         </div>
+        -->
         <div class="no-models text-center"  data-ng-show="showNoModels">
             <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
         </div>

@@ -2,16 +2,24 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.appCommon.utilities.StringUtility'
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.models.services.ModelService',
+    'mainApp.appCommon.services.TopPredictorService',
+    'mainApp.models.controllers.ModelDetailController'
 ])
 
-.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, NavUtility, StringUtility) {
+.controller('ModelDetailsWidgetController', function (
+    $stateParams, $scope, $rootScope, ResourceUtility, DateTimeFormatUtility, 
+    NavUtility, StringUtility, Model, screenWidgetConfig, WidgetService, 
+    WidgetConfigUtility, ModelService, ExternalAttributes, InternalAttributes, ChartData
+) {
+    var data = Model;
+    console.log('DetailsWidget', ResourceUtility, $stateParams.modelId, data, screenWidgetConfig);
     $scope.ResourceUtility = ResourceUtility;
     
-    var widgetConfig = $scope.widgetConfig;
+    var widgetConfig = screenWidgetConfig.Widgets[0];
     var metadata = $scope.metadata;
-    var data = $scope.data;
-    var modelDetails = $scope.data.ModelDetails;
+    var modelDetails = data.ModelDetails;
 
     $scope.displayName = modelDetails[widgetConfig.NameProperty];
     var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
@@ -27,10 +35,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.score = Math.round($scope.score * 100);
     }
      
-    $scope.externalAttributes = data.ExternalAttributes.total;
+    data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
+    $scope.externalAttributes = ExternalAttributes.total;
     $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
     
-    $scope.internalAttributes = data.InternalAttributes.total;
+    $scope.internalAttributes = InternalAttributes.total;
     $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
     
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];
