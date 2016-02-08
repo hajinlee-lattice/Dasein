@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.Test;
 
-public class LogContextTest {
+public class LogContextUnitTestNG {
     @Test(groups = "unit")
     public void test() {
         int interestingValue = 42;
@@ -19,5 +19,5 @@ public class LogContextTest {
         }
     }
 
-    private static final Log log = LogFactory.getLog(LogContextTest.class);
+    private static final Log log = LogFactory.getLog(LogContextUnitTestNG.class);
 }
