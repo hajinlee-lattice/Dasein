@@ -16,4 +16,14 @@ public class SourceFileServiceImpl implements SourceFileService {
     public SourceFile findByName(String name) {
         return sourceFileEntityMgr.findByName(name);
     }
+
+    @Override
+    public void create(SourceFile sourceFile) {
+        sourceFileEntityMgr.create(sourceFile);
+    }
+
+    @Override
+    public void update(SourceFile sourceFile) {
+        sourceFileEntityMgr.update(sourceFile);
+    }
 }

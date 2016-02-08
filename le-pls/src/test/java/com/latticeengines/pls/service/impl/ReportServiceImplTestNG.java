@@ -49,11 +49,6 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void deleteReports() {
-        setupSecurityContext(tenantService.findByTenantId(TENANT1));
-        targetMarketEntityMgr.deleteAll();
-        setupSecurityContext(tenantService.findByTenantId(TENANT2));
-        targetMarketEntityMgr.deleteAll();
-
         List<Report> reports = reportEntityMgr.getAll();
 
         for (Report report : reports) {
@@ -72,6 +67,8 @@ public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
     private Tenant setupTenant(String t) throws Exception {
         Tenant tenant = tenantService.findByTenantId(t);
         if (tenant != null) {
+            setupSecurityContext(tenant);
+            targetMarketEntityMgr.deleteAll();
             tenantService.discardTenant(tenant);
         }
         tenant = new Tenant();

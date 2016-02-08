@@ -18,16 +18,9 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     }
 
     @Override
-    public Boolean resetTables(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/reset", customerSpace);
-        return post("reset", url, null, Boolean.class);
-
-    }
-
-    @Override
-    public Boolean createTable(String customerSpace, String tableName, Table table) {
+    public Boolean createImportTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
-        return post("createTable", url, table, Boolean.class);
+        return post("createImportTable", url, table, Boolean.class);
     }
 
     @Override
@@ -59,6 +52,18 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     public void deleteImportTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
         delete("deleteImportTable", url);
+    }
+
+    @Override
+    public void createTable(String customerSpace, String tableName, Table table) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        post("createTable", url, table, Boolean.class);
+    }
+
+    @Override
+    public Boolean resetTables(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/reset", customerSpace);
+        return post("reset", url, null, Boolean.class);
     }
 
     @Override

@@ -9,13 +9,12 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 /**
  * A base report generation step for generating a single report.
  */
-public abstract class BaseReportStep<T extends MicroserviceStepConfiguration> extends BaseWorkflowStep<T> {
+public abstract class BaseReportStep<T extends BaseReportStepConfiguration> extends BaseWorkflowStep<T> {
     protected abstract String getName();
 
     protected abstract ReportPurpose getPurpose();
@@ -30,7 +29,7 @@ public abstract class BaseReportStep<T extends MicroserviceStepConfiguration> ex
         registerReportInContext(report);
 
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
-                .getMicroServiceHostPort());
+                .getInternalResourceHostPort());
         proxy.registerReport(report, getConfiguration().getCustomerSpace().toString());
     }
 

@@ -69,7 +69,8 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
         setupUsers(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
-        installServiceFlow();
+        installServiceFlow("le-serviceflows-prospectdiscovery", //
+                "com.latticeengines.prospectdiscovery.Initializer");
         createTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -117,11 +118,11 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
 
         String scoreResultTableHdfsDir = "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/ScoreResult";
         createTable("ScoreResult", scoreResultTableHdfsDir, scoreResultTableFiles, true);
-        
+
         String matchedTableHdfsDir = "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/MatchedTable";
         createTable("MatchedTable", matchedTableHdfsDir, matchedTableFiles, true);
     }
-    
+
     private void createTable(String tableName, String path, File[] files, boolean register) throws Exception {
         HdfsUtils.mkdir(yarnConfiguration, path);
         for (File file : files) {
@@ -130,14 +131,14 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
             }
             HdfsUtils.copyLocalToHdfs(yarnConfiguration, file.getAbsolutePath(), path);
         }
-        
+
         if (register) {
             Table table = MetadataConverter.getTable(yarnConfiguration, path);
             table.setName(tableName);
             Map<String, String> urlVariables = new HashMap<>();
             urlVariables.put("customerSpace", DEMO_CUSTOMERSPACE.toString());
             urlVariables.put("tableName", table.getName());
-            
+
             restTemplate.postForObject(microServiceHostPort
                     + "/metadata/customerspaces/{customerSpace}/tables/{tableName}", table, String.class,
                     urlVariables);

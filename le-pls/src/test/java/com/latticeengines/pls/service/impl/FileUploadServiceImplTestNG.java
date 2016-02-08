@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.workflow.SourceFileSchema;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -41,7 +41,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("file1.csv", SourceFileSchema.SalesforceAccount, fileInputStream);
+        fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
 
         String contents = HdfsUtils
                 .getHdfsFileContents(

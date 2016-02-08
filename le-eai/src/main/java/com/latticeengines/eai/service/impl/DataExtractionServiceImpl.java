@@ -82,7 +82,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         List<Table> tableMetadata = eaiMetadataService.getImportTables(customerSpace);
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
-            context.setProperty(ImportProperty.TARGETPATH, targetPath + "/" + sourceImportConfig.getSourceType().getName());
+            context.setProperty(ImportProperty.TARGETPATH, targetPath + "/"
+                    + sourceImportConfig.getSourceType().getName());
 
             Map<String, String> props = sourceImportConfig.getProperties();
             log.info("Moving properties from import config to import context.");
@@ -107,6 +108,10 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     @VisibleForTesting
     void setFilters(SourceImportConfiguration sourceImportConfig, String customerSpace) {
         List<Table> tableMetadata = sourceImportConfig.getTables();
+        Map<String, String> filters = sourceImportConfig.getFilters();
+        if (filters.isEmpty()) {
+            return;
+        }
         for (Table table : tableMetadata) {
             LastModifiedKey lmk = eaiMetadataService.getLastModifiedKey(customerSpace, table);
             StringBuilder filter = new StringBuilder();

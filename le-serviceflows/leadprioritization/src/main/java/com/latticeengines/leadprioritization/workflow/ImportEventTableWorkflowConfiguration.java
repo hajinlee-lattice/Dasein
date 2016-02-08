@@ -3,14 +3,14 @@ package com.latticeengines.leadprioritization.workflow;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
+import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
-public class ImportEventTableConfiguration extends WorkflowConfiguration {
+public class ImportEventTableWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
-        private ImportEventTableConfiguration configuration = new ImportEventTableConfiguration();
+        private ImportEventTableWorkflowConfiguration configuration = new ImportEventTableWorkflowConfiguration();
         private ImportStepConfiguration importData = new ImportStepConfiguration();
-        private MicroserviceStepConfiguration registerReport = new MicroserviceStepConfiguration();
+        private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
@@ -29,12 +29,18 @@ public class ImportEventTableConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder sourceFileType(SourceType sourceType) {
+        public Builder sourceType(SourceType sourceType) {
             importData.setSourceType(sourceType);
             return this;
         }
 
-        public ImportEventTableConfiguration build() {
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            importData.setInternalResourceHostPort(internalResourceHostPort);
+            registerReport.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
+        public ImportEventTableWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
             return configuration;

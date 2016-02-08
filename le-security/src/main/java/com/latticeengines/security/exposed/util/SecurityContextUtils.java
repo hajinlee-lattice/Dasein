@@ -19,4 +19,9 @@ public class SecurityContextUtils {
             return null;
         }
     }
+
+    public static void setTenant(Tenant tenant) {
+        Authentication auth = new TenantToken(tenant);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
 }

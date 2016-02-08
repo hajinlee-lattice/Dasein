@@ -12,7 +12,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("importEventTableWorkflow")
-public class ImportEventTableWorkflow extends AbstractWorkflow<ImportEventTableConfiguration> {
+public class ImportEventTableWorkflow extends AbstractWorkflow<ImportEventTableWorkflowConfiguration> {
     @Autowired
     private ImportData importData;
 

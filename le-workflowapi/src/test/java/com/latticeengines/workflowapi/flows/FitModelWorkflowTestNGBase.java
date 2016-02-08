@@ -11,36 +11,22 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
-import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
@@ -50,27 +36,15 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private CrmCredentialZKService crmCredentialZKService;
-
-    @Value("${workflowapi.test.sfdc.user.name}")
-    private String salesforceUserName;
-
-    @Value("${workflowapi.test.sfdc.passwd.encrypted}")
-    private String salesforcePasswd;
-
-    @Value("${workflowapi.test.sfdc.securitytoken}")
-    private String salesforceSecurityToken;
-
     private TargetMarket defaultTargetMarket;
 
     protected void setupForFitModel() throws Exception {
-        restTemplate.setInterceptors(getAddMagicAuthHeaders());
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
         setupUsers(DEMO_CUSTOMERSPACE);
         setupCamille(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
-        installServiceFlow();
+        installServiceFlow("le-serviceflows-prospectdiscovery", //
+                "com.latticeengines.prospectdiscovery.Initializer");
         createImportTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
         copyStopListToHdfs();
 
@@ -113,41 +87,12 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .uniqueKeyColumn("LatticeAccountID") //
                 .directoryToScore("/tmp/AccountMaster") //
                 .registerScoredTable(true) //
-                .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                .attributes(
+                        Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange",
+                                "BusinessEmployeesRange" })) //
                 .build();
 
         return workflowConfig;
-    }
-
-    private void setupCamille(CustomerSpace customerSpace) throws Exception {
-        BatonService baton = new BatonServiceImpl();
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
-        spaceInfo.properties = new CustomerSpaceProperties();
-        spaceInfo.properties.displayName = "";
-        spaceInfo.properties.description = "";
-        spaceInfo.featureFlags = "";
-        baton.createTenant(customerSpace.getContractId(), //
-                customerSpace.getTenantId(), //
-                customerSpace.getSpaceId(), //
-                spaceInfo);
-        crmCredentialZKService.removeCredentials("sfdc", customerSpace.toString(), true);
-        CrmCredential crmCredential = new CrmCredential();
-        crmCredential.setUserName(salesforceUserName);
-        crmCredential.setPassword(salesforcePasswd);
-        crmCredential.setSecurityToken(salesforceSecurityToken);
-        crmCredential.setUrl("https://login.salesforce.com");
-        crmCredentialZKService.writeToZooKeeper("sfdc", customerSpace.toString(), true, crmCredential, true);
-
-        Camille camille = CamilleEnvironment.getCamille();
-        Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
-                CustomerSpace.parse(customerSpace.toString()), "Eai");
-        Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig") //
-                .append("HttpClient").append("ConnectTimeout");
-        camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-        Path importTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
-                .append("ImportTimeout");
-        camille.create(importTimeoutDocPath, new Document("3600000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
     private void createImportTablesInMetadataStore(CustomerSpace customerSpace, Tenant tenant) throws IOException {

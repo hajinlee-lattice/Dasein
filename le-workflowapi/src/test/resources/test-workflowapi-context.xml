@@ -13,5 +13,6 @@
 
     <import resource="classpath:workflowapi-context.xml"/>
     <import resource="classpath:workflowapi-properties-context.xml"/>
-
+    <import resource="classpath:serviceflows-prospectdiscovery-workflow-context.xml"/>
+    <import resource="classpath:serviceflows-leadprioritization-workflow-context.xml"/>
 </beans>

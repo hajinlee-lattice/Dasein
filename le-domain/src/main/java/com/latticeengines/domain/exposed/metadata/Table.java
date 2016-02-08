@@ -53,7 +53,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "METADATA_TABLE", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TYPE" }) })
 @Filters({ //
-        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"), //
         @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
@@ -70,6 +70,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private LastModifiedKey lastModifiedKey;
     private TableType tableType;
     private Integer tableTypeCode;
+    private String interpretation;
 
     public Table() {
         setTableTypeCode(TableType.DATATABLE.getCode());
@@ -135,6 +136,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("attributes")
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    /**
+     * Uses SchemaInterpretation enumeration
+     */
+    @Column(name = "INTERPRETATION")
+    @JsonProperty("interpretation")
+    public String getInterpretation() {
+        return interpretation;
+    }
+
+    @JsonProperty("interpretation")
+    public void setInterpretation(String interpretation) {
+        this.interpretation = interpretation;
     }
 
     @JsonIgnore
@@ -282,6 +297,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             AttributeMetadata attrMetadatum = new AttributeMetadata();
 
             attrMetadatum.setColumnName(attr.getName());
+            attrMetadatum.setDataType(attr.getPhysicalDataType());
             attrMetadatum.setDisplayName(attr.getDisplayName());
             attrMetadatum.setApprovedUsage(attr.getApprovedUsage());
             attrMetadatum.setDescription(attr.getDescription());
@@ -300,7 +316,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         metadata.setAttributeMetadata(attrMetadata);
         return metadata;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Transient
     public List<TransformDefinition> getRealTimeTransformationMetadata() {
@@ -368,12 +384,12 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
                 return null;
             }
             StringBuilder extractParentDir = new StringBuilder("");
-            if (tokens[tokens.length-1].endsWith(".avro")) {
+            if (tokens[tokens.length - 1].endsWith(".avro")) {
                 for (int i = 0; i < tokens.length - 1; i++) {
                     extractParentDir.append("/").append(tokens[i]);
                 }
             }
-            
+
             parentDir = extractParentDir.toString();
         }
 

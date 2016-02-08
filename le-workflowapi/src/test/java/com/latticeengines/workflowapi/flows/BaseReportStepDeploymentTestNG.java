@@ -50,7 +50,8 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
     private TestReportWorkflowConfiguration generateConfiguration() {
         TestReportWorkflowConfiguration.Builder builder = new TestReportWorkflowConfiguration.Builder();
         return builder //
-                .microServiceHostPort(internalResourceHostPort) //
+                .internalResourceHostPort(internalResourceHostPort) //
+                .microServiceHostPort(microServiceHostPort)
                 .customer(WFAPITEST_CUSTOMERSPACE) //
                 .build();
     }

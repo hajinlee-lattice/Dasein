@@ -66,7 +66,7 @@ public class SourceImportConfiguration {
     }
 
     public void setProperty(String propertyName, String propertyValue) {
-        filters.put(propertyName, propertyValue);
+        properties.put(propertyName, propertyValue);
     }
 
     @JsonProperty("source_cred_type")

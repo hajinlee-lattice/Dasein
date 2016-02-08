@@ -105,7 +105,7 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
             DateTime date = new DateTime();
             table.getLastModifiedKey().setLastModifiedTimestamp(date.minusYears(2).getMillis());
 
-            metadataProxy.createTable(space.toString(), table.getName(), table);
+            metadataProxy.createImportTable(space.toString(), table.getName(), table);
         }
     }
 

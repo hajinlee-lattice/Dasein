@@ -8,6 +8,7 @@
             <list>
                 <value>file:${DATAFLOW_PROPDIR}/dataflow.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR}/dataplatform.properties</value>
+                <value>file:${PROXY_PROPDIR}/proxy.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false"/>

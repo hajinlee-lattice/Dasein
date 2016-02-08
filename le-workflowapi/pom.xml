@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-workflowapi</artifactId>
@@ -18,8 +18,11 @@
         <le.security.version>2.0.20-SNAPSHOT</le.security.version>
         <le.serviceflows.core.version>2.0.20-SNAPSHOT</le.serviceflows.core.version>
         <le.serviceflows.prospectdiscovery.version>2.0.20-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
+        <le.serviceflows.leadprioritization.version>2.0.20-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.workflow.version>2.0.20-SNAPSHOT</le.workflow.version>
         <le.network.version>2.0.20-SNAPSHOT</le.network.version>
+        <le.metadata.version>2.0.20-SNAPSHOT</le.metadata.version>
+        <le.proxy.version>2.0.20-SNAPSHOT</le.proxy.version>
     </properties>
 
     <parent>
@@ -39,6 +42,13 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-prospectdiscovery</artifactId>
             <version>${le.serviceflows.prospectdiscovery.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-leadprioritization</artifactId>
+            <version>${le.serviceflows.leadprioritization.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -205,6 +215,18 @@
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-metadata</artifactId>
+            <version>${le.metadata.version}</version>
+            <classifier>intf</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
         </dependency>
     </dependencies>
 </project>

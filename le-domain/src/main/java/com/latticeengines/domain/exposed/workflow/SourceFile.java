@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -25,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -67,7 +66,7 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     private String path;
 
     @JsonProperty("errors_path")
-    @Column(name = "ERRORS_PATH", nullable = true)
+    @Column(name = "ERRORS_PATH")
     private String errorsPath;
 
     @JsonProperty("created")
@@ -78,10 +77,13 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "UPDATED")
     private Date updated;
 
-    @JsonProperty("table")
-    @OneToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-    @JoinColumn(name = "TABLE_ID", nullable = true)
-    private Table table;
+    @JsonProperty("table_name")
+    @Column(name = "TABLE_NAME")
+    private String tableName;
+
+    @JsonProperty("schema_interpretation")
+    @Column(name = "SCHEMA_INTERPRETATION")
+    private SchemaInterpretation schemaInterpretation;
 
     @Override
     public String getName() {
@@ -154,12 +156,12 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.updated = updated;
     }
 
-    public Table getTable() {
-        return table;
+    public String getTableName() {
+        return tableName;
     }
 
-    public void setTable(Table table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public String getDescription() {
@@ -176,5 +178,13 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
 
     public void setErrorsPath(String errorsPath) {
         this.errorsPath = errorsPath;
+    }
+
+    public SchemaInterpretation getSchemaInterpretation() {
+        return schemaInterpretation;
+    }
+
+    public void setSchemaInterpretation(SchemaInterpretation schemaInterpretation) {
+        this.schemaInterpretation = schemaInterpretation;
     }
 }

@@ -8,7 +8,7 @@ public interface MetadataInterface {
 
     Boolean resetTables(String customerSpace);
 
-    Boolean createTable(String customerSpace, String tableName, Table table);
+    Boolean createImportTable(String customerSpace, String tableName, Table table);
 
     List<String> getImportTableNames(String customerSpace);
 
@@ -19,4 +19,6 @@ public interface MetadataInterface {
     List<String> getTableNames(String customerSpace);
 
     Table getTable(String customerSpace, String tableName);
+
+    void createTable(String customerSpace, String tableName, Table table);
 }

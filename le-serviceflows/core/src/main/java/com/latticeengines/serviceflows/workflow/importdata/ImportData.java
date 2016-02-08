@@ -1,7 +1,10 @@
 package com.latticeengines.serviceflows.workflow.importdata;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -11,8 +14,9 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
@@ -20,6 +24,9 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ImportData.class);
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
@@ -44,8 +51,11 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
         if (sourceImportConfig.getSourceType() == SourceType.FILE) {
             SourceFile sourceFile = retrieveSourceFile();
-            importConfig.setProperty(ImportProperty.HDFSFILE, sourceFile.getPath());
-            importConfig.setProperty(ImportProperty.METADATA, JsonUtils.serialize(retrieveMetadata(sourceFile)));
+            Table metadata = retrieveMetadata(sourceFile);
+            sourceImportConfig.setProperty(ImportProperty.HDFSFILE, sourceFile.getPath());
+            sourceImportConfig.setProperty(ImportProperty.METADATA, //
+                    JsonUtils.serialize(metadata.getModelingMetadata()));
+            sourceImportConfig.setTables(Arrays.asList(metadata));
         }
         return importConfig;
     }
@@ -54,15 +64,18 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         CustomerSpace space = getConfiguration().getCustomerSpace();
 
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy( //
-                getConfiguration().getMicroServiceHostPort());
+                getConfiguration().getInternalResourceHostPort());
         return proxy.findSourceFileByName(getConfiguration().getSourceFileName(), space.toString());
     }
 
-    private ModelingMetadata retrieveMetadata(SourceFile sourceFile) {
-        if (sourceFile.getTable() == null) {
+    private Table retrieveMetadata(SourceFile sourceFile) {
+        if (sourceFile.getTableName() == null) {
             throw new RuntimeException(String.format("No metadata has been associated with source file %s",
                     sourceFile.getName()));
         }
-        return sourceFile.getTable().getModelingMetadata();
+
+        Table table = metadataProxy.getImportTable(getConfiguration().getCustomerSpace().toString(),
+                sourceFile.getTableName());
+        return table;
     }
 }
