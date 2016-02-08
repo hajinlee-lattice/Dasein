@@ -24,6 +24,7 @@
         <module>le-swlib</module>
         <module>le-eai</module>
         <module>le-workflowapi</module>
+        <module>le-propdata</module>
         <module>le-dellebi</module>
     </modules>
 </project>
