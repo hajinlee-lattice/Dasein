@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -83,6 +85,7 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
 
     @JsonProperty("schema_interpretation")
     @Column(name = "SCHEMA_INTERPRETATION")
+    @Enumerated(EnumType.STRING)
     private SchemaInterpretation schemaInterpretation;
 
     @Override
