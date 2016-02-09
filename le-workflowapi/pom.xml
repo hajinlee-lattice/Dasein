@@ -42,13 +42,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-prospectdiscovery</artifactId>
             <version>${le.serviceflows.prospectdiscovery.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-leadprioritization</artifactId>
             <version>${le.serviceflows.leadprioritization.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
