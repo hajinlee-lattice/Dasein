@@ -1,21 +1,17 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflowConfiguration;
 
-public class ImportEventTableWorkflowDeploymentTestNG extends ImportEventTableWorkflowTestNGBase {
+public class ImportEventTableWorkflowInContainerDeploymentTestNG extends ImportEventTableWorkflowTestNGBase {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportEventTableWorkflowDeploymentTestNG.class);
 
@@ -29,13 +25,13 @@ public class ImportEventTableWorkflowDeploymentTestNG extends ImportEventTableWo
         setupForImportWorkflow();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflowAccount() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.SalesforceAccount);
         run(sourceFile);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflowLead() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.SalesforceLead);
         run(sourceFile);
@@ -43,10 +39,10 @@ public class ImportEventTableWorkflowDeploymentTestNG extends ImportEventTableWo
 
     private void run(SourceFile sourceFile) throws Exception {
         ImportEventTableWorkflowConfiguration workflowConfig = generateWorkflowConfig(sourceFile);
-        WorkflowExecutionId workflowId = workflowService.start(importEventTableWorkflow.name(), workflowConfig);
 
-        log.info("Workflow id = " + workflowId.getId());
-        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
-        assertEquals(status, BatchStatus.COMPLETED);
+        workflowConfig.setContainerConfiguration(importEventTableWorkflow.name(), DEMO_CUSTOMERSPACE,
+                "ImportEventTableWorkflowTest_submitWorkflow");
+
+        submitWorkflowAndAssertSuccessfulCompletion(workflowConfig);
     }
 }

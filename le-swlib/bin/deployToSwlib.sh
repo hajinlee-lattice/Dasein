@@ -12,7 +12,7 @@ fi
 echo "$@"
 
 # If -v exists in the arguments then use that version. If not, then use the version of the library
-if [[$@ =~ .*\-v.*]]
+if [[ $@ =~ .*\-v.* ]]
     then
         java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool "$@"
     else

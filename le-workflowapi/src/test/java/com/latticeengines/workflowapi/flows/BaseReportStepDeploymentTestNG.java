@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflowapi.flows.testflows.testreport.TestRegisterReport;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflow;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -38,7 +37,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
         Job job = workflowService.getJob(workflowId);
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
-        assertEquals(report.getName(), new TestRegisterReport().getName());
+        assertEquals(report.getName(), "Test");
 
         Report retrieved = reportService.getReportByName(report.getName());
         assertEquals(report.getJson().toString(), retrieved.getJson().toString());
@@ -51,7 +50,8 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiFunctionalTestNGB
         TestReportWorkflowConfiguration.Builder builder = new TestReportWorkflowConfiguration.Builder();
         return builder //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .microServiceHostPort(microServiceHostPort)
+                .microServiceHostPort(microServiceHostPort) //
+                .reportName("Test") //
                 .customer(WFAPITEST_CUSTOMERSPACE) //
                 .build();
     }

@@ -10,12 +10,6 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfigurati
 
 @Component("registerReport")
 public class TestRegisterReport extends BaseReportStep<BaseReportStepConfiguration> {
-
-    @Override
-    public String getName() {
-        return "Test";
-    }
-
     @Override
     protected ReportPurpose getPurpose() {
         return ReportPurpose.EMPLOYEE_ATTR_LEVEL_SUMMARY;

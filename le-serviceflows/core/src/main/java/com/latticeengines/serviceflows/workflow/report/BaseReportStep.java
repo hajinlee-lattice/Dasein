@@ -15,7 +15,9 @@ import com.latticeengines.workflow.exposed.WorkflowContextConstants;
  * A base report generation step for generating a single report.
  */
 public abstract class BaseReportStep<T extends BaseReportStepConfiguration> extends BaseWorkflowStep<T> {
-    protected abstract String getName();
+    private String getName() {
+        return getConfiguration().getReportName();
+    }
 
     protected abstract ReportPurpose getPurpose();
 

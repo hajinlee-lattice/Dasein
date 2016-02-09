@@ -11,6 +11,22 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class SchemaRepository {
+    private static SchemaRepository instance;
+
+    public static SchemaRepository instance() {
+        if (instance == null) {
+            synchronized (SchemaRepository.class) {
+                if (instance == null) {
+                    instance = new SchemaRepository();
+                }
+            }
+        }
+        return instance;
+    }
+
+    private SchemaRepository() {
+    }
+
     public Table getSchema(SchemaInterpretation schema) {
         switch (schema) {
         case SalesforceAccount:
@@ -52,7 +68,7 @@ public class SchemaRepository {
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false));
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false));
-        table.addAttribute(createAttribute("Won", Schema.Type.BOOLEAN, false));
+        table.addAttribute(createAttribute("IsWon", Schema.Type.BOOLEAN, false));
         table.addAttribute(createAttribute("Company", Schema.Type.STRING));
         table.addAttribute(createAttribute("City", Schema.Type.STRING));
         table.addAttribute(createAttribute("State", Schema.Type.STRING));
@@ -65,7 +81,7 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("Title", Schema.Type.STRING));
         table.addAttribute(createAttribute("LeadSource", Schema.Type.STRING));
         table.addAttribute(createAttribute("Closed", Schema.Type.BOOLEAN));
-        table.addAttribute(createAttribute("Stage", Schema.Type.STRING));
+        table.addAttribute(createAttribute("StageName", Schema.Type.STRING));
         table.addAttribute(createAttribute("Phone", Schema.Type.STRING));
         table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE));
         table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT));

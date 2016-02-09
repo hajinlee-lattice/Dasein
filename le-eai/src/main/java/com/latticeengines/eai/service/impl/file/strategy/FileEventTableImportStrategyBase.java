@@ -13,6 +13,8 @@ import java.util.UUID;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,8 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @Component("fileEventTableImportStrategyBase")
 public class FileEventTableImportStrategyBase extends ImportStrategy {
 
+    private static final Log log = LogFactory.getLog(FileEventTableImportStrategyBase.class);
+
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
 
@@ -52,6 +56,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
+        log.info(String.format("Importing data for table %s with filter %s", table, filter));
         DbCreds creds = getCreds(ctx);
         Properties props = getProperties(ctx, table);
 
@@ -115,6 +120,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Override
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
+        log.info(String.format("Importing metadata for table %s with filter %s", table, filter));
         String metadataFile = ctx.getProperty(ImportProperty.METADATAFILE, String.class);
         String contents;
 

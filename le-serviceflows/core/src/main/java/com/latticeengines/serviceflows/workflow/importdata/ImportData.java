@@ -74,8 +74,11 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
                     sourceFile.getName()));
         }
 
-        Table table = metadataProxy.getImportTable(getConfiguration().getCustomerSpace().toString(),
+        Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 sourceFile.getTableName());
+        if (table == null) {
+            throw new RuntimeException(String.format("No metadata available for source file %s", sourceFile.getName()));
+        }
         return table;
     }
 }

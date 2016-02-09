@@ -40,6 +40,11 @@ public class ImportEventTableWorkflowConfiguration extends WorkflowConfiguration
             return this;
         }
 
+        public Builder reportName(String reportName) {
+            registerReport.setReportName(reportName);
+            return this;
+        }
+
         public ImportEventTableWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);

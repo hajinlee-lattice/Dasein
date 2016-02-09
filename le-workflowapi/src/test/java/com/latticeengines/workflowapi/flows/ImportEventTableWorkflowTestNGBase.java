@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflowConfiguration;
-import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
+import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -73,10 +75,17 @@ public class ImportEventTableWorkflowTestNGBase extends WorkflowApiFunctionalTes
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
             MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
-                    sourceFile.getSchemaInterpretation(), null);
+                    sourceFile.getSchemaInterpretation(), null, yarnConfiguration);
+            strategy.calculate();
+            if (!strategy.isMetadataFullyDefined()) {
+                List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
+                strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
+                        sourceFile.getSchemaInterpretation(), unknown, yarnConfiguration);
+                strategy.calculate();
+            }
             Table table = strategy.getMetadata();
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
-            metadataProxy.createImportTable(tenant.getId(), table.getName(), table);
+            metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
             sourceFileService.create(sourceFile);
 
@@ -91,6 +100,7 @@ public class ImportEventTableWorkflowTestNGBase extends WorkflowApiFunctionalTes
                 .customer(DEMO_CUSTOMERSPACE) //
                 .microServiceHostPort(microServiceHostPort) //
                 .internalResourceHostPort(internalResourceHostPort) //
+                .reportName("Report_" + sourceFile.getName()) //
                 .sourceType(SourceType.FILE) //
                 .sourceFileName(sourceFile.getName()).build();
         return workflowConfig;

@@ -20,8 +20,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
-import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
+import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -70,6 +70,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     public List<ColumnTypeMapping> getUnknownColumns(String sourceFileName) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         MetadataResolutionStrategy strategy = getResolutionStrategy(sourceFile, null);
+        strategy.calculate();
         return strategy.getUnknownColumns();
     }
 
@@ -77,6 +78,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     public void resolveMetadata(String sourceFileName, List<ColumnTypeMapping> additionalColumns) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         MetadataResolutionStrategy strategy = getResolutionStrategy(sourceFile, additionalColumns);
+        strategy.calculate();
         if (!strategy.isMetadataFullyDefined()) {
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
@@ -89,7 +91,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         Table table = strategy.getMetadata();
         table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
-        metadataProxy.createImportTable(customerSpace, table.getName(), table);
+        metadataProxy.createTable(customerSpace, table.getName(), table);
         sourceFileService.update(sourceFile);
     }
 
@@ -104,6 +106,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     private MetadataResolutionStrategy getResolutionStrategy(SourceFile sourceFile,
             List<ColumnTypeMapping> additionalColumns) {
         return new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(), //
-                sourceFile.getSchemaInterpretation(), additionalColumns);
+                sourceFile.getSchemaInterpretation(), additionalColumns, yarnConfiguration);
     }
 }

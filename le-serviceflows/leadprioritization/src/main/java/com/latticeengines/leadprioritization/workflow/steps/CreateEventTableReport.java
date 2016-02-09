@@ -1,20 +1,15 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
+import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
-@Component("createEventTableReport ")
+@Component("createEventTableReport")
 public class CreateEventTableReport extends BaseReportStep<BaseReportStepConfiguration> {
-    @Override
-    protected String getName() {
-        return ReportPurpose.EVENT_TABLE_IMPORT_SUMMARY.name();
-    }
-
     @Override
     protected ReportPurpose getPurpose() {
         return ReportPurpose.EVENT_TABLE_IMPORT_SUMMARY;

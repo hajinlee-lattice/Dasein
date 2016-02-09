@@ -1,9 +1,11 @@
 package com.latticeengines.eai.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -28,6 +30,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -79,11 +82,11 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         context.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
         context.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
         String targetPath = createTargetPath(customerSpace);
-        List<Table> tableMetadata = eaiMetadataService.getImportTables(customerSpace);
+        List<Table> tableMetadata = new ArrayList<>();
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             context.setProperty(ImportProperty.TARGETPATH, targetPath + "/"
-                    + sourceImportConfig.getSourceType().getName());
+                    + sourceImportConfig.getSourceType().getName() + "/" + UUID.randomUUID());
 
             Map<String, String> props = sourceImportConfig.getProperties();
             log.info("Moving properties from import config to import context.");
@@ -92,13 +95,21 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 context.setProperty(entry.getKey(), entry.getValue());
             }
 
-            sourceImportConfig.setTables(tableMetadata);
+            if (sourceImportConfig.getSourceType() != SourceType.FILE) {
+                List<Table> importTables = eaiMetadataService.getImportTables( //
+                        importConfig.getCustomerSpace().toString());
+                sourceImportConfig.setTables(importTables);
+            }
+
             ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-            tableMetadata = importService.importMetadata(sourceImportConfig, context);
+            List<Table> metadata = importService.importMetadata(sourceImportConfig, context);
+            tableMetadata.addAll(metadata);
 
-            sourceImportConfig.setTables(tableMetadata);
+            if (sourceImportConfig.getSourceType() != SourceType.FILE) {
+                sourceImportConfig.setTables(metadata);
+            }
+
             setFilters(sourceImportConfig, customerSpace);
-
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
 
         }
