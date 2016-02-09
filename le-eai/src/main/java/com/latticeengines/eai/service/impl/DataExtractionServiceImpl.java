@@ -119,7 +119,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     void setFilters(SourceImportConfiguration sourceImportConfig, String customerSpace) {
         List<Table> tableMetadata = sourceImportConfig.getTables();
         Map<String, String> filters = sourceImportConfig.getFilters();
-        if (filters.isEmpty()) {
+        if (filters.isEmpty() && sourceImportConfig.getSourceType() == SourceType.FILE) {
             return;
         }
         for (Table table : tableMetadata) {
