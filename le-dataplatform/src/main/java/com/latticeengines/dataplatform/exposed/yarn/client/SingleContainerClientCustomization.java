@@ -100,6 +100,10 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/proxy/proxy.properties", versionManager.getCurrentVersion()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersion(), module), //
                 false));
         if (softwareLibraryService != null) {
