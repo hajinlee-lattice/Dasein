@@ -41,18 +41,19 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
         MatchContext matchContext = new MatchContext();
         matchContext.setInternalResults(recordList);
 
-        MatchOutput output = new MatchOutput();
-        output.setOutputFields(Arrays.asList("Col1", "Col2", "Col3", "Col4"));
-        MatchStatistics statistics = new MatchStatistics();
-        output.setStatistics(statistics);
-        matchContext.setOutput(output);
-        matchContext.setColumnPriorityMap(prepareColumnPriorityMap());
-
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
         input.setMatchEngine(MatchInput.MatchEngine.RealTime);
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         matchContext.setInput(input);
+
+        MatchOutput output = new MatchOutput();
+        output.setOutputFields(Arrays.asList("Col1", "Col2", "Col3", "Col4"));
+        MatchStatistics statistics = new MatchStatistics();
+        output.setStatistics(statistics);
+        output.setSubmittedBy(input.getTenant());
+        matchContext.setOutput(output);
+        matchContext.setColumnPriorityMap(prepareColumnPriorityMap());
 
         matchContext = realTimeMatchExecutor.mergeResults(matchContext);
         verifyMergedRecords(matchContext.getInternalResults());
