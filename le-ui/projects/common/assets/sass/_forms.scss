@@ -745,6 +745,33 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
 
 
 
+/* Custom File Upload
+===================================================================== */
+.file-upload {
+  label {
+    display: block;
+  }
+  & > .form-control {
+    width: 60%;
+    height: 43px;
+    display: inline-block;
+  }
+  div {
+      position: relative;
+      overflow: hidden;
+      input.upload {
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin: 0;
+        padding: 0;
+        font-size: 20px;
+        cursor: pointer;
+        opacity: 0;
+        filter: alpha(opacity=0);
+    }
+  }
+}
 
 
 

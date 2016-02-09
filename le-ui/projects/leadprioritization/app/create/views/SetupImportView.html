@@ -1,1 +1,172 @@
-Setup
+<section>
+
+  <div class="container row">
+    <div class="six columns offset-three">
+
+      <h3>Import Data</h3>
+
+    </div>
+  </div>
+
+  <div data-ng-controller="CredentialsCtrl" class="container row">
+    <div class="columns six offset-three">
+
+        <!-- Error messaging
+        <div data-ng-show="showError">
+            <div class="alert alert-danger">
+                <span><i class="fa fa-exclamation-circle fa-inverse"></i>Error messaging goes here</span>
+                <a class="close" href="#" data-ng-click="closeErrorClick($event)"><i class="fa fa-times fa-inverse"></i></a>
+            </div>
+        </div>
+        -->
+
+        <div class="tabs">
+          <div class="tab">
+            <input type="radio" id="salesforce-tab" name="credentials-tabs" checked>
+            <label for="salesforce-tab">Salesforce</label>
+            <div class="content">
+
+
+              <!-- Loading Icon -->
+              <!--
+              <div data-ng-show="loading">
+                  <div class="loader"> </div>
+                  <h2 class="text-center">Loading</h2>
+              </div>
+              -->
+
+              <div data-ng-show="!loading">
+
+                <div class="toggle-check">
+                  <label for="prod-sand-check">Production</label>
+                  <input type="checkbox" name="prod-sand-check" id="prod-sand-check" class="toggle-switch" />
+                  <label for="prod-sand-check">Sandbox</label>
+                </div>
+
+                <div id="formProduction" class="switch-tab open">
+                    <!-- SFDC Production -->
+                    <div class="form" data-ng-show="!crmProductionSaveInProgress">
+
+                        <!-- Error messaging -->
+                        <!--
+                        <div data-ng-show="crmProductionError != ''" class="alert alert-danger">
+                            {{crmProductionError}}
+                        </div>
+                        -->
+
+
+                        <div class="form-group">
+                            <!-- From PD, thought you might want to reuse
+                            <label>{{ResourceUtility.getString('SYSTEM_SETUP_USER_NAME')}} <span>&ast;</span></label>
+                            -->
+                            <label>Username <span>&ast;</span></label>
+                            <input type="text" class="form-control" data-ng-readonly="crmProductionComplete" data-ng-class="crmProductionError != '' && crmProductionCredentials.UserName == null ? 'error' : ''" data-ng-model="crmProductionCredentials.UserName"  autocomplete="off" />
+                        </div>
+                        <div class="form-group">
+                            <!-- From PD, thought you might want to reuse
+                            <label>{{ResourceUtility.getString('SYSTEM_SETUP_PASSWORD')}} <span>&ast;</span></label>
+                            -->
+                            <label>Password <span>&ast;</span></label>
+                            <input type="password" class="form-control" data-ng-readonly="crmProductionComplete" data-ng-class="crmProductionError != '' && crmProductionCredentials.Password == null ? 'error' : ''" data-ng-model="crmProductionCredentials.Password" autocomplete="off" />
+                        </div>
+                        <div class="form-group">
+                            <!-- From PD, thought you might want to reuse
+                            <label>{{ResourceUtility.getString('SYSTEM_SETUP_SECURITY_TOKEN')}} <span>&ast;</span></label>
+                            -->
+                            <label>Security Token <span>&ast;</span></label>
+                            <span class="security-token-tooltip">
+                                <helper-mark help="{{ResourceUtility.getString('SYSTEM_SETUP_SECURITY_TOKEN_TOOLTIP')}}"></helper-mark>
+                            </span>
+                            <input type="password" class="form-control" data-ng-readonly="crmProductionComplete" data-ng-class="crmProductionError != '' && crmProductionCredentials.SecurityToken == null ? 'error' : ''" data-ng-model="crmProductionCredentials.SecurityToken" autocomplete="off" />
+                        </div>
+                        <div class="form-actions">
+
+                          <!-- From PD
+                          <button class="button orange-button js-crm-production-save-button" type="submit" data-ng-show="!crmProductionComplete" data-ng-click="crmProductionSaveClicked()">{{ResourceUtility.getString('BUTTON_SAVE_AND_VERIFY')}}</button>
+                          <button class="button white-button js-crm-production-edit-button" type="submit" data-ng-show="crmProductionComplete" data-ng-click="crmProductionComplete = false">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
+                          -->
+
+                          <button class="button orange-button js-crm-production-save-button" type="submit" data-ng-show="!crmProductionComplete" data-ng-click="crmProductionSaveClicked()">Save and Verify</button>
+                          <button class="button white-button js-crm-production-edit-button" type="submit" data-ng-show="crmProductionComplete" data-ng-click="crmProductionComplete = false">Edit</button>
+
+                        </div>
+                    </div>
+
+
+                    <!-- Commenting out the loader for the time being because it's annoying -->
+                    <!-- <div class="loader" data-ng-show="crmProductionSaveInProgress"></div> -->
+                </div><!-- End #formProduction -->    
+
+                <div id="formSandbox" class="switch-tab">
+                  <!-- SFDC Sandbox -->
+                  <div class="form" data-ng-show="!crmSandboxSaveInProgress">
+                      <div data-ng-show="crmSandboxError != ''" class="alert alert-danger">
+                          {{crmSandboxError}}
+                      </div>
+                      <div class="form-group">
+                          <label>{{ResourceUtility.getString('SYSTEM_SETUP_USER_NAME')}} <span>&ast;</span></label>
+                          <input type="text" class="form-control" data-ng-readonly="crmSandboxComplete" data-ng-class="crmSandboxError != '' && crmSandboxCredentials.UserName == null ? 'error' : ''" data-ng-model="crmSandboxCredentials.UserName" autocomplete="off" />
+                      </div>
+                      <div class="form-group">
+                          <label>{{ResourceUtility.getString('SYSTEM_SETUP_PASSWORD')}} <span>&ast;</span></label>
+                          <input type="password" class="form-control" data-ng-readonly="crmSandboxComplete" data-ng-class="crmSandboxError != '' && crmSandboxCredentials.Password == null ? 'error' : ''" data-ng-model="crmSandboxCredentials.Password" autocomplete="off" />
+                      </div>
+                      <div class="form-group">
+                          <label>{{ResourceUtility.getString('SYSTEM_SETUP_SECURITY_TOKEN')}} <span>&ast;</span></label>
+                          <span class="security-token-tooltip">
+                              <helper-mark help="{{ResourceUtility.getString('SYSTEM_SETUP_SECURITY_TOKEN_TOOLTIP')}}"></helper-mark>
+                          </span>
+                          <input type="password" class="form-control" data-ng-readonly="crmSandboxComplete" data-ng-class="crmSandboxError != '' && crmSandboxCredentials.SecurityToken == null ? 'error' : ''" data-ng-model="crmSandboxCredentials.SecurityToken" autocomplete="off" />
+                      </div>
+                      <div class="form-actions">
+                        <button class="button orange-button js-crm-sandbox-save-button" type="submit" data-ng-show="!crmSandboxComplete" data-ng-click="crmSandboxSaveClicked()">{{ResourceUtility.getString('BUTTON_SAVE_AND_VERIFY')}}</button>
+                        <button class="button white-button js-crm-sandbox-edit-button" type="submit" data-ng-show="crmSandboxComplete" data-ng-click="crmSandboxComplete = false">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
+                      </div>
+                  </div>
+
+
+                  <!-- Commenting out the loader for the time being because it's annoying -->
+                  <!--<div class="loader" data-ng-show="crmSandboxSaveInProgress"></div> -->
+                </div><!-- End #formSandbox -->
+
+              </div><!-- End data-ng-show -->
+            </div><!-- End .content -->
+          </div><!-- End .tab -->
+
+          <div class="tab">
+            <input type="radio" id="loadfile-tab" name="credentials-tabs">
+            <label for="loadfile-tab">Loadfile</label>
+            <div class="content">
+
+              <div class="form-group">
+                <a href="#">Expected columns</a>  
+              </div>
+              <div class="form-group file-upload">
+                <label for="loadfile">File Path</label>
+                <input id="uploadFile" class="form-control" placeholder="Choose File" disabled="disabled" />
+                <div class="fileUpload button blue-button">
+                    <span>Upload</span>
+                    <input id="uploadBtn" type="file" class="upload" />
+                </div>
+              </div>
+              <!-- Script needed to get filepath and place it into the input field -->
+              <script>
+                document.getElementById("uploadBtn").onchange = function () {
+                    document.getElementById("uploadFile").value = this.value.substring(12);
+                };
+              </script>
+
+
+
+
+              <div class="form-actions">
+                <button type="button" class="button orange-button">Import</button>
+              </div>
+                 
+            </div><!-- End .content -->
+          </div><!-- End .tab -->
+
+      </div><!-- End .tabs -->
+    </div><!-- End .six.columns -->
+  </div><!-- End .container.row -->
+</section>
