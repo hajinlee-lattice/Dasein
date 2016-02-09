@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -86,7 +85,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
         for (SourceImportConfiguration sourceImportConfig : sourceImportConfigs) {
             log.info("Importing for " + sourceImportConfig.getSourceType());
             context.setProperty(ImportProperty.TARGETPATH, targetPath + "/"
-                    + sourceImportConfig.getSourceType().getName() + "/" + UUID.randomUUID());
+                    + sourceImportConfig.getSourceType().getName());
 
             Map<String, String> props = sourceImportConfig.getProperties();
             log.info("Moving properties from import config to import context.");

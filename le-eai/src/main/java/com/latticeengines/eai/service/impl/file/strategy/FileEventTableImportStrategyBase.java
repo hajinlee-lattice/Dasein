@@ -57,6 +57,10 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Override
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
+
+        ctx.setProperty(ImportProperty.TARGETPATH, //
+                ctx.getProperty(ImportProperty.TARGETPATH, String.class) + "/" + UUID.randomUUID());
+
         DbCreds creds = getCreds(ctx);
         Properties props = getProperties(ctx, table);
 
@@ -121,6 +125,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     @Override
     public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         log.info(String.format("Importing metadata for table %s with filter %s", table, filter));
+
         String metadataFile = ctx.getProperty(ImportProperty.METADATAFILE, String.class);
         String contents;
 
