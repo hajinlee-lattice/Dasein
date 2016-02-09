@@ -85,31 +85,38 @@ public class MatchStepAspect {
     }
 
     private Integer getRequestedRows(Object[] args) {
-        for (Object arg : args) {
-            if (arg instanceof MatchContext) {
-                MatchContext matchContext = (MatchContext) arg;
-                return matchContext.getOutput().getStatistics().getRowsRequested();
-            } else if (arg instanceof MatchInput) {
-                MatchInput matchInput = (MatchInput) arg;
-                return matchInput.getData().size();
-            } else if (arg instanceof MatchOutput) {
-                MatchOutput matchOutput = (MatchOutput) arg;
-                return matchOutput.getStatistics().getRowsRequested();
+        try {
+            for (Object arg : args) {
+                if (arg instanceof MatchContext) {
+                    MatchContext matchContext = (MatchContext) arg;
+                    return matchContext.getOutput().getStatistics().getRowsRequested();
+                } else if (arg instanceof MatchInput) {
+                    MatchInput matchInput = (MatchInput) arg;
+                    return matchInput.getData().size();
+                } else if (arg instanceof MatchOutput) {
+                    MatchOutput matchOutput = (MatchOutput) arg;
+                    return matchOutput.getStatistics().getRowsRequested();
+                }
             }
+        } catch (Exception e) {
+            log.warn("Failed to parse number of input from arguments", e);
         }
-
         return null;
     }
 
     private String getTenantId(Object[] args) {
-        for (Object arg : args) {
-            if (arg instanceof MatchContext) {
-                MatchContext matchContext = (MatchContext) arg;
-                return matchContext.getOutput().getSubmittedBy().getId();
-            } else if (arg instanceof MatchInput) {
-                MatchInput matchInput = (MatchInput) arg;
-                return matchInput.getTenant().getId();
+        try {
+            for (Object arg : args) {
+                if (arg instanceof MatchInput) {
+                    MatchInput matchInput = (MatchInput) arg;
+                    return matchInput.getTenant().getId();
+                } else if (arg instanceof MatchContext) {
+                    MatchContext matchContext = (MatchContext) arg;
+                    return matchContext.getOutput().getSubmittedBy().getId();
+                }
             }
+        } catch (Exception e) {
+            log.warn("Failed to parse TenantId from arguments", e);
         }
         return null;
     }
