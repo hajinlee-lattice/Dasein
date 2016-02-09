@@ -26,7 +26,6 @@
                 <value>file:dataplatform.properties</value>
                 <value>file:db.properties</value>
                 <value>file:security.properties</value>
-                <value>file:proxy.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
