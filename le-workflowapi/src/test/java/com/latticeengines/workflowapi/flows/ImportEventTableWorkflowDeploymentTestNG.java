@@ -16,7 +16,7 @@ import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflowConfiguration;
 
 public class ImportEventTableWorkflowDeploymentTestNG extends ImportEventTableWorkflowTestNGBase {
-    @SuppressWarnings("unused")
+
     private static final Log log = LogFactory.getLog(ImportEventTableWorkflowDeploymentTestNG.class);
 
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization/csvfiles";
