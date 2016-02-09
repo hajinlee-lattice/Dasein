@@ -53,11 +53,106 @@ angular
             url: '/',
             redirectTo: 'models'
         })
+        .state('models', {
+            url: '/models',
+            views: {
+                "summary@": {
+                    templateUrl: './app/navigation/summary/ModelListView.html'
+                },
+                "main@": {
+                    templateUrl: './app/models/views/ModelListView.html'
+                }   
+            }
+        })
+        .state('models.import', {
+            url: '/import',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/CreateView.html'
+                },
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'First, setup the model.';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/create/views/SetupImportView.html'
+                }   
+            }
+        })
+        .state('models.fields', {
+            url: '/fields',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/CreateView.html'
+                },
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Success! The training file has been imported';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/create/views/CustomFieldsView.html'
+                }   
+            }
+        })
+        .state('models.validate', {
+            url: '/validate',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/CreateView.html'
+                },
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Summary of Imported Data';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/create/views/ValidateImportView.html'
+                }   
+            }
+        })
+        .state('models.create', {
+            url: '/create',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/CreateView.html'
+                },
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'The model is ready to be created.';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/create/views/CreateModelView.html'
+                }   
+            }
+        })
         .state('model', {
             url: '/model/:modelId',
             resolve: ModelDependencies,
             views: {
                 "navigation@": {
+                    controller: function($scope, Model) {
+                        console.log('MODEL', Model);
+                        $scope.name = Model.ModelDetails.Name;
+                    },
                     templateUrl: './app/navigation/sidebar/ModelView.html'
                 },
                 "summary@": {
@@ -87,22 +182,71 @@ angular
                 }
             }
         })
-        .state('model.activate', {
+        .state('activate', {
             url: '/activate',
             views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'ACTIVATE_MODEL_TITLE';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
                 "main@": {
                     templateUrl: './app/models/views/ActivateModelView.html'
                 }
             }
         })
-        .state('models', {
-            url: '/models',
+        .state('users', {
+            url: '/users',
             views: {
                 "summary@": {
-                    templateUrl: './app/navigation/summary/ModelListView.html'
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'USER_MANAGEMENT_TITLE';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/models/views/ModelListView.html'
+                    templateUrl: './app/userManagement/views/UserManagementView.html'
+                }   
+            }
+        })
+        .state('setup', {
+            url: '/setup',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SYSTEM_SETUP_TITLE';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/config/views/ManageCredentialsView.html'
+                }   
+            }
+        })
+        .state('history', {
+            url: '/history',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'MODEL_LIST_CREATION_HISTORY';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/models/views/ModelCreationHistoryView.html'
                 }   
             }
         });

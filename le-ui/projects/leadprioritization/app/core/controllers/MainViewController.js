@@ -140,7 +140,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
                 createDeploymentWizardView();
             } else {
                 //createModelListView();
-                $state.go('models');
+                //$state.go('models');
             }
         });
     }

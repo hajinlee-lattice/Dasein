@@ -1,15 +1,16 @@
 <div data-ng-controller="ModelListController">
 
     <section id="main-content" class="wrapper">
-        <!--
+        
         <div data-ng-show="loading">
             <div class="loader"> </div>
             <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
         </div>
-        -->
+
         <div class="no-models text-center"  data-ng-show="showNoModels">
             <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
         </div>
+
         <div class="row" data-ng-hide="showNoModels || loading">
             <div class="col-md-12">
                 <div class="pull-left">Displaying 4 of 4</div>
@@ -18,6 +19,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="row" data-ng-hide="showNoModels || loading">
             <section class="panel panel-clear">
                 <div class="panel-body">
