@@ -16,4 +16,4 @@ export DATAFLOW_PROPDIR=$WSHOME/le-dataflow/conf/env/dev
 export CAMILLE_PROPDIR=$WSHOME/le-camille/conf/env/dev
 export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
 
-mvn -Pfunctional -Dtest=$1 integration-test -DargLine=""
+mvn -Pfunctional -Dtest=$1 verify -DargLine=""
