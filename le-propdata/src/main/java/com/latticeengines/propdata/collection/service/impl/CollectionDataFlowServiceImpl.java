@@ -162,7 +162,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("JOBPROPERTIES", getJobProperties());
+        ctx.setProperty("JOBPROPERTIES", new Properties());
         ctx.setProperty("FLOWNAME", "countFlow");
         dataTransformationService.executeNamedTransformation(ctx, "countFlow");
 
@@ -196,14 +196,8 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         ctx.setProperty("QUEUE", LedpQueueAssigner.getPropDataQueueNameForSubmission());
         ctx.setProperty("CHECKPOINT", false);
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
-        ctx.setProperty("JOBPROPERTIES", getJobProperties());
+        ctx.setProperty("JOBPROPERTIES", new Properties());
         return ctx;
-    }
-
-    protected Properties getJobProperties() {
-        Properties jobProperties = new Properties();
-        jobProperties.put("mapred.mapper.new-api", "false");
-        return jobProperties;
     }
 
 }

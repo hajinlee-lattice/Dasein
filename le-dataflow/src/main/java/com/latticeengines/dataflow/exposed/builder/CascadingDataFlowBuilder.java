@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
 
 import cascading.avro.AvroScheme;
@@ -1380,13 +1381,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         Tap<?, ?, ?> sink = createSink(lastOperator, targetPath);
 
-        Properties properties = new Properties();
-        if (jobProperties != null) {
-            properties.putAll(jobProperties);
-        }
-        AppProps.setApplicationJarClass(properties, getClass());
-        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
-
         FlowDef flowDef = FlowDef.flowDef().setName(flowName + "_" + DateTime.now().getMillis()) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByIdentifier(lastOperator), sink);
@@ -1396,6 +1390,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        Properties properties = new Properties();
 
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
@@ -1407,10 +1402,26 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             for (String file : files) {
                 flowDef.addToClassPath(file);
             }
+            String cascadingEngine = dataFlowCtx.getProperty("ENGINE", String.class);
+            if ("TEZ".equalsIgnoreCase(cascadingEngine)) {
+                TezConfiguration localConfig = new TezConfiguration();
+                String prefix = localConfig.get("tez.cluster.additional.classpath.prefix");
+                log.info("load tez cluster classpath prefix from local config: " + prefix);
+
+                prefix = dataFlowLibDir + "*:" + (prefix == null ? "" : prefix);
+                properties.put("tez.cluster.additional.classpath.prefix", prefix);
+                log.info("prepend " + dataFlowLibDir + "* to tez cluster classpath.");
+            }
+
         } catch (Exception e) {
             log.warn("Exception retrieving library jars for this flow.", e);
         }
 
+        if (jobProperties != null) {
+            properties.putAll(jobProperties);
+        }
+        AppProps.setApplicationJarClass(properties, getClass());
+        FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
         Flow<?> flow = flowConnector.connect(flowDef);
 
         flow.writeDOT("dot/wcr.dot");
