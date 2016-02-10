@@ -48,7 +48,9 @@ public class AlexaRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBa
     }
 
     @Override
-    protected Integer getExpectedRows() { return 284; }
+    protected Integer getExpectedRows() {
+        return 284;
+    }
 
     @Override
     protected void verifyResultTable(RefreshProgress progress) {
@@ -70,6 +72,6 @@ public class AlexaRefreshServiceImplTestNG extends MostRecentServiceImplTestNGBa
         Assert.assertEquals(row.get(source.getDomainField()), domain);
         Assert.assertEquals(row.get("CA_PageViews"), 1.5);
         Assert.assertEquals(row.get("CA_Rank"), 43206);
-        Assert.assertEquals(row.get("CA_Users"), 2);
+        Assert.assertEquals(row.get("CA_Users"), 2.0);
     }
 }
