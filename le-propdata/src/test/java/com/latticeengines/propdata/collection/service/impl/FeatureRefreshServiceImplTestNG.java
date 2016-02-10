@@ -39,4 +39,6 @@ public class FeatureRefreshServiceImplTestNG extends MostRecentServiceImplTestNG
         return archiveServiceImplDeploymentTestNG;
     }
 
+    @Override
+    protected Integer getExpectedRows() { return 82; }
 }

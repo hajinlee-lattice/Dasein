@@ -10,10 +10,10 @@ import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntit
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
+import com.latticeengines.propdata.core.source.impl.AlexaMostRecent;
 
-@Component("orbIntelligenceRefreshService")
-public class OrbIntelligenceRefreshService extends AbstractMostRecentService implements RefreshService {
+@Component("alexaRefreshService")
+public class AlexaRefreshService extends AbstractMostRecentService implements RefreshService {
 
     Log log = LogFactory.getLog(this.getClass());
 
@@ -24,7 +24,7 @@ public class OrbIntelligenceRefreshService extends AbstractMostRecentService imp
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Autowired
-    OrbIntelligenceMostRecent source;
+    AlexaMostRecent source;
 
     @Override
     public MostRecentSource getSource() {
@@ -43,7 +43,6 @@ public class OrbIntelligenceRefreshService extends AbstractMostRecentService imp
 
     @Override
     protected void executeDataFlow(RefreshProgress progress) {
-        collectionDataFlowService.executeMergeRawData(source, progress.getRootOperationUID(),
-                "orbIntelligenceRefreshFlow");
+        collectionDataFlowService.executeMergeRawData(source, progress.getRootOperationUID(), "alexaRefreshFlow");
     }
 }

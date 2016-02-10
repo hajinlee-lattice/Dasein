@@ -112,6 +112,7 @@ class MatchPlanner {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
+        record.setInput(inputRecord);
 
         int domainPos = keyPositionMap.containsKey(MatchKey.Domain) ? keyPositionMap.get(MatchKey.Domain) : -1;
 

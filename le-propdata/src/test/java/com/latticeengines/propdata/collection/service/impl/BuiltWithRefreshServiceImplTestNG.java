@@ -39,4 +39,6 @@ public class BuiltWithRefreshServiceImplTestNG extends MostRecentServiceImplTest
         return archiveServiceImplDeploymentTestNG;
     }
 
+    @Override
+    protected Integer getExpectedRows() { return 223; }
 }

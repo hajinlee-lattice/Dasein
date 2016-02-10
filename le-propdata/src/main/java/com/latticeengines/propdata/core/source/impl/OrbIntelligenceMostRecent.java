@@ -11,7 +11,7 @@ import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 
-@Component
+@Component("orbIntelligenceMostRecent")
 public class OrbIntelligenceMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = -7492688545254273100L;

@@ -37,6 +37,8 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
 
     abstract CollectionArchiveServiceImplTestNGBase getBaseSourceTestBean();
 
+    abstract Integer getExpectedRows();
+
     @BeforeMethod(groups = "collection")
     public void setUp() throws Exception {
         source = getSource();
@@ -78,7 +80,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         progress = exportToDB(progress);
         finish(progress);
 
-        verifyResultTable();
+        verifyResultTable(progress);
         cleanupProgressTables();
     }
 
@@ -131,11 +133,13 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         getBaseSourceTestBean().cleanupProgressTables();
     }
 
-    protected void verifyResultTable() {
-        if (source instanceof HasSqlPresence) {
+    protected void verifyResultTable(RefreshProgress progress) {
+        if (getSource() instanceof HasSqlPresence) {
             verifyUniqueness();
             verifyMostRecent();
         }
+
+        verifyNumberOfRows(progress);
     }
 
     protected void verifyUniqueness() {
@@ -156,4 +160,16 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
         int outdatedRows = jdbcTemplateCollectionDB.queryForObject(sql, Integer.class);
         Assert.assertEquals(outdatedRows, 0, "There are " + outdatedRows + " rows outdated.");
     }
+
+    protected void verifyNumberOfRows(RefreshProgress progress) {
+        Assert.assertEquals(progress.getRowsGeneratedInHdfs(), (int) getExpectedRows());
+        if (getSource() instanceof HasSqlPresence) {
+            int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
+                    "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
+            Assert.assertTrue(rowsInPivotedTable > 0, String.format("Only %d results in %s.", rowsInPivotedTable,
+                    ((HasSqlPresence) source).getSqlTableName()));
+            Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGeneratedInHdfs());
+        }
+    }
+
 }

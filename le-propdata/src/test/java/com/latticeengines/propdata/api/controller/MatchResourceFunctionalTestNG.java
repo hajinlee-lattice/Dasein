@@ -23,6 +23,7 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
     }
 
 }

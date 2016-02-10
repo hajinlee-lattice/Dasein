@@ -58,17 +58,38 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Autowired
-    private OrbIntelligenceMostRecent orbIntelligenceMostRecent;
-
-    @Autowired
     private HGData hgData;
 
     @Value("${propdata.collection.cascading.platform:tez}")
     protected String cascadingPlatform;
 
     @Override
-    public void executeMergeRawData(MostRecentSource source, String uid) {
-        executeMergeRawData(source, uid, "mostRecentFlow");
+    public void executeMergeRawData(MostRecentSource source, String uid, String dataFlowBean) {
+        if (StringUtils.isEmpty(dataFlowBean)) {
+            dataFlowBean = "mostRecentFlow";
+        }
+
+        String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
+
+        CollectedSource baseSource = source.getBaseSources()[0];
+        Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
+        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
+
+        Map<String, Table> sources = new HashMap<>();
+        Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);
+        sources.put(baseSource.getSourceName(), table);
+
+        MostRecentDataFlowParameters parameters = new MostRecentDataFlowParameters();
+        parameters.setDomainField(((DomainBased) source).getDomainField());
+        parameters.setTimestampField(source.getTimestampField());
+        parameters.setGroupbyFields(source.getPrimaryKey());
+        parameters.setSourceTable(baseSource.getSourceName());
+        parameters.setEarliest(earliestToArchive);
+
+        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
+        DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
+        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
+        dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
 
     @Override
@@ -100,11 +121,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
             flowBean = "pivotFlow";
         }
         dataTransformationService.executeNamedTransformation(ctx, flowBean);
-    }
-
-    @Override
-    public void executeRefreshOrbIntelligence(String uid) {
-        executeMergeRawData(orbIntelligenceMostRecent, uid, "orbIntelligenceRefreshFlow");
     }
 
     @Override
@@ -159,30 +175,6 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         }
 
         return (Long) records.get(0).get(CountFlow.COUNT);
-    }
-
-    public void executeMergeRawData(MostRecentSource source, String uid, String dataFlowBean) {
-        String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
-
-        CollectedSource baseSource = source.getBaseSources()[0];
-        Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
-        Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
-
-        Map<String, Table> sources = new HashMap<>();
-        Table table = hdfsSourceEntityMgr.getCollectedTableSince(baseSource, earliestToArchive);
-        sources.put(baseSource.getSourceName(), table);
-
-        MostRecentDataFlowParameters parameters = new MostRecentDataFlowParameters();
-        parameters.setDomainField(((DomainBased) source).getDomainField());
-        parameters.setTimestampField(source.getTimestampField());
-        parameters.setGroupbyFields(source.getPrimaryKey());
-        parameters.setSourceTable(baseSource.getSourceName());
-        parameters.setEarliest(earliestToArchive);
-
-        String outputDir = hdfsPathBuilder.constructWorkFlowDir(source, flowName).append(uid).toString();
-        DataFlowContext ctx = dataFlowContext(source, sources, parameters, outputDir);
-        ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
-        dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }
 
     private DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,

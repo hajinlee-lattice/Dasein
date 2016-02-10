@@ -9,16 +9,16 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectedArchiveService;
 import com.latticeengines.propdata.core.source.CollectedSource;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligence;
+import com.latticeengines.propdata.core.source.impl.Alexa;
 
 @Component
-public class OrbIntelligenceArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
+public class AlexaArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
 
     @Autowired
-    OrbIntelligenceArchiveService collectedArchiveService;
+    AlexaArchiveService collectedArchiveService;
 
     @Autowired
-    OrbIntelligence source;
+    Alexa source;
 
     @Autowired
     ArchiveProgressEntityMgr progressEntityMgr;
@@ -36,13 +36,13 @@ public class OrbIntelligenceArchiveServiceImplTestNG extends CollectionArchiveSe
     Date[] getDates() {
         Date[] dates = new Date[3];
 
-        calendar.set(2015, Calendar.AUGUST, 31);
+        calendar.set(2015, Calendar.SEPTEMBER, 1);
         dates[0] = calendar.getTime();
 
         calendar.set(2015, Calendar.OCTOBER, 1);
         dates[1] = calendar.getTime();
 
-        calendar.set(2015, Calendar.NOVEMBER, 2);
+        calendar.set(2015, Calendar.NOVEMBER, 1);
         dates[2] = calendar.getTime();
 
         return dates;

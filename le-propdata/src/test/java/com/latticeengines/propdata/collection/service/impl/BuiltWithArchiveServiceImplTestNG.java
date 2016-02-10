@@ -28,7 +28,9 @@ public class BuiltWithArchiveServiceImplTestNG extends CollectionArchiveServiceI
     }
 
     @Override
-    ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
+    ArchiveProgressEntityMgr getProgressEntityMgr() {
+        return progressEntityMgr;
+    }
 
     @Override
     Date[] getDates() {
@@ -47,6 +49,8 @@ public class BuiltWithArchiveServiceImplTestNG extends CollectionArchiveServiceI
     }
 
     @Override
-    CollectedSource getSource() { return source; }
+    CollectedSource getSource() {
+        return source;
+    }
 
 }

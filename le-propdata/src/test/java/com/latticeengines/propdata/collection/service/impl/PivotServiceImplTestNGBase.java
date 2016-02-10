@@ -134,13 +134,13 @@ abstract public class PivotServiceImplTestNGBase extends PropDataCollectionFunct
     }
 
     protected void verifyResultTable(RefreshProgress progress) {
-        int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
-                "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
-        Assert.assertTrue(rowsInPivotedTable > 0, String.format("Only %d results in %s.", rowsInPivotedTable,
-                ((HasSqlPresence) source).getSqlTableName()));
-        Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGeneratedInHdfs());
-        if (getExpectedRows() != null) {
-            Assert.assertEquals(rowsInPivotedTable, (int) getExpectedRows());
+        Assert.assertEquals(progress.getRowsGeneratedInHdfs(), (int) getExpectedRows());
+        if (getSource() instanceof HasSqlPresence) {
+            int rowsInPivotedTable = jdbcTemplateCollectionDB.queryForObject(
+                    "SELECT COUNT(*) FROM [" + ((HasSqlPresence) source).getSqlTableName() + "]", Integer.class);
+            Assert.assertTrue(rowsInPivotedTable > 0, String.format("Only %d results in %s.", rowsInPivotedTable,
+                    ((HasSqlPresence) source).getSqlTableName()));
+            Assert.assertEquals(rowsInPivotedTable, (int) progress.getRowsGeneratedInHdfs());
         }
     }
 }

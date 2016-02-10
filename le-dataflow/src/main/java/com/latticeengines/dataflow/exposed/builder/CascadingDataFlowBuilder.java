@@ -269,6 +269,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addFunction(identifier, function, fieldsToApply, targetField), builder);
         }
 
+        public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
+                FieldList outputFields) {
+            return new Node(builder.addFunction(identifier, function, fieldsToApply, targetFields, outputFields),
+                    builder);
+        }
+
         public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
             return new Node(builder.addMD5(identifier, fieldsToApply, targetFieldName), builder);
         }
@@ -1087,6 +1093,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField,
             FieldList outputFields) {
+        return addFunction(prior, function, fieldsToApply, Collections.singletonList(targetField), outputFields);
+    }
+
+    private String addFunction(String prior, Function<?> function, FieldList fieldsToApply,
+            List<FieldMetadata> targetFields, FieldList outputFields) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
@@ -1096,7 +1107,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
 
-        if (fieldsToApply.getFields().length == 1 && fieldsToApply.getFields()[0].equals(targetField.getFieldName())) {
+        if (fieldsToApply.getFields().length == 1 && targetFields.size() == 1
+                && fieldsToApply.getFields()[0].equals(targetFields.get(0).getFieldName())) {
             fieldStrategy = Fields.REPLACE;
         }
 
@@ -1106,19 +1118,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
 
         if (fieldStrategy != Fields.REPLACE) {
-            fm.add(targetField);
+            for (FieldMetadata targetField : targetFields) {
+                fm.add(targetField);
+            }
             fm = retainFields(outputFields, fm);
         } else {
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
-            FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
-
-            if (targetFm.getJavaType() != targetField.getJavaType()) {
-                FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
-                        targetField.getFieldName(), null);
-                nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
-                for (int i = 0; i < fm.size(); i++) {
-                    if (fm.get(i).getFieldName().equals(replaceFm.getFieldName())) {
-                        fm.set(i, replaceFm);
+            for (FieldMetadata targetField : targetFields) {
+                FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
+                if (targetFm.getJavaType() != targetField.getJavaType()) {
+                    FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
+                            targetField.getFieldName(), null);
+                    nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
+                    for (int i = 0; i < fm.size(); i++) {
+                        if (fm.get(i).getFieldName().equals(replaceFm.getFieldName())) {
+                            fm.set(i, replaceFm);
+                        }
                     }
                 }
             }

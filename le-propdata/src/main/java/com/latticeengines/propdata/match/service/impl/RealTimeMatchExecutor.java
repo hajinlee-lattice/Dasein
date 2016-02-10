@@ -182,6 +182,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
             }
 
             if (returnUnmatched || matchedAnyColumn) {
+                record.setResultsInSource(null);
                 outputRecords.add(record);
             }
         }

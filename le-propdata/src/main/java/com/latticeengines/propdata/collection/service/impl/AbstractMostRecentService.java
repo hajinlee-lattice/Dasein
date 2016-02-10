@@ -16,7 +16,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
 
     @Override
     protected void executeDataFlow(RefreshProgress progress) {
-        collectionDataFlowService.executeMergeRawData(getSource(), progress.getRootOperationUID());
+        collectionDataFlowService.executeMergeRawData(getSource(), progress.getRootOperationUID(), null);
     }
 
     @Override
