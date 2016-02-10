@@ -1,37 +1,65 @@
 #!/bin/bash
 
-function runCommand()
+function processErrors
 {
-  $1
-  if [ $? -eq 0 ]
+  if [ $? -ne 0 ]
   then
-      exit 0
+      echo "Error!"
+      cat /tmp/errors.txt
+      exit 1
   fi
 }
 
+# Expand aliases
 echo "Expanding aliases."
 shopt -s expand_aliases
+source $WSHOME/le-dev/aliases
 echo "Sourcing aliases file"
-source $HOME/.bash_aliases
+
+# Top-level compile
 echo "Changing dir into workspace"
-cd $HOME/workspace/ledp
+cd $WSHOME
 echo "Top-level compile"
-runCommand "mvn -Pgenerate -DskipTests clean install"
+mvn -Pgenerate -DskipTests clean install 2> /tmp/errors.txt
+processErrors
+
+echo "Deploying framework properties to local Hadoop"
+fwkdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying dataplatform to local Hadoop"
-runCommand "cd le-dataplatform && dpdpl"
+cd $WSHOME/le-dataplatform && dpdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying eai to local Hadoop"
-runCommand "cd ../le-eai && eaidpl"
+cd $WSHOME/le-eai && eaidpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying dataflow to local Hadoop"
-runCommand "cd ../le-dataflow && dfdpl"
+cd $WSHOME/le-dataflow && dfdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying dataflowapi to local Hadoop"
-runCommand "cd ../le-dataflowapi && dfapidpl"
+cd $WSHOME/le-dataflowapi && dfapidpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying workflow to local Hadoop"
-runCommand "cd ../le-workflow && wfdpl"
+cd $WSHOME/le-workflow && wfdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying workflowapi to local Hadoop"
-runCommand "cd ../le-workflowapi && wfapidpl"
+cd $WSHOME/le-workflowapi && wfapidpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying swlib to local Hadoop"
-runCommand "cd ../le-swlib && swlibdpl"
+cd $WSHOME/le-swlib && swlibdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying microservices to local jetty"
-runCommand "cd ../le-microservice && microservicedpl"
+cd $WSHOME/le-microservice && microservicedplnobld 2> /tmp/errors.txt
+processErrors
+
+echo "Success!!!"
+
 
 

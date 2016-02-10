@@ -1,21 +1,38 @@
+alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -Pgenerate -DskipTests clean install'
 alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
-alias dpbld='mvn -DskipTests -Pgenerate clean dependency:copy-dependencies deploy'
-alias sfdpl='mvn install && mvn -DskipTests clean install'
-alias dfdpl='mvn -Pshaded-yarn -DskipTests clean package && hdfs dfs -rm -r -f /app/dataflow/* && hdfs dfs -mkdir -p /app/dataflow/lib && hdfs dfs -put target/le-dataflow*shaded.jar /app/dataflow/lib && hdfs dfs -put conf/env/dev/dataflow.properties /app/dataflow'
-alias wfdpl='mvn -Pshaded-yarn -DskipTests clean package && hdfs dfs -rm -r -f /app/workflow/* && hdfs dfs -mkdir -p /app/workflow/lib && hdfs dfs -put target/le-workflow*shaded.jar /app/workflow/lib && hdfs dfs -put conf/env/dev/workflow.properties /app/workflow'
-alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/dataflowapi && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
-alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
+
+alias dfdplnobld='hadoop fs -rm -r -f /app/dataflow/* && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
+alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld'
+
+alias wfdplnobld='hadoop fs -rm -r -f /app/workflow/* && hadoop fs -mkdir -p /app/workflow/lib && hadoop fs -put $WSHOME/le-workflow/target/le-workflow*shaded.jar /app/workflow/lib && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
+alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
+
+alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
+alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
+
+alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
+alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld'
+
 alias pddpl='mvn -Pshaded-yarn -DskipTests clean deploy && hadoop fs -copyFromLocal target/le-propdata*shaded.jar /app/dataflow/lib'
-alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && hadoop fs -rmr /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal conf/env/dev/dataplatform.properties /app/dataplatform && bin/deployPythonHDFS.sh'
-alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && hadoop fs -rmr /app/eai || true && hadoop fs -rmr /app/db || true && hadoop fs -rmr /app/security || true && hadoop fs -mkdir -p /app/eai/lib && hadoop fs -mkdir /app/db || true && hadoop fs -mkdir /app/security && hadoop fs -copyFromLocal target/le-eai*shaded.jar /app/eai/lib && hadoop fs -copyFromLocal conf/env/dev/eai.properties /app/eai && hadoop fs -copyFromLocal ../le-db/conf/env/dev/db.properties /app/db && hadoop fs -copyFromLocal ../le-security/conf/env/dev/security.properties /app/security'
-alias sparkdpl='mvn -Pshaded -DskipTests clean dependency:copy-dependencies package && rm -f /usr/lib/ledp/* && cp target/le-spark* target/dependency/* /usr/lib/ledp'
+
+alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/conf/env/dev/dataplatform.properties /app/dataplatform && $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
+alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
+
+alias fwkdpl='hadoop fs -rm -r /app/proxy || true && hadoop fs -rm -r /app/db || true && hadoop fs -rm -r /app/security || true && hadoop fs -mkdir /app/proxy || true && hadoop fs -mkdir /app/db || true && hadoop fs -mkdir /app/security && hadoop fs -copyFromLocal $WSHOME/le-proxy/conf/env/dev/proxy.properties /app/proxy && hadoop fs -copyFromLocal $WSHOME/le-db/conf/env/dev/db.properties /app/db && hadoop fs -copyFromLocal $WSHOME/le-security/conf/env/dev/security.properties /app/security'
+
+alias eaidplnobld='hadoop fs -rm -r /app/eai || true && hadoop fs -rm -r /app/db || true && hadoop fs -rm -r /app/security || true && hadoop fs -mkdir -p /app/eai/lib && hadoop fs -mkdir /app/db || true && hadoop fs -mkdir /app/security && hadoop fs -copyFromLocal $WSHOME/le-eai/target/le-eai*shaded.jar /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/conf/env/dev/eai.properties /app/eai'
+alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && eaidplnobld'
+
 alias apidpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-api-*-SNAPSHOT.war $JETTY_HOME/webapps'
 alias scoringapidpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scoringapi-*-SNAPSHOT.war $JETTY_HOME/webapps'
 alias secdpl='mvn -Pgenerate -DskipTests -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean install'
 alias scheddpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-scheduler-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
 alias perfdpl='mvn -DskipTests clean dependency:copy-dependencies deploy && cp target/le-perf-*-SNAPSHOT.jar $HADOOP_HOME/share/hadoop/yarn'
-alias microservicedpl='mvn -DskipTests clean package && bash -c "rm -f $JETTY_HOME/webapps/*" && cp eai/target/le-eai-*.war $JETTY_HOME/webapps && cp dataflowapi/target/le-dataflowapi-*.war $JETTY_HOME/webapps && cp metadata/target/le-metadata-*.war $JETTY_HOME/webapps && cp propdata/target/le-propdata-*.war $JETTY_HOME/webapps && cp core/target/le-microservice-*.war $JETTY_HOME/webapps && cp modeling/target/le-modeling-*.war $JETTY_HOME/webapps && cp workflowapi/target/le-workflowapi-*.war $JETTY_HOME/webapps && cp scoring/target/le-scoring-*.war $JETTY_HOME/webapps'
-alias swlibdpl='hdfs dfs -rm -r /app/swlib || true && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-propdata -i com.latticeengines.propdata.Initializer -f ../le-serviceflows/propdata/target/le-serviceflows-propdata-*-shaded.jar'
+
+alias microservicedplnobld='bash -c "rm -f $JETTY_HOME/webapps/*" && cp eai/target/le-eai-*.war $JETTY_HOME/webapps && cp dataflowapi/target/le-dataflowapi-*.war $JETTY_HOME/webapps && cp metadata/target/le-metadata-*.war $JETTY_HOME/webapps && cp propdata/target/le-propdata-*.war $JETTY_HOME/webapps && cp core/target/le-microservice-*.war $JETTY_HOME/webapps && cp modeling/target/le-modeling-*.war $JETTY_HOME/webapps && cp workflowapi/target/le-workflowapi-*.war $JETTY_HOME/webapps && cp scoring/target/le-scoring-*.war $JETTY_HOME/webapps'
+alias microservicedpl='mvn -DskipTests clean package && microservicedplnobld'
+
+alias swlibdpl='hadoop fs -rm -r /app/swlib || true && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-prospectdiscovery -i com.latticeengines.prospectdiscovery.Initializer -f ../le-serviceflows/prospectdiscovery/target/le-serviceflows-prospectdiscovery-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-leadprioritization -i com.latticeengines.leadprioritization.Initializer -f ../le-serviceflows/leadprioritization/target/le-serviceflows-leadprioritization-*-shaded.jar && bin/deployToSwlib.sh -o install -m dataflowapi -g com.latticeengines -a le-serviceflows-propdata -i com.latticeengines.propdata.Initializer -f ../le-serviceflows/propdata/target/le-serviceflows-propdata-*-shaded.jar'
 alias pytests='mvn -Pcc-python clean test'
 alias mdstests='mvn -Pfunctional -DargLine="" -DMETADATA_PROPDIR=conf/env/dev/ -DSECURITY_PROPDIR=../le-security/conf/env/dev -DMONITOR_PROPDIR=../le-monitor/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
 alias dftests='mvn -Pfunctional -DargLine="" -DDATAFLOW_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
@@ -23,14 +40,13 @@ alias dfapitests='mvn -Pfunctional -DargLine="" -DDATAFLOWAPI_PROPDIR=conf/env/d
 alias dfapidptests='mvn -Pdeployment -DargLine="" -DDATAFLOWAPI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev verify'
 alias dptests='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/dev/ -DDB_PROPDIR=../le-db/conf/env/dev clean dependency:copy-dependencies verify'
 alias eaitests='mvn -Pfunctional -DargLine="" -DEAI_PROPDIR=conf/env/dev/ -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -DPROXY_PROPDIR=../le-proxy/conf/env/dev -DSECURITY_PROPDIR=../le-security/conf/env/dev verify'
-alias sparktests='mvn -Pfunctional -DargLine="" -DSPARKDB_PROPDIR=conf/env/dev/ clean dependency:copy-dependencies verify'
 alias schedtests='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/dev/ -Dfunctional.groups=functional.scheduler clean dependency:copy-dependencies verify'
 alias schedtests-dc='mvn -Pfunctional -DargLine="" -DDATAPLATFORM_PROPDIR=conf/env/functional/ -Dfunctional.groups=functional.scheduler clean dependency:copy-dependencies verify'
 alias dptestscc='mvn -Pcc -Pfunctional -DDATAPLATFORM_PROPDIR=conf/env/dev/ clean dependency:copy-dependencies verify'
 alias apitests='mvn -Pfunctional -DargLine="" -DAPI_PROPDIR=conf/env/dev -DDATAPLATFORM_PROPDIR=../le-dataplatform/conf/env/dev/ -DDB_PROPDIR=../le-db/conf/env/dev/ -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.4.0.jar:$HADOOP_HOME/etc/hadoop clean verify'
 alias scoringapitests='mvn -Pfunctional -DargLine="" -DSCORINGAPI_PROPDIR=conf/env/dev -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.4.0.jar:$HADOOP_HOME/etc/hadoop clean verify'
 alias mtrtests='mvn -Pfunctional -DargLine="" -DAPI_PROPDIR=conf/env/dev -DMONITOR_PROPDIR=conf/env/dev clean verify'
-alias admindplytests='mvn -Pdeployment -DargLine= -DGMAIL_APP_PASSWORD=puntdwffotmrruwu -DPLS_PROPDIR=conf/env/dev -DSECURITY_PROPDIR=../le-security/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djava.util.logging.config.file=../le-dev/test-logging.properties verify'
+alias admindpltests='mvn -Pdeployment -DargLine= -DGMAIL_APP_PASSWORD=puntdwffotmrruwu -DPLS_PROPDIR=conf/env/dev -DSECURITY_PROPDIR=../le-security/conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djava.util.logging.config.file=../le-dev/test-logging.properties verify'
 alias admintests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate -DargLine="" -DADMIN_PROPDIR=conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -DSECURITY_PROPDIR=../le-security/conf/env/dev -Djetty.port=8085 clean verify'
 alias sectests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate -DargLine="" -DSECURITY_PROPDIR=conf/env/dev -DDB_PROPDIR=../le-db/conf/env/dev -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks clean verify'
 alias plsdeptests='MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=256m" MODEL_DL_QUARTZ_ENABLED="" mvn -Pdeployment -DargLine="" -DPLS_PROPDIR=conf/env/dev -Djetty.port=8081 clean verify'
