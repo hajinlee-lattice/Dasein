@@ -120,6 +120,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         ScoreDerivation scoreDerivation = JsonUtils.deserialize(FileUtils.readFileToString( //
                 new File(scoreDerivationPath)), ScoreDerivation.class);
         
+        System.out.println("Processing tenant " + tenantName);
         transformAndScore(dataToScorePath, dataComposition.transforms, pmmlXmlPath, scoreDerivation, expectedScoresPath, keyColumn);
     }
     
@@ -147,7 +148,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
             if (recId instanceof Long) {
                 recIdAsDouble = ((Long) recId).doubleValue();
             } else if (recId instanceof Integer) {
-                recIdAsDouble = (double) recId;
+                recIdAsDouble = ((Integer) recId).doubleValue();
             } else {
                 throw new RuntimeException("Key not instance of Long or Integer.");
             }
