@@ -17,8 +17,6 @@ public class AlexaFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -1829655353767648353L;
 
-    private static Log log = LogFactory.getLog(AlexaFunction.class);
-
     public static final String[] OUTPUT_FIELDS = new String[] { "US_PageViews", "US_Rank", "US_Users", "AU_PageViews",
             "AU_Rank", "AU_Users", "GB_PageViews", "GB_Rank", "GB_Users", "CA_PageViews", "CA_Rank", "CA_Users" };
 

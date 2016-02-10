@@ -128,7 +128,7 @@ public class AlexaRefreshFlow extends MostRecentFlow {
         outputMetadata.add(new FieldMetadata(AlexaIndustryBuffer.BUSINESS_INDUSTRY, String.class));
         outputMetadata.add(new FieldMetadata(AlexaIndustryBuffer.BUSINESS_INDUSTRY_2, String.class));
 
-        Buffer industryBuffer = new AlexaIndustryBuffer(DOMAIN, industryMap, subIndustryMap);
+        Buffer<?> industryBuffer = new AlexaIndustryBuffer(DOMAIN, industryMap, subIndustryMap);
         node = node.groupByAndBuffer(new FieldList(DOMAIN), industryBuffer, outputMetadata);
 
         return node.renamePipe("industries");
