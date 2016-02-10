@@ -38,4 +38,5 @@ hdfs dfs -mkdir -p /app/$VERSION/workflow
 hdfs dfs -mkdir -p /app/$VERSION/workflowapi/lib
 hdfs dfs -mkdir -p /app/$VERSION/propdata
 hdfs dfs -mkdir -p /app/$VERSION/propdata/lib
+hdfs dfs -mkdir -p /app/$VERSION/proxy
 hdfs dfs -mkdir -p /datascientist
