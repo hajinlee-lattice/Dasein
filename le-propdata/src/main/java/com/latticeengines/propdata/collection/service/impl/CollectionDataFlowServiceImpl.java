@@ -35,7 +35,6 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.HGData;
-import com.latticeengines.propdata.core.source.impl.OrbIntelligenceMostRecent;
 import com.latticeengines.propdata.dataflow.common.CountFlow;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
