@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,10 +46,11 @@ public class VisiDBTemplateComponent extends LatticeComponent {
     @PostConstruct
     public void setDependenciesAndProducts() {
         dependencies = Collections.singleton(visiDBDLComponent);
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
-        productSet.add(LatticeProduct.LPA3);
-        super.setAssociatedProducts(productSet);
+    }
+
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3));
     }
 
     @Override

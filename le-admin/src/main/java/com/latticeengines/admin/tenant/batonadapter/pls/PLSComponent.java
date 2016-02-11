@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.pls;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,13 +34,9 @@ public class PLSComponent extends LatticeComponent {
     private LatticeComponentInstaller installer = new PLSInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
 
-    @PostConstruct
-    public void setProducts() {
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
-        productSet.add(LatticeProduct.LPA3);
-        productSet.add(LatticeProduct.PD);
-        super.setAssociatedProducts(productSet);
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD));
     }
 
     @Override

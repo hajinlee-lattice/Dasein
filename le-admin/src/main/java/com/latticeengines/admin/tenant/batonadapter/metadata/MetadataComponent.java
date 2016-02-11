@@ -34,9 +34,11 @@ public class MetadataComponent extends LatticeComponent {
     @PostConstruct
     public void setDependencies() {
         dependencies = Collections.singleton(plsComponent);
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.PD);
-        super.setAssociatedProducts(productSet);
+    }
+
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Collections.singleton(LatticeProduct.PD));
     }
 
     @Override

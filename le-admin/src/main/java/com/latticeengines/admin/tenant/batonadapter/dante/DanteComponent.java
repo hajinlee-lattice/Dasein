@@ -1,6 +1,7 @@
 package com.latticeengines.admin.tenant.batonadapter.dante;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,12 +37,9 @@ public class DanteComponent extends LatticeComponent {
     private LatticeComponentInstaller installer = new DanteInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DanteUpgrader();
 
-    @PostConstruct
-    public void setProducts() {
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
-        productSet.add(LatticeProduct.LPA3);
-        super.setAssociatedProducts(productSet);
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3));
     }
 
     @Override

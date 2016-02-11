@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -245,8 +246,12 @@ public class TenantServiceImpl implements TenantService {
             products = spaceConfiguration.getProducts();
         }
 
+        if (products.isEmpty()) {
+            return BootstrapState.createInitialState();
+        }
+
         Set<String> components = serviceService.getRegisteredServices();
-        BootstrapState state = null;
+        BootstrapState state = BootstrapState.createInitialState();
         for (String serviceName : components) {
             LatticeComponent latticeComponent = orchestrator.getComponent(serviceName);
             if (shouldHaveComponent(products, latticeComponent)) {
@@ -271,7 +276,7 @@ public class TenantServiceImpl implements TenantService {
                 }
             }
         }
-        return state;
+        return state == null ? BootstrapState.createInitialState() : state;
     }
 
     @Override
@@ -342,9 +347,9 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private boolean shouldHaveComponent(List<LatticeProduct> products, LatticeComponent latticeComponent) {
-        Set<LatticeProduct> poductsBelongTo = latticeComponent.getAssociatedProducts();
-        poductsBelongTo.retainAll(products);
-        return !poductsBelongTo.isEmpty();
+        Set<LatticeProduct> productsBelongTo = new HashSet<>(latticeComponent.getAssociatedProducts());
+        productsBelongTo.retainAll(products);
+        return !productsBelongTo.isEmpty();
     }
 
     public static class ProductAndExternalAdminInfo {

@@ -1,5 +1,6 @@
 package com.latticeengines.admin.functionalframework;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,13 +31,14 @@ public class TestLatticeComponent extends LatticeComponent {
 
     @PostConstruct
     public void postConstruct() {
-        if (!batonService.getRegisteredServices().contains(getName()))
+        if (!batonService.getRegisteredServices().contains(getName())) {
             register();
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
-        productSet.add(LatticeProduct.LPA3);
-        productSet.add(LatticeProduct.PD);
-        super.setAssociatedProducts(productSet);
+        }
+    }
+
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3, LatticeProduct.PD));
     }
 
     @Override

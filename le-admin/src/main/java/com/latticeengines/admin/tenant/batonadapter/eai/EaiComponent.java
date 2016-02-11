@@ -1,9 +1,8 @@
 package com.latticeengines.admin.tenant.batonadapter.eai;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,11 +23,9 @@ public class EaiComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new EaiUpgrader();
     public static final String componentName = "Eai";
 
-    @PostConstruct
-    public void setProducts() {
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.PD);
-        super.setAssociatedProducts(productSet);
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return new HashSet<>(Collections.singleton(LatticeProduct.PD));
     }
 
     @Override

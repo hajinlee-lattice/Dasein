@@ -61,7 +61,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         deleteAndCreateTwoTenants();
-        setupTestEnvironment();
+        setupTestEnvironment(null, true);
 
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {

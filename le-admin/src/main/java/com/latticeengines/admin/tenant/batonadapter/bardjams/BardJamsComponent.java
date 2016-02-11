@@ -1,7 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.bardjams;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -45,9 +44,11 @@ public class BardJamsComponent extends LatticeComponent {
     @PostConstruct
     public void setDependenciesAndProducts() {
         dependencies = Collections.singleton(visiDBDLComponent);
-        Set<LatticeProduct> productSet = new HashSet<LatticeProduct>();
-        productSet.add(LatticeProduct.LPA);
-        super.setAssociatedProducts(productSet);
+    }
+
+    @Override
+    public Set<LatticeProduct> getAssociatedProducts() {
+        return Collections.singleton(LatticeProduct.LPA);
     }
 
     @Override
@@ -127,7 +128,8 @@ public class BardJamsComponent extends LatticeComponent {
         tenant.setDlTenantName(getDataWithFailover(dir.getChild("DL_TenantName").getDocument().getData(), tenantId));
         dir.getChild("DL_TenantName").getDocument().setData(tenant.getDlTenantName());
 
-        tenant.setDlUrl(getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(), spaceConfig.getDlAddress()));
+        tenant.setDlUrl(
+                getDataWithFailover(dir.getChild("DL_URL").getDocument().getData(), spaceConfig.getDlAddress()));
         dir.getChild("DL_URL").getDocument().setData(tenant.getDlUrl());
 
         tenant.setDanteManifestPath(getDataWithFailover(dir.getChild("DanteManifestPath").getDocument().getData(),

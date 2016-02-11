@@ -44,8 +44,6 @@ public abstract class LatticeComponent implements HasName, GraphNode {
     @Value("${admin.upload.schema}")
     protected boolean uploadSchema;
 
-    protected Set<LatticeProduct> products;
-
     public static final String spaceConfigNode = PathConstants.SPACECONFIGURATION_NODE;
 
     public abstract boolean doRegistration();
@@ -56,13 +54,7 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     public abstract String getVersionString();
 
-    public void setAssociatedProducts(Set<LatticeProduct> products) {
-        this.products = products;
-    }
-
-    public Set<LatticeProduct> getAssociatedProducts() {
-        return this.products;
-    }
+    public abstract Set<LatticeProduct> getAssociatedProducts();
 
     public final boolean register() {
         if (doRegistration()) {
@@ -90,7 +82,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson, this.getName());
     }
 
-    public static boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson, String serviceName) {
+    public static boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson,
+            String serviceName) {
         String podId = CamilleEnvironment.getPodId();
         Camille camille = CamilleEnvironment.getCamille();
 
@@ -123,8 +116,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     public static DocumentDirectory constructConfigDirectory(String defaultJson, String metadataJson) {
         try {
-            String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
+            String configStr = IOUtils
+                    .toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
             String metaStr = null;
             if (metadataJson != null) {
                 metaStr = IOUtils.toString(
@@ -139,8 +132,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
 
     public static DocumentDirectory constructMetadataDirectory(String defaultJson, String metadataJson) {
         try {
-            String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
+            String configStr = IOUtils
+                    .toString(Thread.currentThread().getContextClassLoader().getResourceAsStream(defaultJson), "UTF-8");
             String metaStr = null;
             if (metadataJson != null) {
                 metaStr = IOUtils.toString(
