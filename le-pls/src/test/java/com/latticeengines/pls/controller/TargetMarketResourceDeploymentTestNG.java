@@ -84,7 +84,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         System.out.println("Deleting existing test tenants ...");
         deleteTwoTenants();
 
-        setupTestEnvironment();
+        setupTestEnvironment("pd", true);
         setupSecurityContext(mainTestingTenant);
         cleanupTargetMarketDB();
         switchToExternalAdmin();
