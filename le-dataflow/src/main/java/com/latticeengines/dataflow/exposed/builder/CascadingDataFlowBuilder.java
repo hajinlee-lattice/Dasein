@@ -1402,19 +1402,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             for (String file : files) {
                 flowDef.addToClassPath(file);
             }
-            String cascadingEngine = dataFlowCtx.getProperty("ENGINE", String.class);
-            if ("TEZ".equalsIgnoreCase(cascadingEngine)) {
-                TezConfiguration localConfig = new TezConfiguration();
-                String prefix = localConfig.get("tez.cluster.additional.classpath.prefix");
-                log.info("load tez cluster classpath prefix from local config: " + prefix);
-
-                prefix = dataFlowLibDir + "*:" + (prefix == null ? "" : prefix);
-                properties.put("tez.cluster.additional.classpath.prefix", prefix);
-                log.info("prepend " + dataFlowLibDir + "* to tez cluster classpath.");
-            }
-
         } catch (Exception e) {
             log.warn("Exception retrieving library jars for this flow.", e);
+        }
+
+        try {
+            TezConfiguration localConfig = new TezConfiguration();
+            for (Map.Entry<String, String> entry : localConfig) {
+                if (entry.getKey().toLowerCase().contains("tez")) {
+                    log.info("[TEZ] " + entry.getKey() + " : " + entry.getValue());
+                }
+            }
+        } catch (Exception e) {
+            // ignore
         }
 
         if (jobProperties != null) {
