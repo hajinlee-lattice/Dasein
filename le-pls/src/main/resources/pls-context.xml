@@ -20,6 +20,7 @@
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:liaison-context.xml" />
     <import resource="classpath:workflow-context.xml"/>
+    <import resource="classpath:pls-quartz-${LOCAL_MODEL_DL_QUARTZ_ENABLED:disabled}-context.xml"/>
 
     <context:component-scan base-package="com.latticeengines.pls">
         <!-- Need to exclude instantiating the swagger config except for bringing up the API
