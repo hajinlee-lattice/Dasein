@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,8 +32,10 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
@@ -128,7 +131,8 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
 
-    @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/default/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create default target market")
     public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -138,7 +142,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.createDefaultTargetMarket();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find target market by name")
     public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -149,7 +154,8 @@ public class InternalResource extends InternalResourceBase {
         return targetMarketService.findTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update target market")
     public void updateTargetMarket(@PathVariable("targetMarketName") String targetMarketName,
@@ -161,7 +167,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -172,7 +179,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -182,7 +190,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteAll();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market report")
     public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
@@ -193,7 +202,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.registerReport(targetMarketName, report);
     }
 
-    @RequestMapping(value = "/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a report")
     public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
@@ -204,7 +214,8 @@ public class InternalResource extends InternalResourceBase {
         reportService.createOrUpdateReport(report);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a SourceFile")
     public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
@@ -215,7 +226,8 @@ public class InternalResource extends InternalResourceBase {
         return sourceFileService.findByName(sourceFileName);
     }
 
-    @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{applicationId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by applicationId")
     public ModelSummary findModelSummaryByAppId(@PathVariable("applicationId") String applicationId,
@@ -262,7 +274,9 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
-    public SimpleBooleanResponse createTestTenant(HttpServletRequest request) throws IOException {
+    public SimpleBooleanResponse createTestTenant(
+            @RequestParam(value = "forceinstall", required = false, defaultValue = "false") Boolean forceInstallation,
+            HttpServletRequest request) throws IOException {
         checkHeader(request);
         String productPrefix = request.getParameter("product");
 
@@ -278,25 +292,35 @@ public class InternalResource extends InternalResourceBase {
         // ==================================================
         // Provision through tenant console if needed
         // ==================================================
-        try {
-            tenantConfigService.getTopology(tenant1Id);
-        } catch (LedpException e) {
-            try {
-                provisionThroughTenantConsole(tenant1Id, "Marketo");
-            } catch (Exception ex) {
-                // do not interrupt, functional test could fail on this
-                log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
-            }
-        }
+        if (forceInstallation) {
 
-        try {
-            tenantConfigService.getTopology(tenant2Id);
-        } catch (LedpException e) {
+            provisionThroughTenantConsole(tenant1Id, "Marketo");
+            provisionThroughTenantConsole(tenant2Id, "Eloqua");
+
+            waitForTenantConsoleInstallation(CustomerSpace.parse(tenant1Id));
+            waitForTenantConsoleInstallation(CustomerSpace.parse(tenant2Id));
+
+        } else {
             try {
-                provisionThroughTenantConsole(tenant2Id, "Eloqua");
-            } catch (Exception ex) {
-                // do not interrupt, functional test could fail on this
-                log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                tenantConfigService.getTopology(tenant1Id);
+            } catch (LedpException e) {
+                try {
+                    provisionThroughTenantConsole(tenant1Id, "Marketo");
+                } catch (Exception ex) {
+                    // do not interrupt, functional test could fail on this
+                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                }
+            }
+
+            try {
+                tenantConfigService.getTopology(tenant2Id);
+            } catch (LedpException e) {
+                try {
+                    provisionThroughTenantConsole(tenant2Id, "Eloqua");
+                } catch (Exception ex) {
+                    // do not interrupt, functional test could fail on this
+                    log.warn("Provision " + tenant1Id + " as a Marketo tenant failed: " + e.getMessage());
+                }
             }
         }
 
@@ -322,13 +346,13 @@ public class InternalResource extends InternalResourceBase {
             if (tenant.getId().equals(tenant2Id)) {
                 payload = JsonUtils.serialize(tenant);
                 HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers, payload);
-                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(
-                        getHostPort() + "/pls/modelsummaries", true, headers);
+                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
+                        true, headers);
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode jNode = mapper.readTree(response);
                 while (jNode.size() < 2) {
-                    InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                            "com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
+                    InputStream ins = getClass().getClassLoader()
+                            .getResourceAsStream("com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
                     ModelSummary data = new ModelSummary();
                     Tenant fakeTenant = new Tenant();
                     fakeTenant.setId("FAKE_TENANT");
@@ -436,16 +460,48 @@ public class InternalResource extends InternalResourceBase {
             String tenantToken = "${TENANT}";
             String topologyToken = "${TOPOLOGY}";
             String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-            InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                    "com/latticeengines/pls/controller/internal/" + testTenantRegJson);
+            InputStream ins = getClass().getClassLoader()
+                    .getResourceAsStream("com/latticeengines/pls/controller/internal/" + testTenantRegJson);
             String payload = IOUtils.toString(ins);
             payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-            HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
-                    + dlTenantName, false, adHeaders, payload);
+            HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
         } else {
             throw new RuntimeException(
                     "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
                             + tupleId);
+        }
+    }
+
+    private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
+        long timeout = 1800000L; // bardjams has a long long timeout
+        long totTime = 0L;
+        String url = adminApi + "/tenants/" + customerSpace.getTenantId() + "?contractId="
+                + customerSpace.getContractId();
+        BootstrapState state = BootstrapState.createInitialState();
+        while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
+                && totTime <= timeout) {
+            try {
+                List<BasicNameValuePair> adHeaders = loginAd();
+                String jsonResponse = HttpClientWithOptionalRetryUtils.sendGetRequest(url, false, adHeaders);
+                log.info("JSON response from tenant console: " + jsonResponse);
+                TenantDocument tenantDocument = JsonUtils.deserialize(jsonResponse, TenantDocument.class);
+                BootstrapState newState = tenantDocument.getBootstrapState();
+                state = newState == null ? state : newState;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to query tenant installation state", e);
+            } finally {
+                try {
+                    Thread.sleep(5000L);
+                    totTime += 5000L;
+                } catch (InterruptedException e) {
+                    log.error(e);
+                }
+            }
+        }
+
+        if (!BootstrapState.State.OK.equals(state.state)) {
+            throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
         }
     }
 
@@ -471,8 +527,8 @@ public class InternalResource extends InternalResourceBase {
     private void assignTestingUsersToTenants(Map<AccessLevel, User> accessLevelToUsers) {
         for (String testTenantId : getTestTenantIds()) {
             for (Map.Entry<AccessLevel, User> accessLevelToUser : accessLevelToUsers.entrySet()) {
-                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId, accessLevelToUser.getValue()
-                        .getUsername());
+                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId,
+                        accessLevelToUser.getValue().getUsername());
             }
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
         }

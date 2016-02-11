@@ -1,6 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -222,7 +223,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public TenantDocument getTenant(String contractId, String tenantId) {
-        return tenantEntityMgr.getTenant(contractId, tenantId);
+        TenantDocument doc = tenantEntityMgr.getTenant(contractId, tenantId);
+        doc.setBootstrapState(getTenantOverallState(contractId, tenantId));
+        return doc;
     }
 
     @Override
@@ -234,23 +237,33 @@ public class TenantServiceImpl implements TenantService {
     public BootstrapState getTenantOverallState(String contractId, String tenantId) {
         final String podId = CamilleEnvironment.getPodId();
         final Camille camille = CamilleEnvironment.getCamille();
+
+        TenantDocument doc = tenantEntityMgr.getTenant(contractId, tenantId);
+        SpaceConfiguration spaceConfiguration = doc.getSpaceConfig();
+        List<LatticeProduct> products = new ArrayList<>();
+        if (spaceConfiguration != null) {
+            products = spaceConfiguration.getProducts();
+        }
+
         Set<String> components = serviceService.getRegisteredServices();
         BootstrapState state = null;
         for (String serviceName : components) {
-            Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
-                    CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
-            BootstrapState newState = BootstrapState.createInitialState();
-            try {
-                if (camille.exists(tenantServiceStatePath)) {
-                    newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
-                } else {
-                    newState = null;
+            LatticeComponent latticeComponent = orchestrator.getComponent(serviceName);
+            if (shouldHaveComponent(products, latticeComponent)) {
+                Path tenantServiceStatePath = PathBuilder.buildCustomerSpaceServicePath(podId, contractId, tenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+                BootstrapState newState;
+                try {
+                    if (camille.exists(tenantServiceStatePath)) {
+                        newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+                    } else {
+                        newState = BootstrapState.createInitialState();
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(
+                            String.format("Error getting the newState of the Service: %s", serviceName));
                 }
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("Error getting the newState of the Service: %s", serviceName));
-            }
-            if (newState != null) {
-                // null means the tenant was provisioned without this component
+
                 if (state == null) {
                     state = newState;
                 } else if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
@@ -268,9 +281,10 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
-        SerializableDocumentDirectory rawDir = tenantEntityMgr
-                .getTenantServiceConfig(contractId, tenantId, serviceName);
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId,
+            String serviceName) {
+        SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId,
+                serviceName);
         DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadataIgnoreOptionsValidation(metaDir);
         return rawDir;
@@ -309,10 +323,11 @@ public class TenantServiceImpl implements TenantService {
         }
     }
 
-    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2,
+            String serviceName) {
         if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR)) {
-            return BootstrapState.constructErrorState(0, 0, "At least one of the components encountered an error : "
-                    + serviceName);
+            return BootstrapState.constructErrorState(0, 0,
+                    "At least one of the components encountered an error : " + serviceName);
         }
 
         if (state1.state.equals(BootstrapState.State.MIGRATED) || state2.state.equals(BootstrapState.State.MIGRATED)) {
@@ -324,6 +339,12 @@ public class TenantServiceImpl implements TenantService {
         }
 
         return BootstrapState.constructOKState(state2.installedVersion);
+    }
+
+    private boolean shouldHaveComponent(List<LatticeProduct> products, LatticeComponent latticeComponent) {
+        Set<LatticeProduct> poductsBelongTo = latticeComponent.getAssociatedProducts();
+        poductsBelongTo.retainAll(products);
+        return !poductsBelongTo.isEmpty();
     }
 
     public static class ProductAndExternalAdminInfo {

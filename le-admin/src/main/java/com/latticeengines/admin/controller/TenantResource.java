@@ -92,7 +92,9 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant for a particular contract id")
-    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId,
+            @PathVariable String tenantId) {
+        contractId = contractId.replace("?", "");
         return tenantService.getTenant(contractId, tenantId);
     }
 

@@ -22,4 +22,4 @@ export CLASSPATH=$CLASSPATH:$HADOOP_HOME/etc/hadoop
 
 pushd $JETTY_HOME
 echo "Running jetty..."
-java $JAVA_OPTIONS -jar $JETTY_HOME/start.jar -Djetty.port=8080 --lib=$HADOOP_HOME/etc/hadoop 2>&1 | tee /tmp/jetty.log 
+java $JAVA_OPTIONS -jar $JETTY_HOME/start.jar -Djetty.port=8080 -Dcom.latticeengines.registerBootstrappers=true --lib=$HADOOP_HOME/etc/hadoop:$TEZ_CONF_DIR 2>&1 | tee /tmp/jetty.log

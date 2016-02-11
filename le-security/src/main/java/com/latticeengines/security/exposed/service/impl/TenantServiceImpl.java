@@ -61,14 +61,10 @@ public class TenantServiceImpl implements TenantService {
         try {
             tenantEntityMgr.delete(tenant);
         } catch (IllegalArgumentException e) {
-            if (!e.getMessage().contains("null entity")) {
-                throw e;
-            } else {
-                log.error(e);
-            }
+            log.error(e);
         }
         try {
-            for (User user : userService.getUsers(tenant.getId())){
+            for (User user : userService.getUsers(tenant.getId())) {
                 userService.deleteUser(tenant.getId(), user.getUsername());
             }
             globalTenantManagementService.discardTenant(tenant);
@@ -93,6 +89,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Tenant findByTenantName(String tenantName) { return tenantEntityMgr.findByTenantName(tenantName); }
+    public Tenant findByTenantName(String tenantName) {
+        return tenantEntityMgr.findByTenantName(tenantName);
+    }
 
 }

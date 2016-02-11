@@ -20,6 +20,9 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
 
+    @Value("${pls.internal.admin.api}")
+    private String adminApi;
+
     @Override
     protected String getRestAPIHostPort() {
         return getDeployedRestAPIHostPort();
@@ -29,36 +32,34 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         return deployedHostPort.endsWith("/") ? deployedHostPort.substring(0, deployedHostPort.length() - 1)
                 : deployedHostPort;
     }
-    
+
     protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
-        setupTestEnvironment(null);
+        setupTestEnvironment(null, false);
     }
 
-    protected void setupTestEnvironment(String productPrefix) throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironment(String productPrefix, Boolean forceInstallation)
+            throws NoSuchAlgorithmException, KeyManagementException, IOException {
         turnOffSslChecking();
-        resetTenantsViaTenantConsole(productPrefix);
+        resetTenantsViaTenantConsole(productPrefix, forceInstallation);
 
         setTestingTenants();
         loginTestingUsersToMainTenant();
         switchToSuperAdmin();
     }
 
-    protected void resetTenantsViaTenantConsole(String productPrefix) throws IOException {
+    protected void resetTenantsViaTenantConsole(String productPrefix, Boolean forceInstallation) throws IOException {
         if (resetByAdminApi) {
             addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
             magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-            String url = "/pls/internal/testtenants";
+            String url = "/pls/internal/testtenants/?forceinstall=" + String.valueOf(forceInstallation);
             if (productPrefix != null) {
-                url += "?product=" + productPrefix;
-            } else {
-                url += "/";
+                url += "&product=" + productPrefix;
             }
-            String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort()
-                    + url, "", String.class);
+            String response = sendHttpPutForObject(magicRestTemplate, getRestAPIHostPort() + url, "", String.class);
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
             Assert.assertTrue(json.get("Success").asBoolean());
         }
     }
-    
+
 }
