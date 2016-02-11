@@ -269,10 +269,13 @@ public class TenantServiceImpl implements TenantService {
                             String.format("Error getting the newState of the Service: %s", serviceName));
                 }
 
-                if (state == null) {
-                    state = newState;
-                } else if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
-                    state = mergeBootstrapStates(state, newState, serviceName);
+                if (newState != null) {
+                    if (state == null || state == BootstrapState.createInitialState()) {
+                        state = newState;
+                    } else
+                        if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
+                        state = mergeBootstrapStates(state, newState, serviceName);
+                    }
                 }
             }
         }
