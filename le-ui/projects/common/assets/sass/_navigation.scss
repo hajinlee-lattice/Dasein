@@ -149,7 +149,7 @@ Secondary Nav (Hamburger and Profile Nav)
         background-color: #efefef;
         text-decoration: none;
       }
-      &.open {
+      &.active {
         background-color: #222;
         color: #fff;
       }
@@ -157,9 +157,13 @@ Secondary Nav (Hamburger and Profile Nav)
     ul {
       display: block;
       z-index: 2;
-      text-align: left;
-      position: absolute;
       
+      margin-top: 0;
+      min-width: 200px;
+      border: none;
+      -webkit-box-shadow: none;
+      -moz-box-shadow:    none;
+      box-shadow:         none;
       & > li {
         text-align: left;
         border-bottom: none;
@@ -168,6 +172,7 @@ Secondary Nav (Hamburger and Profile Nav)
           padding: 4px 28px;
           background: #222;
           color: #fff;
+          width: inherit;
           &:first-of-type {
             padding-top: 8px;
           }
@@ -187,7 +192,7 @@ Secondary Nav (Hamburger and Profile Nav)
     clear: both;
   }
 }
-.profile-nav.dropdown>a.active {
+.profile-nav.dropdown>a.open {
   background-image: url("../images/ico-user-profile.svg");
   background-size: 30px 30px;
   background-repeat: no-repeat; 
