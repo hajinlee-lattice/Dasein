@@ -92,7 +92,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         }
     }
 
-    @Test(groups = "functional.platform", enabled = true)
+    @Test(groups = "functional.platform", enabled = false)
     public void importDataForFile() throws Exception {
         URL inputUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
@@ -239,17 +239,10 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.resources", "/tmp/Nutanix.csv#Nutanix.csv");
 
-        SqoopImporter importer = new SqoopImporter.Builder()
-                .setTable("Nutanix")
-                .setTargetDir("/tmp/dataFromFile")
-                .setDbCreds(creds)
-                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("Nutanix")
-                .setSplitColumn("Nutanix_EventTable_Clean")
-                .setNumMappers(1)
-                .setProperties(props)
-                .setSync(false)
-                .build();
+        SqoopImporter importer = new SqoopImporter.Builder().setTable("Nutanix").setTargetDir("/tmp/dataFromFile")
+                .setDbCreds(creds).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("Nutanix").setSplitColumn("Nutanix_EventTable_Clean").setNumMappers(1).setProperties(props)
+                .setSync(false).build();
 
         ApplicationId appId = sqoopSyncJobService.importData(importer);
 
@@ -298,41 +291,19 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_WARRANTY_GLOBAL";
         String sourceDir = "/tmp/Warranty_Dell.txt";
-        List<String> targetColumns =  Arrays.asList(
-                "ORDER_BUSINESS_UNIT_ID",
-                "LOCAL_CHANNEL",
-                "SERVICE_TAG_ID",
-                "ORDER_NUMBER",
-                "SERVICE_CONTRACT_ORDER_NUMBER",
-                "SERVICE_CONTRACT_START_DATE",
-                "SERVICE_CONTRACT_END_DATE",
-                "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM",
-                "BRAND_DESC",
-                "SERVICE_LEVEL_CODE","CUSTOMER_NUMBER",
-                "SERVICE_CONTRACT_CUSTOMER_NUMBER",
-                "PRODUCT_LINE_PARENT",
-                "PRODUCT_LINE_DESC",
-                "PRODUCT_LINE",
-                "SERVICE_CONTRACT_STATUS_DESC",
-                "SOURCE_SYSTEM_UPDATE_DATE",
-                "REGION_CODE"
-        );
+        List<String> targetColumns = Arrays.asList("ORDER_BUSINESS_UNIT_ID", "LOCAL_CHANNEL", "SERVICE_TAG_ID",
+                "ORDER_NUMBER", "SERVICE_CONTRACT_ORDER_NUMBER", "SERVICE_CONTRACT_START_DATE",
+                "SERVICE_CONTRACT_END_DATE", "SERVICE_LEVEL_DESC,WARRANTY_ITEM_NUM", "BRAND_DESC", "SERVICE_LEVEL_CODE",
+                "CUSTOMER_NUMBER", "SERVICE_CONTRACT_CUSTOMER_NUMBER", "PRODUCT_LINE_PARENT", "PRODUCT_LINE_DESC",
+                "PRODUCT_LINE", "SERVICE_CONTRACT_STATUS_DESC", "SOURCE_SYSTEM_UPDATE_DATE", "REGION_CODE");
         String optionalEnclosurePara = "--optionally-enclosed-by";
         String optionalEnclosureValue = "\\\"";
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/Warranty_Dell.txt", "/tmp");
 
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setTable(targetTable)
-                .setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds())
-                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("DellEbi_Warranty")
-                .setExportColumns(targetColumns)
-                .setNumMappers(1)
-                .addExtraOption(optionalEnclosurePara)
-                .addExtraOption(optionalEnclosureValue)
-                .setSync(false)
-                .build();
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_Warranty").setExportColumns(targetColumns).setNumMappers(1)
+                .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).setSync(false).build();
 
         ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
@@ -349,23 +320,16 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell_Delimiter.txt";
-        List<String> targetColumns = Arrays.asList("MFG_NAME","SUBCLASS_DESC","ITM_SHRT_DESC","MFG_PART_NUM");
+        List<String> targetColumns = Arrays.asList("MFG_NAME", "SUBCLASS_DESC", "ITM_SHRT_DESC", "MFG_PART_NUM");
         String optionalEnclosurePara = "--fields-terminated-by";
         String optionalEnclosureValue = "|~|";
 
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell_Delimiter.txt", "/tmp");
 
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setTable(targetTable)
-                .setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds())
-                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("DellEbi_SKU_Mfg")
-                .setNumMappers(1)
-                .setExportColumns(targetColumns)
-                .addExtraOption(optionalEnclosurePara)
-                .addExtraOption(optionalEnclosureValue)
-                .build();
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns)
+                .addExtraOption(optionalEnclosurePara).addExtraOption(optionalEnclosureValue).build();
 
         ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
@@ -381,20 +345,13 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/sqoopSyncJobServiceImpl");
         String targetTable = "STG_SKU_MANUFACTURER";
         String sourceDir = "/tmp/SKU_Mfg_Dell.txt";
-        List<String> targetColumns = Arrays.asList("MFG_NAME","SUBCLASS_DESC","ITM_SHRT_DESC","MFG_PART_NUM");
+        List<String> targetColumns = Arrays.asList("MFG_NAME", "SUBCLASS_DESC", "ITM_SHRT_DESC", "MFG_PART_NUM");
 
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, inputUrl.getPath() + "/SKU_Mfg_Dell.txt", "/tmp");
 
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setTable(targetTable)
-                .setSourceDir(sourceDir)
-                .setDbCreds(getSQLServerCreds())
-                .setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
-                .setCustomer("DellEbi_SKU_Mfg")
-                .setNumMappers(1)
-                .setExportColumns(targetColumns)
-                .build();
-
+        SqoopExporter exporter = new SqoopExporter.Builder().setTable(targetTable).setSourceDir(sourceDir)
+                .setDbCreds(getSQLServerCreds()).setQueue(LedpQueueAssigner.getModelingQueueNameForSubmission())
+                .setCustomer("DellEbi_SKU_Mfg").setNumMappers(1).setExportColumns(targetColumns).build();
 
         ApplicationId appId = sqoopSyncJobService.exportData(exporter);
 
