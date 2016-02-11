@@ -1,0 +1,98 @@
+<!--Tue Jun  9 14:27:18 2015-->
+<configuration>
+    
+    <property>
+      <name>yarn.scheduler.capacity.maximum-applications</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+    <name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
+    <value>100</value>
+    </property>
+
+    <property>
+      <name>yarn.scheduler.capacity.node-locality-delay</name>
+      <value>9</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.acl_administer_queue</name>
+      <value>*</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.capacity</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Modeling.capacity</name>
+      <value>40</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Modeling.maximum-capacity</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Modeling.state</name>
+      <value>RUNNING</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Modeling.user-limit-factor</name>
+      <value>4</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.PropData.capacity</name>
+      <value>40</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.PropData.maximum-capacity</name>
+      <value>50</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.PropData.state</name>
+      <value>RUNNING</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.PropData.user-limit-factor</name>
+      <value>2</value>
+    </property>
+
+    <property>
+      <name>yarn.scheduler.capacity.root.PropData.maximum-allocation-vcores</name>
+      <value>4</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.queues</name>
+      <value>Scoring,Modeling,PropData</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Scoring.capacity</name>
+      <value>20</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Scoring.maximum-capacity</name>
+      <value>50</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Scoring.state</name>
+      <value>RUNNING</value>
+    </property>
+    
+    <property>
+      <name>yarn.scheduler.capacity.root.Scoring.user-limit-factor</name>
+      <value>2</value>
+    </property>
+  </configuration>
