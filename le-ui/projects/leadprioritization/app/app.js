@@ -13,7 +13,9 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.controllers.LoginController',
     'mainApp.core.controllers.MainViewController',
     'mainApp.appCommon.modals.SimpleModal',
-    'mainApp.navigation.summary.OneLineController'
+    'mainApp.navigation.summary.OneLineController',
+    'pd.navigation',
+    'pd.jobs'
 ])
 
 .config(['$httpProvider', function($httpProvider) {

@@ -7,7 +7,7 @@
     <div class="container" data-ng-show="showError">
         <div class="global-error">
             <span><i class="fa fa-exclamation-circle fa-inverse"></i>{{errorMessage}}</span>
-            <a class="close" href="#" data-ng-click="closeErrorClick($event)"><i class="fa fa-times fa-inverse"></i></a>
+            <a class="close" href="javascript:void(0)" data-ng-click="closeErrorClick($event)"><i class="fa fa-times fa-inverse"></i></a>
         </div>
     </div>
     <div data-ng-show="loading">
@@ -47,13 +47,13 @@
                                 <td data-ng-hide="segments.length === 1">
                                     <div class="priority-column">
                                         <div>
-                                            <a href="#" 
+                                            <a href="javascript:void(0)" 
                                                class="priority-arrow priority-arrow-down" 
                                                data-ng-show="showDecreasePriority(segment)" 
                                                data-ng-click="decreasePriorityClicked($event, segment)"></a>
                                         </div>
                                         <div>
-                                            <a href="#" 
+                                            <a href="javascript:void(0)" 
                                                class="priority-arrow priority-arrow-up" 
                                                data-ng-show="showIncreasePriority(segment)" 
                                                data-ng-click="increasePriorityClicked($event, segment)"></a>
@@ -61,7 +61,7 @@
                                     </div>
                                 </td>
                                 <td class="edit-icons" data-ng-show="allowAddAndDelete">
-                                    <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="#"><i class="fa fa-trash-o"></i></a>
+                                    <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
                                 </td>
                             </tr>
                         </tbody>

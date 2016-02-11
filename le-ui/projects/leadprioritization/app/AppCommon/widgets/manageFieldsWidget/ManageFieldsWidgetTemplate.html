@@ -53,7 +53,7 @@
         </div>
     </div>
     <script id="fieldTemplate" type="text/x-kendo-tmpl">
-        <a data-ng-if="!batchEdit" href="\#" data-ng-click="fieldLinkClicked($event, dataItem)" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</a>
+        <a data-ng-if="!batchEdit" href="javascript:void(0)" data-ng-click="fieldLinkClicked($event, dataItem)" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</a>
         <span data-ng-if="batchEdit" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</span>
     </script>
     <script id="sourceTemplate" type="text/x-kendo-tmpl">

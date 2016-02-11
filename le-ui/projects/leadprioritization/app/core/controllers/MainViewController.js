@@ -193,7 +193,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     // Handle when the Setup link is clicked
     $scope.$on(NavUtility.SETUP_NAV_EVENT, function (event, data) {
-        createSetupView();
+        //createSetupView();
     });
 
     function createSetupView() {
@@ -225,7 +225,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     // Handle the lead enrichment nav event
     $scope.$on(NavUtility.LEAD_ENRICHMENT_NAV_EVENT, function (event, data) {
-        createLeadEnrichmentView();
+        //createLeadEnrichmentView();
     });
 
     function createLeadEnrichmentView() {

@@ -1,0 +1,68 @@
+<div data-ng-controller="JobsCtrl" class="container">
+    <div data-ng-show="showJobSuccessMessage" class="job-success-message">
+        <div>Success! Data has been imported.<a href="#"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
+        <span>Analytics are now available.</span>
+    </div>
+    
+    <div class="table-header">
+        <div class="row">
+            <div class="twelve columns">
+                <h2>Jobs</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="four columns meta">
+                <!-- <small>Displaying 1-8 of 12</small> -->
+            </div>
+            <div class="eight columns text-right">
+                <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
+                <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                    <span class="ico ico-search"></span>
+                </a>
+                <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
+                    <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
+                </a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="ico ico-grid"></span></a>
+                <a ui-sref="jobs.status" class="button icon-button white-button"><span class="ico ico-list selected-icon"></span></a>
+                <a ui-sref="jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
+                <a ui-sref="models"><button type="button" class="button gray-button">View Models</button></a>
+            </div>
+        </div><!-- End .row -->
+    </div><!-- End .table-header -->
+
+    <div class="row jobs-table">
+        <div class="columns twelve panel panel-default">
+            <div class="row panel-heading custom-heading">
+                <span class="columns four">Timestamp</span>
+                <span class="columns four">Job Type</span>
+                <span class="columns four">Status</span>
+            </div>
+            <div class="jobs-table-content">
+                <div 
+                    data-job-status-row 
+                    data-ng-repeat="job in jobs | 
+                        filter: query | 
+                        orderBy: SortOrder | 
+                        startFrom: (current - 1) * pagesize |
+                        limitTo: pagesize" 
+                    job="job" 
+                    statuses="statuses" 
+                    expanded="expanded" 
+                    showJobSuccessMessage="showJobSuccessMessage" 
+                    class="job-td-row">
+                </div>
+                <div data-ng-show="showEmptyJobsMessage">
+                    There are no jobs to show at the moment
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-init="pagesize = 5; current = 1" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="current" max="max = jobs.length / pagesize">
+            </pd-pagination-controls>
+        </div>
+    </div>
+
+</div>

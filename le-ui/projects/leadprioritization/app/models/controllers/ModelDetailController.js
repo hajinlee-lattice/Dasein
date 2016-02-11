@@ -14,8 +14,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.ThresholdExplorerService'
 ])
 
-.controller('ModelDetailController', function ($stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetFrameworkService, WidgetService, ModelService, TopPredictorService, ThresholdExplorerService, Model) {
+.controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
+    NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {
     console.log('###',$scope);
     $scope.ResourceUtility = ResourceUtility;
     
@@ -36,7 +36,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         return;
     }
 
-    console.log(modelId, result);
     var model = Model;
     model.ModelId = modelId;
     model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
@@ -54,13 +53,16 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 
     model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
 
-    angular.extend($scope, {
+    angular.extend(ModelStore, {
         widgetConfig: screenWidgetConfig,
         metadata: null,
         data: model,
         parentData: model
     });
 
+    console.log(modelId, ModelStore);
+
+    $compile($('#ModelDetailsArea').html('<div data-model-details-widget></div>'))($scope);
     
     function filterHighScoresInBottomLeads(bottomLeads) {
         if (bottomLeads === null) {

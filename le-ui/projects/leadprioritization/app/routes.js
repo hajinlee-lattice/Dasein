@@ -46,11 +46,27 @@ angular
             return InternalAttributes.totalAttributeValues + ExternalAttributes.totalAttributeValues;
         }
     };
+
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
         .state('home', {
-            url: '/',
+            url: '/', // '/:tenantId',
+            /* eventually... detect tenantId/choose tenantId
+            resolve: {
+                Tenant: function($q, $stateParams, $scope, $controller) {
+                    var deferred = $q.defer(),
+                        tenantId = $stateParams.tenantId,
+                        LoginCtrl = $controller('LoginController', {});
+
+                    if (tenantId)
+                        deferred.resolve(true);
+                    
+                    console.log('hi',deferred,tenantId,LoginCtrl);
+                    return deferred.promise;
+                }
+            },
+            */
             redirectTo: 'models'
         })
         .state('models', {
@@ -150,14 +166,13 @@ angular
             views: {
                 "navigation@": {
                     controller: function($scope, Model) {
-                        console.log('MODEL', Model);
                         $scope.name = Model.ModelDetails.Name;
                     },
                     templateUrl: './app/navigation/sidebar/ModelView.html'
                 },
                 "summary@": {
-                    controller: 'ModelDetailsWidgetController',
-                    templateUrl: './app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidgetTemplate.html'
+                    controller: 'ModelDetailController',
+                    template: '<div id="ModelDetailsArea"></div>'
                 },
                 "main@": {
                     template: ''
@@ -168,18 +183,104 @@ angular
             url: '/attributes',
             views: {
                 "main@": {
-                    controller: 'TopPredictorWidgetController',
-                    templateUrl: './app/AppCommon/widgets/topPredictorWidget/TopPredictorWidgetTemplate.html'
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
+                    },
+                    template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
             }
         })
         .state('model.performance', {
-            url: '/attributes',
+            url: '/performance',
             views: {
                 "main@": {
-                    controller: 'performanceTabWidgetController',
-                    templateUrl: './app/AppCommon/widgets/performanceTabWidget/PerformanceTabTemplate.html'
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        $compile($('#modelDetailContainer').html('<div id="performanceTab" class="tab-content" data-performance-tab-widget></div>'))($scope);
+                    },
+                    template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
+            }
+        })
+        .state('model.leads', {
+            url: '/leads',
+            views: {
+                "main@": {
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        $compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
+                    },
+                    template: '<div id="modelDetailContainer" class="model-details"></div>'
+                }
+            }
+        })
+        .state('model.summary', {
+            url: '/summary',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'UNDER CONSTRUCTION';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                }   
+            }
+        })
+        .state('model.alerts', {
+            url: '/alerts',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'UNDER CONSTRUCTION';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                }   
+            }
+        })
+        .state('model.scoring', {
+            url: '/scoring',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'UNDER CONSTRUCTION';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                }   
+            }
+        })
+        .state('model.refine', {
+            url: '/refine',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'UNDER CONSTRUCTION';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                }   
             }
         })
         .state('activate', {
@@ -247,6 +348,59 @@ angular
                 },
                 "main@": {
                     templateUrl: './app/models/views/ModelCreationHistoryView.html'
+                }   
+            }
+        })
+        .state('fields', {
+            url: '/fields',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'SETUP_NAV_NODE_MANAGE_FIELDS';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: 'SetupController',
+                    templateUrl: './app/setup/views/SetupView.html'
+                }   
+            }
+        })
+        .state('dashboard', {
+            url: '/dashboard',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'UNDER CONSTRUCTION';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                }   
+            }
+        })
+        .state('enrichment', {
+            url: '/enrichment',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'LEAD_ENRICHMENT_SETUP_TITLE';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: 'LeadEnrichmentController',
+                    templateUrl: './app/setup/views/LeadEnrichmentView.html'
                 }   
             }
         });

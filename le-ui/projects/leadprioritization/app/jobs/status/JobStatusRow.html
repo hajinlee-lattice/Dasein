@@ -1,0 +1,83 @@
+<div class="expanded-{{jobRowExpanded}}">
+    <div class="clearfix">
+        <span class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span class="columns four">{{job.jobType}}</span>
+        <span class="columns four {{job.status}}">{{job.status}}
+            <span data-ng-show="jobCompleted"> [<a ui-sref="jobs.status.ready({jobId: jobId})">View Report</a>]</span>
+            <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>
+
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded">
+                <span><i class="fa fa-angle-double-down fa-lg"></i></span>
+            </a>
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded">
+                <span><i class="fa fa-angle-double-up fa-lg"></i></span>
+            </a>
+        </span>
+    </div>
+    <div class="chevron-row" data-ng-show="jobRowExpanded">
+        <div class="breadcrumb flat">
+            <div class="state-finished-{{jobStepsCompletedStates.load_data}}">
+                <span class="chevron-content chevron-content-text">
+                    Load Data
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.load_data">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.load_data">
+                    <i class="fa fa-check"></i>
+                </span>
+            </div>
+            <div class="state-finished-{{jobStepsCompletedStates.match_data}}">
+                <span class="chevron-content chevron-content-text">
+                    Match Data
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.match_data">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.match_data">
+                    <i class="fa fa-check"></i>
+                </span>
+            </div>
+            <div class="state-finished-{{jobStepsCompletedStates.generate_insights}}">
+                <span class="chevron-content chevron-content-text">
+                    Generate<br>Insights
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.generate_insights">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.generate_insights">
+                    <i class="fa fa-check"></i>
+                </span>
+            </div>
+            <div class="state-finished-{{jobStepsCompletedStates.create_global_model}}">
+                <span class="chevron-content chevron-content-text">
+                    Create Universal<br>Model
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.create_global_model">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.create_global_model">
+                    <i class="fa fa-check"></i>
+                </span>
+            </div>
+            <div class="state-finished-{{jobStepsCompletedStates.create_global_target_market}}">
+                <span class="chevron-content chevron-content-text">
+                    Create Universal<br>Target Market
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsRunningStates.create_global_target_market">
+                    <i class="fa fa-spinner fa-pulse"></i>
+                </span>
+                <span class="chevron-content icon" data-ng-show="jobStepsCompletedStates.create_global_target_market">
+                    <i class="fa fa-check"></i>
+                </span>
+            </div>
+        </div>
+        <div class="completion-times">
+            <span>{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+        </div>
+    </div>
+</div>

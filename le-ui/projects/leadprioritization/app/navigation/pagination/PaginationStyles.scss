@@ -1,0 +1,35 @@
+pd-pagination-controls .pd-pagination {
+    text-align: center;
+    margin: .5em 0;
+    font-size: 1em;
+    
+    span {
+        font-weight: bold;
+    }
+    
+    span.pd-pagination-center {
+        margin: 0 1em;
+    }
+
+    button.white-button {
+        padding: .4em .8em;
+        color: #467dba;
+    }
+    
+    button.disabled,
+    button.active {
+        color: #467dba;
+        pointer-events: none;
+        cursor: default;
+        outline: 0;
+    }
+    
+    button.disabled {
+        border-color: #eee;
+        color: #ccc;
+    }
+
+    .active {
+        color: red;
+    }
+}

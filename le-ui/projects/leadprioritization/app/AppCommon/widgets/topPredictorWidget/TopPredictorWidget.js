@@ -7,14 +7,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
 ])
 
 .controller('TopPredictorWidgetController', function (
-    $scope, $sce, $element, $compile, $rootScope, screenWidgetConfig,
-    ResourceUtility, WidgetFrameworkService, TopPredictorService,
-    ChartData, Model, InternalAttributes, ExternalAttributes,
-    TotalAttributeValues) {
+        $scope, $sce, $element, $compile, $rootScope, ResourceUtility, 
+        WidgetFrameworkService, TopPredictorService, ModelStore
+    ) {
     
-    var widgetConfig = screenWidgetConfig.Widgets[0];
-    var metadata = $scope.metadata;
-    var data = Model;
+    var widgetConfig = ModelStore.widgetConfig.Widgets[0];
+    var metadata = ModelStore.metadata;
+    var data = ModelStore.data;
     var parentData = $scope.parentData;
     $scope.ResourceUtility = ResourceUtility;
     
@@ -31,24 +30,24 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
-    var chartData = ChartData;
+    var chartData = data.ChartData;
     $scope.backToSummaryView = false;
-    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [ChartData.attributesPerCategory]);
+    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     
     // Get Internal category list
-    var internalCategoryObj = InternalAttributes;
+    var internalCategoryObj = data.InternalAttributes;
     $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
     $scope.internalCategories = internalCategoryObj.categories;
     $scope.showInternalCategories = internalCategoryObj.total > 0;
     
     // Get External category list
-    var externalCategoryObj = ExternalAttributes;
+    var externalCategoryObj = data.ExternalAttributes;
     $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
     $scope.externalCategories = externalCategoryObj.categories;
     $scope.showExternalCategories = externalCategoryObj.total > 0;
     
     // Calculate total
-    var totalAttributes = TotalAttributeValues;
+    var totalAttributes = data.TotalAttributeValues;
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
     
     $scope.generateCategoryLabel = function(category) {

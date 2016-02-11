@@ -1,0 +1,19 @@
+<div data-ng-controller="TableCtrl" class="summary blue-fire">
+    <div class="container row">
+
+        <div class="three columns" ng-repeat="table in tables">
+            <div class="summary-list">
+                
+                <h3 class="summary-title">{{table.name}}</h3>
+                <dl>
+                    <span ng-repeat="(key, value) in table.items">
+                        <dt>{{key}}</dt>
+                        <dd><a href="#">{{value}}</a></dd>
+                    </span>
+                </dl>
+
+            </div><!-- End .summary-list -->
+        </div><!-- End .three.columns -->
+
+    </div>
+</div>

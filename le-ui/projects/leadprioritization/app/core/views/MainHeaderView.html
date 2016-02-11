@@ -8,20 +8,24 @@
         <img class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
 
         <div class="profile-nav">
-            <a ng-click="showDiv = !showDiv" ng-class="{'open' : showDiv}">
+            <a href="javascript:void(0)" ng-click="showDiv = !showDiv" ng-class="{'open' : showDiv}">
                 <span class="pd-header-username">{{userDisplayName}}</span>
                 <span class="pd-header-downarrow fa fa-angle-down"></span>
             </a>
             <ul ng-show="showDiv">
-                <li><a href="#" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
-                    <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
-                    <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>
-                    <li data-ng-if="showModelCreationHistoryDropdown" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a></li>
-                    <li data-ng-if="showActivateModel" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="activateModelClicked($event)">{{ResourceUtility.getString('HEADER_ACTIVATE_MODEL')}}</a></li>
-                    <li data-ng-if="showSetup" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="setupClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_FIELDS')}}</a></li>
-                    <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
-                    <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="#" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
-                    <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
+                <li><a href="javascript:void(0)" data-ng-click="updatePasswordClicked($event)" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
+                <!--
+                <li data-ng-if="showUserManagement" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
+                <li data-ng-if="showSystemSetup" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>
+                <li data-ng-if="showModelCreationHistoryDropdown" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a></li>
+                <li data-ng-if="showActivateModel" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="activateModelClicked($event)">{{ResourceUtility.getString('HEADER_ACTIVATE_MODEL')}}</a></li>
+                <li data-ng-if="showSetup" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="setupClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_FIELDS')}}</a></li>
+                -->
+                <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
+                <!--
+                <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
+                -->
+                <li><a href="javascript:void(0)" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
             </ul>
         </div>
 

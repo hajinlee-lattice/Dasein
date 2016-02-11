@@ -10,15 +10,15 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
 .controller('ModelDetailsWidgetController', function (
     $stateParams, $scope, $rootScope, ResourceUtility, DateTimeFormatUtility, 
-    NavUtility, StringUtility, Model, screenWidgetConfig, WidgetService, 
-    WidgetConfigUtility, ModelService, ExternalAttributes, InternalAttributes, ChartData
+    NavUtility, StringUtility, ModelStore, WidgetService, 
+    WidgetConfigUtility, ModelService
 ) {
-    var data = Model;
-    console.log('DetailsWidget', ResourceUtility, $stateParams.modelId, data, screenWidgetConfig);
+    var data = ModelStore.data;
+    console.log('DetailsWidget', $stateParams.modelId, data, ModelStore);
     $scope.ResourceUtility = ResourceUtility;
     
-    var widgetConfig = screenWidgetConfig.Widgets[0];
-    var metadata = $scope.metadata;
+    var widgetConfig = ModelStore.widgetConfig.Widgets[0];
+    var metadata = ModelStore.metadata;
     var modelDetails = data.ModelDetails;
 
     $scope.displayName = modelDetails[widgetConfig.NameProperty];
@@ -36,10 +36,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     }
      
     data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
-    $scope.externalAttributes = ExternalAttributes.total;
+    $scope.externalAttributes = data.ExternalAttributes.total;
     $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
     
-    $scope.internalAttributes = InternalAttributes.total;
+    $scope.internalAttributes = data.InternalAttributes.total;
     $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
     
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];

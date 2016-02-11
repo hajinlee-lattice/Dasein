@@ -51,9 +51,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             path = $scope.selectedPath[0][0],
             donutRect = donut.getBoundingClientRect(),
             pathRect = path.getBoundingClientRect(),
-            center = donutRect.left + (donutRect.width >> 1),
+            center = (donut.offsetLeft) + (donutRect.width >> 1),
             top = (pathRect.top - donutRect.top + (pathRect.height >> 1)) / donutRect.height;
         
+        //console.log(center, donutRect.left, donutRect.width);
         // Adjust height of tail pseudo-element to anchor to path element
         // FIXME - Find a better way to adjust pseudo-element when supported
         var styleSheet = document.styleSheets[0],

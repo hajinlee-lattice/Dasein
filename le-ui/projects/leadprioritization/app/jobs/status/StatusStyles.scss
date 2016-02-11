@@ -1,0 +1,128 @@
+.job-success-message {
+    background: rgb(113, 188, 81);
+    margin-top: 50px;
+    padding: 15px 10px 15px 40px;
+    color: white !important;
+    
+    div {
+        color: white;
+        font-size: 20px;
+        position: relative;
+        
+        i {
+            position: absolute;
+            right: 25px;
+            top: 16px;
+        }
+    }
+}
+.selected-icon {
+    background-color: rgb(81, 135, 192) !important;
+}
+
+.chevron-row {
+    text-align: center;
+    
+    .completion-times span {
+        display: inline-block;
+        width: 191px;
+    }
+}
+.breadcrumb {
+    /*centering*/
+    display: inline-block;
+    overflow: hidden;
+    background-color: #f7f7f7 !important;
+    text-align: center;
+}
+
+.breadcrumb div {
+    color: black !important;
+    text-decoration: none;
+    outline: none;
+    display: table;
+    float: left;
+    font-size: 15px;
+    position: relative;
+    height: 60px;
+    width: 196px;
+    margin-top: 10px;
+}
+.breadcrumb div:first-child:before {
+    left: 14px;
+}
+.chevron-content {
+    display: table-cell;
+    vertical-align: middle;
+}
+span.chevron-content.chevron-content-text {
+    padding-left: 30px !important;
+    font-size: 14px;
+}
+.jobs-table-content {
+    color: black;
+    font-size: 15px;
+    
+    .expanded-true {
+        background: #f7f7f7;
+    }
+    
+    div.clearfix {
+        padding-left: 10px;
+        
+        .Completed {
+            color: rgb(113, 188, 81);
+        }
+        
+        .Failed, .Cancelled {
+            color: rgb(233, 33, 45);
+        }
+    }
+}
+
+/*adding the arrows for the breadcrumbs using rotated pseudo elements*/
+.breadcrumb div:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -30px; /*half of square's length*/
+    /*same dimension as the line-height of .breadcrumb a */
+    width: 60px; 
+    height: 60px;
+    /*as you see the rotated square takes a larger height. which makes it tough to position it properly. So we are going to scale it down so that the diagonals become equal to the line-height of the link. We scale it to 70.7% because if square's: 
+    length = 1; diagonal = (1^2 + 1^2)^0.5 = 1.414 (pythagoras theorem)
+    if diagonal required = 1; length = 1/1.414 = 0.707*/
+    transform: scale(0.707) rotate(45deg);
+    /*we need to prevent the arrows from getting buried under the next link*/
+    z-index: 1;
+    background: white;
+    /*stylish arrow design using box shadow*/
+    box-shadow: 
+        5px -5px 0 5px #f7f7f7;
+    border-radius: 0 0px 0 50px;
+}
+/*we dont need an arrow after the last link*/
+.breadcrumb div:last-child:after {
+    content: none;
+}
+
+.breadcrumb.flat {
+    padding: 0px 0px;
+    border-radius: 0px;
+}
+.flat div {
+    background: white;
+    color: black;
+    transition: all 0.5s;
+}
+.flat div .icon {
+    right: 0;
+    z-index: 99;
+    padding-right: 12px;
+}
+.fa.fa-check {
+    color: rgb(113, 188, 81);
+}
+.flat div span:last-child, .flat div span:nth-last-child(2) {
+    right: 15px;
+}

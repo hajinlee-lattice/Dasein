@@ -60,7 +60,7 @@
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_CSV_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <a href="#" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
+                        <a href="javascript:void(0)" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/rfmodelcsv/{{ModelId}}" filename="rfmodel.csv" filetype="text/csv"></data-file-downloader>

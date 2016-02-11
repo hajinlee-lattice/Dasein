@@ -155,7 +155,6 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     //This method will be used to clear out stored data on logout 
     //and possibly reset system cache
     this.clear = function(keepAuthentication) {
-        console.log('browser clear',keepAuthentication);
         keepAuthentication = typeof keepAuthentication === 'boolean' ? keepAuthentication : false;
         var clientSession;
 

@@ -1,0 +1,61 @@
+<div class="container" data-ng-controller="ImportReadyController">
+    <div class="columns four import-summary-title">
+        <a ui-sref="jobs.status">
+            <button class="button icon-button white-button"><span class="fa fa-chevron-left"></span></button>
+        </a>
+        <div>Jobs > Job Status</div>
+    </div>
+    <div class="summary-desc">
+        {{jobType}} import started on {{jobStartDate}} at {{jobStartTime}} by {{user || "unknown"}}.
+        <div class="breadcrumb flat">
+            <div>
+                <span class="chevron-content chevron-content-text">Load Data</span>
+                <span class="chevron-content icon"><i class="fa fa-check"></i></span>
+            </div>
+            <div>
+                <span class="chevron-content chevron-content-text">Match Data</span>
+                <span class="chevron-content icon"><i class="fa fa-check"></i></span>
+            </div>
+            <div>
+                <span class="chevron-content chevron-content-text">Generate<br>Insights</span>
+                <span class="chevron-content icon"><i class="fa fa-check"></i></span>
+            </div>
+            <div>
+                <span class="chevron-content chevron-content-text">Create Universal<br>Model</span>
+                <span class="chevron-content icon"><i class="fa fa-check"></i></span>
+            </div>
+            <div>
+                <span class="chevron-content chevron-content-text">Create Universal<br>Target Market</span>
+                <span class="chevron-content icon"><i class="fa fa-check"></i></span>
+            </div>
+        </div>
+        <div class="ready-view-completion-times">
+            <span>{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</span>
+            <span>{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</span>
+        </div>
+    </div>
+    
+    <div class="import-summary">
+        <h5>Data Imported</h5>
+        <div class="container row">
+
+            <div class="three columns" data-ng-repeat="table in tables">
+                <div class="summary-list">
+                    
+                    <h3 class="summary-title">{{table.name}}</h3>
+                    <dl>
+                        <span data-ng-repeat="(key, value) in table.items">
+                            <dt>{{key}}</dt>
+                            <dd>{{value}}</dd>
+                        </span>
+                    </dl>
+
+                </div><!-- End .summary-list -->
+            </div><!-- End .three.columns -->
+
+        </div>
+    </div>
+</div>
