@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.TenantDeploymentEntityMgr;
-import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -32,9 +31,6 @@ public class TenantDeploymentServiceImpl implements TenantDeploymentService {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private TenantConfigService tenantConfigService;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;

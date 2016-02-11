@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AmAttribute;
 import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
-import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -37,9 +36,6 @@ public class AmAttributeResource {
 
     @Autowired
     private AmAttributeEntityMgr amAttributeEntityMgr;
-
-    @Autowired
-    private SessionService sessionService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

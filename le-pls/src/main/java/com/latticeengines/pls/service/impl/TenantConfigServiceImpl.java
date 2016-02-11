@@ -35,7 +35,6 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
-import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("tenantConfigService")
 public class TenantConfigServiceImpl implements TenantConfigService {
@@ -52,9 +51,6 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     @Autowired
     @Qualifier("propertiesFileFeatureFlagProvider")
     private DefaultFeatureFlagProvider defaultFeatureFlagProvider;
-
-    @Autowired
-    private TenantService tenantService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

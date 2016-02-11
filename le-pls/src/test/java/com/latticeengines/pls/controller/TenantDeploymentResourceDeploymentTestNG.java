@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import org.apache.zookeeper.ZooDefs;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -31,13 +30,9 @@ import com.latticeengines.domain.exposed.pls.TenantDeploymentStatus;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.Constants;
 
 public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
-
-    @Autowired
-    private CrmCredentialZKService crmCredentialZKService;
     
     private FeatureFlagDefinition def;
 

@@ -23,7 +23,6 @@ import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("targetMarketService")
 public class TargetMarketServiceImpl implements TargetMarketService {
@@ -33,9 +32,6 @@ public class TargetMarketServiceImpl implements TargetMarketService {
 
     @Autowired
     private TargetMarketEntityMgr targetMarketEntityMgr;
-
-    @Autowired
-    private ReportEntityMgr reportEntityMgr;
 
     @Autowired
     private Configuration yarnConfiguration;

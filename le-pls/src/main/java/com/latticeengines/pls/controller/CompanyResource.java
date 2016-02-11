@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.Company;
 import com.latticeengines.pls.entitymanager.CompanyEntityMgr;
-import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -29,9 +28,6 @@ public class CompanyResource {
 
     @Autowired
     private CompanyEntityMgr companyEntityMgr;
-
-    @Autowired
-    private SessionService sessionService;
 
     @RequestMapping(value = "/count", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

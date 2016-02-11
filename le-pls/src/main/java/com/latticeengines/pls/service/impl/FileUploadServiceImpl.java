@@ -31,6 +31,7 @@ import com.latticeengines.workflow.exposed.service.SourceFileService;
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(FileUploadServiceImpl.class);
 
     @Autowired

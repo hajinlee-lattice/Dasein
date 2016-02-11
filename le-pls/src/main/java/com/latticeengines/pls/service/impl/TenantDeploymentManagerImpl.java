@@ -35,7 +35,6 @@ import com.latticeengines.pls.service.TenantDeploymentManager;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.service.VdbMetadataService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -53,9 +52,6 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
 
     @Autowired
     private DataLoaderService dataLoaderService;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     private TenantConfigService tenantConfigService;
