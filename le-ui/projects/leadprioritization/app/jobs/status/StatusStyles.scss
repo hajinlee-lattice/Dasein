@@ -1,3 +1,51 @@
+.jobs-summary {
+    &.summary.blue-fire .black-summary-list.stats h3.summary-title {
+        text-align: center;
+    }
+    .stats.black-summary-list {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: space-between;
+        flex-wrap: wrap-reverse;
+        padding-top: 1em;
+        padding-bottom: 1em;
+    }
+    div.row {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+    }
+    div.row div.columns {
+        display: flex;
+    }
+
+    div.stats-group {
+        dl:nth-child(even) {
+            border-left: 0;
+            padding-left: 0;
+        }
+        dl:nth-child(even):last-child {
+            width: 100%;
+            padding: 0 0.5em;
+            border-top: 1px solid #999;
+        }
+        dl {
+            width: 50%;
+            height: 4em;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center;
+            
+            dd,
+            dt {
+                text-align: center;
+            }
+        }
+    }
+}
 .job-success-message {
     background: rgb(113, 188, 81);
     margin-top: 50px;
