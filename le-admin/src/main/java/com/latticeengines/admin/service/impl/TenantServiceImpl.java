@@ -270,7 +270,7 @@ public class TenantServiceImpl implements TenantService {
                 }
 
                 if (newState != null) {
-                    if (state == null || state == BootstrapState.createInitialState()) {
+                    if (state == null) {
                         state = newState;
                     } else
                         if (!serviceName.equals(DanteComponent.componentName) || danteIsEnabled(contractId, tenantId)) {
