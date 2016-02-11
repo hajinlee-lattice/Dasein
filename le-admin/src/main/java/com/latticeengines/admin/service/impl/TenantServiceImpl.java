@@ -251,7 +251,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         Set<String> components = serviceService.getRegisteredServices();
-        BootstrapState state = BootstrapState.createInitialState();
+        BootstrapState state = null;
         for (String serviceName : components) {
             LatticeComponent latticeComponent = orchestrator.getComponent(serviceName);
             if (shouldHaveComponent(products, latticeComponent)) {
