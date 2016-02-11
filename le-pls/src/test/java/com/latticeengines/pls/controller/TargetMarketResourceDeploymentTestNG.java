@@ -81,6 +81,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         configuration.setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, MAX_PROSPECTS_PER_ACCOUNT);
 
+        System.out.println("Deleting existing test tenants ...");
+        deleteTwoTenants();
+
         setupTestEnvironment();
         setupSecurityContext(mainTestingTenant);
         cleanupTargetMarketDB();
@@ -113,10 +116,9 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         microServiceRestTemplate.getInterceptors().add(addMagicAuthHeader);
 
-        assertEquals(metadataProxy.getImportTables(space.toString()).size(), 0);
-        assertEquals(metadataProxy.getTables(space.toString()).size(), 0);
-
-        provisionMetadataTables(mainTestingTenant);
+        if (metadataProxy.getImportTables(space.toString()).size() == 0) {
+            provisionMetadataTables(mainTestingTenant);
+        }
 
         List<Table> importTables = metadataProxy.getImportTables(space.toString());
         assertEquals(importTables.size(), 5);
@@ -334,4 +336,11 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         }
     }
 
+    private void deleteTwoTenants() throws Exception {
+        turnOffSslChecking();
+        setTestingTenants();
+        for (Tenant tenant : testingTenants) {
+            deleteTenantByRestCall(tenant.getId());
+        }
+    }
 }
