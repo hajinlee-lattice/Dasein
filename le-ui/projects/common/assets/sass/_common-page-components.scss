@@ -194,6 +194,10 @@ Statistic Displays
 }
 .black-summary-list.stats dd {
   color: #fff;
+}
+/* Standardize this across HTML
+================================================== */
+.stats dd.small {
   font-size: 1em;
 }
 

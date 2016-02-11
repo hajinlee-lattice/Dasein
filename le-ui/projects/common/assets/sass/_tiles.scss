@@ -59,11 +59,11 @@
 	&:hover {
 		cursor: pointer;
 	}
-	.tile {
-		min-height: auto !important;
-		background: none !important;
-		transition: none !important;
-	}
+}
+.tile {
+	min-height: auto !important;
+	background: none !important;
+	transition: none !important;
 	label {
 		font-size: 20px;
 	    line-height: 23px;

@@ -1,37 +1,54 @@
-<div ng-controller="TopPredictorWidgetController" id="attributes">
-    <div class="tab-header">
-        <div class="wrapper" data-ng-show="!backToSummaryView">
-            <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="secondary" data-ng-click="exportClicked()">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
-            
-        </div>
-        <div class="wrapper" data-ng-show="backToSummaryView">
-            <a href="javascript:void(0)" id="back-to-summary-link" data-ng-click="backToSummaryClicked()"><i class="fa fa-angle-double-left"></i> {{ResourceUtility.getString('TOP_PREDICTORS_BACK_TO_SUMMARY_LABEL')}}</a>
-        </div>
-    </div>
-    <div id="top-predictor-wrapper" class="wrapper">
-        <h3>{{chartHeader}}</h3>
-        <div class="data">
-            <div class="attributes lattice-attributes" data-ng-show="showExternalCategories">
-                <h4>{{externalPredictorTotal}}</h4>
-                <ul>    
-                    <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                        <a href="javascript:void(0)" class="{{category.activeClass}}" data-ng-bind-html="generateCategoryLabel(category)"></a>
-                    </li>
-                </ul>
-            </div>
-            <div id="chart" class="js-top-predictor-donut">
+<div ng-controller="TopPredictorWidgetController" id="attributes" class="container">
+    <div class="row">
+        <div class="twelve columns">
+            <div data-ng-show="!backToSummaryView">
+                <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="secondary" data-ng-click="exportClicked()">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
                 
             </div>
-            <div class="attributes lattice-attributes" data-ng-show="showInternalCategories">
-                <h4>{{internalPredictorTotal}}</h4>
-                <ul>
-                    <li data-ng-repeat="category in internalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                        <a href="javascript:void(0)" data-ng-bind-html="generateCategoryLabel(category)"></a>
-                    </li>
-                </ul>
+            <div data-ng-show="backToSummaryView">
+                <a href="javascript:void(0)" id="back-to-summary-link" data-ng-click="backToSummaryClicked()"><i class="fa fa-angle-double-left"></i> {{ResourceUtility.getString('TOP_PREDICTORS_BACK_TO_SUMMARY_LABEL')}}</a>
             </div>
         </div>
     </div>
+    <div id="top-predictor-wrapper">
+        <div class="row">
+            <div class="twelve columns">
+                <h3>{{chartHeader}}</h3>
+            </div>
+        </div>
+
+        <div class="row data">
+            <div class="three columns">
+                <div class="attributes lattice-attributes" data-ng-show="showExternalCategories">
+                    <h4>{{externalPredictorTotal}}</h4>
+                    <ul>    
+                        <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
+                            <a href="javascript:void(0)" class="{{category.activeClass}}" data-ng-bind-html="generateCategoryLabel(category)"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- End .three.columns -->
+
+            <div class="six columns">
+                <div id="chart" class="js-top-predictor-donut">
+                    
+                </div>
+            </div><!-- End .six.columns -->
+
+            <div class="three columns">
+                <div class="attributes lattice-attributes" data-ng-show="showInternalCategories">
+                    <h4>{{internalPredictorTotal}}</h4>
+                    <ul>
+                        <li data-ng-repeat="category in internalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
+                            <a href="javascript:void(0)" data-ng-bind-html="generateCategoryLabel(category)"></a>
+                        </li>
+                    </ul>
+                </div>
+            </div><!-- End .three.columns -->
+
+        </div><!-- End .row -->
+    </div><!-- End #top-predictor-wrapper -->
+
     <div id="topPredictorAttributeHover">
         
     </div>

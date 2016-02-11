@@ -1,14 +1,16 @@
-<div data-ng-controller="ModelListController">
+<div class="container" data-ng-controller="ModelListController">
 
-    <section id="main-content" class="wrapper">
-        
-        <div data-ng-show="loading">
-            <div class="loader"> </div>
-            <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
-        </div>
+    <section id="main-content" class="container">
 
-        <div class="no-models text-center"  data-ng-show="showNoModels">
-            <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
+        <div class="row twelve columns">        
+            <div data-ng-show="loading">
+                <div class="loader"> </div>
+                <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+            </div>
+
+            <div class="no-models text-center"  data-ng-show="showNoModels">
+                <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
+            </div>
         </div>
 
         <div class="row" data-ng-hide="showNoModels || loading">
@@ -20,15 +22,10 @@
             </div>
         </div>
 
-        <div class="row" data-ng-hide="showNoModels || loading">
-            <section class="panel panel-clear">
-                <div class="panel-body">
-                    <div class="row" id="modelListContainer">
-                        
-                    </div>
-                </div>
-            </section>
+        <div class="row" data-ng-hide="showNoModels || loading">        
+            <div class="twelve columns tile-list" id="modelListContainer"></div>
         </div>
+
     </section>
     
 </div>

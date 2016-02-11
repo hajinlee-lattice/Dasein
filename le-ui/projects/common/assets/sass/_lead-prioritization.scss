@@ -3,8 +3,27 @@
     padding: 13px;
 }
 
+
+
+
+
+
+/* This is ugly. Remove this when the multiple controllers within the Model List screen have been ironed out and don't include multiple div levels deep 
+================================================================ */ 
+#modelListContainer > div {
+	width: 100%;
+}
+
+
+
+
+
+
+
+
 .model {
 	background-image: url(../images/bkg-active-model-lp.jpg);
+	background-repeat: no-repeat;
 	background-color: #fff;
 	background-position: center center;
 	background-size: 160px;
@@ -13,14 +32,38 @@
 	&.inactive {
         background-color: #f1f1f1;
         background-image: url(../images/bkg-inactive-model-lp.jpg);
-        background-repeat: no-repeat;
-        background-position: center center;
+    }
+    &:hover {
+    	border: #7cc5f3 solid 2px;
     }
 	.status {
 		background: none;
 		border-top: none;
 	}
+	.model-title h2 {
+		font-size: 18px;
+		&.editable {
+			float: left;
+		}
+		button {
+			border: none;
+			background: none;
+			padding: 0;
+			float: right;
+			margin: 0 0 10px 10px;
+			font-size: 18px;
+		}
+	}
+	.form-inline .form-control {
+		width: 100%;
+		margin-bottom: 10px;
+	}
+	.meta-data {
+		margin-top: 254px;
+	}
 }
+
+
 
 .model-details {
 	.back-button {
@@ -40,3 +83,217 @@
         font-family:'ProximaNova-Bold','Open Sans',sans-serif;
     }
 }
+
+
+
+/*
+Model Detail Attributes
+brought over from leadpprioritization/app/assets/style.scss
+================================================================== */
+.js-top-predictor-donut {
+	text-align: center;
+}
+#attributes h3 {
+    text-align: center;
+    font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+    font-weight: normal;
+    font-size: 22px;
+    margin-bottom: 30px;
+}
+#chart span {
+    color: #477cba;
+    cursor: pointer;                
+}
+.data .attributes h4 {
+    margin-bottom: 0;
+    margin-top: 0;
+    padding-bottom: 0.5em;
+    border-bottom: #ddd solid 1px;
+    text-align: left;
+    font-family:'ProximaNova-Bold','Open Sans',sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+}
+
+.lattice-attributes {
+    padding-right: 7px;
+}
+.marketo-attributes {
+    padding-left: 7px;
+}
+
+.attributes.lattice-attributes h4 {
+    text-align: right;
+}
+    .lattice-attributes a, .marketo-attributes a {
+        text-align: right;
+        color: #666;
+        display: block;
+        border-top: transparent solid 1px;
+        border-bottom: #fff solid 1px;
+        font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+        font-size: 14px;
+    }
+    .lattice-attributes a {
+        padding: 7px 0 7px 7px;
+    }
+    .marketo-attributes a {
+        padding: 7px 7px 7px 0;
+        text-align: left;
+    }
+        .attributes a:hover {
+            color: #747474;
+            background: #e1eefd;
+            border-top: #ddd solid 1px;
+        }
+    .attributes span {
+        display: inline-block;
+        color: #fff;
+        width: 33px;
+        height: 26px;
+        vertical-align: middle;
+        text-align: center;
+        line-height: 2em;
+        -webkit-border-radius: 4px; 
+        -moz-border-radius: 4px; 
+        border-radius: 4px;
+        font-family:'ProximaNova-Bold','Open Sans',sans-serif;
+    }
+        .lattice-attributes span {
+            margin-left: 1em;
+        }
+            .firmographics span {
+                background: #85e7d7;
+            }
+            .growth-trends span {
+                background: #0fb6e0;
+            }
+        .marketo-attributes span {
+            margin-right: 1em;
+        }
+            .marketing-response span {
+                background: #4095e1;
+            }
+            .other span {
+                background: #fe864b;
+            }
+#topPredictorAttributeHover {
+    position: fixed;
+    -webkit-transform: translateY(-50%);
+    -moz-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    -o-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+a#back-to-summary-link:hover {
+  cursor: pointer;
+}
+
+.donut-chart-back-button {
+    cursor: pointer;
+}
+
+.attribute-hover {
+    position: relative;
+}
+
+.attribute-hover > div {
+    background: white;
+    width: 350px;
+    text-align: left;
+    box-shadow:
+    0 0 0 1px #CDCDCD,
+    0 0 0 4px hsl(0, 0%, 90%);
+    border-radius: 1px;
+}
+
+.attribute-hover-header {
+    padding: 10px 10px 0 10px;
+}
+
+.attribute-hover p {
+    font-size: 12px;
+    line-height: 14px;
+    overflow: hidden;
+}
+
+.attribute-hover p.truncate_2lines {
+    height: 2.4em;
+    position: relative;
+    word-wrap: break-word;
+}
+
+.attribute-hover p.truncate_2lines:after {
+    content: '...';
+    position: absolute;
+    display: block;
+    bottom: 0em;
+    right: .5em;
+    width: 1.5em;
+    text-align: left;
+    background: #fff;
+}
+
+.attribute-hover h4 {
+    height: 1.2em;
+    padding-left: 6px;
+    margin: 0;
+    display: inline-block;
+    font-family: 'ProximaNova-Bold';
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-size: 16px;
+    line-height: 21px;
+}
+
+.attribute-hover-left-arrow > div:after,
+.attribute-hover-left-arrow > div:before {
+    left: 100%;
+    top: 50%;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.attribute-hover-left-arrow > div:after {
+    border: rgba(255, 255, 255, 0) solid 12px;
+    border-left-color: white;
+    margin-top: -12px;
+}
+
+.attribute-hover-left-arrow > div:before {
+    border: rgba(255, 225, 255, 0) solid 13px;
+    border-left-color: #BBB;
+    margin-top: -13px;
+}
+
+.attribute-hover-right-arrow > div:after,
+.attribute-hover-right-arrow > div:before {
+    right: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.attribute-hover-right-arrow > div:after {
+    border: rgba(255, 255, 255, 0) solid 12px;
+    border-right-color: white;
+    margin-top: -12px;
+}
+
+.attribute-hover-right-arrow > div:before {
+    border: rgba(255, 225, 255, 0) solid 13px;
+    border-right-color: #BBB;
+    margin-top: -13px;
+}
+
+
