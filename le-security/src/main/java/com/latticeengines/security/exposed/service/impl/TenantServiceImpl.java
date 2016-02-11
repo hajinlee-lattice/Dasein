@@ -61,7 +61,11 @@ public class TenantServiceImpl implements TenantService {
         try {
             tenantEntityMgr.delete(tenant);
         } catch (IllegalArgumentException e) {
-            log.error(e);
+            if (!e.getMessage().contains("null entity")) {
+                throw e;
+            } else {
+                log.error(e);
+            }
         }
         try {
             for (User user : userService.getUsers(tenant.getId())) {

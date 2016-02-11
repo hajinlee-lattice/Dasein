@@ -50,11 +50,13 @@ public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTest
 
     @BeforeClass(groups = "deployment.pd")
     public void setup() throws Exception {
+        System.out.println("Deleting existing test tenants ...");
         deleteTwoTenants();
-        System.out.println("Bootstrap test tenants using tenant console.");
+
+        System.out.println("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironment("pd", true);
 
-        System.out.println("Set up testing users.");
+        System.out.println("Setting up testing users ...");
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {
             tenantToAttach = testingTenants.get(0);

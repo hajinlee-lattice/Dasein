@@ -341,30 +341,32 @@ public class InternalResource extends InternalResourceBase {
         LoginDocument loginDoc = JsonUtils.deserialize(loginDocAsString, LoginDocument.class);
 
         headers.add(new BasicNameValuePair(Constants.AUTHORIZATION, loginDoc.getData()));
-
-        for (Tenant tenant : loginDoc.getResult().getTenants()) {
-            if (tenant.getId().equals(tenant2Id)) {
-                payload = JsonUtils.serialize(tenant);
-                HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers, payload);
-                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
-                        true, headers);
-                ObjectMapper mapper = new ObjectMapper();
-                JsonNode jNode = mapper.readTree(response);
-                while (jNode.size() < 2) {
-                    InputStream ins = getClass().getClassLoader()
-                            .getResourceAsStream("com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
-                    ModelSummary data = new ModelSummary();
-                    Tenant fakeTenant = new Tenant();
-                    fakeTenant.setId("FAKE_TENANT");
-                    fakeTenant.setName("Fake Tenant");
-                    fakeTenant.setPid(-1L);
-                    data.setTenant(fakeTenant);
-                    data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
-                            true, headers, JsonUtils.serialize(data));
-                    response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort() + "/pls/modelsummaries",
-                            true, headers);
-                    jNode = mapper.readTree(response);
+        if (!forceInstallation) {
+            for (Tenant tenant : loginDoc.getResult().getTenants()) {
+                if (tenant.getId().equals(tenant2Id)) {
+                    payload = JsonUtils.serialize(tenant);
+                    HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers,
+                            payload);
+                    String response = HttpClientWithOptionalRetryUtils
+                            .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode jNode = mapper.readTree(response);
+                    while (jNode.size() < 2) {
+                        InputStream ins = getClass().getClassLoader().getResourceAsStream(
+                                "com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
+                        ModelSummary data = new ModelSummary();
+                        Tenant fakeTenant = new Tenant();
+                        fakeTenant.setId("FAKE_TENANT");
+                        fakeTenant.setName("Fake Tenant");
+                        fakeTenant.setPid(-1L);
+                        data.setTenant(fakeTenant);
+                        data.setRawFile(new String(IOUtils.toByteArray(ins)));
+                        HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
+                                true, headers, JsonUtils.serialize(data));
+                        response = HttpClientWithOptionalRetryUtils
+                                .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
+                        jNode = mapper.readTree(response);
+                    }
                 }
             }
         }
