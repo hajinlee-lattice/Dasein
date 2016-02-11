@@ -51,6 +51,10 @@ echo "Deploying workflowapi to local Hadoop"
 cd $WSHOME/le-workflowapi && wfapidpl 2> /tmp/errors.txt
 processErrors
 
+echo "Deploying scoring to local Hadoop"
+cd $WSHOME/le-scoring && scoringdpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying swlib to local Hadoop"
 cd $WSHOME/le-swlib && swlibdpl 2> /tmp/errors.txt
 processErrors
