@@ -23,7 +23,6 @@ public class TenantServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(spaceConfig);
 
         Assert.assertEquals(spaceConfig.getTopology(), CRMTopology.MARKETO);
-        Assert.assertEquals(spaceConfig.getProduct(), LatticeProduct.LPA);
 
         Assert.assertTrue(true);
     }

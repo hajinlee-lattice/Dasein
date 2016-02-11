@@ -313,7 +313,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean danteIsEnabled(String contractId, String tenantId) {
-        TenantDocument tenant = getTenant(contractId, tenantId);
+        TenantDocument tenant = tenantEntityMgr.getTenant(contractId, tenantId);
         String str = tenant.getSpaceInfo().featureFlags;
         if (!str.contains(danteFeatureFlag)) {
             return false;
