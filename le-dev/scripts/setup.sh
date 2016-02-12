@@ -10,11 +10,14 @@ function processErrors
   fi
 }
 
+# Test for required env variables
+printf "%s\n" "${WSHOME:?You must set WSHOME}"
+
 # Expand aliases
 echo "Expanding aliases."
 shopt -s expand_aliases
-source $WSHOME/le-dev/aliases
 echo "Sourcing aliases file"
+source $WSHOME/le-dev/aliases
 
 # Top-level compile
 echo "Changing dir into workspace"
