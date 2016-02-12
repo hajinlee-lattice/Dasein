@@ -3,16 +3,76 @@
     padding: 13px;
 }
 
-
-
-/* This is ugly. Remove this when the multiple controllers within the Model List screen have been ironed out and don't include multiple div levels deep 
-================================================================ */ 
-#modelListContainer > div {
+.tile-list > div {
 	width: 100%;
 }
 
+.leads-table .data-table {
+  border: none;
+}
 
-.model {
+.leads-table th.lead-company {
+  width: 35%;
+}
+
+.leads-table th.lead-contact {
+  width: 25%;
+}
+
+.leads-table .lead-converted {
+  text-align: center;
+}
+
+.leads-table .lead-score {
+  width: 20%;
+  text-align: center;
+}
+
+.leads-table tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
+}
+.model-details .data-table h2 {
+	text-align: center;
+	font-size: 22px;
+	margin-top: 2em;
+	font-weight: bold;
+}
+#performanceTab h2{margin:50px 0;padding:0;text-align:center;width:100%;font-size:1.25em;font-family:'ProximaNova-Bold','Open Sans',sans-serif}#performanceTab h2.strike-through{position:relative;z-index:1}#performanceTab h2.strike-through:before{border-top:1px solid #cccccc;content:"";margin:0 auto;position:absolute;top:50%;left:0;right:0;bottom:0;width:936px;z-index:-1}#performanceTab h2.strike-through span{background:white;padding:0 15px}#performanceTab h2.line-through{display:table;white-space:nowrap}#performanceTab h2.line-through:before,#performanceTab h2.line-through:after{border-top:1px solid #cccccc;content:'';display:table-cell;position:relative;top:0.5em;width:45%}#performanceTab h2.line-through:before{right:1.5%}#performanceTab h2.line-through:after{left:1.5%}#performanceTab .lift-data .data-table{margin-top:20px;margin-bottom:35px}
+
+
+.lp .tile-list .list-item {
+    -webkit-order: 0;
+    order: 0;
+    -webkit-flex-grow: 0;
+    flex-grow: 0;
+    -webkit-flex-shrink: 1;
+    flex-shrink: 1;
+    -webkit-flex-basis: auto;
+    flex-basis: auto;
+    -webkit-align-self: auto;
+    align-self: auto;
+    margin-right: 4px;
+	border: #d0d0d0 solid 1px;
+	padding: 0.75em;
+	margin-bottom: 4px;
+	width: 100%;
+	background: #e7e7e7;
+	transition: background 150ms ease;
+	height: 240px;
+	@include media(">medium") {
+		width: calc(50% - 4px);
+	}
+	@include media(">large") {
+		width: calc(33.333% - 4px);
+	}
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+
+
+.lp .tile-list .model {
 	background-image: url(../images/bkg-active-model-lp.jpg);
 	background-repeat: no-repeat;
 	background-color: #fff;

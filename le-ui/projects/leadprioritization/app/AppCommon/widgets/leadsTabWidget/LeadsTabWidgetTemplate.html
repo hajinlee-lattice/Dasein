@@ -1,8 +1,13 @@
-<div data-ng-controller="LeadsTabWidgetController">
-    <data-leads-table id="topSampleTable" leads="data.TopSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_TOP_TITLE')}}"></data-leads-table>
-    <data-leads-table id="bottomSampleTable" leads="data.BottomSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_BOTTOM_TITLE')}}"></data-leads-table>
 
-    <div class="wrapper model-admin-link">
-        <a href="javascript:void(0)" id="adminLink" data-ng-show="showAdminLink" class="hidden-link" data-ng-click="adminLinkClick($event)">{{ResourceUtility.getString('MODEL_ADMIN_LINK_LABEL')}}</a>
-    </div>
+<div class="container">
+	<div class="twelve columns">
+		<div data-ng-controller="LeadsTabWidgetController">
+		    <data-leads-table id="topSampleTable" leads="data.TopSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_TOP_TITLE')}}"></data-leads-table>
+		    <data-leads-table id="bottomSampleTable" leads="data.BottomSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_BOTTOM_TITLE')}}"></data-leads-table>
+
+		    <div class="wrapper model-admin-link">
+		        <a href="javascript:void(0)" id="adminLink" data-ng-show="showAdminLink" class="hidden-link" data-ng-click="adminLinkClick($event)">{{ResourceUtility.getString('MODEL_ADMIN_LINK_LABEL')}}</a>
+		    </div>
+		</div>
+	</div>
 </div>
