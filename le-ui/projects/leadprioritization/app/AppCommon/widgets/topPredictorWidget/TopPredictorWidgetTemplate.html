@@ -2,7 +2,7 @@
     <div class="row">
         <div class="twelve columns">
             <div data-ng-show="!backToSummaryView">
-                <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="secondary" data-ng-click="exportClicked()">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
+                <span class="total-attr-values">{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="javascript:void(0)" class="export-link" data-ng-click="exportClicked()">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
                 
             </div>
             <div data-ng-show="backToSummaryView">
