@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.collection.service.impl;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -15,6 +17,7 @@ import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -98,6 +101,28 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         getLogger().info(String.format("Refreshing %s successful, generated Rows=%d", progress.getSourceName(),
                 progress.getRowsGeneratedInHdfs()));
         return finishProgress(progress);
+    }
+
+    @Override
+    public void purgeOldVersions() {
+        PurgeStrategy purgeStrategy = getSource().getPurgeStrategy();
+        if (PurgeStrategy.NEVER.equals(purgeStrategy)) {
+            return;
+        }
+
+        List<String> versions = hdfsSourceEntityMgr.getVersions(getSource());
+
+        if (PurgeStrategy.NUM_VERSIONS.equals(purgeStrategy)) {
+            int numToKeep = getSource().getNumberOfVersionsToKeep();
+            if (versions.size() <= numToKeep) { return; }
+
+            Collections.sort(versions);
+            Collections.reverse(versions);
+            for (int i = numToKeep; i < versions.size(); i++) {
+                hdfsSourceEntityMgr.purgeSourceAtVersion(getSource(), versions.get(i));
+            }
+
+        }
     }
 
     private boolean transformInternal(RefreshProgress progress) {

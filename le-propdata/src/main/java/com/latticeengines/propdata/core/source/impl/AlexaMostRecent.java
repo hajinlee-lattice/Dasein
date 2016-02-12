@@ -10,6 +10,7 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 
 @Component("alexaMostRecent")
 public class AlexaMostRecent implements MostRecentSource, DomainBased, HasSqlPresence {
@@ -66,5 +67,14 @@ public class AlexaMostRecent implements MostRecentSource, DomainBased, HasSqlPre
     public String getSqlMatchDestination() {
         return "Alexa_Source";
     }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NUM_VERSIONS; }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() { return 2; }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() { return 7; }
 
 }

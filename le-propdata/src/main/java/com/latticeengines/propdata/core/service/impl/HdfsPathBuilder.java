@@ -51,9 +51,14 @@ public class HdfsPathBuilder {
         return baseDir.append(rawDataFlowType);
     }
 
-    public Path constructSnapshotDir(Source source, String version) {
+    public Path constructSnapshotRootDir(Source source) {
         Path baseDir = constructSourceDir(source);
-        return baseDir.append("Snapshot").append(version);
+        return baseDir.append("Snapshot");
+    }
+
+    public Path constructSnapshotDir(Source source, String version) {
+        Path baseDir = constructSnapshotRootDir(source);
+        return baseDir.append(version);
     }
 
     public Path constructWorkFlowDir(Source source, String flowName) {

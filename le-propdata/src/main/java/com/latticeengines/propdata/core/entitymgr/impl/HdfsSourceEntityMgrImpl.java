@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,8 @@ import com.latticeengines.propdata.core.util.TableUtils;
 
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
+
+    private static final Log log = LogFactory.getLog(HdfsSourceEntityMgrImpl.class);
 
     @Autowired
     HdfsPathBuilder hdfsPathBuilder;
@@ -96,6 +100,30 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
+    public synchronized void purgeSourceAtVersion(Source source, String version) {
+        if (source instanceof CollectedSource) {
+            throw new UnsupportedOperationException("Never purge collected source.");
+        }
+
+        String currentVersion = getCurrentVersion(source);
+        if (currentVersion.equalsIgnoreCase(version)) {
+            throw new RuntimeException(
+                    "Cannot purge current version " + version + " for source" + source.getSourceName());
+        }
+
+        String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, path)) {
+                HdfsUtils.rmdir(yarnConfiguration, path);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to purge " + source.getSourceName() + " at version " + version, e);
+        }
+
+        log.info("Purged " + source.getSourceName() + " at version " + version);
+    }
+
+    @Override
     public Table getTableAtVersion(Source source, String version) {
         if (source instanceof CollectedSource) {
             throw new UnsupportedOperationException(
@@ -108,6 +136,23 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
         }
+    }
+
+    @Override
+    public List<String> getVersions(Source source) {
+        String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source).toString();
+        List<String> versions = new ArrayList<>();
+        try {
+            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, snapshot)) {
+                if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
+                    String version = dir.substring(dir.lastIndexOf("/") + 1);
+                    versions.add(version);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get all versions for " + source.getSourceName());
+        }
+        return versions;
     }
 
     @Override

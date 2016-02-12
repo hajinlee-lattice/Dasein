@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.MostRecentSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 
 @Component
 public class BuiltWithMostRecent implements MostRecentSource, DomainBased {
@@ -41,5 +42,14 @@ public class BuiltWithMostRecent implements MostRecentSource, DomainBased {
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NUM_VERSIONS; }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() { return 2; }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() { return 7; }
 
 }

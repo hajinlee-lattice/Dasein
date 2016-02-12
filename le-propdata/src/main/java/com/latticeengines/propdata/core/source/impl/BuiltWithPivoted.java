@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component
@@ -43,5 +44,14 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPrese
 
     @Override
     public String getSqlMatchDestination() { return "BuiltWith_Pivoted_Source"; }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NUM_VERSIONS; }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() { return 2; }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() { return 7; }
 
 }

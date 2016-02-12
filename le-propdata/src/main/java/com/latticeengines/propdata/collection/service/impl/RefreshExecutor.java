@@ -74,6 +74,11 @@ public class RefreshExecutor implements RefreshJobExecutor {
                 + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
     }
 
+    @Override
+    public void purgeOldVersions() {
+        refreshService.purgeOldVersions();
+    }
+
     private RefreshProgress retryJob(RefreshProgress progress) {
         if (ProgressStatus.FAILED.equals(progress.getStatus())) {
             log.info("Found a job to retry: " + progress);

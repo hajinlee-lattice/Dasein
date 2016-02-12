@@ -3,6 +3,7 @@ package com.latticeengines.propdata.collection.service;
 import java.util.Date;
 
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
 
 public interface RefreshService {
@@ -19,6 +20,8 @@ public interface RefreshService {
 
     String findBaseVersionForNewProgress();
 
-    Source getSource();
+    DerivedSource getSource();
+
+    void purgeOldVersions();
 
 }

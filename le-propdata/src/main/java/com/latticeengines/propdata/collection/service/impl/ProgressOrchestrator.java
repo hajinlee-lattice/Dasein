@@ -50,23 +50,23 @@ public class ProgressOrchestrator {
     private Log log = LogFactory.getLog(this.getClass());
     private Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
     private Map<DerivedSource, RefreshService> refreshServiceMap = new HashMap<>();
-    private static final int jobExpirationHours = 48; // expire a job after 48 hour
+    private static final int jobExpirationHours = 48; // expire after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
     private Map<String, RefreshJobExecutor> executorMap = new HashMap<>();
     private ExecutorService executorService;
 
     @PostConstruct
     private void constructMaps() {
-        for (Source source: sourceService.getSources()) {
+        for (Source source : sourceService.getSources()) {
             if (source instanceof RawSource) {
-                for (ArchiveService archiveService: archiveServiceList) {
+                for (ArchiveService archiveService : archiveServiceList) {
                     if (source.equals(archiveService.getSource())) {
                         archiveServiceMap.put((RawSource) source, archiveService);
                         executorMap.put(source.getSourceName(), new ArchiveExecutor(archiveService));
                     }
                 }
             } else if (source instanceof DerivedSource) {
-                for (RefreshService refreshService: refreshServiceList) {
+                for (RefreshService refreshService : refreshServiceList) {
                     if (source.equals(refreshService.getSource())) {
                         refreshServiceMap.put((DerivedSource) source, refreshService);
                         executorMap.put(source.getSourceName(), new RefreshExecutor(refreshService));
@@ -78,30 +78,35 @@ public class ProgressOrchestrator {
 
     public synchronized void executeRefresh() {
         executorService = Executors.newFixedThreadPool(executorMap.size());
-
-        for (RawSource source: archiveServiceMap.keySet()) {
-            try {
-                if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
-                    submitProgress(findArchiveProgressToProceed(source));
-                }
-            } catch (Exception e) {
-                log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
+        for (Source source : sourceService.getSources()) {
+            if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
+                    try {
+                        if (source instanceof RawSource) {
+                            submitProgress(findArchiveProgressToProceed((RawSource) source));
+                        } else if (source instanceof DerivedSource) {
+                            submitProgress(findRefreshProgressToProceed((DerivedSource) source));
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
+                    }
             }
-        }
-
-        for (DerivedSource source: refreshServiceMap.keySet()) {
-            try {
-                if (zkConfigurationService.refreshJobEnabled(source) && (!dryrun)) {
-                    submitProgress(findRefreshProgressToProceed(source));
+            if (source instanceof DerivedSource) {
+                try {
+                    RefreshService refreshService = refreshServiceMap.get(source);
+                    if (refreshService != null) {
+                        refreshService.purgeOldVersions();
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to purge old versions of " + source.getSourceName(), e);
                 }
-            } catch (Exception e) {
-                log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
             }
         }
     }
 
     private void submitProgress(final Progress progress) {
-        if (progress == null) { return; }
+        if (progress == null) {
+            return;
+        }
         final RefreshJobExecutor executor = executorMap.get(progress.getSourceName());
         if (executor != null) {
             executorService.submit(new Runnable() {
@@ -116,8 +121,7 @@ public class ProgressOrchestrator {
     @SuppressWarnings("unchecked")
     ArchiveProgress findArchiveProgressToProceed(RawSource source) {
         ArchiveService archiveService = archiveServiceMap.get(source);
-        return (ArchiveProgress)
-                findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) archiveService);
+        return (ArchiveProgress) findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) archiveService);
     }
 
     @SuppressWarnings("unchecked")
@@ -135,8 +139,7 @@ public class ProgressOrchestrator {
                 Date expireDate = new Date(System.currentTimeMillis() - jobExpirationMilliSeconds);
                 Date lastUpdated = runningProgress.getLatestStatusUpdate();
                 if (lastUpdated.before(expireDate)) {
-                    log.fatal(String.format(
-                            "This progress has been hanging for more than %d hours: %s",
+                    log.fatal(String.format("This progress has been hanging for more than %d hours: %s",
                             jobExpirationHours, runningProgress));
                     runningProgress.setNumRetries(99);
                     service.updateStatusToFailed(runningProgress, "Timeout", null);
@@ -149,19 +152,19 @@ public class ProgressOrchestrator {
 
     private boolean shouldStartNextStep(ProgressStatus status) {
         switch (status) {
-            case NEW:
-            case DOWNLOADED:
-            case TRANSFORMED:
-            case UPLOADED:
-            case FAILED:
-                return true;
-            default:
-                return false;
+        case NEW:
+        case DOWNLOADED:
+        case TRANSFORMED:
+        case UPLOADED:
+        case FAILED:
+            return true;
+        default:
+            return false;
         }
     }
 
     void setServiceMaps(Map<RawSource, ArchiveService> archiveServiceMap,
-                        Map<DerivedSource, RefreshService> pivotServiceMap) {
+            Map<DerivedSource, RefreshService> pivotServiceMap) {
         this.archiveServiceMap = archiveServiceMap;
         this.refreshServiceMap = pivotServiceMap;
     }
