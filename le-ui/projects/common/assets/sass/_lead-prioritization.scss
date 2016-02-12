@@ -5,20 +5,11 @@
 
 
 
-
-
-
 /* This is ugly. Remove this when the multiple controllers within the Model List screen have been ironed out and don't include multiple div levels deep 
 ================================================================ */ 
 #modelListContainer > div {
 	width: 100%;
 }
-
-
-
-
-
-
 
 
 .model {
@@ -29,6 +20,7 @@
 	background-size: 160px;
 	border: #dcdcdc solid 2px;
 	min-height: 310px;
+	position: relative;
 	&.inactive {
         background-color: #f1f1f1;
         background-image: url(../images/bkg-inactive-model-lp.jpg);
@@ -59,7 +51,16 @@
 		margin-bottom: 10px;
 	}
 	.meta-data {
-		margin-top: 254px;
+		position: absolute;
+		bottom: 10px;
+		width: 94%;
+		.delete-model {
+			float: right;
+			border: 0;
+			background: 0;
+			padding: 0;
+			font-size: 24px;
+		}
 	}
 }
 
@@ -297,3 +298,10 @@ a#back-to-summary-link:hover {
 }
 
 
+
+.lp .black-summary-list.stats dt {
+	color: rgba(255, 255, 255, 0.8);	
+}
+.lp .black-summary-list.stats dd {
+	font-size: 1em;
+}
