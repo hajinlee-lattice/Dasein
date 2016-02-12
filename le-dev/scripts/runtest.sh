@@ -26,4 +26,4 @@ if [ $TEST_TYPE = "deployment" ]; then
     TESTGROUP=$TEST_TYPE.$PRODUCT
 fi
 
-mvn -P$TEST_TYPE -Dtest=$TEST -Ddeployment.groups=$TESTGROUP verify -DargLine=""
+mvn -P$TEST_TYPE -Dtest=$TEST -D$TEST_TYPE.groups=$TESTGROUP verify -DargLine=""
