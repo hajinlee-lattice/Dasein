@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchInput {
 
-    private MatchEngine matchEngine;
     private Tenant tenant;
 
     private List<String> fields;
@@ -28,16 +27,6 @@ public class MatchInput {
 
     // if not provided, pick latest
     private String predefinedVersion;
-
-    @JsonProperty("MatchEngine")
-    public MatchEngine getMatchEngine() {
-        return matchEngine;
-    }
-
-    @JsonProperty("MatchEngine")
-    public void setMatchEngine(MatchEngine matchEngine) {
-        this.matchEngine = matchEngine;
-    }
 
     @JsonProperty("KeyMap")
     public Map<MatchKey, String> getKeyMap() {
@@ -109,7 +98,4 @@ public class MatchInput {
         this.customSelection = customSelection;
     }
 
-    public enum MatchEngine {
-        RealTime, Bulk
-    }
 }

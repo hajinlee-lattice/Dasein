@@ -43,7 +43,6 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
 
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
-        input.setMatchEngine(MatchInput.MatchEngine.RealTime);
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         matchContext.setInput(input);
 

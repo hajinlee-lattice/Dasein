@@ -24,7 +24,7 @@ public class MatchInputValidatorUnitTestNG {
         MatchInput input = new MatchInput();
         boolean failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -33,16 +33,7 @@ public class MatchInputValidatorUnitTestNG {
 
         failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
-        } catch (Exception e) {
-            failed = true;
-        }
-        Assert.assertTrue(failed, "Should failed on missing match engine.");
-        input.setMatchEngine(MatchInput.MatchEngine.RealTime);
-
-        failed = false;
-        try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -53,12 +44,11 @@ public class MatchInputValidatorUnitTestNG {
     public void testRealTimeValidation() {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
-        input.setMatchEngine(MatchInput.MatchEngine.RealTime);
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
 
         Boolean failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -70,7 +60,7 @@ public class MatchInputValidatorUnitTestNG {
 
         failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -83,7 +73,7 @@ public class MatchInputValidatorUnitTestNG {
 
         failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -97,7 +87,7 @@ public class MatchInputValidatorUnitTestNG {
 
         failed = false;
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
@@ -106,14 +96,14 @@ public class MatchInputValidatorUnitTestNG {
         failed = false;
         input.setData(generateMockData(2000));
         try {
-            MatchInputValidator.validate(input, maxRealTimeInput);
+            MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
         }
         Assert.assertTrue(failed, "Should failed on too many data.");
 
         input.setData(generateMockData(100));
-        MatchInputValidator.validate(input, maxRealTimeInput);
+        MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
     }
 
     static List<List<Object>> generateMockData(int rows) {

@@ -25,6 +25,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     @MatchStep
     public MatchOutput match(MatchInput input, boolean returnUnmatched) {
         MatchContext matchContext = prepare(input);
+        matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         matchContext.setReturnUnmatched(returnUnmatched);
         matchContext = executeMatch(matchContext);
 
@@ -33,7 +34,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
     }
 
     private MatchContext prepare(MatchInput input) {
-        return matchPlanner.plan(input);
+        return matchPlanner.planForRealTime(input);
     }
 
     private MatchContext executeMatch(MatchContext context) {

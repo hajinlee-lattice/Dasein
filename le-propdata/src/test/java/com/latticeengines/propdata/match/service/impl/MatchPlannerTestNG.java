@@ -29,7 +29,6 @@ public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
     public void testPrepareOutput() {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
-        input.setMatchEngine(MatchInput.MatchEngine.RealTime);
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         Map<MatchKey, String> keyMap = new HashMap<>();
         keyMap.put(MatchKey.Domain, "Domain");
@@ -50,7 +49,7 @@ public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
             uniqueDomains.add(domain);
         }
 
-        MatchContext context = matchPlanner.plan(input);
+        MatchContext context = matchPlanner.planForRealTime(input);
         Assert.assertEquals(context.getStatus(), MatchStatus.NEW);
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 

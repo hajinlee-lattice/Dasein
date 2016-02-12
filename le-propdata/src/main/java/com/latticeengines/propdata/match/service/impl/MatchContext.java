@@ -19,6 +19,7 @@ public class MatchContext {
     private Map<String, List<Map<String, Object>>> resultsBySource;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
+    private MatchEngine matchEngine;
 
     public MatchInput getInput() {
         return input;
@@ -90,5 +91,27 @@ public class MatchContext {
 
     public void setReturnUnmatched(boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    public MatchEngine getMatchEngine() {
+        return matchEngine;
+    }
+
+    public void setMatchEngine(MatchEngine matchEngine) {
+        this.matchEngine = matchEngine;
+    }
+
+    public enum MatchEngine {
+        REAL_TIME("RealTime"), BULK("Bulk");
+        private String name;
+
+        MatchEngine(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
     }
 }

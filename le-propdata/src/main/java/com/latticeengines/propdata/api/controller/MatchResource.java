@@ -37,15 +37,7 @@ public class MatchResource implements MatchInterface {
     public MatchOutput matchRealTime(@RequestBody MatchInput input,
             @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
         try {
-            if (input.getMatchEngine() == null) {
-                throw new IllegalArgumentException("Must specify match engine.");
-            }
-            if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
-                return realTimeMatchService.match(input, returnUnmatched);
-            } else {
-                throw new UnsupportedOperationException(
-                        "Match engine " + MatchInput.MatchEngine.Bulk + " is not supported.");
-            }
+            return realTimeMatchService.match(input, returnUnmatched);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);
         }

@@ -33,16 +33,7 @@ class MatchPlanner {
     private ZkConfigurationService zkConfigurationService;
 
     @MatchStep
-    MatchContext plan(MatchInput input) {
-        if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
-            return planForRealTime(input);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Only MatchEngine " + MatchInput.MatchEngine.RealTime + " is supported.");
-        }
-    }
-
-    private MatchContext planForRealTime(MatchInput input) {
+    MatchContext planForRealTime(MatchInput input) {
         MatchContext context = validateMatchInput(input);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
@@ -51,7 +42,7 @@ class MatchPlanner {
 
     @MatchStep
     private MatchContext validateMatchInput(MatchInput input) {
-        MatchInputValidator.validate(input, zkConfigurationService.maxRealTimeInput());
+        MatchInputValidator.validateRealTimeInput(input, zkConfigurationService.maxRealTimeInput());
         MatchContext context = new MatchContext();
         context.setStatus(MatchStatus.NEW);
         context.setInput(input);

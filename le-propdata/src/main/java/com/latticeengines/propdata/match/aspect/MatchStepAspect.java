@@ -37,7 +37,7 @@ public class MatchStepAspect {
 
         Object[] allObjs = combineArgsAndReturn(joinPoint.getArgs(), retVal);
 
-        String logMsg = String.format("MatchStep=%s ElapsedTime=%d ms", joinPoint.getSignature().toShortString(),
+        String logMsg = String.format("MatchStep=%s TimeElapsedMills=%d", joinPoint.getSignature().toShortString(),
                 elapsedTime);
 
         String tenantId = getTenantId(allObjs);
@@ -48,6 +48,11 @@ public class MatchStepAspect {
         Integer rows = getRequestedRows(allObjs);
         if (rows != null) {
             logMsg += " RowsRequested=" + rows;
+        }
+
+        MatchContext.MatchEngine matchEngine = getMatchEngine(allObjs);
+        if (matchEngine != null) {
+            logMsg += " MatchEngine=" + matchEngine.getName();
         }
 
         String trackId = tracker.get();
@@ -79,6 +84,16 @@ public class MatchStepAspect {
             if (arg instanceof MatchContext) {
                 MatchContext matchContext = (MatchContext) arg;
                 return matchContext.getOutput().getRootOperationUID();
+            }
+        }
+        return null;
+    }
+
+    private MatchContext.MatchEngine getMatchEngine(Object[] args) {
+        for (Object arg : args) {
+            if (arg instanceof MatchContext) {
+                MatchContext matchContext = (MatchContext) arg;
+                return matchContext.getMatchEngine();
             }
         }
         return null;

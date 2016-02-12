@@ -13,39 +13,12 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
 class MatchInputValidator {
     private static Log log = LogFactory.getLog(MatchInputValidator.class);
 
-    static void validate(MatchInput input, Integer maxRealTimeInput) {
+    public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
         if (input.getTenant() == null) {
             throw new IllegalArgumentException("Must provide tenant to run a match.");
         }
-
-        if (input.getMatchEngine() == null) {
-            throw new IllegalArgumentException("Must specify match engine.");
-        }
-
         validateColumnSelection(input);
 
-        if (MatchInput.MatchEngine.RealTime.equals(input.getMatchEngine())) {
-            validateRealTimeInput(input, maxRealTimeInput);
-        } else {
-            throw new UnsupportedOperationException(
-                    "Match engine " + MatchInput.MatchEngine.Bulk + " is not supported.");
-        }
-    }
-
-
-    private static void validateColumnSelection(MatchInput input) {
-        if (input.getPredefinedSelection() == null && input.getCustomSelection() == null) {
-            throw new IllegalArgumentException("Must specify predefined or custom column selection.");
-        }
-
-        if (!ColumnSelection.Predefined.Model.equals(input.getPredefinedSelection())) {
-            throw new UnsupportedOperationException(
-                    "Only Predefined selection " + ColumnSelection.Predefined.Model + " is supported at this time.");
-        }
-
-    }
-
-    private static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
         if (input.getFields() == null || input.getFields().isEmpty()) {
             throw new IllegalArgumentException("Empty list of fields.");
         }
@@ -70,6 +43,18 @@ class MatchInputValidator {
         if (input.getData().size() > maxRealTimeInput) {
             throw new IllegalArgumentException("Too many input data, maximum rows = " + maxRealTimeInput);
         }
+    }
+
+    private static void validateColumnSelection(MatchInput input) {
+        if (input.getPredefinedSelection() == null && input.getCustomSelection() == null) {
+            throw new IllegalArgumentException("Must specify predefined or custom column selection.");
+        }
+
+        if (!ColumnSelection.Predefined.Model.equals(input.getPredefinedSelection())) {
+            throw new UnsupportedOperationException(
+                    "Only Predefined selection " + ColumnSelection.Predefined.Model + " is supported at this time.");
+        }
+
     }
 
     private static void validateKeys(Set<MatchKey> keySet) {
