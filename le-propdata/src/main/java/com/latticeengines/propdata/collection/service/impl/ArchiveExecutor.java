@@ -48,6 +48,9 @@ public class ArchiveExecutor implements RefreshJobExecutor {
         }
     }
 
+    @Override
+    public void purgeOldVersions() { }
+
     private ArchiveProgress retryJob(ArchiveProgress progress) {
         if (ProgressStatus.FAILED.equals(progress.getStatus())) {
             log.info("Found a job to retry: " + progress);

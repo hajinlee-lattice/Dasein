@@ -97,7 +97,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
         public MatchOutput call() {
             List<List<Object>> data = getGoodAccounts(numAccounts);
             MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-            MatchOutput output = matchProxy.match(input, true);
+            MatchOutput output = matchProxy.matchRealTime(input, true);
             log.info("[" + Thread.currentThread().getName() + "] " + output.getStatistics().getRowsMatched()
                     + " out of " + output.getStatistics().getRowsRequested() + " accounts are matched, time elapsed = "
                     + output.getStatistics().getTimeElapsedInMsec() + " msec RootOperationUID="

@@ -25,7 +25,7 @@ public class MatchResource implements MatchInterface {
     @Autowired
     private RealTimeMatchService realTimeMatchService;
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/realtime", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
@@ -34,7 +34,7 @@ public class MatchResource implements MatchInterface {
             + "The url flag \"unmatched\" toggles whether to return the unmatched records."
 
     )
-    public MatchOutput match(@RequestBody MatchInput input,
+    public MatchOutput matchRealTime(@RequestBody MatchInput input,
             @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
         try {
             if (input.getMatchEngine() == null) {

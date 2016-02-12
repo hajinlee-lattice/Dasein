@@ -23,10 +23,10 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        MatchOutput output = matchProxy.match(input, true);
+        MatchOutput output = matchProxy.matchRealTime(input, true);
         Assert.assertNotNull(output);
 
-        output = matchProxy.match(input, false);
+        output = matchProxy.matchRealTime(input, false);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -36,10 +36,10 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
-        MatchOutput output = matchProxy.match(input, true);
+        MatchOutput output = matchProxy.matchRealTime(input, true);
         Assert.assertNotNull(output);
 
-        output = matchProxy.match(input, false);
+        output = matchProxy.matchRealTime(input, false);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);

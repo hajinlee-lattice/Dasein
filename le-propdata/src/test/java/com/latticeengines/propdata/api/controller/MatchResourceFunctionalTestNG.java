@@ -9,7 +9,7 @@ import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNG
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
-    private static final String MATCH_ENDPOINT = "propdata/matches";
+    private static final String MATCH_ENDPOINT = "propdata/matches/realtime";
 
     @Test(groups = { "api" }, enabled = true)
     public void testPredefined() {

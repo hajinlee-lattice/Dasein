@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component
@@ -46,5 +47,14 @@ public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
 
     @Override
     public String getSqlMatchDestination() { return "HGData_Source"; }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NEVER; }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() { return null; }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() { return null; }
 
 }

@@ -11,11 +11,11 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
 
     public MatchProxy() {
-        super("propdata/matches");
+        super("propdata/matches/realtime");
     }
 
     @Override
-    public MatchOutput match(MatchInput input, Boolean returnUnmatched) {
+    public MatchOutput matchRealTime(MatchInput input, Boolean returnUnmatched) {
         String url = constructUrl("?unmatched={unmatched}", String.valueOf(returnUnmatched));
         return post("match", url, input, MatchOutput.class);
     }
