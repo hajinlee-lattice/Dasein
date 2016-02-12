@@ -8,6 +8,8 @@ alias wfdplnobld='hadoop fs -rm -r -f /app/workflow/* && hadoop fs -mkdir -p /ap
 alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
 
 alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
+alias createpod='cd $WSHOME/le-baton && mvn -f pom-batontool.xml -DskipTests clean install && java -jar target/le-baton-tool-*-shaded.jar --podId Default --connectionString localhost:2181 createPod'
+
 alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
 
 alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
