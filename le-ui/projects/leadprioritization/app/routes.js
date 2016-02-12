@@ -218,34 +218,18 @@ angular
         .state('model.summary', {
             url: '/summary',
             views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'UNDER CONSTRUCTION';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
-                },
                 "main@": {
-                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                    templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
+
                 }   
             }
         })
         .state('model.alerts', {
             url: '/alerts',
             views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'UNDER CONSTRUCTION';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
-                },
                 "main@": {
-                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                    //controller: 'AdminInfoSummaryWidgetController',
+                    templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
             }
         })

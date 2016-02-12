@@ -15,8 +15,8 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
             //==================================================
             // Specify Dimensions
             //==================================================
-            var margin = {top: 47, right: 150, bottom: 89, left: 204},
-                width = 1154 - margin.left - margin.right,
+            var margin = {top: 47, right: 0, bottom: 89, left: 130},
+                width = 936 - margin.left - margin.right,
                 height = 336 - margin.top - margin.bottom;
 
             //==================================================
@@ -156,7 +156,7 @@ angular.module('mainApp.appCommon.widgets.performanceTab.ThresholdExplorer', [
                 .style("fill", "#999")
                 .call(yAxis)
                 .append("text")
-                .attr("transform", "translate(" + (-100) + ", " + (height / 2) + ") rotate(-90)")
+                .attr("transform", "translate(" + (-95) + ", " + (height / 2) + ") rotate(-90)")
                 .style("text-anchor", "middle")
                 .style("font-size", "12px")
                 .style("font-family", "ProximaNova-Semibold")

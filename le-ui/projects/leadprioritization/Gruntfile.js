@@ -541,7 +541,10 @@ module.exports = function (grunt) {
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
-                files: ['<%= pls.app %>/assets/styles/**/*.scss'],
+                files: [
+                    '<%= pls.app %>/app/**/*.scss',
+                    '<%= pls.app %>/assets/styles/**/*.scss'
+                ],
                 tasks: ['sass:dev']
             }
         },
