@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.PivotedSource;
+import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("testPivotedSource")
@@ -32,5 +33,14 @@ public class TestPivotedSource implements PivotedSource, DomainBased {
 
     @Override
     public String getDefaultCronExpression() { return null; }
+
+    @Override
+    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NEVER; }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() { return null; }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() { return null; }
 
 }
