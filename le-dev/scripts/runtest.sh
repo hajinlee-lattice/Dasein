@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export API_PROPDIR=$WSHOME/le-api/conf/env/dev
 export DATAPLATFORM_PROPDIR=$WSHOME/le-dataplatform/conf/env/dev
 export DB_PROPDIR=$WSHOME/le-db/conf/env/dev
@@ -16,4 +18,14 @@ export DATAFLOW_PROPDIR=$WSHOME/le-dataflow/conf/env/dev
 export CAMILLE_PROPDIR=$WSHOME/le-camille/conf/env/dev
 export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
 
-mvn -Pfunctional -Dtest=$1 verify -DargLine=""
+PRODUCT=$1
+TEST_TYPE=$2
+TEST=$3
+TESTGROUP=$2
+if [ $PRODUCT = "pd" ]; then
+    if [ $TEST_TYPE = "deployment" ]; then
+        TESTGROUP=$2.$PRODUCT
+    fi
+fi
+
+mvn -P$TEST_TYPE -Dtest=$TEST -Ddeployment.groups=$TESTGROUP verify -DargLine=""
