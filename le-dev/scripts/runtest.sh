@@ -22,10 +22,8 @@ PRODUCT=$1
 TEST_TYPE=$2
 TEST=$3
 TESTGROUP=$2
-if [ $PRODUCT = "pd" ]; then
-    if [ $TEST_TYPE = "deployment" ]; then
-        TESTGROUP=$2.$PRODUCT
-    fi
+if [ $TEST_TYPE = "deployment" ]; then
+    TESTGROUP=$TEST_TYPE.$PRODUCT
 fi
 
 mvn -P$TEST_TYPE -Dtest=$TEST -Ddeployment.groups=$TESTGROUP verify -DargLine=""
