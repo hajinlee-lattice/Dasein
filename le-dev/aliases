@@ -13,7 +13,7 @@ alias dfapidpl='mvn -Pshaded-yarn -DskipTests clean install && dfapidplnobld'
 alias wfapidplnobld='hadoop fs -rm -r /app/workflowapi || true && hadoop fs -mkdir -p /app/workflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-workflowapi/target/le-workflowapi*shaded.jar /app/workflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/workflowapi.properties /app/workflowapi'
 alias wfapidpl='mvn -Pshaded-yarn -DskipTests clean install && wfapidplnobld'
 
-alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir -p /app/scoring/lib && hadoop fs -copyFromLocal $WSHOME/le-scoring/target/le-scoring*shaded.jar /app/scoring/lib && hadoop fs -copyFromLocal conf/env/dev/scoring.properties /app/scoring'
+alias scoringdplnobld='hadoop fs -rm -r /app/scoring || true && hadoop fs -mkdir -p /app/scoring/lib  && hadoop fs -mkdir -p /app/scoring/scripts && hadoop fs -copyFromLocal $WSHOME/le-scoring/target/le-scoring*shaded.jar /app/scoring/lib && hadoop fs -copyFromLocal conf/env/dev/scoring.properties /app/scoring  && hadoop fs -copyFromLocal src/main/python/scoring.py /app/scoring/scripts'
 alias scoringdpl='mvn -Pshaded-yarn -DskipTests clean install && scoringdplnobld'
 
 alias pddpl='mvn -Pshaded-yarn -DskipTests clean deploy && hadoop fs -copyFromLocal target/le-propdata*shaded.jar /app/dataflow/lib'
