@@ -1,0 +1,36 @@
+#ModelDetailsArea .summary {
+    .container.row {
+        width: 100%;
+        max-width: 1030px;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: center;
+        
+        .columns {
+            display: flex;
+            width: 100%;
+            
+            div {
+                margin: 0 auto;
+                width: 100%;
+            }
+        }
+
+        .columns.two div {
+            min-width: 165px;
+        }
+
+        .columns.three div {
+            min-width: 238px;
+        }
+
+        .columns.three.type-conversions div {
+            min-width: 184px;
+        }
+
+        .columns.four div {
+            min-width: 324px;
+        }
+    }
+}
