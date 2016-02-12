@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.monitor.alerts.service.impl.JiraServiceImpl;
 
 public class JiraServiceTestNG {
 
@@ -16,8 +15,8 @@ public class JiraServiceTestNG {
     public void testTriggerOneDetail() {
         boolean flag = true;
         try {
-            JiraService.triggerEvent("JiraServiceTestNG", "http://JiraServiceTestNG", new BasicNameValuePair(
-                    "testmetric", "testvalue"));
+            JiraService.triggerEvent("JiraServiceTestNG", "http://JiraServiceTestNG",
+                    new BasicNameValuePair("testmetric", "testvalue"));
         } catch (LedpException e) {
             flag = false;
         }
@@ -39,8 +38,9 @@ public class JiraServiceTestNG {
     public void testTriggerMultipleDetail() {
         boolean flag = true;
         try {
-            JiraService.triggerEvent("JiraServiceTestNG", "http://JiraServiceTestNG", new BasicNameValuePair(
-                    "testmetric", "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
+            JiraService.triggerEvent("JiraServiceTestNG", "http://JiraServiceTestNG",
+                    new BasicNameValuePair("testmetric", "testvalue"),
+                    new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
         } catch (LedpException e) {
             flag = false;
         }

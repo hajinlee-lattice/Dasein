@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:Xlint="http://www.w3.org/2001/XMLSchema"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -51,6 +52,7 @@
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <joda.version>2.3</joda.version>
+        <influxdb.version>2.1</influxdb.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
