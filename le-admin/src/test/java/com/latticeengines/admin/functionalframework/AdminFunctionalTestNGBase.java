@@ -153,7 +153,9 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        cleanupZK();
+        if (hostPort.contains("localhost")) {
+            cleanupZK();
+        }
         loginAD();
 
         String podId = CamilleEnvironment.getPodId();
