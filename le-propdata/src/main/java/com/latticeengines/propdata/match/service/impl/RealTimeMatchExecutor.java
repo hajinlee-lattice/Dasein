@@ -196,10 +196,10 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
         int totalMatched = 0;
 
-        for (InternalOutputRecord record : records) {
-            record.setColumnMatched(new ArrayList<Boolean>());
+        for (InternalOutputRecord internalRecord : records) {
+            internalRecord.setColumnMatched(new ArrayList<Boolean>());
             List<Object> output = new ArrayList<>();
-            Map<String, Map<String, Object>> results = record.getResultsInSource();
+            Map<String, Map<String, Object>> results = internalRecord.getResultsInSource();
             boolean matchedAnyColumn = false;
             for (int i = 0; i < outputFields.size(); i++) {
                 String field = outputFields.get(i);
@@ -219,25 +219,32 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
                 if (matchContext.getInput().getPredefinedSelection().equals(ColumnSelection.Predefined.Model)) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
-                    record.getColumnMatched().add(value != null);
+                    internalRecord.getColumnMatched().add(value != null);
                 } else {
                     columnMatchCount[i] += (matched ? 1 : 0);
-                    record.getColumnMatched().add(matched);
+                    internalRecord.getColumnMatched().add(matched);
                 }
 
                 matchedAnyColumn = matchedAnyColumn || matched;
             }
 
-            record.setOutput(output);
+            internalRecord.setOutput(output);
 
             if (matchedAnyColumn) {
                 totalMatched++;
-                record.setMatched(true);
+                internalRecord.setMatched(true);
             }
 
             if (returnUnmatched || matchedAnyColumn) {
-                record.setResultsInSource(null);
-                outputRecords.add(record);
+                internalRecord.setResultsInSource(null);
+                OutputRecord outputRecord = new OutputRecord();
+                outputRecord.setInput(internalRecord.getInput());
+                outputRecord.setMatched(internalRecord.isMatched());
+                outputRecord.setOutput(internalRecord.getOutput());
+                outputRecord.setMatchedDomain(internalRecord.getMatchedDomain());
+                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
+                outputRecord.setRowNumber(internalRecord.getRowNumber());
+                outputRecords.add(outputRecord);
             }
         }
 
