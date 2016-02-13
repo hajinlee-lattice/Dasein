@@ -18,10 +18,10 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
-import com.latticeengines.domain.exposed.scoringapi.ModelCombination;
-import com.latticeengines.domain.exposed.scoringapi.ModelTags;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.domain.exposed.scoringapi.TargetedModel;
+import com.latticeengines.domain.exposed.scoringapi.unused.ModelCombination;
+import com.latticeengines.domain.exposed.scoringapi.unused.ModelTags;
+import com.latticeengines.domain.exposed.scoringapi.unused.TargetedModel;
 
 public class CombinationRetrieverUnitTestNG {
     private static class Documents {

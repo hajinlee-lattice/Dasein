@@ -17,7 +17,6 @@ import org.mockito.stubbing.Answer;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
 import com.latticeengines.scoringapi.controller.ScoreResource;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.match.ProprietaryDataMatcher;
 import com.latticeengines.scoringapi.model.ModelEvaluator;
 import com.latticeengines.scoringapi.model.ModelRetriever;
@@ -75,7 +74,8 @@ public class MockScoreService {
     }
 
     public Map<ScoreType, Object> score(Map<String, Object> record) {
-        ScoreRequest request = new ScoreRequest(new CustomerSpace("Some", "Test", "Customer"), "Test", record);
-        return scoreService.scoreRecord(request);
+//        ScoreRequest request = new ScoreRequest(new CustomerSpace("Some", "Test", "Customer"), "Test", record);
+//        return scoreService.scoreRecord(request);
+        return null;
     }
 }

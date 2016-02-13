@@ -20,7 +20,7 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-
+<!-- TODO bn uncomment this once we have some properties and deployment is sorted out.
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
@@ -30,5 +30,5 @@
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
-
+-->
 </beans>

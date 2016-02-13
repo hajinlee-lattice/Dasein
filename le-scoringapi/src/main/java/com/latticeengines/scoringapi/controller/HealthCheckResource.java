@@ -10,7 +10,7 @@ import com.latticeengines.common.exposed.rest.DetailedErrors;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "health", description = "REST resource for checking health of score API")
+@Api(value = "score", description = "REST resource for checking health of score API")
 @RestController
 @RequestMapping("/health")
 @DetailedErrors

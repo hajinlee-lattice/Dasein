@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,7 +30,13 @@ import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
-import com.latticeengines.scoringapi.exposed.ScoreRequest;
+import com.latticeengines.scoringapi.exposed.AccountScoreRequest;
+import com.latticeengines.scoringapi.exposed.ContactScoreRequest;
+import com.latticeengines.scoringapi.exposed.Field;
+import com.latticeengines.scoringapi.exposed.Fields;
+import com.latticeengines.scoringapi.exposed.Model;
+import com.latticeengines.scoringapi.exposed.ModelType;
+import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.history.ScoreHistorian;
 import com.latticeengines.scoringapi.history.ScoreHistoryEntry;
 import com.latticeengines.scoringapi.match.ProprietaryDataMatcher;
@@ -35,6 +45,7 @@ import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
 import com.latticeengines.scoringapi.unused.CombinationElement;
 import com.latticeengines.scoringapi.unused.CombinationRetriever;
+import com.latticeengines.scoringapi.unused.ScoreRequest;
 import com.latticeengines.scoringapi.unused.ScoreType;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -45,9 +56,86 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @DetailedErrors
 public class ScoreResource {
 
-    @RequestMapping(value = "contact", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ApiOperation(value = "Score contact(s)")
-    public Map<ScoreType, Object> scoreRecord(@RequestBody ScoreRequest request) {
+    @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get active models")
+    public List<Model> getActiveModels(@PathVariable ModelType type) {
+        return activeModelMap.get(type);
+    }
+
+    @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get fields for a model")
+    public Fields getModelFields(@PathVariable String modelId) {
+        return modelFields.get(modelId);
+    }
+
+    @RequestMapping(value = "/accounts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Score an account")
+    public ScoreResponse scoreAccount(@RequestBody AccountScoreRequest request) {
+        return simulateScore();
+    }
+
+    @RequestMapping(value = "/contacts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Score a contact")
+    public ScoreResponse scoreRecord(@RequestBody ContactScoreRequest request) {
+        return simulateScore();
+    }
+
+    private ScoreResponse simulateScore() {
+        ScoreResponse scoreResponse = new ScoreResponse();
+        scoreResponse.setScore(ThreadLocalRandom.current().nextInt(5, 99));
+        return scoreResponse;
+    }
+
+    Map<ModelType, List<Model>> activeModelMap = new HashMap<>();
+    Map<String, Fields> modelFields = new HashMap<>();
+
+    @PostConstruct
+    public void initializeStubData() throws Exception {
+        String modelId1 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9999-PLSModel";
+        String modelId2 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9998-PLSModel";
+        String modelId3 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9997-PLSModel";
+
+        List<Model> contactModels = new ArrayList<>();
+        contactModels.add(new Model(modelId1, "US Contact Model", ModelType.CONTACT));
+        contactModels.add(new Model(modelId2, "EU Contact Model", ModelType.CONTACT));
+
+        List<Model> accountModels = new ArrayList<>();
+        accountModels.add(new Model("ms__1bcd7c1d-1703-4704-9536-60728bdd9997-PLSModel", "US Account Model",
+                ModelType.ACCOUNT));
+
+        activeModelMap.put(ModelType.ACCOUNT, accountModels);
+        activeModelMap.put(ModelType.CONTACT, contactModels);
+
+        Fields fields1 = new Fields();
+        fields1.setModelId(modelId1);
+
+        List<Field> fields = new ArrayList<>();
+        fields.add(new Field("Email", FieldType.STRING));
+        fields.add(new Field("Company", FieldType.STRING));
+        fields.add(new Field("City", FieldType.STRING));
+        fields.add(new Field("State", FieldType.STRING));
+        fields.add(new Field("Country", FieldType.STRING));
+        fields.add(new Field("CreatedDate", FieldType.LONG));
+        fields.add(new Field("LastModifiedDate", FieldType.LONG));
+        fields.add(new Field("PostalCode", FieldType.STRING));
+        fields.add(new Field("FirstName", FieldType.STRING));
+        fields.add(new Field("LastName", FieldType.STRING));
+        fields.add(new Field("Title", FieldType.STRING));
+        fields.add(new Field("LeadSource", FieldType.STRING));
+        fields.add(new Field("Phone", FieldType.STRING));
+        fields.add(new Field("AnnualRevenue", FieldType.FLOAT));
+        fields.add(new Field("NumberOfEmployees", FieldType.INTEGER));
+        fields.add(new Field("Industry", FieldType.STRING));
+
+        fields1.setFields(fields);
+
+        modelFields.put(modelId1, fields1);
+        modelFields.put(modelId2, fields1);
+        modelFields.put(modelId3, fields1);
+    }
+
+    @SuppressWarnings("unused")
+    private Map<ScoreType, Object> scoreRecords(@RequestBody ScoreRequest request) {
         try (LogContext context = new LogContext("Space", request.space)) {
             log.info("Received a score request");
 
@@ -148,7 +236,8 @@ public class ScoreResource {
                 throw new RuntimeException("Failed to serialize data totality", ex);
             }
 
-            //Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
+            // Map<String, Object> transformed =
+            // transformer.transform(selected.data.transforms, request.record);
 
             Map<String, Object> transformed = null;
             ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model);

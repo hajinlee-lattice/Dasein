@@ -3,7 +3,7 @@ package com.latticeengines.skald.exposed;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.scoringapi.ModelTags;
+import com.latticeengines.domain.exposed.scoringapi.unused.ModelTags;
 
 public class ScoreRequest {
     public ScoreRequest(CustomerSpace space, String combination, Map<String, Object> record) {

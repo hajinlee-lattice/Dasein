@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.scoringapi;
+package com.latticeengines.domain.exposed.scoringapi.unused;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

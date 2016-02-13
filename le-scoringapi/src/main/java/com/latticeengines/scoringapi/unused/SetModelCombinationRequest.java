@@ -1,7 +1,7 @@
 package com.latticeengines.scoringapi.unused;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.scoringapi.ModelCombination;
+import com.latticeengines.domain.exposed.scoringapi.unused.ModelCombination;
 
 public class SetModelCombinationRequest {
     public CustomerSpace space;

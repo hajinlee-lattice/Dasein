@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.scoringapi;
+package com.latticeengines.domain.exposed.scoringapi.unused;
 
 import java.util.HashMap;
 

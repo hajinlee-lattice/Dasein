@@ -29,7 +29,7 @@ public class SwaggerConfig {
         ApiInfo apiInfo = new ApiInfo("Lattice Engines Score REST API", //
                 "This is the REST API exposed for the Lattice Engines score service.", //
                 "termsofservice.html", //
-                "bnguyen@lattice-engines.com", //
+                "", //
                 "License", //
                 "http://www.apache.org/licenses/LICENSE-2.0");
         return apiInfo;
