@@ -17,7 +17,9 @@ public class MatchedAccount implements Measurement<Matched, InputAccount> {
     public MatchedAccount(MatchInput input, MatchKeyDimension keyDimension, MatchContext.MatchEngine matchEngine,
             Boolean matched) {
         this.dimension = new InputAccount(input, keyDimension);
-        this.dimension.setMatchEngine(matchEngine.getName());
+        if (matchEngine != null) {
+            this.dimension.setMatchEngine(matchEngine.getName());
+        }
         this.fact = new Matched(matched);
     }
 

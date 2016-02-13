@@ -53,7 +53,9 @@ public class MatchedColumn implements Measurement<Matched, MatchedColumn.Matched
         MatchedColumnDimension(MatchInput input, MatchKeyDimension keyDimension, MatchContext.MatchEngine matchEngine,
                 String targetColumn) {
             this.inputAccount = new InputAccount(input, keyDimension);
-            this.inputAccount.setMatchEngine(matchEngine.getName());
+            if (matchEngine != null) {
+                this.inputAccount.setMatchEngine(matchEngine.getName());
+            }
             this.targetColumn = targetColumn;
         }
 

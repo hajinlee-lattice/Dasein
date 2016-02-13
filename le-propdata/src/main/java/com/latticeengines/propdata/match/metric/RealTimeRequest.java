@@ -12,7 +12,9 @@ public class RealTimeRequest implements Measurement<MatchInput, MatchInput> {
 
     public RealTimeRequest(MatchInput matchInput, MatchContext.MatchEngine matchEngine, Integer numSelectedColumns) {
         this.matchInput = matchInput;
-        this.matchInput.setMatchEngine(matchEngine.getName());
+        if (matchEngine != null) {
+            this.matchInput.setMatchEngine(matchEngine.getName());
+        }
         this.matchInput.setNumSelectedColumns(numSelectedColumns);
     }
 

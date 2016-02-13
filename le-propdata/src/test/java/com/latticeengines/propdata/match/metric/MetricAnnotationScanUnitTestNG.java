@@ -16,6 +16,7 @@ public class MetricAnnotationScanUnitTestNG {
         MetricUtils.scan(MatchedColumn.class);
         MetricUtils.scan(RealTimeRequest.class);
         MetricUtils.scan(RealTimeResponse.class);
+        MetricUtils.scan(SqlQueryMeasurement.class);
     }
 
 }

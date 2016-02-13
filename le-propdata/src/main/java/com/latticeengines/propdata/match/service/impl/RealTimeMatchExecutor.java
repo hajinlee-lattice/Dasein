@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -192,6 +193,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         int totalMatched = 0;
 
         for (InternalOutputRecord record : records) {
+            record.setColumnMatched(new ArrayList<Boolean>());
             List<Object> output = new ArrayList<>();
             Map<String, Map<String, Object>> results = record.getResultsInSource();
             boolean matchedAnyColumn = false;
@@ -283,7 +285,18 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
                     + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
+            submitMetric(results.size(), targetColumns.size());
             return results;
+        }
+
+        private void submitMetric(Integer rows, Integer cols) {
+            try {
+                Connection connection = jdbcTemplate.getDataSource().getConnection();
+                String productName = connection.getMetaData().getDatabaseProductName();
+                System.out.println(productName);
+            } catch (Exception e) {
+                log.warn("Failed to store sql metric.", e);
+            }
         }
 
         private static String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
