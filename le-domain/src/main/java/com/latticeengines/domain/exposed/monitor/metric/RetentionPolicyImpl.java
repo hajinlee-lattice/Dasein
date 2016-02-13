@@ -3,7 +3,10 @@ package com.latticeengines.domain.exposed.monitor.metric;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 
 public enum RetentionPolicyImpl implements RetentionPolicy {
-    DEFAULT("default", "INF", 1), ONE_WEEK("one-week", "1w", 1), ONE_HOUR("one-hour", "1h", 1);
+    DEFAULT("default", "INF", 1), //
+    ONE_MONTH("one-month", "4w", 1), //
+    ONE_WEEK("one-week", "1w", 1), //
+    ONE_HOUR("one-hour", "1h", 1);
 
     private String name;
     private String duration;

@@ -1,24 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
-        xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-        xmlns:security="http://www.springframework.org/schema/security"
-        xmlns:util="http://www.springframework.org/schema/util"
-        xsi:schemaLocation="http://www.springframework.org/schema/beans
-      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-      http://www.springframework.org/schema/aop
-      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
-      http://www.springframework.org/schema/tx
-      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
-      http://www.springframework.org/schema/context
-      http://www.springframework.org/schema/context/spring-context-4.0.xsd
-      http://www.springframework.org/schema/jee
-      http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
-      http://www.springframework.org/schema/security
-      http://www.springframework.org/schema/security/spring-security-4.0.xsd
-      http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
 
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
@@ -29,6 +13,7 @@
                 <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
                 <value>file:${PROPDATA_PROPDIR:/etc/ledp}/propdata.properties</value>
                 <value>file:${DATAFLOW_PROPDIR:/etc/ledp}/dataflow.properties</value>
+                <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
                 <value>file:${PLS_PROPDIR:/etc/ledp}/pls.properties</value>
                 <value>file:${SCORING_PROPDIR:/etc/ledp}/scoring.properties</value>
                 <value>file:${DELLEBI_PROPDIR:/etc/ledp}/dellebi.properties</value>
@@ -38,8 +23,8 @@
                 <value>file:${WORKFLOW_PROPDIR:/etc/ledp}/workflow.properties</value>
             </list>
         </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false" />
-        <property name="ignoreResourceNotFound" value="false" />
+        <property name="ignoreUnresolvablePlaceholders" value="false"/>
+        <property name="ignoreResourceNotFound" value="false"/>
     </bean>
 
 </beans>

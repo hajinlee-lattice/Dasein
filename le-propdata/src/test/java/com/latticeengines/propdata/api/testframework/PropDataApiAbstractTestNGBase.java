@@ -4,11 +4,13 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-api-context.xml" })
@@ -33,14 +36,23 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
     @Value("${propdata.test.env}")
     protected String testEnv;
 
+    @Autowired
+    private MetricService metricService;
+
+    @PostConstruct
+    private void postConstruct() {
+        metricService.disable();
+    }
+
     protected static <T> T sendHttpDeleteForObject(RestTemplate restTemplate, String url, Class<T> responseType) {
         ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.DELETE, jsonRequestEntity(""), responseType);
         return response.getBody();
     }
 
-    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload, Class<T> responseType) {
-        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT,
-                jsonRequestEntity(payload), responseType);
+    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload,
+            Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT, jsonRequestEntity(payload),
+                responseType);
         return response.getBody();
     }
 
@@ -52,15 +64,17 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
     }
 
     protected static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers(){
-                        return null;
-                    }
-                    public void checkClientTrusted( X509Certificate[] certs, String authType ){}
-                    public void checkServerTrusted( X509Certificate[] certs, String authType ){}
-                }
-        };
+        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        } };
         final SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());

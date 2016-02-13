@@ -56,8 +56,7 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
             return;
         }
         TestMeasurement measurement = new TestMeasurement();
-        metricService.write(MetricDB.TEST_DB,
-                Collections.<Measurement<SimpleTestClass, ComplexTestClass>> singletonList(measurement));
+        metricService.write(MetricDB.TEST_DB, Collections.singletonList(measurement));
 
         Thread.sleep(3000L);
     }
@@ -70,7 +69,7 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
         private String stringField;
         private Double doubleField;
 
-        @MetricTag(tag = MetricTag.Tag.TENANT_ID)
+        @MetricTag(tag = "Tag1")
         public String getTenantId() {
             return tenantId;
         }
@@ -79,7 +78,7 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
             this.tenantId = tenantId;
         }
 
-        @MetricTag(tag = MetricTag.Tag.LDC_SOURCE_NAME)
+        @MetricTag(tag = "Tag2")
         public String getSourceName() {
             return sourceName;
         }
@@ -128,7 +127,7 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
     private class ComplexTestClass implements Dimension, Fact {
         private SimpleTestClass tagGroup;
 
-        @MetricTagGroup(excludes = { MetricTag.Tag.LDC_SOURCE_NAME })
+        @MetricTagGroup(excludes = { "Tag2" })
         @MetricFieldGroup(includes = { "field", "doubleField", "booleanField" }, excludes = { "doubleField" })
         public SimpleTestClass getTagGroup() {
             return tagGroup;

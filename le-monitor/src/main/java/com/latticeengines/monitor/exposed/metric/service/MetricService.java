@@ -9,6 +9,10 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 
 public interface MetricService {
 
-    <F extends Fact, D extends Dimension> void write(MetricDB db, Collection<Measurement<F, D>> measurements);
+    <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement);
+
+    <F extends Fact, D extends Dimension> void write(MetricDB db, Collection<? extends Measurement<F, D>> measurements);
+
+    void disable();
 
 }

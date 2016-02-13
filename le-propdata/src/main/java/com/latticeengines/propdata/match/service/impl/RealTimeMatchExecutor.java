@@ -22,14 +22,22 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchKey;
+import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.datasource.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.MatchedAccount;
+import com.latticeengines.propdata.match.metric.MatchedColumn;
+import com.latticeengines.propdata.match.metric.RealTimeResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 
@@ -46,12 +54,16 @@ class RealTimeMatchExecutor implements MatchExecutor {
     @Autowired
     private ColumnMetadataService columnMetadataService;
 
+    @Autowired
+    private MetricService metricService;
+
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
         matchContext = fetch(matchContext);
         matchContext = complete(matchContext);
+        generateOutputMetrics(matchContext);
         return matchContext;
     }
 
@@ -103,6 +115,40 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
         matchContext.setStatus(MatchStatus.PROCESSED);
         return matchContext;
+    }
+
+    @MatchStep
+    private void generateOutputMetrics(MatchContext matchContext) {
+        MatchInput input = matchContext.getInput();
+
+        RealTimeResponse response = new RealTimeResponse(matchContext);
+        metricService.write(MetricDB.LDC_Match, response);
+
+        List<MatchedAccount> accountMeasurements = new ArrayList<>();
+        List<MatchedColumn> columnMeasurements = new ArrayList<>();
+        List<InternalOutputRecord> recordList = matchContext.getInternalResults();
+        Map<MatchKey, String> keyMap = input.getKeyMap();
+        List<String> inputFields = input.getFields();
+        List<String> outputFields = matchContext.getOutput().getOutputFields();
+        for (InternalOutputRecord record : recordList) {
+            List<Object> inputData = record.getInput();
+            MatchKeyDimension keyDimension = new MatchKeyDimension(keyMap, inputFields, inputData);
+            MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
+                    record.isMatched());
+            accountMeasurements.add(measurement);
+
+            for (int i = 0; i < outputFields.size(); i++) {
+                String outputField = outputFields.get(i);
+                Boolean matched = record.getColumnMatched().get(i);
+                MatchedColumn matchedColumn = new MatchedColumn(matched, outputField, input, keyDimension,
+                        matchContext.getMatchEngine());
+                columnMeasurements.add(matchedColumn);
+            }
+
+        }
+
+        metricService.write(MetricDB.LDC_Match, accountMeasurements);
+        metricService.write(MetricDB.LDC_Match, columnMeasurements);
     }
 
     @VisibleForTesting
@@ -167,8 +213,10 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
                 if (matchContext.getInput().getPredefinedSelection().equals(ColumnSelection.Predefined.Model)) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
+                    record.getColumnMatched().add(value != null);
                 } else {
                     columnMatchCount[i] += (matched ? 1 : 0);
+                    record.getColumnMatched().add(matched);
                 }
 
                 matchedAnyColumn = matchedAnyColumn || matched;

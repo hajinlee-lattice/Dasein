@@ -3,15 +3,21 @@ package com.latticeengines.domain.exposed.propdata.match;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatchInput {
+public class MatchInput implements Fact, Dimension {
 
     private Tenant tenant;
 
@@ -27,6 +33,9 @@ public class MatchInput {
 
     // if not provided, pick latest
     private String predefinedVersion;
+
+    private String matchEngine;
+    private Integer numSelectedColumns;
 
     @JsonProperty("KeyMap")
     public Map<MatchKey, String> getKeyMap() {
@@ -48,6 +57,12 @@ public class MatchInput {
         this.fields = fields;
     }
 
+    @JsonIgnore
+    @MetricField(name = "InputFields", fieldType = MetricField.FieldType.INTEGER)
+    public Integer getNumInputFields() {
+        return getFields().size();
+    }
+
     @JsonProperty("Data")
     public List<List<Object>> getData() {
         return data;
@@ -58,6 +73,13 @@ public class MatchInput {
         this.data = data;
     }
 
+    @JsonIgnore
+    @MetricField(name = "InputRows", fieldType = MetricField.FieldType.INTEGER)
+    public Integer getNumRows() {
+        return getData().size();
+    }
+
+    @MetricTagGroup
     @JsonProperty("Tenant")
     public Tenant getTenant() {
         return tenant;
@@ -68,6 +90,7 @@ public class MatchInput {
         this.tenant = tenant;
     }
 
+    @MetricTagGroup
     @JsonProperty("PredefinedSelection")
     public ColumnSelection.Predefined getPredefinedSelection() {
         return predefinedSelection;
@@ -98,4 +121,25 @@ public class MatchInput {
         this.customSelection = customSelection;
     }
 
+    @MetricTag(tag = "MatchEngine")
+    @JsonIgnore
+    public String getMatchEngine() {
+        return matchEngine;
+    }
+
+    @JsonIgnore
+    public void setMatchEngine(String matchEngine) {
+        this.matchEngine = matchEngine;
+    }
+
+    @JsonIgnore
+    @MetricField(name = "SelectedColumns", fieldType = MetricField.FieldType.INTEGER)
+    public Integer getNumSelectedColumns() {
+        return numSelectedColumns;
+    }
+
+    @JsonIgnore
+    public void setNumSelectedColumns(Integer numSelectedColumns) {
+        this.numSelectedColumns = numSelectedColumns;
+    }
 }

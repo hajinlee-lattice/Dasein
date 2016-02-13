@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
@@ -9,6 +10,7 @@ class InternalOutputRecord extends OutputRecord {
 
     private String parsedDomain;
     private Map<String, Map<String, Object>> resultsInSource = new HashMap<>();
+    private List<Boolean> columnMatched;
 
     String getParsedDomain() {
         return parsedDomain;
@@ -24,5 +26,13 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setResultsInSource(Map<String, Map<String, Object>> resultsInSource) {
         this.resultsInSource = resultsInSource;
+    }
+
+    public List<Boolean> getColumnMatched() {
+        return columnMatched;
+    }
+
+    public void setColumnMatched(List<Boolean> columnMatched) {
+        this.columnMatched = columnMatched;
     }
 }

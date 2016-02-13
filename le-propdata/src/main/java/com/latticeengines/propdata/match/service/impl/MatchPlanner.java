@@ -13,14 +13,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.RealTimeRequest;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 
 @Component
@@ -32,9 +35,13 @@ class MatchPlanner {
     @Autowired
     private ZkConfigurationService zkConfigurationService;
 
+    @Autowired
+    private MetricService metricService;
+
     @MatchStep
     MatchContext planForRealTime(MatchInput input) {
         MatchContext context = validateMatchInput(input);
+        context = generateInputMetric(context);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);
         return context;
@@ -61,11 +68,25 @@ class MatchPlanner {
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
                     input.getFields().size(), keyPositionMap, domainSet);
+            record.setColumnMatched(new ArrayList<Boolean>());
             records.add(record);
         }
 
         context.setInternalResults(records);
         context.setDomains(domainSet);
+        return context;
+    }
+
+    @MatchStep
+    private MatchContext generateInputMetric(MatchContext context) {
+        MatchInput input = context.getInput();
+        Integer selectedCols = null;
+        if (input.getPredefinedSelection() != null) {
+            selectedCols = columnSelectionService.getTargetColumns(input.getPredefinedSelection()).size();
+        }
+
+        RealTimeRequest request = new RealTimeRequest(input, context.getMatchEngine(), selectedCols);
+        metricService.write(MetricDB.LDC_Match, request);
 
         return context;
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-job-rpm</artifactId>
@@ -61,6 +61,9 @@
                 <camille.properties.path>
                     ../le-camille/conf/env/buildmachine
                 </camille.properties.path>
+                <monitor.properties.path>
+                    ../le-monitor/conf/env/buildmachine
+                </monitor.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -106,6 +109,9 @@
                 <camille.properties.path>
                     ../le-camille/conf/env/devcluster
                 </camille.properties.path>
+                <monitor.properties.path>
+                    ../le-monitor/conf/env/buildmachine
+                </monitor.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -150,6 +156,9 @@
                 <camille.properties.path>
                     ../le-camille/conf/env/qacluster
                 </camille.properties.path>
+                <monitor.properties.path>
+                    ../le-monitor/conf/env/qacluster
+                </monitor.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -194,6 +203,9 @@
                 <camille.properties.path>
                     ../le-camille/conf/env/prodcluster
                 </camille.properties.path>
+                <monitor.properties.path>
+                    ../le-monitor/conf/env/prodcluster
+                </monitor.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -266,6 +278,9 @@
                                 </source>
                                 <source>
                                     <location>${camille.properties.path}/camille.properties</location>
+                                </source>
+                                <source>
+                                    <location>${monitor.properties.path}/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>

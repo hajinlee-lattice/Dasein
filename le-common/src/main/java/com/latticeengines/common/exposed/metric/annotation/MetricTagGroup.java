@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface MetricTagGroup {
 
-    MetricTag.Tag[]includes() default {};
+    String[]includes() default {};
 
-    MetricTag.Tag[]excludes() default {};
+    String[]excludes() default {};
 
 }

@@ -9,6 +9,7 @@
     <import resource="classpath:propdata-core-context.xml"/>
     <import resource="classpath:propdata-persistence-match-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
+    <import resource="classpath:monitor-metric-context.xml" />
 
     <bean id="externalColumnDao" class="com.latticeengines.propdata.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>

@@ -1,6 +1,9 @@
 package com.latticeengines.domain.exposed.security;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -15,6 +18,8 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -23,13 +28,19 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Entity
 @Table(name = "TENANT")
-public class Tenant implements HasName, HasId<String>, HasPid {
+public class Tenant implements HasName, HasId<String>, HasPid, Dimension {
 
     private String id;
     private String name;
     private Long pid;
     private Long registeredTime;
     private List<TargetMarket> targetMarkets;
+
+    public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+
+    static {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     public Tenant() {
     }
@@ -93,6 +104,12 @@ public class Tenant implements HasName, HasId<String>, HasPid {
 
     public void setRegisteredTime(Long registeredTime) {
         this.registeredTime = registeredTime;
+    }
+
+    @MetricTag(tag = "TenantId")
+    @JsonIgnore
+    private String tenantId() {
+        return getId();
     }
 
     // TODO: Note - this is a terrible hack to avoid DP-2243

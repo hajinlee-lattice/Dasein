@@ -1,6 +1,8 @@
 package com.latticeengines.monitor.metric.service.impl;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,7 +37,6 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.MetricUtils;
@@ -49,7 +50,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
     private static final Log log = LogFactory.getLog(MetricServiceInfluxDbImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newFixedThreadPool(2);
     private LoadingCache<String, InfluxDB> dbConnectionCache;
 
     @Autowired
@@ -68,6 +69,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     private String environment;
 
     private Boolean enabled = false;
+    private static String hostname;
 
     @PostConstruct
     private void postConstruct() {
@@ -105,21 +107,42 @@ public class MetricServiceInfluxDbImpl implements MetricService {
                 }
             }
 
+        } else {
+            log.info("Disabled metric store because an empty url is provided.");
         }
     }
 
     @Override
-    public <F extends Fact, D extends Dimension> void write(MetricDB db, Collection<Measurement<F, D>> measurements) {
+    public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
+        write(db, Collections.singleton(measurement));
+    }
+
+    @Override
+    public <F extends Fact, D extends Dimension> void write(MetricDB db,
+            Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
+            log.info("Received " + measurements.size() + " points to write.");
             executor.submit(new MetricRunnable<>(db, measurements));
+        } else if (StringUtils.isNotEmpty(url)) {
+            postConstruct();
+        }
+    }
+
+    @Override
+    public void disable() {
+        if (enabled) {
+            enabled = false;
+            log.info("InfluxDB metric service is disabled.");
         }
     }
 
     private <F extends Fact, D extends Dimension> BatchPoints generateBatchPoints(MetricDB db,
-            Collection<Measurement<F, D>> measurements) {
+            Collection<? extends Measurement<F, D>> measurements) {
         BatchPoints.Builder builder = BatchPoints.database(db.getDbName());
-        builder.tag(MetricTag.Tag.ENVIRONMENT.getTagName(), environment);
-        builder.tag(MetricTag.Tag.ARTIFACT_VERSION.getTagName(), versionManager.getCurrentVersion());
+        builder.tag(MetricUtils.TAG_HOST, getHostName() == null ? MetricUtils.NULL : getHostName());
+        builder.tag(MetricUtils.TAG_ENVIRONMENT, environment);
+        builder.tag(MetricUtils.TAG_ARTIFACT_VERSION, StringUtils.isEmpty(versionManager.getCurrentVersion())
+                ? MetricUtils.NULL : versionManager.getCurrentVersion());
         RetentionPolicy policy = RetentionPolicyImpl.DEFAULT;
         List<Point> points = new ArrayList<>();
 
@@ -127,9 +150,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
             Fact fact = measurement.getFact();
             Dimension dimension = measurement.getDimension();
             policy = measurement.getRetentionPolicy();
-            Point.Builder pointBuilder = Point.measurement(measurement.getName());
+            Point.Builder pointBuilder = Point.measurement(measurement.getClass().getSimpleName());
             pointBuilder = pointBuilder.time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-            pointBuilder.tag(MetricUtils.toStringMap(MetricUtils.parseTags(dimension)));
+            pointBuilder.tag(MetricUtils.parseTags(dimension));
             pointBuilder = pointBuilder.fields(MetricUtils.parseFields(fact));
             points.add(pointBuilder.build());
         }
@@ -163,7 +186,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
                     public InfluxDB load(String key) {
                         if (DB_CACHE_KEY.equals(key)) {
                             String decryptedPassword = CipherUtils.decrypt(password);
-                            return InfluxDBFactory.connect(url, username, decryptedPassword);
+                            InfluxDB influxDB = InfluxDBFactory.connect(url, username, decryptedPassword);
+                            influxDB.setLogLevel(InfluxDB.LogLevel.NONE);
+                            return influxDB;
                         } else {
                             return null;
                         }
@@ -175,9 +200,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     private class MetricRunnable<F extends Fact, D extends Dimension> implements Runnable {
 
         private MetricDB metricDb;
-        private Collection<Measurement<F, D>> measurements;
+        private Collection<? extends Measurement<F, D>> measurements;
 
-        MetricRunnable(MetricDB metricDb, Collection<Measurement<F, D>> measurements) {
+        MetricRunnable(MetricDB metricDb, Collection<? extends Measurement<F, D>> measurements) {
             this.metricDb = metricDb;
             this.measurements = measurements;
         }
@@ -193,8 +218,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
         String queryString = String.format("CREATE RETENTION POLICY \"%s\" ON \"%s\" DURATION %s REPLICATION %d",
                 policy.getName(), db.getDbName(), policy.getDuration(), policy.getReplication());
         JsonNode jsonNode = queryInfluxDb(queryString, db.getDbName());
-        if (jsonNode.get("results").has("error")) {
-            throw new RuntimeException("Failed to create retention policy: " + jsonNode.get("results").get("error"));
+        if (jsonNode.get("results").get(0).has("error")) {
+            throw new RuntimeException(
+                    "Failed to create retention policy: " + jsonNode.get("results").get(0).get("error"));
         }
     }
 
@@ -232,6 +258,19 @@ public class MetricServiceInfluxDbImpl implements MetricService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to query influxDb at " + url, e);
         }
+    }
+
+    private static String getHostName() {
+        if (hostname == null || hostname.equals("unknown")) {
+            try {
+                InetAddress addr;
+                addr = InetAddress.getLocalHost();
+                hostname = addr.getHostName();
+            } catch (UnknownHostException ex) {
+                log.error("Hostname can not be resolved");
+            }
+        }
+        return hostname;
     }
 
 }

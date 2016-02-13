@@ -13,10 +13,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatchStatistics {
+public class MatchStatistics implements Fact {
 
     private static Log log = LogFactory.getLog(MatchStatistics.class);
 
@@ -29,6 +31,7 @@ public class MatchStatistics {
     private static final PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendHours().appendLiteral(":")
             .appendMinutes().appendLiteral(":").appendSeconds().appendLiteral(".").appendMillis3Digit().toFormatter();
 
+    @MetricField(name = "RowsRequested", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsRequested")
     public Integer getRowsRequested() {
         return rowsRequested;
@@ -39,6 +42,7 @@ public class MatchStatistics {
         this.rowsRequested = rowsRequested;
     }
 
+    @MetricField(name = "RowsMatched", fieldType = MetricField.FieldType.INTEGER)
     @JsonProperty("RowsMatched")
     public Integer getRowsMatched() {
         return rowsMatched;
@@ -83,6 +87,12 @@ public class MatchStatistics {
                     + "It has to be in the format of " + durationFormat, e);
             this.timeElapsedInMsec = null;
         }
-
     }
+
+    @MetricField(name = "TimeElapsed", fieldType = MetricField.FieldType.INTEGER)
+    @JsonIgnore
+    public Integer getTimeElapsedMetric() {
+        return Integer.valueOf(getTimeElapsedInMsec().toString());
+    }
+
 }

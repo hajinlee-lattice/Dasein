@@ -1,12 +1,13 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ColumnSelection {
@@ -72,7 +73,7 @@ public class ColumnSelection {
         }
     }
 
-    public enum Predefined {
+    public enum Predefined implements Dimension {
         LeadEnrichment("LeadEnrichment"), DerivedColumns("DerivedColumns"), Model("Model");
 
         private final String name;
@@ -80,7 +81,7 @@ public class ColumnSelection {
 
         static {
             nameMap = new HashMap<>();
-            for (Predefined predefined: Predefined.values()) {
+            for (Predefined predefined : Predefined.values()) {
                 nameMap.put(predefined.getName(), predefined);
             }
         }
@@ -89,7 +90,10 @@ public class ColumnSelection {
             this.name = name;
         }
 
-        public String getName() { return this.name; }
+        @MetricTag(tag = "PredefinedSelection")
+        public String getName() {
+            return this.name;
+        }
 
         public static Predefined fromName(String name) {
             return nameMap.get(name);
@@ -100,6 +104,5 @@ public class ColumnSelection {
         }
 
     }
-
 
 }

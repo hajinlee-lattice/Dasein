@@ -16,12 +16,17 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatchOutput {
+public class MatchOutput implements Fact, Dimension {
 
     private static Log log = LogFactory.getLog(MatchOutput.class);
 
@@ -93,6 +98,7 @@ public class MatchOutput {
         this.metadata = metadata;
     }
 
+    @MetricFieldGroup
     @JsonProperty("Statistics")
     public MatchStatistics getStatistics() {
         return statistics;
@@ -163,6 +169,7 @@ public class MatchOutput {
         }
     }
 
+    @MetricTag(tag = "RootOperationUID")
     @JsonProperty("RootOperationUID")
     public String getRootOperationUID() {
         return rootOperationUID;
@@ -171,6 +178,11 @@ public class MatchOutput {
     @JsonProperty("RootOperationUID")
     public void setRootOperationUID(String rootOperationUID) {
         this.rootOperationUID = rootOperationUID;
+    }
+
+    @MetricField(name = "OutputFields", fieldType = MetricField.FieldType.INTEGER)
+    public Integer numOutputFields() {
+        return getOutputFields().size();
     }
 
 }

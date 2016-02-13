@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.util;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -26,18 +27,21 @@ public class MetricUtilsUnitTestNG {
         Assert.assertTrue(method.isAnnotationPresent(MetricTag.class));
 
         MetricTag metricTag = method.getAnnotation(MetricTag.class);
-        Assert.assertEquals(metricTag.tag(), MetricTag.Tag.TENANT_ID);
+        Assert.assertEquals(metricTag.tag(), "Tag1");
 
         SimpleTestClass instance = new SimpleTestClass();
-        Map.Entry<MetricTag.Tag, String> entry = MetricUtils.parseTag(instance, method);
-        Assert.assertEquals(new AbstractMap.SimpleEntry<>(MetricTag.Tag.TENANT_ID, null), entry);
+        Map.Entry<String, String> entry = MetricUtils.parseTag(instance, method);
+        Assert.assertEquals(new AbstractMap.SimpleEntry<>("Tag1", null), entry);
 
         instance.setTenantId("tenant1");
         entry = MetricUtils.parseTag(instance, method);
         Assert.assertEquals("tenant1", entry.getValue());
 
-        Map<MetricTag.Tag, String> tagSet = MetricUtils.parseTags(instance);
+        Map<String, String> tagSet = MetricUtils.parseTags(instance);
         Assert.assertEquals(tagSet.size(), 2);
+
+        Set<String> tags = MetricUtils.scanTags(SimpleTestClass.class);
+        Assert.assertEquals(tags.size(), 2);
     }
 
     @Test(groups = "unit")
@@ -53,7 +57,7 @@ public class MetricUtilsUnitTestNG {
         tagGroup.setSourceName("source1");
         instance.setTagGroup(tagGroup);
 
-        Map<MetricTag.Tag, String> tagSet = MetricUtils.parseTagGroup(instance, method);
+        Map<String, String> tagSet = MetricUtils.parseTagGroup(instance, method);
         Assert.assertEquals(tagSet.size(), 1);
 
         tagSet = MetricUtils.parseTags(instance);
@@ -81,6 +85,9 @@ public class MetricUtilsUnitTestNG {
 
         Map<String, Object> fieldSet = MetricUtils.parseFields(instance);
         Assert.assertEquals(fieldSet.size(), 4);
+
+        Set<String> fields = MetricUtils.scanFields(SimpleTestClass.class);
+        Assert.assertEquals(fields.size(), 4);
     }
 
     @Test(groups = "unit")
@@ -107,7 +114,7 @@ public class MetricUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testScanMeasurement() {
-        MetricUtils.scan(new TestMeasurement());
+        MetricUtils.scan(TestMeasurement.class);
     }
 
     @Test(groups = "unit")
@@ -123,7 +130,7 @@ public class MetricUtilsUnitTestNG {
         private String stringField;
         private Double doubleField;
 
-        @MetricTag(tag = MetricTag.Tag.TENANT_ID)
+        @MetricTag(tag = "Tag1")
         public String getTenantId() {
             return tenantId;
         }
@@ -132,7 +139,7 @@ public class MetricUtilsUnitTestNG {
             this.tenantId = tenantId;
         }
 
-        @MetricTag(tag = MetricTag.Tag.LDC_SOURCE_NAME)
+        @MetricTag(tag = "Tag2")
         public String getSourceName() {
             return sourceName;
         }
@@ -181,7 +188,7 @@ public class MetricUtilsUnitTestNG {
     private class ComplexTestClass implements Dimension, Fact {
         private SimpleTestClass tagGroup;
 
-        @MetricTagGroup(excludes = { MetricTag.Tag.LDC_SOURCE_NAME })
+        @MetricTagGroup(excludes = { "Tag2" })
         @MetricFieldGroup(includes = { "field", "doubleField", "booleanField" }, excludes = { "doubleField" })
         public SimpleTestClass getTagGroup() {
             return tagGroup;

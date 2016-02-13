@@ -4,11 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 
-public class MatchContext {
+public class MatchContext implements Fact, Dimension {
 
     private MatchStatus status;
     private Set<String> domains;
@@ -21,6 +26,8 @@ public class MatchContext {
     private boolean returnUnmatched;
     private MatchEngine matchEngine;
 
+    @MetricFieldGroup(excludes = { "InputRows" })
+    @MetricTagGroup
     public MatchInput getInput() {
         return input;
     }
@@ -45,6 +52,8 @@ public class MatchContext {
         this.domains = domains;
     }
 
+    @MetricFieldGroup
+    @MetricTagGroup
     public MatchOutput getOutput() {
         return output;
     }
@@ -99,6 +108,11 @@ public class MatchContext {
 
     public void setMatchEngine(MatchEngine matchEngine) {
         this.matchEngine = matchEngine;
+    }
+
+    @MetricTag(tag = "MatchEngine")
+    public String getMatchEngineAsString() {
+        return matchEngine.getName();
     }
 
     public enum MatchEngine {
