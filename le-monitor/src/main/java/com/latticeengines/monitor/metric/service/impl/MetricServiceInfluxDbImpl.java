@@ -74,11 +74,11 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     @PostConstruct
     private void postConstruct() {
         if (StringUtils.isNotEmpty(url)) {
-            buildDbConnectionCache();
-            log.info("Enabled metric store at " + url);
-            enabled = true;
-
             try {
+                buildDbConnectionCache();
+                log.info("Enabled metric store at " + url);
+                enabled = true;
+
                 Pong pong = getInfluxDB().ping();
                 if (pong == null) {
                     log.warn("Had problem pinging fluxDb at " + url + ". Disable the metric service.");

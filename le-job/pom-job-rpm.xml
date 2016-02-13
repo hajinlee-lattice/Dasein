@@ -110,7 +110,7 @@
                     ../le-camille/conf/env/devcluster
                 </camille.properties.path>
                 <monitor.properties.path>
-                    ../le-monitor/conf/env/buildmachine
+                    ../le-monitor/conf/env/devcluster
                 </monitor.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
