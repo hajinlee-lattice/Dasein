@@ -17,7 +17,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "modeling", description = "REST resource for interacting with modeling workflows")
 @RestController
 @RequestMapping("/modeling")
-@PreAuthorize("hasRole('Edit_PLS_Models')")
+@PreAuthorize("hasRole('Edit_PLS_Data')")
 public class ModelingResource {
 
     @RequestMapping(value = "/validations/{filename}", method = RequestMethod.POST)
@@ -25,7 +25,7 @@ public class ModelingResource {
     @ApiOperation(value = "Run a validation workflow on the provided uploaded file. This will generate a report. Returns the job id.")
     public ResponseDocument<String> validateFile(@RequestBody SourceFile file) {
         // TODO
-        return new ResponseDocument<>("LosLobosKickYourAss");
+        return ResponseDocument.successResponse("LosLobosKickYourAss");
     }
 
     @RequestMapping(value = "/models/{filename}", method = RequestMethod.POST)
@@ -34,7 +34,7 @@ public class ModelingResource {
     public ResponseDocument<String> model(@RequestParam("filename") String filename,
             @RequestBody ModelingParameters parameters) {
         // TODO
-        return new ResponseDocument<>("LosLobosKickYourFace");
+        return ResponseDocument.successResponse("LosLobosKickYourFace");
     }
 
 }

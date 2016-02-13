@@ -2,9 +2,12 @@ package com.latticeengines.pls.controller;
 
 import java.io.ByteArrayInputStream;
 import java.rmi.server.UID;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -13,9 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.pls.workflow.ImportEventTableWorkflowSubmitter;
+import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -26,18 +33,24 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class FileUploadResource {
 
     @Autowired
+    private SourceFileService sourceFileService;
+
+    @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private ImportEventTableWorkflowSubmitter importEventTableWorkflowSubmitter;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public ResponseDocument<SourceFile> uploadFile(@RequestParam("name") String name,
+    public ResponseDocument<SourceFile> uploadFile(@RequestParam("fileName") String fileName,
             @RequestParam("schema") SchemaInterpretation schema, @RequestParam("file") MultipartFile file) {
         try {
-            return new ResponseDocument<>(fileUploadService.uploadFile(name, schema,
+            return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
                     new ByteArrayInputStream(file.getBytes())));
         } catch (Exception e) {
-            return new ResponseDocument<>(e);
+            return ResponseDocument.failedResponse(e);
         }
     }
 
@@ -46,9 +59,46 @@ public class FileUploadResource {
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
     public ResponseDocument<SourceFile> uploadFile(@RequestParam("schema") SchemaInterpretation schema,
             @RequestParam("file") MultipartFile file) {
-        String filename = new UID().toString().replace("-", "").replace(":", "") + ".tmp";
+        String filename = new UID().toString().replace("-", "").replace(":", "") + ".csv";
         return uploadFile(filename, schema, file);
     }
 
+    @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the list of unknown metadata columns")
+    public ResponseDocument<List<ColumnTypeMapping>> getUnknownColumns(@PathVariable String fileName) {
+        try {
+            return ResponseDocument.successResponse(fileUploadService.getUnknownColumns(fileName));
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
 
+    @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Resolve the metadata given the list of specified columns")
+    public SimpleBooleanResponse resolveMetadata(@PathVariable String fileName,
+            @RequestBody List<ColumnTypeMapping> unknownColumns) {
+        try {
+            fileUploadService.resolveMetadata(fileName, unknownColumns);
+            return SimpleBooleanResponse.successResponse();
+        } catch (Exception e) {
+            return SimpleBooleanResponse.failedResponse(e);
+        }
+    }
+
+    @RequestMapping(value = "{fileName}/import", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Run the import workflow to import the source file and perform validations")
+    public ResponseDocument<String> importFile(@PathVariable String fileName) {
+        try {
+            SourceFile sourceFile = sourceFileService.findByName(fileName);
+            if (sourceFile == null) {
+                throw new RuntimeException(String.format("No such source file with name %s", fileName));
+            }
+            return ResponseDocument.successResponse(importEventTableWorkflowSubmitter.submit(sourceFile).toString());
+        } catch (Exception e) {
+            return ResponseDocument.failedResponse(e);
+        }
+    }
 }

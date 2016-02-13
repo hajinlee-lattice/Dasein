@@ -93,6 +93,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         Table table = strategy.getMetadata();
         table.setName("SourceFile_" + sourceFileName.replace(".", "_"));
         metadataProxy.createTable(customerSpace, table.getName(), table);
+        sourceFile.setTableName(table.getName());
         sourceFileService.update(sourceFile);
     }
 

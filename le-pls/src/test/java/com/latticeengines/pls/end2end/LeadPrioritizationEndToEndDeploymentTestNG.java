@@ -1,4 +1,4 @@
-package com.latticeengines.pls;
+package com.latticeengines.pls.end2end;
 
 import java.io.InputStream;
 import java.util.List;

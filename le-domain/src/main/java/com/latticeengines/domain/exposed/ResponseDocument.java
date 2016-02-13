@@ -19,12 +19,12 @@ public class ResponseDocument<ResultType> {
     public ResponseDocument() {
     }
 
-    public ResponseDocument(ResultType result) {
+    private ResponseDocument(ResultType result) {
         setSuccess(true);
         setResult(result);
     }
 
-    public ResponseDocument(Exception e) {
+    private ResponseDocument(Exception e) {
         setSuccess(false);
         setErrors(Arrays.asList(e.getMessage()));
     }
@@ -62,6 +62,14 @@ public class ResponseDocument<ResultType> {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public static <T> ResponseDocument<T> successResponse(T t) {
+        return new ResponseDocument<>(t);
+    }
+
+    public static <T> ResponseDocument<T> failedResponse(Exception e) {
+        return new ResponseDocument<>(e);
     }
 
     public static ResponseDocument<?> emptyFailedResponse(List<String> errors) {

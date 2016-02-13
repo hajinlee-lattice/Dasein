@@ -1,4 +1,4 @@
-package com.latticeengines.pls;
+package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

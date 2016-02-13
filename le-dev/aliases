@@ -1,10 +1,10 @@
 alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -Pgenerate -DskipTests clean install'
 alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
-alias dfdplnobld='hadoop fs -rm -r -f /app/dataflow/* && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
+alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
 alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld'
 
-alias wfdplnobld='hadoop fs -rm -r -f /app/workflow/* && hadoop fs -mkdir -p /app/workflow/lib && hadoop fs -put $WSHOME/le-workflow/target/le-workflow*shaded.jar /app/workflow/lib && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
+alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow/lib && hadoop fs -put $WSHOME/le-workflow/target/le-workflow*shaded.jar /app/workflow/lib && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
 alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
 
 alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
@@ -71,9 +71,9 @@ alias svcflowtests='mvn -Pfunctional -DargLine="" -DDATAFLOW_PROPDIR=$PWD/../le-
 alias svcflowtestscluster='SERVICEFLOWS_LOCAL=false mvn -Pfunctional-cluster -DargLine="" -DDATAFLOW_PROPDIR=$PWD/../le-dataflow/conf/env/dev clean verify'
 
 alias runjettyapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/etc/hadoop:$HADOOP_HOME/share/hadoop/common/hadoop-common-$HADOOP_VERSION.$HDP_VERSION.jar -Pfunctional -Djetty.port=9002 jetty:run'
-alias runjettysec='rm -f /var/log/ledp/le-pls*.log && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate clean jetty:run'
+alias runjettysec='bash -c "rm -f /var/log/ledp/le-pls*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -Pgenerate clean jetty:run'
 alias runjettypls='bash -c "rm -f /var/log/ledp/le-pls*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 -Pfunctional -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled jetty:run'
-alias runjettyadmin='rm -f /var/log/ledp/le-admin*.log && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DADMIN_PROPDIR=conf/env/dev -Pfunctional -Djetty.port=8085 -Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks jetty:run'
+alias runjettyadmin='bash -c "rm -f /var/log/ledp/le-admin*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DADMIN_PROPDIR=conf/env/dev -Pfunctional -Djetty.port=8085 -Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks jetty:run'
 alias runjettyjob='bash -c "rm -f /var/log/ledp/le-job*.log" && MODEL_DL_QUARTZ_ENABLED=enabled mvn -Djetty.port=8082 -Pfunctional -Pgenerate clean jetty:run'
 alias runjettyeai='bash -c "rm -f /var/log/ledp/le-eai*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -Pfunctional jetty:run'
 alias runjettymds='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -Pfunctional jetty:run'

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.eai.routes.HdfsUriGenerator;
+import util.HdfsUriGenerator;
 
 public class XmlHandlerProcessor implements Processor {
 
@@ -36,7 +36,7 @@ public class XmlHandlerProcessor implements Processor {
         ExtractDataXmlHandler handler = context.getApplicationContext().getBean(beanName, ExtractDataXmlHandler.class);
         String fileName = handler.initialize(context, table);
         exchange.getIn().setHeader("staxUri", "stax:#" + beanName);
-        String uri = new HdfsUriGenerator().getHdfsUri(exchange, table, fileName);
+        String uri = new HdfsUriGenerator().getHdfsUriForCamel(exchange, table, fileName);
         exchange.getIn().setHeader("hdfsUri", uri);
     }
 

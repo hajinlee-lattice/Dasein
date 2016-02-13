@@ -1,4 +1,4 @@
-package com.latticeengines.pls.util;
+package com.latticeengines.pls.workflow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,15 +27,11 @@ import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
-public class WorkflowSubmitter {
-    private static final Log log = LogFactory.getLog(WorkflowSubmitter.class);
-
-    @Autowired
-    private WorkflowProxy workflowProxy;
+public class FitWorkflowSubmitter extends WorkflowSubmitter {
+    private static final Log log = LogFactory.getLog(FitWorkflowSubmitter.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -46,12 +42,6 @@ public class WorkflowSubmitter {
     @Autowired
     private MatchCommandProxy matchCommandProxy;
 
-    @Value("${pls.api.hostport}")
-    private String internalResourceHostPort;
-
-    @Value("${pls.microservice.rest.endpoint.hostport}")
-    private String microserviceHostPort;
-
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
@@ -60,7 +50,7 @@ public class WorkflowSubmitter {
 
     @Value("${pls.accountmaster.path}")
     private String accountMasterPath;
-    
+
     private void checkForRunningWorkflow(TargetMarket targetMarket) {
         String appId = targetMarket.getApplicationId();
         if (appId == null) {
@@ -70,16 +60,17 @@ public class WorkflowSubmitter {
         try {
             status = workflowProxy.getWorkflowStatusFromApplicationId(appId);
         } catch (Exception e) {
-         // Ignore any errors since this means that any associated workflow must be problematic so let it continue
+            // Ignore any errors since this means that any associated workflow
+            // must be problematic so let it continue
         }
         if (status != null && status.getStatus().isRunning()) {
             throw new LedpException(LedpCode.LEDP_18076);
         }
     }
 
-    public void submitFitWorkflow(TargetMarket targetMarket) {
+    public void submit(TargetMarket targetMarket) {
         checkForRunningWorkflow(targetMarket);
-        
+
         String customer = SecurityContextUtils.getTenant().getId();
         log.info(String.format("Submitting fit model workflow for target market %s and customer %s",
                 targetMarket.getName(), customer));
@@ -115,7 +106,9 @@ public class WorkflowSubmitter {
                     .uniqueKeyColumn("LatticeAccountID") //
                     .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //
-                    .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                    .attributes(
+                            Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2",
+                                    "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                     .build();
 
             String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();

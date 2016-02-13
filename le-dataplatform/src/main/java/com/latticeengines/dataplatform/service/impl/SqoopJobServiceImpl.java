@@ -46,6 +46,8 @@ public class SqoopJobServiceImpl {
             Configuration yarnConfiguration, //
             boolean sync, //
             List<String> otherOptions) {
+        yarnConfiguration = new Configuration(yarnConfiguration);
+
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapreduce.job.queuename=" + queue);
@@ -89,7 +91,7 @@ public class SqoopJobServiceImpl {
             Configuration defaultConfiguration) {
         Configuration yarnConfiguration = exporter.getYarnConfiguration();
         if (yarnConfiguration == null) {
-            yarnConfiguration = defaultConfiguration;
+            yarnConfiguration = new Configuration(defaultConfiguration);
         }
         int numMappers = exporter.getNumMappers();
         if (numMappers < 1) {
@@ -167,7 +169,7 @@ public class SqoopJobServiceImpl {
 
         Configuration yarnConfiguration = importer.getYarnConfiguration();
         if (yarnConfiguration == null) {
-            yarnConfiguration = defaultConfiguration;
+            yarnConfiguration = new Configuration(defaultConfiguration);
         }
 
         int numMappers = importer.getNumMappers();
@@ -298,6 +300,8 @@ public class SqoopJobServiceImpl {
             Configuration yarnConfiguration, //
             boolean sync, //
             String version) {
+
+        yarnConfiguration = new Configuration(yarnConfiguration);
 
         if (table != null && table.startsWith("Play")) {
             numMappers = 1;

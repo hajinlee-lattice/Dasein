@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 
 public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
@@ -37,6 +38,9 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private EaiMetadataService eaiMetadataService;
 
     private URL metadataUrl;
 
@@ -62,6 +66,9 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportContext ctx = new ImportContext(yarnConfiguration);
         ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
+        ctx.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
+        ctx.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
+        ctx.setProperty(ImportProperty.LAST_MODIFIED_DATE, new HashMap<String, Long>());
 
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
@@ -70,15 +77,18 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileImportConfig.setProperties(properties);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
+
         fileImportConfig.setTables(Arrays.<Table> asList(tables.get(0)));
         fileImportService.importDataAndWriteToHdfs(fileImportConfig, ctx);
+
+        eaiMetadataService.updateTableSchema(tables, ctx);
 
         ApplicationId appId = ctx.getProperty(ImportProperty.APPID, ApplicationId.class);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         verifyAllDataNotNullWithNumRows(yarnConfiguration, //
-                ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
+                tables.get(0), //
                 4);
     }
 

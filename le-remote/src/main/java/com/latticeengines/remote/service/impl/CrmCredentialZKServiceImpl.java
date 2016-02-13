@@ -2,6 +2,7 @@ package com.latticeengines.remote.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.stereotype.Component;
 
@@ -94,7 +95,13 @@ public class CrmCredentialZKServiceImpl implements CrmCredentialZKService {
             docPath = addExtraPath(crmType, docPath, isProduction);
 
             Camille camille = CamilleEnvironment.getCamille();
-            Document doc = camille.get(docPath);
+            Document doc;
+            try {
+                doc = camille.get(docPath);
+            } catch (KeeperException.NoNodeException e) {
+                throw new RuntimeException(String.format("No sfdc credentials for customer %s", customerSpace), e);
+            }
+
             CrmCredential crmCredential = JsonUtils.deserialize(doc.getData(), CrmCredential.class);
             crmCredential.setPassword(CipherUtils.decrypt(crmCredential.getPassword()));
 
@@ -128,8 +135,8 @@ public class CrmCredentialZKServiceImpl implements CrmCredentialZKService {
     private Path addExtraPath(String crmType, Path docPath, Boolean isProduction) {
         docPath = docPath.append(crmType);
         if (crmType.equalsIgnoreCase(CrmConstants.CRM_SFDC)) {
-            docPath = docPath.append(isProduction ? SourceCredentialType.PRODUCTION.getName() : SourceCredentialType.SANDBOX
-                    .getName());
+            docPath = docPath.append(isProduction ? SourceCredentialType.PRODUCTION.getName()
+                    : SourceCredentialType.SANDBOX.getName());
         }
         return docPath;
     }

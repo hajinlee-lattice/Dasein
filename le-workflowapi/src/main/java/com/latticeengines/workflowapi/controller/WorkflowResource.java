@@ -112,6 +112,15 @@ public class WorkflowResource implements WorkflowInterface {
         return workflowId == null ? null : workflowService.getStatus(workflowId);
     }
 
+    @RequestMapping(value = "/yarnapps/jobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
+    @Override
+    public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId) {
+        WorkflowExecutionId workflowId = getWorkflowIdFromAppId(applicationId);
+        return workflowId == null ? null : workflowService.getJob(workflowId);
+    }
+
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
         return workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));

@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.base.Predicate;
@@ -54,11 +53,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
     @Override
     public void calculate() {
-        // TODO:
-        // - Ensure that specified additional columns match the column types of
-        // the base schema, if there's a match.
-        // - Centralize validation
-
         result = new Result();
         SchemaRepository repository = SchemaRepository.instance();
         result.metadata = repository.getSchema(schema);
@@ -81,11 +75,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
             if (missing) {
                 iterator.remove();
             }
-        }
-
-        if (!missingRequiredFields.isEmpty()) {
-            throw new RuntimeException(String.format("Missing required fields [%s] in csv file %s", //
-                    StringUtils.join(missingRequiredFields, ","), csvPath));
         }
 
         // Add columns that are not in metadata to unknown columns

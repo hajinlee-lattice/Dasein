@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
@@ -17,7 +18,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class WorkflowSubmitterUnitTestNG {
     
-    private WorkflowSubmitter workflowSubmitter = new WorkflowSubmitter();
+    private FitWorkflowSubmitter fitWorkflowSubmitter = new FitWorkflowSubmitter();
 
     @Test(groups = "unit")
     public void submitFitWorkflow() {
@@ -29,11 +30,11 @@ public class WorkflowSubmitterUnitTestNG {
         when(workflowProxy.getWorkflowStatusFromApplicationId("application_xyz_123")).thenReturn(workflowStatus);
         when(workflowStatus.getStatus()).thenReturn(BatchStatus.STARTED);
         
-        ReflectionTestUtils.setField(workflowSubmitter, "workflowProxy", workflowProxy);
+        ReflectionTestUtils.setField(fitWorkflowSubmitter, "workflowProxy", workflowProxy);
         
         boolean exception = false;
         try {
-            workflowSubmitter.submitFitWorkflow(targetMarket);
+            fitWorkflowSubmitter.submit(targetMarket);
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);

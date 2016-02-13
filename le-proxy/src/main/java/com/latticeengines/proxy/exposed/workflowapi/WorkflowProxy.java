@@ -50,6 +50,12 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
     }
 
     @Override
+    public Job getWorkflowJobFromApplicationId(String applicationId) {
+        String url = constructUrl("/yarnapps/jobs/{applicationId}", applicationId);
+        return get("getWorkflowJobFromApplicationId", url, Job.class);
+    }
+
+    @Override
     public Job getWorkflowExecution(String workflowId) {
         String url = constructUrl("/job/{workflowId}", workflowId);
         return get("getWorkflowExecution", url, Job.class);

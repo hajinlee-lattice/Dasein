@@ -17,8 +17,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import util.HdfsUriGenerator;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -58,16 +61,13 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
     public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
 
-        ctx.setProperty(ImportProperty.TARGETPATH, //
-                ctx.getProperty(ImportProperty.TARGETPATH, String.class) + "/" + UUID.randomUUID());
-
         DbCreds creds = getCreds(ctx);
-        Properties props = getProperties(ctx, table);
+        String localFileName = createLocalFileForClassGeneration(ctx);
+        Properties props = getProperties(ctx, table, localFileName);
 
         try {
-            ApplicationId appId = sqoopSyncJobService.importData(table.getName(), //
-                    ctx.getProperty(ImportProperty.TARGETPATH, String.class), //
-                    creds, //
+            ApplicationId appId = sqoopSyncJobService.importData(localFileName, //
+                    new HdfsUriGenerator().getHdfsUriForSqoop(ctx, table), creds, //
                     LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
                     ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
                     Arrays.<String> asList(new String[] { table.getAttributes().get(0).getName() }), //
@@ -75,10 +75,21 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
                     1, //
                     props);
             ctx.setProperty(ImportProperty.APPID, appId);
+            updateContextProperties(ctx, table);
         } finally {
             FileUtils.deleteQuietly(new File(table.getName() + ".csv"));
             FileUtils.deleteQuietly(new File("." + table.getName() + ".csv.crc"));
         }
+    }
+
+    private void updateContextProperties(ImportContext ctx, Table table) {
+        @SuppressWarnings("unchecked")
+        Map<String, Long> processedRecordsMap = ctx.getProperty(ImportProperty.PROCESSED_RECORDS, Map.class);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Long> lastModifiedTimes = ctx.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
+        processedRecordsMap.put(table.getName(), 0L);
+        lastModifiedTimes.put(table.getName(), DateTime.now().getMillis());
     }
 
     private DbCreds getCreds(ImportContext ctx) {
@@ -89,7 +100,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         return new DbCreds(builder);
     }
 
-    private Properties getProperties(ImportContext ctx, Table table) {
+    private Properties getProperties(ImportContext ctx, Table table, String localFileName) {
         List<String> types = new ArrayList<>();
         for (Attribute attr : table.getAttributes()) {
             types.add(attr.getPhysicalDataType());
@@ -100,14 +111,14 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
-        String fileName = createLocalFileForClassGeneration(hdfsFileToImport);
-        table.setName(fileName);
-        props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, fileName));
-
+        props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, localFileName));
+        props.put("lattice.eai.file.schema", JsonUtils.serialize(table));
         return props;
     }
 
-    private String createLocalFileForClassGeneration(String hdfsFileToImport) {
+    private String createLocalFileForClassGeneration(ImportContext context) {
+        String hdfsFileToImport = context.getProperty(ImportProperty.HDFSFILE, String.class);
+
         try {
             String[] tokens = hdfsFileToImport.split("/");
             String[] fileNameTokens = tokens[tokens.length - 1].split("\\.");
@@ -154,7 +165,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
-
         }
         return table;
     }

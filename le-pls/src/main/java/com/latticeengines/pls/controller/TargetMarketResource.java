@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.network.exposed.pls.TargetMarketInterface;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.pls.util.WorkflowSubmitter;
+import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -30,7 +30,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     private TargetMarketService targetMarketService;
 
     @Autowired
-    private WorkflowSubmitter workflowSubmitter;
+    private FitWorkflowSubmitter fitWorkflowSubmitter;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -42,7 +42,7 @@ public class TargetMarketResource implements TargetMarketInterface {
         }
 
         targetMarketService.createTargetMarket(targetMarket);
-        workflowSubmitter.submitFitWorkflow(targetMarket);
+        fitWorkflowSubmitter.submit(targetMarket);
     }
 
     @RequestMapping(value = "/default", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -51,7 +51,7 @@ public class TargetMarketResource implements TargetMarketInterface {
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public TargetMarket createDefault() {
         TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
-        workflowSubmitter.submitFitWorkflow(targetMarket);
+        fitWorkflowSubmitter.submit(targetMarket);
         return targetMarket;
     }
 
@@ -81,7 +81,7 @@ public class TargetMarketResource implements TargetMarketInterface {
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
 
         if (existing != null && !existing.getAccountFilterString().equals(targetMarket.getAccountFilterString())) {
-            workflowSubmitter.submitFitWorkflow(targetMarket);
+            fitWorkflowSubmitter.submit(targetMarket);
         }
     }
 

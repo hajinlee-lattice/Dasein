@@ -22,6 +22,7 @@
         <le.testfwk.version>2.0.21-SNAPSHOT</le.testfwk.version>
         <le.workflow.version>2.0.21-SNAPSHOT</le.workflow.version>
         <le.serviceflows.prospectdiscovery.version>2.0.21-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
+        <le.serviceflows.leadprioritization.version>2.0.20-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.21-SNAPSHOT</le.proxy.version>
         <le.metadata.version>2.0.21-SNAPSHOT</le.metadata.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
@@ -489,6 +490,11 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-leadprioritization</artifactId>
+            <version>${le.serviceflows.leadprioritization.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${le.serviceflows.prospectdiscovery.version}</version>
         </dependency>
@@ -522,6 +528,7 @@
             <version>${le.metadata.version}</version>
             <classifier>intf</classifier>
         </dependency>
+
 
     </dependencies>
 

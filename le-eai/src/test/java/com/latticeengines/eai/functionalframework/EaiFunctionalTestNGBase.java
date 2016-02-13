@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -130,7 +131,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             camille.delete(docPath);
         } catch (Exception e) {
         }
-        
+
         Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")
                 .append("ConnectTimeout");
         camille.create(connectTimeoutDocPath, new Document("60000"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -161,25 +162,29 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         return file;
     }
 
-    protected void verifyAllDataNotNullWithNumRows(Configuration config, String targetDir, int expectedNumRows)
+    protected void verifyAllDataNotNullWithNumRows(Configuration config, Table table, int expectedNumRows)
             throws Exception {
-        List<String> avroFiles = HdfsUtils.getFilesByGlob(config, String.format("%s/*.avro", targetDir));
-
+        List<Extract> extracts = table.getExtracts();
         int numRows = 0;
-        for (String avroFile : avroFiles) {
-            try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config, new org.apache.hadoop.fs.Path(
-                    avroFile))) {
-                while (reader.hasNext()) {
-                    GenericRecord record = reader.next();
-                    Schema schema = record.getSchema();
-                    for (org.apache.avro.Schema.Field field : schema.getFields()) {
-                        assertNotNull(record.get(field.name()));
+        for (Extract extract : extracts) {
+            List<String> avroFiles = HdfsUtils.getFilesByGlob(config, extract.getPath());
+
+            for (String avroFile : avroFiles) {
+                try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config,
+                        new org.apache.hadoop.fs.Path(avroFile))) {
+                    while (reader.hasNext()) {
+                        GenericRecord record = reader.next();
+                        Schema schema = record.getSchema();
+                        for (org.apache.avro.Schema.Field field : schema.getFields()) {
+                            assertNotNull(record.get(field.name()));
+                        }
+                        numRows++;
                     }
-                    numRows++;
                 }
             }
         }
         assertEquals(numRows, expectedNumRows);
+
     }
 
     protected List<String> getFilesFromHdfs(String targetPath, String table) throws Exception {

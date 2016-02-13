@@ -8,6 +8,7 @@ import org.apache.camel.Processor;
 
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
+import util.HdfsUriGenerator;
 
 public class DataContainerToHdfsProcessor implements Processor {
 
@@ -18,7 +19,7 @@ public class DataContainerToHdfsProcessor implements Processor {
         dataContainer.endContainer();
         InputStream dataInputStream = new FileInputStream(dataContainer.getLocalDataFile());
         exchange.getIn().setHeader("hdfsUri",
-                new HdfsUriGenerator().getHdfsUri(exchange, table, dataContainer.getLocalDataFile().getName()));
+                new HdfsUriGenerator().getHdfsUriForCamel(exchange, table, dataContainer.getLocalDataFile().getName()));
         exchange.getIn().setBody(dataInputStream);
     }
 

@@ -14,13 +14,15 @@ public interface WorkflowInterface {
 
     AppSubmission submitWorkflowExecution(WorkflowConfiguration config);
 
-    AppSubmission restartWorkflowExecution(@PathVariable String workflowId);
+    AppSubmission restartWorkflowExecution(String workflowId);
 
     WorkflowExecutionId getWorkflowId(String applicationId);
 
     WorkflowStatus getWorkflowStatus(String workflowId);
 
     WorkflowStatus getWorkflowStatusFromApplicationId(String applicationId);
+
+    Job getWorkflowJobFromApplicationId(String applicationId);
 
     Job getWorkflowExecution(String workflowId);
 

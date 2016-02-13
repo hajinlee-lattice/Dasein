@@ -227,9 +227,11 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         @SuppressWarnings("unchecked")
         Map<String, Long> map = importContext.getProperty(ImportProperty.LAST_MODIFIED_DATE, Map.class);
         LastModifiedKey lmk = table.getLastModifiedKey();
-        Long lastModifiedDateValue = map.get(table.getName());
-        lmk.setLastModifiedTimestamp(lastModifiedDateValue);
-        log.info("After import Table: " + table.getName() + " has LastModifedKeyTimeStamp:" + lastModifiedDateValue);
+        if (lmk != null) {
+            Long lastModifiedDateValue = map.get(table.getName());
+            lmk.setLastModifiedTimestamp(lastModifiedDateValue);
+            log.info("After import Table: " + table.getName() + " has LastModifedKeyTimeStamp:" + lastModifiedDateValue);
+        }
     }
 
     @Override

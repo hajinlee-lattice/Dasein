@@ -19,6 +19,8 @@ public class ImportEventTableWorkflowConfiguration extends WorkflowConfiguration
         }
 
         public Builder customer(CustomerSpace customerSpace) {
+            configuration.setContainerConfiguration("importEventTableWorkflow", customerSpace,
+                    "ImportEventTableWorkflow");
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             return this;
@@ -48,6 +50,7 @@ public class ImportEventTableWorkflowConfiguration extends WorkflowConfiguration
         public ImportEventTableWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
+
             return configuration;
         }
     }

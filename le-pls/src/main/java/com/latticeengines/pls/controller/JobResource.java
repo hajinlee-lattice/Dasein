@@ -58,6 +58,17 @@ public class JobResource {
         return jobs;
     }
 
+    @RequestMapping(value = "/yarnapps/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve job from yarn application id")
+    public Job findByApplicationId(@PathVariable String applicationId) {
+        Tenant tenantWithPid = getTenant();
+        log.info("Finding job for application Id " + applicationId + " with pid " + tenantWithPid.getPid());
+
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+        return job;
+    }
+
     @RequestMapping(value = "/find", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find jobs with the provided job type")

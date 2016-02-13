@@ -34,9 +34,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.CrmConstants;
-import com.latticeengines.domain.exposed.source.SourceCredentialType;
-import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.eai.service.DataExtractionService;
 import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
@@ -61,9 +58,6 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Autowired
     private EaiMetadataService eaiMetadataService;
-
-    @Autowired
-    private EaiCredentialValidationService eaiCredentialValidationService;
 
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
@@ -104,9 +98,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             List<Table> metadata = importService.importMetadata(sourceImportConfig, context);
             tableMetadata.addAll(metadata);
 
-            if (sourceImportConfig.getSourceType() != SourceType.FILE) {
-                sourceImportConfig.setTables(metadata);
-            }
+            sourceImportConfig.setTables(metadata);
 
             setFilters(sourceImportConfig, customerSpace);
             importService.importDataAndWriteToHdfs(sourceImportConfig, context);
@@ -147,11 +139,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public ApplicationId submitExtractAndImportJob(ImportConfiguration importConfig) {
-        String customerSpace = importConfig.getCustomerSpace().toString();
-        SourceCredentialType sourceCredentialType = importConfig.getSourceConfigurations().get(0)
-                .getSourceCredentialType();
-        eaiCredentialValidationService.validateSourceCredential(customerSpace, CrmConstants.CRM_SFDC,
-                sourceCredentialType);
+        importContext.setProperty(ImportProperty.CUSTOMER, importConfig.getCustomerSpace().toString());
 
         ApplicationId appId = null;
         boolean hasNonEaiJobSourceType = false;
@@ -163,7 +151,9 @@ public class DataExtractionServiceImpl implements DataExtractionService {
             }
         }
         if (hasNonEaiJobSourceType) {
-            extractAndImport(importConfig, importContext);
+            List<Table> tables = extractAndImport(importConfig, importContext);
+            eaiMetadataService.updateTableSchema(tables, importContext);
+            eaiMetadataService.registerTables(tables, importContext);
             return importContext.getProperty(ImportProperty.APPID, ApplicationId.class);
         } else {
             EaiJob eaiJob = createJob(importConfig);
