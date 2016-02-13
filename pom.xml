@@ -38,6 +38,7 @@
         <module>le-perf</module>
         <module>le-web</module>
         <module>le-dataflow</module>
+        <module>le-serviceflows</module>
         <module>le-cassandra</module>
         <module>le-propdata</module>
         <module>le-security</module>
@@ -48,7 +49,6 @@
         <module>le-release</module>
         <module>le-liaison</module>
         <module>le-workflow</module>
-        <module>le-serviceflows</module>
         <module>le-workflowapi</module>
     </modules>
 </project>
