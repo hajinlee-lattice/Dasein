@@ -22,7 +22,7 @@
         <le.testfwk.version>2.0.22-SNAPSHOT</le.testfwk.version>
         <le.workflow.version>2.0.22-SNAPSHOT</le.workflow.version>
         <le.serviceflows.prospectdiscovery.version>2.0.22-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
-        <le.serviceflows.leadprioritization.version>2.0.20-SNAPSHOT</le.serviceflows.leadprioritization.version>
+        <le.serviceflows.leadprioritization.version>2.0.22-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
         <le.metadata.version>2.0.22-SNAPSHOT</le.metadata.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
