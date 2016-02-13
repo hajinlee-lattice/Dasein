@@ -22,7 +22,6 @@ import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
-import org.influxdb.dto.Pong;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -79,32 +78,25 @@ public class MetricServiceInfluxDbImpl implements MetricService {
                 log.info("Enabled metric store at " + url);
                 enabled = true;
 
-                Pong pong = getInfluxDB().ping();
-                if (pong == null) {
-                    log.warn("Had problem pinging fluxDb at " + url + ". Disable the metric service.");
-                    enabled = false;
-                    return;
+                List<String> dbNames = listDatabases();
+                for (MetricDB db : MetricDB.values()) {
+                    if (!dbNames.contains(db.getDbName())) {
+                        getInfluxDB().createDatabase(db.getDbName());
+                        log.info("Creating MetricDB " + db.getDbName() + " because it is not in the influxDB.");
+                    }
+
+                    List<String> policies = listRetentionPolicies(db.getDbName());
+                    for (RetentionPolicyImpl policy : RetentionPolicyImpl.values()) {
+                        if (!policies.contains(policy.getName())) {
+                            createRetentionPolicyIfNotExist(db, policy);
+                            log.info("Creating Retention Policy " + policy.getName() + " in db " + db.getDbName());
+                        }
+                    }
                 }
+
             } catch (Exception e) {
                 log.warn("Had problem connecting fluxDb at " + url + ". Disable the metric service.");
                 enabled = false;
-                return;
-            }
-
-            List<String> dbNames = listDatabases();
-            for (MetricDB db : MetricDB.values()) {
-                if (!dbNames.contains(db.getDbName())) {
-                    getInfluxDB().createDatabase(db.getDbName());
-                    log.info("Creating MetricDB " + db.getDbName() + " because it is not in the influxDB.");
-                }
-
-                List<String> policies = listRetentionPolicies(db.getDbName());
-                for (RetentionPolicyImpl policy : RetentionPolicyImpl.values()) {
-                    if (!policies.contains(policy.getName())) {
-                        createRetentionPolicyIfNotExist(db, policy);
-                        log.info("Creating Retention Policy " + policy.getName() + " in db " + db.getDbName());
-                    }
-                }
             }
 
         } else {
