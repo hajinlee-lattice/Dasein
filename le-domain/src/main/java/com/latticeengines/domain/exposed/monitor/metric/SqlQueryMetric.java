@@ -14,16 +14,6 @@ public class SqlQueryMetric implements Fact, Dimension {
     private Integer cols;
     private Integer timeElapsed;
 
-    public SqlQueryMetric(String hostName, String tableName, String serverType, Integer rows, Integer cols,
-            Integer timeElapsed) {
-        this.hostName = hostName;
-        this.tableName = tableName;
-        this.serverType = serverType;
-        this.rows = rows;
-        this.cols = cols;
-        this.timeElapsed = timeElapsed;
-    }
-
     @MetricTag(tag = "HostName")
     public String getHostName() {
         return hostName;

@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -36,6 +39,7 @@ import com.latticeengines.propdata.core.datasource.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.FetchDataFromSql;
 import com.latticeengines.propdata.match.metric.MatchedAccount;
 import com.latticeengines.propdata.match.metric.MatchedColumn;
 import com.latticeengines.propdata.match.metric.RealTimeResponse;
@@ -268,9 +272,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
     }
 
-    private static class DomainBasedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
+    private class DomainBasedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
 
-        private static Log log = LogFactory.getLog(DomainBasedMatchCallable.class);
+        private Log log = LogFactory.getLog(DomainBasedMatchCallable.class);
 
         private Set<String> domainSet;
 
@@ -285,21 +289,39 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
                     + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
-            submitMetric(results.size(), targetColumns.size());
+            submitMetric(results.size(), targetColumns.size(), System.currentTimeMillis() - beforeQuerying);
             return results;
         }
 
-        private void submitMetric(Integer rows, Integer cols) {
+        private void submitMetric(Integer rows, Integer cols, Long timeElapsed) {
             try {
+                SqlQueryMetric metric = new SqlQueryMetric();
+                metric.setTableName(getSourceTableName());
+                metric.setCols(cols);
+                metric.setRows(rows);
+                metric.setTimeElapsed(Integer.valueOf(String.valueOf(timeElapsed)));
+
                 Connection connection = jdbcTemplate.getDataSource().getConnection();
                 String productName = connection.getMetaData().getDatabaseProductName();
-                System.out.println(productName);
+                metric.setServerType(productName);
+
+                Pattern pattern = Pattern.compile("//(.*?)[:;/$]");
+                Matcher matcher = pattern.matcher(connection.getMetaData().getURL());
+                if (matcher.find()) {
+                    String token = matcher.group(0);
+                    String host = token.substring(2, token.length() - 1);
+                    metric.setHostName(host);
+                }
+
+                FetchDataFromSql fetchDataFromSql = new FetchDataFromSql(metric);
+                metricService.write(MetricDB.LDC_Match, fetchDataFromSql);
+
             } catch (Exception e) {
                 log.warn("Failed to store sql metric.", e);
             }
         }
 
-        private static String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
+        private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
             return "SELECT [Domain], [" + StringUtils.join(columns, "], [") + "] \n" + "FROM [" + tableName + "] \n"
                     + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
         }

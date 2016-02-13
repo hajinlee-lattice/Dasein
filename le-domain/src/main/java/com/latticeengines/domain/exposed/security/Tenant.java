@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.security;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 

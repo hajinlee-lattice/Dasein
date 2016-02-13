@@ -5,11 +5,11 @@ import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 
-public class SqlQueryMeasurement implements Measurement<SqlQueryMetric, SqlQueryMetric> {
+public class FetchDataFromSql implements Measurement<SqlQueryMetric, SqlQueryMetric> {
 
     private SqlQueryMetric metric;
 
-    public SqlQueryMeasurement(SqlQueryMetric metric) {
+    public FetchDataFromSql(SqlQueryMetric metric) {
         this.metric = metric;
     }
 

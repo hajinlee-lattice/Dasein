@@ -140,10 +140,6 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
 
     private class TestMeasurement implements Measurement<SimpleTestClass, ComplexTestClass> {
 
-        public String getName() {
-            return "TestMeasurement";
-        }
-
         public ComplexTestClass getDimension() {
             ComplexTestClass instance = new ComplexTestClass();
             SimpleTestClass tagGroup = new SimpleTestClass();
