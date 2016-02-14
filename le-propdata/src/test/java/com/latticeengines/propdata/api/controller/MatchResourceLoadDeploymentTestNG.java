@@ -49,8 +49,7 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
     }
 
     @Test(groups = "load", enabled = true, dataProvider = "loadTestDataProvider")
-    public void testRealTimeMatchUnderLoad(int numRequests, int accountsPerRequest,
-            long durationThreshold) {
+    public void testRealTimeMatchUnderLoad(int numRequests, int accountsPerRequest, long durationThreshold) {
         ExecutorService executor = Executors.newFixedThreadPool(numRequests);
         List<Future<MatchOutput>> futures = new ArrayList<>();
         for (int i = 0; i < numRequests; i++) {
@@ -78,9 +77,8 @@ public class MatchResourceLoadDeploymentTestNG extends PropDataApiDeploymentTest
     @DataProvider(name = "loadTestDataProvider")
     private Object[][] getLoadTestData() {
         return new Object[][] { { 1, 1000, 10000L }, { 1, 1, 5000L }, { 1, 10, 5000L }, { 1, 100, 5000L },
-                { 2, 100, 5000L }, { 2, 1000, 10000L }, { 4, 100, 5000L }, { 4, 1000, 10000L },
-                { 8, 100, 7500L }, { 8, 1000, 15000L }, { 16, 100, 15000L }, { 32, 100, 20000L },
-                { 64, 100, 25000L } };
+                { 2, 100, 5000L }, { 2, 1000, 15000L }, { 4, 100, 5000L }, { 8, 100, 7500L }, { 16, 100, 15000L },
+                { 32, 100, 20000L }, { 64, 100, 30000L } };
     }
 
     static class MatchCallable implements Callable<MatchOutput> {
