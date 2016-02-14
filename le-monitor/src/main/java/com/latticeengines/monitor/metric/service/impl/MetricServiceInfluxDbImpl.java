@@ -49,7 +49,6 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
     private static final Log log = LogFactory.getLog(MetricServiceInfluxDbImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
-    private ExecutorService executor = Executors.newFixedThreadPool(2);
     private LoadingCache<String, InfluxDB> dbConnectionCache;
 
     @Autowired
@@ -66,6 +65,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
     @Value("${monitor.influxdb.environment:Local}")
     private String environment;
+
+    @Value("${monitor.influxdb.log.level:NONE}")
+    private InfluxDB.LogLevel logLevel;
 
     private Boolean enabled = false;
     private static String hostname;
@@ -95,7 +97,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
                 }
 
             } catch (Exception e) {
-                log.warn("Had problem connecting fluxDb at " + url + ". Disable the metric service.");
+                log.warn("Had problem connecting fluxDb at " + url + ". Disable the metric service.", e);
                 enabled = false;
             }
 
@@ -114,6 +116,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
             log.debug("Received " + measurements.size() + " points to write.");
+            ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(new MetricRunnable<>(db, measurements));
         } else if (StringUtils.isNotEmpty(url)) {
             postConstruct();
@@ -179,7 +182,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
                         if (DB_CACHE_KEY.equals(key)) {
                             String decryptedPassword = CipherUtils.decrypt(password);
                             InfluxDB influxDB = InfluxDBFactory.connect(url, username, decryptedPassword);
-                            influxDB.setLogLevel(InfluxDB.LogLevel.NONE);
+                            influxDB.setLogLevel(logLevel);
                             return influxDB;
                         } else {
                             return null;
