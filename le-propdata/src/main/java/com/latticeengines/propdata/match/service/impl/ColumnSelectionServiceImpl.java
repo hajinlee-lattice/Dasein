@@ -1,12 +1,9 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -37,10 +34,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
 
     private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> sourceColumnMapCache;
     private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache;
-
-    private Set<String> excludeColumns = new HashSet<>(
-            Arrays.asList("CloudTechnologies_ATS", "CloudTechnologies_SocialMediaMonitoring", "IQC001", "IQC002",
-                    "IQC003", "MSA_Code", "RecentPatents", "TotalPatents", "Ultimate_Parent_Company_Indicator"));
 
     @PostConstruct
     private void postConstruct() {
@@ -106,7 +99,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
         for (ExternalColumn column : columns) {
             columnNames.add(column.getDefaultColumnName());
         }
-        columnNames.removeAll(excludeColumns);
         map.put(ColumnSelection.Predefined.Model.getName(), columnNames);
         return map;
     }

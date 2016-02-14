@@ -41,6 +41,7 @@ class MatchPlanner {
     @MatchStep
     MatchContext planForRealTime(MatchInput input) {
         MatchContext context = validateMatchInput(input);
+        context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         context = generateInputMetric(context);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context);

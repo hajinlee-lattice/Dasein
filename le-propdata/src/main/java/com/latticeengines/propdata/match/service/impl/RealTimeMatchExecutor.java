@@ -79,7 +79,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         Map<String, List<String>> sourceColumnsMap = context.getSourceColumnsMap();
 
         ExecutorService executor;
-        if (sourceColumnsMap.size() > MAX_FETCH_THREADS) {
+        if (sourceColumnsMap.size() <= MAX_FETCH_THREADS) {
             executor = Executors.newCachedThreadPool();
         } else {
             executor = Executors.newFixedThreadPool(MAX_FETCH_THREADS);
