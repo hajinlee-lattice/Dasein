@@ -340,8 +340,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
-            return "SELECT [Domain], [" + StringUtils.join(columns, "], [") + "] \n" + "FROM [" + tableName + "] \n"
-                    + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
+            return "SELECT [Domain], [" + StringUtils.join(columns, "], [") + "] \n" + "FROM [" + tableName
+                    + "] WITH(NOLOCK) \n" + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
         }
     }
 
