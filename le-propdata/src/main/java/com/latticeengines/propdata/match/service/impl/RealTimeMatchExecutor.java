@@ -250,17 +250,21 @@ class RealTimeMatchExecutor implements MatchExecutor {
             if (matchedAnyColumn) {
                 totalMatched++;
                 internalRecord.setMatched(true);
+            } else {
+                internalRecord.getErrorMessages().add("The input does not match to any source.");
             }
 
             if (returnUnmatched || matchedAnyColumn) {
                 internalRecord.setResultsInSource(null);
                 OutputRecord outputRecord = new OutputRecord();
+                if (matchedAnyColumn) {
+                    outputRecord.setOutput(internalRecord.getOutput());
+                }
                 outputRecord.setInput(internalRecord.getInput());
                 outputRecord.setMatched(internalRecord.isMatched());
-                outputRecord.setOutput(internalRecord.getOutput());
                 outputRecord.setMatchedDomain(internalRecord.getMatchedDomain());
-                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
                 outputRecord.setRowNumber(internalRecord.getRowNumber());
+                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
                 outputRecords.add(outputRecord);
             }
         }
