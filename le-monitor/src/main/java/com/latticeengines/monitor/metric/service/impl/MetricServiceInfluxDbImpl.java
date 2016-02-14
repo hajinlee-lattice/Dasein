@@ -245,7 +245,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
     private JsonNode queryInfluxDb(String query, String dbName) {
         try {
-            String response = HttpClientWithOptionalRetryUtils.sendGetRequest("http://localhost:8086/query", false,
+            String response = HttpClientWithOptionalRetryUtils.sendGetRequest(url + "/query", false,
                     Collections.<BasicNameValuePair> emptyList(), new BasicNameValuePair("q", query),
                     new BasicNameValuePair("db", dbName));
             ObjectMapper mapper = new ObjectMapper();
