@@ -52,6 +52,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
     private static final String CACHE_TABLE = "DerivedColumnsCache";
     private static final String MODEL = ColumnSelection.Predefined.Model.getName();
+    private static final Integer MAX_FETCH_THREADS = 4;
 
     @Autowired
     private DataSourceService dataSourceService;
@@ -62,17 +63,12 @@ class RealTimeMatchExecutor implements MatchExecutor {
     @Autowired
     private MetricService metricService;
 
-    private ExecutorService executorService = Executors.newFixedThreadPool(4);
-
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
-        try {
-            ExecutorCallable callable = new ExecutorCallable(matchContext);
-            Future<MatchContext> future = executorService.submit(callable);
-            return future.get();
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        matchContext = fetch(matchContext);
+        matchContext = complete(matchContext);
+        generateOutputMetrics(matchContext);
+        return matchContext;
     }
 
     @MatchStep
@@ -82,34 +78,25 @@ class RealTimeMatchExecutor implements MatchExecutor {
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Map<String, List<String>> sourceColumnsMap = context.getSourceColumnsMap();
 
-        if (sourceColumnsMap.size() == 1) {
-            for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-                MatchCallable callable = getMatchCallable(sourceColumns.getKey(), sourceColumns.getValue(), context);
-                try {
-                    List<Map<String, Object>> result = callable.call();
-                    resultMap.put(sourceColumns.getKey(), result);
-                } catch (Exception e) {
-                    LoggingUtils.logError(log, "Failed to fetch data from " + sourceColumns.getKey(), context, e);
-                    throw new RuntimeException("Failed to fetch data from " + sourceColumns.getKey(), e);
-                }
-            }
+        ExecutorService executor;
+        if (sourceColumnsMap.size() > MAX_FETCH_THREADS) {
+            executor = Executors.newCachedThreadPool();
         } else {
-            int numThread = Math.min(4, sourceColumnsMap.size());
-            ExecutorService executor = Executors.newFixedThreadPool(numThread);
-            Map<String, Future<List<Map<String, Object>>>> futureMap = new HashMap<>();
-            for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-                MatchCallable callable = getMatchCallable(sourceColumns.getKey(), sourceColumns.getValue(), context);
-                Future<List<Map<String, Object>>> future = executor.submit(callable);
-                futureMap.put(sourceColumns.getKey(), future);
-            }
-            for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-                Future<List<Map<String, Object>>> future = futureMap.get(sourceColumns.getKey());
-                try {
-                    resultMap.put(sourceColumns.getKey(), future.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    LoggingUtils.logError(log, "Failed to fetch data from " + sourceColumns.getKey(), context, e);
-                    throw new RuntimeException("Failed to fetch data from " + sourceColumns.getKey(), e);
-                }
+            executor = Executors.newFixedThreadPool(MAX_FETCH_THREADS);
+        }
+        Map<String, Future<List<Map<String, Object>>>> futureMap = new HashMap<>();
+        for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
+            MatchCallable callable = getMatchCallable(sourceColumns.getKey(), sourceColumns.getValue(), context);
+            Future<List<Map<String, Object>>> future = executor.submit(callable);
+            futureMap.put(sourceColumns.getKey(), future);
+        }
+        for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
+            Future<List<Map<String, Object>>> future = futureMap.get(sourceColumns.getKey());
+            try {
+                resultMap.put(sourceColumns.getKey(), future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                LoggingUtils.logError(log, "Failed to fetch data from " + sourceColumns.getKey(), context, e);
+                throw new RuntimeException("Failed to fetch data from " + sourceColumns.getKey(), e);
             }
         }
 
@@ -251,6 +238,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 totalMatched++;
                 internalRecord.setMatched(true);
             } else {
+                if (internalRecord.getErrorMessages() == null) {
+                    internalRecord.setErrorMessages(new ArrayList<String>());
+                }
                 internalRecord.getErrorMessages().add("The input does not match to any source.");
             }
 
@@ -298,24 +288,6 @@ class RealTimeMatchExecutor implements MatchExecutor {
             throw new UnsupportedOperationException(
                     "Only support match against predefined selection " + ColumnSelection.Predefined.Model + " now.");
         }
-    }
-
-    private class ExecutorCallable implements Callable<MatchContext> {
-
-        private MatchContext matchContext;
-
-        ExecutorCallable(MatchContext matchContext) {
-            this.matchContext = matchContext;
-        }
-
-        @Override
-        public MatchContext call() {
-            matchContext = fetch(matchContext);
-            matchContext = complete(matchContext);
-            generateOutputMetrics(matchContext);
-            return matchContext;
-        }
-
     }
 
     private class DomainBasedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {

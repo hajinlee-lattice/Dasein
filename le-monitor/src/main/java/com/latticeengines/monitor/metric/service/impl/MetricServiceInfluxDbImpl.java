@@ -50,6 +50,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     private static final Log log = LogFactory.getLog(MetricServiceInfluxDbImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
+    private ExecutorService executor = Executors.newCachedThreadPool();
 
     @Autowired
     private VersionManager versionManager;
@@ -116,7 +117,6 @@ public class MetricServiceInfluxDbImpl implements MetricService {
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
             log.debug("Received " + measurements.size() + " points to write.");
-            ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(new MetricRunnable<>(db, measurements));
         } else if (StringUtils.isNotEmpty(url)) {
             postConstruct();
