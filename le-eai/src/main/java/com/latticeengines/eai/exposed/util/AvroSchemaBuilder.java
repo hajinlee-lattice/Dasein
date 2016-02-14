@@ -141,7 +141,7 @@ public class AvroSchemaBuilder {
                 fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));
             }
 
-            Type type = Type.valueOf(attr.getPhysicalDataType());
+            Type type = Type.valueOf(attr.getPhysicalDataType().toUpperCase());
 
             switch (type) {
             case DOUBLE:

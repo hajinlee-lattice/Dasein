@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.aspectj.apache.bcel.generic.Type;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,9 @@ import util.HdfsUriGenerator;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce.LedpCSVToAvroImportMapper;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -48,6 +52,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private VersionManager versionManager;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -102,13 +109,17 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     private Properties getProperties(ImportContext ctx, Table table, String localFileName) {
         List<String> types = new ArrayList<>();
-        for (Attribute attr : table.getAttributes()) {
-            types.add(attr.getPhysicalDataType());
+        for (@SuppressWarnings("unused")
+        Attribute attr : table.getAttributes()) {
+            types.add(String.class.getSimpleName());
         }
 
         Properties props = new Properties();
+        props.put("importMapperClass", LedpCSVToAvroImportMapper.class.toString());
         props.put("columnTypes", StringUtils.join(types, ","));
-        props.put("yarn.mr.hdfs.class.path", "/app/eai/lib");
+        props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersion()));
+        System.out.println(AvroSchemaBuilder.createSchema(table.getName(), table).toString());
+        props.put("avro.schema", AvroSchemaBuilder.createSchema(table.getName(), table).toString());
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, localFileName));
@@ -161,7 +172,13 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
             if (attrMetadata != null) {
                 attr.setDisplayName(attrMetadata.getDisplayName());
-                attr.setPhysicalDataType(attrMetadata.getDataType());
+                if(attrMetadata.getDataType().equals("date") || attrMetadata.getDataType().equals("Date")){
+                    attr.setPhysicalDataType(Type.LONG.toString());
+                }else{
+                    attr.setPhysicalDataType(attrMetadata.getDataType());
+                }
+                //attr.setPhysicalDataType(attrMetadata.getExtensions().get(2).getValue());
+                attr.setLogicalDataType(attrMetadata.getDataType());
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }

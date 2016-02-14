@@ -169,6 +169,42 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.sqoop</groupId>
+                                    <artifactId>sqoop</artifactId>
+                                    <version>${sqoop.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>target/classes</outputDirectory>
+                                    <includes>**/*.class,**/*.xml</includes>
+                                    <excludes>org/apache/sqoop/mapreduce/DataDrivenImportJob.class,
+                                        org/apache/sqoop/mapreduce/ImportJobBase.class,
+                                        org/apache/sqoop/mapreduce/ExportJobBase.class
+                                    </excludes>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.java</includes>
+                            <excludes>**/*.properties</excludes>
+                            <outputDirectory>target</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
@@ -361,12 +397,6 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>${sqoop.version}</version>
-            <classifier>ledp</classifier>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-perf</artifactId>
             <version>${le.perf.version}</version>
@@ -510,6 +540,12 @@
             <version>${le.testfwk.version}</version>
             <scope>test</scope>
             <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop</artifactId>
+            <version>${sqoop.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

@@ -137,6 +137,10 @@
                     <groupId>org.python</groupId>
                     <artifactId>jython-standalone</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.sqoop</groupId>
+                    <artifactId>sqoop</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -145,6 +149,12 @@
             <version>${le.dataplatform.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.sqoop</groupId>
+                    <artifactId>sqoop</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
