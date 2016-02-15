@@ -12,7 +12,6 @@
         <le.dataplatform.version>2.0.22-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
         <le.monitor.version>2.0.22-SNAPSHOT</le.monitor.version>
-        <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
     </properties>
 
@@ -133,6 +132,10 @@
                     <groupId>tomcat</groupId>
                     <artifactId>jasper-runtime</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.apache.sqoop</groupId>
+                    <artifactId>sqoop</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -175,11 +178,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>${sqoop.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
