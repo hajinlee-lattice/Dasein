@@ -143,9 +143,9 @@ public class DataDrivenDBRecordReader<T extends DBWritable> extends DBRecordRead
     @Override
     protected ResultSet executeQuery(String query) throws SQLException {
         try {
-            return executeQuery(query);
+            return super.executeQuery(query);
         } catch (SQLException sql) {
-            //TODO: if csv is non parsable, how to get to report errors
+            // TODO: if csv is non parsable, how to get to report errors
             throw sql;
         }
     }
