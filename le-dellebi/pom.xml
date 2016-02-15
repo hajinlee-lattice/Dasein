@@ -245,11 +245,6 @@
             <version>${cameljcifs.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.sqoop</groupId>
-            <artifactId>sqoop</artifactId>
-            <version>${sqoop.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
