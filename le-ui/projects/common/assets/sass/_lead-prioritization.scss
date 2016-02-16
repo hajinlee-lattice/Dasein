@@ -147,6 +147,120 @@
 
 
 
+
+/*
+Forms for System SetUp Page
+================================================================== */
+.form-systemSetup {
+    width: 860px;
+    margin: 6em auto 0; 
+}
+    .formSF img, .formMT img {
+        margin-bottom: 30px;
+        padding-left:30%;
+    }
+    .formSF, .form-title, .formMT {
+        float: left;
+    }
+        .form-systemSetup .form-title {
+            width: 240px;
+            font-size: 32px;
+            color: #333;
+            text-align: right;
+            padding-right: 30px;
+            padding-bottom: 425px;
+            border-right: #ccc solid 1px;
+            font-weight: normal;
+        }
+            .form-systemSetup .form-title h1 {
+                font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+                font-size: 32px;
+                line-height: 1em;
+                margin-bottom: 0;
+            }
+            .form-title span {
+                font-size: 10pt;
+                color: #666;
+                margin-top: 0;
+            }
+
+        .formSF, .formMT {
+            width: 310px;
+        }
+        .formSF {
+            border-right: #ccc solid 1px;
+            padding: 0 30px;
+        }
+        .formMT {
+            padding-left: 30px;
+        }
+
+            .formSF .tabpanel .nav-tabs {
+                margin-bottom: 20px;
+                border:0px;
+                text-align: center;
+            }
+                .formSF .tabpanel .nav > li {
+                    padding: 10px 0;
+                    border-bottom: #ccc solid 1px;
+                }
+                .formSF .tabpanel .nav > li.active {
+                    border-bottom: #333 solid 1px;
+                }
+                .formSF .tabpanel .nav > li > a {
+                    font-family:'ProximaNova-Regular','Open Sans',sans-serif;
+                    font-size:14px;
+                    line-height: 12px;
+                    font-weight: bold;
+                    color:#477cba;
+                    text-transform: uppercase;
+                    background: none;
+                    border: 0;
+                    border-radius: 0;
+                    padding: 0 15px;
+                }
+                    .formSF .tabpanel .nav > li:first-of-type > a {
+                        border-right: #999 solid 1px;
+                    }
+                    .formSF .tabpanel .nav > li.active > a {
+                        color: #333;
+                    }
+                    .formSF .tabpanel .nav-tabs a:focus{
+                        color:333;
+                        background: none;
+                        border: 0;
+                    }
+                    .formSF .tabpanel .nav-tabs a:hover{
+                        color:#0177fe;
+                        background: none;
+                        border:0px;
+                    }
+
+            .form-systemSetup label, .form-systemSetup label {
+                font-size: 12px;
+                color: #999;
+                margin-bottom: 2px;
+            }
+                .form-systemSetup label span, .form-title span span {
+                    color: #c70009;   
+                }
+    .form-systemSetup .form-control {
+        color: #333;
+        margin-bottom: 14px;
+    }
+    .form-systemSetup .btn-primary {
+        font-size: 10pt;
+        padding: 10px 16px;
+        margin-bottom:10px;
+    }
+    .secondary-actions a {
+        font-size: 12px;
+        color: #2579ad;
+        display: block;
+    }
+
+
+
 /*
 Model Detail Attributes
 brought over from leadpprioritization/app/assets/style.scss
