@@ -13,6 +13,7 @@
                 <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
                 <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
                 <value>file:${WORKFLOW_PROPDIR:/etc/ledp}/workflow.properties</value>
+                <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false"/>

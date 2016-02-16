@@ -33,6 +33,7 @@
                 <security.properties.path>../le-security/conf/env/buildmachine</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/buildmachine</workflow.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -52,6 +53,7 @@
                 <security.properties.path>../le-security/conf/env/devcluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/devcluster</workflow.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/devcluster</monitor.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -70,6 +72,7 @@
                 <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -88,6 +91,7 @@
                 <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -106,6 +110,7 @@
                 <security.properties.path>../le-securityconf/env/stage</security.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/stage</proxy.properties.path>
                 <workflow.properties.path>../le-workflow/conf/env/stage</workflow.properties.path>
+                <monitor.properties.path>../le-monitor/conf/env/stage</monitor.properties.path>
                 <bin.env.path>bin/env/stage</bin.env.path>
                 <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
             </properties>
@@ -158,6 +163,9 @@
                                 </source>
                                 <source>
                                     <location>${workflow.properties.path}/workflow.properties</location>
+                                </source>
+                                <source>
+                                    <location>${monitor.properties.path}/monitor.properties</location>
                                 </source>
                                 <source>
                                     <location>certificates/${jks.name}</location>

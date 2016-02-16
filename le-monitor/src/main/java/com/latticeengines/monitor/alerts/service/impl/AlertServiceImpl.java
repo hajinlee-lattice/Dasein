@@ -20,7 +20,7 @@ public class AlertServiceImpl implements AlertService {
 
     private static final Log log = LogFactory.getLog(AlertServiceImpl.class);
 
-    @Value("${monitor.alert.service.enabled}")
+    @Value("${monitor.alert.service.enabled:false}")
     private boolean alertServiceEnabled;
 
     @Autowired
