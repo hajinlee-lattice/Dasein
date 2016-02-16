@@ -12,16 +12,16 @@ import com.latticeengines.dataplatform.service.ParallelDispatchService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
-@Component("ParallelDispatchService")
+@Component("parallelDispatchService")
 public class ParallelDispatchServiceImpl implements ParallelDispatchService {
 
     @Value("${dataplatform.model.parallel.enabled:false}")
     private boolean configParallelEnabled;
 
-    @Resource(name = "SingleContainerDispatcher")
+    @Resource(name = "singleContainerDispatcher")
     private ParallelDispatchService singleContainerDispatcher;
 
-    @Resource(name = "MutipleContainerDispatcher")
+    @Resource(name = "mutipleContainerDispatcher")
     private ParallelDispatchService multipleContainerDispatcher;
 
     private ParallelDispatchService defaultContainerDispatcher;

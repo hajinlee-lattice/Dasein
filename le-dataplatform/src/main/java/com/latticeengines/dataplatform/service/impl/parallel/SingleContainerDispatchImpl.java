@@ -15,7 +15,7 @@ import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
-@Component("SingleContainerDispatcher")
+@Component("singleContainerDispatcher")
 public class SingleContainerDispatchImpl implements ParallelDispatchService {
 
     @Resource(name = "modelingJobService")

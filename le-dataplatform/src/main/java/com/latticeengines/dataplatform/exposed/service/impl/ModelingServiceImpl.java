@@ -103,7 +103,7 @@ public class ModelingServiceImpl implements ModelingService {
     @Autowired
     private VersionManager versionManager;
 
-    @Resource(name = "ParallelDispatchService")
+    @Resource(name = "parallelDispatchService")
     private ParallelDispatchService parallelDispatchService;
 
     @Value("${dataplatform.customer.basedir}")
