@@ -199,7 +199,7 @@ dl {
 Grid
 ====================================================================== */
 .wrapper {
-    width:1024px;
+    width:auto;
     margin: 0 auto;
     padding: 0 28px 0 20px;
 }
@@ -969,8 +969,6 @@ Model Details
     }
     #attributes .data > div {
         float: left;
-        width: 193px;
-
     }   
         #attributes .data > div#chart {
             width: 590px;
@@ -2594,7 +2592,7 @@ th.sub-note {
     margin-top:15px !important;
 }
 .panel {
-    box-shadow:0 1px 1px rgba(0,0,0,.25);
+    /* box-shadow:0 1px 1px rgba(0,0,0,.25); */
 }
 .panel-model {
     border:1px solid #ddd;

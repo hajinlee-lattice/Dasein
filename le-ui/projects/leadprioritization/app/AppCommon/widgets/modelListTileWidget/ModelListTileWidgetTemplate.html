@@ -1,7 +1,7 @@
 
 
 
-<div class="list-item model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="model.attributes({ modelId: '{{ data.Id }}' })">
+<div class="columns four list-item model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="model.attributes({ modelId: '{{ data.Id }}' })">
 
         <div class="model-title" data-ng-hide="nameStatus.editing">
             <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>

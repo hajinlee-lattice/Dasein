@@ -24,26 +24,6 @@ angular
             });
 
             return deferred.promise;
-        },
-        screenWidgetConfig: function($q, $stateParams, WidgetService, WidgetConfigUtility) {
-            var widgetConfig = WidgetService.GetApplicationWidgetConfig();
-
-            return WidgetConfigUtility.GetWidgetConfig(
-                widgetConfig,
-                "modelDetailsScreenWidget"
-            );
-        },
-        ChartData: function(TopPredictorService, Model) {
-            return TopPredictorService.FormatDataForTopPredictorChart(Model);
-        },
-        InternalAttributes: function(TopPredictorService, Model, ChartData) {
-            return TopPredictorService.GetNumberOfAttributesByCategory(ChartData.children, false, Model);
-        },
-        ExternalAttributes: function(TopPredictorService, Model, ChartData) {
-            return TopPredictorService.GetNumberOfAttributesByCategory(ChartData.children, true, Model);
-        },
-        TotalAttributeValues: function(TopPredictorService, Model, InternalAttributes, ExternalAttributes) {
-            return InternalAttributes.totalAttributeValues + ExternalAttributes.totalAttributeValues;
         }
     };
 
@@ -219,8 +199,11 @@ angular
             url: '/summary',
             views: {
                 "main@": {
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        //$compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
+                    },
                     templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
-
                 }   
             }
         })
@@ -228,8 +211,11 @@ angular
             url: '/alerts',
             views: {
                 "main@": {
-                    //controller: 'AdminInfoSummaryWidgetController',
-                    templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        //$compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
+                    },
+                    templateUrl: './app/AppCommon/widgets/AdminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
             }
         })

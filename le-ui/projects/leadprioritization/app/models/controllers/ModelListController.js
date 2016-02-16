@@ -32,6 +32,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
             if (modelList == null || modelList.length === 0) {
                 $scope.showNoModels = true;
             } else {
+                $scope.length = modelList.length;
                 var contentContainer = $('#modelListContainer');
                 WidgetFrameworkService.CreateWidget({
                     element: contentContainer,

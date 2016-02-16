@@ -8,21 +8,23 @@
                 <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
             </div>
 
-            <div class="no-models text-center"  data-ng-show="showNoModels">
+            <div class="no-models text-center" data-ng-show="showNoModels">
                 <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
             </div>
         </div>
 
         <div class="row" data-ng-hide="showNoModels || loading">
             <div class="col-md-12">
-                <div class="pull-left">Displaying 4 of 4</div>
+                <div class="pull-left" style="margin-top:0.65em;font-size:1.2em;">
+                    Displaying {{ length }} models
+                </div>
                 <div class="pull-right">
                     <button ui-sref="models.import" type="button" class="button orange-button">Create Model</button>
                 </div>
             </div>
         </div>
 
-        <div class="row" data-ng-hide="showNoModels || loading">        
+        <div class="row" data-ng-hide="showNoModels || loading" style="margin-top:1em;">        
             <div class="twelve columns tile-list" id="modelListContainer"></div>
         </div>
 

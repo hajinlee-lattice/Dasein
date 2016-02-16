@@ -9,7 +9,6 @@ angular.module('mainApp.appCommon.widgets.PerformanceTabWidget', [
     return {
         templateUrl: 'app/AppCommon/widgets/performanceTabWidget/PerformanceTabTemplate.html',
         controller: ['$scope', '$filter', 'ResourceUtility', function ($scope, $filter, ResourceUtility) {
-            console.log('hi', $scope.data);
             //if ($scope.data == null) return;
 
             $scope.threasholdData = $scope.data.ThresholdChartData;
