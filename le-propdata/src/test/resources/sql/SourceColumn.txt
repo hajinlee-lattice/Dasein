@@ -4,7 +4,7 @@
 ;3;	;AlexaMostRecent;	;Categories;	;NVARCHAR(1000);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;4;	;AlexaMostRecent;	;BusinessIndustry;	;NVARCHAR(200);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;5;	;AlexaMostRecent;	;BusinessIndustry2;	;NVARCHAR(200);	;;	;;	;1;	;;	;OTHER;	;;	;;
-;6;	;AlexaMostRecent;	;Description;	;NVARCHAR(1000);	;;	;;	;1;	;;	;OTHER;	;;	;BusinessCardAttribute;
+;6;	;AlexaMostRecent;	;Description;	;NVARCHAR(1000);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;7;	;AlexaMostRecent;	;Domains;	;NVARCHAR(200);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;8;	;AlexaMostRecent;	;Keywords;	;NVARCHAR(100);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;9;	;AlexaMostRecent;	;LinksIn;	;INT;	;;	;;	;1;	;;	;OTHER;	;;	;;
