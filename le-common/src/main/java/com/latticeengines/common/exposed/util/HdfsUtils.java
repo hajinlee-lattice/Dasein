@@ -56,25 +56,25 @@ public class HdfsUtils {
         }
     };
 
-    public static final void mkdir(Configuration configuration, String dir) throws Exception {
+    public static final void mkdir(Configuration configuration, String dir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.mkdirs(new Path(dir));
         }
     }
 
-    public static final boolean isDirectory(Configuration configuration, String path) throws Exception {
+    public static final boolean isDirectory(Configuration configuration, String path) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.isDirectory(new Path(path));
         }
     }
 
-    public static final void rmdir(Configuration configuration, String dir) throws Exception {
+    public static final void rmdir(Configuration configuration, String dir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.delete(new Path(dir), true);
         }
     }
 
-    public static final String getHdfsFileContents(Configuration configuration, String hdfsPath) throws Exception {
+    public static final String getHdfsFileContents(Configuration configuration, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path schemaPath = new Path(hdfsPath);
 
@@ -88,7 +88,7 @@ public class HdfsUtils {
     }
 
     public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
-            throws Exception {
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -97,28 +97,28 @@ public class HdfsUtils {
     }
 
     public static final void copyLocalResourceToHdfs(Configuration configuration, String resourcePath, String hdfsPath)
-            throws Exception {
+            throws IOException {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         Resource resource = resolver.getResource(resourcePath);
         copyLocalToHdfs(configuration, resource.getFile().getAbsolutePath(), hdfsPath);
     }
 
     public static final void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
-            throws Exception {
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
         }
     }
 
     public static final void copyHdfsToLocal(Configuration configuration, String hdfsPath, String localPath)
-            throws Exception {
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             fs.copyToLocalFile(new Path(hdfsPath), new Path(localPath));
         }
     }
 
     public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
-            throws Exception {
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path filePath = new Path(hdfsPath);
 
@@ -128,18 +128,18 @@ public class HdfsUtils {
         }
     }
 
-    public static final boolean fileExists(Configuration configuration, String hdfsPath) throws Exception {
+    public static final boolean fileExists(Configuration configuration, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             return fs.exists(new Path(hdfsPath));
         }
     }
 
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws IOException {
         return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) null);
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
-            throws Exception {
+            throws IOException {
         HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
             @Override
@@ -154,7 +154,7 @@ public class HdfsUtils {
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
-            HdfsFilenameFilter filter) throws Exception {
+            HdfsFilenameFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -175,7 +175,7 @@ public class HdfsUtils {
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
-            throws Exception {
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -196,12 +196,12 @@ public class HdfsUtils {
     }
 
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws Exception {
+            HdfsFileFilter filter) throws IOException {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws Exception {
+            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -219,7 +219,7 @@ public class HdfsUtils {
     }
 
     public static final String getApplicationLog(Configuration configuration, String user, String applicationId)
-            throws Exception {
+            throws IOException {
         String log = "";
         try (InputStream is = getInputStream(configuration, user, applicationId)) {
             try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
