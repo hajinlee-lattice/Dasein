@@ -174,6 +174,7 @@ public enum LedpCode {
     LEDP_18078("Failed to get saved attributes: {0}."), //
     LEDP_18079("Failed to save attributes: {0}."), //
     LEDP_18080("Failed to get template type: {0}."), //
+    LEDP_18081("File {0} is already being imported."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

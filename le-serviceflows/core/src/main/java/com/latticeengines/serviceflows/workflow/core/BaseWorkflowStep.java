@@ -2,10 +2,11 @@ package com.latticeengines.serviceflows.workflow.core;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,8 +22,11 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
@@ -147,6 +151,31 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
         } catch (ClassCastException e) {
             return null;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void registerSourceFileInContext(SourceFile sourceFile) {
+        @SuppressWarnings("unchecked")
+        Set<String> sourceFiles = getObjectFromContext(WorkflowContextConstants.SOURCE_FILES, Set.class);
+
+        if (sourceFiles == null) {
+            sourceFiles = new HashSet<String>();
+        }
+
+        sourceFiles.add(sourceFile.getName());
+        putObjectInContext(WorkflowContextConstants.SOURCE_FILES, sourceFiles);
+    }
+
+    protected void registerReportInContext(Report report) {
+        @SuppressWarnings("unchecked")
+        Set<String> reports = getObjectFromContext(WorkflowContextConstants.REPORTS, Set.class);
+
+        if (reports == null) {
+            reports = new HashSet<String>();
+        }
+
+        reports.add(report.getName());
+        putObjectInContext(WorkflowContextConstants.REPORTS, reports);
     }
 
     protected Double getDoubleValueFromContext(String key) {

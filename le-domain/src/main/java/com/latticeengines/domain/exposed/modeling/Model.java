@@ -302,7 +302,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     public void setFeaturesThreshold(int featuresThreshold) {
         this.featuresThreshold = featuresThreshold;
     }
-    
+
     @JsonIgnore
     public void setKeyCols(String keyCols) {
         this.keyCols = StringTokenUtils.stringToList(keyCols);

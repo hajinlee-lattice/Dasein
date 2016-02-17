@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileState;
 import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflowConfiguration;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
@@ -72,6 +73,7 @@ public class ImportEventTableWorkflowTestNGBase extends WorkflowApiFunctionalTes
             sourceFile.setName(file.getName());
             sourceFile.setPath(outputPath + "/" + file.getName());
             sourceFile.setSchemaInterpretation(schema);
+            sourceFile.setState(SourceFileState.Uploaded);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, sourceFile.getPath());
 
             MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
@@ -88,7 +90,6 @@ public class ImportEventTableWorkflowTestNGBase extends WorkflowApiFunctionalTes
             metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
             sourceFileService.create(sourceFile);
-
             return sourceFileService.findByName(sourceFile.getName());
         } catch (Exception e) {
             throw new RuntimeException(e);

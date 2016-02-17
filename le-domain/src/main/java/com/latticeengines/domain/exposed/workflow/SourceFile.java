@@ -23,6 +23,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -36,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "SOURCE_FILE", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME",
         "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
-public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields {
+public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasAuditingFields, HasApplicationId {
 
     @JsonProperty("name")
     @Column(name = "NAME", nullable = false)
@@ -46,7 +47,7 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
-    @JsonProperty("tenant")
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -67,10 +68,6 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "PATH", nullable = false)
     private String path;
 
-    @JsonProperty("errors_path")
-    @Column(name = "ERRORS_PATH")
-    private String errorsPath;
-
     @JsonProperty("created")
     @Column(name = "CREATED")
     private Date created;
@@ -87,6 +84,15 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "SCHEMA_INTERPRETATION")
     @Enumerated(EnumType.STRING)
     private SchemaInterpretation schemaInterpretation;
+
+    @JsonProperty("application_id")
+    @Column(name = "APPLICATION_ID")
+    private String applicationId;
+
+    @JsonProperty("state")
+    @Column(name = "STATE")
+    @Enumerated(EnumType.STRING)
+    private SourceFileState state;
 
     @Override
     public String getName() {
@@ -175,19 +181,29 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
         this.description = description;
     }
 
-    public String getErrorsPath() {
-        return errorsPath;
-    }
-
-    public void setErrorsPath(String errorsPath) {
-        this.errorsPath = errorsPath;
-    }
-
     public SchemaInterpretation getSchemaInterpretation() {
         return schemaInterpretation;
     }
 
     public void setSchemaInterpretation(SchemaInterpretation schemaInterpretation) {
         this.schemaInterpretation = schemaInterpretation;
+    }
+
+    @Override
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    @Override
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+
+    public SourceFileState getState() {
+        return state;
+    }
+
+    public void setState(SourceFileState state) {
+        this.state = state;
     }
 }

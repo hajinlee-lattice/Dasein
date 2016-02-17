@@ -1,7 +1,7 @@
 package com.latticeengines.serviceflows.workflow.report;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -35,17 +35,6 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
         proxy.registerReport(report, getConfiguration().getCustomerSpace().toString());
     }
 
-    private void registerReportInContext(Report report) {
-        @SuppressWarnings("unchecked")
-        List<Report> reports = getObjectFromContext(WorkflowContextConstants.REPORTS, List.class);
-
-        if (reports == null) {
-            reports = new ArrayList<Report>();
-        }
-
-        reports.add(report);
-        putObjectInContext(WorkflowContextConstants.REPORTS, reports);
-    }
 
     private Report createReport(String json) {
         Report report = new Report();

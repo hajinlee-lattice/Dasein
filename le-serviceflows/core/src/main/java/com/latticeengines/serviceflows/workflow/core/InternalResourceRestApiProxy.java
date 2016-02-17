@@ -106,4 +106,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             throw new RuntimeException("findSourceFileByName: Remote call failure", e);
         }
     }
+
+    public void updateSourceFile(SourceFile sourceFile, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/sourcefiles", sourceFile.getName(), tenantId);
+            log.info(String.format("Getting from %s", url));
+            restTemplate.put(url, sourceFile);
+        } catch (Exception e) {
+            throw new RuntimeException("updateSourceFile: Remote call failure", e);
+        }
+    }
 }

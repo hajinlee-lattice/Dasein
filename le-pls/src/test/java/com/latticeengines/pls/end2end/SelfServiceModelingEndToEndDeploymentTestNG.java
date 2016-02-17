@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.List;
@@ -108,8 +109,18 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 String.format("%s/pls/fileuploads/%s/import", getPLSRestAPIHostPort(), sourceFile.getName()), null,
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
+
         @SuppressWarnings("unchecked")
         String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
+
+        System.out.println(String.format("Workflow application id is %s", applicationId));
+        waitForWorkflowStatus(applicationId, true);
+
+        response = restTemplate.postForObject(
+                String.format("%s/pls/fileuploads/%s/import", getPLSRestAPIHostPort(), sourceFile.getName()), null,
+                ResponseDocument.class);
+        assertFalse(response.isSuccess());
+
         WorkflowStatus completedStatus = waitForWorkflowStatus(applicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
 

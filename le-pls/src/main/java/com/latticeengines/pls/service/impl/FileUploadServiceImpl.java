@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileState;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
 import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
@@ -59,6 +60,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
+            file.setState(SourceFileState.Uploaded);
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());

@@ -24,6 +24,15 @@ public class SourceFileServiceImpl implements SourceFileService {
 
     @Override
     public void update(SourceFile sourceFile) {
-        sourceFileEntityMgr.update(sourceFile);
+        SourceFile existing = sourceFileEntityMgr.findByName(sourceFile.getName());
+        if (existing != null) {
+            delete(existing);
+        }
+        sourceFileEntityMgr.create(sourceFile);
+    }
+
+    @Override
+    public void delete(SourceFile sourceFile) {
+        sourceFileEntityMgr.delete(sourceFile);
     }
 }

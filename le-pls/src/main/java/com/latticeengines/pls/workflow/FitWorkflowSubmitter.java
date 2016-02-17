@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -52,18 +51,7 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
     private String accountMasterPath;
 
     private void checkForRunningWorkflow(TargetMarket targetMarket) {
-        String appId = targetMarket.getApplicationId();
-        if (appId == null) {
-            return;
-        }
-        WorkflowStatus status = null;
-        try {
-            status = workflowProxy.getWorkflowStatusFromApplicationId(appId);
-        } catch (Exception e) {
-            // Ignore any errors since this means that any associated workflow
-            // must be problematic so let it continue
-        }
-        if (status != null && status.getStatus().isRunning()) {
+        if (hasRunningWorkflow(targetMarket)) {
             throw new LedpException(LedpCode.LEDP_18076);
         }
     }

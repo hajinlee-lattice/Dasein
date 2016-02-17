@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.workflow.SourceFileState;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
@@ -64,15 +65,25 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
     }
 
     private void updateSourceFile() {
+        CustomerSpace space = getConfiguration().getCustomerSpace();
         SourceFile sourceFile = retrieveSourceFile();
+        sourceFile.setState(SourceFileState.Imported);
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+        proxy.updateSourceFile(sourceFile, space.toString());
     }
 
     private SourceFile retrieveSourceFile() {
         CustomerSpace space = getConfiguration().getCustomerSpace();
 
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy( //
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+        SourceFile sourceFile = proxy.findSourceFileByName(getConfiguration().getSourceFileName(), space.toString());
+        registerSourceFileInContext(sourceFile);
+        return sourceFile;
+    }
+
+    private InternalResourceRestApiProxy getInternalResourceProxy() {
+        return new InternalResourceRestApiProxy( //
                 getConfiguration().getInternalResourceHostPort());
-        return proxy.findSourceFileByName(getConfiguration().getSourceFileName(), space.toString());
     }
 
     private Table retrieveMetadata(SourceFile sourceFile) {

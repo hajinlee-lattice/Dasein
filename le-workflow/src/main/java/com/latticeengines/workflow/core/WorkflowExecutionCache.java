@@ -35,6 +35,8 @@ import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
+import com.latticeengines.workflow.exposed.service.ReportService;
+import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 
@@ -55,6 +57,12 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private WorkflowService workflowService;
+
+    @Autowired
+    private ReportService reportService;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @PostConstruct
     public void init() {
@@ -148,16 +156,19 @@ public class WorkflowExecutionCache {
         if (contextObj == null) {
             return reports;
         }
-        if (contextObj instanceof List) {
-            for (Object obj : (List) contextObj) {
-                if (obj instanceof Report) {
-                    reports.add((Report) obj);
+        if (contextObj instanceof Set) {
+            for (Object obj : (Set) contextObj) {
+                if (obj instanceof String) {
+                    Report report = reportService.getReportByName((String) obj);
+                    if (report != null) {
+                        reports.add(report);
+                    }
                 } else {
-                    throw new RuntimeException("Failed to convert context object to List<Report>.");
+                    throw new RuntimeException("Failed to convert context object.");
                 }
             }
         } else {
-            throw new RuntimeException("Failed to convert context object to List<Report>.");
+            throw new RuntimeException("Failed to convert context object.");
         }
         return reports;
     }
@@ -169,16 +180,19 @@ public class WorkflowExecutionCache {
         if (contextObj == null) {
             return sourceFiles;
         }
-        if (contextObj instanceof List) {
-            for (Object obj : (List) contextObj) {
-                if (obj instanceof SourceFile) {
-                    sourceFiles.add((SourceFile) obj);
+        if (contextObj instanceof Set) {
+            for (Object obj : (Set) contextObj) {
+                if (obj instanceof String) {
+                    SourceFile sourceFile = sourceFileService.findByName((String) obj);
+                    if (sourceFile != null) {
+                        sourceFiles.add(sourceFile);
+                    }
                 } else {
-                    throw new RuntimeException("Failed to convert context object to List<SourceFile>.");
+                    throw new RuntimeException("Failed to convert context object.");
                 }
             }
         } else {
-            throw new RuntimeException("Failed to convert context object to List<SourceFile>.");
+            throw new RuntimeException("Failed to convert context object.");
         }
         return sourceFiles;
     }

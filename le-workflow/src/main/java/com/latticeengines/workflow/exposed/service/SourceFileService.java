@@ -9,4 +9,6 @@ public interface SourceFileService {
     void create(SourceFile sourceFile);
 
     void update(SourceFile sourceFile);
+
+    void delete(SourceFile sourceFile);
 }

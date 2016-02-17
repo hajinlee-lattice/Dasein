@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.rmi.server.UID;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/fileuploads")
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class FileUploadResource {
+    private static final Logger log = Logger.getLogger(FileUploadResource.class);
 
     @Autowired
     private SourceFileService sourceFileService;
@@ -50,6 +52,7 @@ public class FileUploadResource {
             return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
                     new ByteArrayInputStream(file.getBytes())));
         } catch (Exception e) {
+            log.error(e);
             return ResponseDocument.failedResponse(e);
         }
     }
@@ -70,6 +73,7 @@ public class FileUploadResource {
         try {
             return ResponseDocument.successResponse(fileUploadService.getUnknownColumns(fileName));
         } catch (Exception e) {
+            log.error(e);
             return ResponseDocument.failedResponse(e);
         }
     }
@@ -83,6 +87,7 @@ public class FileUploadResource {
             fileUploadService.resolveMetadata(fileName, unknownColumns);
             return SimpleBooleanResponse.successResponse();
         } catch (Exception e) {
+            log.error(e);
             return SimpleBooleanResponse.failedResponse(e);
         }
     }
@@ -98,6 +103,7 @@ public class FileUploadResource {
             }
             return ResponseDocument.successResponse(importEventTableWorkflowSubmitter.submit(sourceFile).toString());
         } catch (Exception e) {
+            log.error(e);
             return ResponseDocument.failedResponse(e);
         }
     }
