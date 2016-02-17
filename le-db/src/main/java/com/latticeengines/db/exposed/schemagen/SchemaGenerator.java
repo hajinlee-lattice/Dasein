@@ -154,14 +154,19 @@ public class SchemaGenerator {
         for (int i = args.length - packages.length; i < length; i++) {
             packages[j++] = args[i];
         }
-        SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
+
+        SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL, packages);
         File mysqlExportFile = mysqlGenerator.generateToScript();
+
+        SchemaGenerator mysql5Generator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, packages);
+        File mysql5ExportFile = mysql5Generator.generateToScript();
 
         SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
         File sqlServerExportFile = sqlServerGenerator.generateToScript();
 
         if (withStaticSql) {
-            mysqlGenerator.appendStaticSql(mysqlExportFile, DBDialect.MYSQL5INNODB);
+            mysqlGenerator.appendStaticSql(mysqlExportFile, DBDialect.MYSQL);
+            mysql5Generator.appendStaticSql(mysql5ExportFile, DBDialect.MYSQL5INNODB);
             sqlServerGenerator.appendStaticSql(sqlServerExportFile, DBDialect.SQLSERVER);
         }
     }
@@ -207,7 +212,6 @@ public class SchemaGenerator {
                     }
 
                     // deal with the classes within jar files
-                    // url=jar:file:/tmp/dataplatform/database/lib/le-domain-1.0.3-SNAPSHOT.jar!/com/latticeengines/domain/exposed/dataplatform
                     String[] paths = directory.getPath().split("!");
                     // strip off file:
                     File jarFilepath = new File(paths[0].substring(5));
