@@ -56,17 +56,16 @@ public class DataDrivenImportJob extends ImportJobBase {
 
     public static final Log LOG = LogFactory.getLog(DataDrivenImportJob.class.getName());
 
-    @SuppressWarnings("unchecked")
     public DataDrivenImportJob(final SqoopOptions opts) {
         super(opts, null, DataDrivenDBInputFormat.class, null, null);
     }
 
+    @SuppressWarnings("rawtypes")
     public DataDrivenImportJob(final SqoopOptions opts, final Class<? extends InputFormat> inputFormatClass,
             ImportJobContext context) {
         super(opts, null, inputFormatClass, null, context);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected void configureMapper(Job job, String tableName, String tableClassName) throws IOException {
         if (isHCatJob) {
@@ -127,6 +126,7 @@ public class DataDrivenImportJob extends ImportJobBase {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends Mapper> getMapperClass() {
         if (options.getHCatTableName() != null) {
@@ -143,6 +143,7 @@ public class DataDrivenImportJob extends ImportJobBase {
         return null;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     protected Class<? extends OutputFormat> getOutputFormatClass() throws ClassNotFoundException {
         if (isHCatJob) {
