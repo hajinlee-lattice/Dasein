@@ -80,6 +80,15 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
         String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
                 progress.getEndDate());
 
+        long rowsToDownload = jdbcTemplateCollectionDB
+                .queryForObject("SELECT COUNT(*) FROM " + getSource().getCollectedTableName() + " WHERE "
+                        + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
+
+        if (rowsToDownload == 0) {
+            progress.setRowsDownloadedToHdfs(rowsToDownload);
+            return true;
+        }
+
         Date earliest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MIN([" + getSource().getTimestampField() + "]) FROM " + getSource().getCollectedTableName()
                         + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
@@ -100,7 +109,7 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
         whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
                 progress.getEndDate());
 
-        long rowsToDownload = jdbcTemplateCollectionDB
+        rowsToDownload = jdbcTemplateCollectionDB
                 .queryForObject("SELECT COUNT(*) FROM " + getSource().getCollectedTableName() + " WHERE "
                         + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
 

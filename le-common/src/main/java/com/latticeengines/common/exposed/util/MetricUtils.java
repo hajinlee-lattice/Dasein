@@ -215,7 +215,7 @@ public class MetricUtils {
         }
     }
 
-    public static void scan(Class<? extends Measurement> measurementClass) {
+    public static void scan(Class<? extends Measurement<?, ?>> measurementClass) {
         System.out.println("Measurement: " + measurementClass.getSimpleName() + "\n");
         for (Method method : measurementClass.getDeclaredMethods()) {
             if (method.getName().contains("getDimension")) {
