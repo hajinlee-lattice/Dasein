@@ -1,31 +1,31 @@
-'use strict'
+'use strict';
 
-describe('forgot password tests:', function() {
+describe('forgot password tests:', function () {
 
     var loginPage = require('./po/login.po');
     var passwordChange = require('./po/passwordchange.po');
 
-    it('forgot wrong user password should generate error', function() {
+    it('forgot wrong user password should generate error', function () {
         changePasswordWithWrongUsername_assertError();
     });
 
-    it('change password to empty string should generate error', function() {
+    it('change password to empty string should generate error', function () {
         changePasswordToEmptyString_assertError();
     });
 
-    it('change password to current password should generate error', function() {
+    it('change password to current password should generate error', function () {
         changePasswordToCurrentPassword_assertError();
     });
 
-    it('change to password that fails security stands should generate error', function() {
+    it('change to password that fails security stands should generate error', function () {
         changePasswordToUnsafePassword_assertError();
     });
 
-    it('change to password that does not match confirm password should generate error', function() {
+    it('change to password that does not match confirm password should generate error', function () {
         changePasswordButNewPasswordAndConfirmPasswordAreDifferent_assertError();
     });
 
-    it('should pass happy case', function() {
+    it('should pass happy case', function () {
         changePassword_assertItWorked();
     });
 
@@ -81,11 +81,16 @@ describe('forgot password tests:', function() {
         passwordChange.assertPasswordChangeSuccessful(true);
         element(by.buttonText('Return to Login')).click();
         browser.waitForAngular();
+        browser.driver.sleep(5000);
         loginPage.assertLoggedIn(false);
+        browser.driver.sleep(10000);
         //=======================================================
         // Login with alternative password and assert it worked
         //=======================================================
         passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingAlternativePassword);
+        browser.waitForAngular();
+        browser.driver.sleep(5000);
         loginPage.assertLoggedIn(true);
+        loginPage.logout();
     }
 });

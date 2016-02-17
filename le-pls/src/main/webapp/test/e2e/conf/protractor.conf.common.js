@@ -1,8 +1,8 @@
 'use strict';
 
-var Config = function() {
+var Config = function () {
 
-    this.generateConfig = function(specBasePath) {
+    this.generateConfig = function (specBasePath) {
 
         var chromeDownloadPath;
         if (process.platform.indexOf('win') > -1) {
@@ -33,14 +33,14 @@ var Config = function() {
             ],
 
             params: {
-                superAdminUsername:     'pls-super-admin-tester@test.lattice-engines.com',
-                internalAdminUsername:  'pls-internal-admin-tester@test.lattice-engines.com',
-                internalUserUsername:   'pls-internal-user-tester@test.lattice-engines.com',
-                externalAdminUsername:  'pls-external-admin-tester@test.lattice-engines.ext',
-                externalUserUsername:   'pls-external-user-tester@test.lattice-engines.ext',
-                testingUserPassword:    'admin',
-                downloadRoot:           chromeDownloadPath,
-                isProd:                 false
+                superAdminUsername: 'pls-super-admin-tester@test.lattice-engines.com',
+                internalAdminUsername: 'pls-internal-admin-tester@test.lattice-engines.com',
+                internalUserUsername: 'pls-internal-user-tester@test.lattice-engines.com',
+                externalAdminUsername: 'pls-external-admin-tester@test.lattice-engines.ext',
+                externalUserUsername: 'pls-external-user-tester@test.lattice-engines.ext',
+                testingUserPassword: 'admin',
+                downloadRoot: chromeDownloadPath,
+                isProd: false
             },
 
             allScriptsTimeout: 200000,
@@ -52,7 +52,7 @@ var Config = function() {
 
             framework: "jasmine2",
 
-            onPrepare: function() {
+            onPrepare: function () {
                 var jasmineReporters = require('jasmine-reporters');
                 var junitReporter = new jasmineReporters.JUnitXmlReporter({
                     consolidateAll: true,

@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -131,7 +132,8 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
 
-    @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/default/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create default target market")
     public void createDefaultTargetMarket(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -141,7 +143,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.createDefaultTargetMarket();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find target market by name")
     public TargetMarket findTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -152,7 +155,8 @@ public class InternalResource extends InternalResourceBase {
         return targetMarketService.findTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update target market")
     public void updateTargetMarket(@PathVariable("targetMarketName") String targetMarketName,
@@ -164,7 +168,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteTargetMarketByName(@PathVariable("targetMarketName") String targetMarketName,
@@ -175,7 +180,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteTargetMarketByName(targetMarketName);
     }
 
-    @RequestMapping(value = "/targetmarkets/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/"
+            + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a target market")
     public void deleteAllTargetMarkets(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
@@ -185,7 +191,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.deleteAll();
     }
 
-    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/targetmarkets/{targetMarketName}/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a target market report")
     public void registerReport(@PathVariable("targetMarketName") String targetMarketName,
@@ -196,7 +203,8 @@ public class InternalResource extends InternalResourceBase {
         targetMarketService.registerReport(targetMarketName, report);
     }
 
-    @RequestMapping(value = "/reports/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/reports/"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register a report")
     public void registerReport(@PathVariable("tenantId") String tenantId, @RequestBody Report report,
@@ -207,7 +215,8 @@ public class InternalResource extends InternalResourceBase {
         reportService.createOrUpdateReport(report);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a SourceFile")
     public SourceFile findSourceFileByName(@PathVariable("sourceFileName") String sourceFileName,
@@ -218,7 +227,8 @@ public class InternalResource extends InternalResourceBase {
         return sourceFileService.findByName(sourceFileName);
     }
 
-    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a SourceFile")
     public void updateSourceFile(@PathVariable("sourceFileName") String sourceFileName,
@@ -229,7 +239,8 @@ public class InternalResource extends InternalResourceBase {
         sourceFileService.update(sourceFile);
     }
 
-    @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{applicationId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a model summary by applicationId")
     public ModelSummary findModelSummaryByAppId(@PathVariable("applicationId") String applicationId,
@@ -347,13 +358,15 @@ public class InternalResource extends InternalResourceBase {
         if (!forceInstallation) {
             for (Tenant tenant : loginDoc.getResult().getTenants()) {
                 if (tenant.getId().equals(tenant2Id)) {
+                    log.info("Checking models for tenant " + tenant.getId());
                     payload = JsonUtils.serialize(tenant);
                     HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/attach", true, headers,
                             payload);
-                    String response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort()
-                            + "/pls/modelsummaries", true, headers);
+                    String response = HttpClientWithOptionalRetryUtils
+                            .sendGetRequest(getHostPort() + "/pls/modelsummaries?selection=all", true, headers);
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode jNode = mapper.readTree(response);
+                    log.info("Found " + jNode.size() + " models for " + tenant.getId());
                     while (jNode.size() < 2) {
                         InputStream ins = getClass().getClassLoader().getResourceAsStream(
                                 "com/latticeengines/pls/controller/internal/modelsummary-eloqua.json");
@@ -364,12 +377,24 @@ public class InternalResource extends InternalResourceBase {
                         fakeTenant.setPid(-1L);
                         data.setTenant(fakeTenant);
                         data.setRawFile(new String(IOUtils.toByteArray(ins)));
-                        HttpClientWithOptionalRetryUtils.sendPostRequest(
-                                getHostPort() + "/pls/modelsummaries?raw=true", true, headers,
-                                JsonUtils.serialize(data));
-                        response = HttpClientWithOptionalRetryUtils.sendGetRequest(getHostPort()
-                                + "/pls/modelsummaries", true, headers);
+                        HttpClientWithOptionalRetryUtils.sendPostRequest(getHostPort() + "/pls/modelsummaries?raw=true",
+                                true, headers, JsonUtils.serialize(data));
+                        response = HttpClientWithOptionalRetryUtils
+                                .sendGetRequest(getHostPort() + "/pls/modelsummaries", true, headers);
                         jNode = mapper.readTree(response);
+                        log.info("Uploaded a model to " + tenant.getId() + ". Now there are " + jNode.size()
+                                + " models");
+                    }
+                    for (JsonNode modelNode : jNode) {
+                        ModelSummary data = mapper.treeToValue(modelNode, ModelSummary.class);
+                        ModelSummaryStatus status = data.getStatus();
+                        if (ModelSummaryStatus.DELETED.equals(status)) {
+                            log.info("Found a deleted model " + data.getId());
+                            String modelApi = getHostPort() + "/pls/modelsummaries/" + data.getId();
+                            payload = "{ \"Status\": \"UpdateAsInactive\" }";
+                            HttpClientWithOptionalRetryUtils.sendPutRequest(modelApi, false, headers, payload);
+                            log.info("Update model " + data.getId() + " to inactive.");
+                        }
                     }
                 }
             }
@@ -467,12 +492,12 @@ public class InternalResource extends InternalResourceBase {
             String tenantToken = "${TENANT}";
             String topologyToken = "${TOPOLOGY}";
             String dlTenantName = CustomerSpace.parse(tupleId).getTenantId();
-            InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                    "com/latticeengines/pls/controller/internal/" + tenantRegJson);
+            InputStream ins = getClass().getClassLoader()
+                    .getResourceAsStream("com/latticeengines/pls/controller/internal/" + tenantRegJson);
             String payload = IOUtils.toString(ins);
             payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
-            HttpClientWithOptionalRetryUtils.sendPostRequest(adminApi + "/tenants/" + dlTenantName + "?contractId="
-                    + dlTenantName, false, adHeaders, payload);
+            HttpClientWithOptionalRetryUtils.sendPostRequest(
+                    adminApi + "/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders, payload);
         } else {
             throw new RuntimeException(
                     "We need to add the request tenant into ZK, but we do not have AD credentials in the environment. "
@@ -534,8 +559,8 @@ public class InternalResource extends InternalResourceBase {
     private void assignTestingUsersToTenants(Map<AccessLevel, User> accessLevelToUsers) {
         for (String testTenantId : getTestTenantIds()) {
             for (Map.Entry<AccessLevel, User> accessLevelToUser : accessLevelToUsers.entrySet()) {
-                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId, accessLevelToUser.getValue()
-                        .getUsername());
+                userService.assignAccessLevel(accessLevelToUser.getKey(), testTenantId,
+                        accessLevelToUser.getValue().getUsername());
             }
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, passwordTester);
         }
