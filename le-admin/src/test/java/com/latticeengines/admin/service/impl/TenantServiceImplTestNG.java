@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 
