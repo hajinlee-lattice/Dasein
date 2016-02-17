@@ -65,7 +65,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
-            String path = String.format("/pls/fileuploads?name=file1.csv&schema=%s",
+            String path = String.format("/pls/fileuploads?fileName=file1.csv&schema=%s",
                     SchemaInterpretation.SalesforceAccount);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
                     requestEntity, String.class);
