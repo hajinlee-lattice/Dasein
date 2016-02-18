@@ -241,12 +241,14 @@ public enum LedpCode {
     LEDP_21017("Problem getting group last failure launch: there is no failure launch in DL."), //
     LEDP_21018("Problem canceling launch via DataLoader REST; DataLoader result code: {0}, error message: {1}"), //
     LEDP_21019("Problem canceling launch via DataLoader REST: {0}"), //
-    LEDP_21020("Problem running query via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21020("Problem running query via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21021("Problem running query via DataLoader REST: {0}"), //
-    LEDP_21022("Problem getting query status via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21022("Problem getting query status via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21023("Problem getting query status via DataLoader REST: {0}"), //
-    LEDP_21024("Problem getting query result data via DataLoader REST; DataLoader error message: {1}"), //
+    LEDP_21024("Problem getting query result data via DataLoader REST; DataLoader error message: {0}"), //
     LEDP_21025("Problem getting query result data via DataLoader REST: {0}"), //
+    LEDP_21026("Problem getting source table metadata via DataLoader REST; DataLoader error message: {0}"), //
+    LEDP_21027("Problem getting source table metadata via DataLoader REST: {0}"), //
 
     // le-playmaker
     LEDP_22000("Can not create data source for tenant {0}"), //

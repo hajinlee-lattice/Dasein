@@ -4,69 +4,79 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LeadEnrichmentAttribute {
 
+    @JsonProperty("DisplayName")
     private String displayName;
+
+    @JsonProperty("FieldName")
     private String fieldName;
+
+    @JsonProperty("FieldNameInTarget")
+    private String fieldNameInTarget;
+
+    @JsonProperty("FieldType")
     private String fieldType;
+
+    @JsonProperty("CustomerColumnName")
     private String customerColumnName;
+
+    @JsonProperty("DataSource")
     private String dataSource;
+
+    @JsonProperty("Description")
     private String description;
 
-    @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    @JsonProperty("FieldName")
     public String getFieldName() {
         return fieldName;
     }
 
-    @JsonProperty("FieldName")
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
 
-    @JsonProperty("FieldType")
+    public String getFieldNameInTarget() {
+        return fieldNameInTarget;
+    }
+
+    public void setFieldNameInTarget(String fieldNameInTarget) {
+        this.fieldNameInTarget = fieldNameInTarget;
+    }
+
     public String getFieldType() {
         return fieldType;
     }
 
-    @JsonProperty("FieldType")
     public void setFieldType(String fieldType) {
         this.fieldType = fieldType;
     }
 
-    @JsonProperty("CustomerColumnName")
     public String getCustomerColumnName() {
         return customerColumnName;
     }
 
-    @JsonProperty("CustomerColumnName")
     public void setCustomerColumnName(String customerColumnName) {
         this.customerColumnName = customerColumnName;
     }
 
-    @JsonProperty("DataSource")
     public String getDataSource() {
         return dataSource;
     }
 
-    @JsonProperty("DataSource")
     public void setDataSource(String dataSource) {
         this.dataSource = dataSource;
     }
 
-    @JsonProperty("Description")
     public String getDescription() {
         return description;
     }
 
-    @JsonProperty("Description")
     public void setDescription(String description) {
         this.description = description;
     }
