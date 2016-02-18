@@ -16,9 +16,6 @@ import com.latticeengines.security.exposed.InternalResourceBase;
 public class ResourceAspect {
 
     @Autowired
-    private TableResourceHelper tableResourceHelper;
-    
-    @Autowired
     private TableTypeHolder tableTypeHolder;
     
     private InternalResourceBase internalResourceBase = new InternalResourceBase();

@@ -33,17 +33,12 @@ import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
-    @Autowired
-    private MetadataComponentManager componentManager;
 
     @Autowired
     private TenantService tenantService;
 
     @Autowired
     private MetadataService mdService;
-
-    @Autowired
-    private MetadataComponent metadataComponent;
 
     private Tenant tenant;
 
