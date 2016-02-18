@@ -22,7 +22,8 @@ public class HTTPFSAccessMBean {
     @ManagedOperation(description = "Check HttpFS Accessibility")
     public String checkHttpAccess() {
         try {
-            String url = String.format("%s/app/%s/dataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS, versionManager.getCurrentVersion());
+            String s = versionManager.getCurrentVersion().endsWith("") ? "" : "/";
+            String url = String.format("%s/app/%s%sdataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS, versionManager.getCurrentVersion(),s);
             return "dataplatform.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {
             return "Failed to access dataplatform.properties from HttpFS due to: " + e.getMessage();
