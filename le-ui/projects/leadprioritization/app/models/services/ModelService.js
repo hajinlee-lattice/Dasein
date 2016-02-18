@@ -16,13 +16,11 @@ angular.module('mainApp.models.services.ModelService', [
             model = this.models[modelId];
         
         if (typeof model == 'object') {
-            console.log('exists',modelId,model);
             deferred.resolve(model);
         } else {
             (function(self) {
                 ModelService.GetModelById(modelId).then(function(result) {
                     if (result != null && result.success === true) {
-                        console.log('fetched',modelId,result.resultObj);
                         deferred.resolve(result.resultObj);
                         self.models[modelId] = result.resultObj;
                     } else {

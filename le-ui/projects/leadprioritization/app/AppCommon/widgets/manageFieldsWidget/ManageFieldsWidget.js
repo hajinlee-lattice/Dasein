@@ -9,7 +9,11 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'kendo.directives'
 ])
 
-.controller('ManageFieldsWidgetController', function ($scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility, MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel) {
+.controller('ManageFieldsWidgetController', function (
+    $scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility,
+    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel
+) {
+
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;

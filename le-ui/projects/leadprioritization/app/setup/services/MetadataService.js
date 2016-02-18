@@ -54,9 +54,9 @@ angular.module('mainApp.setup.services.MetadataService', [
                 ResultObj: null,
                 ResultErrors: null
             };
-            if (data.Success) {
+            if (data !== null) {
                 result.Success = true;
-                result.ResultObj = data.Result;
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_FIELDS_ERROR');
             }
@@ -91,9 +91,9 @@ angular.module('mainApp.setup.services.MetadataService', [
                 ResultObj: null,
                 ResultErrors: null
             };
-            if (data.Success) {
+            if (data !== null) {
                 result.Success = true;
-                result.ResultObj = data.Result;
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR');
             }
@@ -128,9 +128,9 @@ angular.module('mainApp.setup.services.MetadataService', [
                 ResultObj: null,
                 ResultErrors: null
             };
-            if (data.Success) {
+            if (data !== null) {
                 result.Success = true;
-                result.ResultObj = data.Result;
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELDS_ERROR');
             }
@@ -165,9 +165,9 @@ angular.module('mainApp.setup.services.MetadataService', [
                 ResultObj: null,
                 ResultErrors: null
             };
-            if (data.Success) {
+            if (data !== null) {
                 result.Success = true;
-                result.ResultObj = data.Result;
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR');
             }
@@ -201,9 +201,9 @@ angular.module('mainApp.setup.services.MetadataService', [
                 ResultObj: null,
                 ResultErrors: null
             };
-            if (data.Success) {
+            if (data !== null) {
                 result.Success = true;
-                result.ResultObj = data.Result;
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR');
             }

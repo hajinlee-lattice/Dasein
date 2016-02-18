@@ -11,7 +11,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoAlertsWidget', [
     $scope.modelAlerts = $scope.data.ModelAlerts;
     $scope.suppressedCategories = $scope.data.SuppressedCategories;
 
-    console.log('### adminAlerts', $scope.modelAlerts, $scope.suppressedCategories, $scope.data);
     if ($scope.modelAlerts == null && $scope.suppressedCategories == null) {
         $scope.showErrorMessage = true;
         $scope.alertTabErrorMessage = ResourceUtility.getString("ADMIN_INFO_ALERTS_PAGE_ERROR_MESSAGE");

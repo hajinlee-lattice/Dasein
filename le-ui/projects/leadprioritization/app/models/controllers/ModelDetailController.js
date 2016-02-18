@@ -16,7 +16,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
     NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {
-    console.log('###',$scope);
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $stateParams.modelId;
@@ -60,7 +59,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         parentData: model
     });
 
-    console.log(modelId, ModelStore);
 
     $compile($('#ModelDetailsArea').html('<div data-model-details-widget></div>'))($scope);
     

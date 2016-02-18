@@ -2,30 +2,44 @@ angular
 .module('mainApp')
 
 // add ability to redirect with redirectTo
-.run(['$rootScope', '$state', function($rootScope, $state) {
+.run(['$rootScope', '$state', 'ResourceUtility', function($rootScope, $state, ResourceUtility) {
+
     $rootScope.$on('$stateChangeStart', function(evt, to, params) {
-      if (to.redirectTo) {
-        evt.preventDefault();
-        $state.go(to.redirectTo, params)
-      }
+        var LoadingString = ResourceUtility.getString("GENERAL_LOADING");
+
+        if (to.redirectTo) {
+            evt.preventDefault();
+            $state.go(to.redirectTo, params)
+        }
+
+        // state change spinner
+        $('#mainContentView').html(
+            '<section id="main-content" class="container">' +
+            '<div class="row twelve columns"><div class="loader"></div>' +
+            '<h2 class="text-center">' + LoadingString + '</h2></div></section>');
     });
+    /*
+    $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
+        console.log('END');
+    });
+    */
 }])
 
 // define routes for PD application.
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    var ModelDependencies = {
-        Model: function($q, $stateParams, ModelStore) {
-            var deferred = $q.defer(),
-                id = $stateParams.modelId;
-            
-            ModelStore.getModel(id).then(function(result) {
-                console.log('resolve',id,result);
-                deferred.resolve(result);
-            });
+    var UnderConstruction = '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>',
+        ModelDependencies = {
+            Model: function($q, $stateParams, ModelStore) {
+                var deferred = $q.defer(),
+                    id = $stateParams.modelId;
+                
+                ModelStore.getModel(id).then(function(result) {
+                    deferred.resolve(result);
+                });
 
-            return deferred.promise;
-        }
-    };
+                return deferred.promise;
+            }
+        };
 
     $urlRouterProvider.otherwise('/');
 
@@ -201,7 +215,6 @@ angular
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
-                        //$compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
                     },
                     templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
@@ -211,9 +224,32 @@ angular
             url: '/alerts',
             views: {
                 "main@": {
-                    controller: function($scope, $compile, ModelStore) {
+                    resolve: {
+                        ModelAlertsTmp: function($q, Model, ModelService) {
+                            var deferred = $q.defer(),
+                                data = Model,
+                                id = data.ModelDetails.ModelID,
+                                result = {};
+
+                            var suppressedCategories = data.SuppressedCategories;
+
+                            ModelService.GetModelAlertsByModelId(id).then(function(result) {
+                                if (result != null && result.success === true) {
+                                    data.ModelAlerts = result.resultObj;
+                                    data.SuppressedCategories = suppressedCategories;
+                                    deferred.resolve(result);
+                                } else if (result != null && result.success === false) {
+                                    data.ModelAlerts = result.resultObj;
+                                    data.SuppressedCategories = null;
+                                    deferred.reject('nope');
+                                }
+                            });
+
+                            return deferred.promise;
+                        }
+                    },
+                    controller: function($scope, ModelStore) {
                         $scope.data = ModelStore.data;
-                        //$compile($('#modelDetailContainer').html('<div id="modelDetailsLeadsTab" class="tab-content" data-leads-tab-widget></div>'))($scope);
                     },
                     templateUrl: './app/AppCommon/widgets/AdminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
@@ -232,24 +268,16 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                    template: UnderConstruction
                 }   
             }
         })
         .state('model.refine', {
             url: '/refine',
             views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'UNDER CONSTRUCTION';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
-                },
                 "main@": {
-                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                    controller: 'SetupController',
+                    templateUrl: './app/setup/views/SetupView.html'
                 }   
             }
         })
@@ -352,7 +380,7 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>'
+                    template: UnderConstruction
                 }   
             }
         })

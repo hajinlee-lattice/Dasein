@@ -1,18 +1,23 @@
 #setup {
+  /*
   position: absolute;
   top: 44px;
   left: 0;
   right: 0;
   bottom: 34px;
+  */
 }
 
 #setup .setup-sidebar {
+  display: none;
+  /*
   position: absolute;
   left: 0;
   top: 0;
   bottom:0;
   width: 240px;
   background: white;
+  */
 }
 
 #setup .setup-sidebar .fa {
@@ -35,11 +40,13 @@
 }
 
 #setup .setup-main-panel {
+  /*
   position: absolute;
   left: 243px;
   top: 0;
   right: 0;
   bottom:0;
+  */
   padding: 10px;
   background: white;
   overflow: auto;
@@ -56,7 +63,7 @@
 
 #setup .manage-fields .title .button-area {
   float: right;
-  margin-top: 10px;
+  /* margin-top: 10px; */
 }
 
 #setup .manage-fields .title .button-area button {
@@ -265,6 +272,40 @@
   -o-transition: none !important;
   -ms-transition: none !important;
   transition: none !important;
+}
+#setup .fields-grid .k-grid-pager>a,
+#setup .fields-grid .k-grid-pager li a,
+#setup .fields-grid .k-grid-pager li span {
+  width: 2.2em;
+  height: 2.2em;
+  padding-top: 4px;
+  border: 1px solid #ccc;
+  display: inline-block;
+  text-align: center;
+  float: left;
+}
+
+#setup .fields-grid .k-grid-pager li {
+  vertical-align: middle;
+}
+
+#setup .fields-grid .k-grid-pager a span {
+    position: absolute;
+    margin: 2px 0 0 -2px;
+}
+
+#setup .fields-grid .k-grid-pager span.k-state-selected {
+    color: #fff;
+    background-color: #428bca;
+    border-color: #428bca;
+}
+
+#setup .fields-grid .k-grid-pager span.k-pager-info {
+  float: right;
+}
+
+#setup .fields-grid .k-grid-pager span.k-pager-nav {
+  display: none;
 }
 
 #setup .fields-grid .k-grid-pager a.k-state-disabled {

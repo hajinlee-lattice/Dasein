@@ -20,7 +20,9 @@
     </div>
     <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
         <div class="title">
+            <!--
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
+            -->
             <div class="button-area">
                 <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
                 <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>

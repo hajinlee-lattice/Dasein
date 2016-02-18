@@ -46,12 +46,10 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     var flags = FeatureFlagService.Flags();
     var showAlertsTab = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
     
-    console.log('### adminInfo',flags, showAlertsTab, $scope, ModelStore.data);
     if (showAlertsTab) {
         $scope.loading= true;
-
+/*
         var suppressedCategories = data.SuppressedCategories;
-
         ModelService.GetModelAlertsByModelId(data.ModelId).then(function(result) {
             console.log('RESULT',result);
             $scope.loading= false;
@@ -63,7 +61,6 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
                 ModelStore.SuppressedCategories = null;
             }
             //$scope.$apply();
-            /*
             var contentContainer = $('#adminInfoContainer');
             WidgetFrameworkService.CreateWidget({
                 element: contentContainer,
@@ -72,8 +69,8 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
                 data: data,
                 parentData: null
             });
-            */
         });
+*/
     } else {
         var screenWidgetConfigNoAlertsTab = angular.copy(screenWidgetConfig);
         for (var i = 0; i < screenWidgetConfigNoAlertsTab.Widgets.length; i++) {

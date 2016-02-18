@@ -14,7 +14,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     WidgetConfigUtility, ModelService
 ) {
     var data = ModelStore.data;
-    console.log('DetailsWidget', $stateParams.modelId, data, ModelStore);
     $scope.ResourceUtility = ResourceUtility;
     
     var widgetConfig = ModelStore.widgetConfig.Widgets[0];
