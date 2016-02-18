@@ -22,7 +22,6 @@ import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.security.exposed.exception.SecurityControllerExceptionHandler;
 
 @ControllerAdvice
-@SuppressWarnings("deprecation")
 public class PlsControllerExceptionHandler extends SecurityControllerExceptionHandler {
     private static final Log log = LogFactory.getLog(PlsControllerExceptionHandler.class);
 
