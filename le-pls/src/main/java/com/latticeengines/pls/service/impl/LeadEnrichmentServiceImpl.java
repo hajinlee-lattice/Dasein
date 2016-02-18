@@ -61,7 +61,9 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
 
     private LeadEnrichmentAttribute toLeadEnrichmentAttribute(ColumnMetadata columnMetadata) {
         LeadEnrichmentAttribute attribute = new LeadEnrichmentAttribute();
-        attribute.setFieldName(columnMetadata.getColumnName());
+        String columnName = columnMetadata.getColumnName();
+        attribute.setFieldName(columnName);
+        attribute.setFieldNameInTarget(lpFunctions.fieldNameRestrictLength(columnName, 32));
         attribute.setFieldType(columnMetadata.getDataType());
         attribute.setDisplayName(columnMetadata.getDisplayName());
         attribute.setDataSource(columnMetadata.getMatchDestination());
@@ -93,7 +95,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
                             typeAndVersions.getValue());
                     for (Entry<String, String> entry : map.entrySet()) {
                         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
-                        attr.setFieldName(entry.getKey());
+                        attr.setFieldNameInTarget(entry.getKey());
                         attr.setCustomerColumnName(entry.getValue());
                         attributes.add(attr);
                     }

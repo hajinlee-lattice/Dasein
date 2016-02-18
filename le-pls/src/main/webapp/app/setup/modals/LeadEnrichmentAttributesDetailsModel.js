@@ -48,7 +48,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentAttributesDetailsModel',
             var originalAttribute = $scope.originalAttributes[i];
             attribute.name = originalAttribute.DisplayName;
             attribute.dataSource = originalAttribute.DataSource;
-            attribute.fieldName = 'Lattice_' + originalAttribute.FieldName;
+            attribute.fieldName = 'Lattice_' + originalAttribute.FieldNameInTarget;
             attribute.fieldType = convertFieldType(templateType, originalAttribute.FieldType);
             attributes[i] = attribute;
         }
