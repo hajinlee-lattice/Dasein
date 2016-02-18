@@ -79,4 +79,11 @@ public interface LPFunctions {
 
     void removeLDCWritebackAttributes(ConnectionMgr conn_mgr, String lp_template_version)
             throws IOException, RuntimeException;
+
+    // fieldNameRestrictLength(...)
+    //
+    // Given a customer column name (customerCol) and a maximum length, this function returns
+    // a column name that is no greater than the maximum length.
+
+    String fieldNameRestrictLength(String customerCol, int maxLength);
 }
