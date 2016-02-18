@@ -65,6 +65,11 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             if (!camille.exists(flagPath)) {
                 camille.create(flagPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             }
+
+            Path cronPath = jobCronPath(source);
+            if (StringUtils.isNotEmpty(source.getDefaultCronExpression())) {
+                camille.upsert(cronPath, new Document(source.getDefaultCronExpression()), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            }
         }
 
         log.info("Uploading source db connection pool to ZK using " + sourceDbsJson + " ...");
