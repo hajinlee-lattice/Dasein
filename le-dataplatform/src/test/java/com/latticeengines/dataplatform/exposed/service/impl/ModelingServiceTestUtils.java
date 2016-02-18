@@ -23,6 +23,8 @@ public class ModelingServiceTestUtils {
 
     public static final int NUM_SAMPLES = 1;
 
+    public static final String ALGORITHM_PROPERTIES_FEATURES_THRESHOLD = "criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True features_threshold=";
+
     public static final String EVENT_TABLE = "Q_EventTable_Nutanix";
 
     public static List<String> createExcludeList() {
@@ -56,6 +58,34 @@ public class ModelingServiceTestUtils {
         return createModelCommandWithCommandParameters(pid, EVENT_TABLE);
     }
 
+    public static ModelCommand createModelCommandWithCommandParameters(long pid, int featuresThreshold) {
+        List<ModelCommandParameter> parameters = new ArrayList<>();
+        ModelCommand command = new ModelCommand(pid, "Nutanix", "Nutanix", ModelCommandStatus.NEW, parameters,
+                ModelCommand.TAHOE, EVENT_TABLE);
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
+                "Q_EventTableDepivot_Nutanix"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model_Submission1"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String
+                .valueOf(NUM_SAMPLES)));
+        String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
+        try {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://"
+                    + getPublicIpAddress() + ":8082/DLRestService"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.VALIDATE, "false"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.ALGORITHM_PROPERTIES, String
+                .valueOf(ModelingServiceTestUtils.buildAlgorithmPropertiesStringWithFeatureThreshold(featuresThreshold))));
+        return command;
+    }
+
     public static ModelCommand createModelCommandWithCommandParameters(long pid, String eventTable) {
         return createModelCommandWithCommandParameters(pid, eventTable, false, true);
     }
@@ -73,6 +103,40 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String
                 .valueOf(NUM_SAMPLES)));
+        String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
+        try {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://"
+                    + getPublicIpAddress() + ":8082/DLRestService"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
+        if (debug) {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
+        }
+        if (!validate) {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.VALIDATE, "false"));
+        }
+        return command;
+    }
+
+    public static ModelCommand createModelCommandWithCommandParametersFeatureSelection(long pid, String eventTable, boolean debug,
+            boolean validate) {
+        List<ModelCommandParameter> parameters = new ArrayList<>();
+
+        ModelCommand command = new ModelCommand(pid, "Nutanix", "Nutanix", ModelCommandStatus.NEW, parameters,
+                ModelCommand.TAHOE, eventTable);
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
+                "Q_EventTableDepivot_Nutanix"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model_Submission1"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String
+                .valueOf(NUM_SAMPLES)));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.ALGORITHM_PROPERTIES, String
+                .valueOf(ModelingServiceTestUtils.buildAlgorithmPropertiesStringWithFeatureThreshold(30))));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
@@ -143,4 +207,12 @@ public class ModelingServiceTestUtils {
         }
         return result;
     }
+
+    private static String buildAlgorithmPropertiesStringWithFeatureThreshold(int featureThreshold) {
+        if(featureThreshold > 0)
+            return ALGORITHM_PROPERTIES_FEATURES_THRESHOLD + String.valueOf(featureThreshold);
+        else
+            return ALGORITHM_PROPERTIES_FEATURES_THRESHOLD + String.valueOf(30);
+    }
+
 }

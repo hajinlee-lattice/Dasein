@@ -89,6 +89,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private int positiveEventWarnThreshold = -1;
 
+    private int featuresThreshold = -1;
+
     private MetadataService metadataService;
 
     public ModelCommandCallable() {
@@ -114,6 +116,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.rowWarnThreshold = builder.rowWarnThreshold;
         this.positiveEventFailThreshold = builder.positiveEventFailThreshold;
         this.positiveEventWarnThreshold = builder.positiveEventWarnThreshold;
+        this.featuresThreshold = builder.featuresThreshold;
         this.metadataService = builder.metadataService;
 
         assert(modelCommand != null);
@@ -448,6 +451,7 @@ public class ModelCommandCallable implements Callable<Long> {
         int rowWarnThreshold;
         int positiveEventFailThreshold;
         int positiveEventWarnThreshold;
+        int featuresThreshold;
         MetadataService metadataService;
 
         public Builder() {
@@ -545,6 +549,11 @@ public class ModelCommandCallable implements Callable<Long> {
 
         public Builder positiveEventWarnThreshold(int positiveEventWarnThreshold) {
             this.positiveEventWarnThreshold = positiveEventWarnThreshold;
+            return this;
+        }
+
+        public Builder featuresThreshold(int featuresThreshold) {
+            this.featuresThreshold = featuresThreshold;
             return this;
         }
 

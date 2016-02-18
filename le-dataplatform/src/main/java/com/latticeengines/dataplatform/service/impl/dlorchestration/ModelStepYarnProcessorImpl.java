@@ -43,9 +43,6 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         DEPIVOTED, STANDARD;
     }
 
-    @Autowired
-    private ModelingService modelingService;
-
     @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dbHost;
 
@@ -306,6 +303,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
         model.setProvenanceProperties(generateProvenanceProperties(commandParameters));
+        model.setFeaturesThreshold(generateFeatureThreshold(commandParameters));
 
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
@@ -339,5 +337,24 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         provenanceProperties.put(ModelCommandParameters.DL_QUERY, commandParameters.getDlQuery());
 
         return StringTokenUtils.propertyToString(provenanceProperties);
+    }
+
+    @VisibleForTesting
+    int generateFeatureThreshold(ModelCommandParameters commandParameters) {
+        int featureThreshold = -1;
+        if(commandParameters == null || commandParameters.getAlgorithmProperties() == null ||
+            commandParameters.getAlgorithmProperties().trim().length() == 0 )
+            return featureThreshold;
+
+        String[] properties = commandParameters.getAlgorithmProperties().split("\\s+");
+        for(String prop: properties) {
+            if(prop.toLowerCase().startsWith(ModelCommandParameters.FEATURE_THRESHOLD.toLowerCase())) {
+                if(prop.split("=").length == 2) {
+                    featureThreshold = Integer.parseInt(prop.split("=")[1]);
+                    break;
+                }
+            }
+        }
+        return featureThreshold;
     }
 }

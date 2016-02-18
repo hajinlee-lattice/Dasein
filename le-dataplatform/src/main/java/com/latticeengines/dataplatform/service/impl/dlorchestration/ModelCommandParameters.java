@@ -33,6 +33,7 @@ public class ModelCommandParameters {
     public static final String ALGORITHM_SCRIPT = "AlgorithmScript";
     public static final String DEBUG = "Debug";
     public static final String VALIDATE = "Validate";
+    public static final String FEATURE_THRESHOLD = "features_threshold";
 
     private String depivotedEventTable = null;
     private String metadataTable = EVENT_METADATA;

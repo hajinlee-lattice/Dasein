@@ -103,7 +103,7 @@ public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContext
         // Set test flag to disable validation
         ModelCommandId commandId = ModelingServiceTestUtils.createModelCommandId();
         modelCommandIdEntityMgr.create(commandId);
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(commandId.getPid(),
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersFeatureSelection(commandId.getPid(),
                 TEMP_EVENTTABLE, false, false);
         modelCommandEntityMgr.create(command);
 

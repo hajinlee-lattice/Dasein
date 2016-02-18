@@ -56,6 +56,32 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
+    @Test(groups = "functional")
+    public void testExecuteYarnStepsFeatureThreshold() throws Exception {
+        cleanUpHdfs("Nutanix");
+        cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
+        setupDBConfig();
+        int featureThreshold = 30;
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, featureThreshold);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
+                command, commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, command,
+                commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, command,
+                commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, command,
+                commandParameters);
+        waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
+    }
+
     private void setupDBConfig() {
         modelStepYarnProcessor.setDBConfig(dataSourceHost, dataSourcePort, dataSourceDB, dataSourceUser,
                 dataSourcePasswd, dataSourceDBType);

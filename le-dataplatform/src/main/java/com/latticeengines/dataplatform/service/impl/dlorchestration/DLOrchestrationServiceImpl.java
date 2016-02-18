@@ -76,6 +76,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private int positiveEventWarnThreshold;
 
+    private int featuresThreshold;
+
     private MetadataService metadataService;
 
     @Override
@@ -115,6 +117,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
             .rowWarnThreshold(rowWarnThreshold) //
             .positiveEventFailThreshold(positiveEventFailThreshold) //
             .positiveEventWarnThreshold(positiveEventWarnThreshold) //
+            .featuresThreshold(featuresThreshold)
             .metadataService(metadataService);
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(builder)));
         }
@@ -294,6 +297,14 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setPositiveEventWarnThreshold(int positiveEventWarnThreshold) {
         this.positiveEventWarnThreshold = positiveEventWarnThreshold;
+    }
+
+    public void setFeaturesThreshold(int featuresThreshold) {
+        this.featuresThreshold = featuresThreshold;
+    }
+
+    public int getFeaturesThreshold() {
+        return this.featuresThreshold;
     }
 
     public MetadataService getMetadataService() {

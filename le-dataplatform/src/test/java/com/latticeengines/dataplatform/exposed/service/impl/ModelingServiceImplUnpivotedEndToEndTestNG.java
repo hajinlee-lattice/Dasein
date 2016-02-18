@@ -69,8 +69,10 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     private Model model = null;
 
+    private int featuresThreshold = 3;
+
     private StandaloneHttpServer httpServer;
-    
+
     public String getCustomer() {
         return "Nutanix";
     }
@@ -89,6 +91,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
         randomForestAlgorithm.setSampleName("s0");
+        randomForestAlgorithm.setAlgorithmProperties("features_threshold=" + String.valueOf(featuresThreshold));
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
@@ -220,6 +223,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
+        model.setFeaturesThreshold(featuresThreshold);
 
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -230,6 +234,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
             String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
+            assertEquals(modelingService.getFeatures(model, false).size(), featuresThreshold, 
+                    "Expected " + featuresThreshold + " features after setting features_threshold=" + featuresThreshold + " in algorithm_properties");
             assertNotNull(modelContents);
         }
     }

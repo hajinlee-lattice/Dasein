@@ -192,6 +192,60 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
     }
 
+    @Test(groups = "functional")
+    public void testFeatureSelection() throws Exception {
+        ModelCommand command = new ModelCommand(3L, "Nutanix", "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
+        command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
+        this.modelCommandEntityMgr.create(command);
+
+        ModelCommandCallable.Builder builder = new ModelCommandCallable.Builder();
+        builder.modelCommand(command) //
+                .yarnConfiguration(this.yarnConfiguration) //
+                .modelingJobService(this.modelingJobService) //
+                .modelCommandEntityMgr(this.modelCommandEntityMgr) //
+                .modelCommandStateEntityMgr(this.modelCommandStateEntityMgr) //
+                .modelStepYarnProcessor(this.modelStepYarnProcessor) //
+                .modelCommandLogService(this.modelCommandLogService) //
+                .modelCommandResultEntityMgr(this.modelCommandResultEntityMgr) //
+                .modelStepFinishProcessor(this.modelStepFinishProcessor) //
+                .modelStepOutputResultsProcessor(this.modelStepOutputResultsProcessor) //
+                .modelStepRetrieveMetadataProcessor(this.modelStepRetrieveMetadataProcessor) //
+                .debugProcessorImpl(this.debugProcessorImpl) //
+                .alertService(this.alertService) //
+                .resourceManagerWebAppAddress(this.resourceManagerWebAppAddress) //
+                .appTimeLineWebAppAddress(this.appTimeLineWebAppAddress) //
+                .rowFailThreshold(this.rowFailThreshold) //
+                .rowWarnThreshold(this.rowWarnThreshold) //
+                .positiveEventFailThreshold(this.positiveEventFailThreshold) //
+                .positiveEventWarnThreshold(this.positiveEventWarnThreshold) //
+                .featuresThreshold(30)
+                .metadataService(this.metadataService);
+
+        ModelCommandCallable callable = new ModelCommandCallable(builder);
+        ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
+        JobStatus jobStatus = new JobStatus();
+
+        String outputDir = "diagnostics_output";
+        HdfsUtils.rmdir(this.yarnConfiguration, outputDir);
+        HdfsUtils.mkdir(this.yarnConfiguration, outputDir);
+        String contents = this.getContent();
+        HdfsUtils.writeToFile(this.yarnConfiguration, outputDir + "/diagnostics.json", contents);
+        List<String> files = HdfsUtils.getFilesForDir(this.yarnConfiguration, "diagnostics_output");
+        Assert.assertEquals(files.size(), 1);
+
+        jobStatus.setDataDiagnosticsPath(files.get(0));
+
+        callable.generateDataDiagnostics(commandState, jobStatus);
+        List<ModelCommandLog> logs = this.modelCommandLogService.findByModelCommand(command);
+        Assert.assertEquals(logs.size(), 1);
+        int warnIndex = logs.get(0).getMessage().contains("The number of skipped rows") ? 0 : 1;
+        String warnLog = logs.get(warnIndex).getMessage();
+        Assert.assertTrue(warnLog.contains("IsPublicDomain")
+                && warnLog.contains("Detected abnormal positive event rate"));
+        Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
+    }
+
     private String getContent() {
         return " { \"Summary\": { \"SampleSize\": 130768, \"ColumnSize\": 317, \"PositiveEventRate\": 0.0094212651413189772, "
                 + "\"NumberOfSkippedRows\": 0, \"NumberOfSkippedRows\": 10, \"HighUCColumns\": \"IsPublicDomain, AwardCategory\"} "

@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.test.util.ReflectionTestUtils;
@@ -14,6 +15,8 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
@@ -92,6 +95,16 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         assertEquals(1, processor.calculatePriority(1));
         assertEquals(2, processor.calculatePriority(2));
         assertEquals(2, processor.calculatePriority(3));
+    }
+
+    @Test(groups = "unit")
+    public void testParsingOfFeatureThreshold() {
+        int featureThreshold = 30;
+
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, featureThreshold);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        assertEquals(processor.generateFeatureThreshold(commandParameters), featureThreshold);
     }
 
 }
