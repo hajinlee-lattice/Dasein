@@ -49,7 +49,7 @@ public interface LPFunctions {
 
     Boolean setLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
             Map<String, String> attributes, String lp_template_version)
-            throws IOException, RuntimeException;
+                    throws IOException, RuntimeException;
 
     // getLDCWritebackAttributes(...)
     //
@@ -62,7 +62,7 @@ public interface LPFunctions {
 
     Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
             String lp_template_version)
-            throws IOException, RuntimeException;
+                    throws IOException, RuntimeException;
 
     // setLDCWritebackAttributesDefaultName(...)
     //
@@ -78,6 +78,13 @@ public interface LPFunctions {
     // Removes all the attributes to be written back to teh customer.
 
     void removeLDCWritebackAttributes(ConnectionMgr conn_mgr, String lp_template_version)
+            throws IOException, RuntimeException;
+
+    // getTargetTablesAndDataProviders(...)
+    //
+    // Gets the map of (Target Table, DataProvider) that are used for writing back data to the customer.
+
+    Map<String, String> getTargetTablesAndDataProviders(ConnectionMgr conn_mgr, String lp_template_version)
             throws IOException, RuntimeException;
 
     // fieldNameRestrictLength(...)

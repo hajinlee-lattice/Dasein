@@ -20,8 +20,8 @@ public class ConnectionMgrFactoryImplTestNG extends LiaisonTestNGBase {
 
     @Test(groups = "functional")
     public void testConnection() {
-        String tenantName = "LeanKit";
-        String dlURL = "https://data-pls.lattice-engines.com/Dataloader_PLS/";
+        String tenantName = "Internal_LP_SFDC_220_2";
+        String dlURL = "https://data-pls2.prod.lattice.local/dataloader/";
 
         String queryName = "Q_PLS_Scoring_Incremental";
 

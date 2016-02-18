@@ -27,12 +27,10 @@ public class LPFunctionsTestNG extends LiaisonTestNGBase {
     @Test(groups = "functional")
     public void testLPFunctions() throws IOException {
 
-        System.out.println("\n\nHellow, World!\n\n");
-
-        //String tenantName = "Internal_LP_SFDC_220_2";
-        //String dlURL = "https://data-pls2.prod.lattice.local/dataloader/";
-        String tenantName = "TestSFDC_20160202";
-        String dlURL = "https://10.41.1.187:8080/";
+        String tenantName = "Internal_LP_SFDC_220_2";
+        String dlURL = "https://data-pls2.prod.lattice.local/dataloader/";
+        //String tenantName = "TestSFDC_20160202";
+        //String dlURL = "https://10.41.1.187:8080/";
         ConnectionMgr conn_mgr = connectionMgrFactory.getConnectionMgr("visiDB", tenantName, dlURL);
 
         AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpfcn.getLPTemplateTypeAndVersion(conn_mgr);
@@ -63,10 +61,16 @@ public class LPFunctionsTestNG extends LiaisonTestNGBase {
                     typeAndVersions.getKey(), typeAndVersions.getValue());
         }
 
-        //Map<String, String> existingAtts = lpfcn.getLDCWritebackAttributes(conn_mgr, source, lp_template_version);
+        //Map<String, String> existingAtts = lpfcn.getLDCWritebackAttributes(conn_mgr, source, typeAndVersions.getValue());
         //for (Map.Entry<String, String> att : existingAtts.entrySet()) {
         //    System.out.println(String.format("%s --> %s", att.getKey(), att.getValue()));
         // }
+
+        //System.out.println("\nGetting Table\n");
+        //Map<String, String> mapTableAndDataProvider = lpfcn.getTargetTablesAndDataProviders(conn_mgr, typeAndVersions.getValue());
+        //for (Map.Entry<String, String> tableAndDataProvider : mapTableAndDataProvider.entrySet()) {
+        //    System.out.println(String.format("%s --> %s", tableAndDataProvider.getKey(), tableAndDataProvider.getValue()));
+        //}
 
         //lpfcn.removeLDCWritebackAttributes(conn_mgr, lp_template_version);
         //lpfcn.addLDCMatch(conn_mgr, source, lp_template_version);

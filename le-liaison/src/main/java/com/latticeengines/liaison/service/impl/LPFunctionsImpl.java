@@ -188,7 +188,7 @@ public class LPFunctionsImpl implements LPFunctions {
                         }
                         if (fsColumnMapping.getAttribute("queryColumnName").length() > 4 + sourceStrLength
                                 && fsColumnMapping.getAttribute("queryColumnName").substring(0, 4 + sourceStrLength)
-                                        .equals(String.format("LDC_%s", source))) {
+                                .equals(String.format("LDC_%s", source))) {
                             mappingsToRemove.add(fsColumnMapping);
                         }
                     }
@@ -272,6 +272,25 @@ public class LPFunctionsImpl implements LPFunctions {
         String source = "";
         Map<String, String> attributes = new HashMap<>();
         setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version);
+    }
+
+    @Override
+    public Map<String, String> getTargetTablesAndDataProviders(ConnectionMgr conn_mgr, String lp_template_version)
+            throws IOException, RuntimeException {
+
+        Map<String, String> result = new HashMap<>();
+        LoadGroupMgr lg_mgr = conn_mgr.getLoadGroupMgr();
+        String ptld = "PushLeadsLastScoredToDestination";
+
+        if (lg_mgr.hasLoadGroup(ptld)) {
+            Element ptld_targetQueries = lg_mgr.getLoadGroupFunctionality(ptld, "targetQueries");
+            for (int i = 0; i < ptld_targetQueries.getElementsByTagName("targetQuery").getLength(); i++) {
+                Element targetQuery = (Element) ptld_targetQueries.getElementsByTagName("targetQuery").item(i);
+                result.put(targetQuery.getAttribute("fsTableName"), targetQuery.getAttribute("destDataProvider"));
+            }
+        }
+
+        return result;
     }
 
     @Override
