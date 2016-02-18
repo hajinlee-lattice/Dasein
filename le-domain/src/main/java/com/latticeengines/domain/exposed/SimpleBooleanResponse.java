@@ -23,7 +23,6 @@ public class SimpleBooleanResponse extends ResponseDocument {
         return new SimpleBooleanResponse(false, errors);
     }
 
-    @SuppressWarnings("unchecked")
     public static SimpleBooleanResponse failedResponse(Exception e) {
         return new SimpleBooleanResponse(false, Arrays.asList(e.getMessage()));
     }
