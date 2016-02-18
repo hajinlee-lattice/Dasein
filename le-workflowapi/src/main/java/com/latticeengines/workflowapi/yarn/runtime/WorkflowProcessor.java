@@ -2,7 +2,6 @@ package com.latticeengines.workflowapi.yarn.runtime;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,9 +25,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private ApplicationContext appContext;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @Autowired
     private SoftwareLibraryService softwareLibraryService;

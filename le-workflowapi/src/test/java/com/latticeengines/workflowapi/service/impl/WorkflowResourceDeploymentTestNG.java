@@ -3,7 +3,6 @@ package com.latticeengines.workflowapi.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.ModelWorkflow;
 import com.latticeengines.workflowapi.flows.ModelWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
@@ -13,9 +12,6 @@ public class WorkflowResourceDeploymentTestNG extends WorkflowApiFunctionalTestN
 
     @Autowired
     private ModelWorkflow modelWorkflow;
-
-    @Autowired
-    private WorkflowService workflowService;
 
     @Test(groups = "deployment", enabled = true)
     public void submitWorkflow() throws Exception {

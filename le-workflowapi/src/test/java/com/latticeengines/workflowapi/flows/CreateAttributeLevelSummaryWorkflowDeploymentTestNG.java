@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflow;
 import com.latticeengines.prospectdiscovery.workflow.steps.CreateAttributeLevelSummaryWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends WorkflowApiFunctionalTestNGBase {
@@ -34,9 +33,6 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private SoftwareLibraryService softwareLibraryService;
 
     @Value("${security.test.pls.api.hostport}")
     private String internalResourceHostPort;
