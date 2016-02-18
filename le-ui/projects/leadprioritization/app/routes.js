@@ -216,7 +216,7 @@ angular
                     controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                     },
-                    templateUrl: './app/AppCommon/widgets/AdminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
+                    templateUrl: './app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
             }
         })
@@ -251,7 +251,7 @@ angular
                     controller: function($scope, ModelStore) {
                         $scope.data = ModelStore.data;
                     },
-                    templateUrl: './app/AppCommon/widgets/AdminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
+                    templateUrl: './app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
             }
         })
