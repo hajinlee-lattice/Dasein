@@ -1,8 +1,8 @@
 package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -41,9 +40,6 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
 
     @Autowired
     private EaiService eaiService;
-
-    @Autowired
-    private MetadataService metadataService;
 
     @Autowired
     private Configuration yarnConfiguration;

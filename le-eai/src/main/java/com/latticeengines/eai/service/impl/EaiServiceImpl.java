@@ -2,7 +2,6 @@ package com.latticeengines.eai.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,9 +25,6 @@ public class EaiServiceImpl implements EaiService {
 
     @Autowired
     private JobService jobService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

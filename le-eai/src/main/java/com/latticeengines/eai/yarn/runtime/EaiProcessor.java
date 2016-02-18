@@ -9,7 +9,6 @@ import org.apache.camel.spring.SpringCamelContext;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.eclipse.jetty.client.HttpClient;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
@@ -41,9 +40,6 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     private static final Log log = LogFactory.getLog(EaiProcessor.class);
 
     private ApplicationContext applicationContext;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     @Autowired
     private DataExtractionService dataExtractionService;

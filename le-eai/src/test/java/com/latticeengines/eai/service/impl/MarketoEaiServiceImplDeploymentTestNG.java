@@ -27,7 +27,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -49,9 +48,6 @@ public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBa
 
     @Autowired
     private EaiService eaiService;
-
-    @Autowired
-    private MetadataService metadataService;
 
     @Autowired
     private Configuration yarnConfiguration;

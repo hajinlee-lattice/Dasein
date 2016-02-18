@@ -16,7 +16,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
-import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -38,9 +37,6 @@ public class SalesforceEaiServiceImplFunctionalTestNG extends EaiFunctionalTestN
 
     @Autowired
     private CrmCredentialZKService crmCredentialZKService;
-
-    @Autowired
-    private ImportContext importContext;
 
     private String targetPath;
 
