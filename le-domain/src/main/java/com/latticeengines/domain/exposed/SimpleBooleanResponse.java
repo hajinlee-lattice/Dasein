@@ -1,15 +1,14 @@
 package com.latticeengines.domain.exposed;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SimpleBooleanResponse extends ResponseDocument {
 
     private SimpleBooleanResponse() {
     }
 
-    @SuppressWarnings("unchecked")
     private SimpleBooleanResponse(boolean success, List<String> errors) {
         this.setSuccess(success);
         this.setErrors(errors);
@@ -23,8 +22,7 @@ public class SimpleBooleanResponse extends ResponseDocument {
         return new SimpleBooleanResponse(false, errors);
     }
 
-    @SuppressWarnings("unchecked")
     public static SimpleBooleanResponse failedResponse(Exception e) {
-        return new SimpleBooleanResponse(false, Arrays.asList(e.getMessage()));
+        return new SimpleBooleanResponse(false, Collections.singletonList(e.getMessage()));
     }
 }
