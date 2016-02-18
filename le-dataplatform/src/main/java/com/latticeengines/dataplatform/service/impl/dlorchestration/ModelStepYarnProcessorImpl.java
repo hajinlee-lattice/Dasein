@@ -42,6 +42,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     static enum DataSetType {
         DEPIVOTED, STANDARD;
     }
+    
+    @Autowired
+    private ModelingService modelingService;
 
     @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dbHost;
