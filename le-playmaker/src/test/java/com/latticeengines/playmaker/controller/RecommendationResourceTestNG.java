@@ -111,4 +111,21 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
+    @Test(groups = "deployment")
+    public void getWorkflowTypes() {
+        String url = apiHostPort + "/playmaker/workflowtypes";
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> result = restTemplate.getForObject(url, List.class);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
+    }
+
+    @Test(groups = "deployment")
+    public void getPlayGroups() {
+        String url = apiHostPort + "/playmaker/playgroups";
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> result = restTemplate.getForObject(url, List.class);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() > 0);
+    }
 }

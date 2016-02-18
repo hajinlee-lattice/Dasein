@@ -7,26 +7,28 @@ import com.latticeengines.db.exposed.dao.GenericDao;
 
 public interface PlaymakerRecommendationDao extends GenericDao {
 
-    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination);
+    List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination, List<Integer> playIds);
 
-    List<Map<String, Object>> getPlays(long start, int offset, int maximum);
+    List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds);
 
-    List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum);
+    List<Map<String, Object>> getAccountExtensions(long start, int offset, int maximum, List<Integer> accountIds);
 
     List<Map<String, Object>> getAccountExtensionSchema();
 
-    List<Map<String, Object>> getPlayValues(long start, int offset, int maximum);
+    List<Map<String, Object>> getPlayValues(long start, int offset, int maximum, List<Integer> playgroupIds);
 
     List<Map<String, Object>> getWorkflowTypes();
 
-    int getRecommendationCount(long start, int syncDestination);
+    int getRecommendationCount(long start, int syncDestination, List<Integer>playIds);
 
-    int getPlayCount(long start);
+    int getPlayCount(long start, List<Integer> playgroupIds);
 
-    int getAccountExtensionCount(long start);
+    int getAccountExtensionCount(long start, List<Integer> accountIds);
 
-    int getPlayValueCount(long start);
+    int getPlayValueCount(long start, List<Integer> playgroupIds);
 
     int getAccountExtensionColumnCount();
+
+    List<Map<String, Object>> getPlayGroups();
 
 }

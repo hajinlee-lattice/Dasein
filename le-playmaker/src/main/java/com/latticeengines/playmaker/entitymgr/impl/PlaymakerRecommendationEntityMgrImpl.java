@@ -19,55 +19,55 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum,
-            int syncDestination) {
+            int syncDestination, List<Integer> playIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum, syncDestination);
+        List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum, syncDestination, playIds);
         Map<String, Object> result = wrapResult(recommendations);
         return result;
     }
 
     @Override
-    public Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination) {
+    public Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination, List<Integer>playIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getRecommendationCount(start, syncDestination));
+        result.put(COUNT_KEY, dao.getRecommendationCount(start, syncDestination, playIds));
         return result;
     }
 
     @Override
-    public Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum) {
+    public Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum);
+        List<Map<String, Object>> plays = dao.getPlays(start, offset, maximum, playgroupIds);
         Map<String, Object> result = wrapResult(plays);
         return result;
     }
 
     @Override
-    public Map<String, Object> getPlayCount(String tenantName, long start) {
+    public Map<String, Object> getPlayCount(String tenantName, long start, List<Integer> playgroupIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getPlayCount(start));
+        result.put(COUNT_KEY, dao.getPlayCount(start, playgroupIds));
         return result;
     }
 
     @Override
-    public Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum) {
+    public Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum);
+        List<Map<String, Object>> extensions = dao.getAccountExtensions(start, offset, maximum, accountIds);
         Map<String, Object> result = wrapResult(extensions);
         return result;
     }
 
     @Override
-    public Map<String, Object> getAccountextensionCount(String tenantName, long start) {
+    public Map<String, Object> getAccountextensionCount(String tenantName, long start, List<Integer> accountIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getAccountExtensionCount(start));
+        result.put(COUNT_KEY, dao.getAccountExtensionCount(start, accountIds));
         return result;
     }
 
@@ -89,20 +89,20 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum) {
+    public Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
-        List<Map<String, Object>> values = dao.getPlayValues(start, offset, maximum);
+        List<Map<String, Object>> values = dao.getPlayValues(start, offset, maximum, playgroupIds);
         Map<String, Object> result = wrapResult(values);
         return result;
     }
 
     @Override
-    public Map<String, Object> getPlayValueCount(String tenantName, long start) {
+    public Map<String, Object> getPlayValueCount(String tenantName, long start, List<Integer> playgroupIds) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
 
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getPlayValueCount(start));
+        result.put(COUNT_KEY, dao.getPlayValueCount(start, playgroupIds));
         return result;
     }
 
@@ -120,6 +120,12 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
             result.put(RECORDS_KEY, records);
         }
         return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> getPlayGroups(String tenantName) {
+        PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
+        return dao.getPlayGroups();
     }
 
 }

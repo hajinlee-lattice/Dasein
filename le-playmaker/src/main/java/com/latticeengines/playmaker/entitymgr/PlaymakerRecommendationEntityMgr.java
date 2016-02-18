@@ -14,24 +14,26 @@ public interface PlaymakerRecommendationEntityMgr {
 
     List<Map<String, Object>> getAccountExtensionSchema(String tenantName);
 
-    Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum, int syncDestination);
+    Map<String, Object> getRecommendations(String tenantName, long start, int offset, int maximum, int syncDestination, List<Integer> playIds);
 
-    Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum);
+    Map<String, Object> getPlays(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum);
+    Map<String, Object> getAccountextensions(String tenantName, long start, int offset, int maximum, List<Integer> accountIds);
 
-    Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum);
+    Map<String, Object> getPlayValues(String tenantName, long start, int offset, int maximum, List<Integer> playgroupIds);
 
     List<Map<String, Object>> getWorkflowTypes(String tenantName);
 
-    Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination);
+    Map<String, Object> getRecommendationCount(String tenantName, long start, int syncDestination, List<Integer>playIds);
 
-    Map<String, Object> getPlayCount(String tenantName, long start);
+    Map<String, Object> getPlayCount(String tenantName, long start, List<Integer> playgroupIds);
 
-    Map<String, Object> getAccountextensionCount(String tenantName, long start);
+    Map<String, Object> getAccountextensionCount(String tenantName, long start, List<Integer> accountIds);
 
-    Map<String, Object> getPlayValueCount(String tenantName, long start);
+    Map<String, Object> getPlayValueCount(String tenantName, long start, List<Integer> playgroupIds);
 
     Map<String, Object> getAccountExtensionColumnCount(String tenantName);
+
+    List<Map<String, Object>> getPlayGroups(String tenantName);
 
 }
