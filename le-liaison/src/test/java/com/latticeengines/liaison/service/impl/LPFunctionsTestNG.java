@@ -36,8 +36,6 @@ public class LPFunctionsTestNG extends LiaisonTestNGBase {
         ConnectionMgr conn_mgr = connectionMgrFactory.getConnectionMgr("visiDB", tenantName, dlURL);
 
         AbstractMap.SimpleImmutableEntry<String, String> typeAndVersions = lpfcn.getLPTemplateTypeAndVersion(conn_mgr);
-        String lp_template_type = typeAndVersions.getKey();
-        String lp_template_version = typeAndVersions.getValue();
 
         Map<String, Set<String>> map = new HashMap<String, Set<String>>();
         Set<String> columns1 = new HashSet<String>();
