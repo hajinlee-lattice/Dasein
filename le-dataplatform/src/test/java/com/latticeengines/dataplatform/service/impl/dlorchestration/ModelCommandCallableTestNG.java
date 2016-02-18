@@ -25,10 +25,6 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
@@ -44,24 +40,6 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
     private static final String TEMP_EVENTTABLE_FEW_ROWS = "ModelCommandCallableTestNG_eventtable_fewrows";
-
-    @Autowired
-    private ModelingJobService modelingJobService;
-
-    @Autowired
-    private ModelStepYarnProcessor modelStepYarnProcessor;
-
-    @Autowired
-    private ModelCommandLogService modelCommandLogService;
-
-    @Autowired
-    private ModelStepProcessor modelStepFinishProcessor;
-
-    @Autowired
-    private ModelStepProcessor modelStepOutputResultsProcessor;
-
-    @Autowired
-    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
     @Autowired
     private ModelCommandLogEntityMgr modelCommandLogEntityMgr;

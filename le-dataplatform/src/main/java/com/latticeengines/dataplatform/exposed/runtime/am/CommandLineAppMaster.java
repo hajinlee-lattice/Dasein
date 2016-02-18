@@ -151,9 +151,7 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
             ledpMetricsMgr.publishMetricsNow();
         }
 
-        if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
-
-        } else {
+        if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             log.info("Printing out the status to find the reason: " + status.getExitStatus());
         }
         super.onContainerCompleted(status);

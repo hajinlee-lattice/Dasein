@@ -50,17 +50,7 @@ public class MutipleContainerDispatchImpl implements ParallelDispatchService {
     public String getNumberOfSamplingTrainingSet(boolean isParallelEnabled) {
         return numberOfSamplingTrainingSet;
     }
-// TODO:
-//    @Override
-//    public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
-//            throws Exception {
-//        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-//        JsonNode diagnostics = new ObjectMapper().readTree(content);
-//        long sampleSize = diagnostics.get("DataSummary").get("RowSize").asLong();
-//
-//        return sampleSize;
-//    }
-//    
+
     @Override
     public long getSampleSize(Configuration yarnConfiguration, String diagnosticsPath, boolean isParallelEnabled)
             throws Exception {

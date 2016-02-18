@@ -55,16 +55,6 @@
                         ]]>
         </yarn:container-command>
 
-<!--
-        <yarn:container-command>
-                        <![CDATA[
-                        cat launch_container.sh 
-                        1><LOG_DIR>/Container.stdout
-                        2><LOG_DIR>/Container.stderr
-                        ]]>
-        </yarn:container-command>
--->
-
     </yarn:master>
     
     <context:component-scan base-package="com.latticeengines.dataplatform.runtime.python"/>

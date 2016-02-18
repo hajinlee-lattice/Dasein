@@ -34,7 +34,7 @@ public class PythonInvoker {
             p.waitFor();
             exitValue = p.exitValue();
             log.info("Python process finished successfully");
-            PythonMRUtils.CopyMetedataJsonToHdfs(config, classifier.getModelHdfsDir());
+            PythonMRUtils.copyMetedataJsonToHdfs(config, classifier.getModelHdfsDir());
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_12011, e);

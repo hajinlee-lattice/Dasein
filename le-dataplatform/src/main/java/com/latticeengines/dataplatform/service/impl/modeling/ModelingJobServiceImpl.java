@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl.modeling;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEnt
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
@@ -26,12 +24,6 @@ import com.latticeengines.domain.exposed.modeling.ModelingJob;
 
 @Component("modelingJobService")
 public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJobService {
-
-    @Autowired
-    private AsyncTaskExecutor sqoopJobTaskExecutor;
-
-    @Autowired
-    private MetadataService metadataService;
 
     @Autowired
     protected ModelEntityMgr modelEntityMgr;

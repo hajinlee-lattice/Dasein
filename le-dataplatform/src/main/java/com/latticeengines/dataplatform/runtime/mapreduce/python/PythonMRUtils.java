@@ -76,7 +76,7 @@ public class PythonMRUtils {
         FileUtils.writeStringToFile(metadataFile, metadata);
     }
 
-    public static void CopyMetedataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {
+    public static void copyMetedataJsonToHdfs(Configuration config, String hdfsPath) throws Exception {
         HdfsUtils.copyLocalToHdfs(config, METADATA_JSON_PATH, hdfsPath);
     }
 

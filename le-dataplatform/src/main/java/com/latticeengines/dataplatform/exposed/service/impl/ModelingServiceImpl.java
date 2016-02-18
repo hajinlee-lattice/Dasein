@@ -37,9 +37,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFormat;
 import com.latticeengines.common.exposed.version.VersionManager;
-import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
@@ -86,13 +84,7 @@ public class ModelingServiceImpl implements ModelingService {
     private ModelingJobService modelingJobService;
 
     @Autowired
-    private ModelEntityMgr modelEntityMgr;
-
-    @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
-
-    @Autowired
-    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;

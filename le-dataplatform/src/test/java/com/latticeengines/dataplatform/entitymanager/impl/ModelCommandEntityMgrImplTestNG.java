@@ -11,7 +11,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelCommandIdEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -22,9 +21,6 @@ public class ModelCommandEntityMgrImplTestNG extends DataPlatformFunctionalTestN
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
-
-    @Autowired
-    private ModelCommandIdEntityMgr modelCommandIdEntityMgr;
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {

@@ -26,7 +26,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -39,9 +38,6 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
 
     @Autowired
     private ModelingService modelingService;
-
-    @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
 
     @Value("${dataplatform.customer.basedir}")
     private String custmoderBaseDir;

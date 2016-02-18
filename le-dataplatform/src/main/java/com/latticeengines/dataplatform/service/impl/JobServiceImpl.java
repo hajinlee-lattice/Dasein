@@ -27,7 +27,6 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -57,9 +56,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private YarnClientCustomizationService yarnClientCustomizationService;
-
-    @Autowired
-    private YarnService yarnService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;

@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Joiner;
-import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -27,9 +26,6 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
     @Autowired
     private ModelStepYarnProcessorImpl modelStepYarnProcessor;
-
-    @Autowired
-    private ModelingService modelingService;
 
     protected boolean doDependencyLibraryCopy() {
         return false;

@@ -7,7 +7,6 @@ import java.util.List;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -62,9 +61,6 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
-
-    @Autowired
-    private JdbcTemplate dlOrchestrationJdbcTemplate;
 
     @Autowired
     private DebugProcessorImpl debugProcessorImpl;

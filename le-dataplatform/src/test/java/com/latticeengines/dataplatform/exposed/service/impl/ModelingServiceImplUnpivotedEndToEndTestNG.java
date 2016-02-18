@@ -21,16 +21,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
@@ -60,19 +56,7 @@ import com.latticeengines.testframework.rest.StandaloneHttpServer;
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private ModelingJobService modelingJobService;
-
-    @Autowired
-    private YarnService yarnService;
-
-    @Autowired
     private ModelingService modelingService;
-
-    @Autowired
-    private JobEntityMgr jobEntityMgr;
-
-    @Autowired
-    private ModelEntityMgr modelEntityMgr;
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;

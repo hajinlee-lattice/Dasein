@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,6 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -47,12 +45,6 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Autowired
     private ModelingService modelingService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private ModelCommandLogService modelCommandLogService;
 
     @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dbHost;
