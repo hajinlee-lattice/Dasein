@@ -17,13 +17,17 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     private Map<String, String> extraSources = new HashMap<>();
 
+    @NotEmptyString
     @NotNull
     private String beanName;
 
+    @NotEmptyString
     @NotNull
     private String name;
-    
+
     private DataFlowParameters dataFlowParams;
+
+    private boolean purgeSources;
 
     @JsonProperty("target_path")
     public String getTargetPath() {
@@ -73,5 +77,15 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("data_flow_params")
     public void setDataFlowParams(DataFlowParameters dataFlowParams) {
         this.dataFlowParams = dataFlowParams;
+    }
+
+    @JsonProperty("purge_sources")
+    public Boolean getPurgeSources() {
+        return purgeSources;
+    }
+
+    @JsonProperty("purge_sources")
+    public void setPurgeSources(Boolean purgeSources) {
+        this.purgeSources = purgeSources;
     }
 }

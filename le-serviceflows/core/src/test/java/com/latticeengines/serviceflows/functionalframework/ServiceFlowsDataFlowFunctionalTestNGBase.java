@@ -37,11 +37,11 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
-public abstract class ServiceFlowsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private boolean local = getenv("SERVICEFLOWS_LOCAL", true, Boolean.class);
     private String engine = getenv("SERVICEFLOWS_ENGINE", "TEZ", String.class);
 
-    private static final Log log = LogFactory.getLog(ServiceFlowsFunctionalTestNGBase.class);
+    private static final Log log = LogFactory.getLog(ServiceFlowsDataFlowFunctionalTestNGBase.class);
 
     @Autowired
     private DataTransformationService dataTransformationService;

@@ -54,7 +54,8 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         importConfig.setCustomerSpace(configuration.getCustomerSpace());
 
         if (sourceImportConfig.getSourceType() == SourceType.FILE) {
-            SourceFile sourceFile = retrieveSourceFile();
+            SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
+                    getConfiguration().getSourceFileName());
             Table metadata = retrieveMetadata(sourceFile);
             sourceImportConfig.setProperty(ImportProperty.HDFSFILE, sourceFile.getPath());
             sourceImportConfig.setProperty(ImportProperty.METADATA, //
@@ -66,24 +67,11 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private void updateSourceFile() {
         CustomerSpace space = getConfiguration().getCustomerSpace();
-        SourceFile sourceFile = retrieveSourceFile();
+        SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
+                getConfiguration().getSourceFileName());
         sourceFile.setState(SourceFileState.Imported);
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         proxy.updateSourceFile(sourceFile, space.toString());
-    }
-
-    private SourceFile retrieveSourceFile() {
-        CustomerSpace space = getConfiguration().getCustomerSpace();
-
-        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        SourceFile sourceFile = proxy.findSourceFileByName(getConfiguration().getSourceFileName(), space.toString());
-        registerSourceFileInContext(sourceFile);
-        return sourceFile;
-    }
-
-    private InternalResourceRestApiProxy getInternalResourceProxy() {
-        return new InternalResourceRestApiProxy( //
-                getConfiguration().getInternalResourceHostPort());
     }
 
     private Table retrieveMetadata(SourceFile sourceFile) {

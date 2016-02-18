@@ -15,6 +15,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -103,7 +104,11 @@ public class ImportEventTableWorkflowTestNGBase extends WorkflowApiFunctionalTes
                 .internalResourceHostPort(internalResourceHostPort) //
                 .reportName("Report_" + sourceFile.getName()) //
                 .sourceType(SourceType.FILE) //
-                .sourceFileName(sourceFile.getName()).build();
+                .sourceFileName(sourceFile.getName()) //
+                .dataFlowBeanName("dedupEventTable") //
+                .dataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "Website", "Email", "IsWon")) //
+                .targetTableName(sourceFile.getTableName() + "_deduped") //
+                .build();
         return workflowConfig;
     }
 

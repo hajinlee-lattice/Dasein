@@ -18,10 +18,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -29,7 +31,7 @@ import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
-public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
+public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
     private static final Log log = LogFactory.getLog(BaseWorkflowStep.class);
 
@@ -164,6 +166,17 @@ public abstract class BaseWorkflowStep<T> extends AbstractStep<T> {
 
         sourceFiles.add(sourceFile.getName());
         putObjectInContext(WorkflowContextConstants.SOURCE_FILES, sourceFiles);
+    }
+
+    protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+        SourceFile sourceFile = proxy.findSourceFileByName(name, space.toString());
+        registerSourceFileInContext(sourceFile);
+        return sourceFile;
+    }
+
+    protected InternalResourceRestApiProxy getInternalResourceProxy() {
+        return new InternalResourceRestApiProxy(getConfiguration().getInternalResourceHostPort());
     }
 
     protected void registerReportInContext(Report report) {

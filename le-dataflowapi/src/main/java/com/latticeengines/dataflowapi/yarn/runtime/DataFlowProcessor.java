@@ -114,6 +114,17 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));
         proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+        purgeSources(dataFlowConfig);
         return null;
+    }
+
+    private void purgeSources(DataFlowConfiguration dataFlowConfig) {
+        for (DataFlowSource source : dataFlowConfig.getDataSources()) {
+            if (source.getPurgeAfterUse()) {
+                Table table = proxy.getMetadata(dataFlowConfig.getCustomerSpace(), source.getName());
+                table.setMarkedForPurge(true);
+                proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+            }
+        }
     }
 }

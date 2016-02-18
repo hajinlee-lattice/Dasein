@@ -44,7 +44,7 @@ public class SchemaRepository {
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false));
         table.addAttribute(createAttribute("Website", Schema.Type.STRING, false));
-        table.addAttribute(createAttribute("Won", Schema.Type.BOOLEAN, false));
+        table.addAttribute(createAttribute("IsWon", Schema.Type.BOOLEAN, false));
 
         table.addAttribute(createAttribute("Name", Schema.Type.STRING));
         table.addAttribute(createAttribute("BillingCity", Schema.Type.STRING));

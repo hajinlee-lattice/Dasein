@@ -7,7 +7,8 @@ public class DataFlowSource implements HasName {
 
     private String name;
     private String rawDataPath;
-    
+    private boolean purgeAfterUse;
+
     @Override
     @JsonProperty("name")
     public String getName() {
@@ -30,4 +31,11 @@ public class DataFlowSource implements HasName {
         this.rawDataPath = rawDataPath;
     }
 
+    public boolean getPurgeAfterUse() {
+        return purgeAfterUse;
+    }
+
+    public void setPurgeAfterUse(boolean purgeAfterUse) {
+        this.purgeAfterUse = purgeAfterUse;
+    }
 }

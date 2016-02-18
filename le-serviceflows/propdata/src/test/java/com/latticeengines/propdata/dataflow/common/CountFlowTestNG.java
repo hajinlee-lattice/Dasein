@@ -8,10 +8,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.propdata.dataflow.CountFlowParameters;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-propdata-context.xml" })
-public class CountFlowTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class CountFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {

@@ -17,10 +17,10 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
-public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class QuotaFlowAllProspectsAlreadySentTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();

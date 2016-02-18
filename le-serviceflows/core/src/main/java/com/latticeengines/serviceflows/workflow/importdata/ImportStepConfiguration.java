@@ -10,7 +10,6 @@ public class ImportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private SourceType sourceType;
     private String sourceFileName;
-    private String internalResourceHostPort;
 
     @JsonProperty("source_type")
     public SourceType getSourceType() {
@@ -32,14 +31,5 @@ public class ImportStepConfiguration extends MicroserviceStepConfiguration {
         this.sourceFileName = sourceFileName;
     }
 
-    @JsonProperty("internal_resource_host_port")
-    public String getInternalResourceHostPort() {
-        return internalResourceHostPort;
-    }
-
-    @JsonProperty("internal_resource_host_port")
-    public void setInternalResourceHostPort(String internalResourceHostPort) {
-        this.internalResourceHostPort = internalResourceHostPort;
-    }
 
 }

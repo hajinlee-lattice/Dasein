@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,6 +35,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -71,6 +74,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     private TableType tableType;
     private Integer tableTypeCode;
     private String interpretation;
+    private boolean markedForPurge;
 
     public Table() {
         setTableTypeCode(TableType.DATATABLE.getCode());
@@ -136,6 +140,22 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @JsonProperty("attributes")
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    @JsonIgnore
+    public Attribute getAttribute(final String name) {
+        if (name == null) {
+            return null;
+        }
+        return Iterables.find(attributes, new Predicate<Attribute>() {
+            @Override
+            public boolean apply(@Nullable Attribute attribute) {
+                if (attribute.getName() == null) {
+                    return false;
+                }
+                return attribute.getName().equals(name);
+            }
+        }, null);
     }
 
     /**
@@ -251,6 +271,16 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         if (primaryKey != null) {
             primaryKey.setTable(this);
         }
+    }
+
+    @Column(name = "MARKED_FOR_PURGE", nullable = false)
+    @JsonProperty("marked_for_purge")
+    public boolean isMarkedForPurge() {
+        return markedForPurge;
+    }
+
+    public void setMarkedForPurge(boolean markedForPurge) {
+        this.markedForPurge = markedForPurge;
     }
 
     @Override

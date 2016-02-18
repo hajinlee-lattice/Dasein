@@ -3,6 +3,7 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
@@ -17,10 +18,9 @@ import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowConfiguration;
 import com.latticeengines.domain.exposed.pls.TargetMarketDataFlowOptionName;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
-public class QuotaFlowLargeDataTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class QuotaFlowLargeDataTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     private QuotaFlowParameters getStandardParameters() {
         TargetMarket market = new TargetMarket();

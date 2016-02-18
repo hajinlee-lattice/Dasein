@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("preMatchEventTableFlow")
 public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowParameters> {
@@ -28,7 +29,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 "Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
                 new FieldMetadata("ContactDomain", String.class));
-        retrieveDomains = normalizeDomain(retrieveDomains, "ContactDomain");
+        retrieveDomains = DataFlowUtils.normalizeDomain(retrieveDomains, "ContactDomain");
 
         Node stopped = retrieveDomains.stopList(stoplist, "ContactDomain", "Domain");
 
@@ -69,7 +70,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("Website", "ContactDomain"), //
                 domain);
 
-        domainsForEachAccount = normalizeDomain(domainsForEachAccount, "Domain");
+        domainsForEachAccount = DataFlowUtils.normalizeDomain(domainsForEachAccount, "Domain");
 
         Node last = addIsWonEvent(domainsForEachAccount, opportunity);
         last = addStageClosedWonEvent(last, opportunity);
@@ -228,13 +229,4 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 .retain(new FieldList(fieldsToRetain));
     }
 
-    private Node normalizeDomain(Node last, String fieldName) {
-        final String normalizeDomain = "%s != null ? %s.replaceAll(\"^http://\", \"\").replaceAll(\"^www[.]\", \"\").replaceAll(\"/.*$\", \"\") : null";
-        final String replaceNulls = "%s != null && %s.equals(\"NULL\") ? null : %s";
-        return last //
-                .addFunction(String.format(normalizeDomain, fieldName, fieldName), new FieldList(fieldName),
-                        new FieldMetadata(fieldName, String.class)) //
-                .addFunction(String.format(replaceNulls, fieldName, fieldName, fieldName), new FieldList(fieldName),
-                        new FieldMetadata(fieldName, String.class));
-    }
 }

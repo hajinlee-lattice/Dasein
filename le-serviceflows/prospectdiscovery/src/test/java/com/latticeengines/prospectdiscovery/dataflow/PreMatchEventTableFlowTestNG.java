@@ -9,10 +9,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
-public class PreMatchEventTableFlowTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class PreMatchEventTableFlowTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void execute() throws Exception {

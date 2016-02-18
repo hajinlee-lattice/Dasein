@@ -42,13 +42,13 @@ public class MetadataProxy {
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             interceptors.add(new MagicAuthenticationHeaderHttpRequestInterceptor());
             restTemplate.setInterceptors(interceptors);
-            restTemplate.postForLocation(url, table);
+            restTemplate.put(url, table);
         } catch (Exception e) {
             throw new RuntimeException(String.format( //
                     "Failure setting metadata for table %s at address %s", table.getName(), url), e);
         }
     }
-    
+
     public void deleteMetadata(CustomerSpace space, Table table) {
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", hostname, space, table.getName());
         try {

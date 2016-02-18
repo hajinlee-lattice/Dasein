@@ -1,4 +1,4 @@
-Id,Name,Type,Street,City,State,PostalCode,Country,Website,Sic,Industry,AnnualRevenue,NumberOfEmployees,Ownership,TickerSymbol,Rating,OwnerId,CreatedDate,LastModifiedDate,LastActivityDate,LastViewedDate,AccountSource,Won
+Id,Name,Type,Street,City,State,PostalCode,Country,Website,Sic,Industry,AnnualRevenue,NumberOfEmployees,Ownership,TickerSymbol,Rating,OwnerId,CreatedDate,LastModifiedDate,LastActivityDate,LastViewedDate,AccountSource,IsWon
 00180000017VT4uAAG,West Physics Consulting,,11 Thacher St,Boca Raton,FL,12345,USA,,,,2.0E7,0,,,Hot,00580000001YiY9AAK,1386361395000,1445560382000,1431057600000,1447300422000,,1
 0018000000NW1EqAAL,Biotage AB,,120 Blackstone St NW,Medford,IA,45455,USA,,,Biotechnology,4.52E7,0,,,,00580000001YiXVAA0,1230049013000,1445560382000,1427947200000,1445561865000,,1
 0018000000PlP5MAAV,Doctor Diabetic Supply,,101 NW 24th Street,Miami,FL,33127,USA,,,,4.34E7,0,,,Warm,00580000001YiXVAA0,1238477352000,1445560382000,0,1445903271000,,1

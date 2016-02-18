@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import org.apache.avro.Schema;
 import org.testng.annotations.BeforeClass;
@@ -35,6 +36,12 @@ public class TableUnitTestNG {
     public void getModelingMetadata() {
         ModelingMetadata metadata = table.getModelingMetadata();
         assertEquals(metadata.getAttributeMetadata().size(), 4);
+    }
+
+    @Test(groups = "unit")
+    public void getAttribute() {
+        Attribute unknown = table.getAttribute("foo");
+        assertTrue(unknown == null);
     }
 
     private Table createTable() {

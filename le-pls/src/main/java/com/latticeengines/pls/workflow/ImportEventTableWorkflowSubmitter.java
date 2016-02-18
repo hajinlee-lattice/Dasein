@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -29,6 +30,9 @@ public class ImportEventTableWorkflowSubmitter extends WorkflowSubmitter {
                 .sourceType(SourceType.FILE) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .reportName(sourceFile.getName() + "_Report") //
+                .dataFlowBeanName("dedupEventTable") //
+                .dataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "Website", "Email", "IsWon")) //
+                .targetTableName(sourceFile.getTableName() + "_deduped") //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);

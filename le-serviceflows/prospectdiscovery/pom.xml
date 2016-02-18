@@ -26,7 +26,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${le.serviceflows.core.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>

@@ -3,14 +3,14 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
-import com.latticeengines.serviceflows.functionalframework.ServiceFlowsFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-prospectdiscovery-context.xml" })
-public class CreateAttributeLevelSummaryTestNG extends ServiceFlowsFunctionalTestNGBase {
+public class CreateAttributeLevelSummaryTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     
     private CreateAttributeLevelSummaryParameters getStandardParameters() {
         List<String> groupByCols = Arrays.asList(new String[] { "BusinessIndustry", "AverageProbability" });

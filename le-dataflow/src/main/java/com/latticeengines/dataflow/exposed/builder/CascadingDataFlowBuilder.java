@@ -106,7 +106,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     private static final Log log = LogFactory.getLog(CascadingDataFlowBuilder.class);
     private static JythonEngine engine = new JythonEngine(null);
 
-    protected static class Node {
+    public static class Node {
         private String identifier;
         private CascadingDataFlowBuilder builder;
 
@@ -177,8 +177,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         public Node groupByAndLimit(FieldList groupByFieldList, int count) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, new FirstNBuffer(count)),
-                    builder);
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, new FirstNBuffer(count)), builder);
         }
 
         public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending,
@@ -194,8 +193,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
                 boolean descending, boolean caseInsensitive) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer, descending,
-                    caseInsensitive), builder);
+            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer,
+                    descending, caseInsensitive), builder);
         }
 
         public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer) {
@@ -331,17 +330,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         public Node addTimestamp(String timestampField, int mode) {
-            return new Node(
-                    builder.register(
-                            new AddFieldOperation(identifier, new AddTimestampStrategy(timestampField, mode), builder)),
-                    builder);
+            return new Node(builder.register(new AddFieldOperation(identifier, new AddTimestampStrategy(timestampField,
+                    mode), builder)), builder);
         }
 
         public Node addTimestamp(String timestampField) {
-            return new Node(
-                    builder.register(
-                            new AddFieldOperation(identifier, new AddTimestampStrategy(timestampField), builder)),
-                    builder);
+            return new Node(builder.register(new AddFieldOperation(identifier,
+                    new AddTimestampStrategy(timestampField), builder)), builder);
+        }
+
+        public Table getSourceSchema() {
+            return builder.getSourceMetadata(identifier);
         }
 
         public List<FieldMetadata> getSchema() {
@@ -476,8 +475,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 }
 
                 if (matches.size() == 0) {
-                    throw new IllegalStateException(
-                            String.format("Could not find extract with path %s in HDFS", extract.getPath()));
+                    throw new IllegalStateException(String.format("Could not find extract with path %s in HDFS",
+                            extract.getPath()));
                 }
                 path = matches.get(0);
                 allSchemas[i] = AvroUtils.getSchema(config, new Path(path));
@@ -547,7 +546,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         DataFlowContext ctx = getDataFlowCtx();
         @SuppressWarnings("unchecked")
         Map<String, Table> sourceTables = ctx.getProperty("SOURCETABLES", Map.class);
-        return sourceTables.get(sourceName);
+        Table retrieved = sourceTables.get(sourceName);
+        if (retrieved == null) {
+            throw new RuntimeException(String.format("%s is not a valid source", sourceName));
+        }
+        return retrieved;
     }
 
     private void validateTableForSource(Table sourceTable) {
@@ -699,8 +702,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return addJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT);
     }
 
-    protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields,
-            JoinType joinType) {
+    protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
         if (lhsPipesAndFields == null) {
@@ -738,8 +740,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(join, declaredFields);
     }
 
-    private List<FieldMetadata> combineFields(String rhsId, List<FieldMetadata> lhsFields,
-            List<FieldMetadata> rhsFields) {
+    private List<FieldMetadata> combineFields(String rhsId, List<FieldMetadata> lhsFields, List<FieldMetadata> rhsFields) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
         Set<String> seenFields = new HashSet<>();
 
@@ -760,9 +761,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             if (seenFields.contains(fieldName)) {
                 fieldName = joinFieldName(rhsId, fieldName);
                 if (seenFields.contains(fieldName)) {
-                    throw new RuntimeException(String.format(
-                            "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
-                            fieldName, originalFieldName));
+                    throw new RuntimeException(
+                            String.format(
+                                    "Cannot create joinFieldName %s from field name %s because a field with that name already exists.  Discard the field to avoid this error",
+                                    fieldName, originalFieldName));
                 }
             }
             seenFields.add(fieldName);
@@ -913,8 +915,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
         }
 
-        List<FieldMetadata> declaredFields = getIntersection(groupByFields,
-                pipesAndOutputSchemas.get(prior).getValue());
+        List<FieldMetadata> declaredFields = getIntersection(groupByFields, pipesAndOutputSchemas.get(prior).getValue());
 
         for (Aggregation aggregation : aggregations) {
             String aggFieldName = aggregation.getAggregatedFieldName();
@@ -965,11 +966,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         Pipe groupby = null;
         groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
-        groupby = new Every(groupby,
-                argumentsFieldList == null ? Fields.ALL : convertToFields(argumentsFieldList.getFieldsAsList()), //
+        groupby = new Every(groupby, argumentsFieldList == null ? Fields.ALL
+                : convertToFields(argumentsFieldList.getFieldsAsList()), //
                 new GroupAndExpandFieldsBuffer(argumentsFieldList.getFieldsAsList().size(), expandField, expandFormats,
-                        convertToFields(declaredFieldList.getFieldsAsList())),
-                Fields.RESULTS);
+                        convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
 
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
 
@@ -988,8 +988,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(groupby, pm.getValue());
     }
 
-    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer,
-            List<FieldMetadata> fms) {
+    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer, List<FieldMetadata> fms) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
@@ -1018,7 +1017,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Pipe groupby = new GroupBy(pm.getKey(), fields, new Fields(sortFields.getFields()), descending);
-        groupby = new Every(groupby, buffer, Fields.RESULTS);
+        groupby = new Every(groupby, buffer, Fields.REPLACE);
 
         return register(groupby, pm.getValue());
     }
@@ -1056,8 +1055,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         String[] filterFieldsArray = new String[filterFields.size()];
         filterFields.toArray(filterFieldsArray);
-        Not filter = new Not(
-                new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getValue())));
+        Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getValue())));
         Pipe each = new Each(pm.getKey(), convertToFields(filterFields), filter);
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
         return register(each, fm);
@@ -1087,8 +1085,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return addFunction(prior, function, fieldsToApply, targetField, outputFields);
     }
 
-    protected String addFunction(String prior, Function<?> function, FieldList fieldsToApply,
-            FieldMetadata targetField) {
+    protected String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
         return addFunction(prior, function, fieldsToApply, targetField, null);
     }
 
@@ -1232,8 +1229,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
 
             if (!found) {
-                throw new RuntimeException(
-                        String.format("Could not locate field with name %s in metadata", previousName));
+                throw new RuntimeException(String.format("Could not locate field with name %s in metadata",
+                        previousName));
             }
         }
     }
@@ -1243,8 +1240,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()),
-                new AddMD5Hash(new Fields(targetFieldName)), Fields.ALL);
+        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(
+                targetFieldName)), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
@@ -1395,8 +1392,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         log.info(String.format("About to run data flow %s using execution engine %s", flowName, engine.getName()));
         log.info("Using hadoop fs.defaultFS = " + config.get("fs.defaultFS"));
         try {
-            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
-                    : "/app/" + artifactVersion + "/dataflow/lib/";
+            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/" : "/app/"
+                    + artifactVersion + "/dataflow/lib/";
             log.info("Using dataflow lib path = " + dataFlowLibDir);
             List<String> files = HdfsUtils.getFilesForDir(config, dataFlowLibDir);
             for (String file : files) {
