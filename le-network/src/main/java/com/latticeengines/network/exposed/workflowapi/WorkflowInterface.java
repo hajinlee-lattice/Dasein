@@ -2,8 +2,6 @@ package com.latticeengines.network.exposed.workflowapi;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.PathVariable;
-
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
