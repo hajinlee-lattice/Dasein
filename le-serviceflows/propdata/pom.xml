@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
+            <version>${tez.guava.version}</version>
             <scope>provided</scope>
         </dependency>
 
