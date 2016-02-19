@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.workflow.ImportEventTableWorkflowSubmitter;
 import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -39,9 +38,6 @@ public class FileUploadResource {
 
     @Autowired
     private FileUploadService fileUploadService;
-
-    @Autowired
-    private ImportEventTableWorkflowSubmitter importEventTableWorkflowSubmitter;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -92,19 +88,4 @@ public class FileUploadResource {
         }
     }
 
-    @RequestMapping(value = "{fileName}/import", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Run the import workflow to import the source file and perform validations")
-    public ResponseDocument<String> importFile(@PathVariable String fileName) {
-        try {
-            SourceFile sourceFile = sourceFileService.findByName(fileName);
-            if (sourceFile == null) {
-                throw new RuntimeException(String.format("No such source file with name %s", fileName));
-            }
-            return ResponseDocument.successResponse(importEventTableWorkflowSubmitter.submit(sourceFile).toString());
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseDocument.failedResponse(e);
-        }
-    }
 }

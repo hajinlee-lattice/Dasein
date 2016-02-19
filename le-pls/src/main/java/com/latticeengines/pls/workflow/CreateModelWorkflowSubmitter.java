@@ -11,11 +11,11 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
-import com.latticeengines.leadprioritization.workflow.ImportEventTableWorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.service.SourceFileService;
 
 @Component
-public class ImportEventTableWorkflowSubmitter extends WorkflowSubmitter {
+public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private SourceFileService sourceFileService;
 
@@ -23,7 +23,7 @@ public class ImportEventTableWorkflowSubmitter extends WorkflowSubmitter {
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
         }
-        ImportEventTableWorkflowConfiguration configuration = new ImportEventTableWorkflowConfiguration.Builder()
+        CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .sourceFileName(sourceFile.getName()) //

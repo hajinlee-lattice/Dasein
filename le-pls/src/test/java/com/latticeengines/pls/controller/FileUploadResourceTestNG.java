@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
@@ -73,6 +74,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             });
         }
     }
+
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {

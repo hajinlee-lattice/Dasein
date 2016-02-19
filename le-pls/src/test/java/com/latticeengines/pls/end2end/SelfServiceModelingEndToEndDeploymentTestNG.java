@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -104,9 +105,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
-    public void importFileIntoHdfs() {
+    public void createModel() {
+        ModelingParameters parameters = createModelingParameters(sourceFile.getName());
         ResponseDocument response = restTemplate.postForObject(
-                String.format("%s/pls/fileuploads/%s/import", getPLSRestAPIHostPort(), sourceFile.getName()), null,
+                String.format("%s/pls/models/%s/model", getPLSRestAPIHostPort(), sourceFile.getName()), parameters,
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
 
@@ -117,7 +119,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         waitForWorkflowStatus(applicationId, true);
 
         response = restTemplate.postForObject(
-                String.format("%s/pls/fileuploads/%s/import", getPLSRestAPIHostPort(), sourceFile.getName()), null,
+                String.format("%s/pls/models/%s/model", getPLSRestAPIHostPort(), sourceFile.getName()), parameters,
                 ResponseDocument.class);
         assertFalse(response.isSuccess());
 
@@ -130,13 +132,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(job);
         List<Report> reports = job.getReports();
         assertEquals(reports.size(), 1);
-
-        // Front end will:
-        // - wait for workflow to complete.
-        // - retrieve report from workflow.
-        // - if the workflow fails because of validation failures, the front end
-        // will be made aware and can grab the error message from the workflow
-        // job. This is not fully available yet.
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
@@ -154,5 +149,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private ModelingParameters createModelingParameters(String fileName) {
+        ModelingParameters parameters = new ModelingParameters();
+        parameters.setName("Test");
+        parameters.setDescription("Test");
+        parameters.setFilename(fileName);
+        return parameters;
     }
 }
