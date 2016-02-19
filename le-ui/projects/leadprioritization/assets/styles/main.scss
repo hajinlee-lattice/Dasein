@@ -623,3 +623,64 @@ Forms for System SetUp Page
 @import "performance-tab";
 @import "setup";
 // END: component stylesheets
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Custom Fields Page
+================================================================== */
+.main-content section.custom-fields {
+  margin-top: 80px;
+  .unstyled {
+    margin-top: 20px;
+    td, th {
+      width: 50%;
+      padding: 0 0 4px;
+      vertical-align: top;
+      &:first-child {
+        padding-right: 4px;
+      }
+      &:last-child {
+        padding-left: 4px;
+      }
+    }
+  }
+  input {
+    height: 43px;;
+  }
+  .custom-select:not([class*="col-"]):not([class*="form-control"]):not(input-group-btn) {
+    width: 100%;
+  }
+}
+
+
+
+
+

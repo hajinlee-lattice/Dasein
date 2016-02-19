@@ -88,6 +88,10 @@ button.button, a.button, .button {
 			background-color: $jet;
 		}
 	}
+  &.block-button {
+    display: block;
+    width: 100%;
+  }
 	@include media(">medium") {
     display: inline-block;
     padding: 0.75em 3em;

@@ -52,7 +52,22 @@ table {
         margin-right: 5px;
         font-size: 16px;
     }
+    &.unstyled {
+        tbody tr {
+        border-bottom: none;
+        }
+        th {
+            border-bottom: none;
+        }
+        tbody tr:nth-child(odd) {
+            background: #fff;
+        }
+    }
 }
+
+
+
+
 
 /* Mobile */
 @include media("<medium") {

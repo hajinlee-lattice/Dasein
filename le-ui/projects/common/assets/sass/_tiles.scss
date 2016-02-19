@@ -33,19 +33,19 @@
     flex-basis: auto;
     -webkit-align-self: auto;
     align-self: auto;
-    margin-right: 4px;
+    margin-right: 14px;
 	border: #d0d0d0 solid 1px;
 	padding: 0.75em;
-	margin-bottom: 4px;
+	margin-bottom: 14px;
 	width: 100%;
 	background: #e7e7e7;
 	transition: background 150ms ease;
 	height: 240px;
 	@include media(">medium") {
-		width: calc(50% - 4px);
+		width: calc(50% - 14px);
 	}
 	@include media(">large") {
-		width: calc(33.333% - 4px);
+		width: calc(33.333% - 14px);
 	}
 	&.filter-checked {
 		display: none;
