@@ -188,7 +188,7 @@ public class LPFunctionsImpl implements LPFunctions {
                         }
                         if (fsColumnMapping.getAttribute("queryColumnName").length() > 4 + sourceStrLength
                                 && fsColumnMapping.getAttribute("queryColumnName").substring(0, 4 + sourceStrLength)
-                                .equals(String.format("LDC_%s", source))) {
+                                        .equals(String.format("LDC_%s", source))) {
                             mappingsToRemove.add(fsColumnMapping);
                         }
                     }
@@ -249,15 +249,14 @@ public class LPFunctionsImpl implements LPFunctions {
         Map<String, String> attributes = new HashMap<>();
 
         for (String ldcCol : column_names_in_propdata) {
-            ldcCol = fieldNameRestrictLength(ldcCol, 32);
             if (lp_template_type.equals("SFDC")) {
-                String customerCol = String.format("Lattice_%s__c", ldcCol);
+                String customerCol = String.format("Lattice_%s__c", fieldNameRestrictLength(ldcCol, 32));
                 attributes.put(ldcCol, customerCol);
             } else if (lp_template_type.equals("ELQ")) {
-                String customerCol = String.format("C_Lattice_%s1", ldcCol);
+                String customerCol = String.format("C_Lattice_%s1", fieldNameRestrictLength(ldcCol, 32));
                 attributes.put(ldcCol, customerCol);
             } else if (lp_template_type.equals("MKTO")) {
-                String customerCol = String.format("Lattice_%s", ldcCol);
+                String customerCol = String.format("Lattice_%s", fieldNameRestrictLength(ldcCol, 32));
                 attributes.put(ldcCol, customerCol);
             }
         }
@@ -301,7 +300,7 @@ public class LPFunctionsImpl implements LPFunctions {
             return customerCol;
         }
 
-        final String replacement = "___";
+        final String replacement = "_";
         int nTrailingChars = 7;
 
         final int nReplacement = replacement.length();
