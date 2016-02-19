@@ -22,7 +22,7 @@ public class HTTPFSAccessMBean {
     @ManagedOperation(description = "Check HttpFS Accessibility")
     public String checkHttpAccess() {
         try {
-            String s = versionManager.getCurrentVersion().endsWith("") ? "" : "/";
+            String s = versionManager.getCurrentVersion().equals("") ? "" : "/";
             String url = String.format("%s/app/%s%sdataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS", webHDFS, versionManager.getCurrentVersion(),s);
             return "dataplatform.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {

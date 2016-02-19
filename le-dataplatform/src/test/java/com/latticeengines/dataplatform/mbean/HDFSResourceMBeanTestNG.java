@@ -19,7 +19,7 @@ public class HDFSResourceMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional", "functional.production" })
     public void testCheckHDFSResource() {
         String files = hdfsRcMBean.checkHDFSResource();
-        String s = versionManager.getCurrentVersion().endsWith("") ? "" : "/";
+        String s = versionManager.getCurrentVersion().equals("") ? "" : "/";
         assertTrue(files.contains("/app/" + versionManager.getCurrentVersion() + s + "dataplatform/dataplatform.properties"));
         assertTrue(files.contains("algorithm"));
         assertTrue(files.contains("launcher.py"));
