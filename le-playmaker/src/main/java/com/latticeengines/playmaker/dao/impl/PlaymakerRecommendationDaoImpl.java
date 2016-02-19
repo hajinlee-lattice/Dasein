@@ -158,11 +158,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(playgroupIds)) {
             source.addValue("playgroupIds", playgroupIds);
         }
-        
+
         List<Map<String, Object>> results = queryForListOfMap(sql, source);
         convertToList("PlayGroups", results);
         convertToMapList("TargetProducts", results);
-        
+
         return results;
     }
 
@@ -239,7 +239,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
-        
+
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
         if (result != null) {
             for (Map<String, Object> map : result) {
@@ -273,7 +273,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private String getAccountExtensionFromWhereClause(List<Integer> accountIds) {
         String whereClause = "FROM [LEAccount_Extensions] E WITH (NOLOCK) JOIN [LEAccount] A WITH (NOLOCK) ON E.Item_ID = A.LEAccount_ID AND A.IsActive = 1 "
                 + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', A.[Last_Modification_Date]) >= :start ";
-        
+
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(accountIds)) {
             extraFilter.append("");
@@ -355,10 +355,31 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public List<Map<String, Object>> getPlayGroups() {
-        String sql = "SELECT [PlayGroup_ID] AS ID, External_ID AS External_ID, Display_Name AS DisplayName FROM PlayGroup WHERE IsActive = 1";
+    public List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum) {
+        String sql = "SELECT * FROM (SELECT [PlayGroup_ID] AS ID, External_ID AS External_ID, Display_Name AS DisplayName, "
+                + "DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) AS LastModificationDate, "
+                + "ROW_NUMBER() OVER ( ORDER BY PlayGroup.[Last_Modification_Date], PlayGroup.[PlayGroup_ID]) RowNum "
+                + getPlayGroupWhereClause()
+                + " ) AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
+        ;
 
         MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        source.addValue("startRow", offset + 1);
+        source.addValue("endRow", offset + maximum);
         return queryForListOfMap(sql, source);
+    }
+
+    @Override
+    public int getPlayGroupCount(long start) {
+        String sql = "SELECT COUNT(*) " + getPlayGroupWhereClause();
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        return queryForObject(sql, source, Integer.class);
+    }
+    
+    private String getPlayGroupWhereClause() {
+        return "FROM PlayGroup WHERE IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) >= :start ";
     }
 }

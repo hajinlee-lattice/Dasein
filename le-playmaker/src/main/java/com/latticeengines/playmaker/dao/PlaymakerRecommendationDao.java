@@ -29,6 +29,8 @@ public interface PlaymakerRecommendationDao extends GenericDao {
 
     int getAccountExtensionColumnCount();
 
-    List<Map<String, Object>> getPlayGroups();
+    List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum);
+
+    int getPlayGroupCount(long start);
 
 }

@@ -122,7 +122,7 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
 
     @Test(groups = "deployment")
     public void getPlayGroups() {
-        String url = apiHostPort + "/playmaker/playgroups";
+        String url = apiHostPort + "/playmaker/playgroups?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> result = restTemplate.getForObject(url, List.class);
         Assert.assertNotNull(result);

@@ -123,9 +123,19 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
     }
 
     @Override
-    public List<Map<String, Object>> getPlayGroups(String tenantName) {
+    public List<Map<String, Object>> getPlayGroups(String tenantName, long start, int offset, int maximum) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
-        return dao.getPlayGroups();
+        return dao.getPlayGroups(start, offset, maximum);
+    }
+
+    @Override
+    public Map<String, Object> getPlayGroupCount(String tenantName, long start) {
+        PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put(COUNT_KEY, dao.getPlayGroupCount(start));
+        return result;
+
     }
 
 }

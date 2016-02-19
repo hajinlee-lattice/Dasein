@@ -186,9 +186,16 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends AbstractTestNGSp
     }
 
     @Test(groups = "functional", enabled = true)
+    public void getPlayGroupCount() throws Exception {
+
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getPlayGroupCount(tenant.getTenantName(), 0);
+        Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
+    }
+    
+    @Test(groups = "functional", enabled = true)
     public void getPlayGroups() throws Exception {
 
-        List<Map<String, Object>> result = playMakerRecommendationEntityMgr.getPlayGroups(tenant.getTenantName());
+        List<Map<String, Object>> result = playMakerRecommendationEntityMgr.getPlayGroups(tenant.getTenantName(), 0, 0, 100);
         Assert.assertNotNull(result);
         Assert.assertTrue(result.size() > 0);
     }
