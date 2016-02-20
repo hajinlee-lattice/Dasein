@@ -14,7 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileChecksum;
 import org.apache.hadoop.fs.FileStatus;
@@ -92,6 +94,15 @@ public class HdfsUtils {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
+            }
+        }
+    }
+    
+    public static final void copyInputStreamToHdfsWithoutBom(Configuration configuration, InputStream inputStream, String hdfsPath) throws IOException{
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
+                IOUtils.copy(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                        ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), outputStream);
             }
         }
     }

@@ -61,7 +61,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
             file.setState(SourceFileState.Uploaded);
-            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (Exception e) {
