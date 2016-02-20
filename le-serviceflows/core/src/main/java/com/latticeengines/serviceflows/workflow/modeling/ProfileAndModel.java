@@ -27,7 +27,6 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         log.info("Inside ProfileAndModel execute()");
 
         Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
-
         Map<String, String> modelApplicationIdToEventColumn;
         try {
             modelApplicationIdToEventColumn = profileAndModel(eventTable);

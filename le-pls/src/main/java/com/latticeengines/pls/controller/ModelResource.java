@@ -31,14 +31,14 @@ public class ModelResource {
     @Autowired
     private CreateModelWorkflowSubmitter createModelWorkflowSubmitter;
 
-    @RequestMapping(value = "/{fileName}/model", method = RequestMethod.POST)
+    @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
-    public ResponseDocument<String> model(@PathVariable String fileName, @RequestBody ModelingParameters parameters) {
+    public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
         try {
-            SourceFile sourceFile = sourceFileService.findByName(fileName);
+            SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
             if (sourceFile == null) {
-                throw new RuntimeException(String.format("No such source file with name %s", fileName));
+                throw new RuntimeException(String.format("No such source file with name %s", parameters.getFilename()));
             }
             return ResponseDocument.successResponse(createModelWorkflowSubmitter.submit(sourceFile).toString());
         } catch (Exception e) {
@@ -46,5 +46,4 @@ public class ModelResource {
             return ResponseDocument.failedResponse(e);
         }
     }
-
 }

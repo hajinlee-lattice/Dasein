@@ -1,7 +1,10 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.Arrays;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -19,6 +22,9 @@ public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private SourceFileService sourceFileService;
 
+    @Value("${pls.modelingservice.basedir}")
+    private String modelingServiceHdfsBaseDir;
+
     public ApplicationId submit(SourceFile sourceFile) {
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
@@ -33,6 +39,8 @@ public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {
                 .dataFlowBeanName("dedupEventTable") //
                 .dataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "Website", "Email", "IsWon")) //
                 .targetTableName(sourceFile.getTableName() + "_deduped") //
+                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
+                .eventColumns(Arrays.asList("IsWon")) // TODO get from Table
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);
