@@ -301,7 +301,7 @@ public class LPFunctionsImpl implements LPFunctions {
         }
 
         final String replacement = "_";
-        int nTrailingChars = 7;
+        int nTrailingChars = 10;
 
         final int nReplacement = replacement.length();
 
