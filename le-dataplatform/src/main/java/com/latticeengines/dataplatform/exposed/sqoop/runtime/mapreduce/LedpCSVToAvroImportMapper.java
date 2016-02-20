@@ -190,24 +190,4 @@ public class LedpCSVToAvroImportMapper extends
         }
     }
 
-    public static void main(String[] args) throws ParseException, SQLException, ClassNotFoundException {
-        // String s = "abc";
-        // DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-        // System.out.println(df.parse(s));
-        // Class.forName("org.relique.jdbc.csv.CsvDriver");
-        // Properties props = new Properties();
-        // Define column names and column data types here.
-        // Class klass = CsvDriver.class;
-        // URL location = klass.getResource('/'+klass.getName().replace('.',
-        // '/')+".class");
-        // System.out.println(location);
-        // props.put(CsvDriver.MISSING_VALUE, "$$");
-        // props.put(CsvDriver.IGNORE_UNPARSEABLE_LINES, "String,String");
-        // Connection conn = DriverManager.getConnection("jdbc:relique:csv:" +
-        // "", props);
-        // ResultSet rs =
-        // conn.prepareStatement("Select * from fil1.csv").getResultSet();
-        // System.out.println(rs);
-    }
-
 }
