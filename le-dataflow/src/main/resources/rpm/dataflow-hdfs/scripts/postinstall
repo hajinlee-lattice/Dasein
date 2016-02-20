@@ -12,6 +12,5 @@ fi
 
 hdfs dfs -rm -r -f /app/$VERSION/dataflow/lib/*
 hdfs dfs -put /tmp/app/dataflow/le-dataflow*-shaded.jar /app/$VERSION/dataflow/lib
-hdfs dfs -put /tmp/app/dataflow/le-dellebi*-shaded.jar /app/$VERSION/dataflow/lib
 hdfs dfs -copyFromLocal /tmp/app/dataflow/dataflow.properties /app/$VERSION/dataflow
 rm -rf /tmp/app/dataflow/

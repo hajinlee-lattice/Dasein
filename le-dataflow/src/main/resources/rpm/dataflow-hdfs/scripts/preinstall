@@ -12,14 +12,10 @@ fi
 
 if [ -d "/tmp/app/dataflow" ]; then
     rm -rf /tmp/app/dataflow/le-dataflow*-shaded.jar
-    rm -rf /tmp/app/dataflow/le-propdata*-shaded.jar
-    rm -rf /tmp/app/dataflow/le-dellebi*-shaded.jar
 else
     mkdir -p /tmp/app/dataflow
 fi
 hdfs dfs -mkdir -p /app/$VERSION/dataflow/lib || true
 hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-dataflow*-shaded.jar || true
-hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-propdata*-shaded.jar || true
-hdfs dfs -rm -f /app/$VERSION/dataflow/lib/le-dellebi*-shaded.jar || true
 hdfs dfs -rm -f /app/$VERSION/dataflow/dataflow.properties || true
 

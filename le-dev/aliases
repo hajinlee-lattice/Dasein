@@ -23,6 +23,9 @@ alias pddpl='mvn -Pshaded-yarn -DskipTests clean deploy && hadoop fs -copyFromLo
 alias dpdplnobld='hadoop fs -rm -r /app/dataplatform || true && hadoop fs -mkdir -p /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/target/le-dataplatform*shaded.jar /app/dataplatform/lib && hadoop fs -copyFromLocal $WSHOME/le-dataplatform/conf/env/dev/dataplatform.properties /app/dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh'
 alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
 
+alias dedplnobld='hadoop fs -rm -r /app/dellebi || true && hadoop fs -mkdir -p /app/dellebi/lib && hadoop fs -copyFromLocal $WSHOME/le-dellebi/target/le-dellebi*shaded.jar /app/dellebi/lib && hadoop fs -copyFromLocal $WSHOME/le-dellebi/conf/env/dev/dellebi.properties /app/dellebi'
+alias dedpl='mvn -Pshaded-yarn -DskipTests clean install && dedplnobld'
+
 alias fwkdpl='hadoop fs -rm -r /app/proxy || true && hadoop fs -rm -r /app/db || true && hadoop fs -rm -r /app/security || true && hadoop fs -mkdir /app/proxy || true && hadoop fs -mkdir /app/db || true && hadoop fs -mkdir /app/security && hadoop fs -copyFromLocal $WSHOME/le-proxy/conf/env/dev/proxy.properties /app/proxy && hadoop fs -copyFromLocal $WSHOME/le-db/conf/env/dev/db.properties /app/db && hadoop fs -copyFromLocal $WSHOME/le-security/conf/env/dev/security.properties /app/security'
 
 alias eaidplnobld='hadoop fs -rm -r /app/eai || true && hadoop fs -mkdir -p /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/target/le-eai*shaded.jar /app/eai/lib && hadoop fs -copyFromLocal $WSHOME/le-eai/conf/env/dev/eai.properties /app/eai'

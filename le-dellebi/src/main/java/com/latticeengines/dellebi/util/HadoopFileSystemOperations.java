@@ -3,6 +3,7 @@ package com.latticeengines.dellebi.util;
 import java.net.URI;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -88,7 +89,9 @@ public class HadoopFileSystemOperations {
 
         try {
             Configuration config = new Configuration();
-            List<String> files = HdfsUtils.getFilesForDir(config, String.format("/app/%s/dataflow/lib/", artifactVersion));
+            String libPath = StringUtils.isEmpty(artifactVersion) ? "/app/dellebi/lib"
+                    : String.format("/app/%s/dellebi/lib/", artifactVersion);
+            List<String> files = HdfsUtils.getFilesForDir(config, libPath);
             for (String file : files) {
                 flow.addToClassPath(file);
             }

@@ -45,9 +45,6 @@
                                 <source>
                                     <location>target/le-dataflow-${le.rpm.version}-shaded.jar</location>
                                 </source>
-                                <source>
-                                    <location>../le-dellebi/target/le-dellebi-${le.rpm.version}-shaded.jar</location>
-                                </source>
                             </sources>
                         </mapping>
                     </mappings>

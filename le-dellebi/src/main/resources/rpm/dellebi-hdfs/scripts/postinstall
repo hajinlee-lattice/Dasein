@@ -1,4 +1,16 @@
 #!/bin/bash
 echo 'Running Postinstall'
-hdfs dfs -copyFromLocal /tmp/app/dataflow/le-dellebi*-shaded.jar /app/dataflow/lib
 
+JARFILE=`ls /tmp/app/dellebi/le-dellebi*-shaded.jar`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+
+hdfs dfs -rm -r -f /app/$VERSION/dellebi/lib/*
+hdfs dfs -put /tmp/app/dellebi/le-dellebi*-shaded.jar /app/$VERSION/dellebi/lib
+hdfs dfs -copyFromLocal /tmp/app/dellebi/dataflow.properties /app/$VERSION/dellebi
+rm -rf /tmp/app/dellebi/

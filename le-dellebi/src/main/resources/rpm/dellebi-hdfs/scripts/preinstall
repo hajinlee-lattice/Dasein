@@ -1,10 +1,21 @@
 #!/bin/bash
 echo 'Running Preinstall'
-if [ -d "/tmp/app/dataflow" ]; then
-    rm -rf /tmp/app/dataflow/le-dellebi*-shaded.jar
-else
-    mkdir -p /tmp/app/dataflow
+
+RPMFILE=`ls /tmp/le-dellebi-hdfs-*.rpm`
+VERSION=`echo $RPMFILE | cut -d \- -f 5`
+SNAPSHOT=`echo $RPMFILE | cut -d \- -f 6`
+
+if [[ $SNAPSHOT = SNAPSHOT* ]]
+    then
+        VERSION=$VERSION-"SNAPSHOT"
 fi
-hdfs dfs -mkdir -p /app/dataflow/lib
-hdfs dfs -rm -f /app/dataflow/lib/le-dellebi*-shaded.jar
+
+if [ -d "/tmp/app/dellebi" ]; then
+    rm -rf /tmp/app/dellebi/le-dellebi*-shaded.jar
+else
+    mkdir -p /tmp/app/dellebi
+fi
+hdfs dfs -mkdir -p /app/$VERSION/dellebi/lib || true
+hdfs dfs -rm -f /app/$VERSION/dellebi/lib/le-dellebi*-shaded.jar || true
+hdfs dfs -rm -f /app/$VERSION/dellebi/dellebi.properties || true
 

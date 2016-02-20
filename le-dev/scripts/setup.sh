@@ -62,6 +62,10 @@ echo "Deploying swlib to local Hadoop"
 cd $WSHOME/le-swlib && swlibdpl 2> /tmp/errors.txt
 processErrors
 
+echo "Deploying dellebi to local Hadoop"
+cd $WSHOME/le-dellebi && dedpl 2> /tmp/errors.txt
+processErrors
+
 echo "Deploying microservices to local jetty"
 cd $WSHOME/le-microservice && microservicedplnobld 2> /tmp/errors.txt
 processErrors
