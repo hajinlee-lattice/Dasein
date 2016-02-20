@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.mapreduce.filecache.DistributedCache;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -394,6 +395,11 @@ public class SqoopJobServiceImpl {
             if (tableMetadata != null) {
                 yarnConfiguration.set("lattice.eai.file.schema", tableMetadata);
             }
+
+            String importType = props.getProperty("importType");
+            if (importType != null) {
+                yarnConfiguration.set("importType", importType);
+            }
         }
         List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
         for (String jarFilePath : jarFilePaths) {
@@ -406,8 +412,8 @@ public class SqoopJobServiceImpl {
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // MR_AM_COMMAND_OPTS
-        // yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
-        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+//         yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
+//         "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);

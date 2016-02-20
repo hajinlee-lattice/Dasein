@@ -4,7 +4,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "ID",
+      "ColumnName": "LeadID",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -12,7 +12,7 @@
       "DataType": "String",
       "Description": "",
       "DisplayDiscretizationStrategy": null,
-      "DisplayName": "Lead ID",
+      "DisplayName": "Lead_ID",
       "Extensions": [
         {
           "Key": "DataType",
@@ -41,7 +41,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Column1",
+      "ColumnName": "Country",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -78,7 +78,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Column2",
+      "ColumnName": "Company",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -115,7 +115,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Column3",
+      "ColumnName": "FirstName",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -152,7 +152,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Column4",
+      "ColumnName": "LastName",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -189,12 +189,12 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Column5",
+      "ColumnName": "DS_CompanyName_Length",
       "DataQuality": null,
       "DataSource": [
         "File"
       ],
-      "DataType": "String",
+      "DataType": "Int",
       "Description": "",
       "DisplayDiscretizationStrategy": null,
       "DisplayName": "Column5",
@@ -226,12 +226,12 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "LastUpdatedDate",
+      "ColumnName": "DS_CompanyName_Entropy",
       "DataQuality": null,
       "DataSource": [
         "File"
       ],
-      "DataType": "Date",
+      "DataType": "Float",
       "Description": "",
       "DisplayDiscretizationStrategy": null,
       "DisplayName": "Last Updated Date",

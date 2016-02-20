@@ -55,16 +55,16 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/dataFromFile");
         HdfsUtils.rmdir(yarnConfiguration, "/tmp/sourceFiles");
         HdfsUtils.mkdir(yarnConfiguration, "/tmp/sourceFiles");
-        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1.csv");
+        dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file2.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), "/tmp/sourceFiles");
-        metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file1Metadata.json");
+        metadataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/testdataMetadata.json");
     }
 
     @Test(groups = "functional", dataProvider = "getPropertiesProvider")
     public void importMetadataAndDataAndWriteToHdfs(Map<String, String> properties) throws Exception {
         cleanup();
         ImportContext ctx = new ImportContext(yarnConfiguration);
-        ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file1");
+        ctx.setProperty(ImportProperty.TARGETPATH, "/tmp/dataFromFile/file2");
         ctx.setProperty(ImportProperty.CUSTOMER, "testcustomer");
         ctx.setProperty(ImportProperty.EXTRACT_PATH, new HashMap<String, String>());
         ctx.setProperty(ImportProperty.PROCESSED_RECORDS, new HashMap<String, Long>());
@@ -73,7 +73,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         SourceImportConfiguration fileImportConfig = new SourceImportConfiguration();
         fileImportConfig.setSourceType(SourceType.FILE);
         fileImportConfig.setTables(Arrays.<Table> asList(new Table[] { createFile(
-                new File(dataUrl.getPath()).getParentFile(), "file1") }));
+                new File(dataUrl.getPath()).getParentFile(), "file2") }));
         fileImportConfig.setProperties(properties);
 
         List<Table> tables = fileImportService.importMetadata(fileImportConfig, ctx);
@@ -89,7 +89,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         verifyAllDataNotNullWithNumRows(yarnConfiguration, //
                 tables.get(0), //
-                4);
+                6034);
     }
 
     @DataProvider
@@ -97,7 +97,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Map<String, String> metadataFileProperties = getProperties(true);
         Map<String, String> inlineMetadataProperties = getProperties(false);
 
-        return new Object[][] { { metadataFileProperties }, { inlineMetadataProperties } };
+        return new Object[][] { { metadataFileProperties}, {inlineMetadataProperties }};
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {
@@ -113,9 +113,11 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
             }
             props.put(ImportProperty.METADATA, contents);
         }
-        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/file1.csv");
+        props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/file2.csv");
         Map<String, String> urlProperties = new HashMap<>();
         urlProperties.put(CsvDriver.DATE_FORMAT, "MM-DD-YYYY");
+        urlProperties.put(CsvDriver.MISSING_VALUE, "''");
+        urlProperties.put(CsvDriver.CHARSET, "UTF-8");
         props.put(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
         return props;
     }

@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.zookeeper.ZooDefs;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -148,11 +150,12 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
         DbCreds creds = new DbCreds(builder);
 
+        // if Table contains duplicate column names or column with empty name, here it will throw exception
         DataSchema schema = metadataService.createDataSchema(creds, fileName);
 
         Table file = new Table();
         file.setName(fileName);
-
+        file.setInterpretation(SchemaInterpretation.SalesforceLead.name());
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());
@@ -249,6 +252,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                     "com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
+            //DateTime date = new DateTime();
+            //table.getLastModifiedKey().setLastModifiedTimestamp(date.minusMonths(6).getMillis());
             tables.add(table);
         }
         return tables;

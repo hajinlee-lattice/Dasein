@@ -101,6 +101,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     private DbCreds getCreds(ImportContext ctx) {
         String url = createJdbcUrl(ctx);
+        System.out.println(url);
         String driver = "org.relique.jdbc.csv.CsvDriver";
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.jdbcUrl(url).driverClass(driver);
@@ -115,6 +116,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         }
 
         Properties props = new Properties();
+        props.put("importType", "File.CSV");
         props.put("importMapperClass", LedpCSVToAvroImportMapper.class.toString());
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersion()));
@@ -172,12 +174,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
             if (attrMetadata != null) {
                 attr.setDisplayName(attrMetadata.getDisplayName());
-                if(attrMetadata.getDataType().equals("date") || attrMetadata.getDataType().equals("Date")){
+                if (attrMetadata.getDataType().equals("date") || attrMetadata.getDataType().equals("Date")) {
                     attr.setPhysicalDataType(Type.LONG.toString());
-                }else{
+                } else {
                     attr.setPhysicalDataType(attrMetadata.getDataType());
                 }
-                //attr.setPhysicalDataType(attrMetadata.getExtensions().get(2).getValue());
+                // attr.setPhysicalDataType(attrMetadata.getExtensions().get(2).getValue());
                 attr.setLogicalDataType(attrMetadata.getDataType());
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });

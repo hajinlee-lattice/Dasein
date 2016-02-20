@@ -188,9 +188,11 @@
                                     <overWrite>false</overWrite>
                                     <outputDirectory>target/classes</outputDirectory>
                                     <includes>**/*.class,**/*.xml</includes>
-                                    <excludes>org/apache/sqoop/mapreduce/DataDrivenImportJob.class,
+                                    <excludes>
                                         org/apache/sqoop/mapreduce/ImportJobBase.class,
-                                        org/apache/sqoop/mapreduce/ExportJobBase.class
+                                        org/apache/sqoop/mapreduce/ExportJobBase.class,
+                                        org/apache/sqoop/manager/SqlManager.class,
+                                        org/apache/sqoop/mapreduce/db/DBInputFormat.class
                                     </excludes>
                                 </artifactItem>
                             </artifactItems>
@@ -529,7 +531,7 @@
         <dependency>
             <groupId>net.sourceforge.csvjdbc</groupId>
             <artifactId>csvjdbc</artifactId>
-            <version>1.0.25</version>
+            <version>1.0.28</version>
             <scope>test</scope>
         </dependency>
         <dependency>

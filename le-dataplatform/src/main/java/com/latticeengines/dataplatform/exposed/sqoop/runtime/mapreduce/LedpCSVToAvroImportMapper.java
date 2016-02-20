@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -16,38 +17,41 @@ import org.apache.avro.mapred.AvroOutputFormat;
 import org.apache.avro.mapred.AvroWrapper;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.StringUtils;
-import org.apache.sqoop.mapreduce.AvroImportMapper;
 import org.apache.sqoop.mapreduce.AvroJob;
 import org.mortbay.log.Log;
 
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.SqoopRecord;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
 
 /**
  * Imports records by transforming them to Avro records in an Avro data file.
  */
 @SuppressWarnings("deprecation")
-public class LedpCSVToAvroImportMapper extends AvroImportMapper {
+public class LedpCSVToAvroImportMapper extends
+        AutoProgressMapper<LongWritable, SqoopRecord, AvroWrapper<GenericRecord>, NullWritable> {
     private final AvroWrapper<GenericRecord> wrapper = new AvroWrapper<GenericRecord>();
     private Schema schema;
     private Table table;
     private LargeObjectLoader lobLoader;
     private Path outputPath;
     private CSVPrinter csvFilePrinter;
+    private Map<String, String> errorMap;
+    private String interpretation;
+    private boolean emailOrWebsiteIsEmpty;
     
     private static final String ERROR_FILE = "error.csv";
 
@@ -56,82 +60,120 @@ public class LedpCSVToAvroImportMapper extends AvroImportMapper {
         Configuration conf = context.getConfiguration();
         schema = AvroJob.getMapOutputSchema(conf);
         table = JsonUtils.deserialize(context.getConfiguration().get("lattice.eai.file.schema"), Table.class);
+        interpretation = table.getInterpretation();
         lobLoader = new LargeObjectLoader(conf, FileOutputFormat.getWorkOutputPath(context));
 
         outputPath = AvroOutputFormat.getOutputPath(new JobConf(context.getConfiguration()));
         Log.info("Path is:" + outputPath);
-        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), CSVFormat.RFC4180.withHeader("LineNumber", "ErrorMessage").withDelimiter(StringUtils.COMMA));
+        csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE), CSVFormat.RFC4180.withHeader("LineNumber",
+                "ErrorMessage").withDelimiter(','));
+        CSVDBRecordReader.csvFilePrinter = csvFilePrinter;
+        CSVDBRecordReader.ignoreRecordsCounter = context.getCounter(RecordImportCounter.IGNORED_RECORDS);
+        errorMap = new HashMap<>();
     }
 
     @Override
     protected void map(LongWritable key, SqoopRecord val, Context context) throws IOException, InterruptedException {
         try {
             Log.info("Using LedpCSVToAvroImportMapper");
-            Log.info("Table is: " + table);
             // Loading of LOBs was delayed until we have a Context.
             val.loadLargeObjects(lobLoader);
         } catch (SQLException sqlE) {
             throw new IOException(sqlE);
         }
 
-        GenericRecord record = new GenericData.Record(schema);
-        Map<String, Object> fieldMap = val.getFieldMap();
-        ObjectNode obj = new ObjectMapper().createObjectNode();
-        for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
-            String recordKey = null;
-            Object recordValue = null;
-            Type avroType = null;
-            try {
-                recordKey = entry.getKey();
-                avroType = schema.getField(recordKey).schema().getTypes().get(0).getType();
-                recordValue = toAvro2(String.valueOf(entry.getValue()), avroType, table.getNameAttributeMap().get(recordKey));
-                record.put(recordKey, recordValue);
-            } catch (Exception e) {
-                obj.put(recordKey, "Cannot convert " + entry.getValue() + " to " + avroType);
-            }
-        }
-        if(obj.size() == 0){
+        emailOrWebsiteIsEmpty = false;
+        GenericRecord record = toGenericRecord(val);
+        if (errorMap.size() == 0) {
             wrapper.datum(record);
             context.write(wrapper, NullWritable.get());
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
-        }else{
+        } else {
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-            long lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue() + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
-            csvFilePrinter.printRecord(lineNum, obj.toString());
+            long lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
+                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
+            csvFilePrinter.printRecord(lineNum + 1, errorMap.toString());
             csvFilePrinter.flush();
+            errorMap.clear();
         }
     }
 
-    private Object toAvro2(String s, Type avroType, Attribute attr) {
-        switch (avroType) {
-        case DOUBLE:
-            return Double.valueOf(s);
-        case FLOAT:
-            return Float.valueOf(s);
-        case INT:
-            return Integer.valueOf(s);
-        case LONG:
-            if (attr.getLogicalDataType().equals("Date") || attr.getLogicalDataType().equals("Timestamp")) {
-                DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-                try {
-                    Log.info(s);
-                    Log.info("parse :" + df.parse(s));
-                    return df.parse(s).getTime();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                return Long.valueOf(s);
+    private GenericRecord toGenericRecord(SqoopRecord val) {
+        GenericRecord record = new GenericData.Record(schema);
+        Map<String, Object> fieldMap = val.getFieldMap();
+        for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
+            String fieldKey = entry.getKey();
+            String fieldCsvValue = String.valueOf(entry.getValue());
+            Object fieldAvroValue = null;
+            Type avroType = schema.getField(fieldKey).schema().getTypes().get(0).getType();
+            try {
+                validateRowValueBeforeConvertToAvro(interpretation, fieldKey, fieldCsvValue);
+                LOG.info("Validation Passed! Starting to convert to avro value.");
+                fieldAvroValue = toAvro(fieldCsvValue, avroType,
+                        table.getNameAttributeMap().get(fieldKey));
+            } catch (Exception e) {
+                LOG.error(e);
+                errorMap.put(fieldKey, e.getMessage());
             }
-        case STRING:
-            return s;
-        case BOOLEAN:
-            return Boolean.valueOf(s);
-        case ENUM:
-            return s;
-        default:
-            throw new RuntimeException("Not supported Field, avroType:" + avroType + ", logicalType:"
-                    + attr.getLogicalDataType());
+            record.put(fieldKey, fieldAvroValue);
+        }
+        return record;
+    }
+
+    private void validateRowValueBeforeConvertToAvro(String interpretation, String fieldKey, String fieldCsvValue) {
+        if((fieldKey.equals("Id") || fieldKey.equals("IsWon")) && StringUtils.isEmpty(fieldCsvValue)){
+            throw new RuntimeException(String.format("Required Column %s is missing value", fieldKey));
+        }
+        else if(interpretation.equals(SchemaInterpretation.SalesforceAccount.name())){
+            if(fieldKey.equals("Website") && StringUtils.isEmpty(fieldCsvValue)){
+                emailOrWebsiteIsEmpty = true;
+            }
+            else if(emailOrWebsiteIsEmpty && (fieldKey.equals("Name") || fieldKey.equals("BillingCity") || fieldKey.equals("BillingState") || fieldKey.equals("BillingCountry")) && StringUtils.isEmpty(fieldCsvValue)){
+                throw new RuntimeException(String.format("Website is empty, so %s cannot be empty", fieldKey));
+            }
+        }
+        else if(interpretation.equals(SchemaInterpretation.SalesforceLead.name())){
+            if(fieldKey.equals("Email") && StringUtils.isEmpty(fieldCsvValue)){
+                emailOrWebsiteIsEmpty = true;
+            }
+            else if(emailOrWebsiteIsEmpty &&(fieldKey.equals("Company") || fieldKey.equals("City") || fieldKey.equals("State") || fieldKey.equals("Country")) && StringUtils.isEmpty(fieldCsvValue)){
+                throw new RuntimeException(String.format("Email is empty, so %s cannot be empty", fieldKey));
+            }
+        }
+    }
+
+    private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr) {
+        try{
+            switch (avroType) {
+            case DOUBLE:
+                return Double.valueOf(fieldCsvValue);
+            case FLOAT:
+                return Float.valueOf(fieldCsvValue);
+            case INT:
+                return Integer.valueOf(fieldCsvValue);
+            case LONG:
+                if (attr.getLogicalDataType().equals("Date") || attr.getLogicalDataType().equals("Timestamp")) {
+                    DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+                    Log.info(fieldCsvValue);
+                    Log.info("parse :" + df.parse(fieldCsvValue));
+                    return df.parse(fieldCsvValue).getTime();
+                } else {
+                    return Long.valueOf(fieldCsvValue);
+                }
+            case STRING:
+                return fieldCsvValue;
+            case BOOLEAN:
+                return Boolean.valueOf(fieldCsvValue);
+            case ENUM:
+                return fieldCsvValue;
+            default:
+                throw new RuntimeException("Not supported Field, avroType:" + avroType + ", logicalType:"
+                        + attr.getLogicalDataType());
+            }
+        } catch(NumberFormatException e){
+            throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType);
+        } catch (ParseException e) {
+            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp using MM-dd-yyyy");
         }
 
     }
@@ -148,10 +190,24 @@ public class LedpCSVToAvroImportMapper extends AvroImportMapper {
         }
     }
 
-    public static void main(String[] args) throws ParseException {
-        String s = "2001-07-04T12:08:56.235-0700";
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-        System.out.println(df.parse(s));
-
+    public static void main(String[] args) throws ParseException, SQLException, ClassNotFoundException {
+        // String s = "abc";
+        // DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+        // System.out.println(df.parse(s));
+        // Class.forName("org.relique.jdbc.csv.CsvDriver");
+        // Properties props = new Properties();
+        // Define column names and column data types here.
+        // Class klass = CsvDriver.class;
+        // URL location = klass.getResource('/'+klass.getName().replace('.',
+        // '/')+".class");
+        // System.out.println(location);
+        // props.put(CsvDriver.MISSING_VALUE, "$$");
+        // props.put(CsvDriver.IGNORE_UNPARSEABLE_LINES, "String,String");
+        // Connection conn = DriverManager.getConnection("jdbc:relique:csv:" +
+        // "", props);
+        // ResultSet rs =
+        // conn.prepareStatement("Select * from fil1.csv").getResultSet();
+        // System.out.println(rs);
     }
+
 }
