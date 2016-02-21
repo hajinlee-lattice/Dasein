@@ -1,15 +1,11 @@
 package com.latticeengines.serviceflows.workflow.report;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 /**
  * A base report generation step for generating a single report.
