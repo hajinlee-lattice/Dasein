@@ -155,7 +155,7 @@ class TrainingTestBase(TestBase):
 
     def getPredictScore(self, pipeline, typeDict, values):
         scores = []
-        inputColumns = pipeline.getPipeline()[4].getModelInputColumns()
+        inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
         for value in values:
             row = self.getLine(zip(inputColumns, value), typeDict)
             rowDicts = []
