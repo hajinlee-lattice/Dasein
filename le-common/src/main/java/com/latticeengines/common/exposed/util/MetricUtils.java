@@ -258,6 +258,9 @@ public class MetricUtils {
 
         if (topLevel && !dimensionClass.isInterface()) {
             Set<String> tagNames = new HashSet<>();
+            for (String tag : frameworkTags) {
+                tagNames.add("[" + tag + "]");
+            }
             for (String tag : tagSet) {
                 tagNames.add("[" + tag + "]");
             }
