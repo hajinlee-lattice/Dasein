@@ -1,0 +1,44 @@
+{
+  "columnTransformFiles": {
+    "enumeratedcolumntransformstep": {
+        "KeyWhenSortingByAscending": "1",
+        "Name": "enumeratedcolumntransformstep",
+        "MainClassName": "EnumeratedColumnTransformStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columns":"categoricalColumns"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/enumeratedcolumntransformstep.py"
+    },
+    "columntypeconversionstep":{
+        "KeyWhenSortingByAscending": "1",
+        "Name": "columntypeconversionstep",
+        "MainClassName": "ColumnTypeConversionStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Weird"],
+        "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/columntypeconversionstep.py"
+    },
+    "imputationstepevpipeline":{
+        "KeyWhenSortingByAscending": "1",
+        "Name": "imputationstepevpipeline",
+        "MainClassName": "ImputationStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Numerical"],
+        "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns", "imputationValues": "emptyDictionary", "scalingArray": "emptyList", "meanColumn": "emptyList", "componentMatrix": "emptyList", "targetCol":"targetColumn"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/imputationstepevpipeline.py"
+    },
+    "revenuecolumntransformstep": {
+        "KeyWhenSortingByAscending": "1",
+        "Name": "revenuecolumntransformstep",
+        "MainClassName": "RevenueColumnTransformStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Numerical"],
+        "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/revenuecolumntransformstep.py"
+    }
+  }
+}

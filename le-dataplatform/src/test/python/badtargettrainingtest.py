@@ -4,6 +4,7 @@ import json
 import pickle
 from sklearn.ensemble import RandomForestClassifier
 import sys
+import os
 
 from trainingtestbase import TrainingTestBase
 
@@ -36,7 +37,10 @@ class BadTargetTrainingTest(TrainingTestBase):
                  entry["Key"].find('replace_null_value') >= 0:
                 self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
             else: 
-                self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
+                if os.path.exists('./' + entry["Key"]):
+                    self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
+                elif os.path.exists('./lepipeline.tar.gz/' + entry["Key"]):
+                    self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)

@@ -1,0 +1,34 @@
+{
+  "columnTransformFiles": {
+    "EnumeratedColumnTransformStep": {
+        "KeyWhenSortingByAscending": "1",
+        "Name": "enumeratedcolumntransformstep",
+        "MainClassName": "EnumeratedColumnTransformStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columns": "categoricalColumns"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/enumeratedcolumntransformstep.py"
+    },
+    "ColumnTypeConversionStep":{
+        "KeyWhenSortingByAscending": "1",
+        "Name": "columntypeconversionstep",
+        "MainClassName": "ColumnTypeConversionStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Weird"],
+        "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/columntypeconversionstep.py"
+    },
+    "ImputationStep":{
+        "KeyWhenSortingByAscending": "1",
+        "Name": "imputationstep",
+        "MainClassName": "ImputationStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Numerical"],
+        "NamedParameterListToInit": {"columns": "orderedDictContinuousColumns" , "imputationValues": "emptyDictionary", "targetCol": "targetColumn"},
+        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/imputationstep.py"
+    }
+  }
+}

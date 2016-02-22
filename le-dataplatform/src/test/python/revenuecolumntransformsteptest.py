@@ -7,6 +7,7 @@ import os
 import sys
 import numpy as np
 import math
+from distutils.dir_util import copy_tree
 
 class RevenueColumnTransformStepTest(TrainingTestBase):
     def setUp(self):
@@ -15,6 +16,7 @@ class RevenueColumnTransformStepTest(TrainingTestBase):
         os.makedirs("./evpipeline.tar.gz")
         shutil.copy("../../main/python/evpipeline/evpipelinesteps.py", "./evpipeline.tar.gz/evpipelinesteps.py")
         sys.path.append("./evpipeline.tar.gz")
+        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
     
     def tearDown(self):
         super(RevenueColumnTransformStepTest, self).tearDown()

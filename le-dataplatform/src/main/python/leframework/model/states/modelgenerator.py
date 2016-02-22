@@ -51,6 +51,13 @@ class ModelGenerator(State, JsonGenBase):
             filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
             model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
         
+        filenames = sorted(filenames)
+        for filename in filenames:
+            if filename.endswith(".pyc"):
+                continue
+            filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
+            model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
+
         for step in pipeline.getPipeline():
             rtsArtifacts = step.getRTSArtifacts()
             

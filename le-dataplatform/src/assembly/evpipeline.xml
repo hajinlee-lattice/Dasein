@@ -24,5 +24,12 @@
                 <include>encoder.py</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/python/pipeline/configurablepipelinetransformsfromfile</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>**/*.py</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

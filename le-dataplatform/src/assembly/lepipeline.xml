@@ -15,5 +15,28 @@
                 <exclude>pipeline.py</exclude>
             </excludes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/python/configurablepipelinetransformsfromfile</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>**/*.py</include>
+                <include>**/*.json</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/python/</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>columntransform.py</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/python/configurablepipelinetransformsfromfile</directory>
+            <outputDirectory>./configurablepipelinetransformsfromfile</outputDirectory>
+            <includes>
+                <include>**/*.py</include>
+                <include>**/*.json</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

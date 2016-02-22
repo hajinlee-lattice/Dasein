@@ -27,7 +27,7 @@ class AggregatedModelTrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
-                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[4].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
             elif entry["Key"].find('encoder') >= 0 or entry["Key"].find('pipelinesteps') >= 0 or entry["Key"].find('aggregatedmodel') >= 0: self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
             else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
@@ -36,7 +36,7 @@ class AggregatedModelTrainingTest(TrainingTestBase):
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
         
         # Test the scoring engine using the generated pipeline that was deserialized
-        inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
+        inputColumns = pipeline.getPipeline()[4].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
 
         fieldList = traininglauncher.getParser().fields

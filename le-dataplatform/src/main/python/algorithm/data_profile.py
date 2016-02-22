@@ -276,8 +276,6 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
             else:
                 logger.warn("No statistical type for column %s." % colName)
 
-    logger.info("Categorical columns from schema: " + str(categoricalMetadata) + " length: " + str(len(categoricalMetadata)))
-    logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema) + " length:" + str(len(categoricalMetadataFromSchema)))
     return categoricalMetadataFromSchema
 
 def retrieveColumnBucketMetadata(columnsMetadata):

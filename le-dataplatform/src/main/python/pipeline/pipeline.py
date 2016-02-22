@@ -1,10 +1,15 @@
 import encoder
+import columntransform
+import logging
+
 from pipelinefwk import Pipeline
 from pipelinesteps import ColumnTypeConversionStep
 from pipelinesteps import EnumeratedColumnTransformStep
 from pipelinesteps import ImputationStep
 from pipelinefwk import ModelStep
 from collections import OrderedDict
+
+logger = logging.getLogger(name='pipeline')
    
 def getDecoratedColumns(metadata):
     stringColumns = dict()
@@ -31,10 +36,42 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     # categoricalColumns refer to the columns that are categorical from the metadata
     # We need to transform the physical strings into numbers
     columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(OrderedDict(continuousColumns), {}, targetColumn)]
+
+    steps = None
+    stepsFromJSONFile = None
+    stepsFromPythonFile = None
+
+    try:
+        stepsFromPythonFile = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(OrderedDict(continuousColumns), {}, targetColumn)]
+        steps = stepsFromPythonFile
+    except Exception as e:
+        stepsFromPythonFile = None
+        logger.error("Couldn't load Pipeline from Python file: " + e)
+
+    try:
+        pipelineFilePaths = ["./lepipeline.tar.gz/configurablepipelinetransformsfromfile/pipeline.json",
+                             "./configurablepipelinetransformsfromfile/pipeline.json",
+                             ]
+        colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePaths)
+        stepsFromJSONFile = colTransform.buildPipelineFromFile(
+                            StringColumns = stringColumns,
+                            CategoricalColumns=categoricalColumns,
+                            ContinuousColumns=continuousColumns,
+                            targetColumn=targetColumn,
+                            ColumnsToTransform=columnsToTransform)
+
+    except Exception as e:
+        stepsFromJSONFile = None
+        logger.exception("Couldn't load Pipeline from JSON file. Exception: ")
+
+    if stepsFromJSONFile:
+        steps = stepsFromJSONFile
+    else:
+        steps = stepsFromPythonFile
+
     pipeline = Pipeline(steps)
-      
+
     scoringSteps = steps + [ModelStep()]
     scoringPipeline = Pipeline(scoringSteps)
-      
+
     return pipeline, scoringPipeline

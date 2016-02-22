@@ -46,7 +46,11 @@ class TrainingTestBase(TestBase):
         
         for filename in glob.glob(os.path.join("../../main/python/pipeline", "*.py")):
             shutil.copy(filename, pipelinefwkdir)
-        
+
+        os.makedirs(pipelinefwkdir + "/configurablepipelinetransformsfromfile")
+        for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
+            shutil.copy(filename, pipelinefwkdir)
+
         sys.path.append(pipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
@@ -151,7 +155,7 @@ class TrainingTestBase(TestBase):
 
     def getPredictScore(self, pipeline, typeDict, values):
         scores = []
-        inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
+        inputColumns = pipeline.getPipeline()[4].getModelInputColumns()
         for value in values:
             row = self.getLine(zip(inputColumns, value), typeDict)
             rowDicts = []

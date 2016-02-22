@@ -5,6 +5,7 @@ import pickle
 from random import random
 from sklearn.ensemble import RandomForestClassifier
 import sys
+import os
  
 from leframework import scoringengine as se
 from trainingtestbase import TrainingTestBase
@@ -31,6 +32,7 @@ class TrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
+                print pipeline.getPipeline()
                 self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
             elif entry["Key"].find('encoder') >= 0 or \
                  entry["Key"].find('pipelinesteps') >= 0 or \
@@ -38,7 +40,11 @@ class TrainingTest(TrainingTestBase):
                  entry["Key"].find('make_float') >= 0 or \
                  entry["Key"].find('replace_null_value') >= 0:
                 self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
-            else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
+            else:
+                if os.path.exists('./' + entry["Key"]):
+                    self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
+                elif os.path.exists('./lepipeline.tar.gz/' + entry["Key"]):
+                    self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
  
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)

@@ -6,6 +6,7 @@ import pickle
 import subprocess
 import sys
 import shutil
+from distutils.dir_util import copy_tree
 
 from testbase import removeFiles
 from trainingtestbase import TrainingTestBase
@@ -20,6 +21,7 @@ class EVPipelineTrainingTest(TrainingTestBase):
         shutil.copy("../../main/python/pipeline/encoder.py", "./evpipeline.tar.gz/encoder.py")
         os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         sys.path.append("./evpipeline.tar.gz")
+        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
     
     def tearDown(self):
         super(EVPipelineTrainingTest, self).tearDown()

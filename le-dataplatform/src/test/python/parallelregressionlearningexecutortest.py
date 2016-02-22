@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import pickle
+from distutils.dir_util import copy_tree
 from trainingtestbase import TrainingTestBase
 
 class ParallelRegressionLearningExecutorTest(TrainingTestBase):
@@ -14,6 +15,7 @@ class ParallelRegressionLearningExecutorTest(TrainingTestBase):
         shutil.copy("../../main/python/pipeline/encoder.py", "./evpipeline.tar.gz/encoder.py")
         os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         sys.path.append("./evpipeline.tar.gz")
+        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
     
     def tearDown(self):
         super(ParallelRegressionLearningExecutorTest, self).tearDown()
