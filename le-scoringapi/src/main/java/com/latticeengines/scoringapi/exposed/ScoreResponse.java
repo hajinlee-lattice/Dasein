@@ -1,7 +1,8 @@
 package com.latticeengines.scoringapi.exposed;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.wordnik.swagger.annotations.ApiModelProperty;
 
 public class ScoreResponse {
 

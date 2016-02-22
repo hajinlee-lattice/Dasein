@@ -1,5 +1,8 @@
 package com.latticeengines.scoringapi.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +50,6 @@ import com.latticeengines.scoringapi.unused.CombinationElement;
 import com.latticeengines.scoringapi.unused.CombinationRetriever;
 import com.latticeengines.scoringapi.unused.ScoreRequest;
 import com.latticeengines.scoringapi.unused.ScoreType;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController

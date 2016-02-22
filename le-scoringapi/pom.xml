@@ -22,8 +22,8 @@
         <jpmml.version>2.0.0</jpmml.version>
         <le.camille.version>2.0.22-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
-        <swagger.springmvc.version>0.9.4</swagger.springmvc.version>
-        <swagger.springmvc.ui.version>0.4</swagger.springmvc.ui.version>
+        <springfox.swagger.version>2.2.2</springfox.swagger.version>
+        <springfox.swagger.ui.version>2.2.2</springfox.swagger.ui.version>
 
     </properties>
 
@@ -207,17 +207,19 @@
             <version>${spring.version}</version>
         </dependency>
 
+        <!-- swagger -->
         <dependency>
-            <groupId>com.mangofactory</groupId>
-            <artifactId>swagger-springmvc</artifactId>
-            <version>${swagger.springmvc.version}</version>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox.swagger.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.ajar</groupId>
-            <artifactId>swagger-spring-mvc-ui</artifactId>
-            <version>${swagger.springmvc.ui.version}</version>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${springfox.swagger.ui.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>

@@ -1,37 +1,52 @@
 package com.latticeengines.scoringapi.swagger;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import static com.google.common.collect.Lists.newArrayList;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
-import com.mangofactory.swagger.models.dto.ApiInfo;
-import com.mangofactory.swagger.plugin.EnableSwagger;
-import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.ResponseMessageBuilder;
+import springfox.documentation.schema.ModelRef;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @Configuration
-@EnableSwagger
+@EnableSwagger2
 public class SwaggerConfig {
 
-    private SpringSwaggerConfig springSwaggerConfig;
-
-    @Autowired
-    public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
-        this.springSwaggerConfig = springSwaggerConfig;
-    }
-
     @Bean
-    public SwaggerSpringMvcPlugin customImplementation() {
-        return new SwaggerSpringMvcPlugin(springSwaggerConfig).apiInfo(apiInfo());
+    public Docket api() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.latticeengines.scoringapi.controller"))
+                .build()
+                .pathMapping("/score")
+                .apiInfo(apiInfo())
+                .useDefaultResponseMessages(false)
+                .globalResponseMessage(
+                        RequestMethod.GET,
+                        newArrayList(
+                                new ResponseMessageBuilder().code(500).message("500 message")
+                                        .responseModel(new ModelRef("Error")).build(), //
+                                new ResponseMessageBuilder().code(400).message("Bad Request").build(), //
+                                new ResponseMessageBuilder().code(401).message("Unauthorized").build(), //
+                                new ResponseMessageBuilder().code(402).message("Request Failed").build() //
+                        ));
     }
 
     private ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo("Lattice Engines Score REST API", //
                 "This is the REST API exposed for the Lattice Engines score service.", //
                 "termsofservice.html", //
+                "Terms of service", //
                 "", //
                 "License", //
                 "http://www.apache.org/licenses/LICENSE-2.0");
         return apiInfo;
     }
+
 }
