@@ -20,17 +20,17 @@ import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 

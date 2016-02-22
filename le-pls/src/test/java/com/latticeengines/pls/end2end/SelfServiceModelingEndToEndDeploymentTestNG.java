@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -30,8 +29,8 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.pls.entitymanager.impl.microservice.WorkflowProxy;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -40,9 +39,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
-    private String tenant;
     private Tenant tenantToAttach;
-    private CustomerSpace customerSpace;
     private SourceFile sourceFile;
 
     @BeforeClass(groups = "deployment.lp")
@@ -58,8 +55,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         if (tenantToAttach.getName().contains("Tenant 1")) {
             tenantToAttach = testingTenants.get(0);
         }
-        tenant = tenantToAttach.getId();
-        customerSpace = CustomerSpace.parse(tenant);
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(doc);
 
@@ -75,6 +70,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
@@ -90,6 +86,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         ResponseDocument response = restTemplate.getForObject(
@@ -104,6 +101,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(response.isSuccess());
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
         ModelingParameters parameters = createModelingParameters(sourceFile.getName());
@@ -112,7 +110,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
 
-        @SuppressWarnings("unchecked")
         String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         System.out.println(String.format("Workflow application id is %s", applicationId));

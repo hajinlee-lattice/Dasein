@@ -8,6 +8,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -21,10 +22,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.pls.FilePayload;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class ProcessingStateProcessorUnitTestNG {
 
@@ -40,9 +42,9 @@ public class ProcessingStateProcessorUnitTestNG {
         for (File file : files) {
             FileUtils.copyFileToDirectory(file, queuedDir);
         }
-        RestApiProxy apiProxy = mock(RestApiProxy.class);
-        when(apiProxy.submitWorkflow(any(WorkflowConfiguration.class))).thenReturn( //
-                YarnUtils.appIdFromString("application_1448430180764_0001"));
+        WorkflowProxy apiProxy = mock(WorkflowProxy.class);
+        when(apiProxy.submitWorkflowExecution(any(WorkflowConfiguration.class))).thenReturn( //
+                new AppSubmission(Arrays.asList(YarnUtils.appIdFromString("application_1448430180764_0001"))));
         props.put("restApiProxy", apiProxy);
     }
 

@@ -1,7 +1,7 @@
 package com.latticeengines.pls.entitymanager;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.Contact;

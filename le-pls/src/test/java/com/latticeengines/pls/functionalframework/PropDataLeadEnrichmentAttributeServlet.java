@@ -13,10 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.http.HttpStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
 import com.latticeengines.domain.exposed.propdata.manage.ApprovedUsage;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.FundamentalType;
+import com.latticeengines.domain.exposed.propdata.manage.StatisticalType;
 
 @WebServlet("/propdata/metadata/predefined/leadenrichment")
 public class PropDataLeadEnrichmentAttributeServlet extends HttpServlet {

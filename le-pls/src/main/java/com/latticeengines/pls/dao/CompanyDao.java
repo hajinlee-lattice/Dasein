@@ -1,7 +1,7 @@
 package com.latticeengines.pls.dao;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.pls.Company;

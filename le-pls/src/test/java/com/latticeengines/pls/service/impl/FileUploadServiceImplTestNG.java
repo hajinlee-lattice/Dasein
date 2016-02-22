@@ -12,10 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.FileUploadService;
 
 public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 

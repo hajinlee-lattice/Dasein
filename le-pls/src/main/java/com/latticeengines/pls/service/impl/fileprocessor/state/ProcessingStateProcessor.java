@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.FilePayload;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 
 public class ProcessingStateProcessor extends BaseStateProcessor {
@@ -40,7 +40,7 @@ public class ProcessingStateProcessor extends BaseStateProcessor {
 
         });
 
-        RestApiProxy restApiProxy = getRestApiProxy(properties);
+        WorkflowProxy restApiProxy = getRestApiProxy(properties);
         for (File queuedFile : queuedFiles) {
             String[] tenantAndFileName = stripExtension(queuedFile);
             String fileName = tenantAndFileName[1];
@@ -55,7 +55,7 @@ public class ProcessingStateProcessor extends BaseStateProcessor {
             }
 
             FilePayload payload = JsonUtils.deserialize(payloadStr, FilePayload.class);
-            payload.applicationId = restApiProxy.submitWorkflow(new WorkflowConfiguration()).toString();
+            payload.applicationId = restApiProxy.submitWorkflowExecution(new WorkflowConfiguration()).getApplicationIds().get(0);
             payloadStr = JsonUtils.serialize(payload);
             String payloadFileName = stateDir.getAbsolutePath() + "/" + fileName + ".json";
             try {

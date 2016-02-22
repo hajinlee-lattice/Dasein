@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
@@ -14,6 +13,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class WorkflowSubmitterUnitTestNG {

@@ -13,8 +13,8 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.pls.FilePayload;
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class TerminalStateProcessor extends BaseStateProcessor {
     
@@ -30,7 +30,7 @@ public class TerminalStateProcessor extends BaseStateProcessor {
         
         Collection<File> processingFiles = FileUtils.listFiles(processingDir, //
                 new String[] { "json" }, false);
-        RestApiProxy restApiProxy = getRestApiProxy(properties);
+        WorkflowProxy workflowProxy = getRestApiProxy(properties);
         
         for (File processingFile : processingFiles) {
             String payloadStr = null;
@@ -43,7 +43,7 @@ public class TerminalStateProcessor extends BaseStateProcessor {
             
             FilePayload payload = JsonUtils.deserialize(payloadStr, FilePayload.class);
             
-            JobStatus jobStatus = restApiProxy.getJobStatus(payload.applicationId);
+            JobStatus jobStatus = new JobStatus();
             
             boolean jobStatusMatched = false;
             

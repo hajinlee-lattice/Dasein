@@ -6,9 +6,9 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.latticeengines.pls.entitymanager.impl.microservice.RestApiProxy;
 import com.latticeengines.pls.service.impl.fileprocessor.FileProcessingState;
 import com.latticeengines.pls.service.impl.fileprocessor.StateProcessor;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class BaseStateProcessor implements StateProcessor {
     private static final Log log = LogFactory.getLog(BaseStateProcessor.class);
@@ -35,10 +35,10 @@ public class BaseStateProcessor implements StateProcessor {
         return new String[] { tenant, tokens[index].substring(0, tokens[index].lastIndexOf(".")) };
     }
     
-    protected RestApiProxy getRestApiProxy(Properties props) {
-        RestApiProxy proxy = null;
+    protected WorkflowProxy getRestApiProxy(Properties props) {
+        WorkflowProxy proxy = null;
         try {
-            proxy = (RestApiProxy) props.get("restApiProxy");
+            proxy = (WorkflowProxy) props.get("restApiProxy");
         } catch (Exception e) {
             log.error(e);
         }

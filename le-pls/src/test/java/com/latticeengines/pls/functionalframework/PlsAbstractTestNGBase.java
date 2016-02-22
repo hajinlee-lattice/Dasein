@@ -14,8 +14,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.latticeengines.domain.exposed.security.Session;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.joda.time.DateTime;
 import org.mockito.Mockito;
@@ -47,8 +45,10 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.pls.TargetMarketReportMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
