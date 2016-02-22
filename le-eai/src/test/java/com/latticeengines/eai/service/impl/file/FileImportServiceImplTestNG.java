@@ -89,7 +89,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         verifyAllDataNotNullWithNumRows(yarnConfiguration, //
                 tables.get(0), //
-                6034);
+                6037);
     }
 
     @DataProvider

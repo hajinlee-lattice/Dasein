@@ -59,8 +59,10 @@ public class CSVDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordR
     private String tableName;
 
     public static CSVPrinter csvFilePrinter;
-    
+
     public static Counter ignoreRecordsCounter;
+    
+    public static Counter rowErrorCounter;
 
     public CSVDBRecordReader(DBInputSplit split, Class<T> inputClass, Configuration conf, Connection conn,
             DBConfiguration dbConfig, String cond, String[] fields, String table, String dbProduct) throws SQLException {
@@ -106,6 +108,7 @@ public class CSVDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordR
                 } catch (SQLException e) {
                     LOG.info("This row " + pos + " is malformed. Skip this row!!");
                     ignoreRecordsCounter.increment(1);
+                    rowErrorCounter.increment(1);
                     csvFilePrinter.printRecord(pos + 1, e.getMessage());
                 } finally {
                     pos++;

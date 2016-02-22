@@ -1,7 +1,6 @@
 package com.latticeengines.eai.functionalframework;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
@@ -10,7 +9,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.Schema;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
@@ -158,6 +156,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());
+            attr.setNullable(true);
             file.addAttribute(attr);
         }
 
@@ -175,11 +174,11 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                 try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config,
                         new org.apache.hadoop.fs.Path(avroFile))) {
                     while (reader.hasNext()) {
-                        GenericRecord record = reader.next();
-                        Schema schema = record.getSchema();
-                        for (org.apache.avro.Schema.Field field : schema.getFields()) {
-                            assertNotNull(record.get(field.name()));
-                        }
+                        reader.next();
+                        //Schema schema = record.getSchema();
+                        //for (org.apache.avro.Schema.Field field : schema.getFields()) {
+                            //assertNotNull(record.get(field.name()));
+                        //}
                         numRows++;
                     }
                 }
