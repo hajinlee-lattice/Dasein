@@ -35,7 +35,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
                 var allAvariableAttributes = avariableAttributesData.ResultObj;
                 for (var i = 0; i < allAvariableAttributes.length; i++) {
                     var attr = allAvariableAttributes[i];
-                    if (getAttributeByFieldNameInTarget(savedAttributes, attr.FieldNameInTarget) != null) {
+                    if (getAttribute(savedAttributes, attr.FieldName) != null) {
                         selectedAttributes.push(attr);
                     } else {
                         availableAttributes.push(attr);
@@ -307,10 +307,6 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
 
     function getAttribute(attributes, fieldName) {
         return _.findWhere(attributes, { FieldName: fieldName });
-    }
-
-    function getAttributeByFieldNameInTarget(attributes, fieldNameInTarget) {
-        return _.findWhere(attributes, { FieldNameInTarget: fieldNameInTarget });
     }
 
     function sortAttributes(attributes) {

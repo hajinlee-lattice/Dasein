@@ -95,7 +95,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
                             typeAndVersions.getValue());
                     for (Entry<String, String> entry : map.entrySet()) {
                         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
-                        attr.setFieldNameInTarget(entry.getKey());
+                        attr.setFieldName(entry.getKey());
                         attr.setCustomerColumnName(entry.getValue());
                         attributes.add(attr);
                     }
