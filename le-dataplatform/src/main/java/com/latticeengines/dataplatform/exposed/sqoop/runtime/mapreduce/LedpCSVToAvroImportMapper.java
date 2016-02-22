@@ -209,6 +209,12 @@ public class LedpCSVToAvroImportMapper extends
         if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
         }
+        if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {
+            context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).setValue(0);
+        }
+        if (context.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue() == 0) {
+            context.getCounter(RecordImportCounter.FIELD_MALFORMED).setValue(0);
+        }
     }
 
 }
