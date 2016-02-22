@@ -73,10 +73,10 @@ class EnhancedFilesTest(TrainingTestBase):
 
     def check_data_composition(self):
         # Output File Exists?        
-        outputFile = "./results/enhancements/DataComposition.json"
+        outputFile = "./results/enhancements/datacomposition.json"
         self.assertTrue(os.path.isfile(outputFile))
 
     def check_score_derivation(self):
         # Output File Exists?       
-        outputFile = "./results/enhancements/ScoreDerivation.json"
+        outputFile = "./results/enhancements/scorederivation.json"
         self.assertTrue(os.path.isfile(outputFile))
