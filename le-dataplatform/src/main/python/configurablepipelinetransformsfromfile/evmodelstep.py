@@ -19,7 +19,7 @@ class EVModelStep(PipelineStep):
         self.setModelStep(True)
            
     def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName="Score"):
-         return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
+        return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
        
     def transform(self, dataFrame):
           

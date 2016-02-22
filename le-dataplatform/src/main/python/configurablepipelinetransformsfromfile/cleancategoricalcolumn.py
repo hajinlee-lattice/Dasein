@@ -41,7 +41,7 @@ class CleanCategoricalColumn(PipelineStep):
     def transform(self, dataFrame, threshold = 0.8, targetColumn=None):
         try:
             outputFrame = dataFrame
-            for column, encoder in self.columnsToConvert.iteritems():
+            for column, _ in self.columnsToConvert.iteritems():
                 if column in dataFrame.columns:
                     dataFrameAsList = dataFrame[column].values.tolist()
                     self.cleanCategoriesWithThreshold = self.cleanCateg(dataFrameAsList,thresh=threshold)
@@ -49,7 +49,7 @@ class CleanCategoricalColumn(PipelineStep):
 
             return outputFrame
 
-        except Exception as e:
+        except Exception:
             logger.exception("Caught Exception trying to use CleanCategoricalColumn Threshold Transformation")
             self.cleanCategoriesWithThreshold = None
             return dataFrame
@@ -63,7 +63,7 @@ class CleanCategoricalColumn(PipelineStep):
         try:
             self.cleanCategoriesWithTargetColumn = self.cleanCategFull(self.cleanCategoriesWithThreshold,dataFrame, targetColumn)
             return self.cleanCategoriesWithTargetColumn
-        except Exception as e:
+        except Exception:
             logger.exception("Caught Exception trying to use CleanCategoricalColumn TargetColumn Statistical Test Transformation")
             if self.cleanCategoriesWithThreshold:
                 return self.cleanCategoriesWithThreshold
