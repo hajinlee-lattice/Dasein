@@ -3,12 +3,14 @@ package com.latticeengines.domain.exposed.modeling;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.avro.Schema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DataSchema implements HasName {
 
     private String name;

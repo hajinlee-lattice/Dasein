@@ -169,6 +169,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
+        if (name == null) {
+            return null;
+        }
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         SourceFile sourceFile = proxy.findSourceFileByName(name, space.toString());
         registerSourceFileInContext(sourceFile);

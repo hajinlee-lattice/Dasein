@@ -2,10 +2,11 @@ package com.latticeengines.domain.exposed.modeling;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Field implements HasName {
 
     private String name;
@@ -52,5 +53,5 @@ public class Field implements HasName {
     public void setSqlType(int sqlType) {
         this.sqlType = sqlType;
     }
-    
+
 }
