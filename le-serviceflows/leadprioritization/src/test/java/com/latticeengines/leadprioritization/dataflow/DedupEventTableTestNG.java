@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-leadprioritization-context.xml" })
-public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class DedupEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
     @Test(groups = "functional")
     public void test() {
         verifySource();
@@ -23,28 +23,26 @@ public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctional
                 "Event_IsWon");
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
-        final Map<Object, Integer> histogram = histogram(output, "Domain");
+        Map<Object, Integer> histogram = histogram(output, "Domain");
         Assert.assertTrue(histogram.size() > 0);
-        Assert.assertTrue(Iterables.all(histogram.keySet(), new Predicate<Object>() {
+        Assert.assertTrue(Iterables.all(histogram.values(), new Predicate<Integer>() {
 
             @Override
-            public boolean apply(Object domain) {
-                int qty = histogram.get(domain);
-                return qty == 1 || domain == null || domain.toString().equals("");
+            public boolean apply(Integer input) {
+                return input == 1;
             }
         }));
     }
 
     private void verifySource() {
         List<GenericRecord> input = readInput("EventTable");
-        final Map<Object, Integer> histogram = histogram(input, "Domain");
+        Map<Object, Integer> histogram = histogram(input, "Domain");
         Assert.assertTrue(histogram.size() > 0);
-        Assert.assertFalse(Iterables.all(histogram.keySet(), new Predicate<Object>() {
+        Assert.assertFalse(Iterables.all(histogram.values(), new Predicate<Integer>() {
 
             @Override
-            public boolean apply(Object domain) {
-                int qty = histogram.get(domain);
-                return qty == 1 || domain == null || domain.toString().equals("");
+            public boolean apply(Integer input) {
+                return input == 1;
             }
         }));
     }
@@ -52,11 +50,6 @@ public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctional
     @Override
     protected String getFlowBeanName() {
         return "dedupEventTable";
-    }
-
-    @Override
-    protected String getScenarioName() {
-        return "accountBased";
     }
 
     @Override

@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class SchemaRepository {
     private static SchemaRepository instance;
@@ -118,7 +117,6 @@ public class SchemaRepository {
         attribute.setPhysicalDataType(dataType.toString());
         attribute.setDisplayName(name);
         attribute.setNullable(nullable);
-        attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         return attribute;
     }
 

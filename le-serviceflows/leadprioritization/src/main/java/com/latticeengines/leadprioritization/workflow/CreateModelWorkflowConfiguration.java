@@ -1,14 +1,11 @@
 package com.latticeengines.leadprioritization.workflow;
 
-import java.util.List;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
-import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
 public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
@@ -17,13 +14,11 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         private ImportStepConfiguration importData = new ImportStepConfiguration();
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
         private DedupEventTableConfiguration runDataFlow = new DedupEventTableConfiguration();
-        private ModelStepConfiguration model = new ModelStepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
             registerReport.setMicroServiceHostPort(microServiceHostPort);
             runDataFlow.setMicroServiceHostPort(microServiceHostPort);
-            model.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -32,7 +27,6 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             runDataFlow.setCustomerSpace(customerSpace);
-            model.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -57,7 +51,6 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             importData.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
             runDataFlow.setInternalResourceHostPort(internalResourceHostPort);
-            model.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -76,21 +69,10 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
-            model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
-            return this;
-        }
-
-        public Builder eventColumns(List<String> eventColumns) {
-            model.setEventColumns(eventColumns);
-            return this;
-        }
-
         public CreateModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(runDataFlow);
-            configuration.add(model);
 
             return configuration;
         }

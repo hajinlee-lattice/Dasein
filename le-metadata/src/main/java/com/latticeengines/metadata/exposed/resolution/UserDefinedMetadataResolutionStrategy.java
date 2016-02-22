@@ -23,7 +23,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.exposed.standardschemas.SchemaRepository;
 
 public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStrategy {
@@ -124,7 +123,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attribute.setName(ctm.getColumnName());
                 attribute.setPhysicalDataType(ctm.getColumnType());
                 attribute.setDisplayName(ctm.getColumnName());
-                attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
                 attribute.setNullable(true);
                 attributes.add(attribute);
             }

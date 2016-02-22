@@ -284,7 +284,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
     protected void setupHdfs(CustomerSpace customerSpace) throws Exception {
         String podId = CamilleEnvironment.getPodId();
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/" + customerSpace.getContractId());
-        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + customerSpace.toString());
+        HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/ " + customerSpace.toString());
     }
 
 }

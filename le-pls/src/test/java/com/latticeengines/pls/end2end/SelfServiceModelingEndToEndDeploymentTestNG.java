@@ -6,7 +6,6 @@ import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -109,7 +108,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void createModel() {
         ModelingParameters parameters = createModelingParameters(sourceFile.getName());
         ResponseDocument response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                String.format("%s/pls/models/%s/model", getPLSRestAPIHostPort(), sourceFile.getName()), parameters,
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
 
@@ -120,7 +119,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         waitForWorkflowStatus(applicationId, true);
 
         response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                String.format("%s/pls/models/%s/model", getPLSRestAPIHostPort(), sourceFile.getName()), parameters,
                 ResponseDocument.class);
         assertFalse(response.isSuccess());
 

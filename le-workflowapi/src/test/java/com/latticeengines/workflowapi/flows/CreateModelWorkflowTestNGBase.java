@@ -5,7 +5,6 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -109,8 +108,6 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .dataFlowBeanName("dedupEventTable") //
                 .dataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "Website", "Email", "IsWon")) //
                 .targetTableName(sourceFile.getTableName() + "_deduped") //
-                .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .eventColumns(Arrays.asList("IsWon")) // TODO get from Table
                 .build();
         return workflowConfig;
     }

@@ -27,7 +27,7 @@ public class DataFlowUtils {
 
     public static CascadingDataFlowBuilder.Node extractDomainFromEmail(CascadingDataFlowBuilder.Node last,
             String emailFieldName, String outputFieldName) {
-        final String extract = "%s != null ? %s.replaceAll(\"^.*@\", \"\") : %s";
+        final String extract = "%s != null ? %s.replace(\"^.*@\", \"\") : %s";
         return last //
                 .addFunction(String.format(extract, emailFieldName, emailFieldName, emailFieldName), //
                         new DataFlowBuilder.FieldList(emailFieldName), //
