@@ -192,12 +192,12 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ModelPmml.xml", pmmlContent);
 
                 String dataContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory
-                        + "/enhancements/DataComposition.json");
-                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "DataComposition.json", dataContent);
+                        + "/enhancements/datacomposition.json");
+                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "datacomposition.json", dataContent);
 
                 String scoreContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory
-                        + "/enhancements/ScoreDerivation.json");
-                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ScoreDerivation.json", scoreContent);
+                        + "/enhancements/scorederivation.json");
+                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "scorederivation.json", scoreContent);
             } else {
                 throw new Exception("Unexpected result directory: " + hdfsResultDirectory);
             }
