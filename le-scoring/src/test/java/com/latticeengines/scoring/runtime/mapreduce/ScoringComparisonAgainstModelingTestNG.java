@@ -20,6 +20,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.specific.SpecificDatumWriter;
+import org.springframework.util.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -132,6 +133,9 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         modelingModelPath = customerBaseDir + "/" + tenant + "/models/Q_PLS_ModelingMulesoft_Relaunch/";
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + inputLeadsTable + "/scores";
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 

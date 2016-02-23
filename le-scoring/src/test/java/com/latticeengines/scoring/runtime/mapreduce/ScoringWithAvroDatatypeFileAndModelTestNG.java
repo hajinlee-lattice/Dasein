@@ -2,6 +2,7 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.sql.Timestamp;
 
+import org.springframework.util.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,9 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
         // environments.
         inputLeadsTable = getClass().getSimpleName() + "__LeadsTable";
         CustomerSpace.parse(customer).toString();
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
     }
 

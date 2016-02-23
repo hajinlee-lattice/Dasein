@@ -101,6 +101,9 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         inputLeadsTable = getClass().getSimpleName() + "_LeadsTable";
+        if(!CollectionUtils.isEmpty(metadataService.showTable(scoringJdbcTemplate, inputLeadsTable))){
+            metadataService.dropTable(scoringJdbcTemplate, inputLeadsTable);
+        }
         metadataService.createNewTableFromExistingOne(scoringJdbcTemplate, inputLeadsTable, testInputTable);
         tenant = CustomerSpace.parse(customer).toString();
 
