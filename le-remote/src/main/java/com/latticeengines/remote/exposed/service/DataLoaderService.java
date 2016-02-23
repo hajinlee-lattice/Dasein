@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.dataloader.InstallTemplateRequest;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
+import com.latticeengines.domain.exposed.dataloader.SourceTableMetadataResult;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
@@ -77,4 +78,6 @@ public interface DataLoaderService {
     QueryStatusResult getQueryStatus(String tenantName, String queryHandle, String dlUrl);
 
     QueryDataResult getQueryData(String tenantName, String queryHandle, int startRow, int rowCount, String dlUrl);
+
+    SourceTableMetadataResult getSourceTableMetadata(String tenantName, String dataProviderName, String sourceTableName, String dlUrl);
 }

@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.domain.exposed.dataloader.QueryDataResult;
 import com.latticeengines.domain.exposed.dataloader.QueryStatusResult;
 import com.latticeengines.domain.exposed.dataloader.RunQueryResult;
+import com.latticeengines.domain.exposed.dataloader.SourceTableMetadataResult;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -75,6 +76,7 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private static final String RUN_QUERY = "/RunQuery";
     private static final String GET_QUERY_STATUS = "/GetQueryStatus";
     private static final String GET_QUERY_RESULT_DATA = "/GetQueryResultData";
+    private static final String GET_SOURCE_TABLE_METADATA = "/GetSourceTableMetadata";
     private static final String DL_USER = "LP";
 
     private static final String SEGMENT_PREFIX = "DefnSegment_";
@@ -821,6 +823,29 @@ public class DataLoaderServiceImpl implements DataLoaderService {
             return result;
         } catch (IOException ex) {
             throw new LedpException(LedpCode.LEDP_21025, ex);
+        }
+    }
+
+    @Override
+    @RestApiCall
+    public SourceTableMetadataResult getSourceTableMetadata(String tenantName, String dataProviderName,
+            String sourceTableName, String dlUrl) {
+        try {
+            Map<String, String> paramerters = new HashMap<>();
+            paramerters.put("tenantName", tenantName);
+            paramerters.put("dataProviderName", dataProviderName);
+            paramerters.put("sourceTableName", sourceTableName);
+            String response = callDLRestService(dlUrl, GET_SOURCE_TABLE_METADATA, paramerters);
+            SourceTableMetadataResult result = JsonUtils.deserialize(response,
+                    SourceTableMetadataResult.class);
+
+            if (!result.getSuccess()) {
+                String error = result.getErrorMessage() == null ? "" : result.getErrorMessage();
+                throw new LedpException(LedpCode.LEDP_21026, new String[] { error });
+            }
+            return result;
+        } catch (IOException ex) {
+            throw new LedpException(LedpCode.LEDP_21027, ex);
         }
     }
 }
