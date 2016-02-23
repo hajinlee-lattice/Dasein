@@ -74,7 +74,7 @@ class AggregationExecutor(Executor):
         stateMachine.addState(ScoreDerivationGenerator(), 19)
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(EnhancedSummaryGenerator(), 21)
-        stateMachine.addState(Finalize(), 22)
+        stateMachine.addState(Finalize(), 100)
         return stateMachine
 
     @overrides(Executor)
