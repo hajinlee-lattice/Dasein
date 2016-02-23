@@ -47,6 +47,10 @@
                                     <location>propdata/target/le-serviceflows-propdata-${le.rpm.version}-shaded.jar
                                     </location>
                                 </source>
+                                <source>
+                                    <location>leadprioritization/target/le-serviceflows-leadprioritization-${le.rpm.version}-shaded.jar
+                                    </location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
