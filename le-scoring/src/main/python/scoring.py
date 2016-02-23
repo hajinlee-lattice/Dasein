@@ -12,8 +12,29 @@ PIPELINESTEPS_SCRIPT_NAME = "pipelinesteps.py"
 SCORING_INPUT_PREFIX = "scoringinputfile-"
 SCORING_OUTPUT_PREFIX = "scoringoutputfile-"
 
+IMPUTATION_STEP_SCRIPT_NAME="imputationstep.py"
+IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME="imputationstepevpipeline.py"
+MAKE_FLOAT_SCRIPT_NAME="make_float.py"
+REPLACE_NULL_VALUE_SCRIPT_NAME="replace_null_value.py"
+COLUMNTRANFORM_SCRIPT_NAME="columntransform.py"
+REVENUE_COLUMN_SCRIPT_NAME="revenuecolumntransformstep.py"
+CLEANCATEGORICAL_SCRIPT_NAME="cleancategoricalcolumn.py"
+AGGREGATED_MODEL_SCRIPT_NAME="aggregatedmodel.py"
+ENUMERATED_COLUMN_SCRIPT_NAME="enumeratedcolumntransformstep.py"
+COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
+
 def main(argv):
-    scoringFiles = [SCORING_SCRIPT_NAME, PIPELINE_SCRIPT_NAME, PICKEL_FILE_NAME, PIPELINEFWK_SCRIPT_NAME, ENCODER_SCRIPT_NAME, PIPELINESTEPS_SCRIPT_NAME]
+    scoringFiles = [SCORING_SCRIPT_NAME, PIPELINE_SCRIPT_NAME, PICKEL_FILE_NAME, PIPELINEFWK_SCRIPT_NAME, ENCODER_SCRIPT_NAME, PIPELINESTEPS_SCRIPT_NAME,
+                    IMPUTATION_STEP_SCRIPT_NAME,
+                    IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME,
+                    MAKE_FLOAT_SCRIPT_NAME,
+                    REPLACE_NULL_VALUE_SCRIPT_NAME,
+                    COLUMNTRANFORM_SCRIPT_NAME,
+                    REVENUE_COLUMN_SCRIPT_NAME,
+                    CLEANCATEGORICAL_SCRIPT_NAME,
+                    AGGREGATED_MODEL_SCRIPT_NAME,
+                    ENUMERATED_COLUMN_SCRIPT_NAME,
+                    COLUMNTYPE_CONVERSION_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
