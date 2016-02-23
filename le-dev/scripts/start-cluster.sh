@@ -1,3 +1,8 @@
+# Test for required env variables
+printf "%s\n" "${HADOOP_HOME:?You must set HADOOP_HOME}"
+printf "%s\n" "${ZOOKEEPER_HOME:?You must set ZOOKEEPER_HOME}"
+
+
 rm -f /tmp/*.out
 rm -Rf $HADOOP_HOME/logs/*.log*
 rm -Rf $HADOOP_HOME/logs/*.out*
