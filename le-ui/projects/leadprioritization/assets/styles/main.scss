@@ -649,12 +649,17 @@ Forms for System SetUp Page
 
 
 
-
-
-
+/*
+Create Model: Setup & Import Page
+================================================================== */
+.setup-import {
+  .form-actions {
+    margin-top: 3em;
+  }
+}
 
 /*
-Custom Fields Page
+Create Model: Custom Fields Page
 ================================================================== */
 .main-content section.custom-fields {
   margin-top: 80px;
@@ -680,11 +685,8 @@ Custom Fields Page
   }
 }
 
-
-
-
 /*
-Validate Import View
+Create Model: Validate Import View
 ================================================================== */
 .import-summary {
   h2 {

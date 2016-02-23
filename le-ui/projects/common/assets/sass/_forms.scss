@@ -752,13 +752,15 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
     display: block;
   }
   & > .form-control {
-    width: 60%;
+    width: 64%;
     height: 43px;
     display: inline-block;
   }
   div {
       position: relative;
       overflow: hidden;
+      margin-top: -5px;
+      width: 27%;
       input.upload {
         position: absolute;
         top: 0;
@@ -772,6 +774,9 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
         opacity: 0;
         filter: alpha(opacity=0);
     }
+  }
+  .form-control[disabled] {
+    background: white;
   }
 }
 
