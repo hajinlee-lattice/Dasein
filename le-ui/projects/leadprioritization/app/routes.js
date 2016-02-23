@@ -77,9 +77,6 @@ angular
         .state('models.import', {
             url: '/import',
             views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/CreateView.html'
-                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -95,16 +92,18 @@ angular
             }
         })
         .state('models.fields', {
-            url: '/fields/:csvFile',
+            url: '/fields/:csvFileName',
             resolve: {
-                csvFile: function($stateParams, csvImportModel) {
-                    return csvImportModel.Get($stateParams.csvFile);
+                csvMetaData: function($stateParams, csvImportStore) {
+console.log('#METADATA columns resolve', csvImportStore);
+                    return csvImportStore.Get($stateParams.csvFileName);
                 },
-                csvUnknownColumns: function($q, csvImportService, csvFile) {
+                csvUnknownColumns: function($q, csvImportService, csvMetaData) {
                     var deferred = $q.defer();
-
-                    csvImportService.Validate(csvFile)
+console.log('#RESOLVE columns resolve', csvImportService, csvMetaData);
+                    csvImportService.GetUnknownColumns(csvMetaData)
                         .then(function(result) {
+console.log('#RESOLVE columns complete', result);
                             deferred.resolve(result.Result);
                         });
 
@@ -112,9 +111,6 @@ angular
                 }
             },
             views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/CreateView.html'
-                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -124,14 +120,18 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    controller: function($scope, $state, $stateParams, csvFile, csvUnknownColumns, csvImportService) {
-                        console.log('csvValidation Resolve', csvFile, csvUnknownColumns, $stateParams);
+                    controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
+                        console.log('csvValidation Resolve', csvMetaData, csvUnknownColumns, $stateParams);
                         this.data = csvUnknownColumns;
 
                         this.csvSubmitColumns = function($event) {
-                            csvImportService.Submit(csvFile, this.data).then(function(result) {
-                                console.log('Submit Completed');
-                                $state.go('jobs.status');
+                            csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
+                                console.log('Submit SetUnknownColumns Completed');
+
+                                csvImportService.StartModeling(csvMetaData).then(function(result) {
+                                    console.log('#CSV Modeling', result);
+                                    $state.go('jobs.status');
+                                });
                             });
                         }
                     },
@@ -143,9 +143,6 @@ angular
         .state('models.validate', {
             url: '/validate',
             views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/CreateView.html'
-                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -163,9 +160,6 @@ angular
         .state('models.create', {
             url: '/create',
             views: {
-                "navigation@": {
-                    templateUrl: './app/navigation/sidebar/CreateView.html'
-                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {

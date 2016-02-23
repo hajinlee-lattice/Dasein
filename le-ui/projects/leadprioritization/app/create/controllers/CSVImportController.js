@@ -4,7 +4,7 @@ angular.module('mainApp.create.csvImport', [
     'mainApp.models.services.ModelService',
     'mainApp.core.utilities.NavUtility'
 ])
-.service('csvImportModel', function() {
+.service('csvImportStore', function() {
     this.files = {};
 
     this.Get = function(name) {
@@ -18,11 +18,11 @@ angular.module('mainApp.create.csvImport', [
 .service('csvImportService', function($q, $http, ModelService, ResourceUtility) {
     this.Upload = function(file, fileType) {
         var deferred = $q.defer(),
-            fd = new FormData();
+            formData = new FormData();
         
-        fd.append('file', file);
+        formData.append('file', file);
 
-        $http.post('/pls/fileuploads/unnamed?schema=' + fileType, fd, {
+        $http.post('/pls/fileuploads/unnamed?schema=' + fileType, formData, {
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined
@@ -59,7 +59,7 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
-    this.Validate = function(csvFile) {
+    this.GetUnknownColumns = function(csvFile) {
         var deferred = $q.defer();
 
         $http({
@@ -98,12 +98,12 @@ angular.module('mainApp.create.csvImport', [
         return deferred.promise;
     };
 
-    this.Submit = function(csvFile, csvUnknownColumns) {
+    this.SetUnknownColumns = function(csvMetaData, csvUnknownColumns) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/fileuploads/' + csvFile.name + '/metadata/unknown',
+            url: '/pls/fileuploads/' + csvMetaData.name + '/metadata/unknown',
             data: csvUnknownColumns,
             headers: { 'Content-Type': 'application/json' }
         })
@@ -137,6 +137,50 @@ angular.module('mainApp.create.csvImport', [
 
         return deferred.promise;
     };
+
+    this.StartModeling = function(csvMetaData) {
+        var deferred = $q.defer();
+console.log('StartModeling', csvMetaData)
+        $http({
+            method: 'POST',
+            url: '/pls/models/' + csvMetaData.modelName,
+            data: {
+                'description': 'Self-service Model',
+                'filename': csvMetaData.name,
+                'name': csvMetaData.modelName
+            },
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+            console.log('MODELING POST SUCCESS', status, data);
+            if (data == null) {
+                result = {
+                    Success: false,
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    Result: null
+                };
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: data.Errors,
+                    Result: data.Result
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            console.log('MODELING POST ERROR', status, data);
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 })
 .directive('csvUploader', ['$parse', function ($parse) {
     return {
@@ -154,8 +198,8 @@ angular.module('mainApp.create.csvImport', [
     };
 }])
 .controller('csvImportController', [
-'$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportModel', '$state', 
-function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportModel, $state) {
+'$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', 
+function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state) {
     $scope.showImportError = false;
     $scope.importErrorMsg = "";
     $scope.importing = false;
@@ -171,13 +215,17 @@ function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, cs
         var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
 
         csvImportService.Upload($scope.csvFile, fileType).then(function(result) {
-            console.log('# Upload', result.success, result, $scope);
             if (result.Success && result.Result) {
-                var name = result.Result.name;
+                var fileName = result.Result.name,
+                    metaData = result.Result,
+                    modelName = $scope.modelName;
 
-                csvImportModel.Set(name, result.Result);
+                console.log('#CSV Upload Complete', fileName, modelName, metaData);
+                metaData.modelName = modelName;
 
-                $state.go('models.fields', { csvFile: name })
+                csvImportStore.Set(fileName, metaData);
+
+                $state.go('models.fields', { csvFileName: fileName })
             }
         });
 

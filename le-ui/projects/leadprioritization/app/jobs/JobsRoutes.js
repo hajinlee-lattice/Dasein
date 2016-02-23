@@ -10,7 +10,12 @@ angular
                 url: '/status',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/table/TableView.html'
+                        resolve: { 
+                            ResourceString: function() {
+                                return 'Jobs Page';
+                            }
+                        },
+                        templateUrl: './app/navigation/summary/OneLineView.html'
                     },
                     "main@": {
                         templateUrl: './app/jobs/status/StatusView.html'
