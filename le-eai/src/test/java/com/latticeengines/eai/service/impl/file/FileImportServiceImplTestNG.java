@@ -116,8 +116,6 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         props.put(ImportProperty.HDFSFILE, "/tmp/sourceFiles/file2.csv");
         Map<String, String> urlProperties = new HashMap<>();
         urlProperties.put(CsvDriver.DATE_FORMAT, "MM-DD-YYYY");
-        urlProperties.put(CsvDriver.MISSING_VALUE, "''");
-        urlProperties.put(CsvDriver.CHARSET, "UTF-8");
         props.put(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
         return props;
     }

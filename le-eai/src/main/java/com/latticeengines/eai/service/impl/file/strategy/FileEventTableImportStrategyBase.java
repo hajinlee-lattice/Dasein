@@ -19,6 +19,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.aspectj.apache.bcel.generic.Type;
 import org.joda.time.DateTime;
+import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -207,6 +208,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         if (fileUrlProperties != null && fileUrlProperties.size() > 0) {
             List<String> props = new ArrayList<>();
+            props.add(String.format("%s=%s", CsvDriver.MISSING_VALUE, "''"));
+            props.add(String.format("%s=%s", CsvDriver.CHARSET, "UTF-8"));
             for (Map.Entry<String, String> entry : fileUrlProperties.entrySet()) {
                 props.add(String.format("%s=%s", entry.getKey(), entry.getValue()));
             }
