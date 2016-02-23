@@ -47,7 +47,7 @@ class MulesoftProfilingThenTrainTest(TrainingTestBase):
         
         rocScore = jsonDict["Summary"]["RocScore"]
 
-        self.assertTrue(rocScore > 0.7)
+        self.assertTrue(rocScore > 0.6)
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)

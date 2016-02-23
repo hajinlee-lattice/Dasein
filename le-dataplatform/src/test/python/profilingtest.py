@@ -45,7 +45,7 @@ class ProfilingTest(ProfilingTestBase):
 
         # Check if Kurtosis and Skewness are calculated for an arbitrary record
         skew = metadataDict[featureKey][0][skewnessKey]
-        self.assertEqual(round(skew, 4), 1.4014)
+        self.assertEqual(round(skew, 4), 1.4183)
 
         kurtosis = metadataDict[featureKey][0][kurtosisKey]
-        self.assertEqual(round(kurtosis, 4), 0.5726)
+        self.assertEqual(round(kurtosis, 4), 0.6061)

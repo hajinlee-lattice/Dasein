@@ -59,10 +59,10 @@ class ProfilingThenTrainTest(TrainingTestBase):
 
         # Check if Kurtosis and Skewness are calculated for an arbitrary record
         skew = metadataDict[featureKey][0][skewnessKey]
-        self.assertEqual(round(skew, 4), 1.5411)
+        self.assertEqual(round(skew, 4), 1.535)
 
         kurtosis = metadataDict[featureKey][0][kurtosisKey]
-        self.assertEqual(round(kurtosis, 4), 0.8976)
+        self.assertEqual(round(kurtosis, 4), 0.8808)
 
     def tearDown(self):
         # Remove launcher module to restore its globals()

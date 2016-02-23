@@ -104,7 +104,7 @@
     "Nutanix_EventTable_Clean"
   ],
   "data_format": "avro",
-  "algorithm_properties": "criterion=gini n_estimators=100 n_jobs=5 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True",
+  "algorithm_properties": "criterion=gini n_estimators=20 n_jobs=5 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True",
   "provenance_properties": null,
   "data_profile": "/user/s-analytics/customers/Nutanix/data/EventMetadata/profile-pd344.avro",
   "config_metadata": "/user/s-analytics/customers/Nutanix/data/EventMetadata/metadata-pd344.avsc",
