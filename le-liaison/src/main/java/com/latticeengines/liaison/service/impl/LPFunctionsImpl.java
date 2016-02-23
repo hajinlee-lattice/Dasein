@@ -309,11 +309,11 @@ public class LPFunctionsImpl implements LPFunctions {
             return customerCol;
         }
 
-        if (maxLength < nTrailingChars + 4) {
-            nTrailingChars = maxLength - 4;
+        if (maxLength < nTrailingChars + (1 + nReplacement)) {
+            nTrailingChars = maxLength - (1 + nReplacement);
         }
 
-        String leadingChars = customerCol.substring(0, maxLength - nTrailingChars - 3);
+        String leadingChars = customerCol.substring(0, maxLength - nTrailingChars - nReplacement);
         String trailingChars = customerCol.substring(length - nTrailingChars, length);
 
         return (leadingChars + replacement + trailingChars);
