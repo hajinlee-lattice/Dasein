@@ -1,5 +1,5 @@
 angular
-.module('mainApp.navigation.summary.OneLineController', [])
+.module('pd.navigation.oneline', [])
 .controller('OneLineController', function($scope, ResourceUtility, ResourceString) {
     $scope.summaryTitle = ResourceUtility.getString(ResourceString);
 });

@@ -22,6 +22,7 @@
     /build -->
     <!-- build:remove:dist -->
     
+    <link rel="stylesheet" type="text/css" href="/lib/css/loading-bar.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css" />
     <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
@@ -84,69 +85,10 @@ Use DOMUtil.isIE() to detect internet explorer.
     })();
 </script>
 
-<!-- 3rd-party libraries -->
-
-<script src="/lib/bower/jquery.js"></script>
-<script src="/lib/bower/angular.js"></script>
-<script src="/lib/bower/angular-sanitize.js"></script>
-<script src="/lib/bower/angular-resource.js"></script>
-<!--script src="/lib/bower/angular-animate.js"></script -->
-<script src="/lib/bower/angular-route.js"></script>
-<script src="/lib/bower/angular-ui-router.js"></script>
-<!--
-<script src="/bower_components/crypto/crypto.min.js"></script>
--->
-<script src="/lib/js/crypto/core.js"></script>
-<script src="/lib/js/crypto/sha256.js"></script>
-<script src="/lib/js/ui-bootstrap.js"></script>
-<script src="/lib/js/ui-bootstrap-tpls.js"></script>
-<script src="/lib/bower/jquery.qtip.min.js"></script>
-<script src="/lib/bower/underscore-min.js"></script>
-<script src="/lib/bower/bootstrap.min.js"></script>
-<script src="/lib/bower/jstorage.min.js"></script>
-<script src="/lib/bower/d3.min.js"></script>
-<script src="/lib/js/alasql.min.js"></script>
-<script src="/lib/js/FileSaver.js"></script>
-<script src="/lib/js/kendo.all.min.js"></script>
-
-<!-- self-host vendors -->
+<!-- combined common and vendor js -->
+<script src="/assets/js/min/vendor.min.js"></script>
+<script src="/assets/js/min/production.min.js"></script>
 <script src="/demo/js/bootstrap-select.min.js"></script>
-<script src="/app/vendor/date.format.js"></script>
-<script src="/app/vendor/ui-bootstrap-jpls-0.13.0.js"></script>
-
-<!-- common -->
-<script src="/app/directives/charts/ArcChartDirective.js"></script>
-<script src="/app/directives/helperMarkDirective.js"></script>
-<script src="/app/directives/ngQtipDirective.js"></script>
-<script src="/app/directives/ngEnterDirective.js"></script>
-<script src="/app/utilities/FaultUtility.js"></script>
-<script src="/app/utilities/ConfigConstantUtility.js"></script>
-<script src="/app/utilities/URLUtility.js"></script>
-<script src="/app/utilities/ResourceUtility.js"></script>
-<script src="/app/utilities/EvergageUtility.js"></script>
-<script src="/app/utilities/TimestampIntervalUtility.js"></script>
-<script src="/app/utilities/MetadataUtility.js"></script>
-<script src="/app/utilities/SortUtility.js"></script>
-<script src="/app/utilities/UnderscoreUtility.js"></script>
-<script src="/app/utilities/StringUtility.js"></script>
-<script src="/app/utilities/ExceptionOverrideUtility.js"></script>
-<script src="/app/utilities/AuthenticationUtility.js"></script>
-<script src="/app/utilities/WidgetConfigUtility.js"></script>
-<script src="/app/utilities/AnimationUtility.js"></script>
-<script src="/app/utilities/DateTimeFormatUtility.js"></script>
-<script src="/app/utilities/NumberUtility.js"></script>
-<script src="/app/utilities/AnalyticAttributeUtility.js"></script>
-<script src="/app/utilities/TrackingConstantsUtility.js"></script>
-<script src="/app/utilities/UnderscoreUtility.js"></script>
-<script src="/app/utilities/TenantIdParsingUtility.js"></script>
-<script src="/app/modals/SimpleModal.js"></script>
-<script src="/app/services/WidgetFrameworkService.js"></script>
-<script src="/app/services/PlayTileService.js"></script>
-<script src="/app/services/TopPredictorService.js"></script>
-<script src="/app/services/ThresholdExplorerService.js"></script>
-<script src="/app/services/ModelSummaryValidationService.js"></script>
-<script src="/app/services/ModelAlertsService.js"></script>
-<script src="/app/services/ManageFieldsService.js"></script>
 
 <!-- widgets -->
 <script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
@@ -184,22 +126,22 @@ Use DOMUtil.isIE() to detect internet explorer.
 <!-- app specific -->
 <script src="app/app.js"></script>
 <script src="app/routes.js"></script>
+
 <script src="app/core/utilities/BrowserStorageUtility.js"></script>
 <script src="app/core/utilities/RightsUtility.js"></script>
 <script src="app/core/utilities/PasswordUtility.js"></script>
 <script src="app/core/utilities/ServiceErrorUtility.js"></script>
 <script src="app/core/utilities/NavUtility.js"></script>
-
 <script src="app/core/services/HelpService.js"></script>
 <script src="app/core/services/ResourceStringsService.js"></script>
 <script src="app/core/services/SessionService.js"></script>
 <script src="app/core/services/WidgetService.js"></script>
 <script src="app/core/services/FeatureFlagService.js"></script>
-<script src="app/login/services/LoginService.js"></script>
-<script src="app/config/services/ConfigService.js"></script>
-<script src="app/models/services/ModelService.js"></script>
-<script src="app/userManagement/services/UserManagementService.js"></script>
-<script src="app/setup/services/MetadataService.js"></script>
+<script src="app/core/controllers/MainViewController.js"></script>
+<script src="app/core/controllers/MainHeaderController.js"></script>
+<script src="app/core/controllers/SalesforceCredentialController.js"></script>
+
+<script src="app/create/controllers/CSVImportController.js"></script>
 
 <script src="app/navigation/NavigationController.js"></script>
 <script src="app/navigation/summary/OneLineController.js"></script>
@@ -215,12 +157,13 @@ Use DOMUtil.isIE() to detect internet explorer.
 
 <script src="app/login/controllers/LoginController.js"></script>
 <script src="app/login/controllers/UpdatePasswordController.js"></script>
-<script src="app/core/controllers/MainViewController.js"></script>
-<script src="app/core/controllers/MainHeaderController.js"></script>
-<script src="app/core/controllers/SalesforceCredentialController.js"></script>
+<script src="app/login/modals/TenantSelectionModal.js"></script>
+<script src="app/login/services/LoginService.js"></script>
+
 <script src="app/config/controllers/ManageCredentialsController.js"></script>
 <script src="app/config/modals/EnterCredentialsModal.js"></script>
-<script src="app/userManagement/controllers/UserManagementController.js"></script>
+<script src="app/config/services/ConfigService.js"></script>
+
 <script src="app/models/controllers/ModelListController.js"></script>
 <script src="app/models/controllers/ModelDetailController.js"></script>
 <script src="app/models/controllers/AdminInfoController.js"></script>
@@ -230,26 +173,29 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/models/modals/StaleModelModal.js"></script>
 <script src="app/models/modals/ImportModelModal.js"></script>
 <script src="app/models/modals/AddSegmentModal.js"></script>
+<script src="app/models/services/ModelService.js"></script>
 
-<script src="app/login/modals/TenantSelectionModal.js"></script>
+<script src="app/userManagement/controllers/UserManagementController.js"></script>
 <script src="app/userManagement/modals/AddUserModal.js"></script>
 <script src="app/userManagement/modals/DeleteUserModal.js"></script>
 <script src="app/userManagement/modals/EditUserModal.js"></script>
+<script src="app/userManagement/services/UserManagementService.js"></script>
 
-<script src="app/setup/utilities/SetupUtility.js"></script>
 <script src="app/setup/controllers/SetupController.js"></script>
 <script src="app/setup/controllers/DeploymentWizardController.js"></script>
 <script src="app/setup/controllers/CredentialsController.js"></script>
 <script src="app/setup/controllers/ImportAndEnrichDataController.js"></script>
 <script src="app/setup/controllers/ManageFieldsController.js"></script>
 <script src="app/setup/controllers/LeadEnrichmentController.js"></script>
-<script src="app/setup/services/TenantDeploymentService.js"></script>
-<script src="app/setup/services/LeadEnrichmentService.js"></script>
 <script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
 <script src="app/setup/modals/EditFieldModel.js"></script>
 <script src="app/setup/modals/CancelDeploymentStepModel.js"></script>
 <script src="app/setup/modals/ClearDeploymentModel.js"></script>
 <script src="app/setup/modals/LeadEnrichmentAttributesDetailsModel.js"></script>
+<script src="app/setup/utilities/SetupUtility.js"></script>
+<script src="app/setup/services/TenantDeploymentService.js"></script>
+<script src="app/setup/services/LeadEnrichmentService.js"></script>
+<script src="app/setup/services/MetadataService.js"></script>
 <!-- /build -->
 
 <!-- build:js inline -->

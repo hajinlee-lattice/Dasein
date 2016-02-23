@@ -3,21 +3,22 @@
   "description": "shared libraries and resources for le-ui web apps",
   "version": "1.0.0",
   "license": "ISC",
-  "repository" : { 
-    "type" : "svn",
-    "url" : "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
-  },    
+  "repository": {
+    "type": "svn",
+    "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
+  },
   "main": "index.html",
   "scripts": {
-	"postinstall": "bower install"
+    "postinstall": "bower install && grunt"
   },
   "author": "",
   "dependencies": {
+    "bower": "^1.7.7",
     "grunt": "^0.4.5",
+    "grunt-contrib-concat": "^1.0.0",
     "grunt-contrib-sass": "^0.9.2",
-    "grunt-contrib-watch": "^0.6.1",
-    "bower": "^1.7.7"
+    "grunt-contrib-uglify": "^0.11.1",
+    "grunt-contrib-watch": "^0.6.1"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

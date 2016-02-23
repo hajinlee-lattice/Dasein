@@ -90,12 +90,27 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/create/views/SetupImportView.html'
+                    templateUrl: './app/create/views/CSVImportView.html'
                 }   
             }
         })
         .state('models.fields', {
-            url: '/fields',
+            url: '/fields/:csvFile',
+            resolve: {
+                csvFile: function($stateParams, csvImportModel) {
+                    return csvImportModel.Get($stateParams.csvFile);
+                },
+                csvUnknownColumns: function($q, csvImportService, csvFile) {
+                    var deferred = $q.defer();
+
+                    csvImportService.Validate(csvFile)
+                        .then(function(result) {
+                            deferred.resolve(result.Result);
+                        });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "navigation@": {
                     templateUrl: './app/navigation/sidebar/CreateView.html'
@@ -103,13 +118,24 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Success! The training file has been imported';
+                            return 'Specify Unknown Column Types';
                         }
                     },
-                    controller: 'OneLineController',
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
+                    controller: function($scope, $state, $stateParams, csvFile, csvUnknownColumns, csvImportService) {
+                        console.log('csvValidation Resolve', csvFile, csvUnknownColumns, $stateParams);
+                        this.data = csvUnknownColumns;
+
+                        this.csvSubmitColumns = function($event) {
+                            csvImportService.Submit(csvFile, this.data).then(function(result) {
+                                console.log('Submit Completed');
+                                $state.go('jobs.status');
+                            });
+                        }
+                    },
+                    controllerAs: 'vm',
                     templateUrl: './app/create/views/CustomFieldsView.html'
                 }   
             }

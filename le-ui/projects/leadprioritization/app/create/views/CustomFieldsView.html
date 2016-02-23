@@ -1,7 +1,15 @@
+<style type="text/css">
+	section.custom-fields td select {
+	    font-size: 1.3em;
+	    border: 1px solid #bbb;
+	    color: #666;
+	    padding: 6px;
+	}
+</style>
 <section class="container row custom-fields">
 		<div class="six columns offset-three">
 
-			<p>Displaying 1-3 of 3.</p>
+			<p>Displaying {{ vm.data.length }}.</p>
 
 			<table class="unstyled">
 				<thead>
@@ -11,25 +19,15 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td><input type="text" class="form-control" value="Custom_Field_01" /></td>
+					<tr ng-repeat="item in vm.data">
 						<td>
-							<select class="custom-select">
-								<option>VarChar</option>
-								<option>VarChar</option>
-								<option>VarChar</option>
-								<option>VarChar</option>
-							</select>
+							<label class="form-control" for="columnType_{{$index}}">{{ item.columnName }}</label>
 						</td>
-					</tr>
-					<tr>
-						<td><input type="text" class="form-control" value="Custom_Field_02" /></td>
 						<td>
-							<select class="custom-select">
-								<option>VarChar</option>
-								<option>VarChar</option>
-								<option>VarChar</option>
-								<option>VarChar</option>
+							<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
+								<option value="STRING" selected>STRING</option>
+								<option value="DOUBLE">DOUBLE</option>
+								<option value="BOOLEAN">BOOLEAN</option>
 							</select>
 						</td>
 					</tr>
@@ -37,8 +35,12 @@
 			</table>
 
 			<div class="row">
-				<div class="six columns"><button type="button" class="button gray-button block-button">Go Back</button></div>
-				<div class="six columns"><button type="button" class="button orange-button block-button">Looks Fine, Next</button></div>
+				<div class="six columns">
+					<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
+				</div>
+				<div class="six columns">
+					<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">Looks Fine, Next</button>
+				</div>
 			</div>
 			<ul>
 				<li>
@@ -54,9 +56,10 @@
 
 		</div>
 </section>
-
+<!--
 <script>
   $( document ).ready(function() {
     $(".custom-select").selectpicker();
   });
 </script>
+-->

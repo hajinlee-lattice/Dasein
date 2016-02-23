@@ -763,6 +763,8 @@ $zindex-select-dropdown: 1060; // must be higher than a modal background (1050)
         position: absolute;
         top: 0;
         right: 0;
+        left: 0;
+        bottom: 0;
         margin: 0;
         padding: 0;
         font-size: 20px;

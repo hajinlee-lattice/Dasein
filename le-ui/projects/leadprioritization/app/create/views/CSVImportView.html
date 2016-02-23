@@ -1,0 +1,51 @@
+<section class="container">
+<form name="uploadForm" ng-controller="csvImportController">
+  <div class="row">
+    <div class="columns six offset-three">
+        <!-- Error messaging
+        <div data-ng-show="showError">
+            <div class="alert alert-danger">
+                <span><i class="fa fa-exclamation-circle fa-inverse"></i>Error messaging goes here</span>
+                <a class="close" href="javascript:void(0)" data-ng-click="closeErrorClick($event)"><i class="fa fa-times fa-inverse"></i></a>
+            </div>
+        </div>
+        -->
+        <div id="formName" class="form">
+          <div class="form-group">
+            <label>Model Name</label>
+            <input type="text" class="form-control" placeholder="Example: US Enterprise model" />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea rows="4" class="form-control"></textarea>
+          </div>
+          <div class="form-group file-upload">
+            <label for="loadfile">Upload CSV File</label>
+            <input id="uploadFile" class="form-control" placeholder="Choose File" disabled="disabled" />
+            <div class="fileUpload button blue-button">
+                <span>Browse...</span>
+                <input id="uploadBtn" type="file" class="upload" csv-uploader="csvFile" />
+            </div>
+          </div>
+          <!-- Script needed to get filepath and place it into the input field -->
+          <script>
+            document.getElementById("uploadBtn").onchange = function () {
+                document.getElementById("uploadFile").value = this.value.substring(12);
+            };
+          </script>
+          <div class="form-group">
+            <div class="toggle-check">
+              <label for="account-lead-check">Account Based</label>
+              <input type="checkbox" name="account-lead-check" ng-model="accountLeadCheck" id="account-lead-check" class="toggle-switch" />
+              <label for="account-lead-check">Lead Based</label>
+            </div>          
+          </div>
+          <div class="form-actions">
+            <button type="button" class="button">Cancel</button>
+            <button type="button" class="button orange-button" data-ng-click="uploadFile()">Start the Data Import</button>
+          </div>
+        </div><!-- End .form -->
+    </div><!-- End .six.columns -->
+  </div><!-- End .container.row -->
+</form>
+</section>
