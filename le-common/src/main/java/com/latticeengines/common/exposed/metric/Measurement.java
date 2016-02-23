@@ -1,5 +1,7 @@
 package com.latticeengines.common.exposed.metric;
 
+import java.util.Collection;
+
 public interface Measurement<F extends Fact, D extends Dimension> {
 
     D getDimension();
@@ -7,5 +9,7 @@ public interface Measurement<F extends Fact, D extends Dimension> {
     F getFact();
 
     RetentionPolicy getRetentionPolicy();
+
+    Collection<MetricStore> getMetricStores();
 
 }

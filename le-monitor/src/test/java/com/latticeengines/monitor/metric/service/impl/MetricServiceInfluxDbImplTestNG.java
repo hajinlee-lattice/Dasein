@@ -1,5 +1,6 @@
 package com.latticeengines.monitor.metric.service.impl;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
+import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
@@ -161,5 +163,7 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
         public RetentionPolicy getRetentionPolicy() {
             return RetentionPolicyImpl.ONE_HOUR;
         }
+
+        public Collection<MetricStore> getMetricStores() { return null; }
     }
 }

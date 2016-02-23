@@ -18,7 +18,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricField;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatchStatistics implements Fact {
+public class MatchStatistics {
 
     private static Log log = LogFactory.getLog(MatchStatistics.class);
 

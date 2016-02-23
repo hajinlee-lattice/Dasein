@@ -5,6 +5,7 @@ import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
+import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -12,7 +13,8 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.Matched;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
-public class MatchedColumn implements Measurement<Matched, MatchedColumn.MatchedColumnDimension> {
+public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.MatchedColumnDimension>
+        implements Measurement<Matched, MatchedColumn.MatchedColumnDimension> {
 
     private Matched fact;
     private MatchedColumnDimension dimension;

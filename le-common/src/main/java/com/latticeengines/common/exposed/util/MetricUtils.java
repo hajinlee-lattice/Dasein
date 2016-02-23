@@ -35,6 +35,10 @@ public class MetricUtils {
     public static Collection<String> frameworkTags = Arrays.asList(TAG_ENVIRONMENT, TAG_ARTIFACT_VERSION, TAG_HOST);
 
     public static Map<String, String> parseTags(Dimension dimension) {
+        return parseTagsInternal(dimension);
+    }
+
+    private static Map<String, String> parseTagsInternal(Object dimension) {
         Map<String, String> tagMap = new HashMap<>();
         for (Method method : dimension.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(MetricTag.class)) {
@@ -59,6 +63,10 @@ public class MetricUtils {
     }
 
     public static Map<String, Object> parseFields(Fact fact) {
+        return parseFieldsInternal(fact);
+    }
+
+    private static Map<String, Object> parseFieldsInternal(Object fact) {
         Map<String, Object> fieldMap = new HashMap<>();
         for (Method method : fact.getClass().getDeclaredMethods()) {
             if (method.isAnnotationPresent(MetricField.class)) {
@@ -104,7 +112,7 @@ public class MetricUtils {
     }
 
     @VisibleForTesting
-    static Map.Entry<String, String> parseTag(Dimension dimension, Method method) {
+    static Map.Entry<String, String> parseTag(Object dimension, Method method) {
         try {
             if (String.class.isAssignableFrom(method.getReturnType())) {
                 MetricTag metricMetricTag = method.getAnnotation(MetricTag.class);
@@ -128,33 +136,28 @@ public class MetricUtils {
     }
 
     @VisibleForTesting
-    static Map<String, String> parseTagGroup(Dimension dimension, Method method) {
+    static Map<String, String> parseTagGroup(Object dimension, Method method) {
         try {
             Map<String, String> tagMap = new HashMap<>();
-            if (Dimension.class.isAssignableFrom(method.getReturnType())) {
-                MetricTagGroup metricTagGroup = method.getAnnotation(MetricTagGroup.class);
-                String[] includes = metricTagGroup.includes();
-                String[] excludes = metricTagGroup.excludes();
+            MetricTagGroup metricTagGroup = method.getAnnotation(MetricTagGroup.class);
+            String[] includes = metricTagGroup.includes();
+            String[] excludes = metricTagGroup.excludes();
 
-                Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
-                Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
+            Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
+            Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
 
-                boolean includeAll = includes.length == 0;
+            boolean includeAll = includes.length == 0;
 
-                method.setAccessible(true);
-                Dimension tagGroup = (Dimension) method.invoke(dimension);
-                for (Map.Entry<String, String> entry : parseTags(tagGroup).entrySet()) {
-                    String tag = entry.getKey();
-                    if ((includeAll || includeSet.contains(tag)) && !excludeSet.contains(tag)) {
-                        tagMap.put(entry.getKey(), entry.getValue());
-                    }
+            method.setAccessible(true);
+            Object tagGroup = method.invoke(dimension);
+            for (Map.Entry<String, String> entry : parseTagsInternal(tagGroup).entrySet()) {
+                String tag = entry.getKey();
+                if ((includeAll || includeSet.contains(tag)) && !excludeSet.contains(tag)) {
+                    tagMap.put(entry.getKey(), entry.getValue());
                 }
-
-                return tagMap;
-
-            } else {
-                throw new RuntimeException("MetricTagGroup must be an implementation of Dimension.");
             }
+
+            return tagMap;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse " + MetricTagGroup.class.getSimpleName() + " from method "
                     + method.getName() + " in " + dimension, e);
@@ -162,7 +165,7 @@ public class MetricUtils {
     }
 
     @VisibleForTesting
-    static Map.Entry<String, Object> parseField(Fact Fact, Method method) {
+    static Map.Entry<String, Object> parseField(Object Fact, Method method) {
         try {
             MetricField metricField = method.getAnnotation(MetricField.class);
             MetricField.FieldType fieldType = metricField.fieldType();
@@ -182,33 +185,28 @@ public class MetricUtils {
     }
 
     @VisibleForTesting
-    static Map<String, Object> parseFieldGroup(Fact fact, Method method) {
+    static Map<String, Object> parseFieldGroup(Object fact, Method method) {
         try {
             Map<String, Object> fieldMap = new HashMap<>();
-            if (Fact.class.isAssignableFrom(method.getReturnType())) {
-                MetricFieldGroup metricFieldGroup = method.getAnnotation(MetricFieldGroup.class);
-                String[] includes = metricFieldGroup.includes();
-                String[] excludes = metricFieldGroup.excludes();
+            MetricFieldGroup metricFieldGroup = method.getAnnotation(MetricFieldGroup.class);
+            String[] includes = metricFieldGroup.includes();
+            String[] excludes = metricFieldGroup.excludes();
 
-                Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
-                Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
+            Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
+            Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
 
-                boolean includeAll = includes.length == 0;
+            boolean includeAll = includes.length == 0;
 
-                method.setAccessible(true);
-                Fact fieldGroup = (Fact) method.invoke(fact);
-                for (Map.Entry<String, Object> entry : parseFields(fieldGroup).entrySet()) {
-                    String fieldName = entry.getKey();
-                    if ((includeAll || includeSet.contains(fieldName)) && !excludeSet.contains(fieldName)) {
-                        fieldMap.put(entry.getKey(), entry.getValue());
-                    }
+            method.setAccessible(true);
+            Object fieldGroup = method.invoke(fact);
+            for (Map.Entry<String, Object> entry : parseFieldsInternal(fieldGroup).entrySet()) {
+                String fieldName = entry.getKey();
+                if ((includeAll || includeSet.contains(fieldName)) && !excludeSet.contains(fieldName)) {
+                    fieldMap.put(entry.getKey(), entry.getValue());
                 }
-
-                return fieldMap;
-            } else {
-                throw new RuntimeException(MetricFieldGroup.class.getSimpleName() + " must be an implementation of "
-                        + Fact.class.getSimpleName());
             }
+
+            return fieldMap;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse " + MetricFieldGroup.class.getSimpleName() + " from method "
                     + method.getName() + " in " + fact, e);
@@ -216,10 +214,11 @@ public class MetricUtils {
     }
 
     public static void scan(Class<? extends Measurement<?, ?>> measurementClass) {
-        System.out.println("Measurement: " + measurementClass.getSimpleName() + "\n");
+        System.out.println("========================================\nScan Measurement: " + measurementClass.getSimpleName()
+                + "\n========================================\n");
         for (Method method : measurementClass.getDeclaredMethods()) {
             if (method.getName().contains("getDimension")) {
-                scanTags(method.getReturnType());
+                scanTags(method.getReturnType(), true, true);
             } else if (method.getName().contains("getFact")) {
                 scanFields(method.getReturnType());
             }
@@ -227,12 +226,13 @@ public class MetricUtils {
     }
 
     public static Set<String> scanTags(Class<?> dimensionClass) {
-        return scanTags(dimensionClass, true);
+        return scanTags(dimensionClass, true, false);
     }
 
-    private static Set<String> scanTags(Class<?> dimensionClass, boolean topLevel) {
+    private static Set<String> scanTags(Class<?> dimensionClass, boolean topLevel, boolean includeFrameworkTags) {
         if (topLevel && !dimensionClass.isInterface()) {
-            System.out.println("Scanning tags in " + dimensionClass.getSimpleName() + " ...");
+            System.out.println("Scan tags in Dimension: " + dimensionClass.getSimpleName()
+                    + "\n----------------------------------------");
         }
 
         Set<String> tagSet = new HashSet<>();
@@ -258,13 +258,16 @@ public class MetricUtils {
 
         if (topLevel && !dimensionClass.isInterface()) {
             Set<String> tagNames = new HashSet<>();
-            for (String tag : frameworkTags) {
-                tagNames.add("[" + tag + "]");
+            if (includeFrameworkTags) {
+                for (String tag : frameworkTags) {
+                    tagNames.add("[" + tag + "]");
+                }
             }
             for (String tag : tagSet) {
                 tagNames.add("[" + tag + "]");
             }
-            System.out.println("Final set of tags are: " + StringUtils.join(tagNames, ", ") + "\n");
+            System.out.println("----------------------------------------\nFinal set of tags are: "
+                    + StringUtils.join(tagNames, ", ") + "\n");
         }
 
         return tagSet;
@@ -273,31 +276,26 @@ public class MetricUtils {
     private static Set<String> scanTagGroup(Class<?> dimensionClass, Method method) {
         try {
             Set<String> tagSet = new HashSet<>();
-            if (Dimension.class.isAssignableFrom(method.getReturnType())) {
-                MetricTagGroup metricTagGroup = method.getAnnotation(MetricTagGroup.class);
-                String[] includes = metricTagGroup.includes();
-                String[] excludes = metricTagGroup.excludes();
+            MetricTagGroup metricTagGroup = method.getAnnotation(MetricTagGroup.class);
+            String[] includes = metricTagGroup.includes();
+            String[] excludes = metricTagGroup.excludes();
 
-                Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
-                Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
+            Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
+            Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
 
-                boolean includeAll = includes.length == 0;
+            boolean includeAll = includes.length == 0;
 
-                Class<?> tagGroupClass = method.getReturnType();
-                for (String tag : scanTags(tagGroupClass, false)) {
-                    if ((includeAll || includeSet.contains(tag)) && !excludeSet.contains(tag)) {
-                        tagSet.add(tag);
-                    } else {
-                        System.out.println(String.format(" Exclude tag [%s] in [%s] from [%s]", tag,
-                                tagGroupClass.getSimpleName(), dimensionClass.getSimpleName()));
-                    }
+            Class<?> tagGroupClass = method.getReturnType();
+            for (String tag : scanTags(tagGroupClass, false, false)) {
+                if ((includeAll || includeSet.contains(tag)) && !excludeSet.contains(tag)) {
+                    tagSet.add(tag);
+                } else {
+                    System.out.println(String.format(" Exclude tag [%s] in [%s] from [%s]", tag,
+                            tagGroupClass.getSimpleName(), dimensionClass.getSimpleName()));
                 }
-
-                return tagSet;
-
-            } else {
-                throw new RuntimeException("MetricTagGroup must be an implementation of Dimension.");
             }
+
+            return tagSet;
         } catch (Exception e) {
             throw new RuntimeException("Failed to scan " + MetricTagGroup.class.getSimpleName() + " from method "
                     + method.getName() + " in " + dimensionClass.getSimpleName(), e);
@@ -332,7 +330,7 @@ public class MetricUtils {
 
     private static Set<String> scanFields(Class<?> factClass, boolean topLevel) {
         if (topLevel && !factClass.isInterface()) {
-            System.out.println("Scanning fields in " + factClass.getSimpleName() + " ...");
+            System.out.println("Scan fields in Fact: " + factClass.getSimpleName() + "\n----------------------------------------");
         }
         Set<String> fieldSet = new HashSet<>();
         for (Method method : factClass.getDeclaredMethods()) {
@@ -360,7 +358,8 @@ public class MetricUtils {
             for (String field : fieldSet) {
                 fieldNames.add("[" + field + "]");
             }
-            System.out.println("Final set of fields are: " + StringUtils.join(fieldNames, ", ") + "\n");
+            System.out.println("----------------------------------------\nFinal set of fields are: "
+                    + StringUtils.join(fieldNames, ", ") + "\n");
         }
 
         return fieldSet;
@@ -369,31 +368,26 @@ public class MetricUtils {
     private static Set<String> scanFieldGroup(Class<?> factClass, Method method) {
         try {
             Set<String> fieldSet = new HashSet<>();
-            if (Fact.class.isAssignableFrom(method.getReturnType())) {
-                MetricFieldGroup metricFieldGroup = method.getAnnotation(MetricFieldGroup.class);
-                String[] includes = metricFieldGroup.includes();
-                String[] excludes = metricFieldGroup.excludes();
+            MetricFieldGroup metricFieldGroup = method.getAnnotation(MetricFieldGroup.class);
+            String[] includes = metricFieldGroup.includes();
+            String[] excludes = metricFieldGroup.excludes();
 
-                Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
-                Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
+            Set<String> includeSet = new HashSet<>(Arrays.asList(includes));
+            Set<String> excludeSet = new HashSet<>(Arrays.asList(excludes));
 
-                boolean includeAll = includes.length == 0;
+            boolean includeAll = includes.length == 0;
 
-                Class<?> fieldGroupClass = method.getReturnType();
-                for (String fieldName : scanFields(fieldGroupClass, false)) {
-                    if ((includeAll || includeSet.contains(fieldName)) && !excludeSet.contains(fieldName)) {
-                        fieldSet.add(fieldName);
-                    } else {
-                        System.out.println(String.format(" Exclude field [%s] in [%s] from [%s]", fieldName,
-                                fieldGroupClass.getSimpleName(), factClass.getSimpleName()));
-                    }
+            Class<?> fieldGroupClass = method.getReturnType();
+            for (String fieldName : scanFields(fieldGroupClass, false)) {
+                if ((includeAll || includeSet.contains(fieldName)) && !excludeSet.contains(fieldName)) {
+                    fieldSet.add(fieldName);
+                } else {
+                    System.out.println(String.format(" Exclude field [%s] in [%s] from [%s]", fieldName,
+                            fieldGroupClass.getSimpleName(), factClass.getSimpleName()));
                 }
-
-                return fieldSet;
-            } else {
-                throw new RuntimeException(MetricFieldGroup.class.getSimpleName() + " must be an implementation of "
-                        + Fact.class.getSimpleName());
             }
+
+            return fieldSet;
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse " + MetricFieldGroup.class.getSimpleName() + " from method "
                     + method.getName() + " in " + factClass.getSimpleName(), e);

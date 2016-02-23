@@ -1,26 +1,31 @@
 package com.latticeengines.domain.exposed.monitor.metric;
 
+import org.reflections.Reflections;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.util.MetricUtils;
-import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 
 public class MetricAnnotationScanUnitTestNG {
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void testMetricDimension() {
-        MetricUtils.scanTags(MatchInput.class);
-        MetricUtils.scanFields(MatchInput.class);
+        Reflections reflections = new Reflections("com.latticeengines.domain.exposed");
 
-        MetricUtils.scanTags(MatchOutput.class);
-        MetricUtils.scanFields(MatchOutput.class);
+        for (Class<?> clz: reflections.getSubTypesOf(Dimension.class)) {
+            MetricUtils.scanTags(clz);
+        }
 
-        MetricUtils.scanFields(MatchStatistics.class);
+        for (Class<?> clz: reflections.getSubTypesOf(Fact.class)) {
+            MetricUtils.scanFields(clz);
+        }
 
-        MetricUtils.scanTags(SqlQueryMetric.class);
-        MetricUtils.scanFields(SqlQueryMetric.class);
+        for (Class<?> clz: reflections.getSubTypesOf(Measurement.class)) {
+            MetricUtils.scan((Class<Measurement<?, ?>>) clz);
+        }
     }
 
 }

@@ -2,10 +2,12 @@ package com.latticeengines.propdata.match.metric;
 
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
+import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 
-public class FetchDataFromSql implements Measurement<SqlQueryMetric, SqlQueryMetric> {
+public class FetchDataFromSql extends BaseMeasurement<SqlQueryMetric, SqlQueryMetric>
+        implements Measurement<SqlQueryMetric, SqlQueryMetric> {
 
     private SqlQueryMetric metric;
 

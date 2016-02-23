@@ -71,6 +71,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     private InfluxDB.LogLevel logLevel;
 
     private Boolean enabled = false;
+    private Boolean forceDisabled = false;
     private static String hostname;
 
     @PostConstruct
@@ -108,7 +109,8 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     }
 
     @Override
-    public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
+    public <F extends Fact, D extends Dimension> void
+    write(MetricDB db, Measurement<F, D> measurement) {
         write(db, Collections.singleton(measurement));
     }
 
@@ -116,9 +118,9 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            log.debug("Received " + measurements.size() + " points to write.");
+            log.info("Received " + measurements.size() + " points to write.");
             executor.submit(new MetricRunnable<>(db, measurements));
-        } else if (StringUtils.isNotEmpty(url)) {
+        } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
             postConstruct();
         }
     }
@@ -127,6 +129,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     public void disable() {
         if (enabled) {
             enabled = false;
+            forceDisabled = true;
             log.info("InfluxDB metric service is disabled.");
         }
     }
@@ -204,8 +207,12 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
         @Override
         public void run() {
-            BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-            getInfluxDB().write(batchPoints);
+            try {
+                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
+                getInfluxDB().write(batchPoints);
+            } catch (Exception e) {
+                log.error(e);
+            }
         }
     }
 

@@ -1,12 +1,12 @@
 package com.latticeengines.propdata.match.metric;
 
 import com.latticeengines.common.exposed.metric.Measurement;
-import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
+import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
-public class RealTimeRequest implements Measurement<MatchInput, MatchInput> {
+public class RealTimeRequest extends BaseMeasurement<MatchInput, MatchInput>
+        implements Measurement<MatchInput, MatchInput> {
 
     private MatchInput matchInput;
 
@@ -24,11 +24,6 @@ public class RealTimeRequest implements Measurement<MatchInput, MatchInput> {
 
     public void setMatchInput(MatchInput matchInput) {
         this.matchInput = matchInput;
-    }
-
-    @Override
-    public RetentionPolicy getRetentionPolicy() {
-        return RetentionPolicyImpl.DEFAULT;
     }
 
     @Override

@@ -8,7 +8,7 @@ import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.DomainUtils;
 
-public class MatchKeyDimension implements Dimension {
+public class MatchKeyDimension {
 
     private String domain;
     private String name;

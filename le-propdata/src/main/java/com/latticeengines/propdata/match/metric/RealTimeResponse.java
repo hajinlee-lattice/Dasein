@@ -1,11 +1,11 @@
 package com.latticeengines.propdata.match.metric;
 
 import com.latticeengines.common.exposed.metric.Measurement;
-import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
+import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
-public class RealTimeResponse implements Measurement<MatchContext, MatchContext> {
+public class RealTimeResponse extends BaseMeasurement<MatchContext, MatchContext>
+        implements Measurement<MatchContext, MatchContext> {
 
     private MatchContext context;
 
@@ -29,11 +29,6 @@ public class RealTimeResponse implements Measurement<MatchContext, MatchContext>
     @Override
     public MatchContext getDimension() {
         return getContext();
-    }
-
-    @Override
-    public RetentionPolicy getRetentionPolicy() {
-        return RetentionPolicyImpl.DEFAULT;
     }
 
 }

@@ -17,7 +17,6 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -27,7 +26,7 @@ import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Entity
 @Table(name = "TENANT")
-public class Tenant implements HasName, HasId<String>, HasPid, Dimension {
+public class Tenant implements HasName, HasId<String>, HasPid {
 
     private String id;
     private String name;

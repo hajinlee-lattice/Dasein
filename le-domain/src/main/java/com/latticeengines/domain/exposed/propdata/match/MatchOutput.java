@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MatchOutput implements Fact, Dimension {
+public class MatchOutput {
 
     private static Log log = LogFactory.getLog(MatchOutput.class);
 

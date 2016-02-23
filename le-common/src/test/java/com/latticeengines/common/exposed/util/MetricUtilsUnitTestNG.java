@@ -2,6 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.Measurement;
+import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
@@ -236,6 +238,10 @@ public class MetricUtilsUnitTestNG {
                     return "default";
                 }
             };
+        }
+
+        public Collection<MetricStore> getMetricStores() {
+            return null;
         }
 
     }
