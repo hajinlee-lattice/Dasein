@@ -249,16 +249,8 @@ public class LPFunctionsImpl implements LPFunctions {
         Map<String, String> attributes = new HashMap<>();
 
         for (String ldcCol : column_names_in_propdata) {
-            if (lp_template_type.equals("SFDC")) {
-                String customerCol = String.format("Lattice_%s__c", fieldNameRestrictLength(ldcCol, 32));
-                attributes.put(ldcCol, customerCol);
-            } else if (lp_template_type.equals("ELQ")) {
-                String customerCol = String.format("C_Lattice_%s1", fieldNameRestrictLength(ldcCol, 32));
-                attributes.put(ldcCol, customerCol);
-            } else if (lp_template_type.equals("MKTO")) {
-                String customerCol = String.format("Lattice_%s", fieldNameRestrictLength(ldcCol, 32));
-                attributes.put(ldcCol, customerCol);
-            }
+            String customerCol = getCustomerColumn(lp_template_type, ldcCol);
+            attributes.put(ldcCol, customerCol);
         }
 
         return setLDCWritebackAttributes(conn_mgr, source, attributes, lp_template_version);
@@ -293,6 +285,19 @@ public class LPFunctionsImpl implements LPFunctions {
     }
 
     @Override
+    public String getCustomerColumn(String templateType, String fieldName) {
+        if (templateType.equals("SFDC")) {
+            return String.format("Lattice_%s__c", fieldNameRestrictDefaultLength(fieldName));
+        } else if (templateType.equals("ELQ")) {
+            return String.format("C_Lattice_%s1", fieldNameRestrictDefaultLength(fieldName));
+        } else if (templateType.equals("MKTO")) {
+            return String.format("Lattice_%s", fieldNameRestrictDefaultLength(fieldName));
+        }
+
+        return fieldName;
+    }
+
+    @Override
     public String fieldNameRestrictLength(String customerCol, int maxLength) {
 
         int length = customerCol.length();
@@ -317,5 +322,10 @@ public class LPFunctionsImpl implements LPFunctions {
         String trailingChars = customerCol.substring(length - nTrailingChars, length);
 
         return (leadingChars + replacement + trailingChars);
+    }
+
+    @Override
+    public String fieldNameRestrictDefaultLength(String customerCol) {
+        return fieldNameRestrictLength(customerCol, 32);
     }
 }

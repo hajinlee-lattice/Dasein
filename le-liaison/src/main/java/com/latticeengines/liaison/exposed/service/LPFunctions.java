@@ -18,8 +18,7 @@ public interface LPFunctions {
     // If the DL REST API connection does not return success, then a
     // RuntimeException is thrown.
 
-    AbstractMap.SimpleImmutableEntry<String, String> getLPTemplateTypeAndVersion(
-            ConnectionMgr conn_mgr);
+    AbstractMap.SimpleImmutableEntry<String, String> getLPTemplateTypeAndVersion(ConnectionMgr conn_mgr);
 
     // addLDCMatch(...)
     //
@@ -47,31 +46,31 @@ public interface LPFunctions {
     // If the DL REST API connection does not return success, then a
     // RuntimeException is thrown.
 
-    Boolean setLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
-            Map<String, String> attributes, String lp_template_version)
-                    throws IOException, RuntimeException;
+    Boolean setLDCWritebackAttributes(ConnectionMgr conn_mgr, String source, Map<String, String> attributes,
+            String lp_template_version) throws IOException, RuntimeException;
 
     // getLDCWritebackAttributes(...)
     //
     // Gets Lattice Data Cloud (LDC, or "PropData") attributes to be written
-    // back to the customer in a standard DL/visiDB template.  The attributes
-    // are returned in a map (column_name_in_propdata,column_name_in_customer_system).
+    // back to the customer in a standard DL/visiDB template. The attributes
+    // are returned in a map
+    // (column_name_in_propdata,column_name_in_customer_system).
     // If there is a connection problem, an IOException is thrown.
     // If the DL REST API connection does not return success, then a
     // RuntimeException is thrown.
 
-    Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr, String source,
-            String lp_template_version)
-                    throws IOException, RuntimeException;
+    Map<String, String> getLDCWritebackAttributes(ConnectionMgr conn_mgr, String source, String lp_template_version)
+            throws IOException, RuntimeException;
 
     // setLDCWritebackAttributesDefaultName(...)
     //
-    // Similar to the above method, but the "column_name_in_customer_system" is derived
+    // Similar to the above method, but the "column_name_in_customer_system" is
+    // derived
     // from "column_name_in_propdata" according to the lp_template_type.
 
     Boolean setLDCWritebackAttributesDefaultName(ConnectionMgr conn_mgr, String source,
-            Set<String> column_names_in_propdata, String lp_template_type,
-            String lp_template_version) throws IOException, RuntimeException;
+            Set<String> column_names_in_propdata, String lp_template_type, String lp_template_version)
+                    throws IOException, RuntimeException;
 
     // removeLDCWritebackAttributes(...)
     //
@@ -82,15 +81,32 @@ public interface LPFunctions {
 
     // getTargetTablesAndDataProviders(...)
     //
-    // Gets the map of (Target Table, DataProvider) that are used for writing back data to the customer.
+    // Gets the map of (Target Table, DataProvider) that are used for writing
+    // back data to the customer.
 
     Map<String, String> getTargetTablesAndDataProviders(ConnectionMgr conn_mgr, String lp_template_version)
             throws IOException, RuntimeException;
 
+    // String getCustomerColumn(...)
+    //
+    // From a given internal field name (which may have an arbitrary length,
+    // returns the column name implemented in the customer system, restricted to
+    // the default maximum length.
+
+    String getCustomerColumn(String templateType, String fieldName);
+
     // fieldNameRestrictLength(...)
     //
-    // Given a customer column name (customerCol) and a maximum length, this function returns
+    // Given a customer column name (customerCol) and a maximum length, this
+    // function returns
     // a column name that is no greater than the maximum length.
 
     String fieldNameRestrictLength(String customerCol, int maxLength);
+
+    // fieldNameRestrictDefaultLength(...)
+    //
+    // Given a customer column name (customerCol), this function returns
+    // a column name that is no greater than a default length.
+
+    String fieldNameRestrictDefaultLength(String customerCol);
 }
