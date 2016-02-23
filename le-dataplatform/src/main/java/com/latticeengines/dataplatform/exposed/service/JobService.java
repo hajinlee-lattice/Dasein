@@ -3,12 +3,12 @@ package com.latticeengines.dataplatform.exposed.service;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.hadoop.mapreduce.v2.api.records.Counters;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 
 public interface JobService {
 

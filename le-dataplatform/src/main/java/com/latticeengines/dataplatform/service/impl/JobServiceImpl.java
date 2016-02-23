@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,9 +10,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.TypeConverter;
-import org.apache.hadoop.mapreduce.v2.api.records.Counter;
-import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
-import org.apache.hadoop.mapreduce.v2.api.records.Counters;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -29,19 +25,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.mapreduce.counters.CounterGroupImpl;
-import com.latticeengines.domain.exposed.mapreduce.counters.CounterImpl;
-import com.latticeengines.domain.exposed.mapreduce.counters.CountersImpl;
+import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
+import com.latticeengines.domain.exposed.mapreduce.counters.JobCounters;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -229,30 +222,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         JobID jobId = TypeConverter.fromYarn(ConverterUtils.toApplicationId(applicationId));
         RestTemplate rt = new RestTemplate();
         String response = rt.getForObject(mrJobHistoryServerUrl + "/" + jobId.toString() + "/counters", String.class);
-        JsonNode jn = null;
-        Counters counters = new CountersImpl();
-
-        try {
-            jn = new ObjectMapper().readTree(response);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        ArrayNode counterGroupNodes = (ArrayNode) jn.get("jobCounters").get("counterGroup");
-        for (JsonNode counterGroupNode : counterGroupNodes) {
-            ArrayNode counterNodes = (ArrayNode) counterGroupNode.get("counter");
-
-            CounterGroup counterGroup = new CounterGroupImpl();
-            String counterGroupName = counterGroupNode.get("counterGroupName").asText();
-            counterGroup.setName(counterGroupName);
-            counters.setCounterGroup(counterGroupName, counterGroup);
-
-            for (JsonNode counterNode : counterNodes) {
-                Counter counter = new CounterImpl();
-                counterGroup.setCounter(counterNode.get("name").asText(), counter);
-                counter.setName(counterNode.get("name").asText());
-                counter.setValue(counterNode.get("totalCounterValue").asLong());
-            }
-        }
-        return counters;
+        JobCounters jobCounters = JsonUtils.deserialize(response, JobCounters.class);
+        return jobCounters.getCounters();
     }
 }

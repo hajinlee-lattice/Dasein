@@ -5,17 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.hadoop.mapreduce.v2.api.records.Counter;
-import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CounterGroupImpl implements CounterGroup {
+public class CounterGroup implements org.apache.hadoop.mapreduce.v2.api.records.CounterGroup {
 
     private String name;
     private String displayName;
-    List<CounterImpl> counters = new ArrayList<>();
+    List<Counter> counters = new ArrayList<>();
 
     @Override
     @JsonProperty("counterGroupName")
@@ -29,21 +26,21 @@ public class CounterGroupImpl implements CounterGroup {
         return displayName;
     }
 
-    @JsonProperty("counters")
-    public List<CounterImpl> getCounterList() {
+    @JsonProperty("counter")
+    public List<Counter> getCounterList() {
         return counters;
     }
 
-    @JsonProperty("counters")
-    public void setCounterList(List<CounterImpl> counters) {
+    @JsonProperty("counter")
+    public void setCounterList(List<Counter> counters) {
         this.counters = counters;
     }
 
     @Override
     @JsonIgnore
-    public Map<String, Counter> getAllCounters() {
-        Map<String, Counter> map = new HashMap<String, Counter>();
-        for (Counter counter : counters) {
+    public Map<String, org.apache.hadoop.mapreduce.v2.api.records.Counter> getAllCounters() {
+        Map<String, org.apache.hadoop.mapreduce.v2.api.records.Counter> map = new HashMap<>();
+        for (org.apache.hadoop.mapreduce.v2.api.records.Counter counter : counters) {
             map.put(counter.getName(), counter);
         }
         return map;
@@ -51,7 +48,7 @@ public class CounterGroupImpl implements CounterGroup {
 
     @Override
     @JsonIgnore
-    public Counter getCounter(String key) {
+    public org.apache.hadoop.mapreduce.v2.api.records.Counter getCounter(String key) {
         return getAllCounters().get(key);
     }
 
@@ -69,15 +66,15 @@ public class CounterGroupImpl implements CounterGroup {
 
     @Override
     @JsonIgnore
-    public void addAllCounters(Map<String, Counter> counters) {
+    public void addAllCounters(Map<String, org.apache.hadoop.mapreduce.v2.api.records.Counter> counters) {
         counters.putAll(counters);
     }
 
     @Override
     @JsonIgnore
-    public void setCounter(String key, Counter value) {
+    public void setCounter(String key, org.apache.hadoop.mapreduce.v2.api.records.Counter value) {
         removeCounter(key);
-        counters.add((CounterImpl) value);
+        counters.add((Counter) value);
     }
 
     @Override
