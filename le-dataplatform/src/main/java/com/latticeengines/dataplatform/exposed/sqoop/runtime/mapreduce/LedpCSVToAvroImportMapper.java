@@ -103,7 +103,7 @@ public class LedpCSVToAvroImportMapper extends
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
             long lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
                     + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
-            csvFilePrinter.printRecord(lineNum + 1, errorMap.toString());
+            csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
             csvFilePrinter.flush();
             errorMap.clear();
         }
@@ -136,7 +136,8 @@ public class LedpCSVToAvroImportMapper extends
     }
 
     private void validateRowValueBeforeConvertToAvro(String interpretation, String fieldKey, String fieldCsvValue) {
-        if ((fieldKey.equals("Id") || fieldKey.equals("IsWon") || fieldKey.equals("IsConverted")) && StringUtils.isEmpty(fieldCsvValue)) {
+        if ((fieldKey.equals("Id") || fieldKey.equals("IsWon") || fieldKey.equals("IsConverted"))
+                && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
             throw new RuntimeException(String.format("Required Column %s is missing value", fieldKey));
         } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())) {
@@ -146,7 +147,7 @@ public class LedpCSVToAvroImportMapper extends
                     && (fieldKey.equals("Name") || fieldKey.equals("BillingCity") || fieldKey.equals("BillingState") || fieldKey
                             .equals("BillingCountry")) && StringUtils.isEmpty(fieldCsvValue)) {
                 missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Website is empty, so %s cannot be empty", fieldKey));
+                throw new RuntimeException(String.format("Website column is empty, so %s cannot be empty", fieldKey));
             }
         } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
             if (fieldKey.equals("Email") && StringUtils.isEmpty(fieldCsvValue)) {
@@ -155,7 +156,7 @@ public class LedpCSVToAvroImportMapper extends
                     && (fieldKey.equals("Company") || fieldKey.equals("City") || fieldKey.equals("State") || fieldKey
                             .equals("Country")) && StringUtils.isEmpty(fieldCsvValue)) {
                 missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Email is empty, so %s cannot be empty", fieldKey));
+                throw new RuntimeException(String.format("Email column is empty, so %s cannot be empty", fieldKey));
             }
         }
     }
@@ -205,9 +206,10 @@ public class LedpCSVToAvroImportMapper extends
             lobLoader.close();
         }
         csvFilePrinter.close();
-        HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
         if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() == 0) {
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).setValue(0);
+        } else {
+            HdfsUtils.copyLocalToHdfs(context.getConfiguration(), ERROR_FILE, outputPath + "/" + ERROR_FILE);
         }
         if (context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue() == 0) {
             context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).setValue(0);
