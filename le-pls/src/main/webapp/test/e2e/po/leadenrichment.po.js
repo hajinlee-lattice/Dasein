@@ -70,9 +70,31 @@ var LeadEnrichment = function() {
         var yesBotton = element(by.id('save-attributes-yes'));
         helper.elementExists(yesBotton, true);
         yesBotton.click();
-        sleep(24000);
-        element(by.id('backLeadEnrichmentButton')).isDisplayed().then(function (displayed){
-            expect(displayed).toBe(true);
+        sleep(10000);
+        element(by.id('saveAttributesConfirm')).isPresent().then(function (confirmPresent) {
+            if (confirmPresent) {
+                element(by.id('verifyFieldsError')).isDisplayed().then(function (errorDisplayed){
+                    expect(errorDisplayed).toBe(false);
+                    if (!errorDisplayed) {
+                        element(by.id('invalidFields')).isDisplayed().then(function (invalidFieldsDisplayed){
+                            if (invalidFieldsDisplayed) {
+                                noBotton.click();
+                                sleep(500);
+                            } else {
+                                sleep(24000);
+                                element(by.id('backLeadEnrichmentButton')).isDisplayed().then(function (displayed){
+                                    expect(displayed).toBe(true);
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                sleep(24000);
+                element(by.id('backLeadEnrichmentButton')).isDisplayed().then(function (displayed){
+                    expect(displayed).toBe(true);
+                });
+            }
         });
     };
 

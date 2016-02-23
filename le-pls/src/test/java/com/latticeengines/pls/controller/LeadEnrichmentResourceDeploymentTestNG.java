@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -96,6 +97,37 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
             assertEquals(code, "403");
         }
         assertTrue(exception);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment")
+    public void testVerifyAttributes() {
+        // Target tables:
+        //     Marketo --> LeadRecord
+        //     Eloqua --> Contact
+        //     SFDC --> Contact, Lead
+        // The main test tenant is Marketo.
+        switchToSuperAdmin();
+        LeadEnrichmentAttribute[] attributes = new LeadEnrichmentAttribute[3];
+        LeadEnrichmentAttribute attribute = new LeadEnrichmentAttribute();
+        attribute.setFieldName("Country");
+        attributes[0] = attribute;
+        attribute = new LeadEnrichmentAttribute();
+        attribute.setFieldName("city");
+        attributes[1] = attribute;
+        attribute = new LeadEnrichmentAttribute();
+        String noExistColumn = "ColumnDoesNotExist_!@#";
+        attribute.setFieldName(noExistColumn);
+        attributes[2] = attribute;
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/verifyattributes";
+        Map<String, List<String>> map = restTemplate.postForObject(url, attributes, Map.class);
+        assertNotNull(map);
+        for (Entry<String, List<String>> entry : map.entrySet()) {
+            List<String> invalidFields = entry.getValue();
+            assertNotNull(invalidFields);
+            assertEquals(invalidFields.size(), 1);
+            assertEquals(invalidFields.get(0), noExistColumn);
+        }
     }
 
     @Test(groups = "deployment", enabled = false)

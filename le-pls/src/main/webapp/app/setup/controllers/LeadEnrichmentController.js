@@ -261,16 +261,17 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
             return;
         }
 
-        SaveAttributesModel.show($scope);
-    };
-
-    $scope.saveAttributes = function () {
-        $scope.saveInProgress = true;
         var attributes = [];
         for (var i = 0; i < $scope.selectedAttributes.length; i++) {
             var attribute = $scope.selectedAttributes[i];
             attributes[i] = { FieldName: attribute.FieldName, DataSource: attribute.DataSource };
         }
+        SaveAttributesModel.show($scope, attributes);
+    };
+
+    $scope.saveAttributes = function (attributes) {
+        $scope.saveInProgress = true;
+
         LeadEnrichmentService.SaveAttributes(attributes).then(function (data) {
             if (data.Success) {
                 $scope.saveInProgress = false;

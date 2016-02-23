@@ -80,6 +80,48 @@ angular.module('mainApp.setup.services.LeadEnrichmentService', [
         return deferred.promise;
     };
 
+    this.VerifyAttributes = function (attributes) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'POST',
+            url: '/pls/leadenrichment/verifyattributes',
+            headers: {
+                'Content-Type': "application/json"
+            },
+            data: attributes
+        })
+        .success(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data != null) {
+                result.Success = true;
+                var tables = [];
+                for (var table in data) {
+                    var obj = { tableName: table, invalidFields: data[table] };
+                    tables.push(obj);
+                }
+                result.ResultObj = tables;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
     this.SaveAttributes = function (attributes) {
         var deferred = $q.defer();
 

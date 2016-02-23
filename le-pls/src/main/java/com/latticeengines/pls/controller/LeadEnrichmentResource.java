@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -46,6 +47,14 @@ public class LeadEnrichmentResource {
     public List<LeadEnrichmentAttribute> getAttributes(HttpServletRequest request) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         return leadEnrichmentService.getAttributes(tenant);
+    }
+
+    @RequestMapping(value = "/verifyattributes", method=RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Verify attributes and return fields not exist in target system")
+    public Map<String, List<String>> verifyAttributes(@RequestBody List<LeadEnrichmentAttribute> attributes, HttpServletRequest request) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return leadEnrichmentService.verifyAttributes(tenant, attributes);
     }
 
     @RequestMapping(value = "/attributes", method=RequestMethod.PUT, headers = "Accept=application/json")

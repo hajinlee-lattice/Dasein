@@ -1,17 +1,28 @@
-<div class="modal-dialog modal-sm" data-ng-controller="SaveAttributesController">
+<div class="modal-dialog modal-sm" data-ng-controller="SaveAttributesController" id="saveAttributesConfirm">
     <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title">{{ResourceUtility.getString('LEAD_ENRICHMENT_SAVE_CONFIRM_TITLE')}}</h4>
         </div>
         <div class="modal-body">
-          <div class="row">
-            <div class="col-sm-12 text-center">
-              <p>{{ResourceUtility.getString('LEAD_ENRICHMENT_SAVE_CONFIRM_CONTENT')}}</p>
+            <div data-ng-show="verifyInProgress">
+                <div class="loader"></div>
+                <h2 class="text-center">{{ResourceUtility.getString('LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_WAIT')}}</h2>
             </div>
-          </div>
+            <div data-ng-show="!verifyInProgress" class="row">
+                <div><p>{{ResourceUtility.getString('LEAD_ENRICHMENT_SAVE_CONFIRM_CONTENT')}}</p></div>
+                <div id="invalidFields" data-ng-show="tables != null" class="alert alert-danger">
+                    <div data-ng-repeat="t in tables">
+                        <div>{{ResourceUtility.getString('LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_INVALID_LABEL')}}&nbsp;<b>{{t.tableName}}</b>:</div>
+                        <div class="invalid-field" data-ng-repeat="f in t.invalidFields">{{f}}</div>
+                    </div>
+                </div>
+                <div id="verifyFieldsError" data-ng-show="errorMessage != null" class="global-error local-error">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{errorMessage}}</span>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer">
+        <div data-ng-show="!verifyInProgress" class="modal-footer">
             <button id="save-attributes-no" class="btn btn-secondary" type="button" data-ng-click="noClicked()">{{ResourceUtility.getString('BUTTON_NO_LABEL')}}</button>
             <a id="save-attributes-yes" class="btn btn-primary" href="#" data-ng-click="yesClicked($event)">{{ResourceUtility.getString('BUTTON_YES_LABEL')}}</a>
         </div>
