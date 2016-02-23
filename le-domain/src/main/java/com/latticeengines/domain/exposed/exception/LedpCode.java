@@ -175,6 +175,8 @@ public enum LedpCode {
     LEDP_18079("Failed to save attributes: {0}."), //
     LEDP_18080("Failed to get template type: {0}."), //
     LEDP_18081("File {0} is already being imported."), //
+    LEDP_18082("There is no target table in DataLoader."), //
+    LEDP_18083("Failed to verify attributes: {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
