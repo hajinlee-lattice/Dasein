@@ -11,15 +11,22 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.FileSystemCounter;
+import org.apache.hadoop.mapreduce.JobCounter;
+import org.apache.hadoop.mapreduce.TaskCounter;
+import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
+import org.apache.hadoop.mapreduce.v2.api.records.Counters;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.Assert;
@@ -41,7 +48,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
@@ -53,7 +60,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private ModelingJobService modelingJobService;
+    private JobService jobService;
 
     @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
@@ -74,6 +81,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
     private String baseDir = "/functionalTests/" + suffix;
+    
+    private ApplicationId applicationId;
 
     @BeforeClass(groups = { "functional", "functional.production" })
     public void setupSamplingMRJob() throws Exception {
@@ -153,7 +162,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testGetJobReportsAll() throws Exception {
-        List<ApplicationReport> applications = modelingJobService.getJobReportsAll();
+        List<ApplicationReport> applications = jobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
@@ -163,11 +172,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        modelingJobService.killJob(applicationId);
+        jobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertEquals(status, FinalApplicationStatus.KILLED);
     }
@@ -178,28 +187,28 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        modelingJobService.killJob(applicationId);
+        jobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertNotNull(status);
         assertTrue(status.equals(FinalApplicationStatus.KILLED));
 
-        ApplicationReport app = modelingJobService.getJobReportById(applicationId);
+        ApplicationReport app = jobService.getJobReportById(applicationId);
 
-        List<ApplicationReport> reports = modelingJobService.getJobReportByUser(app.getUser());
+        List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
         int numJobs = reports.size();
         assertTrue(numJobs > 0);
 
-        applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
+        applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 
         status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        reports = modelingJobService.getJobReportByUser(app.getUser());
+        reports = jobService.getJobReportByUser(app.getUser());
         assertTrue(reports.size() > numJobs);
-        modelingJobService.killJob(applicationId);
+        jobService.killJob(applicationId);
     }
 
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -207,13 +216,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        modelingJobService.killJob(applicationId);
+        jobService.killJob(applicationId);
 
-        ApplicationReport app = modelingJobService.getJobReportById(applicationId);
+        ApplicationReport app = jobService.getJobReportById(applicationId);
         assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                 jobNameService.getCustomerFromJobName(app.getName()));
         assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
@@ -234,15 +243,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setDataFormat("csv");
         classifier.setDataProfileHdfsPath(baseDir + "/datascientist1/EventMetadata");
         classifier.setConfigMetadataHdfsPath(baseDir + "/datascientist1/EventMetadata");
-        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/lepipeline.tar.gz");
-        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion() + "/dataplatform/scripts/pipeline.py");
+        classifier.setPythonPipelineLibHdfsPath("/app/" + versionManager.getCurrentVersion()
+                + "/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/" + versionManager.getCurrentVersion()
+                + "/dataplatform/scripts/pipeline.py");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 
-        ApplicationId applicationId = modelingJobService.submitYarnJob("pythonClient", appMasterProperties,
+        ApplicationId applicationId = jobService.submitYarnJob("pythonClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -280,7 +291,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
                 MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
         mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
-        ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
+        applicationId = jobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -293,6 +304,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         });
         assertEquals(4, files.size());
+    }
+
+    @Test(groups = { "functional", "functional.production" }, enabled = true, dependsOnMethods = { "testSubmitMRJob" })
+    public void testGetMRJobCounter() throws Exception {
+        Counters counters = jobService.getMRJobCounters(ConverterUtils.toString(applicationId));
+        Map<String, CounterGroup> counterGroups = counters.getAllCounterGroups();
+        assertTrue(counterGroups.containsKey(FileSystemCounter.class.getCanonicalName()));
+        assertTrue(counterGroups.containsKey(JobCounter.class.getCanonicalName()));
+        assertTrue(counterGroups.get(JobCounter.class.getCanonicalName()).getCounter(JobCounter.TOTAL_LAUNCHED_MAPS.name()).getValue() > 0);
+        assertTrue(counterGroups.containsKey(TaskCounter.class.getCanonicalName()));
+        assertTrue(counterGroups.get(TaskCounter.class.getCanonicalName()).getCounter(TaskCounter.MAP_INPUT_RECORDS.name()).getValue() > 0);
     }
 
     // @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -316,7 +338,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
 
         try {
-            modelingJobService.submitMRJob("samplingJob", properties);
+            jobService.submitMRJob("samplingJob", properties);
         } catch (LedpException ex) {
             assertEquals(ex.getCode(), LedpCode.LEDP_12009);
             return;

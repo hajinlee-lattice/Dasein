@@ -9,7 +9,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.TypeConverter;
+import org.apache.hadoop.mapreduce.v2.api.records.Counter;
+import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
+import org.apache.hadoop.mapreduce.v2.api.records.Counters;
 import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
@@ -22,9 +26,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
@@ -32,6 +39,9 @@ import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.mapreduce.counters.CounterGroupImpl;
+import com.latticeengines.domain.exposed.mapreduce.counters.CounterImpl;
+import com.latticeengines.domain.exposed.mapreduce.counters.CountersImpl;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -60,6 +70,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
+    @Value("${dataplatform.mapreduce.jobhistory.webapp.api.address}")
+    private String mrJobHistoryServerUrl;
+
     @Override
     public List<ApplicationReport> getJobReportsAll() {
         return defaultYarnClient.listApplications();
@@ -83,10 +96,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties) {
+    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
+            Properties containerProperties) {
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
-        yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
+        yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
+                containerProperties);
 
         try {
             ApplicationId applicationId = client.submitApplication();
@@ -209,4 +224,35 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return jobStatus;
     }
 
+    @Override
+    public Counters getMRJobCounters(String applicationId) {
+        JobID jobId = TypeConverter.fromYarn(ConverterUtils.toApplicationId(applicationId));
+        RestTemplate rt = new RestTemplate();
+        String response = rt.getForObject(mrJobHistoryServerUrl + "/" + jobId.toString() + "/counters", String.class);
+        JsonNode jn = null;
+        Counters counters = new CountersImpl();
+
+        try {
+            jn = new ObjectMapper().readTree(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        ArrayNode counterGroupNodes = (ArrayNode) jn.get("jobCounters").get("counterGroup");
+        for (JsonNode counterGroupNode : counterGroupNodes) {
+            ArrayNode counterNodes = (ArrayNode) counterGroupNode.get("counter");
+
+            CounterGroup counterGroup = new CounterGroupImpl();
+            String counterGroupName = counterGroupNode.get("counterGroupName").asText();
+            counterGroup.setName(counterGroupName);
+            counters.setCounterGroup(counterGroupName, counterGroup);
+
+            for (JsonNode counterNode : counterNodes) {
+                Counter counter = new CounterImpl();
+                counterGroup.setCounter(counterNode.get("name").asText(), counter);
+                counter.setName(counterNode.get("name").asText());
+                counter.setValue(counterNode.get("totalCounterValue").asLong());
+            }
+        }
+        return counters;
+    }
 }

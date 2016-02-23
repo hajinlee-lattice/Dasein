@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.v2.api.records.Counters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,6 +32,13 @@ public class JobResource {
     @ApiOperation(value = "Get status about a submitted job")
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return jobService.getJobStatus(applicationId);
+    }
+
+    @RequestMapping(value = "/jobs/{applicationId}/counters", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get job counters of a completed mapreduce ")
+    public Counters getMRJobCounters(@PathVariable String applicationId) {
+        return jobService.getMRJobCounters(applicationId);
     }
 
 }
