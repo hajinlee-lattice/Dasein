@@ -3,20 +3,15 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
-
-import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
-import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceImpl;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 

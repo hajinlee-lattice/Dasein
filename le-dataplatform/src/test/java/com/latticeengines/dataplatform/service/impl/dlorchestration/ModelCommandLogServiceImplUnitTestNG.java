@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelCommandLogEntityMgrImpl;
-import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;

@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import java.sql.Types;
 import java.util.ArrayList;

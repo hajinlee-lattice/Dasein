@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;

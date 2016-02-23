@@ -30,26 +30,26 @@ public class ModelingServiceValidationAspect {
     @Autowired
     private MetadataService metadataService;
 
-    @Before("execution(* com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl.loadData(..)) "
+    @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.loadData(..)) "
             + " && args(config)")
     public void validateLoad(LoadConfiguration config) {
         validateLoadConfig(config);
         validateEventTableColumnNames(config);
     }
 
-    @Before("execution(* com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl.createSamples(..)) "
+    @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.createSamples(..)) "
             + " && args(config)")
     public void validateCreateSamples(SamplingConfiguration config) {
         validateCreateSamplesConfig(config);
     }
 
-    @Before("execution(* com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl.profileData(..)) "
+    @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.profileData(..)) "
             + " && args(config)")
     public void validateProfileData(DataProfileConfiguration config) {
         validateProfileDataConfig(config);
     }
 
-    @Before("execution(* com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl.submitModel(..)) "
+    @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.submitModel(..)) "
             + " && args(model)")
     public void validateSubmitMode(Model model) {
         validateSubmitModelConfig(model);
