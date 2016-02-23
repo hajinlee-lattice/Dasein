@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
@@ -18,19 +19,24 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
     @Override
     public Node construct(DedupEventTableParameters parameters) {
         Node eventTable = addSource(parameters.eventTable);
-        Table schema = eventTable.getSourceSchema();
         Node last = eventTable;
 
-        Attribute websiteColumn = schema.getAttribute(parameters.websiteColumn);
-        // If website column is available, use that. Otherwise use email column
-        if (websiteColumn != null) {
-            last = DataFlowUtils.normalizeDomain(last, parameters.websiteColumn, DOMAIN);
-        } else {
-            last = DataFlowUtils.extractDomainFromEmail(last, parameters.emailColumn, DOMAIN);
+        Attribute websiteColumn = eventTable.getSourceAttribute(SemanticType.Website);
+        Attribute domainColumn = eventTable.getSourceAttribute(SemanticType.Domain);
+        Attribute emailColumn = eventTable.getSourceAttribute(SemanticType.Email);
+
+        if (domainColumn != null) {
+            last = last.rename(new FieldList(domainColumn.getName()), new FieldList(DOMAIN));
+        } else if (websiteColumn != null) {
+            last = DataFlowUtils.normalizeDomain(last, websiteColumn.getName(), DOMAIN);
+        } else if (emailColumn != null) {
+            last = DataFlowUtils.extractDomainFromEmail(last, emailColumn.getName(), DOMAIN);
             last = DataFlowUtils.normalizeDomain(last, DOMAIN);
+        } else {
+            throw new RuntimeException("Need a website, domain, or email column");
         }
 
-        last = addSortColumn(last, parameters, schema, SORT);
+        last = addSortColumn(last, eventTable, SORT);
 
         Node emptyDomains = last //
                 .filter(String.format("%s == null || %s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN)) //
@@ -44,21 +50,25 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                         true, //
                         false);
         last = last.merge(emptyDomains);
-        return last.discard(new FieldList(DOMAIN, SORT));
+        last = last.rename(new FieldList(DOMAIN), new FieldList("Domain"));
+        return last.discard(new FieldList(SORT));
     }
 
-    private Node addSortColumn(Node last, DedupEventTableParameters parameters, Table sourceSchema, String field) {
+    private Node addSortColumn(Node last, Node source, String field) {
         FieldMetadata targetField = new FieldMetadata(field, String.class);
 
+        Attribute event = source.getSourceAttribute(SemanticType.Event);
+        String eventColumn = event.getName();
+
+        Table sourceSchema = source.getSourceSchema();
         if (sourceSchema.getLastModifiedKey() == null) {
-            return last.addFunction(String.format("%s", parameters.eventColumn), new FieldList(parameters.eventColumn),
-                    targetField);
+            return last.addFunction(String.format("%s", eventColumn), new FieldList(eventColumn), targetField);
         } else {
             long optimalCreationTime = DateTime.now().minusDays(OPTIMAL_CREATION_TIME_DAYS_FROM_TODAY).getMillis();
             String lastModifiedField = sourceSchema.getLastModifiedKey().getAttributes().get(0);
             String expression = String.format("(%s ? 1.0 : 0.0) + (1.0 / ((double)Math.abs(%s - %dL) + 1.1))",
-                    parameters.eventColumn, lastModifiedField, optimalCreationTime);
-            return last.addFunction(expression, new FieldList(parameters.eventColumn, lastModifiedField), targetField);
+                    eventColumn, lastModifiedField, optimalCreationTime);
+            return last.addFunction(expression, new FieldList(eventColumn, lastModifiedField), targetField);
         }
     }
 }

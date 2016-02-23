@@ -97,7 +97,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
@@ -341,6 +343,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         public Table getSourceSchema() {
             return builder.getSourceMetadata(identifier);
+        }
+
+        public Attribute getSourceAttribute(final SemanticType semanticType) {
+            return getSourceSchema().getAttribute(semanticType);
         }
 
         public List<FieldMetadata> getSchema() {

@@ -7,11 +7,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class AttributeUnitTestNG {
-    
+
     @Test(groups = "unit")
     public void testSerDe() {
         Attribute attr = new Attribute();
-        
+
         attr.setApprovedUsage("Model");
         attr.setCategory("Firmographics");
         attr.setDataType("Integer");
@@ -20,12 +20,12 @@ public class AttributeUnitTestNG {
         attr.setDisplayName("Attribute 1");
         attr.setDataSource("DerivedColumns");
         attr.setDataQuality("xyz");
-        attr.setSemanticType("City");
-        
+        attr.setSemanticType(SemanticType.City);
+
         String serializedStr = JsonUtils.serialize(attr);
-        
+
         Attribute deserializedAttr = JsonUtils.deserialize(serializedStr, Attribute.class);
-        
+
         assertEquals(deserializedAttr.getApprovedUsage().get(0), attr.getApprovedUsage().get(0));
         assertEquals(deserializedAttr.getDataSource().get(0), attr.getDataSource().get(0));
         assertEquals(deserializedAttr.getCategory(), attr.getCategory());

@@ -38,7 +38,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
     private AbstractMap.SimpleEntry<Table, DbCreds> loadHdfsTableToPDServer() {
         ExportConfiguration exportConfig = new ExportConfiguration();
         String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), "PrematchFlow");
+                configuration.getCustomerSpace(), configuration.getInputTableName());
         Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
         prematchFlowTable.setName(prematchFlowTable.getName() + "_" + System.currentTimeMillis());
 
@@ -46,7 +46,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         String password = CipherUtils.decrypt(configuration.getDbPasswordEncrypted());
         jdbcUrl = jdbcUrl.replaceAll("\\$\\$USER\\$\\$", configuration.getDbUser());
         jdbcUrl = jdbcUrl.replaceAll("\\$\\$PASSWD\\$\\$", password);
-        
+
         DbCreds.Builder credsBuilder = new DbCreds.Builder()
                 .dbType("SQLServer") // SQLServer is the only supported match dbtype
                 .jdbcUrl(jdbcUrl) //

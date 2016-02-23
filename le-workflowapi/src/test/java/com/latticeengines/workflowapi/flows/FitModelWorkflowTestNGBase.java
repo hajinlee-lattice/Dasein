@@ -90,6 +90,7 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .attributes(
                         Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange",
                                 "BusinessEmployeesRange" })) //
+                .prematchFlowTableName("PrematchFlow") //
                 .build();
 
         return workflowConfig;

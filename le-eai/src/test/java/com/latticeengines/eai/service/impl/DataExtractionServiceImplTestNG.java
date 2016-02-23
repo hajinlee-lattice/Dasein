@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -164,7 +165,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.setName("Account");
         Attribute attr = new Attribute();
         attr.setName("Id");
-        attr.setSemanticType("NewId");
+        attr.setSemanticType(SemanticType.ExternalId);
         attr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
         attr.setDataSource("");
         attr.setDataQuality("");
@@ -183,7 +184,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         Attribute lmd = new Attribute();
         lmd.setName("LastModifiedDate");
-        lmd.setSemanticType("");
+        lmd.setSemanticType(SemanticType.ExternalId);
         lmd.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
         lmd.setDataSource("");
         lmd.setDataQuality("");

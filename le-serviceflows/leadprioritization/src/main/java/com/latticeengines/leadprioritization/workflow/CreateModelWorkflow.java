@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.leadprioritization.workflow.steps.CreateEventTableReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
+import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -26,6 +27,9 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
     private DedupEventTable dedupEventTable;
 
     @Autowired
+    private MatchWorkflow matchWorkflow;
+
+    @Autowired
     private Sample sample;
 
     @Autowired
@@ -41,6 +45,7 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
         return new WorkflowBuilder().next(importData) //
                 .next(createEventTableReport) //
                 .next(dedupEventTable) //
+                .next(matchWorkflow) //
                 .next(sample) //
                 .next(profileAndModel) //
                 .build();

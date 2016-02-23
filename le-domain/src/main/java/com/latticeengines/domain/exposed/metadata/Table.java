@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -156,6 +157,25 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
                 return attribute.getName().equals(name);
             }
         }, null);
+    }
+
+    @JsonIgnore
+    public Attribute getAttribute(final SemanticType semanticType) {
+        if (semanticType == null) {
+            return null;
+        }
+        return Iterables.find(attributes, new Predicate<Attribute>() {
+
+            @Override
+            public boolean apply(@Nullable Attribute attribute) {
+                return semanticType == attribute.getSemanticType();
+            }
+        }, null);
+    }
+
+    @JsonIgnore
+    public List<Attribute> findAttributes(Predicate<Attribute> predicate) {
+        return Lists.newArrayList(Iterables.filter(attributes, predicate));
     }
 
     /**

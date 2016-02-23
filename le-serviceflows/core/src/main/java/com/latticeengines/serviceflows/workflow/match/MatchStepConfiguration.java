@@ -31,6 +31,10 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private MatchCommandType matchCommandType;
 
+    @NotEmptyString
+    @NotNull
+    private String inputTableName;
+
     @JsonProperty("db_url")
     public String getDbUrl() {
         return dbUrl;
@@ -91,4 +95,13 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         this.matchCommandType = matchCommandType;
     }
 
+    @JsonProperty("input_table_name")
+    public String getInputTableName() {
+        return inputTableName;
+    }
+
+    @JsonProperty("input_table_name")
+    public void setInputTableName(String inputTableName) {
+        this.inputTableName = inputTableName;
+    }
 }

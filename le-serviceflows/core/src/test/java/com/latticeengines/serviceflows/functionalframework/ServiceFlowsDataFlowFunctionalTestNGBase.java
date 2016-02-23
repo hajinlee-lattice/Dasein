@@ -65,6 +65,9 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         return Paths.get(getFlowBeanName(), getScenarioName()).toString();
     }
 
+    protected void postProcessSourceTable(Table table) {
+    }
+
     protected String getIdColumnName(String tableName) {
         return null;
     }
@@ -134,7 +137,9 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
             String path = sourcePaths.get(key);
             String idColumn = getIdColumnName(key);
             String lastModifiedColumn = getLastModifiedColumnName(key);
-            sources.put(key, MetadataConverter.getTable(yarnConfiguration, path, idColumn, lastModifiedColumn));
+            Table table = MetadataConverter.getTable(yarnConfiguration, path, idColumn, lastModifiedColumn);
+            postProcessSourceTable(table);
+            sources.put(key, table);
         }
         return sources;
     }
@@ -257,8 +262,7 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
         });
     }
 
-    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right,
-            String rightId) {
+    protected boolean identicalSets(List<GenericRecord> left, String leftId, List<GenericRecord> right, String rightId) {
         return allEntriesExist(left, leftId, right, rightId) && allEntriesExist(right, rightId, left, leftId);
     }
 

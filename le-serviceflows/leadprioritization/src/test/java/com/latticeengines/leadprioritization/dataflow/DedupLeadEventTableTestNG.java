@@ -19,10 +19,10 @@ public class DedupLeadEventTableTestNG extends ServiceFlowsDataFlowFunctionalTes
     public void test() {
         verifySource();
 
-        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", null, "Email", "IsConverted");
+        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable");
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
-        final Map<Object, Integer> histogram = histogram(output, "Email");
+        final Map<Object, Integer> histogram = histogram(output, "Domain");
         Assert.assertTrue(histogram.size() > 0);
         Assert.assertTrue(Iterables.all(histogram.keySet(), new Predicate<Object>() {
 

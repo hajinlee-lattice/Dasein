@@ -5,9 +5,12 @@ import java.util.List;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
+import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
+import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
@@ -18,12 +21,14 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
         private DedupEventTableConfiguration runDataFlow = new DedupEventTableConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
+        private MatchStepConfiguration match = new MatchStepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
             registerReport.setMicroServiceHostPort(microServiceHostPort);
             runDataFlow.setMicroServiceHostPort(microServiceHostPort);
             model.setMicroServiceHostPort(microServiceHostPort);
+            match.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -33,6 +38,7 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             registerReport.setCustomerSpace(customerSpace);
             runDataFlow.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
+            match.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -42,9 +48,10 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder targetTableName(String targetTableName) {
+        public Builder dedupTargetTableName(String targetTableName) {
             runDataFlow.setName(targetTableName);
             runDataFlow.setTargetPath(targetTableName);
+            match.setInputTableName(targetTableName);
             return this;
         }
 
@@ -58,6 +65,7 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
             runDataFlow.setInternalResourceHostPort(internalResourceHostPort);
             model.setInternalResourceHostPort(internalResourceHostPort);
+            match.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -66,12 +74,12 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder dataFlowBeanName(String beanName) {
+        public Builder dedupDataFlowBeanName(String beanName) {
             runDataFlow.setBeanName(beanName);
             return this;
         }
 
-        public Builder dataFlowParams(DataFlowParameters dataFlowParameters) {
+        public Builder dedupDataFlowParams(DataFlowParameters dataFlowParameters) {
             runDataFlow.setDataFlowParams(dataFlowParameters);
             return this;
         }
@@ -86,10 +94,29 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
+            match.setDbUrl(matchClientDocument.getUrl());
+            match.setDbUser(matchClientDocument.getUsername());
+            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
+            match.setMatchClient(matchClientDocument.getMatchClient().name());
+            return this;
+        }
+
+        public Builder matchType(MatchCommandType matchCommandType) {
+            match.setMatchCommandType(matchCommandType);
+            return this;
+        }
+
+        public Builder matchDestTables(String destTables) {
+            match.setDestTables(destTables);
+            return this;
+        }
+
         public CreateModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(runDataFlow);
+            configuration.add(match);
             configuration.add(model);
 
             return configuration;

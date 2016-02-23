@@ -175,8 +175,8 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setFundamentalType(attrFromImportTables.getFundamentalType());
                 attr.setPhysicalName(attr.getName());
                 attr.setSemanticType(attrFromImportTables.getSemanticType());
-                if (StringUtils.isNotEmpty(attr.getSemanticType())) {
-                    attr.setName(attr.getSemanticType());
+                if (attr.getSemanticType() != null) {
+                    attr.setName(attr.getSemanticType().toString());
                 }
                 attr.setStatisticalType(attrFromImportTables.getStatisticalType());
                 attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));

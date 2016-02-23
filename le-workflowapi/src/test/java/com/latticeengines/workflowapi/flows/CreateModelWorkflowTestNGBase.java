@@ -5,13 +5,13 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import com.beust.jcommander.internal.Lists;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -20,6 +20,8 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
+import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.SourceFileState;
@@ -28,6 +30,7 @@ import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
 import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.latticeengines.workflow.exposed.service.SourceFileService;
@@ -48,6 +51,9 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private MatchCommandProxy matchCommandProxy;
 
     protected void setupForImportWorkflow() throws Exception {
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
@@ -106,11 +112,16 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .reportName("Report_" + sourceFile.getName()) //
                 .sourceType(SourceType.FILE) //
                 .sourceFileName(sourceFile.getName()) //
-                .dataFlowBeanName("dedupEventTable") //
-                .dataFlowParams(new DedupEventTableParameters(sourceFile.getTableName(), "Website", "Email", "IsWon")) //
-                .targetTableName(sourceFile.getTableName() + "_deduped") //
+                .dedupDataFlowBeanName("dedupEventTable") //
+                .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName())) //
+                .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .eventColumns(Arrays.asList("IsWon")) // TODO get from Table
+                .matchClientDocument(matchCommandProxy.getBestMatchClient(3000)) //
+                .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
+                .matchDestTables("DerivedColumns")
+                .eventColumns(
+                        sourceFile.getSchemaInterpretation() == SchemaInterpretation.SalesforceAccount ? Lists
+                                .newArrayList("IsWon") : Lists.newArrayList("IsConverted")) //
                 .build();
         return workflowConfig;
     }

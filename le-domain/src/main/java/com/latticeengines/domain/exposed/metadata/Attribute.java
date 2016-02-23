@@ -456,14 +456,24 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setSemanticType(String semanticType) {
-        properties.put("SemanticType", semanticType);
+    public void setSemanticType(SemanticType semanticType) {
+        if (semanticType != null) {
+            properties.put("SemanticType", semanticType.toString());
+        }
     }
 
     @Transient
     @JsonIgnore
-    public String getSemanticType() {
-        return (String) properties.get("SemanticType");
+    public SemanticType getSemanticType() {
+        Object raw = properties.get("SemanticType");
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return SemanticType.valueOf(raw.toString());
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Transient
@@ -489,7 +499,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public String getRTSArguments() {
         return (String) properties.get("RTSArguments");
     }
-    
+
     @Transient
     @JsonIgnore
     public Boolean getRTS() {
@@ -499,7 +509,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
         return rts;
     }
-    
+
     @Transient
     @JsonIgnore
     public void setRTS(Boolean rts) {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetadataConverter {
@@ -174,6 +176,14 @@ public class MetadataConverter {
                 List<String> enumValues = Arrays.asList(enumValuesString.split(","));
                 attribute.setCleanedUpEnumValues(enumValues);
                 attribute.setEnumValues(enumValues);
+            }
+            if (!StringUtils.isEmpty(field.getProp("SemanticType"))) {
+                try {
+                    SemanticType semanticType = SemanticType.valueOf(field.getProp("SemanticType"));
+                    attribute.setSemanticType(semanticType);
+                } catch (Exception e) {
+                    // pass
+                }
             }
 
             return attribute;

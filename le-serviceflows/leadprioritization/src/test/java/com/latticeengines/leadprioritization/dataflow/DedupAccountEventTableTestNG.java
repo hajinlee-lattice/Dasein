@@ -19,8 +19,7 @@ public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctional
     public void test() {
         verifySource();
 
-        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable", "Domain", "Email",
-                "Event_IsWon");
+        DedupEventTableParameters parameters = new DedupEventTableParameters("EventTable");
         executeDataFlow(parameters);
         List<GenericRecord> output = readOutput();
         final Map<Object, Integer> histogram = histogram(output, "Domain");

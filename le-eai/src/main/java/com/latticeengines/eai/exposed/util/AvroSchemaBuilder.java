@@ -134,7 +134,7 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
             for (Map.Entry<String, Object> entry : attr.getEntries()) {
-                fieldBuilder.prop(entry.getKey(), entry.getValue().toString());
+                fieldBuilder.prop(entry.getKey(), entry.getValue() == null ? "" : entry.getValue().toString());
             }
 
             if (attr.getEnumValues().size() > 0) {

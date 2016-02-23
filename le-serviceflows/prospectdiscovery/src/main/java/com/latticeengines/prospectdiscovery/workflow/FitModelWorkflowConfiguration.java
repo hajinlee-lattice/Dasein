@@ -99,6 +99,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder prematchFlowTableName(String prematchFlowTableName) {
+            match.setInputTableName(prematchFlowTableName);
+            return this;
+        }
+
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
@@ -127,7 +132,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             runScoreTableDataFlow.setAccountMasterNameAndPath(new String[] { "AccountMaster", directoryToScore });
             return this;
         }
-        
+
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
             return this;
@@ -137,7 +142,7 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             score.setRegisterScoredTable(registerScoredTable);
             return this;
         }
-        
+
         public Builder attributes(List<String> attributes) {
             attrLevelSummaryDataFlows.setAttributes(attributes);
             return this;

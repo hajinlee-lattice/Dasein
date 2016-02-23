@@ -94,6 +94,7 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
                     .uniqueKeyColumn("LatticeAccountID") //
                     .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //
+                    .prematchFlowTableName("PrematchFlow") //
                     .attributes(
                             Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2",
                                     "BusinessRevenueRange", "BusinessEmployeesRange" })) //
