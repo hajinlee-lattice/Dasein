@@ -15,6 +15,7 @@ import cascading.operation.Buffer;
 
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AlexaIndustryBuffer;
+import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 
 @Component("alexaRefreshFlow")
@@ -28,6 +29,10 @@ public class AlexaRefreshFlow extends MostRecentFlow {
     public Node construct(MostRecentDataFlowParameters parameters) {
         Node source = addSource(parameters.getSourceTable());
         source = findMostRecent(source, parameters);
+
+        DateTimeCleanupFunction function = new DateTimeCleanupFunction("OnlineSince");
+        source = source.apply(function, new FieldList("OnlineSince"), new FieldMetadata("OnlineSince", Long.class));
+
         sourceFields = source.getFieldNames();
         Node industry = standardIndustry(source);
         Node country = getCountryRanks(source);

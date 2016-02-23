@@ -9,8 +9,7 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
-abstract public class CleanupFunction extends BaseOperation implements Function
-{
+abstract public class CleanupFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 1529935996686552118L;
     private boolean removeNull;
@@ -21,12 +20,13 @@ abstract public class CleanupFunction extends BaseOperation implements Function
     }
 
     @Override
-    public void operate(FlowProcess flowProcess, FunctionCall functionCall )
-    {
+    public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         Tuple result = cleanupArguments(arguments);
-        if (!removeNull || result != null) {
-            functionCall.getOutputCollector().add( result );
+        if (result != null) {
+            functionCall.getOutputCollector().add(result);
+        } else if (!removeNull) {
+            functionCall.getOutputCollector().add(Tuple.size(1));
         }
     }
 

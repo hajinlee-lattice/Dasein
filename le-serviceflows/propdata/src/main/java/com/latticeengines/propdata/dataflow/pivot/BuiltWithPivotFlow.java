@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
+import cascading.operation.Buffer;
+import cascading.tuple.Fields;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
@@ -18,9 +21,6 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithTopAttrBu
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-
-import cascading.operation.Buffer;
-import cascading.tuple.Fields;
 
 @Component("builtWithPivotFlow")
 public class BuiltWithPivotFlow extends PivotFlow {
@@ -50,7 +50,7 @@ public class BuiltWithPivotFlow extends PivotFlow {
         PivotStrategy pivotStrategy = new BuiltWithPivotStrategy();
         Node pivot = source.pivot(parameters.getJoinFields(), pivotStrategy);
 
-        for (String typeField: BuiltWithPivotStrategy.typeFlags) {
+        for (String typeField : BuiltWithPivotStrategy.typeFlags) {
             pivot = pivot.renameBooleanField(typeField, BooleanType.TRUE_FALSE);
         }
 
@@ -60,7 +60,7 @@ public class BuiltWithPivotFlow extends PivotFlow {
         pivot = pivot.join(joinList, join, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, topAttrs, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, recent, joinList, JoinType.OUTER);
-
+        pivot = removeInvalidDatetime(pivot, parameters.getColumns());
         pivot = pivot.addTimestamp(parameters.getTimestampField());
         return finalRetain(pivot, parameters.getColumns());
     }
@@ -69,9 +69,8 @@ public class BuiltWithPivotFlow extends PivotFlow {
         Node threeMonth = source.filter("Technology_First_Detected + " + ONE_MONTH * 3 + "L >= LE_Last_Upload_Date",
                 new FieldList("Technology_First_Detected", "LE_Last_Upload_Date"));
         threeMonth = threeMonth.renamePipe("recent-tech");
-
-        Buffer<?> buffer = new BuiltWithRecentTechBuffer(new Fields("Domain",
-                "BusinessTechnologiesRecentTechnologies", "BusinessTechnologiesRecentTags"));
+        Buffer<?> buffer = new BuiltWithRecentTechBuffer(
+                new Fields("Domain", "BusinessTechnologiesRecentTechnologies", "BusinessTechnologiesRecentTags"));
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(domainField, String.class));
         fms.add(new FieldMetadata("BusinessTechnologiesRecentTechnologies", String.class));
@@ -86,7 +85,9 @@ public class BuiltWithPivotFlow extends PivotFlow {
         fms.addAll(topAttrFieldMetadata(columns));
 
         List<String> fieldNames = new ArrayList<>();
-        for (FieldMetadata fm: fms) { fieldNames.add(fm.getFieldName()); }
+        for (FieldMetadata fm : fms) {
+            fieldNames.add(fm.getFieldName());
+        }
 
         Buffer<?> buffer = new BuiltWithTopAttrBuffer(attrMap,
                 new Fields(fieldNames.toArray(new String[fieldNames.size()])));
@@ -97,12 +98,12 @@ public class BuiltWithPivotFlow extends PivotFlow {
 
     private Map<String, String> topAttrFields(List<SourceColumn> columns) {
         Map<String, String> attrs = new HashMap<>();
-        for (SourceColumn column: columns) {
+        for (SourceColumn column : columns) {
             if (column.getCalculation().equals(SourceColumn.Calculation.BUILTWITH_TOPATTR)) {
                 try {
                     JsonNode argNode = mapper.readTree(column.getArguments());
                     String[] names = argNode.get("TechnologyNames").asText().split(",");
-                    for (String name: names) {
+                    for (String name : names) {
                         attrs.put(name, column.getColumnName());
                     }
                 } catch (IOException e) {
@@ -115,7 +116,7 @@ public class BuiltWithPivotFlow extends PivotFlow {
 
     private List<FieldMetadata> topAttrFieldMetadata(List<SourceColumn> columns) {
         List<FieldMetadata> fms = new ArrayList<>();
-        for (SourceColumn column: columns) {
+        for (SourceColumn column : columns) {
             if (column.getCalculation().equals(SourceColumn.Calculation.BUILTWITH_TOPATTR)) {
                 fms.add(new FieldMetadata(column.getColumnName(), String.class));
             }
