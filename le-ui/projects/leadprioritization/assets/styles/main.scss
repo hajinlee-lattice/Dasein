@@ -683,4 +683,49 @@ Custom Fields Page
 
 
 
+/*
+Validate Import View
+================================================================== */
+.import-summary {
+  h2 {
+    font-size: 1.35em;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  h3 {
+    text-align: center;
+    font-size: 3em;
+    margin: 0;
+  }
+  .summary-list dt {
+    color: #333;
+    font-size: 0.9em;
+    text-transform: initial;
+  }
+}
+.uploaded-leads, .excluded-leads, .used-leads {
+  padding-top: 110px;  
+  background-repeat: no-repeat;
+}
+.uploaded-leads {
+  background-image: url("../images/ico-uploaded-lead-23.svg");
+  background-position: center 48px;
+  background-size: 114px;
+}
+.excluded-leads {
+  background-image: url("../images/ico-excluded-lead-24.svg");
+  background-position: center 42px;
+  background-size: 56px;
+}
+.used-leads {
+  background-image: url("../images/ico-used-lead-25.svg");
+  background-position: center 43px;
+  background-size: 53px;
+}
+
+
+
+
+
+
 
