@@ -41,9 +41,18 @@ class ModelGenerator(State, JsonGenBase):
         model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": "pipeline.py" }, 
                                            { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" },
                                            { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" }]
-        
+
         (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
-        
+
+        filenames = sorted(filenames)
+        for filename in filenames:
+            if filename.endswith(".pyc"):
+                continue
+            filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
+            model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
+
+        (dirpath, _, filenames) = os.walk("leframework.tar.gz/leframework/configurablepipelinetransformsfromfile/").next()
+
         filenames = sorted(filenames)
         for filename in filenames:
             if filename.endswith(".pyc"):

@@ -97,9 +97,9 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "rfpmml.xml", pmmlContents);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json",
                 modelSummaryContents);
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/ScoreDerivation.json",
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/scorederivation.json",
                 scoreDerivationContents);
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json",
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/datacomposition.json",
                 dataCompositionContents);
         HdfsUtils.writeToFile(yarnConfiguration, metadataDirectory + METADATA_DIAGNOSTIC_FILE,
                 metadataDiagnosticsContents);

@@ -220,12 +220,12 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             String basePath = "/Models/" + modelName + "/" + getModelVersion() + "/";
 
             String dataComposition = HdfsUtils.getHdfsFileContents(yarnConfiguration, jobStatus.getResultDirectory()
-                    + "/enhancements/DataComposition.json");
-            modelPublisher.publish(new Path(basePath + "DataComposition.json"), new Document(dataComposition));
+                    + "/enhancements/datacomposition.json");
+            modelPublisher.publish(new Path(basePath + "datacomposition.json"), new Document(dataComposition));
 
             String scoreDerivation = HdfsUtils.getHdfsFileContents(yarnConfiguration, jobStatus.getResultDirectory()
-                    + "/enhancements/ScoreDerivation.json");
-            modelPublisher.publish(new Path(basePath + "ScoreDerivation.json"), new Document(scoreDerivation));
+                    + "/enhancements/scorederivation.json");
+            modelPublisher.publish(new Path(basePath + "scorederivation.json"), new Document(scoreDerivation));
         } catch (Exception e) {
             LedpException exc = new LedpException(LedpCode.LEDP_16011, e, new String[] {
                     String.valueOf(modelCommand.getPid()), appId });

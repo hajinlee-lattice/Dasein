@@ -36,6 +36,7 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(pipelinefwkdir)
 
         os.makedirs(fwkdir + "/leframework")
+        os.makedirs(fwkdir + "/leframework/configurablepipelinetransformsfromfile")
         os.makedirs(pipelinefwkdir)
 
         enginedir = "/leframework/scoringengine.py"
@@ -50,6 +51,10 @@ class TrainingTestBase(TestBase):
         os.makedirs(pipelinefwkdir + "/configurablepipelinetransformsfromfile")
         for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
             shutil.copy(filename, pipelinefwkdir)
+
+        for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
+            print filename
+            shutil.copy(filename, fwkdir + "/leframework/configurablepipelinetransformsfromfile")
 
         sys.path.append(pipelinefwkdir)
 
