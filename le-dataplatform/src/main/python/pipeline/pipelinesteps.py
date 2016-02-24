@@ -20,7 +20,7 @@ class EnumeratedColumnTransformStep(PipelineStep):
         self.columns = columns
         self.columnList = columns.keys()
             
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         outputFrame = dataFrame
     
         for column, encoder in self.columns.iteritems():
@@ -35,9 +35,6 @@ class EnumeratedColumnTransformStep(PipelineStep):
     
         return outputFrame
     
-    def getColumns(self):
-        return self.columnList
-    
     def getOutputColumns(self):
         return [(create_column(k, "LONG"), [k]) for k in self.columnList]
 
@@ -45,25 +42,22 @@ class EnumeratedColumnTransformStep(PipelineStep):
         return "encoder"
     
 class ColumnTypeConversionStep(PipelineStep):
-    columnsToConvert = []
+    columnsToPivot = []
         
-    def __init__(self, columnsToConvert=[]):
-        self.columnsToConvert = columnsToConvert
+    def __init__(self, columnsToPivot=[]):
+        self.columnsToPivot = columnsToPivot
     
-    def transform(self, dataFrame):
-        if len(self.columnsToConvert) > 0:
-            for column in self.columnsToConvert:
+    def transform(self, dataFrame, configMetadata, test):
+        if len(self.columnsToPivot) > 0:
+            for column in self.columnsToPivot:
                 if column in dataFrame and dataFrame[column].dtype == np.object_:
                     dataFrame[column] = pd.Series(pd.lib.maybe_convert_numeric(dataFrame[column].as_matrix(), set(), coerce_numeric=True))
                 else:
                     logger.info("Column %s cannot be transformed since it is not in the data frame." % column)
         return dataFrame
     
-    def getColumns(self):
-        return self.columnsToConvert
-    
     def getOutputColumns(self):
-        return [(create_column(k, "FLOAT"), [k]) for k in self.columnsToConvert]
+        return [(create_column(k, "FLOAT"), [k]) for k in self.columnsToPivot]
     
     def getRTSMainModule(self):
         return "make_float"
@@ -80,9 +74,6 @@ class ImputationStep(PipelineStep):
         self.imputationValues = imputationValues
         self.targetColumn = targetCol
 
-    def getColumns(self):
-        return self.columnList
-
     def getOutputColumns(self):
         return [(create_column(k, "FLOAT"), [k]) for k, _ in self.columns.iteritems()]
 
@@ -92,7 +83,7 @@ class ImputationStep(PipelineStep):
     def getRTSArtifacts(self):
         return [("imputations.txt", self.imputationFilePath)]
 
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.imputationValues) == 0:
             self.imputationValues = self.__computeImputationValues(dataFrame)
             self.__writeRTSArtifact()

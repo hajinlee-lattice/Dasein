@@ -25,9 +25,7 @@ class ImputationStep(PipelineStep):
         self.meanColumn = meanColumn
         self.componentMatrix = componentMatrix
      
-    def transform(self, dataFrame):
-        outputFrame = dataFrame
-                      
+    def transform(self, dataFrame, configMetadata, test):
         calculateImputationValues = True
         if len(self.imputationValues) != 0:
             calculateImputationValues = False
@@ -111,7 +109,7 @@ class ImputationStep(PipelineStep):
         scaling_array = self.getScalingForPCA(inputDF, eventCol)
         inputScaled = np.multiply(inputDF.values, np.ones(inputDF.shape) * scaling_array.T)
         np.nan_to_num(inputScaled)
-        (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
+        (_, componentsMatrix, _) = self.getPCAComponents(inputScaled)
 
         if len(componentsMatrix) < numberOfColumnsThreshold:
             complementaryColumns = np.zeros((numberOfColumnsThreshold - len(componentsMatrix), len(componentsMatrix[0])))
@@ -172,7 +170,7 @@ class ImputationStep(PipelineStep):
      
     def __createBins(self, x, y, numBins=20):
         if len(x) != len(y):
-             print "Warning: Number of records and number of labels are different."
+            print "Warning: Number of records and number of labels are different."
      
         pairs = []
         numberOfPoints = min(len(x), len(y))

@@ -1,5 +1,5 @@
 '''
-Contains all column tranformation function, whether to apply to categorical or numerical columns
+Contains all column tranformation functions, whether to apply to categorical or numerical columns
 The actual function to apply are taken from model.json file
 '''
 
@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 logger = logging.getLogger(name='columntransform')
 
-class ColumnTransform:
+class ColumnTransform(object):
 
     pipelineFileAsJson = ""
     columnTransformKey = u"columnTransformFiles"
@@ -35,7 +35,7 @@ class ColumnTransform:
                         with open(pipelineFile) as pipelineFileText:
                             self.pipelineFileAsJson = json.load(pipelineFileText)
                             break
-            except Exception as e:
+            except Exception:
                 logger.exception("Could not load pipeline from provided path:" + pathToPipelineFiles)
         else:
             logger.info("Configurable pipeline not loaded because empty path provided: %s" % pathToPipelineFiles)
@@ -56,7 +56,7 @@ class ColumnTransform:
             testPass = True
             missingRequiredKey = None
 
-            for attr, value in jsonToProcess[self.columnTransformKey].iteritems():
+            for _, value in jsonToProcess[self.columnTransformKey].iteritems():
                 if self.uniqueColumnTransformKey not in value:
                     testPass = False
                     missingRequiredKey = self.uniqueColumnTransformKey
@@ -85,7 +85,7 @@ class ColumnTransform:
             logger.exception("Caught Exception while checking Configurable Pipeline JSON for correctness")
             return False
 
-    def buildPipelineFromFile(self, StringColumns = None, CategoricalColumns=None, ContinuousColumns=None, targetColumn=None, ColumnsToTransform=None):
+    def buildPipelineFromFile(self, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None):
         # Return Array that holds functions loaded from file
         pipelineAsArrayOfTransformClasses = []
 
@@ -99,7 +99,7 @@ class ColumnTransform:
                 logger.info("Couldn't validate JSON that created configurable pipeline")
                 return pipelineAsArrayOfTransformClasses
 
-            for attr, value in jsonToProcess[self.columnTransformKey].iteritems():
+            for _, value in jsonToProcess[self.columnTransformKey].iteritems():
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
                 columnTransformObject = {}
@@ -110,14 +110,20 @@ class ColumnTransform:
                 columnTransformObject[self.columnTransformFilePathKey] = sourceFilePathLowerCased
 
                 logger.info("Configurable Pipeline Current Path: %s" % str(os.getcwd()))
-                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, ['./lepipeline.tar.gz', './configurablepipelinetransformsfromfile'])
+                fileObject, pathname, description = imp.find_module(uniqueColumnTransformName, \
+                                                                    ['./lepipeline.tar.gz', './configurablepipelinetransformsfromfile'])
                 columnTransformObject[self.loadedModuleKey] = imp.load_module(uniqueColumnTransformName, fileObject, pathname, description)
-                logger.info("Loaded " + uniqueColumnTransformName + " for Configurable Pipeline ") 
+                logger.info("Loaded %s for Configurable Pipeline " % uniqueColumnTransformName) 
 
                 mainClassName = value[self.mainClassNameKey]
                 args = []
                 namedParameterList = value[self.namedParameterListToInitKey]
-                kwargs = self.buildKwArgs(namedParameterList = namedParameterList, StringColumns = StringColumns, CategoricalColumns=CategoricalColumns, ContinuousColumns=ContinuousColumns, targetColumn=targetColumn, ColumnsToTransform=ColumnsToTransform)
+                kwargs = self.buildKwArgs(namedParameterList = namedParameterList, \
+                                          stringColumns = stringColumns, \
+                                          categoricalColumns=categoricalColumns, \
+                                          continuousColumns=continuousColumns, \
+                                          targetColumn=targetColumn, \
+                                          columnsToTransform=columnsToTransform)
                 loadedObject = getattr(columnTransformObject[self.loadedModuleKey], mainClassName)(*args, **kwargs)
                 columnTransformObject[self.loadedObjectKey] = loadedObject
 
@@ -130,44 +136,44 @@ class ColumnTransform:
             logger.info("Finished Loading Configurable Pipeline")
 
             return pipelineAsArrayOfTransformClasses
-        except Exception:
-            logger.exception("Caught Exception while building Configurable Pipeline")
+        except Exception as e:
+            logger.exception("Caught Exception while building Configurable Pipeline" % str(e))
             return None
 
-    def buildKwArgs(self, namedParameterList=None, StringColumns = None, CategoricalColumns=None, ContinuousColumns=None, targetColumn=None, ColumnsToTransform=None):
+    def buildKwArgs(self, namedParameterList=None, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None):
         kwargs = {}
         try:
             value = None
 
             for namedArgument, namedArgumentDataType in namedParameterList.iteritems():
                 if namedArgumentDataType.lower() == "orderedDictContinuousColumns".lower():
-                    if ContinuousColumns is None:
+                    if continuousColumns is None:
                         value = None
                     else:
-                        value = OrderedDict(ContinuousColumns)
+                        value = OrderedDict(continuousColumns)
                 elif namedArgumentDataType.lower() == "emptyDictionary".lower():
                     value = {}
                 elif namedArgumentDataType.lower() == "categoricalColumns".lower():
-                    value = CategoricalColumns
+                    value = categoricalColumns
                 elif namedArgumentDataType.lower() == "emptyList".lower():
                     value = []
                 elif namedArgumentDataType.lower() == "targetColumn".lower():
                     value = targetColumn
                 elif namedArgumentDataType.lower() == "numericalColumn".lower():
-                    value = ContinuousColumns
+                    value = continuousColumns
                 elif namedArgumentDataType.lower() == "columnsToTransform".lower():
-                    if CategoricalColumns is not None and StringColumns is not None:
-                        value = set(StringColumns - set(CategoricalColumns.keys()))
+                    if categoricalColumns is not None and stringColumns is not None:
+                        value = set(stringColumns - set(categoricalColumns.keys()))
                     else:
                         value = None
                 else:
-                    logger.error("Unknown ColumnType: "+ namedArgument+ ". Assigning List as DataType")
+                    logger.error("Unknown ColumnType: %s. Assigning List as DataType" % namedArgument)
                     value = []
 
                 if namedArgument not in kwargs:
                     kwargs[namedArgument] = value
                 else:
-                    logger.warning("Warning: NamedArgument "+ namedArgument+ " has already been assigned to kwargs")
+                    logger.warning("Warning: NamedArgument %s has already been assigned to kwargs" % namedArgument)
 
             return kwargs
         except Exception:

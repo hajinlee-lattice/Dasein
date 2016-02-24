@@ -9,7 +9,7 @@ from array import array
 class ColumnTransformTest(TrainingTestBase):
 
     def testColumnTransform(self):
-        pipelineFilePath = ["./configurablepipelinetransformsfromfile/pipeline.json".lower()]
+        pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
         pipeline = colTransform.buildPipelineFromFile()
 
@@ -20,21 +20,21 @@ class ColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 3, "Pipeline should have 4 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(len(pipeline), 4, "Pipeline should have 4 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def assertThatEachMemberOfPipelineHasTransformMethod(self, pipeline):
         for step in pipeline:
             self.assertTrue(hasattr(step, "transform"), "Each transform in pipeline should have a transform method")
 
     def checkThatTransformsDontThrowExceptions(self):
-        keys = ["imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"]
-        pipelineFilePath = ["./configurablepipelinetransformsfromfile/pipeline.json".lower()]
+        keys = ["pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"]
+        pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
 
         with open(pipelineFilePath[0]) as pipelineFile:
             pipelineFileAsJSON = json.load(pipelineFile)
-            for attr, value in pipelineFileAsJSON[ colTransform.columnTransformKey ].iteritems():
-                self.assertTrue(value["Name"] in keys, "Couldn't find expected transform name " + value["Name"] + " in file")
+            for _, value in pipelineFileAsJSON[colTransform.columnTransformKey].iteritems():
+                self.assertTrue(value["Name"] in keys, "Couldn't find expected transform name %s in file" % value["Name"])
 
                 uniqueColumnTransformName = value["Name"]
                 columnTransformObject = {}
@@ -48,13 +48,13 @@ class ColumnTransformTest(TrainingTestBase):
                 mainClassName = value["MainClassName"]
                 args = []
                 namedParameterList = value["NamedParameterListToInit"]
-                kwargs = colTransform.buildKwArgs(namedParameterList = namedParameterList, StringColumns = None, CategoricalColumns=None, ContinuousColumns=None, targetColumn=None, ColumnsToTransform=None)
+                kwargs = colTransform.buildKwArgs(namedParameterList = namedParameterList, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None)
                 self.aTestBuildKwArgs(namedParameterList)
 
                 try:
-                    loadedObject = getattr(columnTransformObject["LoadedModule"], mainClassName)(*args, **kwargs)
-                except Exception as E:
-                    print "Caught Exception:",E, "while RUNNING transform from pipeline"
+                    getattr(columnTransformObject["LoadedModule"], mainClassName)(*args, **kwargs)
+                except Exception as e:
+                    print "Caught Exception:", e, "while RUNNING transform from pipeline"
                     raise
 
     def aTestBuildKwArgs(self, namedParameterListAsJSON):

@@ -25,10 +25,18 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/python/pipeline/configurablepipelinetransformsfromfile</directory>
+            <directory>src/main/python/configurablepipelinetransformsfromfile</directory>
             <outputDirectory>.</outputDirectory>
             <includes>
                 <include>**/*.py</include>
+                <include>**/*.json</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/python/</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>columntransform.py</include>
             </includes>
         </fileSet>
     </fileSets>

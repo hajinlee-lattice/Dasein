@@ -18,7 +18,7 @@ class EnumeratedColumnTransformStep(PipelineStep):
     def __init__(self, enumMappings):
         self.columns = enumMappings
             
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         outputFrame = dataFrame
         for column, encoder in self.columns.iteritems():
             if hasattr(encoder, 'classes_'):
@@ -35,10 +35,10 @@ class EnumeratedColumnTransformStep(PipelineStep):
 class ColumnTypeConversionStep(PipelineStep):
     columnsToConvert_ = []
         
-    def __init__(self, columnsToConvert=[]):
-        self.columnsToConvert_ = columnsToConvert
+    def __init__(self, columnsToPivot=[]):
+        self.columnsToConvert_ = columnsToPivot
     
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.columnsToConvert_) > 0:
             for column in self.columnsToConvert_:
                 if column in dataFrame and dataFrame[column].dtype == np.object_:
@@ -63,9 +63,7 @@ class ImputationStep(PipelineStep):
         self.meanColumn = meanColumn
         self.componentMatrix = componentMatrix
      
-    def transform(self, dataFrame):
-        outputFrame = dataFrame
-                      
+    def transform(self, dataFrame, configMetadata, test):
         calculateImputationValues = True
         if len(self.imputationValues) != 0:
             calculateImputationValues = False
@@ -149,7 +147,7 @@ class ImputationStep(PipelineStep):
         scaling_array = self.getScalingForPCA(inputDF, eventCol)
         inputScaled = np.multiply(inputDF.values, np.ones(inputDF.shape) * scaling_array.T)
         np.nan_to_num(inputScaled)
-        (explainedVarianceRatio, componentsMatrix, inputTransformed) = self.getPCAComponents(inputScaled)
+        (_, componentsMatrix, _) = self.getPCAComponents(inputScaled)
 
         if len(componentsMatrix) < numberOfColumnsThreshold:
             complementaryColumns = np.zeros((numberOfColumnsThreshold - len(componentsMatrix), len(componentsMatrix[0])))
@@ -210,7 +208,7 @@ class ImputationStep(PipelineStep):
      
     def __createBins(self, x, y, numBins=20):
         if len(x) != len(y):
-             print "Warning: Number of records and number of labels are different."
+            print "Warning: Number of records and number of labels are different."
      
         pairs = []
         numberOfPoints = min(len(x), len(y))
@@ -257,9 +255,9 @@ class RevenueColumnTransformStep(PipelineStep):
     columns = OrderedDict()
 
     def __init__(self, enumMappings):
-         self.columns = enumMappings
+        self.columns = enumMappings
          
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.columns) == 0:
             return dataFrame
         for column in self.columns:
@@ -297,29 +295,29 @@ class RevenueColumnTransformStep(PipelineStep):
         dataFrame[column] = dataFrame[column].apply(lambda x : np.log(1.0 + x) if x >= 0 else -math.log(1.0 - x))
         
 class EVModelStep(PipelineStep):
-    model_ = None
-    modelInputColumns_ = []
-    scoreColumnName_ = None
+    model = None
+    modelInputColumns = []
+    scoreColumnName = None
     revenueColumnName_ = None
+    
     def __init__(self, model=None, modelInputColumns=None, revenueColumnName=None, scoreColumnName="Score"):
-        self.model_ = model
-        self.modelInputColumns_ = modelInputColumns
-        self.scoreColumnName_ = scoreColumnName
+        self.model = model
+        self.modelInputColumns = modelInputColumns
+        self.scoreColumnName = scoreColumnName
         self.revenueColumnName_ = revenueColumnName
         self.setModelStep(True)
            
     def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName="Score"):
-         return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
+        return EVModelStep(model, modelInputColumns, revenueColumnName, scoreColumnName)
        
-    def transform(self, dataFrame):
-          
+    def transform(self, dataFrame, configMetadata, test):
         outputFrame = pd.DataFrame(columns=["Score", "PredictedRevenue"])
-        outputFrame["Score"] = dataFrame[self.scoreColumnName_]
+        outputFrame["Score"] = dataFrame[self.scoreColumnName]
         if (self.revenueColumnName_ == None):
             outputFrame["PredictedRevenue"] = 0
             return outputFrame
           
-        revenueColumn = self.model_.predict_regression(dataFrame[self.modelInputColumns_])  
+        revenueColumn = self.model.predict_regression(dataFrame[self.modelInputColumns])  
         if (revenueColumn != None):      
             outputFrame["PredictedRevenue"] = revenueColumn
             outputFrame["PredictedRevenue"] = outputFrame["PredictedRevenue"].apply(lambda x : math.exp(x) - 1.0)

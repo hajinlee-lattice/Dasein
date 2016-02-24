@@ -108,6 +108,7 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None 
         stringColumns = params["parser"].getStringColumns()
         
         # Execute the packaged script from the client and get the returned file
@@ -122,8 +123,8 @@ class LearningExecutor(Executor):
         pipeline, scoringPipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
-        training = pipeline.predict(params["training"])
-        test = pipeline.predict(params["test"])
+        training = pipeline.predict(params["training"], configMetadata, False)
+        test = pipeline.predict(params["test"], configMetadata, True)
         return (training, test, metadata)
 
     @overrides(Executor)

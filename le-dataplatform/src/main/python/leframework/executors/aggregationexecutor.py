@@ -15,7 +15,6 @@ from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGen
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
 from leframework.model.states.initializerevenue import InitializeRevenue
-from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
@@ -128,7 +127,7 @@ class AggregationExecutor(Executor):
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
 
-        test = pipeline.predict(test)
+        test = pipeline.predict(test, None, True)
         params["allDataPostTransform"] = test
         return (None, test, metadata)
 

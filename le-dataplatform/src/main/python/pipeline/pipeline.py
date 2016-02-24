@@ -1,13 +1,14 @@
-import encoder
-import columntransform
+from collections import OrderedDict
 import logging
 
+import columntransform
+import encoder
+from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
 from pipelinesteps import ColumnTypeConversionStep
 from pipelinesteps import EnumeratedColumnTransformStep
 from pipelinesteps import ImputationStep
-from pipelinefwk import ModelStep
-from collections import OrderedDict
+
 
 logger = logging.getLogger(name='pipeline')
    
@@ -49,16 +50,13 @@ def setupPipeline(metadata, stringColumns, targetColumn):
         logger.error("Couldn't load Pipeline from Python file: " + e)
 
     try:
-        pipelineFilePaths = ["./lepipeline.tar.gz/configurablepipelinetransformsfromfile/pipeline.json",
-                             "./configurablepipelinetransformsfromfile/pipeline.json",
-                             ]
+        pipelineFilePaths = ["./lepipeline.tar.gz/pipeline.json"]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePaths)
-        stepsFromJSONFile = colTransform.buildPipelineFromFile(
-                            StringColumns = stringColumns,
-                            CategoricalColumns=categoricalColumns,
-                            ContinuousColumns=continuousColumns,
-                            targetColumn=targetColumn,
-                            ColumnsToTransform=columnsToTransform)
+        stepsFromJSONFile = colTransform.buildPipelineFromFile(stringColumns = stringColumns, \
+                                                               categoricalColumns=categoricalColumns, \
+                                                               continuousColumns=continuousColumns, \
+                                                               targetColumn=targetColumn, \
+                                                               columnsToTransform=columnsToTransform)
 
     except Exception as e:
         stepsFromJSONFile = None

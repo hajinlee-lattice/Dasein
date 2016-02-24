@@ -26,6 +26,7 @@ class TrainingTest(TrainingTestBase):
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
  
+        
         for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
             entry = jsonDict["Model"]["CompressedSupportFiles"][index]
             fileName = "./results/" + entry["Key"] + ".gz"
@@ -33,7 +34,8 @@ class TrainingTest(TrainingTestBase):
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
                 print pipeline.getPipeline()
-                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+                self.assertTrue(isinstance(self.getModelStep(pipeline).getModel(), RandomForestClassifier), \
+                                "clf not instance of sklearn RandomForestClassifier.")
             elif entry["Key"].find('encoder') >= 0 or \
                  entry["Key"].find('pipelinesteps') >= 0 or \
                  entry["Key"].find('aggregatedmodel') >= 0 or \
@@ -51,13 +53,13 @@ class TrainingTest(TrainingTestBase):
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
          
         # Test the scoring engine using the generated pipeline that was deserialized
-        allInputColumns = pipeline.getPipeline()[3].getModelInputColumns()
+        allInputColumns = self.getModelStep(pipeline).getModelInputColumns()
         inputColumns = []
         for col in allInputColumns:
             if "Transformed_Boolean" not in col:
                 inputColumns.append(col)
                  
-        value = [ random() for _ in range(len(inputColumns))]
+        value = [random() for _ in range(len(inputColumns))]
  
         typeDict = {}
         for field in fieldList:

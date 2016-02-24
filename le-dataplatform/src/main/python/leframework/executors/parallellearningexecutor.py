@@ -30,6 +30,7 @@ class ParallelLearningExecutor(Executor):
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None
         stringColumns = params["parser"].getStringColumns()
 
         # Execute the packaged script from the client and get the returned file
@@ -45,7 +46,7 @@ class ParallelLearningExecutor(Executor):
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
 
-        training = pipeline.predict(params["training"])
+        training = pipeline.predict(params["training"], configMetadata, False)
 
         return (training, None, metadata)
 

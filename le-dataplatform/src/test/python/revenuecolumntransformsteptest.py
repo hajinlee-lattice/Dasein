@@ -1,22 +1,17 @@
-
-from testbase import TestBase
-from pandas import DataFrame as df
-from trainingtestbase import TrainingTestBase
-import shutil
-import os
-import sys
-import numpy as np
 import math
-from distutils.dir_util import copy_tree
+import os
+from pandas import DataFrame as df
+import shutil
+import sys
+
+import numpy as np
+from trainingtestbase import TrainingTestBase
+
 
 class RevenueColumnTransformStepTest(TrainingTestBase):
+
     def setUp(self):
         super(RevenueColumnTransformStepTest, self).setUp()
-        shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
-        os.makedirs("./evpipeline.tar.gz")
-        shutil.copy("../../main/python/evpipeline/evpipelinesteps.py", "./evpipeline.tar.gz/evpipelinesteps.py")
-        sys.path.append("./evpipeline.tar.gz")
-        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
     
     def tearDown(self):
         super(RevenueColumnTransformStepTest, self).tearDown()
@@ -40,7 +35,7 @@ class RevenueColumnTransformStepTest(TrainingTestBase):
          'Target': [1, 1, 0, 0]
          }
         dataFrame = df(data)
-        result = step.transform(dataFrame)
+        result = step.transform(dataFrame, None, False)
         columns = result.columns.tolist()
         self.assertEqual(len(columns), 5)
         self.assertTrue('Target' in columns)

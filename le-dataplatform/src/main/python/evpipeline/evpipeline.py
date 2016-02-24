@@ -1,14 +1,16 @@
-import encoder
+from collections import OrderedDict
 import logging
+
 from columntransform import ColumnTransform
+import encoder
 from evpipelinesteps import ColumnTypeConversionStep
 from evpipelinesteps import EVModelStep
-from pipelinefwk import ModelStep
 from evpipelinesteps import EnumeratedColumnTransformStep
-from evpipelinesteps import RevenueColumnTransformStep
 from evpipelinesteps import ImputationStep
+from evpipelinesteps import RevenueColumnTransformStep
+from pipelinefwk import ModelStep
 from pipelinefwk import Pipeline
-from collections import OrderedDict
+
 
 logger = logging.getLogger(name='evpipeline')
 
@@ -43,22 +45,23 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     stepsFromPythonFile = None
 
     try:
-        stepsFromPythonFile = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), RevenueColumnTransformStep(OrderedDict(continuousColumns)), ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
+        stepsFromPythonFile = [EnumeratedColumnTransformStep(categoricalColumns), \
+                               ColumnTypeConversionStep(columnsToTransform), \
+                               RevenueColumnTransformStep(OrderedDict(continuousColumns)), \
+                               ImputationStep(OrderedDict(continuousColumns), {}, [], [], [], targetColumn)]
         steps = stepsFromPythonFile
     except Exception:
         stepsFromPythonFile = None
         logger.exception("Couldn't load Pipeline from Python file: ")
     
     try:
-        pipelineFilePaths = ["./lepipeline.tar.gz/configurablepipelinetransformsfromfile/evpipeline.json",
-                             "./configurablepipelinetransformsfromfile/evpipeline.json"]
+        pipelineFilePaths = ["./lepipeline.tar.gz/evpipeline.json"]
         colTransform = ColumnTransform(pathToPipelineFiles=pipelineFilePaths)
-        stepsFromJSONFile = colTransform.buildPipelineFromFile(
-                            StringColumns = stringColumns,
-                            CategoricalColumns=categoricalColumns,
-                            ContinuousColumns=continuousColumns,
-                            targetColumn=targetColumn,
-                            ColumnsToTransform=columnsToTransform)
+        stepsFromJSONFile = colTransform.buildPipelineFromFile(stringColumns = stringColumns, \
+                                                               categoricalColumns = categoricalColumns, \
+                                                               continuousColumns = continuousColumns, \
+                                                               targetColumn = targetColumn, \
+                                                               columnsToTransform = columnsToTransform)
 
     except Exception:
         stepsFromJSONFile = None

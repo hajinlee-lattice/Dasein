@@ -3,28 +3,20 @@ import glob
 import json
 import os
 import pickle
+import shutil
 import subprocess
 import sys
-import shutil
-from distutils.dir_util import copy_tree
 
-from testbase import removeFiles
 from trainingtestbase import TrainingTestBase
 
-class EVPipelineTrainingTest(TrainingTestBase):
+
+class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
     
     def setUp(self):
-        super(EVPipelineTrainingTest, self).setUp()
-        shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
-        os.makedirs("./evpipeline.tar.gz")
-        shutil.copy("../../main/python/evpipeline/evpipelinesteps.py", "./evpipeline.tar.gz/evpipelinesteps.py")
-        shutil.copy("../../main/python/pipeline/encoder.py", "./evpipeline.tar.gz/encoder.py")
-        os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
-        sys.path.append("./evpipeline.tar.gz")
-        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
+        super(ParallelEVPipelineRegressionTrainingTest, self).setUp()
     
     def tearDown(self):
-        super(EVPipelineTrainingTest, self).tearDown()
+        super(ParallelEVPipelineRegressionTrainingTest, self).tearDown()
         shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
 
     def testExecuteLearning(self):
@@ -38,11 +30,13 @@ class EVPipelineTrainingTest(TrainingTestBase):
         traininglauncher = Launcher("modeldriver-regression-evpipeline.json")
         traininglauncher.execute(False)
 
+        print("Modeling pipeline done.")
         os.unlink("model.p")
         os.symlink("./results/model.p", "model.p")
         
         traininglauncher = Launcher("modeldriver-regression-aggregation-evpipeline.json")
         traininglauncher.execute(False)
+        print("Modeling aggregation pipeline done.")
         
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
@@ -55,22 +49,24 @@ class EVPipelineTrainingTest(TrainingTestBase):
                 pipeline = pickle.load(open(fileName, "r"))
                 self.assertTrue(isinstance(pipeline.getPipeline()[4].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
                 self.assertTrue(isinstance(pipeline.getPipeline()[5], EVModelStep), "No post score step.")
-                self.assertIsNotNone(pipeline.getPipeline()[5].model_)
-                self.assertTrue(isinstance(pipeline.getPipeline()[5].model_, AggregatedModel), "clf not instance of AggregatedModel.")
-                self.assertTrue(len(pipeline.getPipeline()[5].model_.models) == 1, "There no models found.")
-                self.assertTrue(len(pipeline.getPipeline()[5].model_.regressionModels) == 1, "There no regression models found.")
+                self.assertIsNotNone(pipeline.getPipeline()[5].model)
+                self.assertTrue(isinstance(pipeline.getPipeline()[5].model, AggregatedModel), "clf not instance of AggregatedModel.")
+                self.assertTrue(len(pipeline.getPipeline()[5].model.models) == 1, "There no models found.")
+                self.assertTrue(len(pipeline.getPipeline()[5].model.regressionModels) == 1, "There no regression models found.")
                 
             os.rename(fileName, "./results/" + entry["Key"])
 
         self.createCSVFromModel("modeldriver-regression-aggregation-evpipeline.json", "./results/scoreinputfile.txt")
         
+        print("CSV from model created.")
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
         os.environ["PYTHONPATH"] = '/usr/local/lib/python2.7/site-packages:./evpipeline.tar.gz:./lepipeline.tar.gz'
         popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = popen.communicate()
+        print("Scoring done.")
+        _, stderr = popen.communicate()
         print stderr
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
-        self.assertEquals(len(tokens), 3)
+        self.assertEquals(len(tokens), 3, "Length != 3")

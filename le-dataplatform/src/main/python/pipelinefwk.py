@@ -24,32 +24,35 @@ class Pipeline:
     def getPipeline(self):
         return self.pipelineSteps
      
-    def predict(self, dataFrame):
+    def predict(self, dataFrame, configMetadata=None, test=False):
         transformed = dataFrame
         for step in self.pipelineSteps:
-            transformed = step.transform(transformed)
+            transformed = step.transform(transformed, configMetadata, test)
         return transformed
     
 class PipelineStep:
-    modelStep_ = False
-    props_ = {}
+    modelStep = False
+    props = {}
  
     def __init__(self, props):
-        self.props_ = props
+        self.props = props
      
     def isModelStep(self):
-        return self.modelStep_
+        return self.modelStep
      
     def setModelStep(self, modelStep):
-        self.modelStep_ = modelStep
+        self.modelStep = modelStep
          
-    def transform(self, dataFrame): pass
+    def transform(self, dataFrame, configMetadata=None, test=False): pass
  
     def setProperty(self, propertyName, propertyValue):
-        self.props_[propertyName] = propertyValue
+        self.props[propertyName] = propertyValue
          
     def getProperty(self, propertyName):
-        return self.props_[propertyName]
+        if propertyName in self.props:
+            return self.props[propertyName]
+        else:
+            return None
     
     def getInputColumns(self):
         return []
@@ -66,27 +69,27 @@ class PipelineStep:
         return []
     
 class ModelStep(PipelineStep):
-    model_ = None
-    modelInputColumns_ = []
-    outputColumns_ = []
-    scoreColumnName_ = ''
+    model = None
+    modelInputColumns = []
+    outputColumns = []
+    scoreColumnName = ''
      
     def getModel(self):
-        return self.model_
+        return self.model
      
     def getModelInputColumns(self):
-        return self.modelInputColumns_
+        return self.modelInputColumns
      
     def __init__(self, model = None, modelInputColumns = None, scoreColumnName="Score"):
-        self.model_ = model
-        self.modelInputColumns_ = modelInputColumns
-        self.scoreColumnName_ = scoreColumnName
+        self.model = model
+        self.modelInputColumns = modelInputColumns
+        self.scoreColumnName = scoreColumnName
         self.setModelStep(True)
          
     def clone(self, model, modelInputColumns, revenueColumnName, scoreColumnName = "Score"):
         return ModelStep(model, modelInputColumns, scoreColumnName)
     
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         dataFrame = dataFrame.convert_objects(convert_numeric=True)
         dataFrame.fillna(0, inplace=True)
              
@@ -94,15 +97,15 @@ class ModelStep(PipelineStep):
             if columnData.dtype == object:
                 dataFrame[columnName] = 0
  
-        if "verbose" in self.model_.__dict__:
-            self.model_.verbose = 0
-        scoreColumn = self.model_.predict_proba(dataFrame[self.modelInputColumns_])
+        if "verbose" in self.model.__dict__:
+            self.model.verbose = 0
+        scoreColumn = self.model.predict_proba(dataFrame[self.modelInputColumns])
         # Check number of event classes 
         index = 1 if len(scoreColumn[0]) == 2 else 0
         scoreColumn = scoreColumn[:, index]
-        outputFrame = pd.DataFrame(scoreColumn, columns=[self.scoreColumnName_])
+        outputFrame = pd.DataFrame(scoreColumn, columns=[self.scoreColumnName])
          
-        for columnName in self.modelInputColumns_:
+        for columnName in self.modelInputColumns:
             outputFrame[columnName] = pd.Series(dataFrame[columnName].values, index=outputFrame.index)
              
         return outputFrame

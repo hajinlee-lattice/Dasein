@@ -17,7 +17,7 @@ class EnumeratedColumnTransformStep(PipelineStep):
         else:
             self.columnList = []
 
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         outputFrame = dataFrame
     
         for column, encoder in self.columns.iteritems():

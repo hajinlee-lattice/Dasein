@@ -33,7 +33,7 @@ class ImputationStep(PipelineStep):
     def getRTSArtifacts(self):
         return [("imputations.txt", self.imputationFilePath)]
 
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.imputationValues) == 0:
             self.imputationValues = self.__computeImputationValues(dataFrame)
             self.__writeRTSArtifact()

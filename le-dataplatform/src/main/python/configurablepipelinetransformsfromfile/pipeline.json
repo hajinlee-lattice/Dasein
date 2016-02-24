@@ -1,5 +1,15 @@
 {
   "columnTransformFiles": {
+    "PivotStep": {
+        "KeyWhenSortingByAscending": "1",
+        "Name": "pivotstep",
+        "MainClassName": "PivotStep",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": [],
+        "NamedParameterListToInit": {},
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/pivotstep.py"
+    },
     "EnumeratedColumnTransformStep": {
         "KeyWhenSortingByAscending": "1",
         "Name": "enumeratedcolumntransformstep",
@@ -8,7 +18,7 @@
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Categorical"],
         "NamedParameterListToInit": {"columns": "categoricalColumns"},
-        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/enumeratedcolumntransformstep.py"
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/enumeratedcolumntransformstep.py"
     },
     "ColumnTypeConversionStep":{
         "KeyWhenSortingByAscending": "1",
@@ -16,9 +26,9 @@
         "MainClassName": "ColumnTypeConversionStep",
         "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Weird"],
+        "OperatesOnColumns": [],
         "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
-        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/columntypeconversionstep.py"
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
     },
     "ImputationStep":{
         "KeyWhenSortingByAscending": "1",
@@ -28,7 +38,7 @@
         "UniqueColumnTransformName": "",
         "OperatesOnColumns": ["Numerical"],
         "NamedParameterListToInit": {"columns": "orderedDictContinuousColumns" , "imputationValues": "emptyDictionary", "targetCol": "targetColumn"},
-        "ColumnTransformFilePath": "./configurablepipelinetransformsfromfile/imputationstep.py"
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstep.py"
     }
   }
 }

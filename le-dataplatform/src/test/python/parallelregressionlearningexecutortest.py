@@ -1,21 +1,16 @@
-import sys
+import glob
 import os
-import shutil
 import pickle
-from distutils.dir_util import copy_tree
+import shutil
+import sys
+
 from trainingtestbase import TrainingTestBase
+
 
 class ParallelRegressionLearningExecutorTest(TrainingTestBase):
 
     def setUp(self):
         super(ParallelRegressionLearningExecutorTest, self).setUp()
-        shutil.rmtree("./evpipeline.tar.gz", ignore_errors=True)
-        os.makedirs("./evpipeline.tar.gz")
-        shutil.copy("../../main/python/evpipeline/evpipelinesteps.py", "./evpipeline.tar.gz/evpipelinesteps.py")
-        shutil.copy("../../main/python/pipeline/encoder.py", "./evpipeline.tar.gz/encoder.py")
-        os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
-        sys.path.append("./evpipeline.tar.gz")
-        copy_tree("../../main/python/configurablepipelinetransformsfromfile", "./evpipeline.tar.gz/")
     
     def tearDown(self):
         super(ParallelRegressionLearningExecutorTest, self).tearDown()

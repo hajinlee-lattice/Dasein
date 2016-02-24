@@ -12,19 +12,5 @@
                 <include>**/*.py</include>
             </includes>
         </fileSet>
-	<fileSet>
-            <directory>src/main/python/configurablepipelinetransformsfromfile</directory>
-            <outputDirectory>leframework</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>src/main/python/configurablepipelinetransformsfromfile</directory>
-            <outputDirectory>leframework/configurablepipelinetransformsfromfile</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
     </fileSets>
 </assembly>

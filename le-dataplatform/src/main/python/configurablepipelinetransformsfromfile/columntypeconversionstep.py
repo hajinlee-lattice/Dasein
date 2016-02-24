@@ -13,7 +13,7 @@ class ColumnTypeConversionStep(PipelineStep):
     def __init__(self, columnsToConvert=[]):
         self.columnsToConvert = columnsToConvert
     
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.columnsToConvert) > 0:
             for column in self.columnsToConvert:
                 if column in dataFrame and dataFrame[column].dtype == np.object_:

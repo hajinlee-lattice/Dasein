@@ -14,6 +14,7 @@ from leframework.argumentparser import ArgumentParser
 import numpy as np
 from testbase import TestBase
 from testbase import removeFiles
+from pipelinefwk import ModelStep
 
 
 class TrainingTestBase(TestBase):
@@ -27,36 +28,42 @@ class TrainingTestBase(TestBase):
         # before running the python script
         self.fwkdir = "./leframework.tar.gz"
         self.pipelinefwkdir = "./lepipeline.tar.gz"
+        self.evpipelinefwkdir = "./evpipeline.tar.gz"
         fwkdir = self.fwkdir
         pipelinefwkdir = self.pipelinefwkdir
+        evpipelinefwkdir = self.evpipelinefwkdir
 
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
         if os.path.exists(pipelinefwkdir):
             shutil.rmtree(pipelinefwkdir)
+        if os.path.exists(evpipelinefwkdir):
+            shutil.rmtree(evpipelinefwkdir)
 
         os.makedirs(fwkdir + "/leframework")
-        os.makedirs(fwkdir + "/leframework/configurablepipelinetransformsfromfile")
         os.makedirs(pipelinefwkdir)
+        os.makedirs(evpipelinefwkdir)
 
         enginedir = "/leframework/scoringengine.py"
 
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
+        os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
         
         for filename in glob.glob(os.path.join("../../main/python/pipeline", "*.py")):
             shutil.copy(filename, pipelinefwkdir)
 
-        os.makedirs(pipelinefwkdir + "/configurablepipelinetransformsfromfile")
+        for filename in glob.glob(os.path.join("../../main/python/evpipeline", "*.py")):
+            shutil.copy(filename, evpipelinefwkdir)
+        shutil.copy("../../main/python/pipeline/encoder.py", evpipelinefwkdir)
+
         for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
             shutil.copy(filename, pipelinefwkdir)
-
-        for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
-            print filename
-            shutil.copy(filename, fwkdir + "/leframework/configurablepipelinetransformsfromfile")
+            shutil.copy(filename, evpipelinefwkdir)
 
         sys.path.append(pipelinefwkdir)
+        sys.path.append(evpipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 
@@ -74,6 +81,8 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(self.fwkdir)
         if os.path.exists(self.pipelinefwkdir):
             shutil.rmtree(self.pipelinefwkdir)
+        if os.path.exists(self.evpipelinefwkdir):
+            shutil.rmtree(self.evpipelinefwkdir)
         removeFiles(".")
         removeFiles("./results")
 
@@ -160,7 +169,8 @@ class TrainingTestBase(TestBase):
 
     def getPredictScore(self, pipeline, typeDict, values):
         scores = []
-        inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
+        modelStep = self.getModelStep(pipeline)
+        inputColumns = modelStep.getModelInputColumns()
         for value in values:
             row = self.getLine(zip(inputColumns, value), typeDict)
             rowDicts = []
@@ -180,3 +190,14 @@ class TrainingTestBase(TestBase):
                 decompressed.write(data)
 
         return decompressed.name
+    
+    def getModelStep(self, pipeline):
+        return [s for s in pipeline.getPipeline() if isinstance(s, ModelStep)][0]
+    
+    def ignore(self, ignore):
+        def _ignore_(path, names):
+            ignoredNames = []
+            if ignore in names:
+                ignoredNames.append(ignore)
+            return set(ignoredNames)
+        return _ignore_

@@ -13,9 +13,9 @@ class RevenueColumnTransformStep(PipelineStep):
     columns = OrderedDict()
 
     def __init__(self, enumMappings):
-         self.columns = enumMappings
+        self.columns = enumMappings
          
-    def transform(self, dataFrame):
+    def transform(self, dataFrame, configMetadata, test):
         if len(self.columns) == 0:
             return dataFrame
         for column in self.columns:

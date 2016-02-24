@@ -16,8 +16,8 @@ Running The Code Plus Notes: #note, test is run for eventList floats but in prac
     aa=['0']*10+['1']*100+['2']*100+['3']*200+['4']*2+['5']*5+['7']*300+['8']*200+['9']*5
     elist=[.1]*10+[.1]*100+[.1]*100+[.1]*200+[.8]*2+[1.0]*5+[.12]*300+[.08]*200+[0]*5
     print elist
-    bb=cleanCateg(aa,.8)
-    ff=cleanCategFull(bb,aa,elist)
+    bb=__cleanCateg(aa,.8)
+    ff=__cleanCategFull(bb,aa,elist)
     z=[j for i, j in zip(bb, ff) if i != j]
 '''
 
@@ -27,24 +27,28 @@ class CleanCategoricalColumn(PipelineStep):
     
     cleanCategoriesWithThreshold = None
     cleanCategoriesWithTargetColumn = None
-    columnsToConvert = {}
+    columnsToPivot = {}
     columnList = []
     
-    def __init__(self, columnsToConvert):
-        self.columnsToConvert = columnsToConvert
-        if columnsToConvert:
-            self.columnList = columnsToConvert.keys()
+    def __init__(self, columnsToPivot):
+        self.columnsToPivot = columnsToPivot
+        if columnsToPivot:
+            self.columnList = columnsToPivot.keys()
         else:
             self.columnList = []
         pass
 
-    def transform(self, dataFrame, threshold = 0.8, targetColumn=None):
+    def transform(self, dataFrame, configMetadata, test):
+        threshold = self.getProperty("threshold")
+        if threshold is None:
+            threshold = 0.8
+        targetColumn = self.getProperty("targetColumn")
         try:
             outputFrame = dataFrame
-            for column, _ in self.columnsToConvert.iteritems():
+            for column, _ in self.columnsToPivot.iteritems():
                 if column in dataFrame.columns:
                     dataFrameAsList = dataFrame[column].values.tolist()
-                    self.cleanCategoriesWithThreshold = self.cleanCateg(dataFrameAsList,thresh=threshold)
+                    self.cleanCategoriesWithThreshold = self.__cleanCateg(dataFrameAsList, thresh=threshold)
                     outputFrame[column] = self.cleanCategoriesWithThreshold
 
             return outputFrame
@@ -61,7 +65,7 @@ class CleanCategoricalColumn(PipelineStep):
                 return dataFrame
 
         try:
-            self.cleanCategoriesWithTargetColumn = self.cleanCategFull(self.cleanCategoriesWithThreshold,dataFrame, targetColumn)
+            self.cleanCategoriesWithTargetColumn = self.__cleanCategFull(self.cleanCategoriesWithThreshold, dataFrame, targetColumn)
             return self.cleanCategoriesWithTargetColumn
         except Exception:
             logger.exception("Caught Exception trying to use CleanCategoricalColumn TargetColumn Statistical Test Transformation")
@@ -72,13 +76,13 @@ class CleanCategoricalColumn(PipelineStep):
 
         return self.cleanCategoriesWithTargetColumn
 
-    def convertListToDataFrame(self, listToConvert):
+    def __convertListToDataFrame(self, listToConvert):
         if type(listToConvert) is list:
             return pd.DataFrame(listToConvert)
         else:
             return listToConvert
 
-    def cleanCateg(self, xlist,thresh=.95,percMin=.01,nullValue='EMPTY'):
+    def __cleanCateg(self, xlist, thresh=.95, percMin=.01, nullValue='EMPTY'):
         cc=Counter(xlist)
         total=len(xlist)*thresh
         cd=sorted(cc.items(), key = lambda x: x[1], reverse=True)
@@ -99,12 +103,12 @@ class CleanCategoricalColumn(PipelineStep):
         return xlist
 
     '''
-    This code revisits cleanCateg results via eventList.
-    cleanList is output of cleanCateg
+    This code revisits __cleanCateg results via eventList.
+    cleanList is output of __cleanCateg
     The new list re-included those categories that are statistically signficant even though they are rare
     '''
 
-    def cleanCategFull(self, cleanList,xlist,eventList,nullValue='EMPTY'):
+    def __cleanCategFull(self, cleanList,xlist,eventList,nullValue='EMPTY'):
         fullKeyList=set(xlist)
         includedKeys=set(cleanList)
         excludedKeys=set(xlist)-set(cleanList)
@@ -126,9 +130,6 @@ class CleanCategoricalColumn(PipelineStep):
         newDict1=dict((k,nullValue) for k in excludedKeys)
         newDict.update(newDict1)
         return [newDict[x] for x in xlist]
-
-    def getColumns(self):
-        return self.columnList
 
     def getOutputColumns(self):
         return [(create_column(k, "LONG"), [k]) for k in self.columnList]
