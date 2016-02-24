@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
@@ -19,6 +21,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -63,7 +67,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
 
     @PostConstruct
     private void definePlsFeatureFlags() {
-        for (PlsFeatureFlag flag: PlsFeatureFlag.values()) {
+        for (PlsFeatureFlag flag : PlsFeatureFlag.values()) {
             if (FeatureFlagClient.getDefinition(flag.getName()) == null) {
                 FeatureFlagClient.setDefinition(flag.getName(), flag.getDefinition());
                 log.info("Defined feature flag " + flag.getName());
@@ -76,9 +80,10 @@ public class TenantConfigServiceImpl implements TenantConfigService {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                    customerSpace.getContractId(), customerSpace.getTenantId(),
-                    customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
+            Path path = PathBuilder
+                    .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                            customerSpace.getTenantId(), customerSpace.getSpaceId())
+                    .append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
             return CRMTopology.fromName(camille.get(path).getData());
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18033, ex);
@@ -90,9 +95,10 @@ public class TenantConfigServiceImpl implements TenantConfigService {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                    customerSpace.getContractId(), customerSpace.getTenantId(),
-                    customerSpace.getSpaceId()).append(new Path(SPACE_CONFIGURATION_ZNODE + DL_ADDRESS_ZNODE));
+            Path path = PathBuilder
+                    .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                            customerSpace.getTenantId(), customerSpace.getSpaceId())
+                    .append(new Path(SPACE_CONFIGURATION_ZNODE + DL_ADDRESS_ZNODE));
             return camille.get(path).getData();
         } catch (Exception ex) {
             log.error("Can not get tenant's data loader address from ZK", ex);
@@ -134,14 +140,37 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             tenantFlags = overwriteDeploymentWizardFlag(tenantFlags, tenantId);
             return tenantFlags;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18049, e, new String[]{ tenantId });
+            throw new LedpException(LedpCode.LEDP_18049, e, new String[] { tenantId });
+        }
+    }
+
+    @Override
+    public List<LatticeProduct> getProducts(String tenantId) {
+        try {
+            SpaceConfiguration spaceConfiguration = getSpaceConfiguration(tenantId);
+            return spaceConfiguration.getProducts();
+        } catch (Exception e) {
+            log.error("Failed to get product list of tenant " + tenantId, e);
+            return new ArrayList<>();
+        }
+    }
+
+    @VisibleForTesting
+    SpaceConfiguration getSpaceConfiguration(String tenantId) {
+        try {
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+            TenantDocument tenantDocument = batonService.getTenant(customerSpace.getContractId(),
+                    customerSpace.getTenantId());
+            return tenantDocument.getSpaceConfig();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18084, e, new String[] { tenantId });
         }
     }
 
     private FeatureFlagValueMap combineDefaultFeatureFlags(FeatureFlagValueMap flags) {
         FeatureFlagValueMap toReturn = defaultFeatureFlagProvider.getDefaultFlags();
         FeatureFlagDefinitionMap flagDefinitions = FeatureFlagClient.getDefinitions();
-        for (Map.Entry<String, Boolean> flag: flags.entrySet()) {
+        for (Map.Entry<String, Boolean> flag : flags.entrySet()) {
             if (flagDefinitions.containsKey(flag.getKey())) {
                 toReturn.put(flag.getKey(), flag.getValue());
             }
@@ -158,8 +187,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     }
 
     /**
-     * If flag already has a value, using oldValue & newValue.
-     * Otherwise, use newValue
+     * If flag already has a value, using oldValue & newValue. Otherwise, use
+     * newValue
+     * 
      * @param flags
      * @param flagId
      * @param value

@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.zookeeper.ZooDefs;
@@ -18,6 +19,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -82,24 +85,11 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
         batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);
 
-        path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
-
-        path = path.append(new Path("/SpaceConfiguration"));
-        if (!camille.exists(path)) {
-            camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        }
-
-        Path topologyPath = path.append(new Path("/Topology"));
-        if (camille.exists(topologyPath)) {
-            camille.delete(topologyPath);
-        }
-        camille.create(topologyPath, new Document("SFDC"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-        Path dlAddressPath = path.append(new Path("/DL_Address"));
-        if (camille.exists(dlAddressPath)) {
-            camille.delete(dlAddressPath);
-        }
-        camille.create(dlAddressPath, new Document(defaultDataLoaderUrl), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
+        spaceConfiguration.setDlAddress(defaultDataLoaderUrl);
+        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA3));
+        spaceConfiguration.setTopology(CRMTopology.SFDC);
+        batonService.setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfiguration);
 
         PLSTenantId = String.format("%s.%s.%s", contractId, tenantId, spaceId);
     }
@@ -189,6 +179,16 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
             verifyFlagBooleanAndDefault(flags, flagId, false);
             verifyFlagBooleanAndDefault(flags, TenantDeploymentConstants.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, false);
         }
+    }
+
+    @Test(groups = "functional")
+    public void getProducts() {
+        List<LatticeProduct> products = configService.getProducts(PLSTenantId);
+        Assert.assertNotNull(products);
+        Assert.assertEquals(products.get(0), LatticeProduct.LPA3);
+
+        products = configService.getProducts("nope");
+        Assert.assertTrue(products.isEmpty());
     }
 
     private boolean redirectDeploymentWizardPage(String tenantId) {
