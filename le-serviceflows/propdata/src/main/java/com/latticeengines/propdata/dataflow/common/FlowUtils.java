@@ -31,7 +31,11 @@ public class FlowUtils {
                     String str = column.getColumnType().toUpperCase();
                     Matcher matcher = varcharPattern.matcher(str);
                     if (matcher.find()) {
-                        Integer length = Integer.valueOf(matcher.group(0));
+                        Integer length = 4000;
+                        String matched = matcher.group(0);
+                        if (!"MAX".equals(matched)) {
+                            length = Integer.valueOf(matched);
+                        }
                         if (length > 10) {
                             log.info("Truncating field " + column.getColumnName() + " to length " + length);
                             Function function = new StringTruncateFunction(column.getColumnName(), length);
