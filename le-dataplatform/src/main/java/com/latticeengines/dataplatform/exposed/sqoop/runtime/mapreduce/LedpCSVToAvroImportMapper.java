@@ -102,7 +102,7 @@ public class LedpCSVToAvroImportMapper extends
             context.write(wrapper, NullWritable.get());
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
             lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
-                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
+                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() + 1;
         } else {
             if (missingRequiredColValue) {
                 context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
@@ -111,7 +111,7 @@ public class LedpCSVToAvroImportMapper extends
             }
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
             lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
-                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
+                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() + 1;
             csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
             csvFilePrinter.flush();
             errorMap.clear();

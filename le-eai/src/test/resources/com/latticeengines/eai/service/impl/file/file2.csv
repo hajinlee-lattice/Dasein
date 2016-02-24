@@ -1,5 +1,5 @@
 Id,Country,Company,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy
-9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816
+9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,3
 12609604,Singapore,,,,1,
 10996868,China,Husor,sun,ze,5,0.464385619
 ,Australia,SMS MANAGEMENT & TECHNOLOGY LIMITED,Murali,Ganti,30,0.1276334577
