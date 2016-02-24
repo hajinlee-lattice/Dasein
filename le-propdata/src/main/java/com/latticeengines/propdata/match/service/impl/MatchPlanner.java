@@ -27,7 +27,7 @@ import com.latticeengines.propdata.match.metric.RealTimeRequest;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
-@Component
+@Component("matchPlanner")
 class MatchPlanner {
 
     @Autowired

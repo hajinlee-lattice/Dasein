@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
-@Component
+@Component("publicDomainService")
 public class PublicDomainServiceImpl implements PublicDomainService {
 
     private static Set<String> publicDomains;
