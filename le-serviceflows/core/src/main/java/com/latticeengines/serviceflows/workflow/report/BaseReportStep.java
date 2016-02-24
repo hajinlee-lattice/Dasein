@@ -22,15 +22,16 @@ public abstract class BaseReportStep<T extends BaseReportStepConfiguration> exte
     @Override
     public final void execute() {
         ObjectNode json = getJson();
-        Report report = createReport(json.toString());
+        if (json != null) {
+            Report report = createReport(json.toString());
 
-        registerReportInContext(report);
+            registerReportInContext(report);
 
-        InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
-                .getInternalResourceHostPort());
-        proxy.registerReport(report, getConfiguration().getCustomerSpace().toString());
+            InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(getConfiguration()
+                    .getInternalResourceHostPort());
+            proxy.registerReport(report, getConfiguration().getCustomerSpace().toString());
+        }
     }
-
 
     private Report createReport(String json) {
         Report report = new Report();

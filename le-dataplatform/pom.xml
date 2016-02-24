@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-dataplatform</artifactId>
@@ -19,6 +19,7 @@
         <le.remote.version>2.0.22-SNAPSHOT</le.remote.version>
         <le.swlib.version>2.0.22-SNAPSHOT</le.swlib.version>
         <le.testfwk.version>2.0.22-SNAPSHOT</le.testfwk.version>
+        <le.network.version>2.0.22-SNAPSHOT</le.network.version>
     </properties>
 
     <parent>
@@ -57,7 +58,8 @@
                                         <argument>*test.py</argument>
                                     </arguments>
                                     <environmentVariables>
-                                        <PYTHONPATH>../../main/python:../../main/python/pipeline:$PYTHONPATH</PYTHONPATH>
+                                        <PYTHONPATH>../../main/python:../../main/python/pipeline:$PYTHONPATH
+                                        </PYTHONPATH>
                                     </environmentVariables>
                                 </configuration>
                             </execution>
@@ -481,6 +483,12 @@
             <artifactId>le-monitor</artifactId>
             <version>${le.monitor.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${le.network.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

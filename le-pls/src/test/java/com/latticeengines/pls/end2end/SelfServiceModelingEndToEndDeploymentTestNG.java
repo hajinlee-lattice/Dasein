@@ -5,6 +5,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +18,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -130,6 +134,20 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(job);
         List<Report> reports = job.getReports();
         assertEquals(reports.size(), 1);
+    }
+
+    // TODO enable once error csv mechanism working
+    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "createModel")
+    public void retrieveErrorsFile() {
+        ResponseEntity<InputStream> inputStreamResponse = restTemplate.getForEntity(
+                String.format("%s/pls/fileuploads/%s/import/errors", getPLSRestAPIHostPort(), sourceFile.getName()),
+                InputStream.class);
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            StreamUtils.copy(inputStreamResponse.getBody(), os);
+            String errors = os.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failure retrieving error.csv", e);
+        }
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {

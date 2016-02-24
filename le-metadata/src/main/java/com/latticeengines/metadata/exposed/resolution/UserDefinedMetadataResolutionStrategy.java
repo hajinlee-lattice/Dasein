@@ -79,6 +79,11 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
             }
         }
 
+        if (!missingRequiredFields.isEmpty()) {
+            throw new RuntimeException(String.format("Missing required fields [%s] in csv file %s", //
+                    StringUtils.join(missingRequiredFields, ","), csvPath));
+        }
+
         // Add columns that are not in metadata to unknown columns
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
@@ -135,7 +140,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         }
 
         // If there are any unknown columns, the metadata is not fully defined.
-
     }
 
     private void validateDataType(ColumnTypeMapping ctm) {

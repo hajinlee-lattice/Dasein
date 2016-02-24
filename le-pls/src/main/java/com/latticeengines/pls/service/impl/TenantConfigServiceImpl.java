@@ -163,7 +163,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
                     customerSpace.getTenantId());
             return tenantDocument.getSpaceConfig();
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18084, e, new String[] { tenantId });
+            throw new LedpException(LedpCode.LEDP_18086, e, new String[] { tenantId });
         }
     }
 

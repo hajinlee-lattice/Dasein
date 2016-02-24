@@ -49,6 +49,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SCORING_SOURCE_DIR = "SCORING_SOURCE_DIR";
     protected static final String SCORING_UNIQUEKEY_COLUMN = "SCORING_UNIQUEKEY_COLUMN";
     protected static final String ATTR_LEVEL_TYPE = "ATTR_LEVEL_TYPE";
+    protected static final String IMPORT_DATA_APPLICATION_ID = "IMPORT_DATA_APPLICATION_ID";
 
     @Autowired
     protected Configuration yarnConfiguration;

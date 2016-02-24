@@ -39,6 +39,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
         ImportConfiguration importConfig = setupImportConfig();
         String url = configuration.getMicroServiceHostPort() + "/eai/importjobs";
         AppSubmission submission = restTemplate.postForObject(url, importConfig, AppSubmission.class);
+        putObjectInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
         waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
         if (getConfiguration().getSourceType() == SourceType.FILE) {
             updateSourceFile();

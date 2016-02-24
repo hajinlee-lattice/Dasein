@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,7 +63,8 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
             file.setState(SourceFileState.Uploaded);
-            HdfsUtils.copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
+            HdfsUtils
+                    .copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (Exception e) {
@@ -97,6 +100,35 @@ public class FileUploadServiceImpl implements FileUploadService {
         metadataProxy.createTable(customerSpace, table.getName(), table);
         sourceFile.setTableName(table.getName());
         sourceFileService.update(sourceFile);
+    }
+
+    @Override
+    public InputStream getImportErrorStream(String fileName) {
+
+        SourceFile sourceFile = sourceFileService.findByName(fileName);
+        if (sourceFile == null) {
+            throw new LedpException(LedpCode.LEDP_18084, new String[] { fileName });
+        }
+
+        try {
+            if (sourceFile.getState() != SourceFileState.Imported) {
+                throw new RuntimeException(String.format("File %s has not been imported yet.", fileName));
+            }
+
+            // TODO need to fix this so we can actually retrieve the pre-deduped
+            // table and from there get to the errors csv.
+            // Alternatively, save away the error.csv path after import,
+            // but that's uglier.
+            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
+            Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
+                    sourceFile.getTableName());
+
+            Path schemaPath = new Path(table.getExtractsDirectory() + "/error.csv");
+            return fs.open(schemaPath);
+
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18085, new String[] { fileName });
+        }
     }
 
     private SourceFile getSourceFile(String sourceFileName) {

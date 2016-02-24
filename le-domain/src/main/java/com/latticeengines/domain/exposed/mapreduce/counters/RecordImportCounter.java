@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce;
+package com.latticeengines.domain.exposed.mapreduce.counters;
 
 public enum RecordImportCounter {
     IMPORTED_RECORDS, //

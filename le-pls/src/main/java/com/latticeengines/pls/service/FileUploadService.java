@@ -14,4 +14,6 @@ public interface FileUploadService {
     List<ColumnTypeMapping> getUnknownColumns(String sourceFileName);
 
     void resolveMetadata(String sourceFileName, List<ColumnTypeMapping> unknownColumns);
+
+    InputStream getImportErrorStream(String sourceFileName);
 }

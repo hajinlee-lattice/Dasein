@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.network.exposed.dataplatform.JobInterface;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "jobs", description = "REST resource for all jobs")
 @RestController
-public class JobResource {
+public class JobResource implements JobInterface {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(JobResource.class);
 
@@ -36,7 +37,7 @@ public class JobResource {
 
     @RequestMapping(value = "/jobs/{applicationId}/counters", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get job counters of a completed mapreduce ")
+    @ApiOperation(value = "Get job counters for a completed mapreduce job")
     public Counters getMRJobCounters(@PathVariable String applicationId) {
         return jobService.getMRJobCounters(applicationId);
     }

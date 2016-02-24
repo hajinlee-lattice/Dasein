@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
@@ -18,6 +19,14 @@ public class SecurityContextUtils {
         } else {
             return null;
         }
+    }
+
+    public static CustomerSpace getCustomerSpace() {
+        Tenant tenant = getTenant();
+        if (tenant == null) {
+            throw new RuntimeException("No tenant set in context");
+        }
+        return CustomerSpace.parse(tenant.getId());
     }
 
     public static void setTenant(Tenant tenant) {
