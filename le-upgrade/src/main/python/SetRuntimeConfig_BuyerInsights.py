@@ -37,7 +37,7 @@ def SetRuntimeConfig_BuyerInsights(tenants, period, hasStaticAttributes):
 
             lg_mgr.commit()
 
-        elif version in ['2.2.0']:
+        elif version in ['2.2.0','2.3.0']:
 
             setIAS_21(lg_mgr, type, hasStaticAttributes)
 
