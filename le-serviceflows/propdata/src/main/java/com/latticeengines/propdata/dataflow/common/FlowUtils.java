@@ -31,16 +31,15 @@ public class FlowUtils {
                     String str = column.getColumnType().toUpperCase();
                     Matcher matcher = varcharPattern.matcher(str);
                     if (matcher.find()) {
-                        Integer length = 4000;
                         String matched = matcher.group(0);
                         if (!"MAX".equals(matched)) {
-                            length = Integer.valueOf(matched);
-                        }
-                        if (length > 10) {
-                            log.info("Truncating field " + column.getColumnName() + " to length " + length);
-                            Function function = new StringTruncateFunction(column.getColumnName(), length);
-                            node = node.apply(function, new DataFlowBuilder.FieldList(column.getColumnName()),
-                                    new DataFlowBuilder.FieldMetadata(column.getColumnName(), String.class));
+                            Integer length = Integer.valueOf(matched);
+                            if (length > 10) {
+                                log.info("Truncating field " + column.getColumnName() + " to length " + length);
+                                Function function = new StringTruncateFunction(column.getColumnName(), length);
+                                node = node.apply(function, new DataFlowBuilder.FieldList(column.getColumnName()),
+                                        new DataFlowBuilder.FieldMetadata(column.getColumnName(), String.class));
+                            }
                         }
                     } else {
                         throw new RuntimeException("Cannot find pattern " + varcharPattern + " in string " + str);
