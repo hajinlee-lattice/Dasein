@@ -1,3 +1,4 @@
+export ADMIN_PROPDIR=$WSHOME/le-admin/conf/env/dev
 export API_PROPDIR=$WSHOME/le-api/conf/env/dev
 export DATAPLATFORM_PROPDIR=$WSHOME/le-dataplatform/conf/env/dev
 export DB_PROPDIR=$WSHOME/le-db/conf/env/dev

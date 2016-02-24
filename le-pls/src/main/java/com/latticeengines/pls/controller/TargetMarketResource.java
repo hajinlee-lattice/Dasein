@@ -5,15 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.network.exposed.pls.TargetMarketInterface;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
@@ -25,6 +21,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/targetmarkets")
 @PreAuthorize("hasRole('View_PLS_TargetMarkets')")
 public class TargetMarketResource implements TargetMarketInterface {
+
+    private static final String FIT_MODEL_WORKFLOW = "fitModelWorkflow";
+    private static final String TEST_FIT_MODEL_WORKFLOW = "mockFitModelWorkflow";
 
     @Autowired
     private TargetMarketService targetMarketService;
@@ -42,7 +41,7 @@ public class TargetMarketResource implements TargetMarketInterface {
         }
 
         targetMarketService.createTargetMarket(targetMarket);
-        fitWorkflowSubmitter.submit(targetMarket);
+        fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, FIT_MODEL_WORKFLOW);
     }
 
     @RequestMapping(value = "/default", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -51,7 +50,17 @@ public class TargetMarketResource implements TargetMarketInterface {
     @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
     public TargetMarket createDefault() {
         TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
-        fitWorkflowSubmitter.submit(targetMarket);
+        fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, FIT_MODEL_WORKFLOW);
+        return targetMarket;
+    }
+
+    @RequestMapping(value = "/default/test", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register a default target market using the test fit model workflow")
+    @PreAuthorize("hasRole('Edit_PLS_TargetMarkets')")
+    public TargetMarket createDefaultTest() {
+        TargetMarket targetMarket = targetMarketService.createDefaultTargetMarket();
+        fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, TEST_FIT_MODEL_WORKFLOW);
         return targetMarket;
     }
 
@@ -81,7 +90,7 @@ public class TargetMarketResource implements TargetMarketInterface {
         targetMarketService.updateTargetMarketByName(targetMarket, targetMarketName);
 
         if (existing != null && !existing.getAccountFilterString().equals(targetMarket.getAccountFilterString())) {
-            fitWorkflowSubmitter.submit(targetMarket);
+            fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, FIT_MODEL_WORKFLOW);
         }
     }
 

@@ -1,10 +1,6 @@
 package com.latticeengines.pls.workflow;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +52,7 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
         }
     }
 
-    public void submit(TargetMarket targetMarket) {
+    public void submitWorkflowForTargetMarketAndWorkflowName(TargetMarket targetMarket, String workflowName) {
         checkForRunningWorkflow(targetMarket);
 
         String customer = SecurityContextUtils.getTenant().getId();
@@ -100,17 +96,17 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
                                     "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                     .build();
 
-            String payloadName = "fitModelWorkflow" + "-" + customer + "-" + targetMarket.getName();
-            configuration.setContainerConfiguration("fitModelWorkflow", CustomerSpace.parse(customer), payloadName);
+            String payloadName = workflowName + "-" + customer + "-" + targetMarket.getName();
+            configuration.setContainerConfiguration(workflowName, CustomerSpace.parse(customer), payloadName);
 
             AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
             ApplicationId applicationId = YarnUtils.appIdFromString(submission.getApplicationIds().get(0));
-            log.info(String.format("Submitted fit model workflow with application id %s", applicationId));
+            log.info(String.format("Submitted %s with application id %s", workflowName, applicationId));
             targetMarket.setApplicationId(applicationId.toString());
             targetMarketService.updateTargetMarketByName(targetMarket, targetMarket.getName());
         } catch (Exception e) {
             throw new RuntimeException(String.format(
-                    "Failed to submit fit workflow for target market %s and customer %s", targetMarket.getName(),
+                    "Failed to submit %s for target market %s and customer %s", workflowName, targetMarket.getName(),
                     customer), e);
         }
     }

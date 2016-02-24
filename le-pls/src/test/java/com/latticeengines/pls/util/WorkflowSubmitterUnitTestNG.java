@@ -34,7 +34,7 @@ public class WorkflowSubmitterUnitTestNG {
         
         boolean exception = false;
         try {
-            fitWorkflowSubmitter.submit(targetMarket);
+            fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, "fitModelWorkflow");
         } catch (Exception e) {
             exception = true;
             assertTrue(e instanceof LedpException);
