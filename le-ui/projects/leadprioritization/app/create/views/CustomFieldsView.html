@@ -25,9 +25,9 @@
 						</td>
 						<td>
 							<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
-								<option value="STRING" selected>STRING</option>
-								<option value="DOUBLE">DOUBLE</option>
-								<option value="BOOLEAN">BOOLEAN</option>
+								<option value="STRING" selected>Text</option>
+								<option value="DOUBLE">Number</option>
+								<option value="BOOLEAN">Boolean</option>
 							</select>
 						</td>
 					</tr>
@@ -42,17 +42,6 @@
 					<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">Looks Fine, Next</button>
 				</div>
 			</div>
-			<ul>
-				<li>
-					<div class="row">
-						<div class="six columns">
-
-						</div>
-						<div class="six columns">
-						</div>
-					</div>
-				</li>
-			</ul>
 
 		</div>
 </section>

@@ -15,6 +15,7 @@ angular
                                 return 'Jobs Page';
                             }
                         },
+                        controller: 'OneLineController',
                         templateUrl: './app/navigation/summary/OneLineView.html'
                     },
                     "main@": {

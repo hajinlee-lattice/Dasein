@@ -185,13 +185,16 @@ console.log('StartModeling', csvMetaData)
 .directive('csvUploader', ['$parse', function ($parse) {
     return {
         restrict: 'A',
-        link: function(scope, element, attrs) {
+        require:'ngModel',
+        link: function(scope, element, attrs, ngModel) {
             var model = $parse(attrs.csvUploader);
             var modelSetter = model.assign;
 
             element.bind('change', function(){
                 scope.$apply(function(){
                     modelSetter(scope, element[0].files[0]);
+                    ngModel.$setViewValue(element.val());
+                    ngModel.$render();
                 });
             });
         }
@@ -225,14 +228,11 @@ function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, cs
 
                 csvImportStore.Set(fileName, metaData);
 
-                $state.go('models.fields', { csvFileName: fileName })
+                $state.go('models.import.columns', { csvFileName: fileName })
             }
         });
 
-        $('#mainContentView').html(
-            '<section id="main-content" class="container">' +
-            '<div class="row twelve columns"><div class="loader"></div>' +
-            '<h2 class="text-center">Uploading File...</h2></div></section>');
+        ShowSpinner('Uploading File...');
     };
 
     $scope.cancelClicked = function(){

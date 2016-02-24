@@ -12,11 +12,7 @@ angular
             $state.go(to.redirectTo, params)
         }
 
-        // state change spinner
-        $('#mainContentView').html(
-            '<section id="main-content" class="container">' +
-            '<div class="row twelve columns"><div class="loader"></div>' +
-            '<h2 class="text-center">' + LoadingString + '</h2></div></section>');
+        ShowSpinner(LoadingString);
     });
     /*
     $rootScope.$on('$stateChangeSuccess', function(evt, to, params) {
@@ -91,21 +87,18 @@ angular
                 }   
             }
         })
-        .state('models.fields', {
-            url: '/fields/:csvFileName',
+        .state('models.import.columns', {
+            url: '/:csvFileName/columns',
             resolve: {
                 csvMetaData: function($stateParams, csvImportStore) {
-console.log('#METADATA columns resolve', csvImportStore);
                     return csvImportStore.Get($stateParams.csvFileName);
                 },
                 csvUnknownColumns: function($q, csvImportService, csvMetaData) {
                     var deferred = $q.defer();
-console.log('#RESOLVE columns resolve', csvImportService, csvMetaData);
-                    csvImportService.GetUnknownColumns(csvMetaData)
-                        .then(function(result) {
-console.log('#RESOLVE columns complete', result);
-                            deferred.resolve(result.Result);
-                        });
+
+                    csvImportService.GetUnknownColumns(csvMetaData).then(function(result) {
+                        deferred.resolve(result.Result);
+                    });
 
                     return deferred.promise;
                 }
@@ -117,19 +110,18 @@ console.log('#RESOLVE columns complete', result);
                             return 'Specify Unknown Column Types';
                         }
                     },
+                    controller: 'OneLineController',
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
-                        console.log('csvValidation Resolve', csvMetaData, csvUnknownColumns, $stateParams);
                         this.data = csvUnknownColumns;
 
                         this.csvSubmitColumns = function($event) {
-                            csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
-                                console.log('Submit SetUnknownColumns Completed');
+                            ShowSpinner('Saving Changes...');
 
+                            csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
                                 csvImportService.StartModeling(csvMetaData).then(function(result) {
-                                    console.log('#CSV Modeling', result);
                                     $state.go('jobs.status');
                                 });
                             });
@@ -423,3 +415,11 @@ console.log('#RESOLVE columns complete', result);
             }
         });
 }]);
+
+function ShowSpinner(LoadingString) {
+    // state change spinner
+    $('#mainContentView').html(
+        '<section id="main-content" class="container">' +
+        '<div class="row twelve columns"><div class="loader"></div>' +
+        '<h2 class="text-center">' + LoadingString + '</h2></div></section>');
+}
