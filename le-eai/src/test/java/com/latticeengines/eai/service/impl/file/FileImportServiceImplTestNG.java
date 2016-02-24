@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce.RecordImportCounter;
+import com.latticeengines.domain.exposed.sqoop.runtime.mapreduce.RecordImportCounter;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
