@@ -4,7 +4,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "LeadID",
+      "ColumnName": "Id",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -115,7 +115,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "FirstName",
+      "ColumnName": "Email",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -152,7 +152,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "LastName",
+      "ColumnName": "City",
       "DataQuality": null,
       "DataSource": [
         "File"

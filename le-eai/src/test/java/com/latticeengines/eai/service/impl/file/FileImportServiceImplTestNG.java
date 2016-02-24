@@ -22,10 +22,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce.RecordImportCounter;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiMetadataService;
@@ -45,6 +48,9 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     private URL metadataUrl;
 
     private URL dataUrl;
+
+    @Autowired
+    private JobService jobService;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -89,7 +95,13 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         verifyAllDataNotNullWithNumRows(yarnConfiguration, //
                 tables.get(0), //
-                6037);
+                12);
+        Counters counters = jobService.getMRJobCounters(appId.toString());
+        assertEquals(counters.getCounter(RecordImportCounter.IMPORTED_RECORDS), 12);
+        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS), 7);
+        assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING), 5);
+        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED), 2);
+        //assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR), 2);
     }
 
     @DataProvider
@@ -97,7 +109,7 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         Map<String, String> metadataFileProperties = getProperties(true);
         Map<String, String> inlineMetadataProperties = getProperties(false);
 
-        return new Object[][] { { metadataFileProperties}, {inlineMetadataProperties }};
+        return new Object[][] { { metadataFileProperties }, { inlineMetadataProperties } };
     }
 
     private Map<String, String> getProperties(boolean useMetadataFile) {

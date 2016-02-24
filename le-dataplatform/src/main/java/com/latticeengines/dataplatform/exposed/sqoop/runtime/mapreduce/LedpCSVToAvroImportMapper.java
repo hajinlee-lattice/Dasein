@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import org.apache.avro.Schema;
@@ -38,6 +39,8 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
 
+import java.util.Comparator;
+
 /**
  * Imports records by transforming them to Avro records in an Avro data file.
  */
@@ -55,6 +58,7 @@ public class LedpCSVToAvroImportMapper extends
     private boolean emailOrWebsiteIsEmpty;
     private boolean missingRequiredColValue;
     private boolean fieldMalFormed;
+    private long lineNum = 1;
 
     private static final String ERROR_FILE = "error.csv";
 
@@ -65,6 +69,8 @@ public class LedpCSVToAvroImportMapper extends
         Log.info("schema is: " + schema.toString());
         table = JsonUtils.deserialize(context.getConfiguration().get("lattice.eai.file.schema"), Table.class);
         interpretation = table.getInterpretation();
+        LOG.info("table is:" + table);
+        LOG.info(interpretation);
         lobLoader = new LargeObjectLoader(conf, FileOutputFormat.getWorkOutputPath(context));
 
         outputPath = AvroOutputFormat.getOutputPath(new JobConf(context.getConfiguration()));
@@ -95,6 +101,8 @@ public class LedpCSVToAvroImportMapper extends
             wrapper.datum(record);
             context.write(wrapper, NullWritable.get());
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
+            lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
+                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
         } else {
             if (missingRequiredColValue) {
                 context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
@@ -102,7 +110,7 @@ public class LedpCSVToAvroImportMapper extends
                 context.getCounter(RecordImportCounter.FIELD_MALFORMED).increment(1);
             }
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-            long lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
+            lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
                     + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
             csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
             csvFilePrinter.flush();
@@ -113,14 +121,28 @@ public class LedpCSVToAvroImportMapper extends
     private GenericRecord toGenericRecord(SqoopRecord val) {
         GenericRecord record = new GenericData.Record(schema);
         Map<String, Object> fieldMap = val.getFieldMap();
-        for (Map.Entry<String, Object> entry : fieldMap.entrySet()) {
+
+        Map<String, Object> sortedFieldMap = new TreeMap<>(new Comparator<String>() {
+
+            @Override
+            public int compare(String o1, String o2) {
+                if (o1.equals("Email") || o1.equals("Website")) {
+                    return -1;
+                } else
+                    return o1.compareTo(o2);
+            }
+
+        });
+        sortedFieldMap.putAll(fieldMap);
+        LOG.info("Start to processing line: " + (lineNum + 1));
+        for (Map.Entry<String, Object> entry : sortedFieldMap.entrySet()) {
             String fieldKey = entry.getKey();
             String fieldCsvValue = String.valueOf(entry.getValue());
             Object fieldAvroValue = null;
             Type avroType = schema.getField(fieldKey).schema().getTypes().get(0).getType();
             try {
                 validateRowValueBeforeConvertToAvro(interpretation, fieldKey, fieldCsvValue);
-                LOG.info("Validation Passed! Starting to convert to avro value.");
+                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", fieldKey));
                 Attribute attr = table.getNameAttributeMap().get(fieldKey);
                 if (attr.isNullable() && fieldCsvValue.equals("")) {
                     fieldAvroValue = null;
@@ -140,7 +162,7 @@ public class LedpCSVToAvroImportMapper extends
         if ((fieldKey.equals("Id") || fieldKey.equals("IsWon") || fieldKey.equals("IsConverted"))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
-            throw new RuntimeException(String.format("Required Column %s is missing value", fieldKey));
+            throw new RuntimeException(String.format("Required Column %s is missing value.", fieldKey));
         } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())) {
             if (fieldKey.equals("Website") && StringUtils.isEmpty(fieldCsvValue)) {
                 emailOrWebsiteIsEmpty = true;
@@ -148,7 +170,7 @@ public class LedpCSVToAvroImportMapper extends
                     && (fieldKey.equals("Name") || fieldKey.equals("BillingCity") || fieldKey.equals("BillingState") || fieldKey
                             .equals("BillingCountry")) && StringUtils.isEmpty(fieldCsvValue)) {
                 missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Website column is empty, so %s cannot be empty", fieldKey));
+                throw new RuntimeException(String.format("Website column is empty, so %s cannot be empty.", fieldKey));
             }
         } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
             if (fieldKey.equals("Email") && StringUtils.isEmpty(fieldCsvValue)) {
@@ -157,7 +179,7 @@ public class LedpCSVToAvroImportMapper extends
                     && (fieldKey.equals("Company") || fieldKey.equals("City") || fieldKey.equals("State") || fieldKey
                             .equals("Country")) && StringUtils.isEmpty(fieldCsvValue)) {
                 missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Email column is empty, so %s cannot be empty", fieldKey));
+                throw new RuntimeException(String.format("Email column is empty, so %s cannot be empty.", fieldKey));
             }
         }
     }
@@ -193,10 +215,10 @@ public class LedpCSVToAvroImportMapper extends
             }
         } catch (NumberFormatException e) {
             fieldMalFormed = true;
-            throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType);
+            throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType + ".");
         } catch (ParseException e) {
             fieldMalFormed = true;
-            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp using MM-dd-yyyy");
+            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp using MM-dd-yyyy.");
         }
 
     }
