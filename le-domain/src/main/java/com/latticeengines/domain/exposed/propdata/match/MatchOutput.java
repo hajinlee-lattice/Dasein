@@ -39,7 +39,8 @@ public class MatchOutput {
     private Date finishedAt;
     private String rootOperationUID = UUID.randomUUID().toString().toUpperCase();
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
+    private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     static {
@@ -135,6 +136,8 @@ public class MatchOutput {
     @JsonProperty("ReceivedAt")
     private void setReceivedAtByString(String requestSubmittedAt) {
         try {
+            SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+            formatter.setCalendar(calendar);
             this.receivedAt = formatter.parse(requestSubmittedAt);
         } catch (Exception e) {
             log.error("Failed to parse timestamp ReceviedAt [" + requestSubmittedAt + "]", e);
@@ -160,6 +163,8 @@ public class MatchOutput {
     @JsonProperty("FinishedAt")
     private void setFinishedAtByString(String resultGeneratedAt) {
         try {
+            SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+            formatter.setCalendar(calendar);
             this.finishedAt = formatter.parse(resultGeneratedAt);
         } catch (Exception e) {
             log.error("Failed to parse timestamp FinishedAt [" + resultGeneratedAt + "]", e);
