@@ -25,6 +25,7 @@ import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.metric.RealTimeRequest;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
+import com.latticeengines.propdata.match.service.PublicDomainService;
 
 @Component
 class MatchPlanner {
@@ -34,6 +35,9 @@ class MatchPlanner {
 
     @Autowired
     private ZkConfigurationService zkConfigurationService;
+
+    @Autowired
+    private PublicDomainService publicDomainService;
 
     @Autowired
     private MetricService metricService;
@@ -60,7 +64,7 @@ class MatchPlanner {
     }
 
     @MatchStep
-    private static MatchContext scanInputData(MatchInput input, MatchContext context) {
+    private MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, Integer> keyPositionMap = getKeyPositionMap(input);
 
         List<InternalOutputRecord> records = new ArrayList<>();
@@ -120,7 +124,7 @@ class MatchPlanner {
         return statistics;
     }
 
-    private static InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
+    private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
             int numInputFields, Map<MatchKey, Integer> keyPositionMap, Set<String> domainSet) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
@@ -136,7 +140,9 @@ class MatchPlanner {
             try {
                 String originalDomain = (String) inputRecord.get(domainPos);
                 String cleanDomain = DomainUtils.parseDomain(originalDomain);
-                record.setParsedDomain(cleanDomain);
+                if (!publicDomainService.isPublicDomain(cleanDomain)) {
+                    record.setParsedDomain(cleanDomain);
+                }
 
                 // update domain set
                 domainSet.add(cleanDomain);
