@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.google.common.base.Predicate;
@@ -80,6 +81,9 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
         // Add columns that are not in metadata to unknown columns
         for (final String field : headerFields) {
+            if (StringUtils.isEmpty(field)) {
+                throw new RuntimeException("Found empty column name in headers.");
+            }
             if (!Iterables.any(attributes, new Predicate<Attribute>() {
 
                 @Override
