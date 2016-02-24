@@ -11,3 +11,5 @@ cp $WSHOME/le-dev/hadoop/dev/yarn-site.xml $HADOOP_CONF_DIR
 hadoop fs -mkdir -p /apps/tez || true
 hadoop fs -copyFromLocal $WSHOME/le-dev/hadoop/artifacts/tez-0.6.2.tar.gz /apps/tez || true
 
+pip install -r $WSHOME/le-dev/scripts/requirements.txt
+
