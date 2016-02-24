@@ -69,7 +69,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
         LeadEnrichmentAttribute attribute = new LeadEnrichmentAttribute();
         String columnName = columnMetadata.getColumnName();
         attribute.setFieldName(columnName);
-        attribute.setFieldNameInTarget(fieldNameRestrictDefaultLength(columnName));
+        attribute.setFieldNameInTarget(lpFunctions.fieldNameRestrictDefaultLength(columnName));
         attribute.setFieldType(columnMetadata.getDataType());
         attribute.setDisplayName(columnMetadata.getDisplayName());
         attribute.setDataSource(columnMetadata.getMatchDestination());
@@ -138,7 +138,7 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
                 String provider = entry.getValue();
                 Map<String, Boolean> colsMap = getColumns(tenantName, provider, table, dlUrl);
                 for (LeadEnrichmentAttribute attribute : attributes) {
-                    String column = getCustomerColumn(templateType, attribute.getFieldName());
+                    String column = lpFunctions.getCustomerColumn(templateType, attribute.getFieldName());
                     if (!colsMap.containsKey(column.toLowerCase())) {
                         List<String> fields = invalidFields.get(table);
                         if (fields == null) {
@@ -180,22 +180,6 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             }
         }
         return colsMap;
-    }
-
-    private String fieldNameRestrictDefaultLength(String fieldName) {
-        return lpFunctions.fieldNameRestrictLength(fieldName, 32);
-    }
-
-    private String getCustomerColumn(String templateType, String fieldName) {
-        if (templateType.equals("SFDC")) {
-            return String.format("Lattice_%s__c", fieldNameRestrictDefaultLength(fieldName));
-        } else if (templateType.equals("ELQ")) {
-            return String.format("C_Lattice_%s1", fieldNameRestrictDefaultLength(fieldName));
-        } else if (templateType.equals("MKTO")) {
-            return String.format("Lattice_%s", fieldNameRestrictDefaultLength(fieldName));
-        } else {
-            return fieldName;
-        }
     }
 
     @Override
