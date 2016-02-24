@@ -97,11 +97,11 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
                 tables.get(0), //
                 12);
         Counters counters = jobService.getMRJobCounters(appId.toString());
-        assertEquals(counters.getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS), 12);
-        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS), 7);
-        assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED), 2);
-        //assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR), 2);
+        assertEquals(counters.getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS).getValue(), 12);
+        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 7);
+        assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
+        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 2);
+        //assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR).getValue(), 2);
     }
 
     @DataProvider
