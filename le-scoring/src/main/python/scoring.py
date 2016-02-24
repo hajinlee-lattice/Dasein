@@ -5,7 +5,7 @@ import shutil
 
 SCORING_SCRIPT_NAME = "scoringengine.py"
 PIPELINE_SCRIPT_NAME = "pipeline.py"
-PICKEL_FILE_NAME = "STPipelineBinary.p"
+PICKLE_FILE_NAME = "STPipelineBinary.p"
 PIPELINEFWK_SCRIPT_NAME = "pipelinefwk.py"
 ENCODER_SCRIPT_NAME = "encoder.py"
 PIPELINESTEPS_SCRIPT_NAME = "pipelinesteps.py"
@@ -22,9 +22,15 @@ CLEANCATEGORICAL_SCRIPT_NAME="cleancategoricalcolumn.py"
 AGGREGATED_MODEL_SCRIPT_NAME="aggregatedmodel.py"
 ENUMERATED_COLUMN_SCRIPT_NAME="enumeratedcolumntransformstep.py"
 COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
+PIVOT_SCRIPT_NAME="pivotstep.py"
 
 def main(argv):
-    scoringFiles = [SCORING_SCRIPT_NAME, PIPELINE_SCRIPT_NAME, PICKEL_FILE_NAME, PIPELINEFWK_SCRIPT_NAME, ENCODER_SCRIPT_NAME, PIPELINESTEPS_SCRIPT_NAME,
+    scoringFiles = [SCORING_SCRIPT_NAME, 
+                    PIPELINE_SCRIPT_NAME, 
+                    PICKLE_FILE_NAME, 
+                    PIPELINEFWK_SCRIPT_NAME, 
+                    ENCODER_SCRIPT_NAME, 
+                    PIPELINESTEPS_SCRIPT_NAME,
                     IMPUTATION_STEP_SCRIPT_NAME,
                     IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME,
                     MAKE_FLOAT_SCRIPT_NAME,
@@ -34,7 +40,8 @@ def main(argv):
                     CLEANCATEGORICAL_SCRIPT_NAME,
                     AGGREGATED_MODEL_SCRIPT_NAME,
                     ENUMERATED_COLUMN_SCRIPT_NAME,
-                    COLUMNTYPE_CONVERSION_SCRIPT_NAME]
+                    COLUMNTYPE_CONVERSION_SCRIPT_NAME,
+                    PIVOT_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
