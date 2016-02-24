@@ -8,12 +8,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Component;
 
+import cascading.operation.Buffer;
+
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataBothBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataNewTechBuffer;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
-
-import cascading.operation.Buffer;
+import com.latticeengines.propdata.dataflow.common.FlowUtils;
 
 @Component("hgDataPivotFlow")
 public class HGDataPivotFlow extends PivotFlow {
@@ -49,6 +50,7 @@ public class HGDataPivotFlow extends PivotFlow {
         FieldList joinFieldList = new FieldList(parameters.getJoinFields());
         join = join.join(joinFieldList, newTech, joinFieldList, JoinType.OUTER);
         join = join.addTimestamp(parameters.getTimestampField());
+        join = FlowUtils.truncateStringFields(join, parameters.getColumns());
         return finalRetain(join, parameters.getColumns());
     }
 

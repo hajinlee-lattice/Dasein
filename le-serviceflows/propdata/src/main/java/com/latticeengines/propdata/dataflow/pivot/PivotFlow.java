@@ -23,10 +23,10 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
-import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.propdata.dataflow.common.FlowUtils;
 
 @Component("pivotFlow")
 public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> {
@@ -41,21 +41,16 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             sourceMap.put(baseTable, addSource(baseTable));
         }
         Node join = joinedConfigurablePipes(parameters, sourceMap);
-        join = removeInvalidDatetime(join, parameters.getColumns());
+        join = FlowUtils.removeInvalidDatetime(join, parameters.getColumns());
         join = join.addTimestamp(parameters.getTimestampField());
-        return finalRetain(join, parameters.getColumns());
+        join = finalRetain(join, parameters.getColumns());
+        if (parameters.hasSqlPresence()) {
+            join = FlowUtils.truncateStringFields(join, parameters.getColumns());
+        }
+        return join;
     }
 
-    protected Node removeInvalidDatetime(Node node, List<SourceColumn> columns) {
-        for (SourceColumn column : columns) {
-            if (column.getColumnType().toUpperCase().contains("DATETIME")) {
-                DateTimeCleanupFunction function = new DateTimeCleanupFunction(column.getColumnName());
-                node = node.apply(function, new FieldList(column.getColumnName()),
-                        new FieldMetadata(column.getColumnName(), Long.class));
-            }
-        }
-        return node;
-    }
+
 
     protected Node finalRetain(Node node, List<SourceColumn> columns) {
         List<String> fields = new ArrayList<>();

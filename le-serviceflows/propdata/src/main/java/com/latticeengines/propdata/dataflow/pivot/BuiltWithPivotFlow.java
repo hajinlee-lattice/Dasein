@@ -21,6 +21,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithTopAttrBu
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
+import com.latticeengines.propdata.dataflow.common.FlowUtils;
 
 @Component("builtWithPivotFlow")
 public class BuiltWithPivotFlow extends PivotFlow {
@@ -60,7 +61,8 @@ public class BuiltWithPivotFlow extends PivotFlow {
         pivot = pivot.join(joinList, join, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, topAttrs, joinList, JoinType.OUTER);
         pivot = pivot.join(joinList, recent, joinList, JoinType.OUTER);
-        pivot = removeInvalidDatetime(pivot, parameters.getColumns());
+        pivot = FlowUtils.removeInvalidDatetime(pivot, parameters.getColumns());
+        pivot = FlowUtils.truncateStringFields(pivot, parameters.getColumns());
         pivot = pivot.addTimestamp(parameters.getTimestampField());
         return finalRetain(pivot, parameters.getColumns());
     }

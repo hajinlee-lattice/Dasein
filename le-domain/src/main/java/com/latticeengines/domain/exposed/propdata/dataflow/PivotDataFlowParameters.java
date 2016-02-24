@@ -11,6 +11,7 @@ public class PivotDataFlowParameters extends DataFlowParameters {
     private List<String> baseTables;
     private String[] joinFields;
     private List<SourceColumn> columns;
+    private Boolean hasSqlPresence = true;
 
     public String getTimestampField() { return timestampField; }
 
@@ -27,4 +28,8 @@ public class PivotDataFlowParameters extends DataFlowParameters {
     public String[] getJoinFields() { return joinFields; }
 
     public void setJoinFields(String[] joinFields) { this.joinFields = joinFields; }
+
+    public Boolean hasSqlPresence() { return hasSqlPresence; }
+
+    public void setHasSqlPresence(Boolean hasSqlPresence) { this.hasSqlPresence = hasSqlPresence; }
 }

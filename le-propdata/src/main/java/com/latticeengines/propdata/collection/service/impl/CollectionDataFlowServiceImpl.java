@@ -31,6 +31,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
+import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.MostRecentSource;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.Source;
@@ -113,6 +114,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(source));
         parameters.setBaseTables(baseTables);
         parameters.setJoinFields(source.getPrimaryKey());
+        parameters.setHasSqlPresence(source instanceof HasSqlPresence);
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty("FLOWNAME", source.getSourceName() + "-" + flowName);
