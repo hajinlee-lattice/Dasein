@@ -1,0 +1,183 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-quartz</artifactId>
+    <packaging>war</packaging>
+    <name>le-${component-name}</name>
+    <description>LE Quartz</description>
+
+    <properties>
+        <component-name>quartz</component-name>
+        <springframework.version>4.0.0.RELEASE</springframework.version>
+        <quartz.version>2.2.2</quartz.version>
+        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
+        <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
+        <le.common.version>2.0.22-SNAPSHOT</le.common.version>
+        <le.db.version>2.0.22-SNAPSHOT</le.db.version>
+        <le.network.version>2.0.22-SNAPSHOT</le.network.version>
+        <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
+        <le.security.version>2.0.22-SNAPSHOT</le.security.version>
+        <!-- <spring.security.version>3.2.5.RELEASE</spring.security.version> -->
+    </properties>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.22-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <!-- Security related. -->
+        <!-- <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency> -->
+        <!-- Transaction dependency is required with Quartz integration -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-network</artifactId>
+            <version>${le.network.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- Security related -->
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+
+        <!-- Quartz framework -->
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz</artifactId>
+            <version>${quartz.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.quartz-scheduler</groupId>
+            <artifactId>quartz-jobs</artifactId>
+            <version>${quartz.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.30</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/</contextPath>
+                    </webApp>
+                    <httpConnector>
+                        <port>8899</port>
+                    </httpConnector>
+                </configuration>
+                <!-- <executions> <execution> <id>jetty-stop</id> <phase>test</phase> 
+                    <goals> <goal>stop</goal> </goals> </execution> </executions> -->
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+

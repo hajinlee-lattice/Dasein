@@ -21,6 +21,9 @@ public abstract class BaseRestApiProxy {
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
     private String microserviceHostPort;
+    
+    @Value("${proxy.quartz.rest.endpoint.hostport}")
+    private String quartzHostPort;
 
     public BaseRestApiProxy(String rootpath, Object... urlVariables) {
         this.rootpath = rootpath == null ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
@@ -74,6 +77,18 @@ public abstract class BaseRestApiProxy {
         }
         return combine(microserviceHostPort, end);
     }
+    
+    protected String constructQuartzUrl(Object path, Object... urlVariables) {
+        if (StringUtils.isEmpty(quartzHostPort)) {
+            throw new NullPointerException("quartzHostPort must be set");
+        }
+        String end = rootpath;
+        if (path != null) {
+            String expandedPath = new UriTemplate(path.toString()).expand(urlVariables).toString();
+            end = combine(rootpath, expandedPath);
+        }
+        return combine(quartzHostPort, end);
+    }
 
     private String combine(Object... parts) {
         List<String> toCombine = new ArrayList<>();
@@ -101,5 +116,13 @@ public abstract class BaseRestApiProxy {
 
     public void setMicroserviceHostPort(String microserviceHostPort) {
         this.microserviceHostPort = microserviceHostPort;
+    }
+    
+    public String getQuartzHostPort() {
+        return quartzHostPort;
+    }
+
+    public void setQuartzHostPort(String quartzHostPort) {
+        this.quartzHostPort = quartzHostPort;
     }
 }

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+	    http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	    http://www.springframework.org/schema/tx
+	    http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+    <import resource="classpath:proxy-context.xml"/>
+    <context:annotation-config/> 
+    <context:component-scan base-package="com.latticeengines.quartz">
+        <context:exclude-filter type="aspectj" expression="com.latticeengines.quartz.controller.*" /> 
+    </context:component-scan>
+    <import resource="classpath:quartz-aspects-context.xml"/>
+    
+    <bean id="scheduler"
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+        lazy-init="false">
+        <property name="autoStartup" value="true" />
+        <property name="applicationContextSchedulerContextKey"
+            value="applicationContext" />
+        <property name="waitForJobsToCompleteOnShutdown" value="true" />
+        <property name="overwriteExistingJobs" value="true" />
+        <property name="dataSource">
+            <ref bean="dataSourceQuartz" />
+        </property>
+        <property name="quartzProperties">
+            <props>
+                <!-- <prop key="org.quartz.jobStore.useProperties">true</prop> -->
+                <prop key="org.quartz.jobStore.misfireThreshold">6000000</prop>
+                <prop key="org.quartz.jobStore.class">org.quartz.impl.jdbcjobstore.JobStoreTX
+                </prop>
+                <prop key="org.quartz.jobStore.driverDelegateClass">org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+                </prop>
+                <prop key="org.quartz.jobStore.tablePrefix">QRTZ_</prop>
+                <prop key="org.quartz.jobStore.isClustered">true</prop>
+                <prop key="org.quartz.jobStore.clusterCheckinInterval">20000</prop>
+                <prop key="org.quartz.scheduler.instanceName">TestClusteredScheduler</prop>
+                <prop key="org.quartz.scheduler.instanceId">AUTO</prop>
+                <prop key="org.quartz.scheduler.jmx.export">true</prop>
+                <prop key="org.quartz.jobStore.misfireThreshold">60000</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="dataSourceQuartz"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${quartz.datasource.driver}" />
+        <property name="url" value="${quartz.datasource.url}" />
+        <property name="username" value="${quartz.datasource.user}" />
+        <property name="password" value="${quartz.datasource.password}" />
+    </bean>
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactoryQuartz"
+        class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceQuartz" />
+        <property name="packagesToScan"
+            value="com.latticeengines.domain.exposed.quartz, com.latticeengines.domain.exposed" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect
+                </prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerQuartz"
+        class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryQuartz">
+        <qualifier value="quartz" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManagerQuartz" />
+
+    <bean id="jobHistoryDao" class="com.latticeengines.quartz.dao.impl.JobHistoryDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryQuartz" />
+    </bean>
+
+</beans>
