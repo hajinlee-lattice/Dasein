@@ -142,10 +142,9 @@ class MatchPlanner {
                 String cleanDomain = DomainUtils.parseDomain(originalDomain);
                 if (!publicDomainService.isPublicDomain(cleanDomain)) {
                     record.setParsedDomain(cleanDomain);
+                    // update domain set
+                    domainSet.add(cleanDomain);
                 }
-
-                // update domain set
-                domainSet.add(cleanDomain);
             } catch (Exception e) {
                 record.setErrorMessages(
                         Collections.singletonList("Error when cleanup domain field: " + e.getMessage()));
