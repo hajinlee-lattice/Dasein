@@ -106,10 +106,10 @@ public class CSVDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordR
                         break;
                     }
                 } catch (SQLException e) {
-                    LOG.info("This row " + (pos + 1) + " is malformed. Skip this row!!");
+                    LOG.info("This row " + (pos + 2) + " is malformed. Skip this row!!");
                     ignoreRecordsCounter.increment(1);
                     rowErrorCounter.increment(1);
-                    csvFilePrinter.printRecord(pos + 1, e.getMessage());
+                    csvFilePrinter.printRecord(pos + 2, e.getMessage());
                 } finally {
                     pos++;
                 }
