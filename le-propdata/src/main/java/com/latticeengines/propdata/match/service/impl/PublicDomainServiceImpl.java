@@ -23,6 +23,7 @@ public class PublicDomainServiceImpl implements PublicDomainService {
         loadPublicDomains();
     }
 
+    @Override
     public Boolean isPublicDomain(String domain) {
         return publicDomains.contains(domain);
     }
