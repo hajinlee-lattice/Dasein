@@ -127,6 +127,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder modelName(String modelName) {
+            model.setModelName(modelName);
+            return this;
+        }
+
         public Builder directoryToScore(String directoryToScore) {
             score.setSourceDir(directoryToScore);
             runScoreTableDataFlow.setAccountMasterNameAndPath(new String[] { "AccountMaster", directoryToScore });

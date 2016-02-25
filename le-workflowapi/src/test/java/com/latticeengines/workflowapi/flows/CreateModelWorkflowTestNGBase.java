@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,6 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
@@ -118,7 +118,8 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchCommandProxy.getBestMatchClient(3000)) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
-                .matchDestTables("DerivedColumns")
+                .matchDestTables("DerivedColumns") //
+                .modelName(UUID.randomUUID().toString())
                 .eventColumns(
                         sourceFile.getSchemaInterpretation() == SchemaInterpretation.SalesforceAccount ? Lists
                                 .newArrayList("IsWon") : Lists.newArrayList("IsConverted")) //

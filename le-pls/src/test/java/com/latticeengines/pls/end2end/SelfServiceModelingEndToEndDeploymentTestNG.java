@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -27,6 +28,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -46,6 +48,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
+    private String modelingWorkflowApplicationId;
+    private ModelingParameters modelingParameters;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -109,31 +113,56 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
-        ModelingParameters parameters = createModelingParameters(sourceFile.getName());
+        String modelName = "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
+        modelingParameters = createModelingParameters(sourceFile.getName(), modelName);
         ResponseDocument response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), modelName), modelingParameters,
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
 
-        String applicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
-        System.out.println(String.format("Workflow application id is %s", applicationId));
-        waitForWorkflowStatus(applicationId, true);
+        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
 
         response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), modelingParameters,
                 ResponseDocument.class);
         assertFalse(response.isSuccess());
 
-        WorkflowStatus completedStatus = waitForWorkflowStatus(applicationId, false);
+        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
+    }
 
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
+    public void retrieveReport() {
         Job job = restTemplate.getForObject( //
-                String.format("%s/pls/jobs/yarnapps/%s", getPLSRestAPIHostPort(), applicationId), //
+                String.format("%s/pls/jobs/yarnapps/%s", getPLSRestAPIHostPort(), modelingWorkflowApplicationId), //
                 Job.class);
         assertNotNull(job);
         List<Report> reports = job.getReports();
         assertEquals(reports.size(), 1);
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
+    public void retrieveModelSummary() throws InterruptedException {
+        ModelSummary found = null;
+        // Wait for model downloader
+        while (true) {
+            @SuppressWarnings("unchecked")
+            List<Object> summaries = restTemplate.getForObject( //
+                    String.format("%s/pls/modelsummaries", getPLSRestAPIHostPort()), List.class);
+            for (Object rawSummary : summaries) {
+                ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
+                if (summary.getName().equals(modelingParameters.getName())) {
+                    found = summary;
+                }
+            }
+            if (found != null)
+                break;
+            Thread.sleep(1000);
+        }
+        assertNotNull(found);
     }
 
     // TODO enable once error csv mechanism working
@@ -167,9 +196,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private ModelingParameters createModelingParameters(String fileName) {
+    private ModelingParameters createModelingParameters(String fileName, String modelName) {
         ModelingParameters parameters = new ModelingParameters();
-        parameters.setName("Test");
+        parameters.setName(modelName);
         parameters.setDescription("Test");
         parameters.setFilename(fileName);
         return parameters;

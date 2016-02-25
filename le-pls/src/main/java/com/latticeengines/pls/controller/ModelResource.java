@@ -40,7 +40,8 @@ public class ModelResource {
             if (sourceFile == null) {
                 throw new RuntimeException(String.format("No such source file with name %s", parameters.getFilename()));
             }
-            return ResponseDocument.successResponse(createModelWorkflowSubmitter.submit(sourceFile).toString());
+            return ResponseDocument.successResponse( //
+                    createModelWorkflowSubmitter.submit(sourceFile, parameters).toString());
         } catch (Exception e) {
             log.error(e);
             return ResponseDocument.failedResponse(e);

@@ -60,8 +60,10 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         for (String eventCol : configuration.getEventColumns()) {
             bldr = bldr.targets(eventCol) //
                     .metadataTable("EventTable-" + eventCol) //
-                    .keyColumn("Id") //
-                    .modelName("Model-" + eventCol);
+                    .keyColumn("Id").modelName(configuration.getModelName());
+            if (configuration.getEventColumns().size() != 1) {
+                bldr = bldr.modelName(configuration.getModelName() + " (" + eventCol + ")");
+            }
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFile();
             modelExecutor.profile();
@@ -70,5 +72,4 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         }
         return modelApplicationIdToEventColumn;
     }
-
 }

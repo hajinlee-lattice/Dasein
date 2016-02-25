@@ -94,6 +94,7 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
                     .attributes(
                             Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2",
                                     "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                    .modelName("Default Model") //
                     .build();
 
             String payloadName = workflowName + "-" + customer + "-" + targetMarket.getName();

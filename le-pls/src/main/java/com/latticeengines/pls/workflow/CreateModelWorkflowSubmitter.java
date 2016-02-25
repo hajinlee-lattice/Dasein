@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.SourceFile;
@@ -47,7 +48,7 @@ public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    public ApplicationId submit(SourceFile sourceFile) {
+    public ApplicationId submit(SourceFile sourceFile, ModelingParameters parameters) {
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
         }
@@ -70,6 +71,7 @@ public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumns") //
+                .modelName(parameters.getName()) //
                 .eventColumns(eventColumns) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);

@@ -21,11 +21,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import com.latticeengines.domain.exposed.workflow.KeyValue;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -169,6 +170,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @JsonProperty("RocScore")
     @Column(name = "ROC_SCORE", nullable = false)
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     public Double getRocScore() {
         return rocScore;
     }
@@ -340,6 +342,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @JsonProperty("Top10PctLift")
     @Column(name = "TOP_10_PCT_LIFT", nullable = true)
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     public Double getTop10PercentLift() {
         return top10PercentLift;
     }
@@ -351,6 +354,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @JsonProperty("Top20PctLift")
     @Column(name = "TOP_20_PCT_LIFT", nullable = true)
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     public Double getTop20PercentLift() {
         return top20PercentLift;
     }
@@ -362,6 +366,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @JsonProperty("Top30PctLift")
     @Column(name = "TOP_30_PCT_LIFT", nullable = true)
+    @Type(type = "com.latticeengines.db.exposed.extension.NaNSafeDoubleType")
     public Double getTop30PercentLift() {
         return top30PercentLift;
     }

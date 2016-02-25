@@ -112,6 +112,11 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder modelName(String modelName) {
+            model.setModelName(modelName);
+            return this;
+        }
+
         public CreateModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
