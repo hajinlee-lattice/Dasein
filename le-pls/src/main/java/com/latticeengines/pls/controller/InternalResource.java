@@ -237,7 +237,8 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/modelsummaries/active/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all active model summaries")
-    public List<ModelSummary> getActiveModelSummaries(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+    public List<ModelSummary> getActiveModelSummaries(@PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return modelSummaryEntityMgr.findAllActive();
@@ -286,18 +287,18 @@ public class InternalResource extends InternalResourceBase {
         }
         return response;
     }
-    
+
     @RequestMapping(value = "/emails/createmodel/result/{result}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Send out email after model creation")
     public void sendPlsCreateModelEmail(@PathVariable("result") String result,
             @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         List<User> users = userService.getUsers(tenantId);
-        for(User user : users ){
-            if(user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())){
-                if(result.equals("COMPLETED")){
+        for (User user : users) {
+            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                if (result.equals("COMPLETED")) {
                     emailService.sendPlsCreateModelCompletionEmail(user, hostPort);
-                }else{
+                } else {
                     emailService.sendPlsCreateModelErrorEmail(user, hostPort);
                 }
             }
