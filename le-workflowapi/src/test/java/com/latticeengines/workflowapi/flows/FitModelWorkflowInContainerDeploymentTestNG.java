@@ -22,7 +22,7 @@ public class FitModelWorkflowInContainerDeploymentTestNG extends FitModelWorkflo
         setupForFitModel();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testWorkflowInContainer() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 
