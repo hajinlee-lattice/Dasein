@@ -55,10 +55,10 @@ def resetMysql():
     assert charsWritten == 8, "Error with running ddl_pls_multitenant_mysql5innodb.sql script in le-db directory. Please check if script is correct"
 
 
-def waitForServerToStart(checkingUrl):
+def waitForServerToStart(checkingUrl, waitminute):
     startTime = time.time()
 
-    while time.time() - startTime < 180:   # Wait for 3 minutes for the server to start
+    while time.time() - startTime < (waitminute * 60):   # Wait for [waitminute] minutes for the server to start
         try:
             output = urllib2.urlopen(checkingUrl)
             if output.getcode() == 200:
@@ -68,9 +68,12 @@ def waitForServerToStart(checkingUrl):
             continue
         except urllib2.URLError:
             continue
+
+    print 'timeout on checking %s after %d seconds.' % (checkingUrl, waitminute * 60)
+
     return False
 
-def startAllServers():
+def startAllServers(waitminute):
     microserviceUrl = "http://localhost:8080/doc/doc/api-docs"
     isMicroserviceRunning = False
     try:
@@ -88,7 +91,7 @@ def startAllServers():
         if proc:
             global microservicePid
             microservicePid = proc.pid
-        if not waitForServerToStart(microserviceUrl):
+        if not waitForServerToStart(microserviceUrl, waitminute):
             print "Microservice server did not successfully start. Exitting."
             sys.exit(1)
     else:
@@ -114,7 +117,7 @@ def startAllServers():
         if proc:
             global plsPid
             plsPid = proc.pid
-        if not waitForServerToStart(plsServerUrl):
+        if not waitForServerToStart(plsServerUrl, waitminute):
             print "PLS server did not successfully start. Exitting."
             killAllRunningServers()
             sys.exit(1)
@@ -141,7 +144,7 @@ def startAllServers():
         if proc:
             global adminPid
             adminPid = proc.pid
-        if not waitForServerToStart(tenantConsoleUrl):
+        if not waitForServerToStart(tenantConsoleUrl, waitminute):
             print "Tenant Console server did not successfully start. Exitting."
             killAllRunningServers()
             sys.exit(1)
@@ -178,6 +181,7 @@ def parseCliArgs():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--skip-upload', dest='skipupload', action='store_true', help='skip upload test artifacts to hdfs.')
     parser.add_argument('--skip-setup', dest='skipsetup', action='store_true', help='skip test setup.')
+    parser.add_argument('-w', dest='waitminute', type=int, default=5, help='number of minutes wait for jettys to start up, default = 5 min.')
     args = parser.parse_args()
     return args
 
@@ -205,7 +209,7 @@ if __name__ == "__main__":
         print 'Skip test setup.'
 
     atexit.register(killAllRunningServers)
-    startAllServers()
+    startAllServers(args.waitminute)
 
     print 'Environmental setup finished for PD End to End. Running the actual test.'
     runPDMockedEndToEndTest();
