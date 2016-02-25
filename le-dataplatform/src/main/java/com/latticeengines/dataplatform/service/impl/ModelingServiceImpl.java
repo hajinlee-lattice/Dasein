@@ -341,23 +341,20 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setTargets(model.getTargetsList());
         classifier.setKeyCols(model.getKeyColsList());
         String script = algorithm.getScript();
-        String afterPart = StringUtils.substringAfter(script, "/app");
-        script = "/app/" + versionManager.getCurrentVersion() + afterPart;
-        classifier.setPythonScriptHdfsPath(script);
+        classifier.setPythonScriptHdfsPath(getScriptPathWithVersion(script));
 
         String pipelineLibScript = algorithm.getPipelineLibScript();
         if (StringUtils.isEmpty(pipelineLibScript)) {
-            pipelineLibScript = String.format("/app/%s/dataplatform/scripts/lepipeline.tar.gz",
-                    versionManager.getCurrentVersion());
+            pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
         }
+        classifier.setPythonPipelineLibHdfsPath(getScriptPathWithVersion(pipelineLibScript));
+
         String pipelineScript = algorithm.getPipelineScript();
         if (StringUtils.isEmpty(pipelineScript)) {
-            pipelineScript = String.format("/app/%s/dataplatform/scripts/pipeline.py",
-                    versionManager.getCurrentVersion());
+            pipelineScript = "/app/dataplatform/scripts/pipeline.py";
         }
+        classifier.setPythonPipelineScriptHdfsPath(getScriptPathWithVersion(pipelineScript));
 
-        classifier.setPythonPipelineLibHdfsPath(pipelineLibScript);
-        classifier.setPythonPipelineScriptHdfsPath(pipelineScript);
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
         classifier.setProvenanceProperties(model.getProvenanceProperties());
@@ -382,6 +379,11 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setTestDataHdfsPath(testPath);
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
+    }
+
+    private String getScriptPathWithVersion(String script) {
+        String afterPart = StringUtils.substringAfter(script, "/app");
+        return "/app/" + versionManager.getCurrentVersion() + afterPart;
     }
 
     private String getDataProfileAvroPathInHdfs(String path) {
