@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
 import com.latticeengines.scoringapi.controller.ScoreResource;
 import com.latticeengines.scoringapi.match.ProprietaryDataMatcher;
 import com.latticeengines.scoringapi.model.ModelEvaluator;
-import com.latticeengines.scoringapi.model.ModelRetriever;
+import com.latticeengines.scoringapi.model.impl.ModelRetrieverImpl;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
 import com.latticeengines.scoringapi.unused.CombinationElement;
 import com.latticeengines.scoringapi.unused.CombinationRetriever;
@@ -30,7 +30,7 @@ public class MockScoreService {
     private final ScoreResource scoreService = new ScoreResource();
 
     @Mock
-    private ModelRetriever modelRetriever;
+    private ModelRetrieverImpl modelRetriever;
 
     @Mock
     private CombinationRetriever combinationRetriever;

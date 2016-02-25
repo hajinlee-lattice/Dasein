@@ -12,7 +12,7 @@ public class Field {
     private String fieldName;
 
     @JsonProperty("fieldType")
-    @ApiModelProperty(value = "Data type of the field", allowableValues = "boolean,integer,float,string,temporal,long")
+    @ApiModelProperty(required = true, value = "Data type of the field", allowableValues = "BOOLEAN,INTEGER,FLOAT,STRING,TEMPORAL,LONG")
     private FieldType fieldType;
 
     public Field() {

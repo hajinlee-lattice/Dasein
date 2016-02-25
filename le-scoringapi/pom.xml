@@ -17,14 +17,16 @@
 
     <properties>
         <component-name>scoringapi</component-name>
+        <le.camille.version>2.0.22-SNAPSHOT</le.camille.version>
         <le.common.version>2.0.22-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.22-SNAPSHOT</le.monitor.version>
+        <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
+        <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
         <jpmml.version>2.0.0</jpmml.version>
-        <le.camille.version>2.0.22-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
         <springfox.swagger.version>2.2.2</springfox.swagger.version>
         <springfox.swagger.ui.version>2.2.2</springfox.swagger.ui.version>
-
     </properties>
 
     <build>
@@ -35,6 +37,7 @@
                 <configuration>
                     <attachClasses>true</attachClasses>
                     <classesClassifier>classes</classesClassifier>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
         </plugins>
@@ -91,8 +94,6 @@
                         <version>${jetty.version}</version>
                         <configuration>
                             <useTestClasspath>true</useTestClasspath>
-                            <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
-                            <webAppSourceDirectory>${basedir}/src/test/webapp</webAppSourceDirectory>
                             <webAppConfig>
                                 <extraClasspath>
                                     ${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
@@ -131,6 +132,14 @@
             <version>${le.common.version}</version>
             <classifier>intf</classifier>
             <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
                     <artifactId>jsp-2.1</artifactId>
@@ -175,6 +184,68 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>jetty-util</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+-->
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+<!--             <scope>runtime</scope>  -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jetty</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
         </dependency>
 
         <dependency>

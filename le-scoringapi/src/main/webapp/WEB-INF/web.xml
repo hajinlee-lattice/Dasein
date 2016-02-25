@@ -7,20 +7,25 @@
     <display-name>SCORE API</display-name>
     <description>Lattice Engines Score REST API</description>
 
-    <context-param>
-        <param-name>contextClass</param-name>
-        <param-value>
-         org.springframework.web.context.support.AnnotationConfigWebApplicationContext
-      </param-value>
-    </context-param>
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>com.latticeengines.scoringapi.infrastructure</param-value>
-    </context-param>
-
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:scoringapi-context.xml</param-value>
+    </context-param>
+
+<!--     <context-param> -->
+<!--         <param-name>contextClass</param-name> -->
+<!--         <param-value> -->
+<!--          org.springframework.web.context.support.AnnotationConfigWebApplicationContext -->
+<!--       </param-value> -->
+<!--     </context-param> -->
+<!--     <context-param> -->
+<!--         <param-name>contextConfigLocation</param-name> -->
+<!--         <param-value>com.latticeengines.scoringapi.web</param-value> -->
+<!--     </context-param> -->
 
     <servlet>
         <servlet-name>score</servlet-name>

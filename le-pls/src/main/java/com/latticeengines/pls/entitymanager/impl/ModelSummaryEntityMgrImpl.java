@@ -108,6 +108,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return modelSummaryDao.findAllValid();
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> findAllActive() {
+        return modelSummaryDao.findAllActive();
+    }
+
     private void inflateDetails(ModelSummary summary) {
         KeyValue kv = summary.getDetails();
         Hibernate.initialize(kv);

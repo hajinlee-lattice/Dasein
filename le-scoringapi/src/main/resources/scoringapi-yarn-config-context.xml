@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:yarn="http://www.springframework.org/schema/yarn"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xsi:schemaLocation="
+      http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <yarn:configuration>
+        dfs.client.failover.proxy.provider.${scoringapi.dfs.nameservices}=${scoringapi.dfs.client.failover.proxy.provider}
+        dfs.nameservices=${scoringapi.dfs.nameservices}
+        dfs.ha.namenodes.${scoringapi.dfs.nameservices}=nn1,nn2
+        dfs.namenode.rpc-address.${scoringapi.dfs.nameservices}.nn1=${scoringapi.dfs.namenode.rpc-address.nn1}
+        dfs.namenode.rpc-address.${scoringapi.dfs.nameservices}.nn2=${scoringapi.dfs.namenode.rpc-address.nn2}
+        fs.defaultFS=${scoringapi.fs.defaultFS}
+    </yarn:configuration>
+
+</beans>

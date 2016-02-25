@@ -1,17 +1,30 @@
-package com.latticeengines.scoringapi.infrastructure;
+package com.latticeengines.scoringapi.web;
+
+import java.util.List;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = { "com.latticeengines.scoringapi", "com.latticeengines.common.exposed.rest" })
+@ComponentScan(basePackages = { "com.latticeengines.db", "com.latticeengines.oauth2db", "com.latticeengines.scoringapi",
+        "com.latticeengines.common.exposed.rest" })
 public class WebConfiguration extends WebMvcConfigurerAdapter {
     public WebConfiguration() {
         super();
+    }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setPrettyPrint(true);
+
+        converters.add(converter);
     }
 
     @Override

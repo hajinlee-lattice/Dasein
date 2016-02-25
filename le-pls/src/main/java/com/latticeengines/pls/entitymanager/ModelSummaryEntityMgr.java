@@ -24,6 +24,8 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     List<ModelSummary> findAllValid();
 
+    List<ModelSummary> findAllActive();
+
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
 
     void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap);

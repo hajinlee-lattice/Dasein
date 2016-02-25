@@ -8,7 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.jython.JythonEngine;
-import com.latticeengines.scoringapi.model.ModelRetriever;
+import com.latticeengines.scoringapi.model.impl.ModelRetrieverImpl;
 
 @Service
 public class TransformRetriever {
@@ -29,5 +29,5 @@ public class TransformRetriever {
 
     private static LoadingCache<String, JythonEngine> cache;
 
-    private static final Log log = LogFactory.getLog(ModelRetriever.class);
+    private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
 }

@@ -20,15 +20,18 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-<!-- TODO bn uncomment this once we have some properties and deployment is sorted out.
+
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
                 <value>file:${SCORINGAPI_PROPDIR:/etc/ledp}/scoringapi.properties</value>
+                <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
+                <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
+                <value>file:${OAUTH2_DB_PROPDIR:/etc/ledp}/oauth2.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
--->
+
 </beans>

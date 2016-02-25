@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Company {
 
     @JsonProperty("name")
-    @ApiModelProperty(required = true)
+    @ApiModelProperty(required = false)
     private String name;
 
     @JsonProperty("city")
