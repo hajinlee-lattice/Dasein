@@ -58,9 +58,12 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.totalSuccessEvents = StringUtility.AddCommas($scope.totalSuccessEvents);
     
     $scope.conversionRate = modelDetails[widgetConfig.TotalSuccessEventsProperty] / (modelDetails[widgetConfig.TestSetProperty] + modelDetails[widgetConfig.TrainingSetProperty]);
-    if ($scope.conversionRate != null && $scope.conversionRate <= 1) {
+    if ($scope.conversionRate != null && $scope.conversionRate < 1) {
         $scope.conversionRate = $scope.conversionRate * 100;
         $scope.conversionRate = $scope.conversionRate.toFixed(2);
+    } else if ($scope.conversionRate != null && $scope.conversionRate === 1) {
+        $scope.conversionRate = $scope.conversionRate * 100;
+        $scope.conversionRate = $scope.conversionRate.toFixed(0);
     }
     $scope.leadSource = modelDetails[widgetConfig.LeadSourceProperty];
     $scope.opportunity = modelDetails[widgetConfig.OpportunityProperty];
