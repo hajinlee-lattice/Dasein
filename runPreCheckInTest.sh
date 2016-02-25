@@ -2,6 +2,7 @@
 
 import subprocess, os, stat, sys, pexpect, signal, psutil, atexit
 import urllib, urllib2, time
+import argparse
 
 microservicePid = None
 adminPid = None
@@ -173,7 +174,16 @@ def runTestSetupScript():
     os.chdir(os.environ['WSHOME'])
     subprocess.call(['./le-dev/scripts/setup.sh'])
 
+def parseCliArgs():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--skip-upload', dest='skipupload', action='store_true', help='skip upload test artifacts to hdfs.')
+    parser.add_argument('--skip-setup', dest='skipsetup', action='store_true', help='skip test setup.')
+    args = parser.parse_args()
+    return args
+
 if __name__ == "__main__":
+    args = parseCliArgs()
+
     isProcessRunning("mysql")
     isProcessRunning("zookeeper")
     isProcessRunning("hadoop")
@@ -184,8 +194,15 @@ if __name__ == "__main__":
     os.chdir(os.environ['WSHOME'] + '/le-db')
     resetMysql()
 
-    uploadNecessaryFilesToHDFS()
-    runTestSetupScript()
+    if not args.skipupload:
+        uploadNecessaryFilesToHDFS()
+    else:
+        print 'skip upload necessary files to hdfs.'
+
+    if not args.skipsetup:
+        runTestSetupScript()
+    else:
+        print 'Skip test setup.'
 
     atexit.register(killAllRunningServers)
     startAllServers()
