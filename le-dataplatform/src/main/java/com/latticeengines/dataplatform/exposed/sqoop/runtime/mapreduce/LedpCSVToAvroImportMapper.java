@@ -205,6 +205,11 @@ public class LedpCSVToAvroImportMapper extends
             case STRING:
                 return fieldCsvValue;
             case BOOLEAN:
+                if (fieldCsvValue.equals("1")) {
+                    return Boolean.TRUE;
+                } else if (fieldCsvValue.equals("0")) {
+                    return Boolean.FALSE;
+                }
                 return Boolean.valueOf(fieldCsvValue);
             case ENUM:
                 return fieldCsvValue;
