@@ -110,6 +110,10 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.nullable = nullable;
     }
 
+    /**
+     * Corresponds to an avro data type. Only possible values are in
+     * Schema.Type.
+     */
     @Column(name = "DATA_TYPE", nullable = false)
     public String getPhysicalDataType() {
         return physicalDataType;
@@ -119,6 +123,11 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.physicalDataType = physicalDataType;
     }
 
+    /**
+     * Effectively the semantic type of the source. For example, in the case of
+     * SFDC which has a semantic type called PhoneNumber, this would be set to
+     * PhoneNumber.
+     */
     @Column(name = "LOGICAL_DATA_TYPE", nullable = true)
     @JsonProperty("logical_type")
     public String getLogicalDataType() {
@@ -128,6 +137,32 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonProperty("logical_type")
     public void setLogicalDataType(String logicalDataType) {
         this.logicalDataType = logicalDataType;
+    }
+
+    /**
+     * Lattice's semantic interpretation of the type. Mapped to a strict
+     * enumeration of possible values.
+     */
+    @Transient
+    @JsonIgnore
+    public SemanticType getSemanticType() {
+        Object raw = properties.get("SemanticType");
+        if (raw == null) {
+            return null;
+        }
+        try {
+            return SemanticType.valueOf(raw.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setSemanticType(SemanticType semanticType) {
+        if (semanticType != null) {
+            properties.put("SemanticType", semanticType.toString());
+        }
     }
 
     @Column(name = "PRECISION", nullable = true)
@@ -284,6 +319,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (List<String>) properties.get("ApprovedUsage");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setStatisticalType(String statisticalType) {
@@ -296,6 +334,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (String) properties.get("StatisticalType");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setFundamentalType(String fundamentalType) {
@@ -308,6 +349,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (String) properties.get("FundamentalType");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setDataQuality(String dataQuality) {
@@ -339,6 +383,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (List<String>) properties.get("DataSource");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setDisplayDiscretizationStrategy(String displayDiscretizationStrategy) {
@@ -363,6 +410,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (String) properties.get("Description");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setTags(String tags) {
@@ -382,6 +432,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return (List<String>) properties.get("Tags");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setPhysicalName(String physicalName) {
@@ -406,6 +459,9 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         return getExtensionValue("Category");
     }
 
+    /**
+     * Used for VisiDB/legacy systems
+     */
     @Transient
     @JsonIgnore
     public void setDataType(String dataType) {
@@ -452,28 +508,6 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             }
         }
         return null;
-    }
-
-    @Transient
-    @JsonIgnore
-    public void setSemanticType(SemanticType semanticType) {
-        if (semanticType != null) {
-            properties.put("SemanticType", semanticType.toString());
-        }
-    }
-
-    @Transient
-    @JsonIgnore
-    public SemanticType getSemanticType() {
-        Object raw = properties.get("SemanticType");
-        if (raw == null) {
-            return null;
-        }
-        try {
-            return SemanticType.valueOf(raw.toString());
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     @Transient

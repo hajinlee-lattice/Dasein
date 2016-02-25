@@ -10,5 +10,7 @@ public enum SemanticType {
     PostalCode, //
     Country, //
     Email, //
-    Domain
+    Domain, //
+    LastModifiedDate, //
+    CreationDate, //
 }
