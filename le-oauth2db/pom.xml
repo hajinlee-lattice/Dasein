@@ -14,9 +14,7 @@
         <le.common.version>2.0.22-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
         <le.db.version>2.0.22-SNAPSHOT</le.db.version>
-        <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.oauth2.version>2.0.7.RELEASE</spring.oauth2.version>
-        <spring.boot.version>1.2.4.RELEASE</spring.boot.version>
         <java.version>1.7</java.version>
     </properties>
 

@@ -19,6 +19,4 @@ public interface PlaymakerTenantEntityMgr {
 
     void updateByTenantName(PlaymakerTenant tenant);
 
-    String findTenantByTokenId(String tokenId);
-
 }

@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
-import com.latticeengines.oauth2db.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
@@ -139,12 +139,4 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
         log.info("Updated the following tenantName=" + tenant.getTenantName());
     }
 
-    @Override
-    public String findTenantByTokenId(String tokenId) {
-        OAuthUser user = userEngityMgr.getByAccessToken(tokenId);
-        if (user != null) {
-            return user.getUserId();
-        }
-        return null;
-    }
 }

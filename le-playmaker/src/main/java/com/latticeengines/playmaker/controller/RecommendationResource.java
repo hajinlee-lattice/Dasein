@@ -5,8 +5,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -20,10 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
-import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -35,8 +32,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 @ImportResource(value = { "classpath:playmaker-context.xml", "classpath:playmaker-properties-context.xml" })
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource extends SpringBootServletInitializer {
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
@@ -51,7 +46,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
 
     @Autowired
-    private PlaymakerTenantEntityMgr playmakerEntityMgr;
+    private OAuthUserEntityMgr oAuthUserEntityMgr;
 
     @RequestMapping(value = "/recommendations", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -64,7 +59,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination,
             @ApiParam(value = "Play's Id whose recommendations are returned", required = false) @RequestParam(value = "playId", required = false) List<Integer> playIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendations(tenantName, start, offset, maximum,
                 SynchronizationDestinationEnum.mapToIntType(destination), playIds);
     }
@@ -78,7 +73,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination,
             @ApiParam(value = "Play's Id whose recommendations are returned; all play Ids if not specified", required = false) @RequestParam(value = "playId", required = false) List<Integer> playIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendationCount(tenantName, start,
                 SynchronizationDestinationEnum.mapToIntType(destination), playIds);
     }
@@ -93,7 +88,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlays(tenantName, start, offset, maximum, playgroupIds);
     }
 
@@ -105,7 +100,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayCount(tenantName, start, playgroupIds);
     }
 
@@ -119,7 +114,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountextensions(tenantName, start, offset, maximum, accountIds);
     }
 
@@ -131,7 +126,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Account Id whose extension columns are returned; all account Ids if not specified", required = false) @RequestParam(value = "accountId", required = false) List<Integer> accountIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountextensionCount(tenantName, start, accountIds);
     }
 
@@ -139,7 +134,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @ResponseBody
     @ApiOperation(value = "Get account extensions")
     public List<Map<String, Object>> getAccountExtensionSchema(HttpServletRequest request) {
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountExtensionSchema(tenantName);
     }
 
@@ -147,7 +142,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @ResponseBody
     @ApiOperation(value = "Get column count of account extension")
     public Map<String, Object> getAccountExtensionColumnCount(HttpServletRequest request) {
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getAccountExtensionColumnCount(tenantName);
     }
 
@@ -161,7 +156,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayValues(tenantName, start, offset, maximum, playgroupIds);
     }
 
@@ -173,7 +168,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Play group's Id whose plays are returned; all play group Ids if not specified", required = false) @RequestParam(value = "playgroupId", required = false) List<Integer> playgroupIds) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayValueCount(tenantName, start, playgroupIds);
     }
 
@@ -182,7 +177,7 @@ public class RecommendationResource extends SpringBootServletInitializer {
     @ApiOperation(value = "Get workflow types' IDs and Names")
     public List<Map<String, Object>> getWorkflowTypes(HttpServletRequest request) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getWorkflowTypes(tenantName);
     }
 
@@ -193,10 +188,10 @@ public class RecommendationResource extends SpringBootServletInitializer {
             HttpServletRequest request,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayGroupCount(tenantName, start);
     }
-    
+
     @RequestMapping(value = "/playgroups", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all play groups' IDs and Names")
@@ -205,28 +200,8 @@ public class RecommendationResource extends SpringBootServletInitializer {
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
             @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum) {
 
-        String tenantName = getTenantName(request);
+        String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getPlayGroups(tenantName, start, offset, maximum);
     }
 
-    private String getTenantName(HttpServletRequest request) {
-        try {
-            String token = Oauth2Utils.extractHeaderToken(request);
-            if (token == null) {
-                throw new LedpException(LedpCode.LEDP_22003);
-            }
-            String tokenId = Oauth2Utils.extractTokenKey(token);
-            if (tokenId == null) {
-                throw new LedpException(LedpCode.LEDP_22004);
-            }
-            String tenantName = playmakerEntityMgr.findTenantByTokenId(tokenId);
-            if (tenantName == null) {
-                throw new LedpException(LedpCode.LEDP_22006);
-            }
-            return tenantName;
-        } catch (Exception ex) {
-            log.error("Can not get tenant!", ex);
-            throw new LedpException(LedpCode.LEDP_22005, ex);
-        }
-    }
 }

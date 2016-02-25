@@ -17,6 +17,8 @@ export WORKFLOW_PROPDIR=$WSHOME/le-workflow/conf/env/dev
 export DATAFLOW_PROPDIR=$WSHOME/le-dataflow/conf/env/dev
 export CAMILLE_PROPDIR=$WSHOME/le-camille/conf/env/dev
 export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
+export PLAYMAKER_PROPDIR=$WSHOME/le-playmaker/conf/env/dev
+export OAUTH2_DB_PROPDIR=$WSHOME/le-oauth2db/conf/env/dev
 
 PRODUCT=$1
 TEST_TYPE=$2

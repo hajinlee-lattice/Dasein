@@ -259,9 +259,13 @@ public enum LedpCode {
     LEDP_22000("Can not create data source for tenant {0}"), //
     LEDP_22001("Can not find DB connection info for tenant {0}"), //
     LEDP_22002("Tenant exists, but there's no such oauth user, tenant name={0}"), //
-    LEDP_22003("Access token does not exist!"), LEDP_22004("Access token does not have token key!"), //
-    LEDP_22005("Failed to get tenant!"), LEDP_22006("Failed to get tenant from DB!"), //
     LEDP_22007("Failed to get recommendations after retry."), //
+
+    // le-oauth2db
+    LEDP_23001("Access token does not exist!"), //
+    LEDP_23002("Access token does not have token key!"), //
+    LEDP_23003("Failed to get tenant!"), //
+    LEDP_23004("Failed to get tenant from DB!"), //
 
     // le-upgrade
     LEDP_24000("Yarn operation exception: {0}"), //

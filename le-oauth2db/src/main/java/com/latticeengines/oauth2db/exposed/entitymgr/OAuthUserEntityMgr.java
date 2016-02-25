@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2db.entitymgr;
+package com.latticeengines.oauth2db.exposed.entitymgr;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 
@@ -14,4 +14,5 @@ public interface OAuthUserEntityMgr {
 
     OAuthUser getByAccessToken(String token);
 
+    String findTenantNameByAccessToken(String accessToken);
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.oauth2db.entitymgr.impl;
+package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.oauth2db.dao.OAuthUserDao;
-import com.latticeengines.oauth2db.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 
 @Component("oAuthUserEntityMgr")
 public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
@@ -51,6 +51,15 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     public OAuthUser getByAccessToken(String token) {
         OAuthUser user = userDao.getByAccessToken(token);
         return user;
+    }
+
+    @Override
+    public String findTenantNameByAccessToken(String accessToken) {
+        OAuthUser user = getByAccessToken(accessToken);
+        if (user != null) {
+            return user.getUserId();
+        }
+        return null;
     }
 
 }
