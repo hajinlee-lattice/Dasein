@@ -16,4 +16,6 @@
     <!-- Optional context configuration                                  -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="extractWAR">true</Set>
+
+    <Set name="maxFormContentSize">16777216</Set>
 </Configure>
