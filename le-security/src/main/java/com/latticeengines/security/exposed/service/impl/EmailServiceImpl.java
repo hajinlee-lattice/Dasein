@@ -226,6 +226,7 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "tenant deployment");
             builder.replaceToken("{{errormsg}}", "Unable to import data.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
@@ -270,6 +271,7 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "tenant deployment");
             builder.replaceToken("{{errormsg}}", "Unable to enrich data.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
@@ -300,7 +302,8 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS validate metadata complete email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
-            log.error("Failed to send PLS validate metadata complete email to " + user.getEmail() + " " + e.getMessage());
+            log.error("Failed to send PLS validate metadata complete email to " + user.getEmail() + " "
+                    + e.getMessage());
         }
 
     }
@@ -314,6 +317,7 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "tenant deployment");
             builder.replaceToken("{{errormsg}}", "Missing data.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to add missing data.");
             builder.replaceToken("{{url}}", hostport);
@@ -335,6 +339,7 @@ public class EmailServiceImpl implements EmailService {
 
             builder.replaceToken("{{firstname}}", user.getFirstName());
             builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "tenant deployment");
             builder.replaceToken("{{errormsg}}", "Unable to validate metadata.");
             builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
             builder.replaceToken("{{url}}", hostport);
@@ -345,6 +350,50 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending PLS validate metadata error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS validate metadata error email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsCreateModelCompletionEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS create model complete email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", "We have completed the model creation.");
+            builder.replaceToken("{{currentstep}}", "");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Model Creation Completed", mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending PLS create model complete email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS create model complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsCreateModelErrorEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS create model error email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "model creation");
+            builder.replaceToken("{{errormsg}}", "Failed to create a model.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Model Creation Failed", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending PLS create model error email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS create model error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 }

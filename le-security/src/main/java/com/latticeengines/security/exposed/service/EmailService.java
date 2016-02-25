@@ -40,4 +40,8 @@ public interface EmailService {
     void sendPlsMetadataMissingEmail(User user, String hostport);
 
     void sendPlsValidateMetadataErrorEmail(User user, String hostport);
+
+    void sendPlsCreateModelCompletionEmail(User user, String hostport);
+
+    void sendPlsCreateModelErrorEmail(User user, String hostport);
 }
