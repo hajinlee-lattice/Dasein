@@ -9,11 +9,44 @@ angular.module('pd.jobs', [
 
 .service('JobsService', function($http, $q, _) {
 
-    var stepsNameDictionary = { "markReportOutOfDate": "load_data", "importData": "load_data", "createPreMatchEventTable": "match_data",
-            "loadHdfsTableToPDServer": "match_data", "match": "match_data", "createEventTableFromMatchResult": "generate_insights", "runImportSummaryDataFlow": "generate_insights",
-            "registerImportSummaryReport": "generate_insights", "sample": "generate_insights", "profileAndModel": "create_global_model",
-            "chooseModel": "create_global_model", "score": "create_global_target_market", "runScoreTableDataFlow": "create_global_target_market", "runAttributeLevelSummaryDataFlows": "create_global_target_market" };
-    var numStepsInGroup = { "load_data": 0, "match_data": 0, "generate_insights": 0, "create_global_model": 0, "create_global_target_market": 0 };
+    var stepsNameDictionary = { 
+        "markReportOutOfDate": "load_data", 
+        "importData": "load_data", 
+        "createPreMatchEventTable": "match_data",
+        "loadHdfsTableToPDServer": "match_data", 
+        "match": "match_data", 
+        "createEventTableFromMatchResult": "generate_insights", 
+        "runImportSummaryDataFlow": "generate_insights",
+        "registerImportSummaryReport": "generate_insights", 
+        "sample": "generate_insights", 
+        "profileAndModel": "create_global_model",
+        "chooseModel": "create_global_model", 
+        "score": "create_global_target_market", 
+        "runScoreTableDataFlow": "create_global_target_market", 
+        "runAttributeLevelSummaryDataFlows": "create_global_target_market" 
+    };
+    
+    var dictionary = {
+        'fitModelWorkflow': stepsNameDictionary,
+        'createModelWorkflow': {
+            'importData': 'load_data',
+            'createEventTableReport': 'load_data',
+            'dedupEventTable': 'load_data',
+            'loadHdfsTableToPDServer': 'generate_insights',
+            'match': 'generate_insights',
+            'createEventTableFromMatchResult': 'generate_insights',
+            'sample': 'create_global_target_market',
+            'profileAndModel': 'create_global_target_market'
+        }
+    };
+
+    var numStepsInGroup = { 
+        "load_data": 0, 
+        "match_data": 0, 
+        "generate_insights": 0,
+        "create_global_model": 0, 
+        "create_global_target_market": 0 
+    };
 
     this.getAllJobs = function() {
         var deferred = $q.defer();
@@ -128,13 +161,14 @@ angular.module('pd.jobs', [
     
     function getStepRunning(job) {
         if (job.jobStatus != "Running") {
-            return null;
+            //return null;
         }
         
         for (var i = 0; i < job.steps.length; i++) {
-            var stepRunning = stepsNameDictionary[job.steps[i].jobStepType.trim()];
+            var stepRunning = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+            //console.log('step', i, stepRunning, dictionary[job.jobType][job.steps[i].jobStepType.trim()]);
             if (stepRunning && job.steps[i].stepStatus == "Running") {
-                return stepsNameDictionary[job.steps[i].jobStepType.trim()];
+                return dictionary[job.jobType][job.steps[i].jobStepType.trim()];
             }
         }
         return null;
@@ -148,7 +182,7 @@ angular.module('pd.jobs', [
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
-                var stepCompleted = stepsNameDictionary[job.steps[i].jobStepType.trim()];
+                var stepCompleted = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
                 if (stepCompleted) {
                     numStepsInGroup[stepCompleted] += 1;
                     stepsCompleted.push(stepCompleted);

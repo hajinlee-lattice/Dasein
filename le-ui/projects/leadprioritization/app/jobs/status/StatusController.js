@@ -17,6 +17,7 @@ angular
                 $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
                 $scope.jobCompleted = false;
                 $scope.jobId = $scope.job.id;
+                $scope.jobType = $scope.job.jobType;
                 $scope.stepsCompletedTimes;
                 $scope.showJobSuccessMessage;
                 
@@ -34,7 +35,6 @@ angular
                     $scope.jobStepsCompletedStates = $scope.statuses[$scope.jobId].completed;
                     $scope.stepsCompletedTimes = $scope.statuses[$scope.jobId].completedTimes;
                 }
-
                 if ($scope.job.status == "Running") {
                     $scope.jobRunning = true;
                     periodicQueryJobStatus($scope.job.id);

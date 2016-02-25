@@ -132,8 +132,8 @@ angular
                 }   
             }
         })
-        .state('models.validate', {
-            url: '/validate',
+        .state('jobs.status.csv', {
+            url: '/csv/:jobId',
             views: {
                 "summary@": {
                     resolve: { 
