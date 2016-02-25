@@ -269,6 +269,15 @@ Primary Sidebar Nav Menu Styling
     &.ico-fingerprint {
       width: 16px;
     }
+    &.ico-history {
+      width: 24px;
+    }
+    &.ico-user {
+      width: 21px;
+    }
+  }
+  .active .ico {
+    background-color: #fff;
   }
   .fa-circle-thin, .fa-check-circle-o {
     background-color: #222831; 

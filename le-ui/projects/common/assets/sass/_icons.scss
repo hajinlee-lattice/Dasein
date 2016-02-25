@@ -105,6 +105,15 @@ Icons
 		-webkit-mask:  url("../images/ico-chip.svg");
 		mask:  url("../images/ico-chip.svg");
 	}
+	&.ico-history {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-model-history-10.svg");
+		mask:  url("../images/ico-model-history-10.svg");
+	}
+
+	&.ico-light-gray {
+		background-color: #b3b5b8;
+	}
 	&.ico-white {
 		background-color: $pearl-white;
 	}
@@ -193,5 +202,8 @@ Icons
 	}
 	.ico-chip {
 		background-image:  url("../images/ico-chip.svg");
+	}
+	.ico-history {
+		background-image:  url("../images/ico-model-history-10.svg");
 	}	
 }
