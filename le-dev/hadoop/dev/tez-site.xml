@@ -29,4 +29,8 @@
         <name>tez.allow.disabled.timeline-domains</name>
         <value>true</value>
     </property>
+    <property>
+        <name>tez.tez-ui.history-url.base</name>
+        <value>http://localhost:8001/tez-ui/</value>
+    </property>
 </configuration>
