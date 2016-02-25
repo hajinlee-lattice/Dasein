@@ -3,7 +3,9 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+
 import java.util.List;
+
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -100,6 +102,26 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
         assertEquals(processor.generateFeatureThreshold(commandParameters), featureThreshold);
+    }
+
+    @Test(groups = "unit")
+    public void testParsingOfSamplingPercentage() {
+        for(int numberOfSamples = 1; numberOfSamples < 5; numberOfSamples++) {
+            assertEquals(processor.getSamplePercentage(numberOfSamples), 100 / numberOfSamples );
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testSamplingPercentage() {
+        int numSamples = 1;
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L, numSamples );
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+        assertEquals(commandParameters.getNumSamples(), numSamples);
+
+        numSamples = 3;
+        command = ModelingServiceTestUtils.createModelCommandWithCommandParametersNumSamples(1L, numSamples );
+        commandParameters = new ModelCommandParameters(command.getCommandParameters());
+        assertEquals(commandParameters.getNumSamples(), numSamples);
     }
 
 }

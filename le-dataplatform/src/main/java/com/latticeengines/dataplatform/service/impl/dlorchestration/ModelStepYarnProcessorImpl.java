@@ -42,7 +42,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     static enum DataSetType {
         DEPIVOTED, STANDARD;
     }
-    
+
     @Autowired
     private ModelingService modelingService;
 
@@ -214,7 +214,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setTable(modelCommand.getEventTable());
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
-        config.setSamplePrefix(SAMPLENAME_PREFIX + "100");
+        if(commandParameters.getNumSamples() > 1)
+            config.setSamplePrefix(constructSampleName(getSamplePercentage(commandParameters.getNumSamples())));
+        else
+        	config.setSamplePrefix(constructSampleName(100));
         config.setTargets(commandParameters.getModelTargets());
         ApplicationId appId = modelingService.profileData(config);
 
@@ -359,5 +362,17 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             }
         }
         return featureThreshold;
+    }
+
+    @VisibleForTesting
+    int getSamplePercentage(int numberOfSamples) {
+        int samplePercentage = 100;
+        if(numberOfSamples <= 1) {
+            return samplePercentage;
+        } else {
+            List<Integer> samplesList = calculateSamplePercentages(numberOfSamples);
+            samplePercentage = samplesList.get(0);
+            return samplePercentage;
+        }
     }
 }
