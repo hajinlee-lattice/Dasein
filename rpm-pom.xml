@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
+    <artifactId>le-toplevel</artifactId>
+    <version>2.0.22-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Lattice Data Platform Top Level RPM Module</name>
+
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>2.0.22-SNAPSHOT</version>
+        <relativePath>le-parent</relativePath>
+    </parent>
+
+    <modules>
+	<module>le-scoring/pom-scoring-hdfs.xml</module>
+	<module>le-dataflow/pom-dataflow-hdfs.xml</module>
+	<module>le-dellebi/pom-dellebi-hdfs.xml</module>
+	<module>le-dataplatform/pom-dataplatform-hdfs.xml</module>
+	<module>le-serviceflows/pom-serviceflows-rpm.xml</module>
+	<module>le-api/pom-api-rpm.xml</module>
+	<module>le-job/pom-job-rpm.xml</module>
+	<module>le-pls/pom-pls-rpm.xml</module>
+	<module>le-ui/pom-ui-rpm.xml</module>
+	<module>le-admin/pom-admin-rpm.xml</module>
+	<module>le-microservice/pom-microservice-rpm.xml</module>
+    </modules>
+</project>
