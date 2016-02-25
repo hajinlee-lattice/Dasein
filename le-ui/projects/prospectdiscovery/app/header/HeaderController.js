@@ -81,7 +81,7 @@ angular.module('pd.header', [
     }
 
     function checkBrowserWidth(){
-        if (window.matchMedia("(min-width: 768px)").matches) {
+        if (window.matchMedia("(min-width: 1200px)").matches) {
             $("body").addClass("open-nav");
         } else {
             $("body").removeClass("open-nav");

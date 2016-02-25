@@ -73,55 +73,11 @@
 
 
 .lp .tile-list .model {
-	background-image: url(../images/bkg-active-model-lp.jpg);
-	background-repeat: no-repeat;
-	background-color: #fff;
-	background-position: center center;
-	background-size: 160px;
-	border: #dcdcdc solid 2px;
-	min-height: 310px;
-	position: relative;
-	&.inactive {
-        background-color: #f1f1f1;
-        background-image: url(../images/bkg-inactive-model-lp.jpg);
-    }
-    &:hover {
-    	border: #7cc5f3 solid 2px;
-    }
-	.status {
-		background: none;
-		border-top: none;
-	}
-	.model-title h2 {
-		font-size: 18px;
-		&.editable {
-			float: left;
-		}
-		button {
-			border: none;
-			background: none;
-			padding: 0;
-			float: right;
-			margin: 0 0 10px 10px;
-			font-size: 18px;
-		}
-	}
 	.form-inline .form-control {
 		width: 100%;
 		margin-bottom: 10px;
 	}
-	.meta-data {
-		position: absolute;
-		bottom: 10px;
-		width: 94%;
-		.delete-model {
-			float: right;
-			border: 0;
-			background: 0;
-			padding: 0;
-			font-size: 24px;
-		}
-	}
+	
 }
 
 

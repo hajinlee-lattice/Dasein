@@ -1,7 +1,6 @@
+<div class="four columns">
 
-
-
-<div class="columns four list-item model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="model.attributes({ modelId: '{{ data.Id }}' })">
+    <div class="model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="model.attributes({ modelId: '{{ data.Id }}' })">
 
         <div class="model-title" data-ng-hide="nameStatus.editing">
             <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
@@ -23,20 +22,18 @@
                 </div>
             </div>
         </div>
-        <div class="row meta-data">
-            <div class="twelve columns">
-                <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
-                <div class="stats-group">
-                    <dl class="stats">
-                        <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
-                        <dd class="small">{{createdDate}}</dd>
-                    </dl>
-                    <dl class="stats" data-ng-show="!isActive">
-                        <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
-                        <dd class="small">{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</dd>
-                    </dl>
-                </div>
+        <div class="meta-data">
+            <dl class="stats">
+                <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
+                <dd class="small">{{createdDate}}</dd>
+            </dl>
+            <div class="status">
+                <span data-ng-show="!isActive" class="error-text">{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
+                <span data-ng-show="isActive" class="success-text">{{ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
             </div>
+            <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
         </div>
+
+    </div>
 
 </div><!-- End .list-item.model -->

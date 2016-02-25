@@ -127,4 +127,23 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
         LoginService.Logout();
     };
+
+
+    checkBrowserWidth();
+    $(window).resize(checkBrowserWidth);
+
+    $scope.handleSidebarToggle = function ($event) {
+        console.log('BUH');
+        $("body").toggleClass("open-nav");
+    }
+
+    function checkBrowserWidth(){
+        if (window.matchMedia("(min-width: 1200px)").matches) {
+            $("body").addClass("open-nav");
+        } else {
+            $("body").removeClass("open-nav");
+        }
+    }
+
+
 });

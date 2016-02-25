@@ -167,11 +167,6 @@ a.emphasized {
 
 
 
-
-
-
-
-
 /* 
 Badges
 ========================================================= */
@@ -185,11 +180,14 @@ Badges
     white-space: nowrap;
     vertical-align: middle;
     background-color: #e7e7e7;
-    &.badge-green {
+    &.green-badge {
     	background-color: #71bc51;
     }
-    &.badge-blue {
+    &.blue-badge {
     	background-color: #3989c4;
     	color: #fff;
     }
 }
+
+
+
