@@ -25,3 +25,14 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -v $VERSION \
     -i com.latticeengines.propdata.Initializer \
     -f /tmp/le-serviceflows-propdata-*-shaded.jar
+
+java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
+    -o install \
+    -m propdata \
+    -g com.latticeengines \
+    -a le-serviceflows \
+    -v $VERSION \
+    -i com.latticeengines.leadprioritization.Initializer \
+    -f /tmp/le-serviceflows-leadprioritization*-shaded.jar
+
+
