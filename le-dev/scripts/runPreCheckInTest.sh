@@ -97,7 +97,6 @@ def startAllServers(waitminute):
     else:
         print "Microservice server is running locally."
 
-    runjettypls='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=5003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks -Djetty.port=8081 -Pfunctional -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled jetty:run'
     plsServerUrl = "http://localhost:8081/pls/api-docs"
     isPLSServerRunning = False
     try:
@@ -179,7 +178,6 @@ def runTestSetupScript():
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('--skip-upload', dest='skipupload', action='store_true', help='skip upload test artifacts to hdfs.')
     parser.add_argument('--skip-setup', dest='skipsetup', action='store_true', help='skip test setup.')
     parser.add_argument('-w', dest='waitminute', type=int, default=5, help='number of minutes wait for jettys to start up, default = 5 min.')
     args = parser.parse_args()
@@ -198,10 +196,7 @@ if __name__ == "__main__":
     os.chdir(os.environ['WSHOME'] + '/le-db')
     resetMysql()
 
-    if not args.skipupload:
-        uploadNecessaryFilesToHDFS()
-    else:
-        print 'skip upload necessary files to hdfs.'
+    uploadNecessaryFilesToHDFS()
 
     if not args.skipsetup:
         runTestSetupScript()
