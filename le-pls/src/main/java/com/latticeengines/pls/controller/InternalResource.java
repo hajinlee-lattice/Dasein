@@ -61,6 +61,7 @@ import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -116,6 +117,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private SourceFileService sourceFileService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -281,6 +285,23 @@ public class InternalResource extends InternalResourceBase {
             response.setSuccess(false);
         }
         return response;
+    }
+    
+    @RequestMapping(value = "/emails/createmodel/result/{result}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after model creation")
+    public void sendPlsCreateModelEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        for(User user : users ){
+            if(user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())){
+                if(result.equals("COMPLETED")){
+                    emailService.sendPlsCreateModelCompletionEmail(user, hostPort);
+                }else{
+                    emailService.sendPlsCreateModelErrorEmail(user, hostPort);
+                }
+            }
+        }
     }
 
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")

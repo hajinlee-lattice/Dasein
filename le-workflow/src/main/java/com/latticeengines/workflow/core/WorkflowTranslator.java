@@ -59,6 +59,10 @@ public class WorkflowTranslator {
                 simpleJobBuilder = simpleJobBuilder.next(step(workflow.getSteps().get(i)));
             }
         }
+
+        if(workflow.getListener() != null){
+            simpleJobBuilder.listener(workflow.getListener());
+        }
         return simpleJobBuilder.build();
     }
 

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CreateEventTableReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -35,6 +36,9 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
     @Autowired
     private ProfileAndModel profileAndModel;
 
+    @Autowired
+    private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
+
     @Bean
     public Job createModelWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -48,6 +52,7 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
                 .next(matchWorkflow) //
                 .next(sample) //
                 .next(profileAndModel) //
+                .listener(sendEmailAfterModelCompletionListener)//
                 .build();
     }
 }

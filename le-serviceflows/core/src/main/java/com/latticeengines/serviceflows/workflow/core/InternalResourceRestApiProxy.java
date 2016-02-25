@@ -116,4 +116,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             throw new RuntimeException("updateSourceFile: Remote call failure", e);
         }
     }
+
+    public void sendPlsCreateModelEmail(String result, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/emails/createmodel/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, result);
+        } catch (Exception e) {
+            throw new RuntimeException("sendEmail: Remote call failure", e);
+        }
+    }
 }

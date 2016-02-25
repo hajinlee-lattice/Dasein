@@ -1,5 +1,6 @@
 package com.latticeengines.workflow.exposed.build;
 
+import org.springframework.batch.core.JobExecutionListener;
 
 public class WorkflowBuilder {
 
@@ -20,6 +21,11 @@ public class WorkflowBuilder {
 
     public WorkflowBuilder enableDryRun() {
         workflow.setDryRun(true);
+        return this;
+    }
+
+    public WorkflowBuilder listener(JobExecutionListener listener) {
+        workflow.listener(listener);
         return this;
     }
 
