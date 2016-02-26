@@ -20,7 +20,12 @@
 				<dd class="error-text">{{data.row_error || 0}}</dd>
 			</dl>
 
-			<button type="button" class="button white-button block-button download-button">Download Error Log</button>
+			<button 
+				type="button" 
+				class="button white-button block-button download-button"
+				ng-click="clickGetErrorLog($event)">
+				Download Error Log
+			</button>
 
 		</div>
 		<div class="two columns used-leads">

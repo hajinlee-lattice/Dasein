@@ -276,6 +276,89 @@ angular
                 }   
             }
         })
+        .state('sureshot', {
+            url: '/sureshot',
+            redirectto: 'sureshot.apikey',
+            views: {
+                "navigation@": {
+                    templateUrl: './app/navigation/sidebar/SureshotView.html'
+                },
+                "summary@": {
+                    template: ''
+                },
+                "main@": {
+                    template: ''
+                }   
+            }
+        })
+        .state('sureshot.apikey', {
+            url: '/apikey',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'API Key';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: ''
+                }   
+            }
+        })
+        .state('sureshot.models', {
+            url: '/models',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Models';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: ''
+                }   
+            }
+        })
+        .state('sureshot.enrichment', {
+            url: '/enrichment',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Enrichment';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: ''
+                }   
+            }
+        })
+        .state('sureshot.webhook', {
+            url: '/webhook',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'How to Create Webhook';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    template: ''
+                }   
+            }
+        })
         .state('activate', {
             url: '/activate',
             views: {

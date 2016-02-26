@@ -68,10 +68,25 @@ angular
                         templateUrl: './app/navigation/summary/OneLineView.html'
                     },
                     "main@": {
-                        controller: function($scope, JobReport) {
+                        controller: function($scope, JobsService, JobReport) {
                             $scope.report = JobReport;
                             $scope.data = data = JSON.parse(JobReport.json.Payload);
                             $scope.data.used_records = data.imported_records - data.ignored_records;
+                            $scope.errorlog = '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors';
+
+                            $scope.clickGetErrorLog = function($event) {
+                                console.log('click', JobReport);
+
+                                JobsService.getErrorLog(JobReport).then(function(result) {
+                                    console.log('success',result);
+
+                                    var blob = new Blob([ JSON.stringify(result) ], {
+                                        type: "text/plain;charset=utf-8"
+                                    });
+                                    
+                                    saveAs(blob, "errorlog.json");
+                                });
+                            }
                         },
                         templateUrl: './app/create/views/ValidateImportView.html'
                     }   

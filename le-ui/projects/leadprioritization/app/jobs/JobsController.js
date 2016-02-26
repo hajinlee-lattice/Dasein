@@ -48,6 +48,34 @@ angular.module('pd.jobs', [
         "create_global_target_market": 0 
     };
 
+    this.getErrorLog = function(JobReport) {
+        var deferred = $q.defer();
+        
+        $http({
+            method: 'GET',
+            url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors'
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorCode = response.data.errorCode || 'Error';
+                var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                alert(errorCode + ': ' + errorMsg);
+
+                deferred.reject(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
     this.getAllJobs = function() {
         var deferred = $q.defer();
         var result;

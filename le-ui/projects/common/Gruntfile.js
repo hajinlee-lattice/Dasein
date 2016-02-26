@@ -40,7 +40,6 @@ module.exports = function(grunt) {
 					'<%= dir.bower %>/min/jquery*.js',
 					'<%= dir.bower %>/min/angular.min.js',
 					'<%= dir.bower %>/min/*.js',
-					'<%= dir.bower %>/crypto/*.js',
 					'<%= dir.bower %>/*.js'
 				],
 				dest: '<%= dir.assets %>/js/min/vendor.min.js'

@@ -133,7 +133,6 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $(window).resize(checkBrowserWidth);
 
     $scope.handleSidebarToggle = function ($event) {
-        console.log('BUH');
         $("body").toggleClass("open-nav");
     }
 
