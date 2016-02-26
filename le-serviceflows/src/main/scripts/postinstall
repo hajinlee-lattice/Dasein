@@ -28,11 +28,11 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
 
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
-    -m dataflow \
+    -m dataflowapi \
     -g com.latticeengines \
     -a le-serviceflows \
     -v $VERSION \
     -i com.latticeengines.leadprioritization.Initializer \
-    -f /tmp/le-serviceflows-leadprioritization*-shaded.jar
+    -f /tmp/le-serviceflows-leadprioritization-*-shaded.jar
 
 
