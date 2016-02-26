@@ -65,7 +65,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
 
     protected static final CustomerSpace WFAPITEST_CUSTOMERSPACE = CustomerSpace
             .parse("WFAPITests.WFAPITests.WFAPITests");
-    protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 60;
+    protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 90;
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);
