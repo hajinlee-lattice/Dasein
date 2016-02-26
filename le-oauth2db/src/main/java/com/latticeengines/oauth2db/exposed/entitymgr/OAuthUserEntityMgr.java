@@ -1,5 +1,7 @@
 package com.latticeengines.oauth2db.exposed.entitymgr;
 
+import java.util.Date;
+
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 
 public interface OAuthUserEntityMgr {
@@ -15,4 +17,6 @@ public interface OAuthUserEntityMgr {
     OAuthUser getByAccessToken(String token);
 
     String findTenantNameByAccessToken(String accessToken);
+
+    Date getPasswordExpiration(String userId);
 }

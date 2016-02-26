@@ -1,6 +1,13 @@
 package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -13,8 +20,13 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 @Component("oAuthUserEntityMgr")
 public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
 
+    private final Log log = LogFactory.getLog(this.getClass());
+
     @Autowired
     private OAuthUserDao userDao;
+
+    @Value("${oauth2.password_expiration_days}")
+    private int passwordExpirationDays;
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -54,12 +66,23 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     }
 
     @Override
+    @Transactional(value = "oauth2")
     public String findTenantNameByAccessToken(String accessToken) {
         OAuthUser user = getByAccessToken(accessToken);
         if (user != null) {
             return user.getUserId();
         }
         return null;
+    }
+
+    @Override
+    public Date getPasswordExpiration(String userId) {
+        if (passwordExpirationDays <= 0) {
+            log.info(String.format("oauth2.password_expiration_days <= 0.  Disabling expiration for user with id=%s",
+                    userId));
+            return null;
+        }
+        return DateTime.now(DateTimeZone.UTC).plusDays(passwordExpirationDays).toDate();
     }
 
 }
