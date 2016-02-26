@@ -169,7 +169,7 @@ def uploadNecessaryFilesToHDFS():
 
 def runPDMockedEndToEndTest():
     os.chdir(os.environ['WSHOME'] + '/le-pls')
-    ret = subprocess.call(['mvn', '-Pdeployment', '-Ddeployment.groups=deployment.pd', '-DargLine=""', '-DPROXY_PROPDIR=../le-proxy/conf/env/dev', '-DPLS_PROPDIR=conf/env/dev', '-DSECURITY_PROPDIR=../le-security/conf/env/dev', '-DDB_PROPDIR=../le-db/conf/env/dev', '-DWORKFLOW_PROPDIR=../le-workflow/conf/env/dev', '-Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks', '-Djava.util.logging.config.file=../le-dev/test-logging.properties', 'clean', 'verify', '-Dtest=PDMockedEndToEnd*'])
+    ret = subprocess.call(['mvn', '-Pdeployment', '-Ddeployment.groups=deployment.precheckin', '-DargLine=""', '-Djavax.net.ssl.trustStore=certificates/laca-ldap.dev.lattice.local.jks', '-Djava.util.logging.config.file=../le-dev/test-logging.properties', 'clean', 'verify', '-Dtest=PDMockedEndToEnd*'])
     assert ret == 0, 'PD EndToEnd Test Failed'
 
 def runTestSetupScript():

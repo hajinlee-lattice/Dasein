@@ -46,7 +46,7 @@ public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static Tenant tenantToAttach;
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "deployment.pd")
+    @BeforeClass(groups = "deployment.precheckin")
     public void setup() throws Exception {
         System.out.println("Deleting existing test tenants ...");
         deleteTwoTenants();
@@ -76,7 +76,7 @@ public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment.pd")
+    @Test(groups = "deployment.precheckin")
     public void validateSfdcCreds() {
         CrmCredential crmCredential = new CrmCredential();
         crmCredential.setUserName(salesforceUserName);
@@ -89,7 +89,7 @@ public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "deployment.pd", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
+    @Test(groups = "deployment.precheckin", dependsOnMethods = { "validateSfdcCreds" }, enabled = true)
     public void createDefaultTargetMarketWithMockedWorkflow() throws Exception {
         restTemplate.postForObject(getRestAPIHostPort() + PLS_TARGETMARKET_URL + "default/test", null, TargetMarket.class);
 
