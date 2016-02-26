@@ -19,7 +19,10 @@ angular
                 $scope.jobId = $scope.job.id;
                 $scope.stepsCompletedTimes;
                 $scope.showJobSuccessMessage;
-                
+
+                var periodicQueryId;
+                var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
+
                 $scope.cancelJob = function(jobId) {
                     JobsService.cancelJob(jobId);
                 };
@@ -72,9 +75,6 @@ angular
                     $scope.jobRowExpanded = false;
                     $scope.expanded[$scope.jobId] = false;
                 };
-                
-                var periodicQueryId;
-                var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
                 function cancelPeriodJobStatusQuery() {
                     clearInterval(periodicQueryId);
@@ -118,7 +118,7 @@ angular
                 function queryJobStatusAndSetStatesVariables(jobId) {
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
-                            if (response.resultObj.jobStatus == "Completed") {
+                            if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
                                 cancelPeriodJobStatusQuery();
                                 $scope.showJobSuccessMessage = true;
                                 BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
