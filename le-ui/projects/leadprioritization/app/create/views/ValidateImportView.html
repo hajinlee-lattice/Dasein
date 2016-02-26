@@ -4,28 +4,28 @@
 	<div class="row text-center">
 
 		<div class="two columns offset-two uploaded-leads">
-			<h2>All Leads that <br/>were Uploaded</h2>
-			<h3 class="blue-text">10,000</h3>
+			<h2>All records that <br/>were Uploaded</h2>
+			<h3 class="blue-text">{{data.imported_records || 0}}</h3>
 		</div>
 		<div class="four columns excluded-leads">
-			<h2>All Leads that <br/>were Excluded</h2>
-			<h3 class="error-text">2,100</h3>
+			<h2>All records that <br/>were Excluded</h2>
+			<h3 class="error-text">{{data.ignored_records || 0}}</h3>
 
 			<dl class="summary-list">
 				<dt>Required Field Missing</dt>
-				<dd class="error-text">1,500</dd>
+				<dd class="error-text">{{data.required_field_missing || 0}}</dd>
 				<dt>Field Malformed</dt>
-				<dd class="error-text">500</dd>
+				<dd class="error-text">{{data.field_malformed || 0}}</dd>
 				<dt>Row Error</dt>
-				<dd class="error-text">100</dd>
+				<dd class="error-text">{{data.row_error || 0}}</dd>
 			</dl>
 
 			<button type="button" class="button white-button block-button download-button">Download Error Log</button>
 
 		</div>
 		<div class="two columns used-leads">
-			<h2>Leads Used to <br/>Create the Model</h2>
-			<h3 class="success-text">7,900</h3>
+			<h2>Records used to <br/>Create the Model</h2>
+			<h3 class="success-text">{{data.used_records || 0}}</h3>
 		</div>
 
 	</div>

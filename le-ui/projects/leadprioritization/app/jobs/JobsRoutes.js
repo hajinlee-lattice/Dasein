@@ -34,6 +34,49 @@ angular
                     }
                 }
             })
+            .state('jobs.status.csv', {
+                url: '/csv/:jobId',
+                resolve: {
+                    JobReport: function($q, $stateParams, JobsService) {
+                        var deferred = $q.defer();
+
+                        JobsService.getJobStatus($stateParams.jobId).then(function(result) {
+                            var reports = result.resultObj.reports,
+                                report = null;
+
+                            reports.forEach(function(item) {
+                                if (item.purpose = "EVENT_TABLE_IMPORT_SUMMARY") {
+                                    report = item;
+                                }
+                            });
+
+
+                            deferred.resolve(report);
+                        });
+
+                        return deferred.promise;
+                    } 
+                },
+                views: {
+                    "summary@": {
+                        resolve: { 
+                            ResourceString: function() {
+                                return 'Summary of Imported Data';
+                            }
+                        },
+                        controller: 'OneLineController',
+                        templateUrl: './app/navigation/summary/OneLineView.html'
+                    },
+                    "main@": {
+                        controller: function($scope, JobReport) {
+                            $scope.report = JobReport;
+                            $scope.data = data = JSON.parse(JobReport.json.Payload);
+                            $scope.data.used_records = data.imported_records - data.ignored_records;
+                        },
+                        templateUrl: './app/create/views/ValidateImportView.html'
+                    }   
+                }
+            })
             .state('jobs.import', {
                 url: '/import'
             })

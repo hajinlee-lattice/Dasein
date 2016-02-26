@@ -132,23 +132,6 @@ angular
                 }   
             }
         })
-        .state('jobs.status.csv', {
-            url: '/csv/:jobId',
-            views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'Summary of Imported Data';
-                        }
-                    },
-                    controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: './app/create/views/ValidateImportView.html'
-                }   
-            }
-        })
         .state('models.create', {
             url: '/create',
             views: {

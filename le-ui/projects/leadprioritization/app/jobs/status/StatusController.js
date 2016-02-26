@@ -18,9 +18,10 @@ angular
                 $scope.jobCompleted = false;
                 $scope.jobId = $scope.job.id;
                 $scope.jobType = $scope.job.jobType;
+                $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;
                 $scope.showJobSuccessMessage;
-                
+                console.log('##',$scope.job)
                 $scope.cancelJob = function(jobId) {
                     JobsService.cancelJob(jobId);
                 };

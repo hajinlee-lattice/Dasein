@@ -107,7 +107,8 @@ angular.module('pd.jobs', [
                             startTimestamp: jobInfo.startTimestamp,
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
-                            completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted)
+                            completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted),
+                            reports: jobInfo.reports
                         }
                 };
 

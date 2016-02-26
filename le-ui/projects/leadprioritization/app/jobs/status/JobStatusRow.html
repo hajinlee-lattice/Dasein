@@ -3,7 +3,7 @@
         <span class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns four">{{job.jobType}}</span>
         <span class="columns four {{job.status}}">{{job.status}}
-            <span data-ng-show="jobCompleted"> [
+            <span data-ng-show="jobCompleted || jobFailed"> [
                 <a ui-sref="jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">View Report</a>
                 <a ui-sref="jobs.status.csv({jobId: jobId})" ng-show="jobType == 'createModelWorkflow'">View Report</a>
             ]</span>
