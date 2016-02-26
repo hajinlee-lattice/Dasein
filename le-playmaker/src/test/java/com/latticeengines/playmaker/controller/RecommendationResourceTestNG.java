@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalTestNG;
 
@@ -21,7 +22,7 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
     public void beforeClass() {
         super.beforeClass();
         PlaymakerTenant newTenant = playMakerEntityMgr.create(tenant);
-        restTemplate = getOauthTemplate(newTenant.getTenantName(), newTenant.getTenantPassword());
+        restTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
     }
 
     @AfterClass(groups = "deployment")
@@ -93,7 +94,7 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
-    
+
     @Test(groups = "deployment")
     public void getPlayValues() {
         String url = apiHostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100";

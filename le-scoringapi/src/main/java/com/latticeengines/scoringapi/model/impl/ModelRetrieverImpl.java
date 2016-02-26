@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -21,7 +22,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
 import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.Fields;
@@ -87,10 +87,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public List<Model> getActiveModels(String tenantId, ModelType type) {
         List<Model> models = new ArrayList<>();
 
-        List<ModelSummary> modelSummaries = internalResourceRestApiProxy.getActiveModelSummaries(tenantId);
-        for (ModelSummary modelSummary : modelSummaries) {
-            Model model = new Model(modelSummary.getId(), modelSummary.getName(), type);
-            models.add(model);
+        List<?> modelSummaries = internalResourceRestApiProxy.getActiveModelSummaries(tenantId);
+        if (modelSummaries != null) {
+            for (Object modelSummary : modelSummaries) {
+                @SuppressWarnings("unchecked")
+                Map<String, String> map = (Map<String, String>) modelSummary;
+                Model model = new Model(map.get("Id"), map.get("Name"), type);
+                models.add(model);
+            }
         }
 
         return models;

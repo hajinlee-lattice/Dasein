@@ -7,6 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.functionalframework.BasePlaymakerFunctionalTestNG;
 
 public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
@@ -32,7 +33,7 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
             Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
         }
 
-        adminRestTemplate = getOauthTemplate(newTenant.getTenantName(), newTenant.getTenantPassword());
+        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -43,7 +44,7 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         Assert.assertNotNull(newTenant.getTenantPassword());
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
 
-        adminRestTemplate = getOauthTemplate(newTenant.getTenantName(), newTenant.getTenantPassword());
+        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")

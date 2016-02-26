@@ -1,14 +1,8 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
-import java.util.Date;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +11,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
+import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.dao.PlaymakerTenantDao;
 import com.latticeengines.playmaker.entitymgr.PlaymakerTenantEntityMgr;
 
@@ -30,9 +25,6 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Autowired
     private OAuthUserEntityMgr userEngityMgr;
-
-    @Value("${oauth2.password_expiration_days}")
-    private int passwordExpirationDays;
 
     @Override
     @Transactional(value = "playmaker")
@@ -64,8 +56,8 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
         } else {
             log.info("Generating new password for tenant " + tenant.getTenantName());
             // Generate new password
-            user.setPassword(generatePassword());
-            user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
+            user.setPassword(OAuth2Utils.generatePassword());
+            user.setPasswordExpiration(userEngityMgr.getPasswordExpiration(tenant.getTenantName()));
             user.setPasswordExpired(false);
             userEngityMgr.update(user);
         }
@@ -78,24 +70,10 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
     private OAuthUser getNewOAuthUser(PlaymakerTenant tenant) {
         OAuthUser user = new OAuthUser();
         user.setUserId(tenant.getTenantName());
-        user.setPassword(generatePassword());
-        user.setPasswordExpiration(getPasswordExpiration(tenant.getTenantName()));
+        user.setPassword(OAuth2Utils.generatePassword());
+        user.setPasswordExpiration(userEngityMgr.getPasswordExpiration(tenant.getTenantName()));
 
         return user;
-    }
-
-    private String generatePassword() {
-        RandomValueStringGenerator generator = new RandomValueStringGenerator(12);
-        return generator.generate();
-    }
-
-    private Date getPasswordExpiration(String tenantId) {
-        if (passwordExpirationDays <= 0) {
-            log.info(String.format("oauth2.password_expiration_days <= 0.  Disabling expiration for tenant with id=%s",
-                    tenantId));
-            return null;
-        }
-        return DateTime.now(DateTimeZone.UTC).plusDays(passwordExpirationDays).toDate();
     }
 
     @Override

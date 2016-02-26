@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -241,7 +242,14 @@ public class InternalResource extends InternalResourceBase {
             HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
-        return modelSummaryEntityMgr.findAllActive();
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllActive();
+
+        for (ModelSummary summary : summaries) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
+        }
+
+        return summaries;
     }
 
     @RequestMapping(value = "/modelsummaries/{applicationId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")

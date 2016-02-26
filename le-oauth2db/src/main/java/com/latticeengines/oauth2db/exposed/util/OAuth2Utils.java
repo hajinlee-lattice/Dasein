@@ -10,7 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -76,6 +82,26 @@ public class OAuth2Utils {
             log.error("Can not get tenant!", ex);
             throw new LedpException(LedpCode.LEDP_23003, ex);
         }
+    }
+
+    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password) {
+        ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
+        resource.setUsername(username);
+        resource.setPassword(password);
+        resource.setClientId(username);
+
+        resource.setGrantType("password");
+        resource.setAccessTokenUri(authHostPort + "/oauth/token");
+
+        DefaultAccessTokenRequest accessTokenRequest = new DefaultAccessTokenRequest();
+        OAuth2ClientContext context = new DefaultOAuth2ClientContext(accessTokenRequest);
+        OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);
+        return newRestTemplate;
+    }
+
+    public static String generatePassword() {
+        RandomValueStringGenerator generator = new RandomValueStringGenerator(12);
+        return generator.generate();
     }
 
 }

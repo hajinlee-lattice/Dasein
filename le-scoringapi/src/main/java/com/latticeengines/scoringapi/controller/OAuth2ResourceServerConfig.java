@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.scoringapi.exception.ExceptionEncodingTranslator;
 
 @Configuration
-//@EnableAutoConfiguration
+// @EnableAutoConfiguration
 @EnableResourceServer
 @EnableWebSecurity
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
@@ -33,7 +33,6 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
- System.out.println("inside OAuth2Resource.configure resources");
         resources.tokenStore(tokenStore()).resourceId(PLAYMAKER_REST_RESOURCE_ID).stateless(false);
         OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
@@ -44,16 +43,16 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-System.out.println("inside OAuth2Resource.configure http");
         // define URL patterns to enable OAuth2 security
 
-        http.requestMatchers()
-                .antMatchers("/score/**", "/api-docs/**", "/swagger/**").and() //
-                .authorizeRequests()
-                    .antMatchers("/score/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))") //
-//                    .antMatchers(HttpMethod.POST, "/tenants").permitAll()
-                    .antMatchers("/tenants/**").access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))") //
-                    .antMatchers("/api-docs", "/api-docs/**", "/swagger/**").permitAll();
+        // @formatter:off
+        http.requestMatchers().
+                antMatchers("/score/**", "/api-docs/**", "/swagger/**").and().
+                authorizeRequests().
+                    antMatchers("/score/configuration/**", "/score/webjars/**", "/score/v2/**", "/score/api-docs", "/score/api-docs/**", "/score/swagger/**", "/score/swagger**").permitAll().
+                    antMatchers("/score/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))").
+                    antMatchers("/tenants/**").access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))");
+        // @formatter:on
     }
 
 }
