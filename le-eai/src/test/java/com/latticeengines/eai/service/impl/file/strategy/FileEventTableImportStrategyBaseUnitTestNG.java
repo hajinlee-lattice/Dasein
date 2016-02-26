@@ -23,7 +23,10 @@ public class FileEventTableImportStrategyBaseUnitTestNG {
         ctx.setProperty(ImportProperty.FILEURLPROPERTIES, JsonUtils.serialize(urlProperties));
 
         String url = new FileEventTableImportStrategyBase().createJdbcUrl(ctx);
-        assertTrue(url.equals("jdbc:relique:csv:./?timestampFormat=HH:mm:ss&dateFormat=MM-DD-YYYY")
-                || url.equals("jdbc:relique:csv:./?dateFormat=MM-DD-YYYY&timestampFormat=HH:mm:ss"));
+        assertTrue(url.contains("jdbc:relique:csv:./?"));
+        assertTrue(url.contains("dateFormat=MM-DD-YYYY"));
+        assertTrue(url.contains("timestampFormat=HH:mm:ss"));
+        assertTrue(url.contains("charset=UTF-8"));
+        assertTrue(url.contains("missingValue=''"));
     }
 }
