@@ -12,7 +12,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
     -m dataflowapi \
     -g com.latticeengines \
-    -a le-serviceflows \
+    -a le-serviceflows-prospectdiscovery \
     -v $VERSION \
     -i com.latticeengines.prospectdiscovery.Initializer \
     -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
@@ -30,7 +30,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
     -m dataflowapi \
     -g com.latticeengines \
-    -a le-serviceflows \
+    -a le-serviceflows-leadprioritization \
     -v $VERSION \
     -i com.latticeengines.leadprioritization.Initializer \
     -f /tmp/le-serviceflows-leadprioritization-*-shaded.jar
