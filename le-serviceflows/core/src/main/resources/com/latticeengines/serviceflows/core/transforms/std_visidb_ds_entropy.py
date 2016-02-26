@@ -8,12 +8,11 @@
 import math
 
 def metadata():
-    return {  "ApprovedUsage"   : "Model"
-            , "DataType"        : "Float"
-            , "Category"        : "Lead Information"
-            , "FundamentalType" : "numeric"
-            , "StatisticalType" : "ratio"
-            , "Tags"            : "Internal" }
+    return {  'ApprovedUsage'   : 'Model'
+            , 'Category'        : 'Lead Information'
+            , 'FundamentalType' : 'numeric'
+            , 'StatisticalType' : 'ratio'
+            , 'Tags'            : 'Internal' }
 
 
 def argument_length(n):
