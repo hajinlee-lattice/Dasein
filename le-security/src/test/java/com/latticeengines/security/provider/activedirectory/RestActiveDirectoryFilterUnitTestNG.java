@@ -1,5 +1,7 @@
 package com.latticeengines.security.provider.activedirectory;
 
+import java.util.Calendar;
+
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -15,8 +17,12 @@ public class RestActiveDirectoryFilterUnitTestNG {
 
     @Test(groups = "unit")
     public void isSameDayForOneHourBefore() {
-        System.out.println(System.currentTimeMillis());
-        long oneHourBefore = System.currentTimeMillis() - 60*60*1000;
-        assertTrue(new RestActiveDirectoryFilter().isSameDay(oneHourBefore, System.currentTimeMillis()));
+        long curTime = System.currentTimeMillis();
+        System.out.println(curTime);
+        long hourBefore = curTime - 60*60*1000;
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(curTime);
+        int curHour = c.get(Calendar.HOUR);
+        assertTrue((curHour == 0) || (new RestActiveDirectoryFilter().isSameDay(hourBefore, curTime)));
     }
 }
