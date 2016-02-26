@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,13 +27,29 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 
 @Entity
+@Access(AccessType.FIELD)
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid {
 
+    @Column(name = "TENANT_ID", nullable = false, unique = true)
     private String id;
+
+    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "TENANT_PID", unique = true, nullable = false)
     private Long pid;
+
+    @Column(name = "REGISTERED_TIME", nullable = false)
     private Long registeredTime;
+
+    @Column(name = "UI_VERSION", nullable = false, unique = false)
+    private String uiVersion = "2.0";
+
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     private List<TargetMarket> targetMarkets;
 
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS z");
@@ -49,7 +67,6 @@ public class Tenant implements HasName, HasId<String>, HasPid {
 
     @Override
     @JsonProperty("DisplayName")
-    @Column(name = "NAME", nullable = false, unique = true)
     public String getName() {
         return name;
     }
@@ -62,7 +79,6 @@ public class Tenant implements HasName, HasId<String>, HasPid {
 
     @Override
     @JsonProperty("Identifier")
-    @Column(name = "TENANT_ID", nullable = false, unique = true)
     public String getId() {
         return id;
     }
@@ -73,12 +89,8 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         this.id = id;
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    @Basic(optional = false)
-    @Column(name = "TENANT_PID", unique = true, nullable = false)
     @Override
+    @JsonIgnore
     public Long getPid() {
         return pid;
     }
@@ -95,7 +107,6 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     }
 
     @JsonIgnore
-    @Column(name = "REGISTERED_TIME", nullable = false)
     public Long getRegisteredTime() {
         return registeredTime;
     }
@@ -110,9 +121,18 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         return getId();
     }
 
+    @JsonProperty("UIVersion")
+    public String getUiVersion() {
+        return uiVersion;
+    }
+
+    @JsonProperty("UIVersion")
+    public void setUiVersion(String uiVersion) {
+        this.uiVersion = uiVersion;
+    }
+
     // TODO: Note - this is a terrible hack to avoid DP-2243
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY, mappedBy = "tenant")
     public List<TargetMarket> getTargetMarkets() {
         return targetMarkets;
     }
