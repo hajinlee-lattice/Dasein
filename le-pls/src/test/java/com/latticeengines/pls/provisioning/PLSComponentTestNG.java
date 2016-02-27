@@ -1,5 +1,7 @@
 package com.latticeengines.pls.provisioning;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -7,7 +9,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -63,7 +67,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         bootstrap();
 
         // wait a while, then test your installation
-        int numOfRetries = 10;
+        int numOfRetries = 30;
         BootstrapState state;
         do {
             state = batonService.getTenantServiceBootstrapState(contractId, tenantId, serviceName);
@@ -72,7 +76,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
 
         if (!state.state.equals(BootstrapState.State.OK)) {
-            Assert.fail(state.errorMessage);
+            Assert.fail("Bootstrap State is " + state.state + " instead of " + BootstrapState.State.OK + ": " + state.errorMessage);
         }
 
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
@@ -85,6 +89,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
         newTenant = tenantService.findByTenantId(tenant.getId());
         Assert.assertEquals(newTenant.getName(), tenantName);
+        Assert.assertEquals(newTenant.getUiVersion(), "3.0");
 
         componentManager.discardTenant(tenant);
         Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
@@ -101,6 +106,10 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         TenantInfo tenantInfo = new TenantInfo(properties);
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
         batonService.createTenant(contractId, tenantId, spaceID, contractInfo, tenantInfo, spaceInfo);
+
+        SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
+        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA3));
+        batonService.setupSpaceConfiguration(contractId, tenantId, spaceID, spaceConfiguration);
     }
 
     private void cleanupZK() {

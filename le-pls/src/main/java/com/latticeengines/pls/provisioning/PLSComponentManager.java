@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -88,6 +89,11 @@ public class PLSComponentManager {
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
 
+        List<LatticeProduct> products = tenantConfigService.getProducts(PLSTenantId);
+        if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
+            tenant.setUiVersion("3.0");
+        }
+
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails);
     }
 
@@ -105,7 +111,7 @@ public class PLSComponentManager {
             try {
                 tenantService.registerTenant(tenant);
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_18028, String.format("Registrating tenant %s error. "
+                throw new LedpException(LedpCode.LEDP_18028, String.format("Registering tenant %s error. "
                         + "Tenant name possibly already exists.", tenant.getId()), e);
             }
         }

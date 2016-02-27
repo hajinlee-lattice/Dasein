@@ -43,6 +43,7 @@ public class TenantServiceImpl implements TenantService {
     public void updateTenant(Tenant tenant) {
         Tenant oldTenant = tenantEntityMgr.findByTenantId(tenant.getId());
         oldTenant.setName(tenant.getName());
+        oldTenant.setUiVersion(tenant.getUiVersion());
         if (tenant.getRegisteredTime() == null) {
             oldTenant.setRegisteredTime(new Date().getTime());
         } else {
