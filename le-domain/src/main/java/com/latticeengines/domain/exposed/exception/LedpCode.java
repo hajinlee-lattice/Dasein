@@ -336,7 +336,8 @@ public enum LedpCode {
             "The file type {0} is not found in the DellEBI configuration database. Please check the config database."), //
     LEDP_29001("Must define one type to retrieve."), //
     LEDP_29002("The input parameter {0} is null."), //
-    LEDP_29003("The file {0} is not recorded in the Execution_Log table."),
+    LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
+    LEDP_29004("Failed to download or unzip File , name={0}."), //
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."),
