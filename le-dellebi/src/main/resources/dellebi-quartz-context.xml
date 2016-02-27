@@ -16,20 +16,61 @@
 
     <bean name="dellebiManagerJob"
         class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="jobClass" value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
+        <property name="jobClass"
+            value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
         <property name="durability" value="true" />
-        <property name="jobDataMap">
-        <map>
-            <entry key="dailyFlow" value-ref="dailyFlow" />
-            <entry key="exportAndReportService" value-ref="exportAndReportService" />
-        </map>
-    </property>
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="dailyFlow" value-ref="dailyFlow" />
+                <entry key="exportAndReportService" value-ref="exportAndReportService" />
+                <entry key="fileTypesList" value="${dellebi.fileTypes.dellebiManagerJob}" />
+            </map>
+        </property>
+    </bean>
 
+    <bean name="dellebiManagerJob2"
+        class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass"
+            value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
+        <property name="durability" value="true" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="dailyFlow" value-ref="dailyFlow" />
+                <entry key="exportAndReportService" value-ref="exportAndReportService" />
+                <entry key="fileTypesList" value="${dellebi.fileTypes.dellebiManagerJob2}" />
+            </map>
+        </property>
+    </bean>
+
+    <bean name="dellebiManagerJob3"
+        class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+        <property name="jobClass"
+            value="com.latticeengines.dellebi.dataprocess.DellEbiDailyJob" />
+        <property name="durability" value="true" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="dailyFlow" value-ref="dailyFlow" />
+                <entry key="exportAndReportService" value-ref="exportAndReportService" />
+                <entry key="fileTypesList" value="${dellebi.fileTypes.dellebiManagerJob3}" />
+            </map>
+        </property>
     </bean>
 
     <bean id="dellebiManagerCronTrigger"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="dellebiManagerJob" />
+        <property name="cronExpression" value="0 0/5 * * * ?" />
+    </bean>
+
+    <bean id="dellebiManagerCronTrigger2"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="dellebiManagerJob2" />
+        <property name="cronExpression" value="0 0/5 * * * ?" />
+    </bean>
+
+    <bean id="dellebiManagerCronTrigger3"
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="dellebiManagerJob3" />
         <property name="cronExpression" value="0 0/5 * * * ?" />
     </bean>
 
@@ -39,11 +80,19 @@
                 <ref bean="dellebiManagerCronTrigger" />
             </list>
         </property>
-        <property name="jobDetails">
+    </bean>
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
             <list>
-                <ref bean="dellebiManagerJob" />
+                <ref bean="dellebiManagerCronTrigger2" />
             </list>
         </property>
     </bean>
-
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="dellebiManagerCronTrigger3" />
+            </list>
+        </property>
+    </bean>
 </beans>

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
@@ -18,47 +19,13 @@ import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.dellebi.util.PipeFactory;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Configuration
 public class FlowDefinition {
 
-    @Value("${dellebi.cascadinginpath}")
-    private String cascadingInpath;
-    @Value("${dellebi.datahadooprootpath}")
-    private String dataHadoopRootPath;
-    @Value("${dellebi.datahadoopworkingpath}")
-    private String dataHadoopWorkingPath;
-
-    @Value("${dellebi.datainputfiletype}")
-    private String dataInputFileType;
-
     @Value("${dellebi.cascadinginputdelimiter}")
     private String cascadingInputDelimiter;
-
-    @Value("${dellebi.ordersummary}")
-    private String orderSummary;
-    @Value("${dellebi.orderdetail}")
-    private String orderDetail;
-    @Value("${dellebi.shiptoaddrlattice}")
-    private String shipToAddrLattice;
-    @Value("${dellebi.warrantyglobal}")
-    private String warrantyGlobal;
-    @Value("${dellebi.quotetrans}")
-    private String quoteTrans;
-
-    @Value("${dellebi.orderdetailfields}")
-    private String orderDetailFields;
-    @Value("${dellebi.shiptoaddrfields}")
-    private String shipToAddrFields;
-    @Value("${dellebi.warrantyfields}")
-    private String warrantyFields;
-
-    @Value("${dellebi.exportedorderdetailfields}")
-    private String exportedOrderDetailFields;
-    @Value("${dellebi.exportedshiptoaddrfields}")
-    private String exportedShipToAddrFields;
-    @Value("${dellebi.exportedwarrantyfields}")
-    private String exportedWarrantyFields;
 
     @Autowired
     private DellEbiFlowService dellEbiFlowService;
@@ -69,52 +36,55 @@ public class FlowDefinition {
     private static final Log log = LogFactory.getLog(FlowDefinition.class);
 
     @Bean
-    public FlowDef initialConfigs() {
-        dellEbiConfigEntityMgr.initialService();
-        return null;
-    }
-
-    @Bean
+    @Scope("prototype")
     public FlowDef getOrderSumDailyFlow() {
         return getGenericItemDailyFlow(FileType.ORDER_SUMMARY.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getOrderDetailDailyFlow() {
         return getGenericItemDailyFlow(FileType.ORDER_DETAIL.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getQuoteDailyFlow() {
         return getGenericItemDailyFlow(FileType.QUOTE.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getSkuItemClassDailyFlow() {
         return getGenericItemDailyFlow(FileType.SKU_ITM_CLS_CODE.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getSkuMfgDailyFlow() {
         return getGenericItemDailyFlow(FileType.SKU_MANUFACTURER.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getSkuGlobalDailyFlow() {
         return getGenericItemDailyFlow(FileType.SKU_GLOBAL.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getWarrantyDailyFlow() {
         return getGenericItemDailyFlow(FileType.WARRANTY.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getCalendarDailyFlow() {
         return getGenericItemDailyFlow(FileType.CALENDAR.getType());
     }
 
     @Bean
+    @Scope("prototype")
     public FlowDef getChannelDailyFlow() {
         return getGenericItemDailyFlow(FileType.CHANNEL.getType());
     }
@@ -123,9 +93,11 @@ public class FlowDefinition {
     public FlowDef getGenericItemDailyFlow(String type) {
 
         log.info("Initial " + type + " flow definition!");
-
-        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter), dellEbiFlowService.getTxtDir(null));
-        Tap outTapFile = new Hfs(new TextDelimited(false, "\t"), dellEbiFlowService.getOutputDir(null),
+        DataFlowContext context = new DataFlowContext();
+        context.setProperty(DellEbiFlowService.FILE_TYPE, type);
+        Tap inTapFile = new Hfs(new TextDelimited(true, cascadingInputDelimiter),
+                dellEbiFlowService.getTxtDir(context));
+        Tap outTapFile = new Hfs(new TextDelimited(false, "\t"), dellEbiFlowService.getOutputDir(context),
                 SinkMode.UPDATE);
         Tap failedRowsTapFile = new Hfs(new TextDelimited(false, "\t"), dellEbiFlowService.getErrorOutputDir(null),
                 SinkMode.UPDATE);

@@ -4,22 +4,22 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public interface FileFlowService {
 
-    String getOutputDir();
+    String getOutputDir(String type);
 
     String getErrorOutputDir();
 
-    String getTxtDir();
+    String getTxtDir(String type);
 
     String getZipDir();
 
-    String getTargetDB();
-
-    DataFlowContext getContext();
+    String getTargetDB(String type);
 
     FileType getFileType(String zipFileName);
 
     boolean deleteFile(String fileName);
 
     void registerFailedFile(String fileName);
+
+    void initialContext(DataFlowContext context);
 
 }

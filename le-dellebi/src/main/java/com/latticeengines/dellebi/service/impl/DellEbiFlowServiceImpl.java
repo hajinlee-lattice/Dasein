@@ -1,21 +1,30 @@
 package com.latticeengines.dellebi.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Resource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
+import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
+import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
+
+    private static final Log log = LogFactory.getLog(DailyFlow.class);
 
     @Resource(name = "localFileFlowService")
     private FileFlowService localFileFlowService;
@@ -33,16 +42,25 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     @Override
-    public DataFlowContext getFile() {
-        DataFlowContext context = new DataFlowContext();
-        context = smbFileFlowService.getContext();
+    public DataFlowContext getFile(DataFlowContext context) {
+
+        if (!readConfigs(context)) {
+            context.setProperty(RESULT_KEY, false);
+            log.info("There is no type entry defined in the config table");
+            return context;
+        } else {
+            context.setProperty(RESULT_KEY, true);
+        }
+
+        smbFileFlowService.initialContext(context);
+
         String fileName = context.getProperty(ZIP_FILE_NAME, String.class);
 
         if (fileName != null) {
             return context;
         }
 
-        context = localFileFlowService.getContext();
+        localFileFlowService.initialContext(context);
 
         return context;
     }
@@ -60,18 +78,20 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Override
     public String getOutputDir(DataFlowContext context) {
+        String type = context.getProperty(FILE_TYPE, String.class);
         if (isSmb(context)) {
-            return smbFileFlowService.getOutputDir();
+            return smbFileFlowService.getOutputDir(type);
         }
-        return localFileFlowService.getOutputDir();
+        return localFileFlowService.getOutputDir(type);
     }
 
     @Override
     public String getTxtDir(DataFlowContext context) {
+        String type = context.getProperty(FILE_TYPE, String.class);
         if (isSmb(context)) {
-            return smbFileFlowService.getTxtDir();
+            return smbFileFlowService.getTxtDir(type);
         }
-        return localFileFlowService.getTxtDir();
+        return localFileFlowService.getTxtDir(type);
     }
 
     @Override
@@ -93,10 +113,11 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Override
     public String getTargetDB(DataFlowContext context) {
+        String type = context.getProperty(DellEbiFlowService.FILE_TYPE, String.class);
         if (isSmb(context)) {
-            return smbFileFlowService.getTargetDB();
+            return smbFileFlowService.getTargetDB(type);
         }
-        return localFileFlowService.getTargetDB();
+        return localFileFlowService.getTargetDB(type);
     }
 
     @Override
@@ -126,8 +147,7 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         }
         localFileFlowService.registerFailedFile(zipFileName);
 
-        DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(LOG_ENTRY,
-                DellEbiExecutionLog.class);
+        DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(LOG_ENTRY, DellEbiExecutionLog.class);
         dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, err);
     }
 
@@ -160,9 +180,30 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     public String getTargetTable(DataFlowContext context) {
         String fileType = context.getProperty(FILE_TYPE, String.class);
 
-        if (fileType.equals(FileType.QUOTE.getType())) {
-            return targetTable;
-        }
         return dellEbiConfigEntityMgr.getTargetTable(fileType);
     }
+
+    private Boolean readConfigs(DataFlowContext context) {
+
+        dellEbiConfigEntityMgr.initialService();
+
+        String[] types = context.getProperty(TYPES_LIST, String[].class);
+        List<DellEbiConfig> configsList = new ArrayList<DellEbiConfig>();
+
+        for (String type : types) {
+            DellEbiConfig config = dellEbiConfigEntityMgr.getConfigByType(type);
+            if (config != null) {
+                log.info("The configuration for: " + type + " is " + config.toString());
+                configsList.add(config);
+            }
+        }
+
+        if (configsList.size() == 0) {
+            return false;
+        } else {
+            context.setProperty(DellEbiFlowService.CFG_LIST, configsList);
+            return true;
+        }
+    }
+
 }

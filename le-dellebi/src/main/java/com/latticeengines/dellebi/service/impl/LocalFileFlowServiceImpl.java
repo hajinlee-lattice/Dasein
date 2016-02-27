@@ -14,6 +14,8 @@ import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("localFileFlowService")
 public class LocalFileFlowServiceImpl extends BaseFileFlowService {
@@ -30,8 +32,6 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
     @Value("${dellebi.datatarget.stagefinal.dbname}")
     private String stageFinalTargetDB;
-
-    private DataFlowContext context;
 
     public File getScanedFile() {
 
@@ -62,9 +62,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     @Override
-    public DataFlowContext getContext() {
-
-        context = new DataFlowContext();
+    public void initialContext(DataFlowContext context) {
 
         File scanedFile = getScanedFile();
 
@@ -81,26 +79,19 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 dellEbiExecutionLog.setStartDate(new Date());
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.NewFile.getStatus());
                 dellEbiExecutionLogEntityMgr.createOrUpdate(dellEbiExecutionLog);
+                context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
                 txtFileName = downloadAndUnzip(new FileInputStream(scanedFile), zipFileName);
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Downloaded.getStatus());
                 dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.LOG_ENTRY, dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
-                context.setProperty(DellEbiFlowService.FILE_SOURCE,
-                        DellEbiFlowService.FILE_SOURCE_LOCAL);
-                context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
-
-                return context;
+                context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_LOCAL);
 
             } catch (Exception ex) {
-                ex.printStackTrace();
-                log.warn("Failed to get local file! error=" + ex.getMessage());
                 dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
             }
         }
-
-        return context;
     }
 
     @Override
@@ -110,8 +101,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     @Override
-    public String getTargetDB() {
-        String type = context.getProperty(DellEbiFlowService.FILE_TYPE, String.class);
+    public String getTargetDB(String type) {
         if (type.equals(FileType.QUOTE.getType()))
             return localTargetDB;
         else
@@ -130,6 +120,11 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             if (!fileName.endsWith(".zip")) {
                 return false;
             }
+
+            if (!isActive(file)) {
+                return false;
+            }
+
             if (isFailedFile(fileName)) {
                 return false;
             }
@@ -184,8 +179,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
 
     protected boolean isProcessedFile(File file) {
         String filename = file.getName();
-        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr
-                .getEntryByFile(filename);
+        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(filename);
 
         if (dellEbiExecutionLog == null) {
             return false;
@@ -196,6 +190,23 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
         }
 
         return false;
+    }
+
+    protected boolean isActive(File file) {
+        String fileName = file.getName();
+        FileType type = getFileType(fileName);
+        if (type == null)
+            return false;
+        String typeName = type.getType();
+
+        Boolean isActive = dellEbiConfigEntityMgr.getIsActive(typeName);
+
+        if (isActive == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        return isActive;
+
     }
 
 }
