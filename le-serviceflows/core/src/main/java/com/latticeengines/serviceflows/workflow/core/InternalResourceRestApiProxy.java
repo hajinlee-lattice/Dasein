@@ -2,7 +2,12 @@ package com.latticeengines.serviceflows.workflow.core;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -74,6 +79,23 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
                     ModelSummary.class);
         } catch (Exception e) {
             throw new RuntimeException("getModelSummaryFromApplicationId: Remote call failure", e);
+        }
+    }
+
+    @SuppressWarnings("rawtypes")
+    public void updateModelSummary(String modelId, AttributeMap attrMap) {
+        try {
+            String url = constructUrl("pls/internal/modelsummaries", modelId);
+            HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
+            log.info(String.format("Putting to %s", url));
+            ResponseEntity<ResponseDocument> response = restTemplate.<ResponseDocument> exchange(url, HttpMethod.PUT,
+                    requestEntity, ResponseDocument.class);
+            ResponseDocument responseDoc = response.getBody();
+            if (!responseDoc.isSuccess()) {
+                throw new RuntimeException("updateModelSummary failed!");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("updateModelSummary: Remote call failure", e);
         }
     }
 

@@ -12,6 +12,7 @@ import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTa
 import com.latticeengines.prospectdiscovery.workflow.steps.MarkReportOutOfDate;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
+import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
 import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
@@ -48,8 +49,11 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private ChooseModel chooseModel;
 
     @Autowired
+    private ActivateModel activateModel;
+
+    @Autowired
     private Score score;
-    
+
     @Autowired
     private CreateAttributeLevelSummaryWorkflow createAttributeLevelSummaryWorkflow;
 
@@ -68,6 +72,7 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(sample) //
                 .next(profileAndModel) //
                 .next(chooseModel) //
+                .next(activateModel) //
                 .next(score) //
                 .next(createAttributeLevelSummaryWorkflow) //
                 .build();

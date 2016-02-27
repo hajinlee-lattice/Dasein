@@ -1,18 +1,17 @@
 package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -30,9 +29,11 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
     public static final double MINIMUM_ROC = 0.7;
 
     private static final Log log = LogFactory.getLog(ChooseModel.class);
-    private static final int MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES = 6 * 60;
 
     private InternalResourceRestApiProxy proxy = null;
+    
+    @Autowired
+    private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
 
     @Override
     public void execute() {
@@ -48,10 +49,12 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         if (proxy == null) {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
-        List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries(modelApplicationIdToEventColumn.keySet());
+        List<ModelSummary> modelSummaries = waitForDownloadedModelSummaries.wait(configuration, modelApplicationIdToEventColumn.keySet());
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
-        executionContext.putString(SCORING_MODEL_ID, bestModelIdAndEventColumn.getKey());
+        String modelId = bestModelIdAndEventColumn.getKey();
+        executionContext.putString(ACTIVATE_MODEL_IDS, JsonUtils.serialize(Arrays.<String> asList(new String[]{modelId})));
+        executionContext.putString(SCORING_MODEL_ID, modelId);
         executionContext.putString(EVENT_COLUMN, bestModelIdAndEventColumn.getValue());
 
         TargetMarket targetMarket = proxy.findTargetMarketByName(configuration.getTargetMarket().getName(),
@@ -134,50 +137,6 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         }
 
         return chosenModel;
-    }
-
-    private List<ModelSummary> waitForDownloadedModelSummaries(Set<String> modelApplicationIds) {
-        List<ModelSummary> modelSummaries = new ArrayList<>();
-        Set<String> foundModels = new HashSet<>();
-
-        int maxTries = MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES;
-        int i = 0;
-
-        log.info("Expecting to retrieve models with these application ids:" + Joiner.on(", ").join(modelApplicationIds));
-
-        do {
-            for (String modelApplicationId : modelApplicationIds) {
-                if (!foundModels.contains(modelApplicationId)) {
-                    ModelSummary model = proxy.getModelSummaryFromApplicationId(modelApplicationId, configuration
-                            .getCustomerSpace().toString());
-                    if (model != null) {
-                        modelSummaries.add(model);
-                        foundModels.add(modelApplicationId);
-                    } else {
-                        log.info("Still waiting for model:" + modelApplicationId);
-                    }
-                }
-            }
-
-            try {
-                Thread.sleep(10000L);
-            } catch (InterruptedException e) {
-                // do nothing
-            }
-            i++;
-
-            if (i == maxTries) {
-                break;
-            }
-        } while (modelSummaries.size() < modelApplicationIds.size());
-
-        if (modelSummaries.size() < modelApplicationIds.size()) {
-            Joiner joiner = Joiner.on(",").skipNulls();
-            throw new LedpException(LedpCode.LEDP_28013, new String[] { joiner.join(modelApplicationIds),
-                    joiner.join(foundModels) });
-        }
-
-        return modelSummaries;
     }
 
     @VisibleForTesting
