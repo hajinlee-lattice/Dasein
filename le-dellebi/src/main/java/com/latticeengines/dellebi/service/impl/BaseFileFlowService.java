@@ -24,8 +24,6 @@ import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class BaseFileFlowService implements FileFlowService {
 
@@ -123,7 +121,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     protected String downloadAndUnzip(InputStream is, String fileName) {
         String zipDir = getZipDir();
-        String txtDir = getTxtDir(getFileType(fileName).getType());
+        String txtDir = getTxtDir();
 
         try {
             Configuration conf = new Configuration();
@@ -144,11 +142,12 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
         } catch (Exception ex) {
             log.error("Can not download or unzip File, name=" + fileName, ex);
-            throw new LedpException(LedpCode.LEDP_29004, ex, new String[] { fileName });
+            return null;
         }
     }
 
-    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName) throws Exception {
+    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName)
+            throws Exception {
 
         int idx = zipFileName.lastIndexOf(".");
         if (idx < 0) {
@@ -186,7 +185,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
                     zipIn.closeEntry();
                 }
             }
-            entry = zipIn.getNextEntry();   
+            entry = zipIn.getNextEntry();
 
         }
         zipIn.close();
@@ -204,8 +203,8 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     @Override
-    public String getTxtDir(String type) {
-        return dataHadoopWorkingPath + "/" + type + "/txt_dir";
+    public String getTxtDir() {
+        return dataHadoopWorkingPath + "/txt_dir";
     }
 
     @Override
@@ -214,8 +213,8 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     @Override
-    public String getOutputDir(String type) {
-        return dataHadoopWorkingPath + "/" + type + "/output";
+    public String getOutputDir() {
+        return dataHadoopWorkingPath + "/output";
     }
 
     @Override

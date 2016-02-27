@@ -81,8 +81,8 @@ public class ExportAndReportService {
 
     public boolean export(DataFlowContext context) {
 
-        String sourceDir = dellEbiFlowService.getOutputDir(context);
-        String successFile = dellEbiFlowService.getOutputDir(context) + "/_SUCCESS";
+        String sourceDir = dellEbiFlowService.getOutputDir(null);
+        String successFile = dellEbiFlowService.getOutputDir(null) + "/_SUCCESS";
         String sqlStr = "exec " + quote_sp;
         DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(DellEbiFlowService.LOG_ENTRY,
                 DellEbiExecutionLog.class);
@@ -149,7 +149,7 @@ public class ExportAndReportService {
         ;
         if (errorMsg == null) {
             try {
-                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
+                List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
                 if (files != null && files.size() > 0) {
                     boolean result = dellEbiFlowService.deleteFile(context);
                     if (result) {

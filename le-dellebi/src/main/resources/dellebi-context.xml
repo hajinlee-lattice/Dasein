@@ -18,25 +18,26 @@
 
     <import resource="classpath:dellebi-persistence-context.xml" />
     <context:component-scan base-package="com.latticeengines.dellebi" />
-    <context:component-scan base-package="com.latticeengines.dataplatform.service.impl">
+
+    <context:component-scan base-package="com.latticeengines.dataplatform">
         <context:exclude-filter type="aspectj"
-            expression="com.latticeengines.dataplatform.service.impl.dlorchestration.*" />
+            expression="com.latticeengines.dataplatform.controller.*" />
         <context:exclude-filter type="aspectj"
-            expression="com.latticeengines.dataplatform.service.impl.modeling.*" />
-        <context:exclude-filter type="aspectj"
-            expression="com.latticeengines.dataplatform.service.impl.parallel.*" />
-        <context:exclude-filter type="aspectj"
-            expression="com.latticeengines.dataplatform.service.impl.watchdog.*" />
-        <context:exclude-filter type="assignable"
-            expression="com.latticeengines.dataplatform.service.impl.ParallelDispatchServiceImpl" />
-        <context:exclude-filter type="assignable"
-            expression="com.latticeengines.dataplatform.service.impl.MapReduceCustomizationServiceImpl" />
-        <context:exclude-filter type="assignable"
-            expression="com.latticeengines.dataplatform.service.impl.JobServiceImpl" />
+            expression="com.latticeengines.dataplatform.mbean.*" />
     </context:component-scan>
 
     <import resource="classpath:dataplatform-yarn-config-context.xml" />
     <import resource="classpath:dataplatform-yarn-client-context.xml" />
+    <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
+    <import
+        resource="classpath:sampling/dataplatform-parallel-mr-sampling-context.xml" />
+    <import resource="classpath:python/dataplatform-mr-python-context.xml" />
+    <import resource="classpath:db-context.xml" />
+    <import resource="classpath:dataplatform-persistence-context.xml" />
+    <import resource="classpath:dataplatform-validation-context.xml" />
+    <import resource="classpath:monitor-alerts-context.xml" />
+    <import resource="classpath:remote-context.xml" />
+    <import resource="classpath:swlib-context.xml" />
     <import resource="classpath:common-component-context.xml"/>
 
     <import

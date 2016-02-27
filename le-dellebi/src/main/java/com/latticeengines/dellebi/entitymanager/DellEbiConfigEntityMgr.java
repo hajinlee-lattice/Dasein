@@ -1,9 +1,6 @@
 package com.latticeengines.dellebi.entitymanager;
 
 import java.sql.Date;
-import java.util.List;
-
-import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 
 public interface DellEbiConfigEntityMgr {
 
@@ -31,21 +28,5 @@ public interface DellEbiConfigEntityMgr {
     String getTargetTable(String type);
 
     Boolean getIsDeleted(String type);
-
-    List<DellEbiConfig> getConfigs();
-
-    DellEbiConfig getConfigByType(String type);
-
-    Boolean getIsActive(String type);
-
-    String getInboxPath(String type);
-
-    String getBean(String type);
-
-    String getFilePattern(String type);
-
-    int getPriority(String type);
-
-    String getQuartzJob(String type);
 
 }
