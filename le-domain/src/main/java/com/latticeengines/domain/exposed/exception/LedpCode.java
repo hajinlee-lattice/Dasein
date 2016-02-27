@@ -337,9 +337,12 @@ public enum LedpCode {
     LEDP_29001("Must define one type to retrieve."), //
     LEDP_29002("The input parameter {0} is null."), //
     LEDP_29003("The file {0} is not recorded in the Execution_Log table."),
-    
+
     // le-quartz 30000-31000
-    LEDP_30000("Destination Url {0} invalid.");
+    LEDP_30000("Destination Url {0} invalid."),
+
+    // le-scoringapi
+    LEDP_31000("Failed to retrieve file from HDFS {0}");
 
     private String message;
 
