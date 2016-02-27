@@ -22,12 +22,12 @@ public class ScoreResourceMockData {
     public Map<ModelType, List<Model>> activeModelMap = new HashMap<>();
     public Map<String, Fields> modelFields = new HashMap<>();
 
+    public static final String modelId1 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9999-PLSModel";
+    public static final String modelId2 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9998-PLSModel";
+    public static final String modelId3 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9997-PLSModel";
+
     @PostConstruct
     public void initializeStubData() throws Exception {
-        String modelId1 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9999-PLSModel";
-        String modelId2 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9998-PLSModel";
-        String modelId3 = "ms__1bcd7c1d-1703-4704-9536-60728bdd9997-PLSModel";
-
         List<Model> contactModels = new ArrayList<>();
         contactModels.add(new Model(modelId1, "US Contact Model", ModelType.CONTACT));
         contactModels.add(new Model(modelId2, "EU Contact Model", ModelType.CONTACT));

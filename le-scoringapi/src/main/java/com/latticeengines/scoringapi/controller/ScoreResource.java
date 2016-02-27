@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.rest.DetailedErrors;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringapi.exposed.AccountScoreRequest;
@@ -53,28 +54,24 @@ public class ScoreResource {
     @ResponseBody
     @ApiOperation(value = "Get active models (only contact type is supported in M1)")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
-        String tenantId = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
-        log.info(String.format("getActiveModels for %s and type %s", tenantId, type));
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        log.info(String.format("getActiveModels for %s and type %s", customerSpace.toString(), type));
 
-        List<Model> models = modelRetriever.getActiveModels(tenantId, type);
+        List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
 
-        return scoreResourceMockData.activeModelMap.get(type);
+        return models;
     }
 
     @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get fields for a model")
-    public Fields getModelFields(@PathVariable String modelId) {
-        Fields fields = modelRetriever.getModelFields(modelId);
+    public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId) {
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        log.info(String.format("getModelFields for %s and modelId %s", customerSpace.toString(), modelId));
 
-        return scoreResourceMockData.modelFields.get(modelId);
-    }
+        Fields fields = modelRetriever.getModelFields(customerSpace, modelId);
 
-    @RequestMapping(value = "/accounts", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Score an account (not supported in M1)")
-    public ScoreResponse scoreAccount(@RequestBody AccountScoreRequest request) {
-        return scoreResourceMockData.simulateScore();
+        return fields;
     }
 
     @RequestMapping(value = "/contacts", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -83,6 +80,13 @@ public class ScoreResource {
     public ScoreResponse scoreContact(@RequestBody ContactScoreRequest request) {
         ScoreResponse response = scoreRequestProcessor.process(request);
 
+        return scoreResourceMockData.simulateScore();
+    }
+
+    @RequestMapping(value = "/accounts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Score an account (not supported in M1)")
+    public ScoreResponse scoreAccount(@RequestBody AccountScoreRequest request) {
         return scoreResourceMockData.simulateScore();
     }
 

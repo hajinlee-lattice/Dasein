@@ -21,7 +21,7 @@ import com.latticeengines.scoringapi.exception.ExceptionEncodingTranslator;
 @EnableWebSecurity
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
-    private static final String PLAYMAKER_REST_RESOURCE_ID = "playmaker_api";
+    private static final String LP_REST_RESOURCE_ID = "lp_api";
 
     @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
@@ -33,7 +33,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-        resources.tokenStore(tokenStore()).resourceId(PLAYMAKER_REST_RESOURCE_ID).stateless(false);
+        resources.tokenStore(tokenStore()).resourceId(LP_REST_RESOURCE_ID).stateless(false);
         OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
 
         ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
@@ -50,8 +50,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                 antMatchers("/score/**", "/api-docs/**", "/swagger/**").and().
                 authorizeRequests().
                     antMatchers("/score/configuration/**", "/score/webjars/**", "/score/v2/**", "/score/api-docs", "/score/api-docs/**", "/score/swagger/**", "/score/swagger**").permitAll().
-                    antMatchers("/score/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_CLIENT'))").
-                    antMatchers("/tenants/**").access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))");
+                    antMatchers("/score/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");
         // @formatter:on
     }
 

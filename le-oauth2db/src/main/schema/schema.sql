@@ -183,6 +183,22 @@ INSERT INTO [dbo].[oauth_client_details]
             'ROLE_PLAYMAKER_ADMIN', NULL, NULL, NULL, 'false')
 GO
 
+ INSERT INTO [dbo].[oauth_client_details]
+           ([client_id]
+           ,[resource_ids]
+           ,[client_secret]
+           ,[scope]
+           ,[authorized_grant_types]
+           ,[web_server_redirect_uri]
+           ,[authorities]
+           ,[access_token_validity]
+           ,[refresh_token_validity]
+           ,[additional_information]
+           ,[autoapprove])
+     VALUES
+           ('lp', 'lp_api', NULL, 'read,write', 'password,refresh_token', NULL,
+            'ROLE_LP_ADMIN', NULL, NULL, NULL, 'false')
+
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[OAuthUser]') AND type in (N'U'))
 DROP TABLE [dbo].[OAuthUser]

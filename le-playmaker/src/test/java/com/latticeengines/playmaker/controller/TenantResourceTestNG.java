@@ -33,7 +33,8 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
             Assert.assertEquals(ex.getMessage(), "401 Unauthorized");
         }
 
-        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
+        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
+                newTenant.getTenantPassword(), newTenant.getTenantName());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -44,7 +45,8 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         Assert.assertNotNull(newTenant.getTenantPassword());
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
 
-        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
+        adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
+                newTenant.getTenantPassword(), newTenant.getTenantName());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")

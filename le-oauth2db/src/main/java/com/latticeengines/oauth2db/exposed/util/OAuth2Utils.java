@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.client.token.grant.password.ResourceO
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
@@ -84,11 +85,16 @@ public class OAuth2Utils {
         }
     }
 
-    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password) {
+    public static CustomerSpace getCustomerSpace(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        return CustomerSpace.parse(getTenantName(request, oAuthUserEntityMgr));
+    }
+
+
+    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password, String clientId) {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setUsername(username);
         resource.setPassword(password);
-        resource.setClientId(username);
+        resource.setClientId(clientId);
 
         resource.setGrantType("password");
         resource.setAccessTokenUri(authHostPort + "/oauth/token");

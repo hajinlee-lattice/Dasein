@@ -22,7 +22,8 @@ public class RecommendationResourceTestNG extends BasePlaymakerFunctionalTestNG 
     public void beforeClass() {
         super.beforeClass();
         PlaymakerTenant newTenant = playMakerEntityMgr.create(tenant);
-        restTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(), newTenant.getTenantPassword());
+        restTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
+                newTenant.getTenantPassword(), newTenant.getTenantName());
     }
 
     @AfterClass(groups = "deployment")

@@ -262,6 +262,20 @@ public class InternalResource extends InternalResourceBase {
         return modelSummaryEntityMgr.findByApplicationId(applicationId);
     }
 
+    @RequestMapping(value = "/modelsummaries/modelid/{modelId}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get a model summary by modelId")
+    public ModelSummary findModelSummaryByModelId(@PathVariable("modelId") String modelId,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, false, true);
+        summary.setPredictors(new ArrayList<Predictor>());
+        summary.setDetails(null);
+
+        return summary;
+    }
+
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")

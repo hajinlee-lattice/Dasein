@@ -6,16 +6,21 @@ import com.latticeengines.scoringapi.model.ModelEvaluator;
 
 public class ModelArtifacts {
 
-//    private model id
+    private String modelId;
     private DataComposition dataComposition;
     private ScoreDerivation scoreDerivation;
     private ModelEvaluator pmmlEvaluator;
 
-    ModelArtifacts(DataComposition dataComposition, ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator) {
+    public ModelArtifacts(String modelId, DataComposition dataComposition, ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator) {
         super();
+        this.modelId = modelId;
         this.dataComposition = dataComposition;
         this.scoreDerivation = scoreDerivation;
         this.pmmlEvaluator = pmmlEvaluator;
+    }
+
+    public String getModelId() {
+        return modelId;
     }
 
     public DataComposition getDataComposition() {

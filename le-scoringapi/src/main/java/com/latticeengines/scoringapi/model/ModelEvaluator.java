@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.model;
 
+import java.io.InputStream;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,20 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoringapi.unused.ScoreType;
 
 public class ModelEvaluator {
+
+    private final PMMLManager manager;
+
+    public ModelEvaluator(InputStream is) {
+        PMML unmarshalled;
+        try {
+            unmarshalled = IOUtil.unmarshal(is);
+        } catch (JAXBException | SAXException ex) {
+            throw new RuntimeException("Unable to parse PMML file", ex);
+        }
+
+        this.manager = new PMMLManager(unmarshalled);
+    }
+
     public ModelEvaluator(Reader pmml) {
         PMML unmarshalled;
         try {
@@ -98,5 +113,4 @@ public class ModelEvaluator {
         return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
     }
 
-    private final PMMLManager manager;
 }
