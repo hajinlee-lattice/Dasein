@@ -1,0 +1,35 @@
+
+#
+# $LastChangedBy$
+# $LastChangedDate$
+# $Rev$
+#
+
+def metadata():
+    return {  'ApprovedUsage'   : 'Model'
+            , 'Description'     : 'Indicates that First Name is same as Last Name'
+            , 'DisplayName'     : 'Identical First and Last Names'
+            , 'Category'        : 'Lead Information'
+            , 'StatisticalType' : 'nominal'
+            , 'Tags'            : 'Internal' }
+
+
+def std_visidb_ds_firstname_sameas_lastname(firstname, lastname):
+    if firstname is None or lastname is None:
+        return None
+
+    if firstname == '' and lastname == '':
+        return 0
+
+    if firstname.lower() == lastname.lower():
+        return 1
+
+    return 0
+
+
+def transform(args, record):
+    column1 = args["column1"]
+    column2 = args["column2"]
+    firstname = record[column1]
+    lastname = record[column2]
+    return std_visidb_ds_firstname_sameas_lastname(firstname, lastname)
