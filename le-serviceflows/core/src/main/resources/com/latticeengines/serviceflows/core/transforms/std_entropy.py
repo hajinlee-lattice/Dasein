@@ -15,19 +15,11 @@ def metadata():
             , 'Tags'            : 'Internal' }
 
 
-def argument_length(n):
-    if n is None:
-        return 1
-    if len(n) > 30:
-        return 30
-    return len(n)
+def std_entropy(s):
 
-
-def std_visidb_ds_entropy(s):
-    s = s.lower()
     base = 2
 
-    if s is None or argument_length(s) == 0:
+    if s is None or len(s) == 0:
         return None
 
     occurences = {}
@@ -44,10 +36,10 @@ def std_visidb_ds_entropy(s):
         p = float(v)/depth
         e -= p * math.log(p, base)
 
-    return e / float(argument_length(s))
+    return e / float(len(s))
 
 
 def transform(args, record):
     column = args["column"]
     value = record[column]
-    return std_visidb_ds_entropy(value)
+    return std_entropy(value)
