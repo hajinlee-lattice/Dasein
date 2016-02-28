@@ -16,7 +16,7 @@ def get_logger(name):
 def create_column(name, dataType):
     return { "name": name, "type": dataType}
  
-class Pipeline:
+class Pipeline(object):
     pipelineSteps = []
     def __init__(self, pipelineSteps):
         self.pipelineSteps = pipelineSteps
@@ -24,13 +24,13 @@ class Pipeline:
     def getPipeline(self):
         return self.pipelineSteps
      
-    def predict(self, dataFrame, configMetadata=None, test=False):
+    def predict(self, dataFrame, configMetadata, test):
         transformed = dataFrame
         for step in self.pipelineSteps:
             transformed = step.transform(transformed, configMetadata, test)
         return transformed
     
-class PipelineStep:
+class PipelineStep(object):
     modelStep = False
     props = {}
  
@@ -43,7 +43,7 @@ class PipelineStep:
     def setModelStep(self, modelStep):
         self.modelStep = modelStep
          
-    def transform(self, dataFrame, configMetadata=None, test=False): pass
+    def transform(self, dataFrame, configMetadata, test): pass
  
     def setProperty(self, propertyName, propertyValue):
         self.props[propertyName] = propertyValue
@@ -67,6 +67,9 @@ class PipelineStep:
 
     def getRTSArtifacts(self):
         return []
+
+    def appendMetadataEntry(self, configMetadata, entry):
+        configMetadata.append(entry)
     
 class ModelStep(PipelineStep):
     model = None

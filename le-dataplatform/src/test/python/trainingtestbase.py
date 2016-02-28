@@ -167,10 +167,8 @@ class TrainingTestBase(TestBase):
                 fp.write(line + "\n")
                 i += 1
 
-    def getPredictScore(self, pipeline, typeDict, values):
+    def getPredictScore(self, pipeline, inputColumns, typeDict, values):
         scores = []
-        modelStep = self.getModelStep(pipeline)
-        inputColumns = modelStep.getModelInputColumns()
         for value in values:
             row = self.getLine(zip(inputColumns, value), typeDict)
             rowDicts = []

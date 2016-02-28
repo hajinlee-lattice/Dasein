@@ -57,8 +57,9 @@ class ModelGenerator(State, JsonGenBase):
             if len(rtsArtifacts) == 0:
                 continue
             for key, filePath in rtsArtifacts:
-                filePkl = self.__getSerializedFile(self.__compressFile(filePath))
-                model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": key })
+                if filePath is not None:
+                    filePkl = self.__getSerializedFile(self.__compressFile(filePath))
+                    model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": key })
 
         self.model = model
     

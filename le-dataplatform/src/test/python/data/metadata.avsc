@@ -703,14 +703,69 @@
       "DataSource": null
     },
     {
-      "DataType": null,
+      "DataType": "String",
       "Tags": null,
       "FundamentalType": null,
       "LastTimeSourceUpdated": null,
       "StatisticalType": null,
       "ApprovedUsage": null,
       "DisplayName": null,
-      "Extensions": null,
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "String"
+        },
+        {
+          "Key": "PivotValues",
+          "Value": [
+            {
+              "PivotValue": "_Other",
+              "PivotColumn": "x2Other",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Part_Time",
+              "PivotColumn": "x2PartTime",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Health_Care",
+              "PivotColumn": "x2HealthCare",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Assistant",
+              "PivotColumn": "x2Assistant",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "",
+              "PivotColumn": "x2NoTitle",
+              "IsNull": true
+            },
+            {
+              "PivotValue": "_Manager",
+              "PivotColumn": "x2Manager",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Upper_Management",
+              "PivotColumn": "x2Manager",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Sales",
+              "PivotColumn": "x2Sales",
+              "IsNull": false
+            },
+            {
+              "PivotValue": "_Technical",
+              "PivotColumn": "x2Technical",
+              "IsNull": false
+            }
+          ]
+        }
+      ],
       "Description": null,
       "ColumnName": "PD_DA_JobTitle",
       "DisplayDiscretizationStrategy": null,

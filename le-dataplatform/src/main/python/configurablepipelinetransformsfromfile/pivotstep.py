@@ -1,42 +1,87 @@
-from pipelinefwk import get_logger
-from pipelinefwk import create_column
-from pipelinefwk import PipelineStep
-
 '''
 Description:
 
     This step will pivot the list of columns by retrieving the metadata from our config metadata structure
 '''
+import os
+
+from pipelinefwk import PipelineStep
+from pipelinefwk import create_column
+from pipelinefwk import get_logger
+
 
 logger = get_logger("pipeline")
 
 class PivotStep(PipelineStep):
     
     columnsToPivot = {}
-    columnList = {}
-    columnValues = {}
+    pivotValuesFilePath = None
     
     def __init__(self, columnsToPivot={}):
         self.columnsToPivot = columnsToPivot
-        if columnsToPivot:
-            for columnName, columnValues in columnsToPivot.items():
-                for columnValue in columnValues:
-                    self.columnList.put("%s%s" % (columnName, columnValue), columnName)
-                    self.columnValues.put("%s%s" % (columnName, columnValue), columnValue)
 
     def transform(self, dataFrame, configMetadata, test):
-        if configMetadata is not None:
+        if configMetadata is not None and len(self.columnsToPivot) == 0:
             self.__setPivotColumns(configMetadata)
-        for k, v in self.columnList.items():
-            value = self.columnValues.get(k)
-            dataFrame[k] = dataFrame[v].apply(lambda row: 1 if row == value else 0)
+            self.__writeRTSArtifact()
+            
+        columnsToRemove = set()
+        for k, v in self.columnsToPivot.items():
+            values = v[1]
+            columnsToRemove.add(v[0])
+            dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values))
+            self.__appendMetadataEntry(configMetadata, k)
+        
+        for c in columnsToRemove:
+            dataFrame.drop(c, axis=1, inplace=True)
         return dataFrame
     
+    def __appendMetadataEntry(self, configMetadata, columnName):
+        if configMetadata is None:
+            return
+        entry = {}
+        entry["ColumnName"] = columnName
+        entry["StatisticalType"] = "ratio"
+        entry["FundamentalType"] = "Integer"
+        entry["DataType"] = "Integer"
+        super(PivotStep, self).appendMetadataEntry(configMetadata, entry)
+    
+    def pivot(self, row, values):
+        for value in values:
+            if row == value:
+                return 1
+        return 0
+    
     def __setPivotColumns(self, configMetadata):
-        pass
+        for config in configMetadata:
+            column = config["ColumnName"]
+            if "Extensions" in config and config["Extensions"] is not None:
+                pivotValues = None
+                for e in config["Extensions"]:
+                    if e["Key"] == "PivotValues":
+                        pivotValues = e["Value"]
+                if pivotValues is None:
+                    continue
+                for pivotValue in pivotValues:
+                    pivotColumn = pivotValue["PivotColumn"]
+                    try:
+                        pValues = self.columnsToPivot[pivotColumn]
+                    except KeyError:
+                        pValues = (column, [])
+                        
+                    pValues[1].append(pivotValue["PivotValue"])
+                    self.columnsToPivot[pivotColumn] = pValues
+
+    def __writeRTSArtifact(self):
+        with open("pivotvalues.txt", "w") as fp:
+            fp.write(str(self.columnsToPivot))
+            self.pivotValuesFilePath = os.path.abspath(fp.name)
 
     def getOutputColumns(self):
-        return [(create_column(k, "INT"), [v]) for k, v in self.columnList.items()]
+        return [(create_column(k, "INT"), [v[0], k]) for k, v in self.columnsToPivot.items()]
 
     def getRTSMainModule(self):
         return "pivot"
+
+    def getRTSArtifacts(self):
+        return [("pivotvalues.txt", self.pivotValuesFilePath)]

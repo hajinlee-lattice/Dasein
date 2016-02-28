@@ -1539,6 +1539,37 @@
         "OffsetMinutes": -300
       },
       "StatisticalType": "nominal",
+      "Extensions": [
+        {
+          "Key": "DataType",
+          "Value": "String"
+        },
+        {
+          "Key": "PivotValues",
+          "Value": [
+            {
+              "PivotValue": 0,
+              "PivotColumn": "BusinessTechnologiesEncoding_0",
+              "IsNull": false
+            },
+            {
+              "PivotValue": 1,
+              "PivotColumn": "BusinessTechnologiesEncoding_1",
+              "IsNull": false
+            },
+            {
+              "PivotValue": 2,
+              "PivotColumn": "BusinessTechnologiesEncoding_2",
+              "IsNull": false
+            },
+            {
+              "PivotValue": -1,
+              "PivotColumn": "BusinessTechnologiesEncoding_None",
+              "IsNull": true
+            }
+          ]
+        }
+      ],
       "Tags": [
         "External"
       ]

@@ -52,9 +52,11 @@ class ScoringEngineTest(TrainingTestBase):
                                  "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
                                  stdout = subprocess.PIPE, stderr=subprocess.PIPE)
         _, stderr = popen.communicate()
-        print "error"
-        print str(stderr)
-        print stderr
+        
+        if len(stderr) > 0:
+            print "Error:"
+            print str(stderr)
+            print stderr
         self.assertEquals(len(stderr), 0)
 
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()

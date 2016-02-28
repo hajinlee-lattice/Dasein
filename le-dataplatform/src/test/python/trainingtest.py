@@ -53,11 +53,7 @@ class TrainingTest(TrainingTestBase):
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)
          
         # Test the scoring engine using the generated pipeline that was deserialized
-        allInputColumns = self.getModelStep(pipeline).getModelInputColumns()
-        inputColumns = []
-        for col in allInputColumns:
-            if "Transformed_Boolean" not in col:
-                inputColumns.append(col)
+        inputColumns = json.loads(open(glob.glob("model.json")[0]).read())["features"]
                  
         value = [random() for _ in range(len(inputColumns))]
  
@@ -76,43 +72,3 @@ class TrainingTest(TrainingTestBase):
         print(lines[1])
         print("Score = " + str(resultFrame1['Score'][0]))
         self.assertEquals(resultFrame1['Score'][0], resultFrame2['Score'][0])
-        print("===========================================")
-        # Generate the csv files
-        testcase = 2
-        values = []
-        values.append(value)
-        for i in range(testcase - 1):
-            values.append([random() for _ in range(len(inputColumns))])
- 
-        scores = self.getPredictScore(pipeline, typeDict, values)
-        for i in range(len(scores)):
-            print str(i + 1) + ", " + str(scores[i])
-        self.createCSV(inputColumns, values)
- 
-        # self.__generateScoringInput(pipeline, t, inputColumns, typeDict)
- 
-    def generateScoringInput(self, pipeline, t, inputColumns, typeDict):
-        lines = []
-        w = open("scoringtestinput.txt", 'wb')
-        i = 0;
-        values = []
-        dataValues = t.as_matrix(inputColumns)
-        print "size of the inputColumns: " + str(len(inputColumns))
-        print "length of t0 " + str(len(dataValues[0]))
-        for data in dataValues:
-            if len(data) != 100:
-                print "not equal to 100 " + str(data)
-            if i >= 100:
-                break;
-            line = self.getLineToScore2(inputColumns, typeDict, data)
-            values.append(data)
-            w.write(line + "\n")
-            lines.append(line)
-            i = i + 1
-        print i
-        w.close()
-        rowDicts = []
-        for line in lines:
-            rowDicts.append(se.getRowToScore(line)[1])
-        se.predict(pipeline, rowDicts)
-        self.createCSV(inputColumns, values)

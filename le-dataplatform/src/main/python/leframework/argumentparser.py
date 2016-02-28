@@ -37,8 +37,8 @@ class ArgumentParser(object):
             configMetadataJson = open(self.stripPath(self.metadataSchema["config_metadata"])).read()
             self.configMetadata = json.loads(configMetadataJson)
             logger.debug("JSON config metadata schema %s" % configMetadataJson)
-        except:
-            logger.warn("Config metadata does not exist!")
+        except Exception as e:
+            logger.warn("Errors loading config metadata.", e)
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]

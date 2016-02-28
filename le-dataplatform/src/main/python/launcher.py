@@ -117,9 +117,6 @@ class Launcher(object):
         if not os.path.exists(modelEnhancementsLocalDir):
             os.mkdir(modelEnhancementsLocalDir)
  
-        # Get algorithm properties
-        algorithmProperties = parser.getAlgorithmProperties()
- 
         # Execute the packaged script from the client and get the returned file
         # that contains the generated model data
         execfile(script, globals())
@@ -131,9 +128,6 @@ class Launcher(object):
         # Get hdfs model dir
         modelHdfsDir = executor.getModelDirPath(schema)
         if not modelHdfsDir.endswith("/"): modelHdfsDir += "/"
- 
-        # Get hdfs model enhancements dir
-        modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
  
         params = dict()
         params["modelLocalDir"] = modelLocalDir
@@ -178,10 +172,22 @@ class Launcher(object):
         if len(newFeatures) > 0:
             params["schema"]["features"] = params["schema"]["features"] + newFeatures
             parser.fields = self.updatedFields(parser.fields, newFeatures, self.training, self.test)
+        
+        if self.training is not None:
+            dataFrameColumns = set(self.training.columns.values.tolist())
+            schema["features"] = [x for x in schema["features"] if x in dataFrameColumns]
  
         # Passes runtime properties to report progress
         # training and testing data passed in as Pandas DataFrame
-        self.clf = globals()["train"](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties(), params)
+        # Get algorithm properties
+        algorithmProperties = parser.getAlgorithmProperties() 
+        self.clf = globals()["train"](self.training,
+                                      self.test,
+                                      schema,
+                                      modelLocalDir,
+                                      algorithmProperties,
+                                      parser.getRuntimeProperties(), 
+                                      params)
  
         if postProcessClf:
             executor.postProcessClassifier(self.clf, params)
@@ -202,6 +208,9 @@ class Launcher(object):
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
  
             # Copy the enhanced model data files from local to hdfs?
+            # Get hdfs model enhancements dir
+            modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
+ 
             if self.clf != None:
                 hdfs.mkdir(modelEnhancementsHdfsDir)
                 (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
