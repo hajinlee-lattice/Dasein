@@ -1,7 +1,10 @@
 package com.latticeengines.scoringapi.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -9,12 +12,16 @@ import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.scoringapi.exposed.ContactScoreRequest;
 import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
+import com.latticeengines.scoringapi.exposed.ScoreResponse;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
 
-public class ScoringResourceTestNG extends ScoringApiFunctionalTestNGBase {
+public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
+
+    private static final Log log = LogFactory.getLog(ScoringResourceTestNG.class);
 
     @Autowired
     private ScoreResourceMockData scoreResourceMockData;
@@ -26,7 +33,7 @@ public class ScoringResourceTestNG extends ScoringApiFunctionalTestNGBase {
         List<Model> models = response.getBody();
         Assert.assertNotNull(models);
         for (Model model : models) {
-            System.out.println(model.getModelId());
+            log.info(model.getModelId());
         }
     }
 
@@ -37,20 +44,24 @@ public class ScoringResourceTestNG extends ScoringApiFunctionalTestNGBase {
         ResponseEntity<Fields> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<Fields>() {});
         Fields fields = response.getBody();
         Assert.assertNotNull(fields);
-        System.out.println(fields.getModelId());
+        log.info(fields.getModelId());
         for (Field field : fields.getFields()) {
-            System.out.println(field.getFieldName() + " " + field.getFieldType());
+            log.info(field.getFieldName() + " " + field.getFieldType());
         }
+    }
 
-        response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<Fields>() {});
-        fields = response.getBody();
-        Assert.assertNotNull(fields);
-        System.out.println(fields.getModelId());
-        for (Field field : fields.getFields()) {
-            System.out.println(field.getFieldName() + " " + field.getFieldType());
-        }
-//        String result = oAuth2RestTemplate.getForObject(url, String.class);
-//        Assert.assertNotNull(result);
+    @Test(groups = "functional", enabled = false)
+    public void scoreContact() {
+        String url = apiHostPort + "/score/contacts";
+        ContactScoreRequest request = new ContactScoreRequest();
+        request.setEmailAddress("");
+        request.setModelId("ms__7a5b24bb-8ff6-4797-98c4-4e1a045b1595-PLSModel");
+        List<Field> fields = new ArrayList<>();
+        request.setFields(fields);
 
+        ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, request, ScoreResponse.class);
+
+        ScoreResponse scoreResponse = response.getBody();
+        Assert.assertNotNull(scoreResponse);
     }
 }

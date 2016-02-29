@@ -3,9 +3,9 @@ package com.latticeengines.scoringapi.controller;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
 
-public class HealthCheckResourceTestNG extends ScoringApiFunctionalTestNGBase {
+public class HealthCheckResourceTestNG extends ScoringApiControllerTestNGBase {
 
     @Test(groups = "functional")
     public void getHealthCheck() {
