@@ -23,7 +23,7 @@
             <map>
                 <entry key="dailyFlow" value-ref="dailyFlow" />
                 <entry key="exportAndReportService" value-ref="exportAndReportService" />
-                <entry key="fileTypesList" value="${dellebi.fileTypes.dellebiManagerJob}" />
+                <entry key="fileTypesList" value="${dellebi.fileTypes.dellebiManagerJob1}" />
             </map>
         </property>
     </bean>
