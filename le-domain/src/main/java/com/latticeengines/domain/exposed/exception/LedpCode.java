@@ -340,10 +340,14 @@ public enum LedpCode {
     LEDP_29004("Failed to download or unzip File , name={0}."), //
 
     // le-quartz 30000-31000
-    LEDP_30000("Destination Url {0} invalid."),
+    LEDP_30000("Destination Url {0} invalid."), //
 
     // le-scoringapi
-    LEDP_31000("Failed to retrieve file from HDFS {0}");
+    LEDP_31000("Failed to retrieve file from HDFS {0}"), //
+    LEDP_31001("Failed to get model json hdfs path from HDFS {0}"), //
+    LEDP_31002("Failed to copy model json from hdfs {0} to local {1}"), //
+    LEDP_31003("Model file does not exist {0}"), //
+    LEDP_31004("Too many model files exist at {0}");
 
     private String message;
 
