@@ -18,6 +18,7 @@ public class DellEbiDailyJob extends QuartzJobBean {
 
     private DailyFlow dailyFlow;
     private ExportAndReportService exportAndReportService;
+    private String fileTypesList;
 
     private static final Log log = LogFactory.getLog(DellEbiDailyJob.class);
 
@@ -26,7 +27,7 @@ public class DellEbiDailyJob extends QuartzJobBean {
         log.info("Start to process files from inbox.");
         long startTime = System.currentTimeMillis();
 
-        DataFlowContext context = dailyFlow.doDailyFlow();
+        DataFlowContext context = dailyFlow.doDailyFlow(getFileTypesList().split(","));
         boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         if (result) {
             log.info("EBI daily Job Flow finished successfully.");
@@ -54,12 +55,20 @@ public class DellEbiDailyJob extends QuartzJobBean {
         try {
             process();
         } catch (Exception e) {
-            log.error("Failed to execute daily job!", e);
+            log.error(fileTypesList + " Failed to execute daily job!", e);
         }
     }
 
     public void setDailyFlow(DailyFlow dailyFlow) {
         this.dailyFlow = dailyFlow;
+    }
+
+    public void setFileTypesList(String fileTypesList) {
+        this.fileTypesList = fileTypesList;
+    }
+
+    public String getFileTypesList() {
+        return this.fileTypesList;
     }
 
     public void setExportAndReportService(ExportAndReportService exportAndReportService) {

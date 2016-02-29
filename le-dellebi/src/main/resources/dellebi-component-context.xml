@@ -13,32 +13,22 @@
            http://www.springframework.org/schema/util/spring-util-4.0.xsd
            http://camel.apache.org/schema/spring
        http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <context:annotation-config />
+    <context:component-scan base-package="com.latticeengines.dataplatform.service.impl.metadata" />
+    <import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <import resource="classpath:dataplatform-yarn-client-context.xml" />
+    <import resource="classpath:common-component-context.xml"/>
+    <bean id="sqoopSyncJobService" class="com.latticeengines.dataplatform.service.impl.SqoopSyncJobServiceImpl" />
+    <bean id="jobNameService" class="com.latticeengines.dataplatform.service.impl.JobNameServiceImpl" />
+    <bean id="metadataService" class="com.latticeengines.dataplatform.service.impl.MetadataServiceImpl" />
 
-
-
-    <bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow"
-        depends-on="initialConfigs">
-        <constructor-arg>
-            <util:list list-class="java.util.ArrayList">
-                <ref bean="getOrderSumDailyFlow" />
-                <ref bean="getOrderDetailDailyFlow" />
-                <ref bean="getWarrantyDailyFlow" />
-                <ref bean="getQuoteDailyFlow" />
-                <ref bean="getSkuItemClassDailyFlow" />
-                <ref bean="getSkuMfgDailyFlow" />
-                <ref bean="getSkuGlobalDailyFlow" />
-                <ref bean="getWarrantyDailyFlow" />
-                <ref bean="getCalendarDailyFlow" />
-                <ref bean="getChannelDailyFlow" />
-            </util:list>
-        </constructor-arg>
-    </bean>
+    <bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow" />
 
     <bean id="hadoopfilesystemoperations"
         class="com.latticeengines.dellebi.util.HadoopFileSystemOperations" />
 
     <bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
 
-    <bean id="exportAndReportService" class="com.latticeengines.dellebi.util.ExportAndReportService" />
+    <bean id="exportAndReportService" class="com.latticeengines.dellebi.util.ExportAndReportService"/>
 
 </beans>

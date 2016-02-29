@@ -2,6 +2,7 @@ package com.latticeengines.dellebi.service.impl;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -24,6 +25,10 @@ import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.service.FileType;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
+import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class BaseFileFlowService implements FileFlowService {
 
@@ -121,7 +126,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     protected String downloadAndUnzip(InputStream is, String fileName) {
         String zipDir = getZipDir();
-        String txtDir = getTxtDir();
+        String txtDir = getTxtDir(getFileType(fileName).getType());
 
         try {
             Configuration conf = new Configuration();
@@ -142,12 +147,11 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
         } catch (Exception ex) {
             log.error("Can not download or unzip File, name=" + fileName, ex);
-            return null;
+            throw new LedpException(LedpCode.LEDP_29004, ex, new String[] { fileName });
         }
     }
 
-    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName)
-            throws Exception {
+    private String unzip(FileSystem fs, String zipDir, String txtDir, String zipFileName) throws Exception {
 
         int idx = zipFileName.lastIndexOf(".");
         if (idx < 0) {
@@ -203,8 +207,8 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     @Override
-    public String getTxtDir() {
-        return dataHadoopWorkingPath + "/txt_dir";
+    public String getTxtDir(String type) {
+        return dataHadoopWorkingPath + "/" + type + "/txt_dir";
     }
 
     @Override
@@ -213,13 +217,68 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     @Override
-    public String getOutputDir() {
-        return dataHadoopWorkingPath + "/output";
+    public String getOutputDir(String type) {
+        return dataHadoopWorkingPath + "/" + type + "/output";
     }
 
     @Override
     public String getErrorOutputDir() {
         return dataHadoopErrorWorkingPath;
+    }
+
+    protected boolean isActive(String fileName) {
+
+        FileType type = getFileType(fileName);
+        if (type == null)
+            return false;
+        String typeName = type.getType();
+
+        Boolean isActive = dellEbiConfigEntityMgr.getIsActive(typeName);
+
+        if (isActive == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        return isActive;
+    }
+
+    protected boolean isProcessedFile(String fileName) {
+
+        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(fileName);
+
+        if (dellEbiExecutionLog == null) {
+            return false;
+        }
+
+        if (dellEbiExecutionLog.getStatus() == DellEbiExecutionLogStatus.Completed.getStatus()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected boolean isValidForDate(String fileName, Long lastModified) {
+        Long dateLong;
+        FileType type = getFileType(fileName);
+        if (type == null)
+            return false;
+
+        String typeName = type.getType();
+
+        Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
+
+        if (startDate == null) {
+            dateLong = -1L;
+        } else {
+            dateLong = startDate.getTime();
+        }
+
+        if (lastModified > dateLong) {
+            return true;
+        }
+
+        return false;
+
     }
 
 }

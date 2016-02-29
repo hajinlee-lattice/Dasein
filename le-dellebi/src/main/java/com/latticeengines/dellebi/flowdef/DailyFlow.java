@@ -1,12 +1,14 @@
 package com.latticeengines.dellebi.flowdef;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -15,11 +17,13 @@ import cascading.flow.planner.PlannerException;
 import cascading.property.AppProps;
 
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -63,20 +67,33 @@ public class DailyFlow {
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
     @Autowired
+    private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
+
+    @Autowired
     private VersionManager versionManager;
 
     @Autowired
     private MailSender mailSender;
 
-    private ArrayList<FlowDef> flowList;
+    @Autowired
+    private ApplicationContext applicationContext;
 
-    public DailyFlow(ArrayList<FlowDef> flowList) {
-        this.flowList = flowList;
-    }
+    public DataFlowContext doDailyFlow(String[] typesList) {
 
-    public DataFlowContext doDailyFlow() {
+        DataFlowContext context = new DataFlowContext();
 
-        DataFlowContext context = dellEbiFlowService.getFile();
+        context.setProperty(DellEbiFlowService.TYPES_LIST, typesList);
+
+        log.info("Processed types are:" + Arrays.asList(typesList).toString());
+
+        dellEbiFlowService.getFile(context);
+
+        boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
+        if (!result) {
+            log.error("Ran into an unexpected error!");
+            return context;
+        }
+
         String fileName = context.getProperty(DellEbiFlowService.TXT_FILE_NAME, String.class);
         if (fileName == null) {
             log.info("There's no valid file or can not get file!");
@@ -94,7 +111,7 @@ public class DailyFlow {
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
         try {
-            FlowDef flow = getFlowFromFile(context);
+            FlowDef flow = getFlowFromConfigs(context);
 
             log.info("Cascading starts to process file! type=" + flow.getName());
             String workOutDir = dellEbiFlowService.getOutputDir(context);
@@ -104,16 +121,16 @@ public class DailyFlow {
 
         } catch (PlannerException e) {
             log.error("Cascading failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
-                    + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName,
+                    "check " + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
 
         } catch (Exception e) {
             log.error("Daily flow failed!", e);
-            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName, "check "
-                    + dellebiEnv + " environment. error=" + e);
+            mailSender.sendEmail(mailReceiveList, "Dell EBI daily refresh just failed! file=" + fileName,
+                    "check " + dellebiEnv + " environment. error=" + e);
             dellEbiFlowService.registerFailedFile(context, e.getMessage());
             context.setProperty(DellEbiFlowService.RESULT_KEY, false);
             return context;
@@ -130,15 +147,16 @@ public class DailyFlow {
         return context;
     }
 
-    private FlowDef getFlowFromFile(DataFlowContext context) {
-        for (FlowDef flow : flowList) {
-            if (flow.getName().equals(dellEbiFlowService.getFileType(context).getType())) {
+    private FlowDef getFlowFromConfigs(DataFlowContext context) {
+
+        List<DellEbiConfig> configsList = dellEbiConfigEntityMgr.getConfigs();
+        for (DellEbiConfig config : configsList) {
+            if (config.getType().equalsIgnoreCase(dellEbiFlowService.getFileType(context).getType())) {
+                FlowDef flow = (FlowDef) applicationContext.getBean(config.getBean());
                 HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersion());
                 return flow;
             }
         }
-
         return null;
     }
-
 }

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +39,7 @@ import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
@@ -53,8 +55,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     private String smbAccount;
     @Value("${dellebi.smbps}")
     private String smbPS;
-    @Value("${dellebi.smbinboxpath}")
-    private String smbInboxPath;
 
     @Value("${dellebi.local.inboxpath}")
     private String localInboxPath;
@@ -78,7 +78,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        smbClean(smbInboxPath);
+        dellEbiConfigEntityMgr.initialService();
+        smbClean();
     }
 
     @BeforeMethod(groups = "functional")
@@ -94,6 +95,10 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "fileDataProvider")
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
+        String typesStr = "quote,order_detail,Order_Summary,Warranty,SKU_Global,SKU_Manufacturer,"
+                + "SKU_Itm_Cls_Code,Calendar,Channel";
+        String[] typesList = typesStr.split(",");
+        String smbInboxPath = getSmbInboxPathByFileName(fileName);
 
         if (sourceType.equals("SMB")) {
             log.info("Copying file: " + file);
@@ -105,7 +110,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
         processLogEntryStatus(fileName, isProcessed);
 
-        DataFlowContext context = dailyFlow.doDailyFlow();
+        DataFlowContext context = dailyFlow.doDailyFlow(typesList);
         context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
         boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
         if (isProcessed == false) {
@@ -113,8 +118,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
             exportAndReportService.export(context);
 
             Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)), true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(context)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);
@@ -133,6 +138,9 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "startDateFileDataProvider")
     public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
+        String typesStr = "quote,order_detail";
+        String[] typesList = typesStr.split(",");
+        String smbInboxPath = getSmbInboxPathByFileName(fileName);
 
         if (sourceType.equals("SMB")) {
             log.info("Copying file: " + file);
@@ -146,7 +154,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
         processSmbFileModifiedDate(fileName, isSetStartDate);
 
-        DataFlowContext context = dailyFlow.doDailyFlow();
+        DataFlowContext context = dailyFlow.doDailyFlow(typesList);
         context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
 
         boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
@@ -158,8 +166,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
             exportAndReportService.export(context);
 
             Configuration conf = new Configuration();
-            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(null)), true);
-            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(null) + "/*.txt");
+            Assert.assertEquals(HdfsUtils.fileExists(conf, dellEbiFlowService.getOutputDir(context)), true);
+            List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");
             Assert.assertEquals(files.size(), 1);
             if (sourceType.equals("SMB")) {
                 SmbFile smbFile = smbRetrieve(smbInboxPath, file);
@@ -170,6 +178,32 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
                 }
             }
         }
+    }
+
+    @Test(groups = "functional", dataProvider = "filteredTypeFileDataProvider")
+    public void testFilteredTypeFile(String file, String sourceType, Boolean isSetStartDate) throws Exception {
+        String fileName = getFileNameFromPath(file);
+        String typesStr = "quote,order_detail,Order_Summary,SKU_Global,SKU_Manufacturer,"
+                + "SKU_Itm_Cls_Code,Calendar,Channel";
+        String[] typesList = typesStr.split(",");
+        String smbInboxPath = getSmbInboxPathByFileName(fileName);
+
+        if (sourceType.equals("SMB")) {
+            log.info("Copying file: " + file);
+            smbPut(smbInboxPath, file);
+        } else {
+            log.info("Copying file: " + fileName);
+            FileUtils.copyFileToDirectory(new File(file), new File(localInboxPath));
+        }
+
+        processLogEntryStatus(fileName, false);
+
+        DataFlowContext context = dailyFlow.doDailyFlow(typesList);
+        context.setProperty(DellEbiFlowService.START_TIME, System.currentTimeMillis());
+
+        boolean result = context.getProperty(DellEbiFlowService.RESULT_KEY, Boolean.class);
+
+        Assert.assertEquals(result, false);
     }
 
     @DataProvider(name = "fileDataProvider")
@@ -195,6 +229,11 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         return new Object[][] { { "./src/test/resources/tgt_quote_trans_global_5_2015.zip", "SMB", true }, };
     }
 
+    @DataProvider(name = "filteredTypeFileDataProvider")
+    public static Object[][] getFilteredTypeFileNameData() {
+        return new Object[][] { { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true }, };
+    }
+
     private void smbPut(String remoteUrl, String localFile) throws Exception {
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
 
@@ -209,48 +248,48 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     }
 
-    private void smbClean(String remoteUrl) throws Exception {
+    private void smbClean() throws Exception {
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
         jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
-        try {
-            SmbFile remoteFile = new SmbFile(remoteUrl + '/', auth);
-            SmbFile[] smbFiles = remoteFile.listFiles();
-            for (SmbFile smbFile : smbFiles) {
-                String fileName = smbFile.getName();
-
-                for (Object[] obj : getValidateNameData()) {
-                    String objFileName = getFileNameFromPath((String) obj[0]);
-                    if (fileName.equals(objFileName)) {
-                        smbFile.delete();
-                        log.info("Deleting smbFile, name=" + remoteUrl + "/" + fileName);
-                        break;
-                    }
-                }
-
-                for (Object[] obj : getStartDateNameData()) {
-                    String objFileName = getFileNameFromPath((String) obj[0]);
-                    if (fileName.equals(objFileName)) {
-                        smbFile.delete();
-                        log.info("Deleting smbFile, name=" + remoteUrl + "/" + fileName);
-                        break;
-                    }
-                }
-
+        List<DellEbiConfig> configs = dellEbiConfigEntityMgr.getConfigs();
+        List<String> cleanPaths = new ArrayList<String>();
+        for (DellEbiConfig config : configs) {
+            if (!cleanPaths.contains(config.getInboxPath())) {
+                cleanPaths.add(config.getInboxPath());
             }
-
-        } catch (SmbException ex) {
-            ex.printStackTrace();
-            return;
         }
-    }
+        for (String cleanPath : cleanPaths) {
+            try {
+                SmbFile remoteFile = new SmbFile(cleanPath + '/', auth);
+                SmbFile[] smbFiles = remoteFile.listFiles();
+                for (SmbFile smbFile : smbFiles) {
+                    String fileName = smbFile.getName();
 
-    private SmbFile smbRetrieve(String remoteUrl, String localFilePath) throws Exception {
-        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
+                    for (Object[] obj : getValidateNameData()) {
+                        String objFileName = getFileNameFromPath((String) obj[0]);
+                        if (fileName.equals(objFileName)) {
+                            smbFile.delete();
+                            log.info("Deleting smbFile, name=" + cleanPath + "/" + fileName);
+                            break;
+                        }
+                    }
 
-        String fileName = getFileNameFromPath(localFilePath);
+                    for (Object[] obj : getStartDateNameData()) {
+                        String objFileName = getFileNameFromPath((String) obj[0]);
+                        if (fileName.equals(objFileName)) {
+                            smbFile.delete();
+                            log.info("Deleting smbFile, name=" + cleanPath + "/" + fileName);
+                            break;
+                        }
+                    }
 
-        return new SmbFile(remoteUrl + "/" + fileName, auth);
+                }
 
+            } catch (SmbException ex) {
+                ex.printStackTrace();
+                return;
+            }
+        }
     }
 
     private void processLogEntryStatus(String fileName, Boolean isProcessed) {
@@ -303,6 +342,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
 
+        String smbInboxPath = getSmbInboxPathByFileName(fileName);
+
         SmbFile remoteFile = new SmbFile(smbInboxPath + "/" + fileName, auth);
 
         DataFlowContext context = new DataFlowContext();
@@ -316,5 +357,24 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
             Long dateLong2 = date.getTime() - 10000000;
             remoteFile.setLastModified(dateLong2);
         }
+    }
+
+    private String getSmbInboxPathByFileName(String fileName) {
+        DataFlowContext context = new DataFlowContext();
+        context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, fileName);
+
+        String type = dellEbiFlowService.getFileType(context).getType();
+
+        return dellEbiConfigEntityMgr.getInboxPath(type);
+
+    }
+
+    private SmbFile smbRetrieve(String remoteUrl, String localFilePath) throws Exception {
+        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
+
+        String fileName = getFileNameFromPath(localFilePath);
+
+        return new SmbFile(remoteUrl + "/" + fileName, auth);
+
     }
 }

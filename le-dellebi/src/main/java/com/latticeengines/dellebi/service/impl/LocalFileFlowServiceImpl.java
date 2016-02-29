@@ -31,8 +31,6 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     @Value("${dellebi.datatarget.stagefinal.dbname}")
     private String stageFinalTargetDB;
 
-    private DataFlowContext context;
-
     public File getScanedFile() {
 
         try {
@@ -50,7 +48,6 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 if (isValidFile(zipFile)) {
                     String zipFileName = zipFile.getName();
                     log.info("Found one new local file, name=" + zipFileName);
-
                     return zipFile;
                 }
             }
@@ -62,9 +59,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     @Override
-    public DataFlowContext getContext() {
-
-        context = new DataFlowContext();
+    public void initialContext(DataFlowContext context) {
 
         File scanedFile = getScanedFile();
 
@@ -81,26 +76,19 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
                 dellEbiExecutionLog.setStartDate(new Date());
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.NewFile.getStatus());
                 dellEbiExecutionLogEntityMgr.createOrUpdate(dellEbiExecutionLog);
+                context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
                 txtFileName = downloadAndUnzip(new FileInputStream(scanedFile), zipFileName);
                 dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Downloaded.getStatus());
                 dellEbiExecutionLogEntityMgr.executeUpdate(dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.LOG_ENTRY, dellEbiExecutionLog);
                 context.setProperty(DellEbiFlowService.TXT_FILE_NAME, txtFileName);
                 context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, zipFileName);
-                context.setProperty(DellEbiFlowService.FILE_SOURCE,
-                        DellEbiFlowService.FILE_SOURCE_LOCAL);
-                context.setProperty(DellEbiFlowService.FILE_TYPE, fileType);
-
-                return context;
+                context.setProperty(DellEbiFlowService.FILE_SOURCE, DellEbiFlowService.FILE_SOURCE_LOCAL);
 
             } catch (Exception ex) {
-                ex.printStackTrace();
-                log.warn("Failed to get local file! error=" + ex.getMessage());
                 dellEbiExecutionLogEntityMgr.recordFailure(dellEbiExecutionLog, ex.getMessage());
             }
         }
-
-        return context;
     }
 
     @Override
@@ -110,8 +98,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     @Override
-    public String getTargetDB() {
-        String type = context.getProperty(DellEbiFlowService.FILE_TYPE, String.class);
+    public String getTargetDB(String type) {
         if (type.equals(FileType.QUOTE.getType()))
             return localTargetDB;
         else
@@ -121,6 +108,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
     protected boolean isValidFile(File file) {
 
         String fileName = file.getName();
+        Long lastModifiedTime = file.lastModified();
 
         try {
             if (file.isDirectory()) {
@@ -130,22 +118,21 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             if (!fileName.endsWith(".zip")) {
                 return false;
             }
+
+            if (!isActive(fileName)) {
+                return false;
+            }
+
             if (isFailedFile(fileName)) {
                 return false;
             }
 
-            if (!isValidForDate(file)) {
+            if (!isValidForDate(fileName, lastModifiedTime)) {
                 return false;
             }
 
-            if (isProcessedFile(file)) {
+            if (isProcessedFile(fileName)) {
                 return false;
-            }
-
-            for (FileType type : FileType.values()) {
-                if (type.equals(getFileType(fileName))) {
-                    return true;
-                }
             }
 
         } catch (Exception e) {
@@ -153,49 +140,6 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             return false;
         }
         return true;
-    }
-
-    protected boolean isValidForDate(File file) {
-        String fileName = file.getName();
-        Long dateLong1, dateLong2;
-        FileType type = getFileType(fileName);
-        if (type == null)
-            return false;
-
-        String typeName = type.getType();
-
-        Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
-
-        if (startDate == null) {
-            dateLong1 = -1L;
-        } else {
-            dateLong1 = startDate.getTime();
-        }
-
-        dateLong2 = file.lastModified();
-
-        if (dateLong2 > dateLong1) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    protected boolean isProcessedFile(File file) {
-        String filename = file.getName();
-        DellEbiExecutionLog dellEbiExecutionLog = dellEbiExecutionLogEntityMgr
-                .getEntryByFile(filename);
-
-        if (dellEbiExecutionLog == null) {
-            return false;
-        }
-
-        if (dellEbiExecutionLog.getStatus() == DellEbiExecutionLogStatus.Completed.getStatus()) {
-            return true;
-        }
-
-        return false;
     }
 
 }
