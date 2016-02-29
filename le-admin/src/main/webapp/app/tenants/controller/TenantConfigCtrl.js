@@ -141,7 +141,7 @@ app.controller('TenantConfigCtrl', function($scope, $rootScope, $timeout, $state
         $scope.twoLPsAreSelected = false;
         var selectedLPAnum = 0;
         for (var i = 0; i < selectedProducts.length; i++) {
-            if (selectedProducts[i].name.includes( "Lead Prioritization")) {
+            if (selectedProducts[i].name === ( "Lead Prioritization")) {
                 LPASelected = true;
                 selectedLPAnum += 1;
             }
