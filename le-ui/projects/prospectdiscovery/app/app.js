@@ -8,7 +8,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',
-    'pd.login',
+    'mainApp.login.services.LoginService',
     'pd.navigation',
     'pd.header',
     'pd.fingerprints',

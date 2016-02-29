@@ -87,11 +87,27 @@ Use DOMUtil.isIE() to detect internet explorer.
 
 <!-- combined common and vendor js -->
 <script src="/assets/js/min/vendor.min.js"></script>
-<script src="/lib/js/angular/angular-tooltips.js"></script>
 <script src="/assets/js/min/production.min.js"></script>
+
 <script src="/demo/js/bootstrap-select.min.js"></script>
+<script src="/lib/js/angular/angular-tooltips.js"></script>
+
+
+<!-- app specific -->
+<script src="app/app.js"></script>
+<script src="app/routes.js"></script>
 
 <!-- widgets -->
+<script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
+<script src="app/AppCommon/utilities/AnimationUtility.js"></script>
+<script src="app/AppCommon/utilities/AnalyticAttributeUtility.js"></script>
+<script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
+<script src="app/AppCommon/services/PlayTileService.js"></script>
+<script src="app/AppCommon/services/TopPredictorService.js"></script>
+<script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
+<script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
+<script src="app/AppCommon/services/ModelAlertsService.js"></script>
+<script src="app/AppCommon/services/ManageFieldsService.js"></script>
 <script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
 <script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
 <script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
@@ -124,20 +140,7 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
 <script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
 
-<!-- app specific -->
-<script src="app/app.js"></script>
-<script src="app/routes.js"></script>
-
-<script src="app/core/utilities/BrowserStorageUtility.js"></script>
-<script src="app/core/utilities/RightsUtility.js"></script>
-<script src="app/core/utilities/PasswordUtility.js"></script>
-<script src="app/core/utilities/ServiceErrorUtility.js"></script>
-<script src="app/core/utilities/NavUtility.js"></script>
-<script src="app/core/services/HelpService.js"></script>
-<script src="app/core/services/ResourceStringsService.js"></script>
-<script src="app/core/services/SessionService.js"></script>
 <script src="app/core/services/WidgetService.js"></script>
-<script src="app/core/services/FeatureFlagService.js"></script>
 <script src="app/core/controllers/MainViewController.js"></script>
 <script src="app/core/controllers/MainHeaderController.js"></script>
 <script src="app/core/controllers/SalesforceCredentialController.js"></script>
@@ -159,7 +162,6 @@ Use DOMUtil.isIE() to detect internet explorer.
 <script src="app/login/controllers/LoginController.js"></script>
 <script src="app/login/controllers/UpdatePasswordController.js"></script>
 <script src="app/login/modals/TenantSelectionModal.js"></script>
-<script src="app/login/services/LoginService.js"></script>
 
 <script src="app/config/controllers/ManageCredentialsController.js"></script>
 <script src="app/config/modals/EnterCredentialsModal.js"></script>

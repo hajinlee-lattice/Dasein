@@ -20,7 +20,7 @@ angular.module('mainApp.login.controllers.LoginController', [
 
     $("body").addClass("login-body");
     $('[autofocus]').focus();
-console.log('LoginController init');
+
     // Property bindings
     $scope.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
@@ -118,23 +118,21 @@ console.log('LoginController init');
     };
 
     $scope.getWidgetConfigDoc = function () {
-        ConfigService.GetWidgetConfigDocument().then(function() {
-            $("body").removeClass("login-body");
-            $rootScope.$broadcast("ShowFooterEvent", true);
-            constructMainView(); return;
-            getFeatureFlags();
-        });
+        //ConfigService.GetWidgetConfigDocument().then(function() {
+            //$("body").removeClass("login-body");
+            //$rootScope.$broadcast("ShowFooterEvent", true);
+            constructMainView();
+            //getFeatureFlags();
+        //});
     };
 
     function getFeatureFlags() {
-            console.log('GOT FEATURE FLAGS MOFO')
             constructMainView();
         //FeatureFlagService.GetAllFlags().then(function() {
         //});
     }
 
     function constructMainView() {
-        console.log('loginController constructMainView');
         $http.get('./app/views/MainView.html').success(function (html) {
             var scope = $rootScope.$new();
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;

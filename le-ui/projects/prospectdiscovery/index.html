@@ -36,59 +36,28 @@
                     <div ui-view="summary"></div>
                     <div ui-view="main"></div>
                 </div>
-                <!--
-                <div id="mainFooterView" class="footer" data-ng-show="showFooter">
-                    © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}</a>
-                </div>
-                -->
             </section>
 
         </div><!-- End #inner-wrap -->
     </div><!-- End #outer-wrap -->
 
-    <!-- build:remove:dist -->
-<!-- combined common and vendor js -->
-<script src="/assets/js/min/vendor.min.js"></script>
-<script src="/assets/js/min/production.min.js"></script>
-<script src="/demo/js/bootstrap-select.min.js"></script>
+    <!-- combined common and vendor js -->
+    <script src="/assets/js/min/vendor.min.js"></script>
+    <script src="/assets/js/min/production.min.js"></script>
 
-    <!-- common -->
     <script src="/demo/js/responsive-tables.js"></script>
     <script src="/demo/js/toggle-switch.js"></script>
     <script src="/demo/js/drop-down.js"></script>
     <script src="/demo/js/bootstrap-select.min.js"></script>
 
-    <script src="/app/directives/helperMarkDirective.js"></script>
-    <script src="/app/directives/ngQtipDirective.js"></script>
-    <script src="/app/directives/ngEnterDirective.js"></script>
-    <script src="/app/utilities/FaultUtility.js"></script>
-    <script src="/app/utilities/ConfigConstantUtility.js"></script>
-    <script src="/app/utilities/URLUtility.js"></script>
-    <script src="/app/utilities/ResourceUtility.js"></script>
-    <script src="/app/utilities/EvergageUtility.js"></script>
-    <script src="/app/utilities/TimestampIntervalUtility.js"></script>
-    <script src="/app/utilities/MetadataUtility.js"></script>
-    <script src="/app/utilities/SortUtility.js"></script>
-    <script src="/app/utilities/UnderscoreUtility.js"></script>
-    <script src="/app/utilities/StringUtility.js"></script>
-    <script src="/app/modals/SimpleModal.js"></script>
-
+    <!-- build:remove:dist -->
     <!-- app specific -->
     <script src="app/app.js"></script>
     <script src="app/routes.js"></script>
-    <script src="app/utilities/BrowserStorageUtility.js"></script>
-    <script src="app/utilities/ServiceErrorUtility.js"></script>
-    <script src="app/utilities/NavUtility.js"></script>
-    <script src="app/utilities/RightsUtility.js"></script>
-    <script src="app/utilities/PasswordUtility.js"></script>
     <script src="app/login/LoginController.js"></script>
-    <script src="app/login/LoginService.js"></script>
-    <script src="app/services/ResourceStringsService.js"></script>
-    <script src="app/services/SessionService.js"></script>
-    <script src="app/services/FeatureFlagService.js"></script>
-    <script src="app/services/ConfigService.js"></script>
-    <script src="app/services/HelpService.js"></script>
     <script src="app/header/HeaderController.js"></script>
+
+    <script src="app/fingerprints/FingerprintsController.js"></script>
     
     <script src="app/navigation/NavigationController.js"></script>
     <script src="app/navigation/pagination/PaginationController.js"></script>
@@ -98,8 +67,6 @@
     <script src="app/navigation/links/LinksController.js"></script>
     <script src="app/navigation/subnav/SubNavController.js"></script>
     <script src="app/navigation/navdash/NavDashController.js"></script>
-
-    <script src="app/fingerprints/FingerprintsController.js"></script>
 
     <script src="app/builder/BuilderController.js"></script>
     <script src="app/builder/BuilderRoutes.js"></script>
@@ -127,29 +94,6 @@
     <script type="text/javascript">
         var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
         var jslist = [
-            {path:cdnroot + "jquery/<%= version.jquery %>/jquery.min.js", fallback:"/lib/js/jquery.js"},
-
-            {path:cdnroot + "angular.js/<%= version.angular %>/angular.min.js", fallback:"/lib/js/angular/angular.js"},
-            {path:cdnroot + "angular.js/<%= version.angular %>/angular-sanitize.min.js", fallback:"/lib/js/angular/angular-sanitize.js"},
-            {path:cdnroot + "angular.js/<%= version.angular %>/angular-resource.min.js", fallback:"/lib/js/angular/angular-resource.js"},
-            {path:cdnroot + "angular.js/<%= version.angular %>/angular-route.min.js", fallback:"/lib/js/angular/angular-route.js"},
-
-            {path:cdnroot + "crypto-js/<%= version.crypto %>/components/core-min.js", fallback:"/lib/js/crypto/core.js"},
-            {path:cdnroot + "crypto-js/<%= version.crypto %>/components/sha256-min.js", fallback:"/lib/js/crypto/sha256.js"},
-
-            {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap.min.js", fallback:"/lib/js/ui-bootstrap.js"},
-            {path:cdnroot + "angular-ui-bootstrap/<%= version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.min.js", fallback:"/lib/js/ui-bootstrap-tpls.js"},
-            {path:cdnroot + "qtip2/<%= version.qtip2 %>/jquery.qtip.min.js", fallback:"/lib/js/jquery.qtip.js"},
-            {path:cdnroot + "underscore.js/<%= version.underscore %>/underscore-min.js", fallback:"/lib/js/underscore.js"},
-            {path:cdnroot + "twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js", fallback:"/lib/js/bootstrap.js"},
-            {path:cdnroot + "d3/<%= version.d3 %>/d3.min.js", fallback:"/lib/js/d3.js"},
-            {path:cdnroot + "jStorage/<%= version.jStorage %>/jstorage.min.js", fallback:"/lib/js/jstorage.js"},
-            {path:cdnroot + "alasql/<%= version.alasql %>/alasql.min.js", fallback:"/lib/js/alasql.min.js"},
-            {path:cdnroot + "FileSaver.js/<%= version.FileSaver %>/FileSaver.min.js", fallback:"/lib/js/FileSaver.js"},
-            {path:"//kendo.cdn.telerik.com/<%= version.kendo %>/js/kendo.all.min.js", fallback:"/lib/js/kendo.all.min.js"},
-
-            {path:cdnroot + "webfont/<%= version.webfont %>/webfontloader.js", fallback:"/lib/js/webfontloader.js"},
-
             {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
         ];
 

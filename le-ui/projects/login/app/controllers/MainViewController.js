@@ -5,7 +5,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.config.services.ConfigService',
-    'mainApp.config.controllers.ManageCredentialsController',
     'mainApp.login.controllers.UpdatePasswordController',
     'mainApp.core.services.FeatureFlagService'
 ])
@@ -15,10 +14,8 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
         createUpdatePasswordView();
-    } else {
-        createModelViewAndRefreshFeatures();
     }
-console.log('MainViewController init');
+
     // Handle Initial View
     $http.get('./app/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();
@@ -34,7 +31,6 @@ console.log('MainViewController init');
     function createManageCredentialsView() {
         // Set the hash
         window.location.hash = NavUtility.MANAGE_CREDENTIALS_HASH;
-console.log('LoginController init');
         // Fetch the view and make it Angular aware
         $http.get('./app/config/views/ManageCredentialsView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -54,7 +50,6 @@ console.log('LoginController init');
     function createUpdatePasswordView() {
         // Set the hash
         window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
-console.log('createUpdatePasswordView init');
         // Fetch the view and make it Angular aware
         $http.get('./app/views/UpdatePasswordView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -66,7 +61,6 @@ console.log('createUpdatePasswordView init');
 
     function createUpdatePasswordSuccessView() {
         // Set the hash
-console.log('createUpdatePasswordSuccessView init');
         window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
         $http.get('./app/views/UpdatePasswordSuccessView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -82,7 +76,6 @@ console.log('createUpdatePasswordSuccessView init');
     function createUserManagementView() {
         // Set the hash
         window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
-console.log('createUserManagementView init');
         // Fetch the view and make it Angular aware
         $http.get('./app/views/UserManagementView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -98,7 +91,6 @@ console.log('createUserManagementView init');
     function createAdminInfoView(data) {
         // Set the hash
         window.location.hash = NavUtility.ADMIN_INFO_HASH;
-console.log('createAdminInfoView init');
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -113,7 +105,6 @@ console.log('createAdminInfoView init');
 
     function modelCreationHistoryView() {
         window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
-console.log('modelCreationHistoryView init');
         $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
@@ -121,6 +112,7 @@ console.log('modelCreationHistoryView init');
     }
 
     // Handle when the Model List link is clicked
+    /*
     $scope.$on(NavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
         createModelListView();
     });
@@ -133,7 +125,6 @@ console.log('modelCreationHistoryView init');
 
     function createModelListView() {
         // Set the hash
-console.log('createModelListView init'); return;
         window.location.hash = NavUtility.MODEL_LIST_HASH;
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelListView.html').success(function (html) {
@@ -141,7 +132,7 @@ console.log('createModelListView init'); return;
             $compile($("#mainContentView").html(html))(scope);
         });
     }
-
+    */
     // Handle when the Model List link is clicked
     $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
         createModelDetailView(data);
@@ -150,7 +141,6 @@ console.log('createModelListView init'); return;
     function createModelDetailView(data) {
         // Set the hash
         window.location.hash = NavUtility.MODEL_DETAIL_HASH;
-console.log('createModelDetailView init');
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelDetailView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -167,7 +157,6 @@ console.log('createModelDetailView init');
     function createActivateModelView() {
         // Set the hash
         window.location.hash = NavUtility.ACTIVATE_MODEL;
-console.log('createActivateModelView init');
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ActivateModelView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -183,7 +172,6 @@ console.log('createActivateModelView init');
     function createSetupView() {
         // Set the hash
         window.location.hash = NavUtility.SETUP_HASH;
-console.log('createSetupView');
         // Fetch the view and make it Angular aware
         $http.get('./app/setup/views/SetupView.html').success(function (html) {
             var scope = $rootScope.$new();

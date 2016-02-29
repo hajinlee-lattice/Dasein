@@ -71,7 +71,7 @@ angular
                         controller: function($scope, JobsService, JobReport) {
                             $scope.report = JobReport;
                             $scope.data = data = JSON.parse(JobReport.json.Payload);
-                            $scope.data.used_records = data.imported_records - data.ignored_records;
+                            $scope.data.total_records = data.imported_records + data.ignored_records;
                             $scope.errorlog = '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors';
 
                             $scope.clickGetErrorLog = function($event) {
