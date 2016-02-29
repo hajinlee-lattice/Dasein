@@ -3,14 +3,17 @@ package com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericData;
@@ -59,6 +62,7 @@ public class LedpCSVToAvroImportMapper extends
     private boolean missingRequiredColValue;
     private boolean fieldMalFormed;
     private long lineNum = 2;
+    private Parser parser = new Parser();
 
     private static final String ERROR_FILE = "error.csv";
 
@@ -71,6 +75,8 @@ public class LedpCSVToAvroImportMapper extends
         interpretation = table.getInterpretation();
         LOG.info("table is:" + table);
         LOG.info(interpretation);
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
         lobLoader = new LargeObjectLoader(conf, FileOutputFormat.getWorkOutputPath(context));
 
         outputPath = AvroOutputFormat.getOutputPath(new JobConf(context.getConfiguration()));
@@ -195,10 +201,11 @@ public class LedpCSVToAvroImportMapper extends
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
                 if (attr.getLogicalDataType().equals("Date") || attr.getLogicalDataType().equals("Timestamp")) {
-                    DateFormat df = new SimpleDateFormat("MM-dd-yyyy");
-                    Log.info(fieldCsvValue);
-                    Log.info("parse :" + df.parse(fieldCsvValue));
-                    return df.parse(fieldCsvValue).getTime();
+                    Log.info("Date value from csv: " + fieldCsvValue);
+                    List<DateGroup> groups = parser.parse(fieldCsvValue);
+                    List<Date> dates = groups.get(0).getDates();
+                    Log.info("parse to date:" + dates.get(0));
+                    return dates.get(0).getTime();
                 } else {
                     return Long.valueOf(fieldCsvValue);
                 }
@@ -221,9 +228,9 @@ public class LedpCSVToAvroImportMapper extends
         } catch (NumberFormatException e) {
             fieldMalFormed = true;
             throw new RuntimeException("Cannot convert " + fieldCsvValue + " to " + avroType + ".");
-        } catch (ParseException e) {
+        } catch (Exception e) {
             fieldMalFormed = true;
-            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp using MM-dd-yyyy.");
+            throw new RuntimeException("Cannot parse " + fieldCsvValue + " as Date or Timestamp.");
         }
 
     }
@@ -246,5 +253,4 @@ public class LedpCSVToAvroImportMapper extends
             context.getCounter(RecordImportCounter.FIELD_MALFORMED).setValue(0);
         }
     }
-
 }

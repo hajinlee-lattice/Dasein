@@ -95,12 +95,12 @@ public class FileImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         verifyAllDataNotNullWithNumRows(yarnConfiguration, //
                 tables.get(0), //
-                11);
+                10);
         Counters counters = jobService.getMRJobCounters(appId.toString());
-        assertEquals(counters.getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS).getValue(), 11);
-        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 8);
+        assertEquals(counters.getCounter(com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter.IMPORTED_RECORDS).getValue(), 10);
+        assertEquals(counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 9);
         assertEquals(counters.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
-        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 2);
+        assertEquals(counters.getCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 3);
         assertEquals(counters.getCounter(RecordImportCounter.ROW_ERROR).getValue(), 1);
     }
 
