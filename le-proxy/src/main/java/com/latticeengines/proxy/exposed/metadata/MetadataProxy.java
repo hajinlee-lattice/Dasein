@@ -67,6 +67,12 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     }
 
     @Override
+    public void updateTable(String customerSpace, String tableName, Table table) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}");
+        put("updateTable", url, table);
+    }
+
+    @Override
     public List<String> getTableNames(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables", customerSpace);
         String[] importTableNames = get("getTables", url, String[].class);

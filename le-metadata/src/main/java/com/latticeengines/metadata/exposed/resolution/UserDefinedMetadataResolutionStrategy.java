@@ -21,6 +21,8 @@ import org.apache.hadoop.conf.Configuration;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -80,8 +82,8 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         }
 
         if (!missingRequiredFields.isEmpty()) {
-            throw new RuntimeException(String.format("Missing required fields [%s] in csv file %s", //
-                    StringUtils.join(missingRequiredFields, ","), csvPath));
+            throw new LedpException(LedpCode.LEDP_18087, //
+                    new String[] { StringUtils.join(missingRequiredFields, ","), csvPath });
         }
 
         // Add columns that are not in metadata to unknown columns

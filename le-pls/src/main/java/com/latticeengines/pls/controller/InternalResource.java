@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -51,9 +52,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -67,7 +68,6 @@ import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.workflow.exposed.service.ReportService;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -233,6 +233,17 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         sourceFileService.update(sourceFile);
+    }
+
+    @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a SourceFile")
+    public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
+             @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        sourceFileService.create(sourceFile);
     }
 
     @RequestMapping(value = "/modelsummaries/active/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")

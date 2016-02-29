@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.workflow;
+package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
 

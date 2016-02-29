@@ -1,6 +1,6 @@
-package com.latticeengines.workflow.exposed.service;
+package com.latticeengines.pls.service;
 
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface SourceFileService {
 
@@ -11,4 +11,6 @@ public interface SourceFileService {
     void update(SourceFile sourceFile);
 
     void delete(SourceFile sourceFile);
+
+    SourceFile clone(String name);
 }

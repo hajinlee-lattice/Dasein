@@ -31,12 +31,10 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.service.ReportService;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 
@@ -60,9 +58,6 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private ReportService reportService;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     @PostConstruct
     public void init() {
@@ -103,7 +98,6 @@ public class WorkflowExecutionCache {
         job.setJobType(jobInstance.getJobName());
         job.setSteps(getJobSteps(jobExecution));
         job.setReports(getReports(jobExecution));
-        job.setSourceFiles(getSourceFiles(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());
@@ -171,30 +165,6 @@ public class WorkflowExecutionCache {
             throw new RuntimeException("Failed to convert context object.");
         }
         return reports;
-    }
-
-    private List<SourceFile> getSourceFiles(JobExecution jobExecution) {
-        ExecutionContext context = jobExecution.getExecutionContext();
-        Object contextObj = context.get(WorkflowContextConstants.SOURCE_FILES);
-        List<SourceFile> sourceFiles = new ArrayList<>();
-        if (contextObj == null) {
-            return sourceFiles;
-        }
-        if (contextObj instanceof Set) {
-            for (Object obj : (Set) contextObj) {
-                if (obj instanceof String) {
-                    SourceFile sourceFile = sourceFileService.findByName((String) obj);
-                    if (sourceFile != null) {
-                        sourceFiles.add(sourceFile);
-                    }
-                } else {
-                    throw new RuntimeException("Failed to convert context object.");
-                }
-            }
-        } else {
-            throw new RuntimeException("Failed to convert context object.");
-        }
-        return sourceFiles;
     }
 
     @SuppressWarnings("unchecked")

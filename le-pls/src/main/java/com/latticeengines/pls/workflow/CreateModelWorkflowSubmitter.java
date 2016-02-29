@@ -25,12 +25,12 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
+import com.latticeengines.pls.service.SourceFileService;
 
 @Component
 public class CreateModelWorkflowSubmitter extends WorkflowSubmitter {

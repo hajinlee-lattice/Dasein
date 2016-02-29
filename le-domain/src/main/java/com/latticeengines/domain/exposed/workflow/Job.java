@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
 
 public class Job implements HasId<Long>, HasName {
 
@@ -25,7 +24,6 @@ public class Job implements HasId<Long>, HasName {
     private String jobType;
     private String user;
     private List<JobStep> steps;
-    private List<SourceFile> sourceFiles;
     private List<Report> reports;
     private Map<String, String> outputs;
 
@@ -121,16 +119,6 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setSteps(List<JobStep> steps) {
         this.steps = steps;
-    }
-
-    @JsonProperty
-    public List<SourceFile> getSourceFiles() {
-        return sourceFiles;
-    }
-
-    @JsonProperty
-    public void setSourceFiles(List<SourceFile> sourceFiles) {
-        this.sourceFiles = sourceFiles;
     }
 
     @JsonProperty

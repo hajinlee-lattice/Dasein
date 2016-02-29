@@ -14,8 +14,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.pls.service.SourceFileService;
 
 public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -23,9 +25,14 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
     private FileUploadService fileUploadService;
 
     @Autowired
+    private SourceFileService sourceFileService;
+
+    @Autowired
     private Configuration yarnConfiguration;
 
     private InputStream fileInputStream;
+
+    private SourceFile sourceFile;
 
     private File dataFile;
 
@@ -41,7 +48,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
+        sourceFile = fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
 
         String contents = HdfsUtils
                 .getHdfsFileContents(
@@ -51,5 +58,11 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
                                 contractId, contractId));
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "uploadFile")
+    public void cloneFile() {
+        SourceFile clone = sourceFileService.clone(sourceFile.getName());
+        assertEquals(clone.getName(), "file1.clone.csv");
     }
 }

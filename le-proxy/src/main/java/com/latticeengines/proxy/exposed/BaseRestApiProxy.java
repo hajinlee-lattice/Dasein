@@ -21,7 +21,7 @@ public abstract class BaseRestApiProxy {
 
     @Value("${proxy.microservice.rest.endpoint.hostport}")
     private String microserviceHostPort;
-    
+
     @Value("${proxy.quartz.rest.endpoint.hostport}")
     private String quartzHostPort;
 
@@ -39,6 +39,15 @@ public abstract class BaseRestApiProxy {
         log.info(String.format("Invoking %s by posting to url %s with body %s", method, url, body));
         try {
             return restTemplate.postForObject(url, body, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+        }
+    }
+
+    protected <B> void put(String method, String url, B body) {
+        log.info(String.format("Invoking %s by putting to url %s with body %s", method, url, body));
+        try {
+            restTemplate.put(url, body);
         } catch (Exception e) {
             throw new RuntimeException(String.format("%s: Remote call failure", method), e);
         }
@@ -77,7 +86,7 @@ public abstract class BaseRestApiProxy {
         }
         return combine(microserviceHostPort, end);
     }
-    
+
     protected String constructQuartzUrl(Object path, Object... urlVariables) {
         if (StringUtils.isEmpty(quartzHostPort)) {
             throw new NullPointerException("quartzHostPort must be set");
@@ -117,7 +126,7 @@ public abstract class BaseRestApiProxy {
     public void setMicroserviceHostPort(String microserviceHostPort) {
         this.microserviceHostPort = microserviceHostPort;
     }
-    
+
     public String getQuartzHostPort() {
         return quartzHostPort;
     }

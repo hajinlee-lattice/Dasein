@@ -21,4 +21,6 @@ public interface MetadataInterface {
     Table getTable(String customerSpace, String tableName);
 
     void createTable(String customerSpace, String tableName, Table table);
+
+    void updateTable(String customerSpace, String tableName, Table table);
 }

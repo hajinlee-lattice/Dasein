@@ -20,8 +20,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
-import com.latticeengines.domain.exposed.workflow.SourceFileState;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
 import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
@@ -29,7 +29,7 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
+import com.latticeengines.pls.service.SourceFileService;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {

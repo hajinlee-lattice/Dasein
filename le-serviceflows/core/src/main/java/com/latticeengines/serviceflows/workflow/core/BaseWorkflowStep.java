@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;

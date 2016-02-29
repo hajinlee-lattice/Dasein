@@ -23,10 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
+import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -42,6 +45,9 @@ public class FileUploadResource {
 
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -64,6 +70,27 @@ public class FileUploadResource {
             @RequestParam("file") MultipartFile file) {
         String filename = new UID().toString().replace("-", "").replace(":", "") + ".csv";
         return uploadFile(filename, schema, file);
+    }
+
+    @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Retrieve the metadata of the specified source file")
+    public ResponseDocument<Table> getSourceFile(@PathVariable String fileName) {
+        try {
+            SourceFile sourceFile = sourceFileService.findByName(fileName);
+            if (sourceFile == null) {
+                return null;
+            }
+            if (sourceFile.getTableName() == null) {
+                return null;
+            }
+            Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
+                    sourceFile.getTableName());
+            return ResponseDocument.successResponse(table);
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseDocument.failedResponse(e);
+        }
     }
 
     @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.GET)
@@ -104,5 +131,28 @@ public class FileUploadResource {
 
         InputStream is = fileUploadService.getImportErrorStream(fileName);
         return new ResponseEntity(is, headers, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "{fileName}/clone", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Clone the specified source file.  Optionally set its metadata to the specified metadata in the post request.")
+    public ResponseDocument<SourceFile> clone(@PathVariable String fileName, @RequestBody Table metadata) {
+        try {
+            SourceFile sourceFile = sourceFileService.clone(fileName);
+            if (metadata != null) {
+                String customerSpace = SecurityContextUtils.getCustomerSpace().toString();
+                Table existingMetadata = metadataProxy.getTable(customerSpace, sourceFile.getTableName());
+                existingMetadata.setMarkedForPurge(true);
+                metadataProxy.updateTable(customerSpace, existingMetadata.getName(), existingMetadata);
+                metadata.setName(fileName + "_metadata");
+                metadataProxy.createTable(customerSpace, metadata.getName(), metadata);
+                sourceFile.setTableName(metadata.getName());
+                sourceFileService.update(sourceFile);
+            }
+            return ResponseDocument.successResponse(sourceFile);
+        } catch (Exception e) {
+            log.error(e);
+            return ResponseDocument.failedResponse(e);
+        }
     }
 }

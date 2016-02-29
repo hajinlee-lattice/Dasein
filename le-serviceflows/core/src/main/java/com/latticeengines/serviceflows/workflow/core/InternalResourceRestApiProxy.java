@@ -9,9 +9,9 @@ import org.springframework.http.ResponseEntity;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 public class InternalResourceRestApiProxy extends BaseRestApiProxy {
@@ -132,10 +132,20 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     public void updateSourceFile(SourceFile sourceFile, String tenantId) {
         try {
             String url = constructUrl("pls/internal/sourcefiles", sourceFile.getName(), tenantId);
-            log.info(String.format("Getting from %s", url));
+            log.info(String.format("Putting to %s", url));
             restTemplate.put(url, sourceFile);
         } catch (Exception e) {
             throw new RuntimeException("updateSourceFile: Remote call failure", e);
+        }
+    }
+
+    public void createSourceFile(SourceFile sourceFile, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/sourcefiles", sourceFile.getName(), tenantId);
+            log.info(String.format("Posting to %s", url));
+            restTemplate.postForObject(url, sourceFile, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException("createSourceFile: Remote call failure", e);
         }
     }
 

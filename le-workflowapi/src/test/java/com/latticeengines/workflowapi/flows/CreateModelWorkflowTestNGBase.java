@@ -21,10 +21,10 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
-import com.latticeengines.domain.exposed.workflow.SourceFileState;
 import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
@@ -33,7 +33,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
@@ -45,9 +44,6 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -94,8 +90,8 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
             table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
             metadataProxy.createTable(tenant.getId(), table.getName(), table);
             sourceFile.setTableName(table.getName());
-            sourceFileService.create(sourceFile);
-            return sourceFileService.findByName(sourceFile.getName());
+            internalResourceProxy.createSourceFile(sourceFile, tenant.getId());
+            return internalResourceProxy.findSourceFileByName(sourceFile.getName(), tenant.getId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

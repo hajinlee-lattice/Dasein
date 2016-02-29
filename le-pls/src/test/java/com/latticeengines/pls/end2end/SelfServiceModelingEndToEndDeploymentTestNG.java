@@ -5,10 +5,10 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,22 +19,27 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.StreamUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -53,6 +58,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
+
         System.out.println("Deleting existing test tenants ...");
         deleteTwoTenants();
 
@@ -113,25 +119,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
-        String modelName = "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
-        modelingParameters = createModelingParameters(sourceFile.getName(), modelName);
-        ResponseDocument response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), modelName), modelingParameters,
-                ResponseDocument.class);
-        assertTrue(response.isSuccess());
-
-        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
-
-        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
-
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), modelingParameters,
-                ResponseDocument.class);
-        assertFalse(response.isSuccess());
-
-        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
+        model(sourceFile);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
@@ -165,18 +153,91 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(found);
     }
 
-    // TODO enable once error csv mechanism working
-    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "createModel")
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
-        ResponseEntity<InputStream> inputStreamResponse = restTemplate.getForEntity(
-                String.format("%s/pls/fileuploads/%s/import/errors", getPLSRestAPIHostPort(), sourceFile.getName()),
-                InputStream.class);
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            StreamUtils.copy(inputStreamResponse.getBody(), os);
-            String errors = os.toString();
-        } catch (Exception e) {
-            throw new RuntimeException("Failure retrieving error.csv", e);
+    }
+
+    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
+            "retrieveReport" })
+    public void cloneAndRemodel() {
+        ResponseDocument response = restTemplate.getForObject(
+                String.format("%s/pls/fileuploads/%s/metadata", getPLSRestAPIHostPort(), sourceFile.getName()),
+                ResponseDocument.class);
+        Table table = new ObjectMapper().convertValue(response.getResult(), Table.class);
+        assertNotNull(table);
+
+        // Disable some predictors
+        Attribute website = table.getAttribute("Website");
+        website.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        Attribute country = table.getAttribute("City");
+        country.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+
+        response = restTemplate.postForObject(
+                String.format("%s/pls/fileuploads/%s/clone", getPLSRestAPIHostPort(), sourceFile.getName()), table,
+                ResponseDocument.class);
+        assertTrue(response.isSuccess());
+        SourceFile clonedSourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+
+        // Now remodel
+        model(clonedSourceFile);
+
+    }
+
+    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
+    public void retrieveModelSummaryForClonedModel() throws InterruptedException {
+        ModelSummary found = getModelSummary();
+        assertNotNull(found);
+        List<Predictor> predictors = found.getPredictors();
+        assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
+            @Override
+            public boolean apply(@Nullable Predictor predictor) {
+                return predictor.getName().equals(SemanticType.Website.toString())
+                        || predictor.getName().equals(SemanticType.Country.toString());
+            }
+
+        }));
+    }
+
+    private ModelSummary getModelSummary() throws InterruptedException {
+        ModelSummary found = null;
+        // Wait for model downloader
+        while (true) {
+            @SuppressWarnings("unchecked")
+            List<Object> summaries = restTemplate.getForObject( //
+                    String.format("%s/pls/modelsummaries", getPLSRestAPIHostPort()), List.class);
+            for (Object rawSummary : summaries) {
+                ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
+                if (summary.getName().equals(modelingParameters.getName())) {
+                    found = summary;
+                }
+            }
+            if (found != null)
+                break;
+            Thread.sleep(1000);
         }
+        return found;
+    }
+
+    private void model(SourceFile sourceFile) {
+        ResponseDocument response;
+        String modelName = "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
+        modelingParameters = createModelingParameters(sourceFile.getName(), modelName);
+        response = restTemplate.postForObject(String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), modelName),
+                modelingParameters, ResponseDocument.class);
+        assertTrue(response.isSuccess());
+
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
+
+        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
+
+        response = restTemplate.postForObject(
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), modelingParameters,
+                ResponseDocument.class);
+        assertFalse(response.isSuccess());
+
+        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {

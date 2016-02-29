@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.leadprioritization.workflow.CreateModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
 

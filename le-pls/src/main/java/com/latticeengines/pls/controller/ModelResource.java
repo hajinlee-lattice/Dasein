@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.CreateModelWorkflowSubmitter;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -23,7 +23,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/models")
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class ModelResource {
-    private static final Logger log = Logger.getLogger(FileUploadResource.class);
+    private static final Logger log = Logger.getLogger(ModelResource.class);
 
     @Autowired
     private SourceFileService sourceFileService;

@@ -1,11 +1,11 @@
-package com.latticeengines.workflow.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.workflow.SourceFile;
-import com.latticeengines.workflow.exposed.entitymgr.SourceFileEntityMgr;
-import com.latticeengines.workflow.exposed.service.SourceFileService;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 
 @Component("sourceFileService")
 public class SourceFileServiceImpl implements SourceFileService {
@@ -34,5 +34,10 @@ public class SourceFileServiceImpl implements SourceFileService {
     @Override
     public void delete(SourceFile sourceFile) {
         sourceFileEntityMgr.delete(sourceFile);
+    }
+
+    @Override
+    public SourceFile clone(String name) {
+        return sourceFileEntityMgr.clone(name);
     }
 }

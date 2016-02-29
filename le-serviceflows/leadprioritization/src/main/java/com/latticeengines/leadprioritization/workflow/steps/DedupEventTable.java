@@ -5,7 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
@@ -29,6 +30,7 @@ public class DedupEventTable extends RunDataFlow<DedupEventTableConfiguration> {
         SourceFile sourceFile = retrieveSourceFile(getConfiguration().getCustomerSpace(), //
                 getConfiguration().getSourceFileName());
         sourceFile.setTableName(tableName);
+        sourceFile.setState(SourceFileState.Ready);
         getInternalResourceProxy().updateSourceFile(sourceFile, getConfiguration().getCustomerSpace().toString());
     }
 }

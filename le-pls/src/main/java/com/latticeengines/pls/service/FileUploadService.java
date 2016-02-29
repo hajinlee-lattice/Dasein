@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 
 public interface FileUploadService {

@@ -1,9 +1,11 @@
-package com.latticeengines.workflow.exposed.entitymgr;
+package com.latticeengines.pls.entitymanager;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
-import com.latticeengines.domain.exposed.workflow.SourceFile;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface SourceFileEntityMgr extends BaseEntityMgr<SourceFile> {
 
     SourceFile findByName(String name);
+
+    SourceFile clone(String name);
 }
