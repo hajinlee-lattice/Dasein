@@ -43,8 +43,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
         setupUsers(DEMO_CUSTOMERSPACE);
         setupCamille(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
-        installServiceFlow("le-serviceflows-prospectdiscovery", //
-                "com.latticeengines.prospectdiscovery.Initializer");
         createImportTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
         copyStopListToHdfs();
 

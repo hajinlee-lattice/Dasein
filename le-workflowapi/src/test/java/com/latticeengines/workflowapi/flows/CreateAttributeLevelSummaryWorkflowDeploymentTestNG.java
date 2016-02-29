@@ -53,7 +53,8 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     public void testWorkflow() throws Exception {
         CreateAttributeLevelSummaryWorkflowConfiguration workflowConfig = generateWorkflowConfiguration();
 
-        WorkflowExecutionId workflowId = workflowService.start(createAttributeLevelSummaryWorkflow.name(), workflowConfig);
+        WorkflowExecutionId workflowId = workflowService.start(createAttributeLevelSummaryWorkflow.name(),
+                workflowConfig);
 
         System.out.println("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
@@ -65,8 +66,6 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
         setupUsers(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
-        installServiceFlow("le-serviceflows-prospectdiscovery", //
-                "com.latticeengines.prospectdiscovery.Initializer");
         createTablesInMetadataStore(DEMO_CUSTOMERSPACE, tenant);
 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -86,11 +85,14 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
                 .microServiceHostPort(microServiceHostPort) //
                 .targetMarket(defaultTargetMarket) //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .accountMasterNameAndPath(new String[] { "AccountMaster", //
-                        "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/ScoredEventTable" }) //
+                .accountMasterNameAndPath(
+                        new String[] { "AccountMaster", //
+                                "/Pods/Default/Contracts/DemoContract/Tenants/DemoTenant/Spaces/Production/Data/Tables/ScoredEventTable" }) //
                 .scoreResult("ScoreResult") //
                 .uniqueKeyColumn("LatticeAccountID") //
-                .attributes(Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange", "BusinessEmployeesRange" })) //
+                .attributes(
+                        Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange",
+                                "BusinessEmployeesRange" })) //
                 .eventColumnName("Event_IsWon") //
                 .eventTableName("MatchedTable") //
                 .build();
@@ -99,9 +101,12 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
     }
 
     private void createTablesInMetadataStore(CustomerSpace customerSpace, Tenant tenant) throws Exception {
-        URL scoredEventTable = getClass().getClassLoader().getResource("com/latticeengines/workflowapi/flows/prospectdiscovery/ScoredEventTable");
-        URL scoreResultTable = getClass().getClassLoader().getResource("com/latticeengines/workflowapi/flows/prospectdiscovery/ScoreResult");
-        URL matchedTable = getClass().getClassLoader().getResource("com/latticeengines/workflowapi/flows/prospectdiscovery/MatchedTable");
+        URL scoredEventTable = getClass().getClassLoader().getResource(
+                "com/latticeengines/workflowapi/flows/prospectdiscovery/ScoredEventTable");
+        URL scoreResultTable = getClass().getClassLoader().getResource(
+                "com/latticeengines/workflowapi/flows/prospectdiscovery/ScoreResult");
+        URL matchedTable = getClass().getClassLoader().getResource(
+                "com/latticeengines/workflowapi/flows/prospectdiscovery/MatchedTable");
         File scoredEventTableDir = new File(scoredEventTable.getFile());
         File scoreResultTableDir = new File(scoreResultTable.getFile());
         File matchedTableDir = new File(matchedTable.getFile());
@@ -136,8 +141,7 @@ public class CreateAttributeLevelSummaryWorkflowDeploymentTestNG extends Workflo
             urlVariables.put("tableName", table.getName());
 
             restTemplate.postForObject(microServiceHostPort
-                    + "/metadata/customerspaces/{customerSpace}/tables/{tableName}", table, String.class,
-                    urlVariables);
+                    + "/metadata/customerspaces/{customerSpace}/tables/{tableName}", table, String.class, urlVariables);
         }
     }
 

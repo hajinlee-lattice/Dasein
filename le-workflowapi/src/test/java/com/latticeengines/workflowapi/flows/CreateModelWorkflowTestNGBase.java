@@ -62,9 +62,6 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
         setupUsers(DEMO_CUSTOMERSPACE);
         setupCamille(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
-        installServiceFlow("le-serviceflows-leadprioritization", //
-                "com.latticeengines.leadprioritization.Initializer");
-
     }
 
     protected SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
