@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.dellebi;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.sql.Date;
 
 import javax.persistence.Column;
@@ -12,6 +11,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -19,7 +21,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "Config")
 public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiConfig> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3568465584606850312L;
+
+    protected static final Log log = LogFactory.getLog(DellEbiConfig.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -133,29 +137,7 @@ public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiCo
     }
 
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        String newLine = System.getProperty("line.separator");
-
-        result.append(this.getClass().getName());
-        result.append(" Object {");
-        result.append(newLine);
-
-        Field[] fields = this.getClass().getDeclaredFields();
-
-        for (Field field : fields) {
-            result.append("  ");
-            try {
-                result.append(field.getName());
-                result.append(": ");
-                result.append(field.get(this));
-            } catch (IllegalAccessException ex) {
-                System.out.println(ex);
-            }
-            result.append(newLine);
-        }
-        result.append("}");
-
-        return result.toString();
+        return ToStringBuilder.reflectionToString(this, ToStringBuilder.getDefaultStyle()).toString();
     }
 
 }
