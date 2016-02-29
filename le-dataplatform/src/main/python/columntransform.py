@@ -26,6 +26,7 @@ class ColumnTransform(object):
     namedParameterListToInitKey = u"NamedParameterListToInit"
     loadedObjectKey = u"LoadedObject"
     resultOfCallingMainMethodNameKey = u"ResultOfCallingMainMethodName"
+    sortingKey = u'KeyWhenSortingByAscending'
 
     def __init__(self, pathToPipelineFiles = None):
         if pathToPipelineFiles is not None:
@@ -99,7 +100,10 @@ class ColumnTransform(object):
                 logger.info("Couldn't validate JSON that created configurable pipeline")
                 return pipelineAsArrayOfTransformClasses
 
-            for _, value in jsonToProcess[self.columnTransformKey].iteritems():
+            for x in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
+                print x
+
+            for _, value in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
                 columnTransformObject = {}
@@ -137,7 +141,7 @@ class ColumnTransform(object):
 
             return pipelineAsArrayOfTransformClasses
         except Exception as e:
-            logger.exception("Caught Exception while building Configurable Pipeline" % str(e))
+            logger.exception("Caught Exception while building Configurable Pipeline %s" % str(e))
             return None
 
     def buildKwArgs(self, namedParameterList=None, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None):

@@ -1,7 +1,7 @@
 {
   "columnTransformFiles": {
     "PivotStep": {
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "3",
         "Name": "pivotstep",
         "MainClassName": "PivotStep",
         "MainMethodName": "__init__",
@@ -11,7 +11,7 @@
         "ColumnTransformFilePath": "./lepipeline.tar.gz/pivotstep.py"
     },
     "EnumeratedColumnTransformStep": {
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "0",
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
         "MainMethodName": "__init__",
@@ -31,7 +31,7 @@
         "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
     },
     "ImputationStep":{
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "2",
         "Name": "imputationstep",
         "MainClassName": "ImputationStep",
         "MainMethodName": "__init__",

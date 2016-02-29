@@ -6,6 +6,8 @@ import imp
 from trainingtestbase import TrainingTestBase
 from array import array
 
+from configurablepipelinetransformsfromfile.columntypeconversionstep import ColumnTypeConversionStep
+
 class ColumnTransformTest(TrainingTestBase):
 
     def testColumnTransform(self):
@@ -17,6 +19,7 @@ class ColumnTransformTest(TrainingTestBase):
         self.assertThatEachMemberOfPipelineHasTransformMethod(pipeline)
         self.checkThatTransformsDontThrowExceptions()
         self.assertNamedParameterListStatic()
+        self.assertSortingOfTransform(pipeline)
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
@@ -82,3 +85,14 @@ class ColumnTransformTest(TrainingTestBase):
         self.assertIsNone(namedParameterList["orderedDictContinuousColumns"], "OrderedDictContinuousolumn should be None")
         self.assertTrue(isinstance(namedParameterList["emptyDictionary"], dict), "Couldn't create Empty Dictionary")
         self.assertTrue(isinstance(namedParameterList["emptyList"], list), "Couldn't create Empty List")
+        
+    def assertSortingOfTransform(self, pipeline):
+        for i, step in enumerate(pipeline):
+            if i == 0:
+                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
+            if i == 1:
+                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
+            if i == 2:
+                self.assertEquals(step.__class__.__name__ , "ImputationStep")
+            if i == 3:
+                self.assertEquals(step.__class__.__name__ , "PivotStep")
