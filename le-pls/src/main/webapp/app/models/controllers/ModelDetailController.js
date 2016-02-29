@@ -42,7 +42,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
             model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
             model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
-            model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
+            var topLeads = ModelService.FormatLeadSampleData(model.TopSample);
+            model.TopSample = filterLowScoresInTopLeads(topLeads);
             var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
             model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
             model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
@@ -70,6 +71,14 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             return bottomLeads;
         }
         var toReturn = _.reject(bottomLeads, function(bottomLead){ return bottomLead.Score > 10; });
+        return toReturn;
+    }
+    
+    function filterLowScoresInTopLeads(topLeads) {
+        if (topLeads === null) {
+            return topLeads;
+        }
+        var toReturn = _.reject(topLeads, function(topLeads){ return topLeads.Score < 90; });
         return toReturn;
     }
 });
