@@ -12,7 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
-import com.latticeengines.metadata.service.impl.SetTenantAspect;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
@@ -23,8 +23,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findAll(String customerSpace, String tableName) {
-        new SetTenantAspect().setSecurityContext( //
-                tenantEntityMgr.findByTenantId(customerSpace));
+        SecurityContextUtils.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
         List<Table> tables = tableEntityMgr.findAll();
 
         assertEquals(tables.size(), 1);
@@ -32,8 +31,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findByName(String customerSpace, String tableName) {
-        new SetTenantAspect().setSecurityContext( //
-                tenantEntityMgr.findByTenantId(customerSpace));
+        SecurityContextUtils.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
 
         Table table = tableEntityMgr.findByName(tableName);
         validateTable(table);

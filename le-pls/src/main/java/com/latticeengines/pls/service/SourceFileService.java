@@ -11,6 +11,4 @@ public interface SourceFileService {
     void update(SourceFile sourceFile);
 
     void delete(SourceFile sourceFile);
-
-    SourceFile clone(String name);
 }

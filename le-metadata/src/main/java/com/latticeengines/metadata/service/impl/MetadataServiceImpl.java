@@ -118,4 +118,10 @@ public class MetadataServiceImpl implements MetadataService {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
+
+    @Override
+    public Table cloneTable(CustomerSpace customerSpace, String tableName) {
+        return tableEntityMgr.clone(tableName);
+    }
+
 }

@@ -6,6 +6,4 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 public interface SourceFileEntityMgr extends BaseEntityMgr<SourceFile> {
 
     SourceFile findByName(String name);
-
-    SourceFile clone(String name);
 }

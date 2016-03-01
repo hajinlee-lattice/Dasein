@@ -29,7 +29,7 @@ public class CreateModelWorkflowDeploymentTestNG extends CreateModelWorkflowTest
         setupForImportWorkflow();
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testWorkflowAccount() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.SalesforceAccount);
         run(sourceFile);

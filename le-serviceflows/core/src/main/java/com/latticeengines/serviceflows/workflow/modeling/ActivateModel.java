@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 @Component("activateModel")
@@ -36,7 +36,7 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
             }
             modelIds = waitForDownloadedModelSummaries.retrieveModelIds(configuration,
                     modelApplicationIdToEventColumn.keySet());
-        }else{
+        } else {
             modelIds = JsonUtils.deserialize(executionContext.getString(ACTIVATE_MODEL_IDS), List.class);
         }
 

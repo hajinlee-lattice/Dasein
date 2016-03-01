@@ -41,4 +41,12 @@ public class MetadataResource {
         String customer = SecurityContextUtils.getCustomerSpace().toString();
         return metadataProxy.getTable(customer, tableName);
     }
+
+    @RequestMapping(value = "/{tableName}/clone", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Clone the specified table")
+    public Table clone(@PathVariable String tableName) {
+        String customer = SecurityContextUtils.getCustomerSpace().toString();
+        return metadataProxy.cloneTable(customer, tableName);
+    }
 }

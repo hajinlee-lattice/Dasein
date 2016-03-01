@@ -60,7 +60,7 @@ public class WorkflowTranslator {
             }
         }
 
-        if(workflow.getListener() != null){
+        if (workflow.getListener() != null) {
             simpleJobBuilder.listener(workflow.getListener());
         }
         return simpleJobBuilder.build();

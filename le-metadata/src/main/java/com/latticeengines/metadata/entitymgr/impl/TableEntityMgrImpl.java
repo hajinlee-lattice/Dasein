@@ -2,6 +2,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -51,6 +56,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private HiveTableDao hiveTableDao;
+
+    private Configuration yarnConfiguration = new Configuration();
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -108,6 +115,35 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         Table table = tableDao.findByName(name);
         inflateTable(table);
         return table;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Table clone(String name) {
+        Table clone = findByName(name);
+        if (clone == null) {
+            throw new RuntimeException(String.format("No such table with name %s", name));
+        }
+
+        clone.setName(clone.getName() + "_clone");
+
+        create(clone);
+
+        if (clone.getExtracts().size() > 0) {
+            Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                    SecurityContextUtils.getCustomerSpace());
+
+            Path sourcePath = tablesPath.append(name);
+            Path destPath = tablesPath.append(clone.getName());
+            log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
+            try {
+                HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
+                        destPath.toString()), e);
+            }
+        }
+        return clone;
     }
 
     private static void inflateTable(Table table) {

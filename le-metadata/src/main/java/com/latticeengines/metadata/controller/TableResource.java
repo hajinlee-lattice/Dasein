@@ -78,6 +78,15 @@ public class TableResource {
         return tableResourceHelper.deleteTable(customerSpace, tableName, request);
     }
 
+    @RequestMapping(value = "/tables/{tableName}/clone", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Clone table and underlying extracts")
+    public Table cloneTable(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            HttpServletRequest request) {
+        return tableResourceHelper.cloneTable(customerSpace, tableName, request);
+    }
+
     @RequestMapping(value = "/tables/reset", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset tables")

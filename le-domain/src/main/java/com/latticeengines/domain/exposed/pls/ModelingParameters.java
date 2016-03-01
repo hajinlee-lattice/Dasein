@@ -15,6 +15,12 @@ public class ModelingParameters {
     @JsonProperty
     private String description;
 
+    /**
+     * In leiu of filename.
+     */
+    @JsonProperty
+    private String eventTableName;
+
     public String getFilename() {
         return filename;
     }
@@ -37,5 +43,13 @@ public class ModelingParameters {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getEventTableName() {
+        return eventTableName;
+    }
+
+    public void setEventTableName(String eventTableName) {
+        this.eventTableName = eventTableName;
     }
 }

@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.SourceFileService;
 
 @Component("sourceFileService")
 public class SourceFileServiceImpl implements SourceFileService {
@@ -34,10 +34,5 @@ public class SourceFileServiceImpl implements SourceFileService {
     @Override
     public void delete(SourceFile sourceFile) {
         sourceFileEntityMgr.delete(sourceFile);
-    }
-
-    @Override
-    public SourceFile clone(String name) {
-        return sourceFileEntityMgr.clone(name);
     }
 }

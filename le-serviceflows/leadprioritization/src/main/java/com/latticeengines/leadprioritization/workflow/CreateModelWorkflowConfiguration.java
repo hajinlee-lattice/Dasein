@@ -44,7 +44,6 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder sourceFileName(String sourceFileName) {
             importData.setSourceFileName(sourceFileName);
-            runDataFlow.setSourceFileName(sourceFileName);
             return this;
         }
 

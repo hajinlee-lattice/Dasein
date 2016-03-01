@@ -75,7 +75,7 @@ public class FileUploadResource {
     @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Retrieve the metadata of the specified source file")
-    public ResponseDocument<Table> getSourceFile(@PathVariable String fileName) {
+    public ResponseDocument<Table> getMetadata(@PathVariable String fileName) {
         try {
             SourceFile sourceFile = sourceFileService.findByName(fileName);
             if (sourceFile == null) {
@@ -133,26 +133,4 @@ public class FileUploadResource {
         return new ResponseEntity(is, headers, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "{fileName}/clone", method = RequestMethod.POST)
-    @ResponseBody
-    @ApiOperation(value = "Clone the specified source file.  Optionally set its metadata to the specified metadata in the post request.")
-    public ResponseDocument<SourceFile> clone(@PathVariable String fileName, @RequestBody Table metadata) {
-        try {
-            SourceFile sourceFile = sourceFileService.clone(fileName);
-            if (metadata != null) {
-                String customerSpace = SecurityContextUtils.getCustomerSpace().toString();
-                Table existingMetadata = metadataProxy.getTable(customerSpace, sourceFile.getTableName());
-                existingMetadata.setMarkedForPurge(true);
-                metadataProxy.updateTable(customerSpace, existingMetadata.getName(), existingMetadata);
-                metadata.setName(fileName + "_metadata");
-                metadataProxy.createTable(customerSpace, metadata.getName(), metadata);
-                sourceFile.setTableName(metadata.getName());
-                sourceFileService.update(sourceFile);
-            }
-            return ResponseDocument.successResponse(sourceFile);
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseDocument.failedResponse(e);
-        }
-    }
 }

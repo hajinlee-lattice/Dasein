@@ -1,32 +1,29 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.leadprioritization.workflow;
 
 import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
+import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
+import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
-import com.latticeengines.workflowapi.steps.dlorchestration.ModelGenerateSamples;
-import com.latticeengines.workflowapi.steps.dlorchestration.ModelLoadData;
-import com.latticeengines.workflowapi.steps.dlorchestration.ModelProfileData;
-import com.latticeengines.workflowapi.steps.dlorchestration.ModelSubmit;
 
 @Component("modelWorkflow")
 public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> {
 
     @Autowired
-    private ModelLoadData modelLoadData;
+    private Sample sample;
 
     @Autowired
-    private ModelGenerateSamples modelGenerateSamples;
+    private ProfileAndModel profileAndModel;
 
     @Autowired
-    private ModelProfileData modelProfileData;
-
-    @Autowired
-    private ModelSubmit modelSubmit;
+    private ActivateModel activateModel;
 
     @Bean
     public Job modelWorkflowJob() throws Exception {
@@ -35,11 +32,10 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(modelLoadData) //
-                .next(modelGenerateSamples) //
-                .next(modelProfileData) //
-                .next(modelSubmit) //
+        return new WorkflowBuilder().next(sample) //
+                .next(profileAndModel) //
+                .next(activateModel) //
                 .build();
-    }
 
+    }
 }

@@ -56,6 +56,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelingWorkflowApplicationId;
     private ModelingParameters modelingParameters;
 
+    private ModelSummary originalModelSummary;
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
 
@@ -119,7 +121,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
-        model(sourceFile);
+        modelingParameters = createModelingParameters(sourceFile.getName(), null);
+        model(modelingParameters);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
@@ -134,23 +137,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
     public void retrieveModelSummary() throws InterruptedException {
-        ModelSummary found = null;
-        // Wait for model downloader
-        while (true) {
-            @SuppressWarnings("unchecked")
-            List<Object> summaries = restTemplate.getForObject( //
-                    String.format("%s/pls/modelsummaries", getPLSRestAPIHostPort()), List.class);
-            for (Object rawSummary : summaries) {
-                ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
-                if (summary.getName().equals(modelingParameters.getName())) {
-                    found = summary;
-                }
-            }
-            if (found != null)
-                break;
-            Thread.sleep(1000);
-        }
-        assertNotNull(found);
+        originalModelSummary = getModelSummary();
+        assertNotNull(originalModelSummary);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -178,9 +166,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(response.isSuccess());
         SourceFile clonedSourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
 
-        // Now remodel
-        model(clonedSourceFile);
+        response = restTemplate.getForObject(
+                String.format("%s/pls/fileuploads/%s/metadata", getPLSRestAPIHostPort(), sourceFile.getName()),
+                ResponseDocument.class);
+        Table eventTable = new ObjectMapper().convertValue(response.getResult(), Table.class);
 
+        // Now remodel
+        ModelingParameters parameters = createModelingParameters(null, table.getName());
+        model(parameters);
     }
 
     @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
@@ -218,12 +211,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return found;
     }
 
-    private void model(SourceFile sourceFile) {
+    private void model(ModelingParameters parameters) {
         ResponseDocument response;
-        String modelName = "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
-        modelingParameters = createModelingParameters(sourceFile.getName(), modelName);
-        response = restTemplate.postForObject(String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), modelName),
-                modelingParameters, ResponseDocument.class);
+        modelingParameters = parameters;
+        response = restTemplate.postForObject(
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), parameters.getName()), modelingParameters,
+                ResponseDocument.class);
         assertTrue(response.isSuccess());
 
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
@@ -257,11 +250,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private ModelingParameters createModelingParameters(String fileName, String modelName) {
+    private ModelingParameters createModelingParameters(String fileName, String eventTableName) {
         ModelingParameters parameters = new ModelingParameters();
-        parameters.setName(modelName);
+        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDescription("Test");
         parameters.setFilename(fileName);
+        parameters.setEventTableName(eventTableName);
         return parameters;
     }
 }

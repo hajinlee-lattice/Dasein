@@ -59,10 +59,4 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
     }
-
-    @Test(groups = "functional", dependsOnMethods = "uploadFile")
-    public void cloneFile() {
-        SourceFile clone = sourceFileService.clone(sourceFile.getName());
-        assertEquals(clone.getName(), "file1.clone.csv");
-    }
 }

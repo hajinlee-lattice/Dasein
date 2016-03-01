@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.CreateModelWorkflowSubmitter;
+import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -26,22 +25,24 @@ public class ModelResource {
     private static final Logger log = Logger.getLogger(ModelResource.class);
 
     @Autowired
-    private SourceFileService sourceFileService;
+    private CreateModelWorkflowSubmitter createModelWorkflowSubmitter;
 
     @Autowired
-    private CreateModelWorkflowSubmitter createModelWorkflowSubmitter;
+    private ModelWorkflowSubmitter modelWorkflowSubmitter;
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
         try {
-            SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
-            if (sourceFile == null) {
-                throw new RuntimeException(String.format("No such source file with name %s", parameters.getFilename()));
+            if (parameters.getFilename() != null) {
+                return ResponseDocument.successResponse( //
+                        createModelWorkflowSubmitter.submit(parameters).toString());
+            } else {
+                return ResponseDocument.successResponse( //
+                        modelWorkflowSubmitter.submit(parameters).toString());
             }
-            return ResponseDocument.successResponse( //
-                    createModelWorkflowSubmitter.submit(sourceFile, parameters).toString());
+
         } catch (Exception e) {
             log.error(e);
             return ResponseDocument.failedResponse(e);

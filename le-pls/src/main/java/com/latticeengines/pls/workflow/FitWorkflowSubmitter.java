@@ -1,6 +1,10 @@
 package com.latticeengines.pls.workflow;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,25 +24,18 @@ import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
-public class FitWorkflowSubmitter extends WorkflowSubmitter {
+public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     private static final Log log = LogFactory.getLog(FitWorkflowSubmitter.class);
-
-    @Autowired
-    private MetadataProxy metadataProxy;
 
     @Autowired
     private TargetMarketService targetMarketService;
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
-
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceHdfsBaseDir;
 
     @Value("${pls.fitflow.stoplist.path}")
     private String stoplistPath;
@@ -55,7 +52,7 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
     public void submitWorkflowForTargetMarketAndWorkflowName(TargetMarket targetMarket, String workflowName) {
         checkForRunningWorkflow(targetMarket);
 
-        String customer = SecurityContextUtils.getTenant().getId();
+        String customer = SecurityContextUtils.getCustomerSpace().toString();
         log.info(String.format("Submitting fit model workflow for target market %s and customer %s",
                 targetMarket.getName(), customer));
         try {
@@ -106,9 +103,8 @@ public class FitWorkflowSubmitter extends WorkflowSubmitter {
             targetMarket.setApplicationId(applicationId.toString());
             targetMarketService.updateTargetMarketByName(targetMarket, targetMarket.getName());
         } catch (Exception e) {
-            throw new RuntimeException(String.format(
-                    "Failed to submit %s for target market %s and customer %s", workflowName, targetMarket.getName(),
-                    customer), e);
+            throw new RuntimeException(String.format("Failed to submit %s for target market %s and customer %s",
+                    workflowName, targetMarket.getName(), customer), e);
         }
     }
 }

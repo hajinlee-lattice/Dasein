@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -14,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
@@ -22,11 +24,14 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(ProfileAndModel.class);
 
+    @Autowired
+    private MetadataProxy metadataProxy;
+
     @Override
     public void execute() {
         log.info("Inside ProfileAndModel execute()");
 
-        Table eventTable = JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+        Table eventTable = getEventTable();
         Map<String, String> modelApplicationIdToEventColumn;
         try {
             modelApplicationIdToEventColumn = profileAndModel(eventTable);
@@ -35,6 +40,15 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         }
 
         executionContext.putString(MODEL_APP_IDS, JsonUtils.serialize(modelApplicationIdToEventColumn));
+    }
+
+    private Table getEventTable() {
+        if (configuration.getEventTableName() != null) {
+            return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                    configuration.getEventTableName());
+        } else {
+            return JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+        }
     }
 
     private Map<String, String> profileAndModel(Table eventTable) throws Exception {

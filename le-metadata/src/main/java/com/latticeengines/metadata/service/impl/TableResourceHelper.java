@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -85,6 +86,13 @@ public class TableResourceHelper {
         CustomerSpace space = CustomerSpace.parse(customerSpace);
         mdService.deleteTable(space, tableName);
         return true;
+    }
+
+    public Table cloneTable(String customerSpace, //
+            String tableName, HttpServletRequest request) {
+        log.info(String.format("cloneTable(%s(", tableName));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.cloneTable(space, tableName);
     }
 
     public SimpleBooleanResponse validateMetadata(@PathVariable String customerSpace, //

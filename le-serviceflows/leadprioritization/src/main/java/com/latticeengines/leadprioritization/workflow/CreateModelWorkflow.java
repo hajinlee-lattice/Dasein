@@ -10,9 +10,6 @@ import com.latticeengines.leadprioritization.workflow.steps.CreateEventTableRepo
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
-import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
-import com.latticeengines.serviceflows.workflow.modeling.ProfileAndModel;
-import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -32,13 +29,7 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
     private MatchWorkflow matchWorkflow;
 
     @Autowired
-    private Sample sample;
-
-    @Autowired
-    private ProfileAndModel profileAndModel;
-
-    @Autowired
-    private ActivateModel activateModel;
+    private ModelWorkflow modelWorkflow;
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -54,10 +45,8 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
                 .next(createEventTableReport) //
                 .next(dedupEventTable) //
                 .next(matchWorkflow) //
-                .next(sample) //
-                .next(profileAndModel) //
-                .next(activateModel) //
-                .listener(sendEmailAfterModelCompletionListener)//
+                .next(modelWorkflow) //
+                .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }
 }

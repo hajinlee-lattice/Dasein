@@ -9,17 +9,4 @@ public class DedupEventTableConfiguration extends DataFlowStepConfiguration {
     public DedupEventTableConfiguration() {
         setPurgeSources(true);
     }
-
-    @NotNull
-    @NotEmptyString
-    @JsonProperty
-    private String sourceFileName;
-
-    public String getSourceFileName() {
-        return sourceFileName;
-    }
-
-    public void setSourceFileName(String sourceFileName) {
-        this.sourceFileName = sourceFileName;
-    }
 }

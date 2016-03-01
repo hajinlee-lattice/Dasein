@@ -1,8 +1,8 @@
 package com.latticeengines.metadata.entitymgr;
 
-import com.latticeengines.domain.exposed.metadata.Table;
-
 import java.util.List;
+
+import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface TableEntityMgr {
 
@@ -13,4 +13,6 @@ public interface TableEntityMgr {
     List<Table> findAll();
 
     void deleteByName(String name);
+
+    Table clone(String name);
 }
