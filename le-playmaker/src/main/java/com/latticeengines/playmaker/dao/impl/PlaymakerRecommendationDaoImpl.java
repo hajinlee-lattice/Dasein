@@ -25,7 +25,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             List<Integer> playIds) {
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
                 + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, "
-                + "CASE WHEN PL.[Description] IS NOT NULL THEN PL.[Description] ELSE L.[Description] END AS Description, "
+                + "COALESCE(PL.[Description], L.[Description]) AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
                 + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
                 + getLikelihood()
@@ -69,7 +69,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             for (Map<String, Object> record : results) {
                 String contacts = (String) record.get("Contacts");
                 if (contacts != null) {
-                    String[] contactArray = contacts.split("[|]");
+                    String[] contactArray = contacts.split("[|]", -1);
                     if (contactArray.length >= 8) {
                         List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
@@ -127,14 +127,25 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private String getDestinationonValues(int syncDestination) {
         switch (syncDestination) {
         case 0:
-            return "0,2";
+            return "0";
         case 1:
-            return "1,2";
+            return "1";
         case 2:
-            return "0,1,2";
+            return "0,1";
         default:
-            return "0,2";
+            return "0";
         }
+
+        // switch (syncDestination) {
+        // case 0:
+        // return "0,2";
+        // case 1:
+        // return "1,2";
+        // case 2:
+        // return "0,1,2";
+        // default:
+        // return "0,2";
+        // }
     }
 
     @Override
@@ -378,7 +389,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         source.addValue("start", start);
         return queryForObject(sql, source, Integer.class);
     }
-    
+
     private String getPlayGroupWhereClause() {
         return "FROM PlayGroup WHERE IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) >= :start ";
     }

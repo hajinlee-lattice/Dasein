@@ -10,6 +10,6 @@ public class PlaymakerRecommendationDaoImplV740 extends PlaymakerRecommendationD
 
     @Override
     protected String getLikelihood() {
-        return "CASE WHEN L.Normalized_Score IS NOT NULL THEN L.Normalized_Score ELSE L.Likelihood END AS Likelihood, ";
+        return "COALESCE(L.Normalized_Score, L.Likelihood) AS Likelihood, ";
     }
 }
