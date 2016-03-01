@@ -1,4 +1,4 @@
-Id,Country,Company,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy,LastModifiedDate
+LeadId,Country,Company,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy,LastModifiedDate
 9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,3
 12609604,Singapore,,,,1,,10/10/04
 10996868,China,Husor,sun,ze,5,0.464385619,10/23/04

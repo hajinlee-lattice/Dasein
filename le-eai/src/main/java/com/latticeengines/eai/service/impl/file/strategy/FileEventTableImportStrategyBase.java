@@ -17,7 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.aspectj.apache.bcel.generic.Type;
 import org.joda.time.DateTime;
 import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,16 +170,14 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         }
 
         for (Attribute attr : table.getAttributes()) {
-            ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
+            ModelingMetadata.AttributeMetadata attrMetadata = null;
+            if (attr.getSemanticType() != null) {
+                attrMetadata = attrMap.get(attr.getSemanticType().name());
+            } else {
+                attrMetadata = attrMap.get(attr.getName());
+            }
 
             if (attrMetadata != null) {
-                attr.setDisplayName(attrMetadata.getDisplayName());
-                if (attrMetadata.getDataType().equals("date") || attrMetadata.getDataType().equals("Date")) {
-                    attr.setPhysicalDataType(Type.LONG.toString());
-                } else {
-                    attr.setPhysicalDataType(attrMetadata.getDataType());
-                }
-                // attr.setPhysicalDataType(attrMetadata.getExtensions().get(2).getValue());
                 attr.setLogicalDataType(attrMetadata.getDataType());
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
