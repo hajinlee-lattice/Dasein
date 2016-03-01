@@ -172,14 +172,16 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private void initEntries(DataFlowContext context) {
-        Collections.sort(context.getProperty(DellEbiFlowService.CFG_LIST, List.class));
+        @SuppressWarnings("unchecked")
+        List<DellEbiConfig> cfgList = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        Collections.sort(cfgList);
     }
 
-    @SuppressWarnings("unchecked")
     private List<DellEbiConfig> getEntries(DataFlowContext context) {
-        return context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        @SuppressWarnings("unchecked")
+        List<DellEbiConfig> cfgList = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        return cfgList;
     }
 
     protected String getSmbInboxPathByFileName(String fileName) {
