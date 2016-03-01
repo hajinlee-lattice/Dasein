@@ -55,6 +55,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
         Assert.assertNotNull(createDefaultFeatureFlag);
         Assert.assertTrue(danteFeatureFlag.getConfigurable()
                 && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA)
+                && danteFeatureFlag.getAvailableProducts().contains(LatticeProduct.LPA3)
                 && danteFeatureFlag.getDisplayName() != null && danteFeatureFlag.getDocumentation() != null);
         Assert.assertTrue(!quotaFeatureFlag.getConfigurable()
                 && quotaFeatureFlag.getAvailableProducts().contains(LatticeProduct.PD)

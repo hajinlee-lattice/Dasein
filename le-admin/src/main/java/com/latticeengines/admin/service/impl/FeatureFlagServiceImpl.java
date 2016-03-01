@@ -98,6 +98,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
     void defineDefaultFeatureFlags() {
         Set<LatticeProduct> danteProdSet = new HashSet<LatticeProduct>();
         danteProdSet.add(LatticeProduct.LPA);
+        danteProdSet.add(LatticeProduct.LPA3);
         Set<LatticeProduct> quotaProdSet = new HashSet<LatticeProduct>();
         quotaProdSet.add(LatticeProduct.PD);
         Set<LatticeProduct> targetMarketProdSet = new HashSet<LatticeProduct>();
