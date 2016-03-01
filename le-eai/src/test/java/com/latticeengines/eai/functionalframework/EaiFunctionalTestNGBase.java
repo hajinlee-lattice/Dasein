@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -147,7 +148,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         builder.jdbcUrl(url).driverClass(driver).dbType("GenericJDBC");
         DbCreds creds = new DbCreds(builder);
 
-        // if Table contains duplicate column names or column with empty name, here it will throw exception
+        // if Table contains duplicate column names or column with empty name,
+        // here it will throw exception
         DataSchema schema = metadataService.createDataSchema(creds, fileName);
 
         Table file = new Table();
@@ -156,7 +158,38 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());
+            attr.setDisplayName(field.getName());
             attr.setNullable(true);
+            if (attr.getName().equals("LeadId")) {
+                attr.setSemanticType(SemanticType.ExternalId);
+                attr.setPhysicalDataType(String.class.getSimpleName());
+            }
+            if (attr.getName().equals("Country")) {
+                attr.setSemanticType(SemanticType.Country);
+                attr.setPhysicalDataType(String.class.getSimpleName());
+            }
+            if (attr.getName().equals("Company")) {
+                attr.setSemanticType(SemanticType.CompanyName);
+                attr.setPhysicalDataType(String.class.getSimpleName());
+            }
+            if (attr.getName().equals("Email")) {
+                attr.setSemanticType(SemanticType.Email);
+                attr.setPhysicalDataType(String.class.getSimpleName());
+            }
+            if (attr.getName().equals("City")) {
+                attr.setSemanticType(SemanticType.City);
+                attr.setPhysicalDataType(String.class.getSimpleName());
+            }
+            if (attr.getName().equals("DS_CompanyName_Length")) {
+                attr.setPhysicalDataType("int");
+            }
+            if (attr.getName().equals("DS_CompanyName_Entropy")) {
+                attr.setPhysicalDataType(Float.class.getSimpleName());
+            }
+            if (attr.getName().equals("LastModifiedDate")) {
+                attr.setSemanticType(SemanticType.LastModifiedDate);
+                attr.setPhysicalDataType(Long.class.getSimpleName());
+            }
             file.addAttribute(attr);
         }
 
@@ -175,10 +208,11 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                         new org.apache.hadoop.fs.Path(avroFile))) {
                     while (reader.hasNext()) {
                         reader.next();
-                        //Schema schema = record.getSchema();
-                        //for (org.apache.avro.Schema.Field field : schema.getFields()) {
-                            //assertNotNull(record.get(field.name()));
-                        //}
+                        // Schema schema = record.getSchema();
+                        // for (org.apache.avro.Schema.Field field :
+                        // schema.getFields()) {
+                        // assertNotNull(record.get(field.name()));
+                        // }
                         numRows++;
                     }
                 }
@@ -250,8 +284,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                     "com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
-            //DateTime date = new DateTime();
-            //table.getLastModifiedKey().setLastModifiedTimestamp(date.minusMonths(6).getMillis());
+            // DateTime date = new DateTime();
+            // table.getLastModifiedKey().setLastModifiedTimestamp(date.minusMonths(6).getMillis());
             tables.add(table);
         }
         return tables;
