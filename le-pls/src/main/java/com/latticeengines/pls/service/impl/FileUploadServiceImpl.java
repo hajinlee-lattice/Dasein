@@ -19,17 +19,17 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
 import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
 import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.pls.service.FileUploadService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.latticeengines.pls.service.SourceFileService;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
@@ -115,10 +115,6 @@ public class FileUploadServiceImpl implements FileUploadService {
                 throw new RuntimeException(String.format("File %s has not been imported yet.", fileName));
             }
 
-            // TODO need to fix this so we can actually retrieve the pre-deduped
-            // table and from there get to the errors csv.
-            // Alternatively, save away the error.csv path after import,
-            // but that's uglier.
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
                     sourceFile.getTableName());

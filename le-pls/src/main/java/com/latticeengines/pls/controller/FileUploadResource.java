@@ -1,15 +1,15 @@
 package com.latticeengines.pls.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.server.UID;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.python.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +39,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class FileUploadResource {
     private static final Logger log = Logger.getLogger(FileUploadResource.class);
+    private static final int MAX_ERROR_CSV_LENGTH = 65536;
 
     @Autowired
     private SourceFileService sourceFileService;
@@ -123,14 +124,19 @@ public class FileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
     @SuppressWarnings("unchecked")
-    public ResponseEntity<InputStream> getImportErrors(@PathVariable String fileName) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-
-        InputStream is = fileUploadService.getImportErrorStream(fileName);
-        return new ResponseEntity(is, headers, HttpStatus.OK);
+    public String getImportErrors(@PathVariable String fileName) {
+        try (InputStream is = fileUploadService.getImportErrorStream(fileName)) {
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                IOUtils.copy(is, os, MAX_ERROR_CSV_LENGTH);
+                String errors = new String(os.toByteArray());
+                if (errors.length() >= MAX_ERROR_CSV_LENGTH) {
+                    errors += "\n...Too many errors.  Data truncated...";
+                }
+                return errors;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to retrieve error csv", e);
+        }
     }
 
 }

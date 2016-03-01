@@ -1,6 +1,7 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
@@ -143,6 +144,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
+        // Relies on error in Account.csv
+        String csv = restTemplate.getForObject(
+                String.format("%s/pls/fileuploads/%s/import/errors", getPLSRestAPIHostPort(), sourceFile.getName()),
+                String.class);
+        assertNotEquals(csv.length(), 0);
     }
 
     @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
