@@ -173,14 +173,15 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     private void initEntries(DataFlowContext context) {
-        @SuppressWarnings("unchecked")
-        List<DellEbiConfig> cfgList = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        List<?> objs = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        List<DellEbiConfig> cfgList = DellEbiFlowServiceImpl.asList(objs, DellEbiConfig.class);
         Collections.sort(cfgList);
+        context.setProperty(DellEbiFlowService.CFG_LIST, cfgList);
     }
 
     private List<DellEbiConfig> getEntries(DataFlowContext context) {
-        @SuppressWarnings("unchecked")
-        List<DellEbiConfig> cfgList = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        List<?> objs = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
+        List<DellEbiConfig> cfgList = DellEbiFlowServiceImpl.asList(objs, DellEbiConfig.class);
         return cfgList;
     }
 

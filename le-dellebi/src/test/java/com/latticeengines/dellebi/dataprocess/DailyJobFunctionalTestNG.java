@@ -95,8 +95,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @Test(groups = "functional", dataProvider = "fileDataProvider")
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
-        String typesStr = "quote,order_detail,Order_Summary,Warranty,SKU_Global,SKU_Manufacturer,"
-                + "SKU_Itm_Cls_Code,Calendar,Channel";
+        String typesStr = "order_detail,Order_Summary,Warranty,SKU_Global,SKU_Manufacturer,"
+                + "SKU_Itm_Cls_Code,Calendar,Channel,quote";
         String[] typesList = typesStr.split(",");
         String smbInboxPath = getSmbInboxPathByFileName(fileName);
 
@@ -286,8 +286,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
                 }
 
             } catch (SmbException ex) {
-                ex.printStackTrace();
-                return;
+                log.error(ex);
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.latticeengines.dellebi.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -206,4 +207,12 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         }
     }
 
+    public static <T> List<T> asList(Collection<?> c, Class<? extends T> type) {
+        if (c == null)
+            return null;
+        List<T> list = new ArrayList<T>(c.size());
+        for (Object o : c)
+            list.add(type.cast(o));
+        return list;
+    }
 }
