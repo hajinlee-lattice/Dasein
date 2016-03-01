@@ -100,9 +100,6 @@ class ColumnTransform(object):
                 logger.info("Couldn't validate JSON that created configurable pipeline")
                 return pipelineAsArrayOfTransformClasses
 
-            for x in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
-                print x
-
             for _, value in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):
                 uniqueColumnTransformName = value[self.uniqueColumnTransformKey]
 
