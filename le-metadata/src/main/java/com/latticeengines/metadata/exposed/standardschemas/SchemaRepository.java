@@ -53,13 +53,13 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("BillingState", Schema.Type.STRING, SemanticType.State));
         table.addAttribute(createAttribute("BillingPostalCode", Schema.Type.STRING, SemanticType.PostalCode));
         table.addAttribute(createAttribute("BillingCountry", Schema.Type.STRING, SemanticType.Country));
-        table.addAttribute(createAttribute("Industry", Schema.Type.STRING));
-        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE));
-        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT));
-        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG));
-        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG));
-        table.addAttribute(createAttribute("YearStarted", Schema.Type.STRING));
-        table.addAttribute(createAttribute("Phone", Schema.Type.STRING));
+        table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
+        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
+        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT, SemanticType.NumberOfEmployees));
+        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
+        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG, SemanticType.LastModifiedDate));
+        table.addAttribute(createAttribute("YearStarted", Schema.Type.STRING, SemanticType.YearStarted));
+        table.addAttribute(createAttribute("Phone", Schema.Type.STRING, SemanticType.PhoneNumber));
 
         return table;
     }
@@ -78,18 +78,18 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country));
         table.addAttribute(createAttribute("PostalCode", Schema.Type.STRING, SemanticType.PostalCode));
 
-        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG));
-        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG));
-        table.addAttribute(createAttribute("FirstName", Schema.Type.STRING));
-        table.addAttribute(createAttribute("LastName", Schema.Type.STRING));
-        table.addAttribute(createAttribute("Title", Schema.Type.STRING));
-        table.addAttribute(createAttribute("LeadSource", Schema.Type.STRING));
-        table.addAttribute(createAttribute("Closed", Schema.Type.BOOLEAN));
-        table.addAttribute(createAttribute("StageName", Schema.Type.STRING));
-        table.addAttribute(createAttribute("Phone", Schema.Type.STRING));
-        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE));
-        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT));
-        table.addAttribute(createAttribute("Industry", Schema.Type.STRING));
+        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
+        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG, SemanticType.LastModifiedDate));
+        table.addAttribute(createAttribute("FirstName", Schema.Type.STRING, SemanticType.FirstName));
+        table.addAttribute(createAttribute("LastName", Schema.Type.STRING, SemanticType.LastName));
+        table.addAttribute(createAttribute("Title", Schema.Type.STRING, SemanticType.EmployeeTitle));
+        table.addAttribute(createAttribute("LeadSource", Schema.Type.STRING, SemanticType.LeadSource));
+        table.addAttribute(createAttribute("Closed", Schema.Type.BOOLEAN, SemanticType.IsClosed));
+        table.addAttribute(createAttribute("StageName", Schema.Type.STRING, SemanticType.LeadStageName));
+        table.addAttribute(createAttribute("Phone", Schema.Type.STRING, SemanticType.PhoneNumber));
+        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
+        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT, SemanticType.NumberOfEmployees));
+        table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
         return table;
     }
 

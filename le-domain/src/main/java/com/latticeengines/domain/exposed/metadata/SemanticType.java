@@ -3,14 +3,30 @@ package com.latticeengines.domain.exposed.metadata;
 public enum SemanticType {
     ExternalId, //
     Event, //
-    CompanyName, //
+    Domain, //
+
+    LastModifiedDate, //
+    CreatedDate, //
+
+    FirstName, //
+    LastName, //
+    EmployeeTitle, //
+    Email, //
+
     City, //
     State, //
-    Website, //
     PostalCode, //
     Country, //
-    Email, //
-    Domain, //
-    LastModifiedDate, //
-    CreationDate, //
+    PhoneNumber, //
+
+    Website, //
+
+    LeadSource, //
+    CompanyName, //
+    IsClosed, //
+    LeadStageName, //
+    Industry, //
+    AnnualRevenue, //
+    NumberOfEmployees, //
+    YearStarted, //
 }
