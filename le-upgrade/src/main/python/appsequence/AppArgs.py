@@ -12,6 +12,7 @@ class AppArgs( object ):
 
     print 'Usage: {0} --checkOnly <tenant_list.csv> <results.csv>'.format( cmd )
     print 'Usage: {0} --upgrade <tenant_list.csv> <results.csv>'.format( cmd )
+    print 'Usage: {0} --missingLead <tenantName>'.format( cmd )
     print ''
     
     exit( exit_code )
@@ -30,19 +31,24 @@ class AppArgs( object ):
     if len(argv) == 1:
       cls.usage( cmd, 0 )
 
-    if len(argv) != 4:
-      cls.usage( cmd, 1 )
+    # if len(argv) != 4 and len(argv) != 2:
+    #   cls.usage( cmd, 1 )
 
     option = argv[1]
 
-    if option not in ['--checkOnly','--upgrade']:
+    if option not in ['--checkOnly','--upgrade','--missingLead']:
       cls.usage( argv[0], 1 )
 
     checkOnly = False
     if option == '--checkOnly':
       checkOnly = True
 
-    tenantFileName = argv[2]
-    resultsFileName = argv[3]
+    if option in ['--checkOnly','--upgrade']:
+      tenantFileName = argv[2]
+      resultsFileName = argv[3]
+      return (checkOnly, tenantFileName, resultsFileName)
 
-    return (checkOnly, tenantFileName, resultsFileName)
+    if option == '--missingLead':
+      tenantName = argv[2]
+      resultsFileName = argv[3]
+      return  (tenantName,resultsFileName)
