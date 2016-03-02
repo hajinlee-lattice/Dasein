@@ -72,6 +72,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Double top20PercentLift;
     private Double top30PercentLift;
     private String applicationId;
+    private String eventTableName;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -386,4 +387,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
+
+    @JsonProperty("EventTableName")
+    @Column(name = "Event_Table_Name", nullable = true)
+    public void setEventTableName(String eventTableName) {
+        this.eventTableName = eventTableName;
+    }
+
+    public String getEventTableName() {
+        return eventTableName;
+    }
+
 }

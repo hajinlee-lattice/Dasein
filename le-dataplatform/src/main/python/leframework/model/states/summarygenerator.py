@@ -84,8 +84,8 @@ class SummaryGenerator(State, JsonGenBase):
     def __getDLEventTableData(self, provenanceProperties, rowCount):
         element = OrderedDict()
         element["SourceRowCount"] = rowCount
-        if len(provenanceProperties) == 0:
-            self.logger.error("Provenance property is null.")
+        if len(provenanceProperties) < 3:
+            self.logger.error("Provenance property does not have the dataloader properties.")
             return element
 
         element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 

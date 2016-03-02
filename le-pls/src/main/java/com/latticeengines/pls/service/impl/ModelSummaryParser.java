@@ -126,6 +126,9 @@ public class ModelSummaryParser {
             summary.setId(String.format("ms__%s-%s", uuid, name));
         }
 
+        JsonNode eventTableProvenance = json.get("EventTableProvenance");
+        summary.setEventTableName(JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class, ""));
+
         // the Id will be used to find hdfs path, make sure they are in sync.
         try {
             String uuidInPath = ModelIdUtils.extractUuid(hdfsPath);

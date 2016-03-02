@@ -71,6 +71,7 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchDestTables("DerivedColumns") //
                 .modelName(parameters.getName()) //
                 .eventColumns(eventColumns) //
+                .eventTableName(sourceFile.getTableName()) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);

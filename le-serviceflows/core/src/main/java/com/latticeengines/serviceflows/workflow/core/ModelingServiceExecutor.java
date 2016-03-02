@@ -150,6 +150,7 @@ public class ModelingServiceExecutor {
         model.setCustomer(builder.getCustomer());
         model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
         model.setDataFormat("avro");
+        model.setProvenanceProperties("Event_Table_Name=" + builder.getEventTableTable());
 
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setTargetsList(targetAndFeatures.getKey());
@@ -233,6 +234,7 @@ public class ModelingServiceExecutor {
         private Configuration yarnConfiguration;
         private String metadataContents;
         private String modelName;
+        private String eventTableName;
 
         private String loadSubmissionUrl = "/rest/load";
         private String modelSubmissionUrl = "/rest/submit";
@@ -369,6 +371,11 @@ public class ModelingServiceExecutor {
 
         public Builder retrieveModelingJobStatusUrl(String modelingJobStatusUrl) {
             this.setModelingJobStatusUrl(modelingJobStatusUrl);
+            return this;
+        }
+
+        public Builder eventTableName(String eventTableName) {
+            this.setEventTableName(eventTableName);
             return this;
         }
 
@@ -570,6 +577,14 @@ public class ModelingServiceExecutor {
 
         public String getModelingJobStatusUrl() {
             return modelingJobStatusUrl;
+        }
+
+        public void setEventTableName(String eventTableName) {
+            this.eventTableName = eventTableName;
+        }
+
+        public String getEventTableTable() {
+            return eventTableName;
         }
 
     }

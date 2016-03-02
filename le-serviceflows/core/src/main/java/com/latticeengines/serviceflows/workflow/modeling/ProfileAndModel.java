@@ -74,7 +74,8 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         for (String eventCol : configuration.getEventColumns()) {
             bldr = bldr.targets(eventCol) //
                     .metadataTable("EventTable-" + eventCol) //
-                    .keyColumn("Id").modelName(configuration.getModelName());
+                    .keyColumn("Id").modelName(configuration.getModelName())
+                    .eventTableName(getConfiguration().getEventTableName());
             if (configuration.getEventColumns().size() != 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + eventCol + ")");
             }

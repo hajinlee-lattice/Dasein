@@ -16,9 +16,14 @@ class ProvenanceGenerator(State):
 
         if len(properties) > 0:
             self.result = OrderedDict()
-            self.result["SourceURL"] = properties["DataLoader_Instance"]
-            self.result["TenantName"] = properties["DataLoader_TenantName"]
-            self.result["QueryName"] = properties["DataLoader_Query"]
+            if "DataLoader_Instance" in properties.keys():
+                self.result["SourceURL"] = properties["DataLoader_Instance"]
+            if "DataLoader_TenantName" in properties.keys():
+                self.result["TenantName"] = properties["DataLoader_TenantName"]
+            if "DataLoader_Query" in properties.keys():
+                self.result["QueryName"] = properties["DataLoader_Query"]
+            if "Event_Table_Name" in properties.keys():
+                self.result["EventTableName"] = properties["Event_Table_Name"]
         else:
             self.logger.error("Provenance property is null.")
             self.result = OrderedDict()
