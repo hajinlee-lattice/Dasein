@@ -66,25 +66,6 @@ Use DOMUtil.isIE() to detect internet explorer.
 -->
 <!--[if IE]> <div id="isIE"></div> <![endif]-->
 
-<script type="text/javascript">
-    WebFontConfig = {
-        google: { families: [ 'Open Sans' ]
-        }
-    };
-</script>
-
-<!-- build:remove:dist -->
-<script type="text/javascript">
-    (function() {
-        var wf = document.createElement('script');
-        wf.src = 'lib/js/webfontloader.js';
-        wf.type = 'text/javascript';
-        wf.async = 'true';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(wf, s);
-    })();
-</script>
-
 <!-- combined common and vendor js -->
 <script src="/assets/js/min/vendor.min.js"></script>
 <script src="/assets/js/min/production.min.js"></script>

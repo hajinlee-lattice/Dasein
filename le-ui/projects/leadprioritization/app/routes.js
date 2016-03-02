@@ -276,6 +276,24 @@ angular
                 }   
             }
         })
+        .state('apitoken', {
+            url: '/apitoken',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'API Tokens';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: 'GenerateAPITokenController',
+                    templateUrl: './app/AppCommon/widgets/generateAPITokenWidget/generateAPIToken.html'
+                }  
+            }
+        })
         .state('sureshot', {
             url: '/sureshot',
             redirectto: 'sureshot.apikey',
