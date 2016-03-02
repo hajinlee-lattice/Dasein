@@ -274,8 +274,11 @@ public class ModelSummaryParser {
         String dateTimePattern = "(0[1-9]|1[012])/(0[1-9]|[12][0-9]|3[01])/(19|20)\\d\\d";
         Pattern pattern = Pattern.compile(dateTimePattern);
         Matcher matcher = pattern.matcher(nameDatetime);
-        matcher.find();
-        return nameDatetime.substring(0, matcher.start() - 1);
+        if (matcher.find()) {
+            return nameDatetime.substring(0, matcher.start() - 1);
+        } else {
+            return nameDatetime;
+        }
     }
 
     public boolean isIncomplete(JsonNode summaryJson) {

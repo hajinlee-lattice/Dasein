@@ -32,7 +32,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
         String data = new String(IOUtils.toByteArray(is));
         ModelSummary summary = modelSummaryParser.parse("modelsummary-eloqua.json", data);
 
-        assertEquals(summary.getName(), "PLSModel-Eloqua-02/18/2015 07:25:38 GMT");
+        assertEquals(summary.getName(), "PLSModel-Eloqua");
         assertEquals(summary.getLookupId(), "TENANT1|Q_PLS_Modeling_TENANT1|8195dcf1-0898-4ad3-b94d-0d0f806e979e");
         assertEquals(summary.getTrainingRowCount().longValue(), 15376L);
         assertEquals(summary.getTestRowCount().longValue(), 3738L);
@@ -91,7 +91,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
         String data = new String(IOUtils.toByteArray(is));
         ModelSummary summary = modelSummaryParser.parse("modelsummary-detailsonly.json", data);
 
-        assertEquals(summary.getName(), "PLSModel-02/18/2015 07:25:38 GMT");
+        assertEquals(summary.getName(), "PLSModel");
         assertEquals(summary.getLookupId(), "TENANT1|Q_PLS_Modeling_TENANT1|8195dcf1-0898-4ad3-b94d-0d0f806e979e");
         assertEquals(summary.getTrainingRowCount().longValue(), 0L);
         assertEquals(summary.getTestRowCount().longValue(), 0L);
