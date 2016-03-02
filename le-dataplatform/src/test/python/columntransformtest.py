@@ -1,12 +1,10 @@
-import columntransform
-
-import json
-import imp
-
-from trainingtestbase import TrainingTestBase
 from array import array
+import imp
+import json
 
-from configurablepipelinetransformsfromfile.columntypeconversionstep import ColumnTypeConversionStep
+import columntransform
+from trainingtestbase import TrainingTestBase
+
 
 class ColumnTransformTest(TrainingTestBase):
 

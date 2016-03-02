@@ -1,7 +1,4 @@
-from avro import schema, datafile, io
 from collections import OrderedDict
-import json
-import math
 import os
 
 import encoder
