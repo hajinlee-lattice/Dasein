@@ -1,7 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,10 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -20,6 +24,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
@@ -29,6 +34,8 @@ import com.latticeengines.propdata.match.service.PublicDomainService;
 
 @Component("matchPlanner")
 class MatchPlanner {
+
+    private static Log log = LogFactory.getLog(MatchPlanner.class);
 
     @Autowired
     private ColumnSelectionService columnSelectionService;
@@ -69,16 +76,18 @@ class MatchPlanner {
 
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> domainSet = new HashSet<>();
+        Set<NameLocation> nameLocationSet = new HashSet<>();
 
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(input.getData().get(i), i,
-                    input.getFields().size(), keyPositionMap, domainSet);
+                    input.getFields().size(), keyPositionMap, domainSet, nameLocationSet);
             record.setColumnMatched(new ArrayList<Boolean>());
             records.add(record);
         }
 
         context.setInternalResults(records);
         context.setDomains(domainSet);
+        context.setNameLocations(nameLocationSet);
         return context;
     }
 
@@ -125,29 +134,69 @@ class MatchPlanner {
     }
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
-            int numInputFields, Map<MatchKey, Integer> keyPositionMap, Set<String> domainSet) {
+            int numInputFields, Map<MatchKey, Integer> keyPositionMap, Set<String> domainSet,
+            Set<NameLocation> nameLocationSet) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
         record.setInput(inputRecord);
 
-        int domainPos = keyPositionMap.containsKey(MatchKey.Domain) ? keyPositionMap.get(MatchKey.Domain) : -1;
-
         if (inputRecord.size() != numInputFields) {
-            record.setErrorMessages(Collections.singletonList("The number of objects in this row [" + inputRecord.size()
-                    + "] does not match the number of fields claimed [" + numInputFields + "]"));
-        } else if (domainPos >= 0) {
+            record.addErrorMessage("The number of objects in this row [" + inputRecord.size()
+                    + "] does not match the number of fields claimed [" + numInputFields + "]");
+            return record;
+        }
+
+        if (keyPositionMap.containsKey(MatchKey.Domain)) {
+            int domainPos = keyPositionMap.get(MatchKey.Domain);
             try {
                 String originalDomain = (String) inputRecord.get(domainPos);
                 String cleanDomain = DomainUtils.parseDomain(originalDomain);
-                if (!publicDomainService.isPublicDomain(cleanDomain)) {
-                    record.setParsedDomain(cleanDomain);
-                    // update domain set
-                    domainSet.add(cleanDomain);
+                record.setParsedDomain(cleanDomain);
+                // update domain set
+                domainSet.add(cleanDomain);
+                if (publicDomainService.isPublicDomain(cleanDomain)) {
+                    record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
                 }
             } catch (Exception e) {
-                record.setErrorMessages(
-                        Collections.singletonList("Error when cleanup domain field: " + e.getMessage()));
+                record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
+            }
+        }
+
+        if (keyPositionMap.containsKey(MatchKey.Name) && keyPositionMap.containsKey(MatchKey.State)
+                && keyPositionMap.containsKey(MatchKey.Country)) {
+            int namePos = keyPositionMap.get(MatchKey.Name);
+            int statePos = keyPositionMap.get(MatchKey.State);
+            int countryPos = keyPositionMap.get(MatchKey.Country);
+
+            try {
+                String originalName = (String) inputRecord.get(namePos);
+                String originalState = (String) inputRecord.get(statePos);
+                String originalCountry = (String) inputRecord.get(countryPos);
+
+                if (StringUtils.isEmpty(originalCountry)) {
+                    originalCountry = LocationUtils.USA;
+                }
+
+                String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
+                String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
+
+                NameLocation nameLocation = new NameLocation();
+                nameLocation.setName(originalName);
+                nameLocation.setState(cleanState);
+                nameLocation.setCountry(cleanCountry);
+
+                if (keyPositionMap.containsKey(MatchKey.City)) {
+                    int cityPos = keyPositionMap.get(MatchKey.City);
+                    String originalCity = (String) inputRecord.get(cityPos);
+                    nameLocation.setCity(originalCity);
+                }
+
+                record.setParsedNameLocation(nameLocation);
+                nameLocationSet.add(nameLocation);
+            } catch (Exception e) {
+                log.error(ExceptionUtils.getFullStackTrace(e));
+                record.addErrorMessage("Error when cleanup name and location fields: " + e.getMessage());
             }
         }
 

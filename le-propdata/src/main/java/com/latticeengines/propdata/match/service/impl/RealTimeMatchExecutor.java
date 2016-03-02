@@ -25,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.datasource.DataSourcePool;
@@ -45,6 +47,7 @@ import com.latticeengines.propdata.match.metric.MatchedColumn;
 import com.latticeengines.propdata.match.metric.RealTimeResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
+import com.latticeengines.propdata.match.service.PublicDomainService;
 
 @Component("realTimeMatchExecutor")
 class RealTimeMatchExecutor implements MatchExecutor {
@@ -62,6 +65,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     @Autowired
     private MetricService metricService;
+
+    @Autowired
+    private PublicDomainService publicDomainService;
 
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
@@ -165,11 +171,77 @@ class RealTimeMatchExecutor implements MatchExecutor {
             Map<String, List<Map<String, Object>>> resultsMap) {
         for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
             String sourceName = result.getKey();
-            if (isDomainSource(sourceName)) {
+            if (isCachedSource(sourceName)) {
+                String domainField = getDomainField(sourceName);
+                String nameField = getNameField(sourceName);
+                String cityField = getCityField(sourceName);
+                String stateField = getStateField(sourceName);
+                String countryField = getCountryField(sourceName);
+                for (InternalOutputRecord record : records) {
+                    // try using domain first
+                    boolean matched = false;
+                    String parsedDomain = record.getParsedDomain();
+                    if (StringUtils.isNotEmpty(parsedDomain)) {
+                        for (Map<String, Object> row : result.getValue()) {
+                            if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
+                                record.getResultsInSource().put(sourceName, row);
+                                matched = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!matched) {
+                        NameLocation nameLocation = record.getParsedNameLocation();
+                        if (nameLocation != null) {
+                            String parsedName = nameLocation.getName();
+                            String parsedCountry = nameLocation.getCountry();
+                            String parsedState = nameLocation.getState();
+                            String parsedCity = nameLocation.getCity();
+                            if (StringUtils.isNotEmpty(parsedName)) {
+                                for (Map<String, Object> row : result.getValue()) {
+                                    if (row.get(nameField) == null
+                                            || !parsedName.equalsIgnoreCase((String) row.get(nameField))) {
+                                        continue;
+                                    }
+
+                                    Object countryInRow = row.get(countryField);
+                                    Object stateInRow = row.get(stateField);
+                                    Object cityInRow = row.get(cityField);
+
+                                    if (countryInRow != null
+                                            && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
+                                        continue;
+                                    }
+
+                                    if (countryInRow == null && !LocationUtils.USA.equalsIgnoreCase(parsedCountry)) {
+                                        continue;
+                                    }
+
+                                    if (StringUtils.isNotEmpty(parsedState) && stateInRow != null
+                                            && !parsedState.equalsIgnoreCase((String) stateInRow)) {
+                                        continue;
+                                    }
+
+                                    if (StringUtils.isNotEmpty(parsedCity) && cityInRow != null
+                                            && !parsedCity.equalsIgnoreCase((String) cityInRow)) {
+                                        continue;
+                                    }
+
+                                    record.getResultsInSource().put(sourceName, row);
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+            } else if (isDomainSource(sourceName)) {
                 String domainField = getDomainField(sourceName);
                 for (InternalOutputRecord record : records) {
                     String parsedDomain = record.getParsedDomain();
-                    if (StringUtils.isEmpty(parsedDomain)) {
+                    if (StringUtils.isEmpty(parsedDomain) || publicDomainService.isPublicDomain(parsedDomain)) {
                         continue;
                     }
 
@@ -252,7 +324,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 }
                 outputRecord.setInput(internalRecord.getInput());
                 outputRecord.setMatched(internalRecord.isMatched());
-                outputRecord.setMatchedDomain(internalRecord.getMatchedDomain());
+                outputRecord.setMatchedDomain(internalRecord.getParsedDomain());
+                outputRecord.setMatchedNameLocation(internalRecord.getParsedNameLocation());
                 outputRecord.setRowNumber(internalRecord.getRowNumber());
                 outputRecord.setErrorMessages(internalRecord.getErrorMessages());
                 outputRecords.add(outputRecord);
@@ -270,23 +343,110 @@ class RealTimeMatchExecutor implements MatchExecutor {
         return true;
     }
 
+    private boolean isCachedSource(String sourceName) {
+        return MODEL.equals(sourceName);
+    }
+
     private String getDomainField(String sourceName) {
         return "Domain";
     }
 
+    private String getNameField(String sourceName) { return "Name"; }
+
+    private String getCityField(String sourceName) { return "City"; }
+
+    private String getStateField(String sourceName) { return "State"; }
+
+    private String getCountryField(String sourceName) { return "Country"; }
+
     private MatchCallable getMatchCallable(String sourceName, List<String> targetColumns, MatchContext matchContext) {
         JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
         if (MODEL.equals(sourceName)) {
-            DomainBasedMatchCallable callable = new DomainBasedMatchCallable();
+            CachedMatchCallable callable =
+                    new CachedMatchCallable("Domain", "Name", "Country", "State", "City");
             callable.setSourceName(sourceName);
             callable.setTargetColumns(targetColumns);
             callable.setJdbcTemplate(jdbcTemplate);
             callable.setDomainSet(matchContext.getDomains());
+            callable.setNameLocationSet(matchContext.getNameLocations());
             callable.setRootOperationUID(matchContext.getOutput().getRootOperationUID());
             return callable;
         } else {
             throw new UnsupportedOperationException(
                     "Only support match against predefined selection " + ColumnSelection.Predefined.Model + " now.");
+        }
+    }
+
+    private class CachedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
+
+        private Log log = LogFactory.getLog(CachedMatchCallable.class);
+
+        private String domainField;
+        private String nameField;
+        private String countryField;
+        private String stateField;
+        private String cityField;
+
+        CachedMatchCallable(String domainField, String nameField, String countryField, String stateField,
+                            String cityField) {
+            this.domainField = domainField;
+            this.nameField = nameField;
+            this.countryField = countryField;
+            this.stateField = stateField;
+            this.cityField = cityField;
+        }
+
+        private Set<String> domainSet;
+        private Set<NameLocation> nameLocationSet;
+
+        public void setDomainSet(Set<String> domainSet) {
+            this.domainSet = domainSet;
+        }
+
+        public void setNameLocationSet(Set<NameLocation> nameLocationSet) {
+            this.nameLocationSet = nameLocationSet;
+        }
+
+        @Override
+        public List<Map<String, Object>> call() {
+            Long beforeQuerying = System.currentTimeMillis();
+            List<Map<String, Object>> results = jdbcTemplate
+                    .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet, nameLocationSet));
+            log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
+                    + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
+            submitSqlMetric(getSourceTableName(), jdbcTemplate, results.size(), targetColumns.size(),
+                    System.currentTimeMillis() - beforeQuerying);
+            return results;
+        }
+
+        private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains,
+                                         Collection<NameLocation> nameLocations) {
+            String sql = "SELECT "
+                    + "[" + domainField + "], "
+                    + "[" + nameField + "], "
+                    + "[" + countryField + "], "
+                    + "[" + stateField + "], "
+                    + ( cityField != null ? "[" + cityField + "], " : "" )
+                    + "[" + StringUtils.join(columns, "], [") + "] \n"
+                    + "FROM [" + tableName + "] WITH(NOLOCK) \n"
+                    + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
+
+            for (NameLocation nameLocation : nameLocations) {
+                sql += " OR ( ";
+                sql += String.format("[%s] = '%s'", nameField, nameLocation.getName());
+                if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
+                    sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry());
+                }
+                if (StringUtils.isNotEmpty(nameLocation.getState())) {
+                    sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState());
+                }
+                if (cityField != null && StringUtils.isNotEmpty(nameLocation.getCity())) {
+                    sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity());
+                }
+                sql += " )\n";
+            }
+
+            return sql;
         }
     }
 
@@ -307,41 +467,43 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
                     + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
-            submitMetric(results.size(), targetColumns.size(), System.currentTimeMillis() - beforeQuerying);
+            submitSqlMetric(getSourceTableName(), jdbcTemplate, results.size(), targetColumns.size(),
+                    System.currentTimeMillis() - beforeQuerying);
             return results;
-        }
-
-        private void submitMetric(Integer rows, Integer cols, Long timeElapsed) {
-            try {
-                SqlQueryMetric metric = new SqlQueryMetric();
-                metric.setTableName(getSourceTableName());
-                metric.setCols(cols);
-                metric.setRows(rows);
-                metric.setTimeElapsed(Integer.valueOf(String.valueOf(timeElapsed)));
-
-                Connection connection = jdbcTemplate.getDataSource().getConnection();
-                String productName = connection.getMetaData().getDatabaseProductName();
-                metric.setServerType(productName);
-
-                Pattern pattern = Pattern.compile("//(.*?)[:;/$]");
-                Matcher matcher = pattern.matcher(connection.getMetaData().getURL());
-                if (matcher.find()) {
-                    String token = matcher.group(0);
-                    String host = token.substring(2, token.length() - 1);
-                    metric.setHostName(host);
-                }
-
-                FetchDataFromSql fetchDataFromSql = new FetchDataFromSql(metric);
-                metricService.write(MetricDB.LDC_Match, fetchDataFromSql);
-
-            } catch (Exception e) {
-                log.warn("Failed to store sql metric.", e);
-            }
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
             return "SELECT [Domain], [" + StringUtils.join(columns, "], [") + "] \n" + "FROM [" + tableName
                     + "] WITH(NOLOCK) \n" + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
+        }
+    }
+
+    private void submitSqlMetric(String tableName, JdbcTemplate jdbcTemplate, Integer rows, Integer cols,
+                                 Long timeElapsed) {
+        try {
+            SqlQueryMetric metric = new SqlQueryMetric();
+            metric.setTableName(tableName);
+            metric.setCols(cols);
+            metric.setRows(rows);
+            metric.setTimeElapsed(Integer.valueOf(String.valueOf(timeElapsed)));
+
+            Connection connection = jdbcTemplate.getDataSource().getConnection();
+            String productName = connection.getMetaData().getDatabaseProductName();
+            metric.setServerType(productName);
+
+            Pattern pattern = Pattern.compile("//(.*?)[:;/$]");
+            Matcher matcher = pattern.matcher(connection.getMetaData().getURL());
+            if (matcher.find()) {
+                String token = matcher.group(0);
+                String host = token.substring(2, token.length() - 1);
+                metric.setHostName(host);
+            }
+
+            FetchDataFromSql fetchDataFromSql = new FetchDataFromSql(metric);
+            metricService.write(MetricDB.LDC_Match, fetchDataFromSql);
+
+        } catch (Exception e) {
+            log.warn("Failed to store sql metric.", e);
         }
     }
 

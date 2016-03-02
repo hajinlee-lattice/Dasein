@@ -12,11 +12,13 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 
 public class MatchContext implements Fact, Dimension {
 
     private MatchStatus status;
     private Set<String> domains;
+    private Set<NameLocation> nameLocations;
     private MatchInput input;
     private MatchOutput output;
     private Map<String, List<String>> sourceColumnsMap;
@@ -50,6 +52,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setDomains(Set<String> domains) {
         this.domains = domains;
+    }
+
+    public Set<NameLocation> getNameLocations() {
+        return nameLocations;
+    }
+
+    public void setNameLocations(Set<NameLocation> nameLocations) {
+        this.nameLocations = nameLocations;
     }
 
     @MetricFieldGroup

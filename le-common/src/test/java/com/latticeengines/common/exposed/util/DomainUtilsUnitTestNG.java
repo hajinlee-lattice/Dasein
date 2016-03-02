@@ -4,8 +4,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.DomainUtils;
-
 public class DomainUtilsUnitTestNG {
     @Test(groups = "unit", dataProvider = "domainDataProvider")
     public void testParseDomain(String url, String domain) {
@@ -20,6 +18,7 @@ public class DomainUtilsUnitTestNG {
                 {"http://www.rutherfordproperty.co.nz", "rutherfordproperty.co.nz"},
                 {"http://trinid.com/", "trinid.com"},
                 {"maps.google.com", "maps.google.com"},
+                {"adoic@gmail.com", "gmail.com"},
                 {"www.www.com", "www.com"},
                 {"abcdefg", null},
                 {"www.www", null}

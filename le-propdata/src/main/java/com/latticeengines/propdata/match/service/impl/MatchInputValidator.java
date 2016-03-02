@@ -62,8 +62,9 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Neither domain nor name is provided.");
         }
 
-        if (!keySet.contains(MatchKey.Domain)) {
-            throw new UnsupportedOperationException("Only domain based match is supported for now.");
+        if (!keySet.contains(MatchKey.Domain) && keySet.contains(MatchKey.Name)
+                && (!keySet.contains(MatchKey.Country) || !keySet.contains(MatchKey.State))) {
+            throw new IllegalArgumentException("Name location based match must has country and state.");
         }
     }
 

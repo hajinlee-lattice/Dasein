@@ -15,6 +15,7 @@ public class OutputRecord {
     private Boolean matched;
     private List<Object> input;
     private String matchedDomain;
+    private NameLocation matchedNameLocation;
     private List<Object> output;
     private List<String> errorMessages;
 
@@ -56,6 +57,16 @@ public class OutputRecord {
     @JsonProperty("MatchedDomain")
     public void setMatchedDomain(String matchedDomain) {
         this.matchedDomain = matchedDomain;
+    }
+
+    @JsonProperty("MatchedNameLocation")
+    public NameLocation getMatchedNameLocation() {
+        return matchedNameLocation;
+    }
+
+    @JsonProperty("MatchedNameLocation")
+    public void setMatchedNameLocation(NameLocation matchedNameLocation) {
+        this.matchedNameLocation = matchedNameLocation;
     }
 
     @JsonProperty("Output")
