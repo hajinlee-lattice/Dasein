@@ -110,7 +110,21 @@ Icons
 		-webkit-mask:  url("../images/ico-model-history-10.svg");
 		mask:  url("../images/ico-model-history-10.svg");
 	}
-
+	&.ico-datatable {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-datatable.svg");
+		mask:  url("../images/ico-datatable.svg");
+	}
+	&.ico-performance {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-performance.svg");
+		mask:  url("../images/ico-performance.svg");
+	}
+	&.ico-alerts {
+		background-color: $pearl-white;
+		-webkit-mask:  url("../images/ico-performance.svg");
+		mask:  url("../images/ico-performance.svg");
+	}
 	&.ico-light-gray {
 		background-color: #b3b5b8;
 	}
