@@ -36,7 +36,8 @@ class ColumnTransform(object):
                         with open(pipelineFile) as pipelineFileText:
                             self.pipelineFileAsJson = json.load(pipelineFileText)
                             break
-            except Exception:
+            except Exception as e:
+                logger.warn(str(e))
                 logger.exception("Could not load pipeline from provided path:" + pathToPipelineFiles)
         else:
             logger.info("Configurable pipeline not loaded because empty path provided: %s" % pathToPipelineFiles)

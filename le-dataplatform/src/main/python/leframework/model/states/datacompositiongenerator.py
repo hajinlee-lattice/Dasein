@@ -18,7 +18,7 @@ class DataCompositionGenerator(State):
         if configMetadata is not None:
             # TODO Need to handle derived fields.
             fields = OrderedDict(self.__get_fields(configMetadata))
-            transforms = list(self.__get_transforms())
+            transforms = list(self.__get_transforms(fields))
 
             structure["fields"] = fields
             structure["transforms"] = transforms
@@ -64,7 +64,7 @@ class DataCompositionGenerator(State):
 
         return result
 
-    def __get_transforms(self):
+    def __get_transforms(self, fields):
         pipeline = self.getMediator().pipeline.getPipeline()
         result = []
         for step in pipeline:
@@ -73,6 +73,9 @@ class DataCompositionGenerator(State):
             
             for column in columns:
                 name = column[0]["name"]
+                
+                if step.doColumnCheck() and (name not in fields or fields[name]["interpretation"] != "FEATURE"):
+                    continue
                 if len(column[1]) == 1:
                     result.append(self.__make_transform(rtsModule, name, column[0]["type"], [("column", k) for k in column[1]]))
                 else:

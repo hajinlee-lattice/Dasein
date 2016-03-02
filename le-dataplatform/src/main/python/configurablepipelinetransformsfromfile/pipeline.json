@@ -1,44 +1,66 @@
 {
   "columnTransformFiles": {
     "PivotStep": {
-        "KeyWhenSortingByAscending": "3",
-        "Name": "pivotstep",
-        "MainClassName": "PivotStep",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": [],
-        "NamedParameterListToInit": {},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/pivotstep.py"
+      "KeyWhenSortingByAscending": "1",
+      "Name": "pivotstep",
+      "MainClassName": "PivotStep",
+      "MainMethodName": "__init__",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {},
+      "ColumnTransformFilePath": "./lepipeline.tar.gz/pivotstep.py"
     },
     "EnumeratedColumnTransformStep": {
-        "KeyWhenSortingByAscending": "0",
-        "Name": "enumeratedcolumntransformstep",
-        "MainClassName": "EnumeratedColumnTransformStep",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Categorical"],
-        "NamedParameterListToInit": {"columns": "categoricalColumns"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/enumeratedcolumntransformstep.py"
+      "KeyWhenSortingByAscending": "2",
+      "Name": "enumeratedcolumntransformstep",
+      "MainClassName": "EnumeratedColumnTransformStep",
+      "MainMethodName": "__init__",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Categorical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "categoricalColumns"
+      },
+      "ColumnTransformFilePath": "./lepipeline.tar.gz/enumeratedcolumntransformstep.py"
     },
-    "ColumnTypeConversionStep":{
-        "KeyWhenSortingByAscending": "1",
-        "Name": "columntypeconversionstep",
-        "MainClassName": "ColumnTypeConversionStep",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": [],
-        "NamedParameterListToInit": {"columnsToConvert": "columnsToTransform"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
+    "ColumnTypeConversionStep": {
+      "KeyWhenSortingByAscending": "3",
+      "Name": "columntypeconversionstep",
+      "MainClassName": "ColumnTypeConversionStep",
+      "MainMethodName": "__init__",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {
+        "columnsToConvert": "columnsToTransform"
+      },
+      "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
     },
-    "ImputationStep":{
-        "KeyWhenSortingByAscending": "2",
-        "Name": "imputationstep",
-        "MainClassName": "ImputationStep",
-        "MainMethodName": "__init__",
-        "UniqueColumnTransformName": "",
-        "OperatesOnColumns": ["Numerical"],
-        "NamedParameterListToInit": {"columns": "orderedDictContinuousColumns" , "imputationValues": "emptyDictionary", "targetCol": "targetColumn"},
-        "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstep.py"
+    "ImputationStep": {
+      "KeyWhenSortingByAscending": "4",
+      "Name": "imputationstep",
+      "MainClassName": "ImputationStep",
+      "MainMethodName": "__init__",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [
+        "Numerical"
+      ],
+      "NamedParameterListToInit": {
+        "columns": "orderedDictContinuousColumns",
+        "imputationValues": "emptyDictionary",
+        "targetCol": "targetColumn"
+      },
+      "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstep.py"
+    },
+    "ExportDataFrameStep": {
+      "KeyWhenSortingByAscending": "5",
+      "Name": "exportdfstep",
+      "MainClassName": "ExportDataFrameStep",
+      "MainMethodName": "__init__",
+      "UniqueColumnTransformName": "",
+      "OperatesOnColumns": [],
+      "NamedParameterListToInit": {},
+      "ColumnTransformFilePath": "./lepipeline.tar.gz/exportdfstep.py"
     }
   }
 }

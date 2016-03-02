@@ -32,8 +32,7 @@ class PivotStep(PipelineStep):
             dataFrame[k] = dataFrame[v[0]].apply(lambda row: self.pivot(row, values))
             self.__appendMetadataEntry(configMetadata, k)
         
-        for c in columnsToRemove:
-            dataFrame.drop(c, axis=1, inplace=True)
+        super(PivotStep, self).removeColumns(dataFrame, columnsToRemove)
         return dataFrame
     
     def __appendMetadataEntry(self, configMetadata, columnName):
@@ -42,15 +41,15 @@ class PivotStep(PipelineStep):
         entry = {}
         entry["ColumnName"] = columnName
         entry["StatisticalType"] = "ratio"
-        entry["FundamentalType"] = "Integer"
+        entry["FundamentalType"] = "numeric"
         entry["DataType"] = "Integer"
         super(PivotStep, self).appendMetadataEntry(configMetadata, entry)
     
     def pivot(self, row, values):
         for value in values:
             if row == value:
-                return 1
-        return 0
+                return 1.0
+        return 0.0
     
     def __setPivotColumns(self, configMetadata):
         for config in configMetadata:
@@ -78,10 +77,14 @@ class PivotStep(PipelineStep):
             self.pivotValuesFilePath = os.path.abspath(fp.name)
 
     def getOutputColumns(self):
-        return [(create_column(k, "INT"), [v[0], k]) for k, v in self.columnsToPivot.items()]
+        return [(create_column(k, "INTEGER"), [v[0], k]) for k, v in self.columnsToPivot.items()]
 
     def getRTSMainModule(self):
         return "pivot"
 
     def getRTSArtifacts(self):
         return [("pivotvalues.txt", self.pivotValuesFilePath)]
+    
+    def doColumnCheck(self):
+        return False
+

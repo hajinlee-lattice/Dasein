@@ -23,14 +23,14 @@ class ColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 4, "Pipeline should have 4 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(len(pipeline), 5, "Pipeline should have 4 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def assertThatEachMemberOfPipelineHasTransformMethod(self, pipeline):
         for step in pipeline:
             self.assertTrue(hasattr(step, "transform"), "Each transform in pipeline should have a transform method")
 
     def checkThatTransformsDontThrowExceptions(self):
-        keys = ["pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"]
+        keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
 
@@ -89,10 +89,10 @@ class ColumnTransformTest(TrainingTestBase):
     def assertSortingOfTransform(self, pipeline):
         for i, step in enumerate(pipeline):
             if i == 0:
-                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
-            if i == 1:
-                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
-            if i == 2:
-                self.assertEquals(step.__class__.__name__ , "ImputationStep")
-            if i == 3:
                 self.assertEquals(step.__class__.__name__ , "PivotStep")
+            if i == 1:
+                self.assertEquals(step.__class__.__name__ , "EnumeratedColumnTransformStep")
+            if i == 2:
+                self.assertEquals(step.__class__.__name__ , "ColumnTypeConversionStep")
+            if i == 3:
+                self.assertEquals(step.__class__.__name__ , "ImputationStep")

@@ -14,7 +14,7 @@ def get_logger(name):
     return logger
 
 def create_column(name, dataType):
-    return { "name": name, "type": dataType}
+    return { "name": name, "type": dataType }
  
 class Pipeline(object):
     pipelineSteps = []
@@ -70,6 +70,14 @@ class PipelineStep(object):
 
     def appendMetadataEntry(self, configMetadata, entry):
         configMetadata.append(entry)
+    
+    def removeColumns(self, dataFrame, columnsToRemove):
+        for c in columnsToRemove:
+            dataFrame.drop(c, axis=1, inplace=True)
+        self.setProperty("REMOVEDCOLUMNS", columnsToRemove)
+    
+    def doColumnCheck(self):
+        return True
     
 class ModelStep(PipelineStep):
     model = None

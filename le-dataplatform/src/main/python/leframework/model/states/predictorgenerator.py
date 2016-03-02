@@ -96,7 +96,7 @@ class PredictorGenerator(State):
             predictor["Category"] = None
             if metadata["Extensions"] is not None:
                 for e in metadata["Extensions"]:
-                    if (e["Key"] == "Category"):
+                    if e["Key"] == "Category":
                         predictor["Category"] = e["Value"]
                         break
         else:

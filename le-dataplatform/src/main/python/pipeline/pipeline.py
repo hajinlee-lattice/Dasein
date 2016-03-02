@@ -8,6 +8,8 @@ from pipelinefwk import Pipeline
 from pipelinesteps import ColumnTypeConversionStep
 from pipelinesteps import EnumeratedColumnTransformStep
 from pipelinesteps import ImputationStep
+from pipelinesteps import PivotStep
+from pipelinesteps import ExportDataFrameStep
 
 
 logger = logging.getLogger(name='pipeline')
@@ -43,7 +45,11 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     stepsFromPythonFile = None
 
     try:
-        stepsFromPythonFile = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(OrderedDict(continuousColumns), {}, targetColumn)]
+        stepsFromPythonFile = [PivotStep(),
+                               EnumeratedColumnTransformStep(categoricalColumns), 
+                               ColumnTypeConversionStep(columnsToTransform), 
+                               ImputationStep(OrderedDict(continuousColumns), {}, targetColumn),
+                               ExportDataFrameStep()]
         steps = stepsFromPythonFile
     except Exception as e:
         stepsFromPythonFile = None
@@ -52,7 +58,7 @@ def setupPipeline(metadata, stringColumns, targetColumn):
     try:
         pipelineFilePaths = ["./lepipeline.tar.gz/pipeline.json"]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles=pipelineFilePaths)
-        stepsFromJSONFile = colTransform.buildPipelineFromFile(stringColumns = stringColumns, \
+        stepsFromJSONFile = colTransform.buildPipelineFromFile(stringColumns=stringColumns, \
                                                                categoricalColumns=categoricalColumns, \
                                                                continuousColumns=continuousColumns, \
                                                                targetColumn=targetColumn, \
