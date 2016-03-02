@@ -12,10 +12,10 @@ print 'PATH : {0}'.format(PATCH_PATH)
 print 'REV  : {0}'.format(REVISION)
 print ''
 
-(checkOnly, tenantFileName, resultsFileName) = appsequence.AppArgs.get(sys.argv)
+(tenantName,resultsFileName) = appsequence.AppArgs.get(sys.argv)
 sequence = []
 sequence.append(appsequence.LPCheckVersion('2.3.0'))
 sequence.append(lpMissingLeadsReport.MissingLeadsReport())
 #sequence.append(appsequence.LPSetVersion('2.3.0'))
-app = appsequence.AppSequence(tenantFileName, resultsFileName, sequence, checkOnly)
+app = appsequence.AppSequence(tenantName, resultsFileName, sequence, False)
 app.execute()
