@@ -136,7 +136,14 @@ public class LedpCSVToAvroImportMapper extends
 
             @Override
             public int compare(String o1, String o2) {
-                SemanticType semanticType = SemanticType.valueOf(o1);
+                final String s = o1;
+                Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
+                    @Override
+                    public boolean apply(Attribute attribute) {
+                        return attribute.getPhysicalName().equals(s);
+                    }
+                });
+                SemanticType semanticType = attr.getSemanticType();
                 if (semanticType != null
                         && (semanticType.equals(SemanticType.Email) || semanticType.equals(SemanticType.Website))) {
                     return -1;
