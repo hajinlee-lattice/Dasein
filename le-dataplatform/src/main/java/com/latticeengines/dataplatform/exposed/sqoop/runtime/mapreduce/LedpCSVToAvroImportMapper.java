@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
@@ -39,6 +41,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
 
@@ -53,6 +56,7 @@ public class LedpCSVToAvroImportMapper extends
     private final AvroWrapper<GenericRecord> wrapper = new AvroWrapper<GenericRecord>();
     private Schema schema;
     private Table table;
+    private List<Attribute> attributes;
     private LargeObjectLoader lobLoader;
     private Path outputPath;
     private CSVPrinter csvFilePrinter;
@@ -132,7 +136,9 @@ public class LedpCSVToAvroImportMapper extends
 
             @Override
             public int compare(String o1, String o2) {
-                if (o1.equals("Email") || o1.equals("Website")) {
+                SemanticType semanticType = SemanticType.valueOf(o1);
+                if (semanticType != null
+                        && (semanticType.equals(SemanticType.Email) || semanticType.equals(SemanticType.Website))) {
                     return -1;
                 } else
                     return o1.compareTo(o2);
@@ -142,14 +148,21 @@ public class LedpCSVToAvroImportMapper extends
         sortedFieldMap.putAll(fieldMap);
         LOG.info("Start to processing line: " + (lineNum + 1));
         for (Map.Entry<String, Object> entry : sortedFieldMap.entrySet()) {
-            String fieldKey = entry.getKey();
+            final String fieldKey = entry.getKey();
             String fieldCsvValue = String.valueOf(entry.getValue());
             Object fieldAvroValue = null;
             Type avroType = schema.getField(fieldKey).schema().getTypes().get(0).getType();
+
+            Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
+                @Override
+                public boolean apply(Attribute attribute) {
+                    return attribute.getPhysicalName().equals(fieldKey);
+                }
+            });
+
             try {
-                validateRowValueBeforeConvertToAvro(interpretation, fieldKey, fieldCsvValue);
+                validateRowValueBeforeConvertToAvro(interpretation, attr, fieldCsvValue);
                 LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", fieldKey));
-                Attribute attr = table.getNameAttributeMap().get(fieldKey);
                 if (attr.isNullable() && fieldCsvValue.equals("")) {
                     fieldAvroValue = null;
                 } else {
@@ -164,29 +177,29 @@ public class LedpCSVToAvroImportMapper extends
         return record;
     }
 
-    private void validateRowValueBeforeConvertToAvro(String interpretation, String fieldKey, String fieldCsvValue) {
-        if ((fieldKey.equals("Id") || fieldKey.equals("IsWon") || fieldKey.equals("IsConverted"))
+    private void validateRowValueBeforeConvertToAvro(String interpretation, Attribute attr, String fieldCsvValue) {
+        SemanticType semanticType = attr.getSemanticType();
+        if (semanticType == null) {
+            Log.info("SemanticType for attribute " + attr.getName() + " is null.");
+        } else if ((semanticType.equals(SemanticType.ExternalId) || semanticType.equals(SemanticType.Event))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
-            throw new RuntimeException(String.format("Required Column %s is missing value.", fieldKey));
-        } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())) {
-            if (fieldKey.equals("Website") && StringUtils.isEmpty(fieldCsvValue)) {
-                emailOrWebsiteIsEmpty = true;
-            } else if (emailOrWebsiteIsEmpty
-                    && (fieldKey.equals("Name") || fieldKey.equals("BillingCity") || fieldKey.equals("BillingState") || fieldKey
-                            .equals("BillingCountry")) && StringUtils.isEmpty(fieldCsvValue)) {
-                missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Website column is empty, so %s cannot be empty.", fieldKey));
-            }
-        } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
-            if (fieldKey.equals("Email") && StringUtils.isEmpty(fieldCsvValue)) {
-                emailOrWebsiteIsEmpty = true;
-            } else if (emailOrWebsiteIsEmpty
-                    && (fieldKey.equals("Company") || fieldKey.equals("City") || fieldKey.equals("State") || fieldKey
-                            .equals("Country")) && StringUtils.isEmpty(fieldCsvValue)) {
-                missingRequiredColValue = true;
-                throw new RuntimeException(String.format("Email column is empty, so %s cannot be empty.", fieldKey));
-            }
+            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getName()));
+        } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())
+                && semanticType.equals(SemanticType.Website) && StringUtils.isEmpty(fieldCsvValue)) {
+            emailOrWebsiteIsEmpty = true;
+        } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())
+                && semanticType.equals(SemanticType.Email) && StringUtils.isEmpty(fieldCsvValue)) {
+            emailOrWebsiteIsEmpty = true;
+        } else if (emailOrWebsiteIsEmpty
+                && (semanticType.equals(SemanticType.CompanyName) || semanticType.equals(SemanticType.City)
+                        || semanticType.equals(SemanticType.State) || semanticType.equals(SemanticType.Country))
+                && StringUtils.isEmpty(fieldCsvValue)) {
+            missingRequiredColValue = true;
+            String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? table.getAttribute(
+                    SemanticType.Website).getName() : table.getAttribute(SemanticType.Email).getName();
+            throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", colName,
+                    attr.getName()));
         }
     }
 
@@ -200,7 +213,8 @@ public class LedpCSVToAvroImportMapper extends
             case INT:
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
-                if (attr.getLogicalDataType().equals("Date") || attr.getLogicalDataType().equals("Timestamp")) {
+                if (attr.getSemanticType().equals(SemanticType.CreatedDate)
+                        || attr.getSemanticType().equals(SemanticType.LastModifiedDate)) {
                     Log.info("Date value from csv: " + fieldCsvValue);
                     List<DateGroup> groups = parser.parse(fieldCsvValue);
                     List<Date> dates = groups.get(0).getDates();

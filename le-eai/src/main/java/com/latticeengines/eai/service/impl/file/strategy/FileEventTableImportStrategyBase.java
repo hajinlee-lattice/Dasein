@@ -170,13 +170,11 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         }
 
         for (Attribute attr : table.getAttributes()) {
-            ModelingMetadata.AttributeMetadata attrMetadata = null;
+            ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
+            attr.setPhysicalName(attr.getName());
             if (attr.getSemanticType() != null) {
-                attrMetadata = attrMap.get(attr.getSemanticType().name());
-            } else {
-                attrMetadata = attrMap.get(attr.getName());
+                attr.setName(attr.getSemanticType().name());
             }
-
             if (attrMetadata != null) {
                 attr.setLogicalDataType(attrMetadata.getDataType());
             } else {

@@ -4,7 +4,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "ExternalId",
+      "ColumnName": "Id",
       "DataQuality": null,
       "DataSource": [
         "File"
@@ -78,7 +78,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "CompanyName",
+      "ColumnName": "Company",
       "DataQuality": null,
       "DataSource": [
         "File"

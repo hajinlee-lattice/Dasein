@@ -158,7 +158,6 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 String type = descField.getType();
 
                 attr.setName(descField.getName());
-                attr.setName(descField.getName());
                 attr.setDisplayName(descField.getLabel());
                 attr.setLength(descField.getLength());
                 attr.setPrecision(descField.getPrecision());
