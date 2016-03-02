@@ -19,12 +19,12 @@ def std_visidb_ds_firstname_sameas_lastname(firstname, lastname):
         return None
 
     if firstname == '' and lastname == '':
-        return 0
+        return False
 
     if firstname.lower() == lastname.lower():
-        return 1
+        return True
 
-    return 0
+    return False
 
 
 def transform(args, record):

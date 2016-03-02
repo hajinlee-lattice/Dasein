@@ -23,9 +23,9 @@ def std_visidb_ds_title_isacademic(n):
         return None
 
     if re.search('student|researcher|professor|dev|programmer', n.lower()) and std_visidb_ds_title_level(n) == 0:
-        return 1
+        return True
 
-    return 0
+    return False
 
 
 def transform(args, record):

@@ -80,12 +80,12 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty("purge_sources")
-    public Boolean getPurgeSources() {
+    public boolean getPurgeSources() {
         return purgeSources;
     }
 
     @JsonProperty("purge_sources")
-    public void setPurgeSources(Boolean purgeSources) {
+    public void setPurgeSources(boolean purgeSources) {
         this.purgeSources = purgeSources;
     }
 }

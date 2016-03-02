@@ -29,7 +29,7 @@ public class JythonFunctionsUnitTestNG {
     @DataProvider(name = "functions")
     public Object[][] getFunctions() {
         return new Object[][] { //
-                new Object[] { "title_length", "length", Integer.class, new String[] { "xyz" }, 3 } //
+        new Object[] { "title_length", "length", Integer.class, new String[] { "xyz" }, 3 } //
 
         };
     }
@@ -53,9 +53,8 @@ public class JythonFunctionsUnitTestNG {
         CSVPrinter output = null;
         CSVFormat outputCSVFormat = CSVFormat.DEFAULT.withRecordSeparator("\n");
 
-        try (InputStreamReader readerTestDataDSAPACMKTO = new InputStreamReader(
-                new BOMInputStream(new FileInputStream(testDataDSAPACMKTO)));
-                FileWriter writer = new FileWriter(outputFileName)) {
+        try (InputStreamReader readerTestDataDSAPACMKTO = new InputStreamReader(new BOMInputStream(new FileInputStream(
+                testDataDSAPACMKTO))); FileWriter writer = new FileWriter(outputFileName)) {
 
             if (DEBUGGING_OUTPUT && WRITE_FLOATING_POINT_DIFFERENCES) {
                 output = new CSVPrinter(writer, outputCSVFormat);
@@ -117,7 +116,8 @@ public class JythonFunctionsUnitTestNG {
                 long attributeTime = System.currentTimeMillis();
                 totalAttTime = attributeTime - startReadTime;
 
-                Object resultCompanyEntropy = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultCompanyEntropy = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_companyname_entropy", "std_visidb_ds_companyname_entropy",
                         new String[] { company }, Double.class);
 
@@ -139,7 +139,8 @@ public class JythonFunctionsUnitTestNG {
                 Boolean passesCompanyLength = passesIntegerValues(resultCompanyLength, dsCompanyLength);
                 assertEquals(passesCompanyLength, Boolean.TRUE);
 
-                Object resultAlexaRelatedLinks = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultAlexaRelatedLinks = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_alexa_relatedlinks_count", "std_visidb_ds_pd_alexa_relatedlinks_count",
                         new String[] { alexaRelatedLinks }, Integer.class);
 
@@ -162,7 +163,8 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesAlexaRelatedLinks, Boolean.TRUE);
 
-                Object resultModelAction = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultModelAction = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_modelaction_ordered", "std_visidb_ds_pd_modelaction_ordered",
                         new String[] { modelAction }, Integer.class);
 
@@ -185,7 +187,8 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesModelAction, Boolean.TRUE);
 
-                Object resultJobsTrend = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultJobsTrend = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_jobstrendstring_ordered", "std_visidb_ds_pd_jobstrendstring_ordered",
                         new String[] { jobsTrendString }, Integer.class);
 
@@ -208,7 +211,8 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesJobsTrend, Boolean.TRUE);
 
-                Object resultFundingStage = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultFundingStage = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_fundingstage_ordered", "std_visidb_ds_pd_fundingstage_ordered",
                         new String[] { fundingStage }, Integer.class);
 
@@ -243,7 +247,8 @@ public class JythonFunctionsUnitTestNG {
                 Boolean passesPhoneEntropy = passesDoubleValues(resultPhoneEntropy, dsPhoneEntropy);
                 assertEquals(passesPhoneEntropy, Boolean.TRUE);
 
-                Object resultMonthsSinceOnline = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
+                Object resultMonthsSinceOnline = engine.invoke(
+                        "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_alexa_monthssinceonline", "std_visidb_alexa_monthssinceonline",
                         new String[] { alexaOnlineSince }, Integer.class);
 
@@ -262,9 +267,9 @@ public class JythonFunctionsUnitTestNG {
 
                 Object resultFirstLastName = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_firstname_sameas_lastname", "std_visidb_ds_firstname_sameas_lastname", //
-                        new String[] { firstName, lastName }, Integer.class);
+                        new String[] { firstName, lastName }, Boolean.class);
 
-                Boolean passesFirstLastName = passesIntegerValues(resultFirstLastName, dsFirstLastName);
+                Boolean passesFirstLastName = passesBooleanValues(resultFirstLastName, dsFirstLastName);
                 assertEquals(passesFirstLastName, Boolean.TRUE);
 
                 Object resultTitleLevel = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
@@ -276,16 +281,16 @@ public class JythonFunctionsUnitTestNG {
 
                 Object resultTitleIsTechRelated = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_title_istechrelated", "std_visidb_ds_title_istechrelated", //
-                        new String[] { title }, Integer.class);
+                        new String[] { title }, Boolean.class);
 
-                Boolean passesTitleIsTechRelated = passesIntegerValues(resultTitleIsTechRelated, dsTitleIsTechRelated);
+                Boolean passesTitleIsTechRelated = passesBooleanValues(resultTitleIsTechRelated, dsTitleIsTechRelated);
                 assertEquals(passesTitleIsTechRelated, Boolean.TRUE);
 
                 Object resultTitleIsAcademic = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_title_isacademic", "std_visidb_ds_title_isacademic", //
-                        new String[] { title }, Integer.class);
+                        new String[] { title }, Boolean.class);
 
-                Boolean passesTitleIsAcademic = passesIntegerValues(resultTitleIsAcademic, dsTitleIsAcademic);
+                Boolean passesTitleIsAcademic = passesBooleanValues(resultTitleIsAcademic, dsTitleIsAcademic);
                 assertEquals(passesTitleIsAcademic, Boolean.TRUE);
 
                 Object resultIndustryGroup = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
@@ -330,12 +335,12 @@ public class JythonFunctionsUnitTestNG {
                 System.out.println(String.format("Avg Function (1) Time: %f", ((double) totalFcn1Time) / ((double) i)));
                 System.out.println(String.format("Valid AlexaRelatedLinks Calculation: %f",
                         (double) nValidAlexaRelatedLinks / (double) i));
-                System.out.println(
-                        String.format("Valid ModelAction Calculation: %f", (double) nValidModelAction / (double) i));
-                System.out.println(
-                        String.format("Valid JobsTrend Calculation: %f", (double) nValidJobsTrend / (double) i));
-                System.out.println(
-                        String.format("Valid FundingStage Calculation: %f", (double) nValidFundingStage / (double) i));
+                System.out.println(String.format("Valid ModelAction Calculation: %f", (double) nValidModelAction
+                        / (double) i));
+                System.out.println(String.format("Valid JobsTrend Calculation: %f", (double) nValidJobsTrend
+                        / (double) i));
+                System.out.println(String.format("Valid FundingStage Calculation: %f", (double) nValidFundingStage
+                        / (double) i));
             }
         }
     }
@@ -360,6 +365,23 @@ public class JythonFunctionsUnitTestNG {
             passes = Boolean.FALSE;
         } else {
             passes = (Integer.parseInt(reference) == (int) calc);
+        }
+        return passes;
+    }
+
+    private Boolean passesBooleanValues(Object calc, String reference) {
+        if (reference.equals("1")) {
+            reference = "true";
+        } else if (reference.equals("0")) {
+            reference = "false";
+        }
+        Boolean passes = Boolean.FALSE;
+        if (calc == null) {
+            passes = (reference.equals(""));
+        } else if (reference.equals("")) {
+            passes = Boolean.FALSE;
+        } else {
+            passes = (Boolean.parseBoolean(reference) == (boolean) calc);
         }
         return passes;
     }

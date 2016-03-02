@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.python.core.PyBoolean;
 import org.python.core.PyDictionary;
 import org.python.core.PyFloat;
 import org.python.core.PyInteger;
@@ -20,7 +21,7 @@ public class JythonEngine {
 
     private PythonInterpreter interpreter;
     private Map<String, String> functionScriptMap = new HashMap<>();
-    
+
     public JythonEngine(String modelPath) {
         if (modelPath == null) {
             interpreter = new PythonInterpreter();
@@ -31,11 +32,11 @@ public class JythonEngine {
         interpreter = new PythonInterpreter(null, sys);
         interpreter.exec(String.format("import os;os.chdir('%s')", modelPath));
     }
-    
+
     public PythonInterpreter getInterpreter() {
         return interpreter;
     }
-    
+
     public Object invoke(String packageName, String module, String function, Object[] params, Class<?> returnType) {
         String script = functionScriptMap.get(packageName + "." + module + "." + function);
         if (script == null) {
@@ -43,12 +44,12 @@ public class JythonEngine {
             for (int i = 1; i <= params.length; i++) {
                 l.add("p" + i);
             }
-            
+
             script = String.format("from %s import %s; x = %s.%s(%s)", //
                     packageName, module, module, function, StringUtils.join(l, ","));
             functionScriptMap.put(packageName + "." + module + "." + function, script);
         }
-        
+
         for (int i = 1; i <= params.length; i++) {
             interpreter.set("p" + i, params[i - 1]);
         }
@@ -58,6 +59,8 @@ public class JythonEngine {
             return ((PyFloat) x).getValue();
         } else if (x instanceof PyString) {
             return x.toString();
+        } else if (x instanceof PyBoolean) {
+            return ((PyBoolean) x).getBooleanValue();
         } else if (x instanceof PyInteger) {
             if (returnType == Long.class) {
                 return (long) ((PyInteger) x).getValue();
@@ -78,10 +81,10 @@ public class JythonEngine {
         }
         return null;
     }
-    
+
     public <T> T invoke(String function, Map<String, Object> arguments, Map<String, Object> record, Class<T> returnType) {
         String script = functionScriptMap.get(function);
-        
+
         if (script == null) {
             script = String.format("import %s; x = %s.transform(args, record)", function, function);
             functionScriptMap.put(function, script);

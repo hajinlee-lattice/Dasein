@@ -201,7 +201,7 @@ public abstract class DataFlowBuilder {
                         attribute.setRTS(Boolean.valueOf(value));
                     }
                 }
-                
+
                 table.addAttribute(attribute);
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Failed to convert field %s to output metadata format",
@@ -295,6 +295,11 @@ public abstract class DataFlowBuilder {
 
         public FieldMetadata(String fieldName, Class<?> javaType) {
             this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
+        }
+
+        public FieldMetadata(String fieldName, Class<?> javaType, Map<String, String> properties) {
+            this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
+            properties.putAll(properties);
         }
 
         @SuppressWarnings("deprecation")

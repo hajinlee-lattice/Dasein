@@ -21,9 +21,9 @@ def std_visidb_ds_title_istechrelated(n):
         return None
 
     if re.search('(?<!\w)eng|tech|info|dev', n.lower()):
-        return 1
+        return True
 
-    return 0
+    return False
 
 
 def transform(args, record):

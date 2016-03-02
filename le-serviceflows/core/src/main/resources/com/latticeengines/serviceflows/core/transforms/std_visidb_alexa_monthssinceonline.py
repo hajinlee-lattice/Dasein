@@ -19,12 +19,15 @@ def metadata():
             , 'Tags'                  : 'External' }
 
 
-def std_visidb_alexa_monthssinceonline(dtstr):
+def std_visidb_alexa_monthssinceonline(date):
 
-    if dtstr is None or dtstr == '':
+    if date is None or date == '':
         return None
 
-    dt = datetime.datetime.strptime(dtstr, '%m/%d/%Y %I:%M:%S %p')
+    if isinstance(date, long):
+        dt = datetime.datetime.fromtimestamp(date / 1000)
+    else:
+        dt = datetime.datetime.strptime(date, '%m/%d/%Y %I:%M:%S %p')
 
     return int(round((datetime.datetime.now() - dt).total_seconds())) / 2626560
 

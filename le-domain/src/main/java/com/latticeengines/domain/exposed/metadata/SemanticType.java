@@ -10,7 +10,7 @@ public enum SemanticType {
 
     FirstName, //
     LastName, //
-    EmployeeTitle, //
+    Title, //
     Email, //
 
     City, //
@@ -21,12 +21,6 @@ public enum SemanticType {
 
     Website, //
 
-    LeadSource, //
     CompanyName, //
-    IsClosed, //
-    LeadStageName, //
     Industry, //
-    AnnualRevenue, //
-    NumberOfEmployees, //
-    YearStarted, //
 }

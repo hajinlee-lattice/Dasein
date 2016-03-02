@@ -349,6 +349,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return getSourceSchema().getAttribute(semanticType);
         }
 
+        public Attribute getSourceAttribute(String attributeName) {
+            return getSourceSchema().getAttribute(attributeName);
+        }
+
         public List<FieldMetadata> getSchema() {
             return builder.getMetadata(identifier);
         }

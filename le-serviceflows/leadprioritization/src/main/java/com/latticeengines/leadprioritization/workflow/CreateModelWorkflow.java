@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CreateEventTableReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -29,6 +30,9 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
     private MatchWorkflow matchWorkflow;
 
     @Autowired
+    private AddStandardAttributes addStandardAttributes;
+
+    @Autowired
     private ModelWorkflow modelWorkflow;
 
     @Autowired
@@ -45,6 +49,7 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
                 .next(createEventTableReport) //
                 .next(dedupEventTable) //
                 .next(matchWorkflow) //
+                .next(addStandardAttributes) //
                 .next(modelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();

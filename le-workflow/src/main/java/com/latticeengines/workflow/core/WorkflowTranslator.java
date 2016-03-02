@@ -92,6 +92,7 @@ public class WorkflowTranslator {
                     }
 
                     step.execute();
+                    step.onExecutionCompleted();
                 }
 
                 return RepeatStatus.FINISHED;

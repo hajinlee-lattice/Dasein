@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
@@ -19,16 +20,18 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         private CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration();
         private ImportStepConfiguration importData = new ImportStepConfiguration();
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
-        private DedupEventTableConfiguration runDataFlow = new DedupEventTableConfiguration();
+        private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
+        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
             registerReport.setMicroServiceHostPort(microServiceHostPort);
-            runDataFlow.setMicroServiceHostPort(microServiceHostPort);
+            dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             model.setMicroServiceHostPort(microServiceHostPort);
             match.setMicroServiceHostPort(microServiceHostPort);
+            addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -36,9 +39,10 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             configuration.setContainerConfiguration("createModelWorkflow", customerSpace, "CreateModelWorkflow");
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
-            runDataFlow.setCustomerSpace(customerSpace);
+            dedupEventTable.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
+            addStandardAttributes.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -48,8 +52,8 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder dedupTargetTableName(String targetTableName) {
-            runDataFlow.setName(targetTableName);
-            runDataFlow.setTargetPath(targetTableName);
+            dedupEventTable.setName(targetTableName);
+            dedupEventTable.setTargetPath(targetTableName);
             match.setInputTableName(targetTableName);
             return this;
         }
@@ -62,9 +66,10 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             importData.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
-            runDataFlow.setInternalResourceHostPort(internalResourceHostPort);
+            dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             model.setInternalResourceHostPort(internalResourceHostPort);
             match.setInternalResourceHostPort(internalResourceHostPort);
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -74,12 +79,12 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder dedupDataFlowBeanName(String beanName) {
-            runDataFlow.setBeanName(beanName);
+            dedupEventTable.setBeanName(beanName);
             return this;
         }
 
         public Builder dedupDataFlowParams(DataFlowParameters dataFlowParameters) {
-            runDataFlow.setDataFlowParams(dataFlowParameters);
+            dedupEventTable.setDataFlowParams(dataFlowParameters);
             return this;
         }
 
@@ -124,9 +129,10 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         public CreateModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
-            configuration.add(runDataFlow);
+            configuration.add(dedupEventTable);
             configuration.add(match);
             configuration.add(model);
+            configuration.add(addStandardAttributes);
 
             return configuration;
         }

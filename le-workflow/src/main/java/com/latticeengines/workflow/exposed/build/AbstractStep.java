@@ -29,7 +29,8 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     @SuppressWarnings("unchecked")
     public AbstractStep() {
-        this.configurationClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        this.configurationClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass())
+                .getActualTypeArguments()[0];
     }
 
     public boolean setup() {
@@ -37,9 +38,16 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         if (stepStringConfig != null) {
             configuration = JsonUtils.deserialize(stepStringConfig, configurationClass);
             log.info("Configuration instance set for " + configurationClass.getName());
+            onConfigurationInitialized();
             return true;
         } else
             return false;
+    }
+
+    protected void onConfigurationInitialized() {
+    }
+
+    public void onExecutionCompleted() {
     }
 
     /**
