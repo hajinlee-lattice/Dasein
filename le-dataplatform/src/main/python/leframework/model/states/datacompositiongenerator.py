@@ -9,7 +9,7 @@ class DataCompositionGenerator(State):
     def __init__(self):
         State.__init__(self, "DataCompositionGenerator")
         self._logger = logging.getLogger(name="DataCompositionGenerator")
-    
+
     @overrides(State)
     def execute(self):
         structure = OrderedDict()
@@ -24,7 +24,7 @@ class DataCompositionGenerator(State):
             structure["transforms"] = transforms
 
         self.getMediator().data_composition = structure
-    
+
     def __get_fields(self, configMetadata):
         schema = self.mediator.schema
         result = []
@@ -33,13 +33,13 @@ class DataCompositionGenerator(State):
             if len(metadata) == 0:
                 continue
             metadata = metadata[0]
-            
+
             details = OrderedDict()
             details["source"] = "REQUEST"
             if "DataSource" in metadata and metadata["DataSource"] is not None:
                 if "DerivedColumns" in metadata["DataSource"]:
                     details["source"] = "PROPRIETARY"
-            
+
             # TODO Decide if we need to handle TEMPORAL types or not.
             if dataType == "boolean":
                 details["type"] = "BOOLEAN"
@@ -49,14 +49,24 @@ class DataCompositionGenerator(State):
                 details["type"] = "FLOAT"
             else:
                 details["type"] = "STRING"
-            
+
             # TODO Should identify interesting non-feature columns through metadata.
             if name in schema["features"]:
                 details["interpretation"] = "FEATURE"
             elif name == "Email":
                 details["interpretation"] = "EMAIL_ADDRESS"
-            elif name == "LeadID":
+            elif name == "LeadID" or name == "ExternalId":
                 details["interpretation"] = "RECORD_ID"
+            elif name == "CompanyName":
+                details["interpretation"] = "COMPANY_NAME"
+            elif name == "City":
+                details["interpretation"] = "COMPANY_CITY"
+            elif name == "State":
+                details["interpretation"] = "COMPANY_STATE"
+            elif name == "Country":
+                details["interpretation"] = "COMPANY_COUNTRY"
+            elif name == "Website":
+                details["interpretation"] = "WEBSITE"
             else:
                 continue
 
@@ -70,10 +80,10 @@ class DataCompositionGenerator(State):
         for step in pipeline:
             columns = step.getOutputColumns()
             rtsModule = step.getRTSMainModule()
-            
+
             for column in columns:
                 name = column[0]["name"]
-                
+
                 if step.doColumnCheck() and (name not in fields or fields[name]["interpretation"] != "FEATURE"):
                     continue
                 if len(column[1]) == 1:
@@ -82,7 +92,7 @@ class DataCompositionGenerator(State):
                     l = [("column%d" % i, column[1][i-1]) for i in xrange(1, len(column[1])+1)]
                     result.append(self.__make_transform(rtsModule, name, column[0]["type"], l))
         return result
-    
+
     def __make_transform(self, name, output, data_type, arguments):
         result = OrderedDict()
         result["name"] = name
@@ -90,4 +100,4 @@ class DataCompositionGenerator(State):
         result["type"] = data_type
         result["arguments"] = OrderedDict(arguments)
         return result
-            
+

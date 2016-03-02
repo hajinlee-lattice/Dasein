@@ -6,6 +6,11 @@ public enum FieldInterpretation {
 
     // Email address tied to this record.
     EMAIL_ADDRESS,
+    WEBSITE,
+    COMPANY_NAME,
+    COMPANY_CITY,
+    COMPANY_STATE,
+    COMPANY_COUNTRY,
 
     // Input feature for the predictive model.
     FEATURE
