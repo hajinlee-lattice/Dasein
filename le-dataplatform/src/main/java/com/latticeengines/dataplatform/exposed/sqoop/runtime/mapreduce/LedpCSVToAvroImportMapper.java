@@ -157,10 +157,6 @@ public class LedpCSVToAvroImportMapper extends
         LOG.info("Start to processing line: " + (lineNum + 1));
         for (Map.Entry<String, Object> entry : sortedFieldMap.entrySet()) {
             final String fieldKey = entry.getKey();
-            String fieldCsvValue = String.valueOf(entry.getValue());
-            Object fieldAvroValue = null;
-            Type avroType = schema.getField(fieldKey).schema().getTypes().get(0).getType();
-
             Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
                 @Override
                 public boolean apply(Attribute attribute) {
@@ -168,9 +164,14 @@ public class LedpCSVToAvroImportMapper extends
                 }
             });
 
+            String attrKey = attr.getName();
+            Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
+            String fieldCsvValue = String.valueOf(entry.getValue());
+            Object fieldAvroValue = null;
+
             try {
                 validateRowValueBeforeConvertToAvro(interpretation, attr, fieldCsvValue);
-                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", fieldKey));
+                LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", attrKey));
                 if (attr.isNullable() && fieldCsvValue.equals("")) {
                     fieldAvroValue = null;
                 } else {
@@ -180,7 +181,7 @@ public class LedpCSVToAvroImportMapper extends
                 LOG.error(e);
                 errorMap.put(fieldKey, e.getMessage());
             }
-            record.put(fieldKey, fieldAvroValue);
+            record.put(attrKey, fieldAvroValue);
         }
         return record;
     }
