@@ -2,7 +2,6 @@
 var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
-    'angular-loading-bar',
     'mainApp.appCommon.modals.SimpleModal',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',

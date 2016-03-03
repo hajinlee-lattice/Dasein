@@ -23,7 +23,7 @@
     "postinstall": "npm run sass",
 
     "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD",
-    "InstallDev": "concurrent -kr \"npm run InstallDevCommon\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
+    "InstallDev": "concurrent -k \"npm run InstallDevCommon\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
 
     "//": "start express server",
     "qa": "npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
@@ -31,8 +31,8 @@
     "prod": "grunt prod",
 
     "//": "all projects",
-    "sass": "concurrent -r \"npm run commonsass\" \"npm run pdsass\" \"npm run lpsass\" ",
-    "sentry": "concurrent -r \"npm run commonsentry\" \"npm run pdsentry\" \"npm run lpsentry\"",
+    "sass": "concurrent \"npm run commonsass\" \"npm run pdsass\" \"npm run lpsass\" ",
+    "sentry": "concurrent \"npm run commonsentry\" \"npm run pdsentry\" \"npm run lpsentry\"",
     
     "//": "individual projects",
     "InstallCommon": "cd projects/common/ && npm install --production",
@@ -43,9 +43,9 @@
     "InstallDevPD": "cd projects/prospectdiscovery/ && npm install",
     "InstallDevLP": "cd projects/leadprioritization/ && npm install",
 
-    "commonsass": "cd projects/common/ && grunt sass",
-    "pdsass": "cd projects/prospectdiscovery/ && grunt sass",
-    "lpsass": "cd projects/leadprioritization/ && grunt sass",
+    "commonsass": "cd projects/common/ && grunt",
+    "pdsass": "cd projects/prospectdiscovery/ && grunt sass:dev",
+    "lpsass": "cd projects/leadprioritization/ && grunt sass:dev",
 
     "commonsentry": "cd projects/common/ && grunt sentry",
     "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",

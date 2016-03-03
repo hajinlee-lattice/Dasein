@@ -118,18 +118,11 @@ angular.module('mainApp.login.controllers.LoginController', [
     };
 
     $scope.getWidgetConfigDoc = function () {
-        //ConfigService.GetWidgetConfigDocument().then(function() {
-            //$("body").removeClass("login-body");
-            //$rootScope.$broadcast("ShowFooterEvent", true);
-            constructMainView();
-            //getFeatureFlags();
-        //});
+        constructMainView();
     };
 
     function getFeatureFlags() {
-            constructMainView();
-        //FeatureFlagService.GetAllFlags().then(function() {
-        //});
+        constructMainView();
     }
 
     function constructMainView() {
@@ -138,7 +131,8 @@ angular.module('mainApp.login.controllers.LoginController', [
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
 
             if (!scope.isLoggedInWithTempPassword) {
-                //window.open("/pd/#/jobs/import/credentials", "_self");
+                window.open("/lp", "_self");
+                return;
             }
 
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;

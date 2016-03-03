@@ -18,9 +18,10 @@ angular.module('mainApp.setup.controllers.DeploymentWizardController', [
     $scope.buildTab = new Tab(ResourceUtility.getString('SETUP_DEPLOYMENT_WIZARD_NAV_BUILD_MODEL'), false, true);
     $scope.publishTab = new Tab(ResourceUtility.getString('SETUP_DEPLOYMENT_WIZARD_NAV_PUBLISH_SCORES'), false, true);
     $scope.tabs = [$scope.importTab, $scope.buildTab, $scope.publishTab];
-
+console.log($scope);
     $scope.loading = true;
     TenantDeploymentService.GetTenantDeployment().then(function(result) {
+console.log(result);
         $scope.loading = false;
         if (result.Success) {
             $scope.deployment = result.ResultObj;

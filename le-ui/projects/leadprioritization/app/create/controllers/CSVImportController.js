@@ -16,13 +16,14 @@ angular.module('mainApp.create.csvImport', [
     }
 })
 .service('csvImportService', function($q, $http, ModelService, ResourceUtility) {
-    this.Upload = function(file, fileType) {
+    this.Upload = function(file, fileType, cancelDeferred) {
         var deferred = $q.defer(),
             formData = new FormData();
         
         formData.append('file', file);
 
         $http.post('/pls/fileuploads/unnamed?schema=' + fileType, formData, {
+            timeout: cancelDeferred.promise,
             transformRequest: angular.identity,
             headers: {
                 'Content-Type': undefined
@@ -69,10 +70,13 @@ angular.module('mainApp.create.csvImport', [
         })
         .success(function(data, status, headers, config) {
             console.log('VALIDATION SUCCESS', status, data);
-            if (data == null) {
+            if (data == null || !data.Success) {
+                if (data && data.Errors.length > 0) {
+                    var errors = data.Errors.join('\n');
+                }
                 result = {
                     Success: false,
-                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    ResultErrors: errors || ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
                     Result: null
                 };
             } else {
@@ -140,7 +144,7 @@ angular.module('mainApp.create.csvImport', [
 
     this.StartModeling = function(csvMetaData) {
         var deferred = $q.defer();
-console.log('StartModeling', csvMetaData)
+        console.log('StartModeling', csvMetaData)
         $http({
             method: 'POST',
             url: '/pls/models/' + csvMetaData.modelName,
@@ -201,8 +205,8 @@ console.log('StartModeling', csvMetaData)
     };
 }])
 .controller('csvImportController', [
-'$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', 
-function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state) {
+        '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
+        function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state, $q) {
     $scope.showImportError = false;
     $scope.importErrorMsg = "";
     $scope.importing = false;
@@ -210,14 +214,15 @@ function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, cs
     $scope.ResourceUtility = ResourceUtility;
     $scope.accountLeadCheck = false;
 
-    $scope.uploadFile = function(){
+    $scope.uploadFile = function() {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
         $scope.importing = true;
 
         var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
+        this.cancelDeferred = cancelDeferred = $q.defer();
 
-        csvImportService.Upload($scope.csvFile, fileType).then(function(result) {
+        csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
             if (result.Success && result.Result) {
                 var fileName = result.Result.name,
                     metaData = result.Result,
@@ -232,10 +237,17 @@ function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, cs
             }
         });
 
-        ShowSpinner('Uploading File...');
+        $('#mainSummaryView .summary>h1').html('Uploading File');
+        $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
+
+        ShowSpinner('<button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
+
+        $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
     };
 
-    $scope.cancelClicked = function(){
-        console.log('okClicked');
+    $scope.cancelClicked = function() {
+        console.log('cancelled');
+        this.cancelDeferred.resolve();
+        $state.go('models');
     };
 }]);

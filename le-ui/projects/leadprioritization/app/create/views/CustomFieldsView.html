@@ -5,45 +5,57 @@
 	    color: #666;
 	    padding: 6px;
 	}
+	div.error-message {
+	    width: 600px;
+	    margin: 0 auto 2em;
+	    overflow: hidden;
+	    height: 2.4em;
+	    background: #f03213;
+	    color: white;
+	    font-size: 1.2em;
+	    padding: 0.5em;
+	}
 </style>
 <section class="container row custom-fields">
-		<div class="six columns offset-three">
+	<div class="error-message text-center" ng-show="vm.errors">{{ vm.errors }}</div>
+	<div class="six columns offset-three">
 
-			<p>Displaying {{ vm.data.length }}.</p>
+		<p>Displaying {{ vm.data.length }}.</p>
 
-			<table class="unstyled">
-				<thead>
-					<tr>
-						<th>Custom Field Name</th>
-						<th>Type</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr ng-repeat="item in vm.data">
-						<td>
-							<label class="form-control" for="columnType_{{$index}}">{{ item.columnName }}</label>
-						</td>
-						<td>
-							<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
-								<option value="STRING" selected>Text</option>
-								<option value="DOUBLE">Number</option>
-								<option value="BOOLEAN">Boolean</option>
-							</select>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<table class="unstyled">
+			<thead>
+				<tr>
+					<th>Custom Field Name</th>
+					<th>Type</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in vm.data">
+					<td>
+						<label class="form-control" for="columnType_{{$index}}">{{ item.columnName }}</label>
+					</td>
+					<td>
+						<select class="custom-select" name="columnType_{{$index}}" ng-model="item.columnType" value="{{item.columnType}}">
+							<option value="STRING" selected>Text</option>
+							<option value="DOUBLE">Number</option>
+							<option value="BOOLEAN">Boolean</option>
+							<option value="DATE">Date</option>
+						</select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 
-			<div class="row">
-				<div class="six columns">
-					<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
-				</div>
-				<div class="six columns">
-					<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">Looks Fine, Next</button>
-				</div>
+		<div class="row">
+			<div class="six columns">
+				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
 			</div>
-
+			<div class="six columns">
+				<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">Looks Fine, Next</button>
+			</div>
 		</div>
+
+	</div>
 </section>
 <!--
 <script>

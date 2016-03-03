@@ -97,7 +97,8 @@ angular
                     var deferred = $q.defer();
 
                     csvImportService.GetUnknownColumns(csvMetaData).then(function(result) {
-                        deferred.resolve(result.Result);
+                        console.log(result);
+                        deferred.resolve(result);
                     });
 
                     return deferred.promise;
@@ -115,7 +116,9 @@ angular
                 },
                 "main@": {
                     controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
-                        this.data = csvUnknownColumns;
+                        console.log(csvUnknownColumns);
+                        this.errors = csvUnknownColumns.ResultErrors;
+                        this.data = csvUnknownColumns.Result;
 
                         this.csvSubmitColumns = function($event) {
                             ShowSpinner('Saving Changes...');
@@ -294,12 +297,12 @@ angular
                 }  
             }
         })
-        .state('sureshot', {
-            url: '/sureshot',
-            redirectto: 'sureshot.apikey',
+        .state('marketosettings', {
+            url: '/marketosettings',
+            redirectto: 'marketosettings.apikey',
             views: {
                 "navigation@": {
-                    templateUrl: './app/navigation/sidebar/SureshotView.html'
+                    templateUrl: './app/navigation/sidebar/MarketoSettingsView.html'
                 },
                 "summary@": {
                     template: ''
@@ -309,7 +312,7 @@ angular
                 }   
             }
         })
-        .state('sureshot.apikey', {
+        .state('marketosettings.apikey', {
             url: '/apikey',
             views: {
                 "summary@": {
@@ -326,7 +329,7 @@ angular
                 }   
             }
         })
-        .state('sureshot.models', {
+        .state('marketosettings.models', {
             url: '/models',
             views: {
                 "summary@": {
@@ -343,7 +346,7 @@ angular
                 }   
             }
         })
-        .state('sureshot.enrichment', {
+        .state('marketosettings.enrichment', {
             url: '/enrichment',
             views: {
                 "summary@": {
@@ -360,7 +363,7 @@ angular
                 }   
             }
         })
-        .state('sureshot.webhook', {
+        .state('marketosettings.webhook', {
             url: '/webhook',
             views: {
                 "summary@": {
@@ -375,6 +378,61 @@ angular
                 "main@": {
                     template: ''
                 }   
+            }
+        }) 
+        .state('signout', {
+            url: '/signout', 
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Shutting Down';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: function(LoginService) {
+                        ShowSpinner('Signing Out...');
+                        LoginService.Logout();
+                    }
+                }
+            }
+        })
+        .state('updatepassword', {
+            url: '/updatepassword',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'Update Your Password';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    templateUrl: './app/login/views/UpdatePasswordView.html'
+                }
+            }
+        })
+        .state('deploymentwizard', {
+            url: '/deploymentwizard',
+            views: {
+                "summary@": {
+                    resolve: { 
+                        ResourceString: function() {
+                            return 'hi';
+                        }
+                    },
+                    controller: 'OneLineController',
+                    templateUrl: './app/navigation/summary/OneLineView.html'
+                },
+                "main@": {
+                    controller: 'DeploymentWizardController',
+                    templateUrl: './app/setup/views/DeploymentWizardView.html'
+                }
             }
         })
         .state('activate', {

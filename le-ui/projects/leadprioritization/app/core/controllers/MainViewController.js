@@ -22,12 +22,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
 .controller('MainViewController', function ($scope, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
-    if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
-        createUpdatePasswordView();
-    } else {
-        createMainContentViewAndRefreshFeatures();
-    }
-
     // Handle Initial View
     $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();
@@ -35,6 +29,39 @@ angular.module('mainApp.core.controllers.MainViewController', [
         $compile($("#mainHeaderView").html(html))(scope);
     });
 
+    createMainContentViewAndRefreshFeatures();
+
+    // Handle when the Update Password link is clicked
+    $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
+        if (data != null && data.Success) {
+            createUpdatePasswordSuccessView(); console.log('buh',data);
+        } else {
+            $state.go('updatepassword');
+        }
+    });
+
+    function createUpdatePasswordSuccessView() {
+        $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+    
+    function createMainContentViewAndRefreshFeatures() {
+        FeatureFlagService.GetAllFlags().then(function() {
+            var flags = FeatureFlagService.Flags();
+            
+            /* Redirect to DeploymentWizard functionality disabled for LP3 M1
+
+            if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
+                $state.go('deploymentwizard');
+                //createDeploymentWizardView();
+            }
+            */
+        });
+    }
+
+    /*
     // Handle when the Manage Credentials link is clicked
     $scope.$on(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
         createManageCredentialsView();
@@ -46,37 +73,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
         // Fetch the view and make it Angular aware
         $http.get('./app/config/views/ManageCredentialsView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            $compile($("#mainContentView").html(html))(scope);
-        });
-    }
-
-    // Handle when the Update Password link is clicked
-    $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
-        if (data != null && data.Success) {
-            createUpdatePasswordSuccessView();
-        } else {
-            createUpdatePasswordView();
-        }
-    });
-
-    function createUpdatePasswordView() {
-        // Set the hash
-        //window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
-
-        // Fetch the view and make it Angular aware
-        $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
-            scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
-            $compile($("#mainContentView").html(html))(scope);
-        });
-    }
-
-    function createUpdatePasswordSuccessView() {
-        // Set the hash
-        //window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
-        $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -133,18 +129,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
         //createModelListView();
     });
 
-    function createMainContentViewAndRefreshFeatures() {
-        FeatureFlagService.GetAllFlags().then(function() {
-            var flags = FeatureFlagService.Flags();
-            if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
-                createDeploymentWizardView();
-            } else {
-                //createModelListView();
-                //$state.go('models');
-            }
-        });
-    }
-/*
     function createModelListView() {
         // Set the hash
         //window.location.hash = NavUtility.MODEL_LIST_HASH;
@@ -155,7 +139,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
-*/
+
     // Handle when the Model Detail link is clicked
     $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
         //createModelDetailView(data);
@@ -238,4 +222,5 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
+    */
 });

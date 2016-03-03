@@ -1,13 +1,18 @@
 angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.appCommon.utilities.TimestampIntervalUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, NavUtility, LoginService) {
+.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, NavUtility, LoginService, TimestampIntervalUtility) {
+    var loginDocument = BrowserStorageUtility.getLoginDocument();
+    $scope.isLoggedInWithTempPassword = loginDocument.MustChangePassword;
+    $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
+
     $scope.ResourceUtility = ResourceUtility;
     $scope.oldPassword = null;
     $scope.newPassword = null;
