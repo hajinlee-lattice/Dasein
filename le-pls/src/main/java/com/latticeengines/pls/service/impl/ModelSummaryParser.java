@@ -127,7 +127,9 @@ public class ModelSummaryParser {
         }
 
         JsonNode eventTableProvenance = json.get("EventTableProvenance");
-        summary.setEventTableName(JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class, ""));
+        if (eventTableProvenance != null) {
+            summary.setEventTableName(JsonUtils.getOrDefault(eventTableProvenance.get("EventTableName"), String.class, ""));
+        }
 
         // the Id will be used to find hdfs path, make sure they are in sync.
         try {
