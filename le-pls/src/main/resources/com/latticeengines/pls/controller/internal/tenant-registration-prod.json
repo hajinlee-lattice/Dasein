@@ -14,6 +14,14 @@
         {
           "Node": "SuperAdminEmails",
           "Data": "[]"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
         }
       ]
     },
