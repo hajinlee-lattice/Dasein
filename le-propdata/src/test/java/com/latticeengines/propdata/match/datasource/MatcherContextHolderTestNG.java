@@ -23,7 +23,7 @@ public class MatcherContextHolderTestNG extends PropDataMatchFunctionalTestNGBas
 
     private ExecutorService executor = Executors.newFixedThreadPool(MatchClient.values().length);
 
-    @Test(groups = "api.functional")
+    @Test(groups = "api", enabled = false)
     public void switchMatcherClient() throws InterruptedException, ExecutionException {
         Map<MatchClient, Future<Boolean>> results = new ConcurrentHashMap<>();
         for (MatchClient client: MatchClient.values()) {
