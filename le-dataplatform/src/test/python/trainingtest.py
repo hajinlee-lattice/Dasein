@@ -26,7 +26,7 @@ class TrainingTest(TrainingTestBase):
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
  
-        
+        foundStandardFunction = False
         for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
             entry = jsonDict["Model"]["CompressedSupportFiles"][index]
             fileName = "./results/" + entry["Key"] + ".gz"
@@ -47,7 +47,10 @@ class TrainingTest(TrainingTestBase):
                     self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
                 elif os.path.exists('./lepipeline.tar.gz/' + entry["Key"]):
                     self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
- 
+            if entry["Key"].startswith("std_"):
+                foundStandardFunction = True
+        
+        self.assertTrue(foundStandardFunction)
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         self.assertTrue(jsonDict["NormalizationBuckets"] is not None)
         self.assertTrue(len(jsonDict["NormalizationBuckets"]) > 0)

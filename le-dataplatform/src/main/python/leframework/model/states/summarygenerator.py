@@ -88,9 +88,12 @@ class SummaryGenerator(State, JsonGenBase):
             self.logger.error("Provenance property does not have the dataloader properties.")
             return element
 
-        element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 
-        element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
-        element["QueryName"] = provenanceProperties["DataLoader_Query"]
+        if "DataLoader_Instance" in provenanceProperties:
+            element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"]
+        if "DataLoader_TenantName" in provenanceProperties:
+            element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
+        if "DataLoader_Query" in provenanceProperties:
+            element["QueryName"] = provenanceProperties["DataLoader_Query"]
         return element
 
     def __getConstructionInfo(self):

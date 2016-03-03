@@ -73,10 +73,11 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-        String container_count = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name());
-        if (container_count == null)
-            container_count = "1";
-        containerProperties.put(AppmasterConstants.CONTAINER_COUNT, container_count);
+        String containerCount = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name());
+        if (containerCount == null) {
+            containerCount = "1";
+        }
+        containerProperties.put(AppmasterConstants.CONTAINER_COUNT, containerCount);
         containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
         containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),

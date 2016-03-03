@@ -1,5 +1,6 @@
 import base64
 from collections import OrderedDict
+import fnmatch
 import gzip
 import logging
 import os
@@ -61,7 +62,36 @@ class ModelGenerator(State, JsonGenBase):
                     filePkl = self.__getSerializedFile(self.__compressFile(filePath))
                     model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": key })
 
+        swlibDir = self.__getSwlibPath()
+        
+        if swlibDir is not None:
+            try:
+                files = []
+                for root, _, filenames in os.walk(swlibDir):
+                    for filename in fnmatch.filter(filenames, "*.py"):
+                        files.append((root, filename))
+                for dirpath, filename in files:
+                    if filename != "__init__.py":
+                        filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
+                        model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
+            except Exception as e:
+                self.logger.warn(str(e));
+        
         self.model = model
+        
+    def __getSwlibPath(self):
+        provenanceProperties = self.mediator.provenanceProperties
+        artifactId = None
+        version = None
+        if "swlib.artifact_id" in provenanceProperties:
+            artifactId = provenanceProperties["swlib.artifact_id"]
+        if "swlib.version" in provenanceProperties:
+            version = provenanceProperties["swlib.version"]
+        
+        if artifactId is not None and version is not None:
+            return "%s-%s.jar" % (artifactId, version)
+        return None
+
     
     def __getPipeline(self, mediator):
         scoringPipeline = mediator.scoringPipeline

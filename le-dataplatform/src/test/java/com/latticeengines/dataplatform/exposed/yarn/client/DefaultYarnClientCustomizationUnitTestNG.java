@@ -34,7 +34,7 @@ public class DefaultYarnClientCustomizationUnitTestNG {
     @Test(groups = "unit", dataProvider = "settings")
     public void getXmxSetting(int minAllocationInMb, String requestedMemory, String expectedValue) {
         when(yarnConfiguration.getInt(anyString(), anyInt())).thenReturn(minAllocationInMb);
-        customization = new DefaultYarnClientCustomization(yarnConfiguration, null, null, null);
+        customization = new DefaultYarnClientCustomization(yarnConfiguration, null, null, null, null);
         if (requestedMemory != null) {
             containerProperties.setProperty(ContainerProperty.MEMORY.name(), requestedMemory);
         }

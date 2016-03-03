@@ -8,13 +8,14 @@ from random import shuffle
 import shutil
 import sys
 import uuid
+import zipfile
 
 from leframework import scoringengine as se
 from leframework.argumentparser import ArgumentParser
 import numpy as np
+from pipelinefwk import ModelStep
 from testbase import TestBase
 from testbase import removeFiles
-from pipelinefwk import ModelStep
 
 
 class TrainingTestBase(TestBase):
@@ -29,9 +30,11 @@ class TrainingTestBase(TestBase):
         self.fwkdir = "./leframework.tar.gz"
         self.pipelinefwkdir = "./lepipeline.tar.gz"
         self.evpipelinefwkdir = "./evpipeline.tar.gz"
+        self.swlibdir = "./le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.jar"
         fwkdir = self.fwkdir
         pipelinefwkdir = self.pipelinefwkdir
         evpipelinefwkdir = self.evpipelinefwkdir
+        swlibdir = self.swlibdir
 
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
@@ -39,10 +42,13 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(pipelinefwkdir)
         if os.path.exists(evpipelinefwkdir):
             shutil.rmtree(evpipelinefwkdir)
+        if os.path.exists(swlibdir):
+            shutil.rmtree(swlibdir)
 
         os.makedirs(fwkdir + "/leframework")
         os.makedirs(pipelinefwkdir)
         os.makedirs(evpipelinefwkdir)
+        os.makedirs(swlibdir)
 
         enginedir = "/leframework/scoringengine.py"
 
@@ -75,6 +81,12 @@ class TrainingTestBase(TestBase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
+        
+        self.__unzipSoftwareLibJar()
+    
+    def __unzipSoftwareLibJar(self):
+        with zipfile.ZipFile("data/le-serviceflows-leadprioritization-2.0.22-SNAPSHOT.zip") as z:
+            z.extractall(self.swlibdir)
     
     def tearDown(self):
         if os.path.exists(self.fwkdir):
@@ -83,6 +95,8 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(self.pipelinefwkdir)
         if os.path.exists(self.evpipelinefwkdir):
             shutil.rmtree(self.evpipelinefwkdir)
+        if os.path.exists(self.swlibdir):
+            shutil.rmtree(self.swlibdir)
         removeFiles(".")
         removeFiles("./results")
 

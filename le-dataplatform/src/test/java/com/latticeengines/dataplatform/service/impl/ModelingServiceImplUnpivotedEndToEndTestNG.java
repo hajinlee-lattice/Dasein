@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -84,8 +85,9 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-
-        fs.delete(new Path(String.format("%s/%s", customerBaseDir, getCustomer())), true);
+        String customer = getCustomer();
+        fs.delete(new Path(String.format("%s/%s", customerBaseDir, customer)), true);
+        fs.delete(new Path(String.format("%s/%s.%s.Production", customerBaseDir, customer, customer)), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
@@ -115,6 +117,11 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer(getCustomer());
         m.setDataFormat("avro");
+        m.setProvenanceProperties(StringUtils.join(new String[] {
+                "swlib.module=dataflowapi", //
+                "swlib.group_id=com.latticeengines", //
+                "swlib.version=2.0.22-SNAPSHOT", //
+                "swlib.artifact_id=le-serviceflows-leadprioritization" }, " "));
 
         return m;
     }

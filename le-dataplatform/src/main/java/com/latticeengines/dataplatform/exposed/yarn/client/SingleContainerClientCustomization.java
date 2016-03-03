@@ -24,22 +24,12 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
 
     private static final Log log = LogFactory.getLog(SingleContainerClientCustomization.class);
 
-    private SoftwareLibraryService softwareLibraryService;
-
-    public SingleContainerClientCustomization(Configuration yarnConfiguration, //
-            VersionManager versionManager, //
-            String hdfsJobBaseDir, //
-            String webHdfs) {
-        super(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
-    }
-
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
             SoftwareLibraryService softwareLibraryService, //
             String hdfsJobBaseDir, //
             String webHdfs) {
-        this(yarnConfiguration, versionManager, hdfsJobBaseDir, webHdfs);
-        this.softwareLibraryService = softwareLibraryService;
+        super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
 
     public abstract String getModuleName();

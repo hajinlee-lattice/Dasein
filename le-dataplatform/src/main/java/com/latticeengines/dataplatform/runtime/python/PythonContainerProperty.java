@@ -14,6 +14,7 @@ public enum PythonContainerProperty {
     METADATA_CONTENTS, //
     DATAPROFILE, //
     CONFIGMETADATA, //
-    VERSION
+    VERSION, //
+    SWLIBARTIFACT
 
 }

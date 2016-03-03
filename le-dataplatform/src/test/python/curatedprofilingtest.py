@@ -1,6 +1,7 @@
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 
+
 class CuratedProfilingTest(ProfilingTestBase):
 
     def testExecuteProfiling(self):

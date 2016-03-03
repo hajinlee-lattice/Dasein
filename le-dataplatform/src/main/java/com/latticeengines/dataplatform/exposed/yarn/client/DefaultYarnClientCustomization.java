@@ -21,6 +21,7 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
 public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
@@ -29,16 +30,22 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
     protected Configuration yarnConfiguration;
 
     protected VersionManager versionManager;
+    
+    protected SoftwareLibraryService softwareLibraryService;
 
     private String hdfsJobBaseDir;
 
     private String webHdfs;
 
-    public DefaultYarnClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
-            String hdfsJobBaseDir, String webHdfs) {
+    public DefaultYarnClientCustomization(Configuration yarnConfiguration, //
+            VersionManager versionManager, //
+            SoftwareLibraryService softwareLibraryService, //
+            String hdfsJobBaseDir, //
+            String webHdfs) {
         super();
         this.yarnConfiguration = yarnConfiguration;
         this.versionManager = versionManager;
+        this.softwareLibraryService = softwareLibraryService;
         this.hdfsJobBaseDir = hdfsJobBaseDir;
         this.webHdfs = webHdfs;
     }
