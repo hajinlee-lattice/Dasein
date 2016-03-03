@@ -433,15 +433,15 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
             for (NameLocation nameLocation : nameLocations) {
                 sql += " OR ( ";
-                sql += String.format("[%s] = '%s'", nameField, nameLocation.getName());
+                sql += String.format("[%s] = '%s'", nameField, nameLocation.getName().replace("'", "''"));
                 if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                    sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry());
+                    sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry().replace("'", "''"));
                 }
                 if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                    sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState());
+                    sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState().replace("'", "''"));
                 }
                 if (cityField != null && StringUtils.isNotEmpty(nameLocation.getCity())) {
-                    sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity());
+                    sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity().replace("'", "''"));
                 }
                 sql += " )\n";
             }
