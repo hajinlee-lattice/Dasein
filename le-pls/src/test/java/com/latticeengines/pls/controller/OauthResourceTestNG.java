@@ -15,7 +15,7 @@ public class OauthResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void generateApiToken() {
-        switchToExternalAdmin();
+        switchToThirdPartyUser();
         String token = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/oauth/generateApiToken?tenantId=" + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));

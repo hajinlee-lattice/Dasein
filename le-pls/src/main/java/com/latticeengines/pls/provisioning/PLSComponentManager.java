@@ -85,6 +85,13 @@ public class PLSComponentManager {
         }
         List<String> externalAdminEmails = EmailUtils.parseEmails(emailListInJson);
 
+        try {
+            emailListInJson = configDir.get("/ThirdPartyUserEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+        }
+        List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
+
         Tenant tenant = new Tenant();
         tenant.setId(PLSTenantId);
         tenant.setName(tenantName);
@@ -94,11 +101,11 @@ public class PLSComponentManager {
             tenant.setUiVersion("3.0");
         }
 
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails);
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
     }
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
-            List<String> externalAdminEmails) {
+            List<String> externalAdminEmails, List<String> thirdPartyEmails) {
         if (tenantService.hasTenantId(tenant.getId())) {
             LOGGER.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
@@ -119,6 +126,7 @@ public class PLSComponentManager {
         assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
         assignAccessLevelByEmails(externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
+        assignAccessLevelByEmails(thirdPartyEmails, AccessLevel.THIRD_PARTY_USER, tenant.getId());
     }
 
     public void discardTenant(Tenant tenant) {

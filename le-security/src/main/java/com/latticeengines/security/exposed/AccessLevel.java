@@ -27,10 +27,11 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
-            GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.CREATE_OAUTH_APITOKEN //
+            GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
+    THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
+            )), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_REPORTING, //
@@ -39,8 +40,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
             GrantedRight.VIEW_PLS_TARGETMARKETS, //
-            GrantedRight.VIEW_PLS_QUOTAS, //
-            GrantedRight.CREATE_OAUTH_APITOKEN //
+            GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -60,7 +60,7 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
-            GrantedRight.CREATE_OAUTH_APITOKEN //
+            GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
             )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -81,9 +81,8 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS, //
-            GrantedRight.CREATE_OAUTH_APITOKEN //
-            ) //
-    ); //
+            GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
+            )); //
 
     private List<GrantedRight> grantedRights;
 

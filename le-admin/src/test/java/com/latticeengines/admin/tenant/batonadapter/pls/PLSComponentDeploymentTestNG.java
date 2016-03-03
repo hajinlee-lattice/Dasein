@@ -70,6 +70,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         node = confDir.get(new Path("/ExternalAdminEmails"));
         node.getDocument().setData("[ ]");
 
+        node = confDir.get(new Path("/ThirdPartyUserEmails"));
+        node.getDocument().setData("[ ]");
         return confDir;
     }
 

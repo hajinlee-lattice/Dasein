@@ -123,10 +123,10 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Quotas";
         }
     },//
-    CREATE_OAUTH_APITOKEN {
+    CREATE_PLS_OAUTH_APITOKEN {
         @Override
         public String getAuthority() {
-            return "Create_OAUTH_ApiToken";
+            return "Create_PLS_OauthApiToken";
         }
     };
 

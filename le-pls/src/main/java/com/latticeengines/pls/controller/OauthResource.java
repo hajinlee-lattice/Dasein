@@ -25,7 +25,7 @@ public class OauthResource {
     @RequestMapping(value = "/generateApiToken", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth Api Token for a tenant")
-    @PreAuthorize("hasRole('Create_OAUTH_ApiToken')")
+    @PreAuthorize("hasRole('Create_PLS_OauthApiToken')")
     public String generateApiToken(@RequestParam(value = "tenantId") String tenantId) {
         log.info("Generating api token for tenant " + tenantId);
         return oauthService.generateAPIToken(tenantId);

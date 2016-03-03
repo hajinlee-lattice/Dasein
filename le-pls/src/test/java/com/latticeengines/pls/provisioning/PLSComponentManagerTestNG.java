@@ -30,7 +30,8 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         List<String> superAdmins = Collections.singletonList("bnguyen@lattice-engines.com");
         List<String> latticeAdmins = Collections.singletonList("ysong@lattice-engines.com");
         List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");
-        componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins);
+        List<String> thirdPartyUsers = Collections.singletonList("thirdPartyUser1@gmail.com");
+        componentManager.provisionTenant(tenant, superAdmins, latticeAdmins, externalAdmins, thirdPartyUsers);
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         Tenant newTenant = tenantService.findByTenantId(tenant.getId());
@@ -50,10 +51,15 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
             Assert.assertEquals(level, AccessLevel.EXTERNAL_ADMIN);
         }
 
+        for (String email : thirdPartyUsers) {
+            AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
+            Assert.assertEquals(level, AccessLevel.THIRD_PARTY_USER);
+        }
+
         tenant = createTestTenant();
         tenant.setName("new name");
         componentManager.provisionTenant(tenant, Collections.<String> emptyList(), Collections.<String> emptyList(),
-                Collections.<String> emptyList());
+                Collections.<String> emptyList(), Collections.<String> emptyList());
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
 
         newTenant = tenantService.findByTenantId(tenant.getId());
@@ -70,6 +76,10 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         }
 
         for (String email : externalAdmins) {
+            Assert.assertFalse(userService.inTenant(tenant.getId(), email));
+        }
+
+        for (String email : thirdPartyUsers) {
             Assert.assertFalse(userService.inTenant(tenant.getId(), email));
         }
     }

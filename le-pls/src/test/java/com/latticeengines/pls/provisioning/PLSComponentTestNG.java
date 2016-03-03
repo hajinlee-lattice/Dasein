@@ -127,6 +127,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         confDir.add("/SuperAdminEmails", "[\"" + testAdminUsername + "\"]");
         confDir.add("/LatticeAdminEmails", "[ ]");
         confDir.add("/ExternalAdminEmails", "[ ]");
+        confDir.add("/ThirdPartyUserEmails", "[ ]");
         batonService.bootstrap(contractId, tenantId, spaceID, serviceName,
                 new SerializableDocumentDirectory(confDir).flatten());
     }

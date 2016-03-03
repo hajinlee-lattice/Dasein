@@ -37,6 +37,10 @@
         {
           "Node": "SuperAdminEmails",
           "Data": "[\"bnguyen@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
         }
       ]
     },

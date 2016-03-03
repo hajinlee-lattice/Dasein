@@ -38,6 +38,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     private static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
     private static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
     private static final String EXTERNAL_USER_USERNAME_1 = "pls-external-user-tester-1@test.lattice-engines.ext";
+    private static final String THIRD_PARTY_USER_USERNAME = "pls-third-party-user-tester@test.lattice-engines.ext";
 
     private static final Long NINETY_DAYS_IN_MILLISECONDS = 90 * 24 * 60 * 60 * 1000L;
 
@@ -78,12 +79,13 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     }
 
     @Override
-    public Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(List<Tenant> testingTenants) {
+    public Map<AccessLevel, User> createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(
+            List<Tenant> testingTenants) {
         if (shouldRecreateUserWithUsernameAndPassword(ADMIN_USERNAME, ADMIN_PASSWORD)) {
             globalUserManagementService.deleteUser("bnguyen");
             globalUserManagementService.deleteUser(ADMIN_USERNAME);
             createUser(ADMIN_USERNAME, ADMIN_USERNAME, "Super", "User", ADMIN_PASSWORD_HASH);
-            for (Tenant testingTenant: testingTenants) {
+            for (Tenant testingTenant : testingTenants) {
                 userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, testingTenant.getId(), ADMIN_USERNAME);
             }
         }
@@ -91,7 +93,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
         if (shouldRecreateUserWithUsernameAndPassword(PASSWORD_TESTER, PASSWORD_TESTER_PASSWORD)) {
             globalUserManagementService.deleteUser(PASSWORD_TESTER);
             createUser(PASSWORD_TESTER, PASSWORD_TESTER, "Lattice", "Tester", PASSWORD_TESTER_PASSWORD_HASH);
-            for (Tenant testingTenant: testingTenants) {
+            for (Tenant testingTenant : testingTenants) {
                 userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testingTenant.getId(), ADMIN_USERNAME);
             }
         }
@@ -100,7 +102,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
 
         for (AccessLevel level : AccessLevel.values()) {
             User user = createATestUserIfNecessary(level);
-            for (Tenant testingTenant: testingTenants) {
+            for (Tenant testingTenant : testingTenants) {
                 userService.assignAccessLevel(level, testingTenant.getId(), user.getUsername());
             }
             testingUsers.put(level, user);
@@ -109,8 +111,9 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
         if (shouldRecreateUserWithUsernameAndPassword(EXTERNAL_USER_USERNAME_1, GENERAL_PASSWORD)) {
             globalUserManagementService.deleteUser(EXTERNAL_USER_USERNAME_1);
             createUser(EXTERNAL_USER_USERNAME_1, EXTERNAL_USER_USERNAME_1, "Lattice", "Tester", GENERAL_PASSWORD_HASH);
-            for (Tenant testingTenant: testingTenants) {
-                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testingTenant.getId(), EXTERNAL_USER_USERNAME_1);
+            for (Tenant testingTenant : testingTenants) {
+                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testingTenant.getId(),
+                        EXTERNAL_USER_USERNAME_1);
             }
         }
 
@@ -185,22 +188,26 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
     @Override
     public String getUsernameForAccessLevel(AccessLevel accessLevel) {
         switch (accessLevel) {
-            case SUPER_ADMIN:
-                return SUPER_ADMIN_USERNAME;
-            case INTERNAL_ADMIN:
-                return INTERNAL_ADMIN_USERNAME;
-            case INTERNAL_USER:
-                return INTERNAL_USER_USERNAME;
-            case EXTERNAL_ADMIN:
-                return EXTERNAL_ADMIN_USERNAME;
-            case EXTERNAL_USER:
-                return EXTERNAL_USER_USERNAME;
-            default:
-                throw new IllegalArgumentException("Unknown access level!");
+        case SUPER_ADMIN:
+            return SUPER_ADMIN_USERNAME;
+        case INTERNAL_ADMIN:
+            return INTERNAL_ADMIN_USERNAME;
+        case INTERNAL_USER:
+            return INTERNAL_USER_USERNAME;
+        case EXTERNAL_ADMIN:
+            return EXTERNAL_ADMIN_USERNAME;
+        case EXTERNAL_USER:
+            return EXTERNAL_USER_USERNAME;
+        case THIRD_PARTY_USER:
+            return THIRD_PARTY_USER_USERNAME;
+        default:
+            throw new IllegalArgumentException("Unknown access level!");
         }
     }
 
     @Override
-    public String getGeneralPassword() { return GENERAL_PASSWORD; }
+    public String getGeneralPassword() {
+        return GENERAL_PASSWORD;
+    }
 
 }

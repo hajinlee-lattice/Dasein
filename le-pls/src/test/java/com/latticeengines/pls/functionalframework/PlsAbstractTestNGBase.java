@@ -198,6 +198,10 @@ public abstract class PlsAbstractTestNGBase extends SecurityFunctionalTestNGBase
     protected void switchToExternalUser() {
         switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER);
     }
+    
+    protected void switchToThirdPartyUser() {
+        switchToTheSessionWithAccessLevel(AccessLevel.THIRD_PARTY_USER);
+    }
 
     protected void switchToTheSessionWithAccessLevel(AccessLevel level) {
         if (testingUserSessions == null || testingUserSessions.isEmpty()) {
