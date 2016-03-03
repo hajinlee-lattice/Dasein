@@ -45,7 +45,7 @@ public class SchemaRepository {
         Table table = createTable(SchemaInterpretation.SalesforceAccount);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
 
-        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.ExternalId));
+        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
         table.addAttribute(createAttribute("Website", Schema.Type.STRING, false, SemanticType.Website));
         table.addAttribute(createAttribute("IsWon", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
@@ -70,7 +70,7 @@ public class SchemaRepository {
         Table table = createTable(SchemaInterpretation.SalesforceLead);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
 
-        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.ExternalId));
+        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
         table.addAttribute(createAttribute("IsConverted", Schema.Type.BOOLEAN, false, SemanticType.Event));
 

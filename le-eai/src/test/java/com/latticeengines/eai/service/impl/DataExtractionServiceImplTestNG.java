@@ -165,7 +165,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.setName("Account");
         Attribute attr = new Attribute();
         attr.setName("Id");
-        attr.setSemanticType(SemanticType.ExternalId);
+        attr.setSemanticType(SemanticType.Id);
         attr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
         attr.setDataSource("");
         attr.setDataQuality("");
@@ -209,7 +209,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
         System.out.println(tables);
         assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
-        assertTrue(tables.get(0).getNameAttributeMap().containsKey("ExternalId"));
+        assertTrue(tables.get(0).getNameAttributeMap().containsKey("Id"));
 
         waitForCamelMessagesToComplete(camelContext);
 
@@ -218,7 +218,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         List<String> filesForTable = getFilesFromHdfs(targetPath, table.getName());
         List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(filesForTable.get(0)));
         for (GenericRecord record : records) {
-            String name = String.valueOf(record.get("ExternalId"));
+            String name = String.valueOf(record.get("Id"));
             assertTrue(StringUtils.isNotEmpty(name));
         }
 

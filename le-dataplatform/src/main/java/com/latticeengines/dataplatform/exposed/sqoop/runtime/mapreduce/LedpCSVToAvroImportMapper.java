@@ -190,7 +190,7 @@ public class LedpCSVToAvroImportMapper extends
         SemanticType semanticType = attr.getSemanticType();
         if (semanticType == null) {
             Log.info("SemanticType for attribute " + attr.getName() + " is null.");
-        } else if ((semanticType.equals(SemanticType.ExternalId) || semanticType.equals(SemanticType.Event))
+        } else if ((semanticType.equals(SemanticType.Id) || semanticType.equals(SemanticType.Event))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
             throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getPhysicalName()));

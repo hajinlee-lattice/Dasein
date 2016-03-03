@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 public enum SemanticType {
-    ExternalId, //
+    Id, //
     Event, //
     Domain, //
 

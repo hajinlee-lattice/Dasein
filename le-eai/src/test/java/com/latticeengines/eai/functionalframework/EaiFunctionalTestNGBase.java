@@ -161,7 +161,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             attr.setDisplayName(field.getName());
             attr.setNullable(true);
             if (attr.getName().equals("Id")) {
-                attr.setSemanticType(SemanticType.ExternalId);
+                attr.setSemanticType(SemanticType.Id);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
             if (attr.getName().equals("Country")) {
