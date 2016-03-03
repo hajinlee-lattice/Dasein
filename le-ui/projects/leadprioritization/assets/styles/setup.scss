@@ -56,9 +56,15 @@
   position: relative;
 }
 
+#setup .manage-fields .title {
+  height: 50px;
+  margin-bottom: 10px;
+}
+
 #setup .manage-fields .title h2 {
   display: inline-block;
   max-width: 580px;
+  margin: 4px 0;
 }
 
 #setup .manage-fields .title .button-area {
@@ -187,6 +193,8 @@
   border-style: none;
   padding: 0.6em 0.4em;
   font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 #setup .fields-grid table td *{
@@ -205,6 +213,7 @@
   height: 1.8em;
   font-size: 12px;
   text-indent: 0;
+  box-sizing: content-box;
 }
 
 #setup .fields-grid table select {
@@ -214,6 +223,9 @@
   height: 1.8em;
   font-size: 12px;
   text-indent: 0;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
 }
 
 #setup .fields-grid table select.tags {
@@ -260,6 +272,7 @@
 }
 
 #setup .fields-grid .k-grid-pager {
+  min-width: 1020px;
   background: white;
   border: none;
   margin: 8px 0 0 0;
@@ -273,6 +286,7 @@
   -ms-transition: none !important;
   transition: none !important;
 }
+
 #setup .fields-grid .k-grid-pager>a,
 #setup .fields-grid .k-grid-pager li a,
 #setup .fields-grid .k-grid-pager li span {
@@ -289,15 +303,22 @@
   vertical-align: middle;
 }
 
+#setup .fields-grid .k-grid-pager a.k-link {
+  border-right: 0;
+}
+
+#setup .fields-grid .k-grid-pager a.k-pager-last {
+  border-right: 1px solid #ccc;
+}
+
 #setup .fields-grid .k-grid-pager a span {
-    position: absolute;
-    margin: 2px 0 0 -2px;
+  margin: 2px 0 0 -2px;
 }
 
 #setup .fields-grid .k-grid-pager span.k-state-selected {
-    color: #fff;
-    background-color: #428bca;
-    border-color: #428bca;
+  color: #fff;
+  background-color: #428bca;
+  border-color: #428bca;
 }
 
 #setup .fields-grid .k-grid-pager span.k-pager-info {
@@ -347,23 +368,32 @@
 
 #setup .fields-grid .k-grid-pager .k-pager-numbers {
   margin: 0;
-  
 }
 
 #setup .field-details {
+  /*
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+  */
   background: white;
   min-width: 800px;
+}
+
+#setup .field-details h4 {
+  font-size: 1.3em;
 }
 
 #setup .field-details .data-table {
   width: 580px;
   border: 1px solid #ccc;
   border-radius: 2px;
+}
+
+#setup .field-details table {
+  margin: 0;
 }
 
 #setup .field-details tbody {
@@ -394,6 +424,8 @@
 
 #setup .field-details .form-control {
   width: 320px;
+  font-size: 14px;
+  font-family: inherit;
 }
 
 
