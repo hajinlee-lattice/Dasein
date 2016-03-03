@@ -174,26 +174,28 @@ class MatchPlanner {
                 String originalState = (String) inputRecord.get(statePos);
                 String originalCountry = (String) inputRecord.get(countryPos);
 
-                if (StringUtils.isEmpty(originalCountry)) {
-                    originalCountry = LocationUtils.USA;
+                if (StringUtils.isNotEmpty(originalName)) {
+                    if (StringUtils.isEmpty(originalCountry)) {
+                        originalCountry = LocationUtils.USA;
+                    }
+
+                    String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
+                    String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
+
+                    NameLocation nameLocation = new NameLocation();
+                    nameLocation.setName(originalName);
+                    nameLocation.setState(cleanState);
+                    nameLocation.setCountry(cleanCountry);
+
+                    if (keyPositionMap.containsKey(MatchKey.City)) {
+                        int cityPos = keyPositionMap.get(MatchKey.City);
+                        String originalCity = (String) inputRecord.get(cityPos);
+                        nameLocation.setCity(originalCity);
+                    }
+
+                    record.setParsedNameLocation(nameLocation);
+                    nameLocationSet.add(nameLocation);
                 }
-
-                String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
-                String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
-
-                NameLocation nameLocation = new NameLocation();
-                nameLocation.setName(originalName);
-                nameLocation.setState(cleanState);
-                nameLocation.setCountry(cleanCountry);
-
-                if (keyPositionMap.containsKey(MatchKey.City)) {
-                    int cityPos = keyPositionMap.get(MatchKey.City);
-                    String originalCity = (String) inputRecord.get(cityPos);
-                    nameLocation.setCity(originalCity);
-                }
-
-                record.setParsedNameLocation(nameLocation);
-                nameLocationSet.add(nameLocation);
             } catch (Exception e) {
                 log.error(ExceptionUtils.getFullStackTrace(e));
                 record.addErrorMessage("Error when cleanup name and location fields: " + e.getMessage());
