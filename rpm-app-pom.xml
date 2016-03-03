@@ -5,7 +5,7 @@
     <artifactId>le-toplevel</artifactId>
     <version>2.0.22-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Lattice Data Platform Top Level HDFS Module</name>
+    <name>Lattice Data Platform Top Level non-HDFS Module</name>
 
     <parent>
         <groupId>com.latticeengines</groupId>
@@ -15,10 +15,11 @@
     </parent>
 
     <modules>
-        <module>le-dataplatform/pom-dataplatform-hdfs.xml</module>
-        <module>le-scoring/pom-scoring-hdfs.xml</module>
-        <module>le-dataflow/pom-dataflow-hdfs.xml</module>
-        <module>le-serviceflows/pom-serviceflows-rpm.xml</module>
-        <module>le-dellebi/pom-dellebi-hdfs.xml</module>
+        <module>le-api/pom-api-rpm.xml</module>
+        <module>le-job/pom-job-rpm.xml</module>
+        <module>le-pls/pom-pls-rpm.xml</module>
+        <module>le-ui/pom-ui-rpm.xml</module>
+        <module>le-admin/pom-admin-rpm.xml</module>
+        <module>le-microservice/pom-microservice-rpm.xml</module>
     </modules>
 </project>
