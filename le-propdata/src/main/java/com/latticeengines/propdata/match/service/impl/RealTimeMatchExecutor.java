@@ -432,18 +432,20 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
             for (NameLocation nameLocation : nameLocations) {
-                sql += " OR ( ";
-                sql += String.format("[%s] = '%s'", nameField, nameLocation.getName().replace("'", "''"));
-                if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                    sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry().replace("'", "''"));
+                if (StringUtils.isNotEmpty(nameLocation.getName())) {
+                    sql += " OR ( ";
+                    sql += String.format("[%s] = '%s'", nameField, nameLocation.getName().replace("'", "''"));
+                    if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
+                        sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry().replace("'", "''"));
+                    }
+                    if (StringUtils.isNotEmpty(nameLocation.getState())) {
+                        sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState().replace("'", "''"));
+                    }
+                    if (cityField != null && StringUtils.isNotEmpty(nameLocation.getCity())) {
+                        sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity().replace("'", "''"));
+                    }
+                    sql += " )\n";
                 }
-                if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                    sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState().replace("'", "''"));
-                }
-                if (cityField != null && StringUtils.isNotEmpty(nameLocation.getCity())) {
-                    sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity().replace("'", "''"));
-                }
-                sql += " )\n";
             }
 
             return sql;

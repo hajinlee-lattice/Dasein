@@ -217,6 +217,7 @@
                                         <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
+                                        <argument>-Xnocompile</argument>
                                         <argument>-d</argument>
                                         <argument>${project.build.directory}/generated-sources</argument>
                                         <argument>-p</argument>
@@ -241,6 +242,7 @@
                                         <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
+                                        <argument>-Xnocompile</argument>
                                         <argument>-d</argument>
                                         <argument>${project.build.directory}/generated-sources</argument>
                                         <argument>-p</argument>
@@ -265,6 +267,7 @@
                                         <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
+                                        <argument>-Xnocompile</argument>
                                         <argument>-d</argument>
                                         <argument>${project.build.directory}/generated-sources</argument>
                                         <argument>-p</argument>
@@ -289,6 +292,7 @@
                                         <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
+                                        <argument>-Xnocompile</argument>
                                         <argument>-d</argument>
                                         <argument>${project.build.directory}/generated-sources</argument>
                                         <argument>-p</argument>
