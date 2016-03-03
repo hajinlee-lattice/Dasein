@@ -26,6 +26,13 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
 
     public SingleContainerClientCustomization(Configuration yarnConfiguration, //
             VersionManager versionManager, //
+            String hdfsJobBaseDir, //
+            String webHdfs) {
+        this(yarnConfiguration, versionManager, null, hdfsJobBaseDir, webHdfs);
+    }
+
+    public SingleContainerClientCustomization(Configuration yarnConfiguration, //
+            VersionManager versionManager, //
             SoftwareLibraryService softwareLibraryService, //
             String hdfsJobBaseDir, //
             String webHdfs) {
