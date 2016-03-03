@@ -25,6 +25,7 @@ import org.testng.Assert;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -206,6 +207,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         attribute.setStatisticalType("ratio");
         attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
         attribute.setDataSource("DerivedColumns");
+        attribute.addValidator(new RequiredIfOtherFieldIsEmpty("Test"));
 
         return table;
     }

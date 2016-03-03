@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
+import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -53,6 +54,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private Map<String, Object> properties = new HashMap<>();
     private Table table;
     private Long tenantId;
+    private List<InputValidatorWrapper> validatorWrappers = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -298,6 +300,35 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
+    }
+
+    @Column(name = "VALIDATORS", nullable = true)
+    @Lob
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
+    public List<InputValidatorWrapper> getValidatorWrappers() {
+        return validatorWrappers;
+    }
+
+    public void setValidatorWrappers(List<InputValidatorWrapper> validatorWrappers) {
+        this.validatorWrappers = validatorWrappers;
+    }
+
+    @JsonIgnore
+    @Transient
+    public List<InputValidator> getValidators() {
+        List<InputValidator> validators = new ArrayList<>();
+        for (InputValidatorWrapper raw : validatorWrappers) {
+            if (raw.getValidator() != null) {
+                validators.add(raw.getValidator());
+            }
+        }
+
+        return validators;
+    }
+
+    public void addValidator(InputValidator validator) {
+        InputValidatorWrapper wrapper = new InputValidatorWrapper(validator);
+        validatorWrappers.add(wrapper);
     }
 
     @Transient

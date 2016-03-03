@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class SchemaRepository {
@@ -48,11 +49,12 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("Website", Schema.Type.STRING, false, SemanticType.Website));
         table.addAttribute(createAttribute("IsWon", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
-        table.addAttribute(createAttribute("Name", Schema.Type.STRING, SemanticType.CompanyName));
-        table.addAttribute(createAttribute("BillingCity", Schema.Type.STRING, SemanticType.City));
-        table.addAttribute(createAttribute("BillingState", Schema.Type.STRING, SemanticType.State));
+        table.addAttribute(createAttribute("Name", Schema.Type.STRING, SemanticType.CompanyName, "Website"));
+        table.addAttribute(createAttribute("BillingCity", Schema.Type.STRING, SemanticType.City, "Website"));
+        table.addAttribute(createAttribute("BillingState", Schema.Type.STRING, SemanticType.State, "Website"));
+        table.addAttribute(createAttribute("BillingCountry", Schema.Type.STRING, SemanticType.Country, "Website"));
         table.addAttribute(createAttribute("BillingPostalCode", Schema.Type.STRING, SemanticType.PostalCode));
-        table.addAttribute(createAttribute("BillingCountry", Schema.Type.STRING, SemanticType.Country));
+
         table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
         table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE));
         table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT));
@@ -72,10 +74,10 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
         table.addAttribute(createAttribute("IsConverted", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
-        table.addAttribute(createAttribute("Company", Schema.Type.STRING, SemanticType.CompanyName));
-        table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City));
-        table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State));
-        table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country));
+        table.addAttribute(createAttribute("Company", Schema.Type.STRING, SemanticType.CompanyName, "Email"));
+        table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City, "Email"));
+        table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State, "Email"));
+        table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country, "Email"));
         table.addAttribute(createAttribute("PostalCode", Schema.Type.STRING, SemanticType.PostalCode));
 
         table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
@@ -119,7 +121,17 @@ public class SchemaRepository {
         return createAttribute(name, dataType, true, semanticType);
     }
 
+    private Attribute createAttribute(String name, Schema.Type dataType, SemanticType semanticType,
+            String otherFieldForValidator) {
+        return createAttribute(name, dataType, true, semanticType, otherFieldForValidator);
+    }
+
     private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType) {
+        return createAttribute(name, dataType, nullable, semanticType, null);
+    }
+
+    private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType,
+            String otherFieldForValidator) {
         Attribute attribute = new Attribute();
         attribute.setName(name);
         attribute.setPhysicalDataType(dataType.toString());
@@ -127,6 +139,11 @@ public class SchemaRepository {
         attribute.setNullable(nullable);
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         attribute.setSemanticType(semanticType);
+
+        if (otherFieldForValidator != null) {
+            attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherFieldForValidator));
+        }
+
         return attribute;
     }
 

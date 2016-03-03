@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -111,6 +112,18 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrMetadata.getStatisticalType(), "ratio");
         assertEquals(attrMetadata.getFundamentalType(), "numeric");
         assertEquals(attrMetadata.getTags().get(0), "External");
+    }
+
+    @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })
+    public void getAttributeValidators(String urlType) {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        String url = String.format("%s/metadata/customerspaces/%s/%s/%s", //
+                getRestAPIHostPort(), CUSTOMERSPACE1, urlType, TABLE1);
+        Table table = restTemplate.getForObject(url, Table.class, new HashMap<>());
+        Attribute attribute = table.getAttributes().get(3);
+        assertNotNull(attribute);
+        assertEquals(attribute.getValidators().size(), 1);
     }
 
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTableMetadata" })
