@@ -20,7 +20,7 @@ public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironment();
+        switchToSuperAdmin();
         deleteUserByRestCall(USER_EMAIL);
     }
 

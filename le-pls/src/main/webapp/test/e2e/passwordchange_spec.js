@@ -25,9 +25,24 @@ describe('forgot password tests:', function () {
         changePasswordButNewPasswordAndConfirmPasswordAreDifferent_assertError();
     });
 
-    it('should pass happy case', function () {
-        changePassword_assertItWorked();
-    });
+    it('login and change password to alternative password', function () {
+        passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingPassword);
+        passwordChange.navigateFromHomePageToChangePasswordPage();
+        passwordChange.changePasswordFromOldToNew(passwordChange.params.passwordTestingPassword, passwordChange.params.passwordTestingAlternativePassword);
+        passwordChange.assertPasswordChangeSuccessful(true);
+        element(by.buttonText('Return to Login')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(5000);
+        loginPage.assertLoggedIn(false);
+    }, 200000);
+
+    it('login with alternative password and assert it worked', function () {
+        passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingAlternativePassword);
+        browser.waitForAngular();
+        browser.driver.sleep(10000);
+        loginPage.assertLoggedIn(true);
+        loginPage.logout();
+    }, 200000);
 
     function changePasswordWithWrongUsername_assertError() {
         loginPage.get();
@@ -71,26 +86,4 @@ describe('forgot password tests:', function () {
         passwordChange.assertPasswordChangeSuccessful(false);
     }
 
-    function changePassword_assertItWorked() {
-        //=======================================================
-        // Login and change password to alternative password
-        //=======================================================
-        passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingPassword);
-        passwordChange.navigateFromHomePageToChangePasswordPage();
-        passwordChange.changePasswordFromOldToNew(passwordChange.params.passwordTestingPassword, passwordChange.params.passwordTestingAlternativePassword);
-        passwordChange.assertPasswordChangeSuccessful(true);
-        element(by.buttonText('Return to Login')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(5000);
-        loginPage.assertLoggedIn(false);
-        browser.driver.sleep(10000);
-        //=======================================================
-        // Login with alternative password and assert it worked
-        //=======================================================
-        passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingAlternativePassword);
-        browser.waitForAngular();
-        browser.driver.sleep(5000);
-        loginPage.assertLoggedIn(true);
-        loginPage.logout();
-    }
 });
