@@ -1,7 +1,5 @@
 package com.latticeengines.pls.workflow;
 
-import java.util.List;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -27,14 +25,12 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18088, new String[] { parameters.getEventTableName() });
         }
 
-        List<String> eventColumns = getEventColumns(eventTable);
         ModelWorkflowConfiguration configuration = new ModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .workflow("modelAndEmailWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName(parameters.getName()) //
-                .eventColumns(eventColumns) //
                 .eventTableName(parameters.getEventTableName()) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);

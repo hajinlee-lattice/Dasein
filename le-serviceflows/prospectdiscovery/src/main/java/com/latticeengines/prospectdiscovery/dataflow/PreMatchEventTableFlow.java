@@ -118,9 +118,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         fieldsToRetain.add("Event_IsWon");
         fieldsToRetain.add("Revenue_IsWon");
 
-        FieldMetadata event = new FieldMetadata("Event_IsWon", Boolean.class);
-        event.setPropertyValue("logicalType", "event");
-        event.setPropertyValue("displayName", "Event_IsWon");
+        FieldMetadata event = getEventFieldMetadata("Event_IsWon");
         return joined //
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addIsWonEvent") //
@@ -151,9 +149,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         fieldsToRetain.add("Event_StageIsClosedWon");
         fieldsToRetain.add("Revenue_StageIsClosedWon");
 
-        FieldMetadata event = new FieldMetadata("Event_StageIsClosedWon", Boolean.class);
-        event.setPropertyValue("logicalType", "event");
-        event.setPropertyValue("displayName", "Event_StageIsClosedWon");
+        FieldMetadata event = getEventFieldMetadata("Event_StageIsClosedWon");
         return joined //
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addStageClosedWonEvent") //
@@ -181,9 +177,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         fieldsToRetain.add("Event_IsClosed");
         fieldsToRetain.add("Revenue_IsClosed");
 
-        FieldMetadata event = new FieldMetadata("Event_IsClosed", Boolean.class);
-        event.setPropertyValue("logicalType", "event");
-        event.setPropertyValue("displayName", "Event_IsClosed");
+        FieldMetadata event = getEventFieldMetadata("Event_IsClosed");
         return joined //
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addClosedEvent") //
@@ -202,9 +196,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
         fieldsToRetain.add("Event_OpportunityCreated");
         fieldsToRetain.add("Revenue_OpportunityCreated");
 
-        FieldMetadata event = new FieldMetadata("Event_OpportunityCreated", Boolean.class);
-        event.setPropertyValue("logicalType", "event");
-        event.setPropertyValue("displayName", "Event_OpportunityCreated");
+        FieldMetadata event = getEventFieldMetadata("Event_OpportunityCreated");
         return joined //
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addOpportunityCreatedEvent") //
@@ -227,6 +219,14 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 .addFunction("Count != null && Count > 0 ? true : false", new FieldList("Count"), event) //
                 .checkpoint("addHasContacts") //
                 .retain(new FieldList(fieldsToRetain));
+    }
+
+    private FieldMetadata getEventFieldMetadata(String column) {
+        FieldMetadata event = new FieldMetadata(column, Boolean.class);
+        event.setPropertyValue("LogicalType", "event");
+        event.setPropertyValue("SemanticType", "Event");
+        event.setPropertyValue("DisplayName", column);
+        return event;
     }
 
 }

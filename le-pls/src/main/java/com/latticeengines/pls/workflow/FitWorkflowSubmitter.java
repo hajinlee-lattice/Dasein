@@ -83,7 +83,6 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                     .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                     .matchClient(matchClientDocument.getMatchClient().name()) //
                     .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                    .eventColumns(eventCols) //
                     .uniqueKeyColumn("LatticeAccountID") //
                     .directoryToScore(accountMasterPath) //
                     .registerScoredTable(true) //

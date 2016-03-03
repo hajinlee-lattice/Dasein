@@ -14,6 +14,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -57,8 +58,8 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         List<String> excludedColumns = new ArrayList<>();
 
-        for (String eventCol : configuration.getEventColumns()) {
-            excludedColumns.add(eventCol);
+        for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
+            excludedColumns.add(event.getName());
         }
 
         for (Attribute attr : eventTable.getAttributes()) {
@@ -71,19 +72,19 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         excludedColumns.toArray(excludeList);
         bldr = bldr.profileExcludeList(excludeList);
 
-        for (String eventCol : configuration.getEventColumns()) {
-            bldr = bldr.targets(eventCol) //
-                    .metadataTable("EventTable-" + eventCol) //
-                    .keyColumn("Id").modelName(configuration.getModelName())
+        for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
+            bldr = bldr.targets(event.getName()) //
+                    .metadataTable("EventTable-" + event.getDisplayName()) //
+                    .keyColumn("Id").modelName(configuration.getModelName()) //
                     .eventTableName(getConfiguration().getEventTableName());
-            if (configuration.getEventColumns().size() != 1) {
-                bldr = bldr.modelName(configuration.getModelName() + " (" + eventCol + ")");
+            if (eventTable.getAttributes(SemanticType.Event).size() > 1) {
+                bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");
             }
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFile();
             modelExecutor.profile();
             String modelAppId = modelExecutor.model();
-            modelApplicationIdToEventColumn.put(modelAppId, eventCol);
+            modelApplicationIdToEventColumn.put(modelAppId, event.getName());
         }
         return modelApplicationIdToEventColumn;
     }

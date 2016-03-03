@@ -412,7 +412,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(operation.getOutputPipe(), operation.getOutputMetadata());
     }
 
-    private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap) {
+    private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap, Table table) {
         List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
 
         for (Field field : fieldMap.values()) {
@@ -424,6 +424,27 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 }
             }
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+
+            // Merge in properties from Attribute on the Table
+            Attribute attribute = table.getAttribute(field.name());
+            if (attribute != null) {
+                Map<String, Object> properties = attribute.getProperties();
+                for (String key : properties.keySet()) {
+                    Object metadataValue = properties.get(key);
+                    String avroValue = fm.getPropertyValue(key);
+                    if (avroValue != null && !avroValue.equals(metadataValue)) {
+                        log.warn(String
+                                .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
+                                        field.name(), table.getName(), avroValue, metadataValue));
+                    }
+                    fm.setPropertyValue(key, metadataValue.toString());
+                }
+            } else {
+                log.warn(String.format(
+                        "Could not find field %s in table %s.  Attribute is in avro but not in metadata", field.name(),
+                        table.getName()));
+            }
+
             fields.add(fm);
         }
         return fields;
@@ -538,7 +559,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         // group and sort the extracts
         if (sourceTable.getPrimaryKey() != null && sourceTable.getLastModifiedKey() != null) {
-            // TODO Use logical sort
             String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0);
             Fields sortFields = new Fields(lastModifiedKeyColName);
             sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());
@@ -549,7 +569,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         toRegister = new Pipe(sourceTableName, toRegister);
 
-        return new Node(register(toRegister, getFieldMetadata(allColumns), sourceTableName), this);
+        List<FieldMetadata> fm = getFieldMetadata(allColumns, sourceTable);
+        return new Node(register(toRegister, fm, sourceTableName), this);
     }
 
     protected Table getSourceMetadata(String sourceName) {

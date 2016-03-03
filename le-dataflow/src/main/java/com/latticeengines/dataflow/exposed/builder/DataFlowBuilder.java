@@ -199,6 +199,8 @@ public abstract class DataFlowBuilder {
                         attribute.setRTSArguments(value);
                     } else if (key.equals("RTSAttribute")) {
                         attribute.setRTS(Boolean.valueOf(value));
+                    } else if (key.equals("SemanticType")) {
+                        attribute.setSemanticTypeString(value);
                     }
                 }
 
@@ -302,7 +304,6 @@ public abstract class DataFlowBuilder {
             properties.putAll(properties);
         }
 
-        @SuppressWarnings("deprecation")
         public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Field avroField) {
             this.avroType = avroType;
             this.javaType = javaType;

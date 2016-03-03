@@ -174,6 +174,20 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
+    public List<Attribute> getAttributes(final SemanticType semanticType) {
+        if (semanticType == null) {
+            return null;
+        }
+        return findAttributes(new Predicate<Attribute>() {
+
+            @Override
+            public boolean apply(@Nullable Attribute attribute) {
+                return attribute.getSemanticType() == semanticType;
+            }
+        });
+    }
+
+    @JsonIgnore
     public List<Attribute> findAttributes(Predicate<Attribute> predicate) {
         return Lists.newArrayList(Iterables.filter(attributes, predicate));
     }

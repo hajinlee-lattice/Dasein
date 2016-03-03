@@ -62,4 +62,5 @@ public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctional
     protected String getLastModifiedColumnName(String tableName) {
         return "LastModifiedDate";
     }
+
 }

@@ -112,6 +112,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         eventTable.setName(matchTableName);
 
         addMetadata(eventTable, dbCreds);
+        addMetadataFromPreMatchTable(eventTable, preMatchEventTable);
         url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
@@ -137,7 +138,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
                     String column = rset.getString(1);
                     String metadataName = rset.getString(2);
                     String metadataValue = rset.getString(3);
-                    
+
                     if (metadataValue != null) {
                         metadataValue = metadataValue.trim();
                     }
@@ -162,6 +163,27 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
 
                     if (m != null) {
                         m.invoke(attr, metadataValue);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addMetadataFromPreMatchTable(Table eventTable, Table preMatchEventTable) {
+        for (Attribute preMatchAttribute : preMatchEventTable.getAttributes()) {
+            Attribute postMatchAttribute = eventTable.getAttribute(preMatchAttribute.getName());
+            if (postMatchAttribute != null) {
+                Map<String, Object> preMatchProperties = preMatchAttribute.getProperties();
+                for (String preMatchPropertyKey : preMatchProperties.keySet()) {
+                    if (postMatchAttribute.getPropertyValue(preMatchPropertyKey) == null) {
+                        log.info(String.format("Adding property %s with value %s to attribute %s in post-match table",
+                                preMatchPropertyKey, preMatchProperties.get(preMatchPropertyKey),
+                                postMatchAttribute.getName()));
+                        postMatchAttribute.setPropertyValue(preMatchPropertyKey,
+                                preMatchProperties.get(preMatchPropertyKey));
+                    } else {
+                        log.info(String.format("Post-match attribute %s already has property %s defined",
+                                postMatchAttribute.getName(), preMatchPropertyKey));
                     }
                 }
             }

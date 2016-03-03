@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
 
 @Component("mockProfileAndModel")
@@ -26,7 +26,6 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
     private static final Log log = LogFactory.getLog(MockProfileAndModel.class);
     private static final String MODEL_HDFS_BASEDIR = "/user/s-analytics/customers/%s/models/RunMatchWithLEUniverse_123_DerivedColumns/";
     private static final String MODEL_SOURCEDIR = "/tmp/PDEndToEndTest/models/";
-
 
     @Override
     public void execute() {
@@ -51,10 +50,7 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
         uploadOrOverrideExistingModels(bldr, modelApplicationIdToEventColumn);
 
         List<String> excludedColumns = new ArrayList<>();
-
-        for (String eventCol : configuration.getEventColumns()) {
-            excludedColumns.add(eventCol);
-        }
+        excludedColumns.add("Event_OpportunityCreated");
 
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null || attr.getApprovedUsage().get(0).equals("None")) {
@@ -81,7 +77,8 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
         return modelApplicationIdToEventColumn;
     }
 
-    private void uploadOrOverrideExistingModels(ModelingServiceExecutor.Builder bldr, Map<String, String> modelApplicationIdToEventColumn) throws Exception {
+    private void uploadOrOverrideExistingModels(ModelingServiceExecutor.Builder bldr,
+            Map<String, String> modelApplicationIdToEventColumn) throws Exception {
         FileSystem fs = FileSystem.get(bldr.getYarnConfiguration());
         fs.delete(new Path(String.format(MODEL_HDFS_BASEDIR, configuration.getCustomerSpace().toString())), true);
         fs.mkdirs(new Path(String.format(MODEL_HDFS_BASEDIR, configuration.getCustomerSpace().toString())));
@@ -91,7 +88,8 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
         Path modelBaseDir = new Path(String.format(MODEL_HDFS_BASEDIR, configuration.getCustomerSpace().toString()));
         for (FileStatus fileStatus : fileStatuses) {
             Path fullEventColumnPath = fileStatus.getPath();
-            String eventColumnName = fullEventColumnPath.toString().substring(fullEventColumnPath.toString().lastIndexOf("/")+1);
+            String eventColumnName = fullEventColumnPath.toString().substring(
+                    fullEventColumnPath.toString().lastIndexOf("/") + 1);
 
             Path fullModelPath = fs.listStatus(fullEventColumnPath)[0].getPath();
             String modelName = fullModelPath.toString().substring(fullModelPath.toString().lastIndexOf("/"));
@@ -99,7 +97,8 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
             String applicationIdPath = fs.listStatus(fullModelPath)[0].getPath().toString();
             String applicationId = String.format("application_%s",
                     applicationIdPath.substring(applicationIdPath.lastIndexOf("/") + 1));
-            fs.setTimes(new Path(applicationIdPath + "/enhancements/modelsummary.json"), System.currentTimeMillis(), System.currentTimeMillis());
+            fs.setTimes(new Path(applicationIdPath + "/enhancements/modelsummary.json"), System.currentTimeMillis(),
+                    System.currentTimeMillis());
 
             boolean renameSucc = fs.rename(fullModelPath, new Path(modelBaseDir.toString() + modelName));
             modelApplicationIdToEventColumn.put(applicationId, eventColumnName);

@@ -1,7 +1,5 @@
 package com.latticeengines.leadprioritization.workflow;
 
-import java.util.List;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -90,11 +88,6 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
-            return this;
-        }
-
-        public Builder eventColumns(List<String> eventColumns) {
-            model.setEventColumns(eventColumns);
             return this;
         }
 

@@ -1,7 +1,5 @@
 package com.latticeengines.pls.workflow;
 
-import java.util.List;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,8 +49,6 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18088, new String[] { parameters.getEventTableName() });
         }
 
-        List<String> eventColumns = getEventColumns(eventTable);
-
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration.Builder()
@@ -70,7 +66,6 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumns") //
                 .modelName(parameters.getName()) //
-                .eventColumns(eventColumns) //
                 .eventTableName(sourceFile.getTableName()) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);

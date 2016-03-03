@@ -3,10 +3,8 @@ package com.latticeengines.workflowapi.flows;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -57,12 +55,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
     }
 
     protected FitModelWorkflowConfiguration generateFitModelWorkflowConfiguration() {
-        List<String> eventCols = new ArrayList<>();
-        eventCols.add("Event_IsWon");
-        eventCols.add("Event_StageIsClosedWon");
-        eventCols.add("Event_IsClosed");
-        eventCols.add("Event_OpportunityCreated");
-
         Map<String, String> extraSources = new HashMap<>();
         extraSources.put("PublicDomain", "/tmp/Stoplist/*.avro");
 
@@ -79,7 +71,6 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchClient("PD130") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .eventColumns(eventCols) //
                 .targetMarket(defaultTargetMarket) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .uniqueKeyColumn("LatticeAccountID") //

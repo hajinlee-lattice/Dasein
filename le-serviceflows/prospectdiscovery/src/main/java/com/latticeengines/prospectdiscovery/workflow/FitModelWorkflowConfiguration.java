@@ -40,7 +40,6 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
         private RunScoreTableDataFlowConfiguration runScoreTableDataFlow = new RunScoreTableDataFlowConfiguration();
         private RunAttributeLevelSummaryDataFlowsConfiguration attrLevelSummaryDataFlows = new RunAttributeLevelSummaryDataFlowsConfiguration();
 
-
         public Builder customer(CustomerSpace customerSpace) {
             fitModel.setCustomerSpace(customerSpace);
             microservice.setCustomerSpace(customerSpace);
@@ -106,11 +105,6 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
-            return this;
-        }
-
-        public Builder eventColumns(List<String> eventColumns) {
-            model.setEventColumns(eventColumns);
             return this;
         }
 

@@ -167,6 +167,20 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         }
     }
 
+    @Transient
+    @JsonIgnore
+    public void setSemanticTypeString(String semanticTypeString) {
+        SemanticType semanticType = null;
+        try {
+            semanticType = SemanticType.valueOf(semanticTypeString);
+        } catch (Exception e) {
+            // pass
+        }
+        if (semanticType != null) {
+            setSemanticType(semanticType);
+        }
+    }
+
     @Column(name = "PRECISION", nullable = true)
     public Integer getPrecision() {
         return precision;

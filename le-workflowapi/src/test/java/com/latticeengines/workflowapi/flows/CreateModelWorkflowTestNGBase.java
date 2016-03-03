@@ -12,7 +12,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-import com.beust.jcommander.internal.Lists;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -112,10 +111,7 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .matchClientDocument(matchCommandProxy.getBestMatchClient(3000)) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumns") //
-                .modelName(UUID.randomUUID().toString())
-                .eventColumns(
-                        sourceFile.getSchemaInterpretation() == SchemaInterpretation.SalesforceAccount ? Lists
-                                .newArrayList("IsWon") : Lists.newArrayList("IsConverted")) //
+                .modelName(UUID.randomUUID().toString()) //
                 .build();
         return workflowConfig;
     }
