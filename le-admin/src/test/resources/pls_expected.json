@@ -15,6 +15,11 @@
       "Node":"SuperAdminEmails",
       "Data": "[\"bnguyen@lattice-engines.com\"]",
       "Metadata" : {"Type":"array"}
+    },
+    {
+      "Node":"ThirdPartyUserEmails",
+      "Data": "[]",
+      "Metadata" : {"Type":"array"}
     }
   ]
 }
