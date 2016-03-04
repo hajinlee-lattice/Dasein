@@ -23,6 +23,7 @@ AGGREGATED_MODEL_SCRIPT_NAME="aggregatedmodel.py"
 ENUMERATED_COLUMN_SCRIPT_NAME="enumeratedcolumntransformstep.py"
 COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
 PIVOT_SCRIPT_NAME="pivotstep.py"
+EXPORT_DF_SCRIPT_NAME="exportdfstep.py"
 
 def main(argv):
     scoringFiles = [SCORING_SCRIPT_NAME, 
@@ -41,7 +42,8 @@ def main(argv):
                     AGGREGATED_MODEL_SCRIPT_NAME,
                     ENUMERATED_COLUMN_SCRIPT_NAME,
                     COLUMNTYPE_CONVERSION_SCRIPT_NAME,
-                    PIVOT_SCRIPT_NAME]
+                    PIVOT_SCRIPT_NAME,
+                    EXPORT_DF_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
@@ -49,7 +51,7 @@ def main(argv):
             continue
         #change the file name of supported files
         modelID = argv[index]
-        manipulateSupportedFiles(modelID, scoringFiles, leadFiles)    
+        manipulateSupportedFiles(modelID, scoringFiles, leadFiles)
         #do scoring
         print "leadFiles are:"
         print leadFiles
