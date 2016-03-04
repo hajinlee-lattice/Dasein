@@ -18,9 +18,10 @@ public class DataFlowClientCustomization extends SingleContainerClientCustomizat
     private static final Log log = LogFactory.getLog(DataFlowClientCustomization.class);
 
     @Autowired
-    public DataFlowClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
-            SoftwareLibraryService softwareLibraryService,
-            @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
+    public DataFlowClientCustomization(Configuration yarnConfiguration, //
+            VersionManager versionManager, //
+            SoftwareLibraryService softwareLibraryService, //
+            @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir, //
             @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
         super(yarnConfiguration, versionManager, softwareLibraryService, hdfsJobBaseDir, webHdfs);
     }
