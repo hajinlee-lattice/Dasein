@@ -47,7 +47,7 @@ class ModelGenerator(State, JsonGenBase):
 
         filenames = sorted(filenames)
         for filename in filenames:
-            if filename.endswith(".pyc"):
+            if filename.endswith(".pyc") or filename.endswith(".gz"):
                 continue
             filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
             model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
