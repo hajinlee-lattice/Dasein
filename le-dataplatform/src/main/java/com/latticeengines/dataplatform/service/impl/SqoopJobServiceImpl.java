@@ -53,7 +53,7 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapreduce.job.queuename=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
-        cmds.add("--m");
+        cmds.add("-m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(table);
@@ -107,7 +107,7 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(exporter.getDbCreds()));
-        cmds.add("--m");
+        cmds.add("-m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(exporter.getTable());
@@ -193,7 +193,7 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--connect");
         cmds.add(connectionUrl);
-        cmds.add("--m");
+        cmds.add("-m");
         cmds.add(Integer.toString(numMappers));
 
         if (SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
@@ -313,7 +313,7 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapreduce.job.queuename=" + queue);
         cmds.add("--connect");
         cmds.add(connectionUrl);
-        cmds.add("--m");
+        cmds.add("-m");
         cmds.add(Integer.toString(numMappers));
 
         if (query == null) {
