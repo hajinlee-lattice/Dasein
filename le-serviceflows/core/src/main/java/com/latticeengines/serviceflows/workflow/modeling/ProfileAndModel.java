@@ -63,7 +63,9 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         }
 
         for (Attribute attr : eventTable.getAttributes()) {
-            if (attr.getApprovedUsage() == null || attr.getApprovedUsage().get(0).equals("None")) {
+            if (attr.getApprovedUsage() == null //
+                    || attr.getApprovedUsage().size() == 0 
+                    || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
             }
         }
@@ -76,12 +78,13 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             bldr = bldr.targets(event.getName()) //
                     .metadataTable("EventTable-" + event.getDisplayName()) //
                     .keyColumn("Id").modelName(configuration.getModelName()) //
-                    .eventTableName(getConfiguration().getEventTableName());
+                    .eventTableName(configuration.getEventTableName()) //
+                    .productType(configuration.getProductType());
             if (eventTable.getAttributes(SemanticType.Event).size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");
             }
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
-            modelExecutor.writeMetadataFile();
+            modelExecutor.writeMetadataFiles();
             modelExecutor.profile();
             String modelAppId = modelExecutor.model();
             modelApplicationIdToEventColumn.put(modelAppId, event.getName());

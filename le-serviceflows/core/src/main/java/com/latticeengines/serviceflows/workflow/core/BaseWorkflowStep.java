@@ -23,9 +23,10 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
@@ -107,10 +108,18 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         System.arraycopy(tokens, 0, newTokens, 0, newTokens.length);
         return "/" + StringUtils.join(newTokens, "/");
     }
+    
+    private String getDataCompositionContents(Table eventTable) {
+        DataComposition dataComposition = new DataComposition();
+        dataComposition.fields = new HashMap<>();
+        dataComposition.transforms = eventTable.getRealTimeTransformationMetadata();
+        return JsonUtils.serialize(dataComposition);
+    }
 
     protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
             ModelStepConfiguration modelStepConfiguration, Table eventTable) {
         String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
+        String dataCompositionContents = getDataCompositionContents(eventTable);
 
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
         bldr.sampleSubmissionUrl("/modeling/samples") //
@@ -123,9 +132,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 .modelingServiceHdfsBaseDir(modelStepConfiguration.getModelingServiceHdfsBaseDir()) //
                 .customer(modelStepConfiguration.getCustomerSpace().toString()) //
                 .metadataContents(metadataContents) //
+                .dataCompositionContents(dataCompositionContents) //
                 .yarnConfiguration(yarnConfiguration) //
                 .hdfsDirToSample(getHdfsDir(eventTable.getExtracts().get(0).getPath())) //
-                .table(eventTable.getName());
+                .table(eventTable.getName()) //
+                .productType(modelStepConfiguration.getProductType());
 
         return bldr;
     }
@@ -159,7 +170,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     @SuppressWarnings("unchecked")
     protected void registerSourceFileInContext(SourceFile sourceFile) {
-        @SuppressWarnings("unchecked")
         Set<String> sourceFiles = getObjectFromContext(WorkflowContextConstants.SOURCE_FILES, Set.class);
 
         if (sourceFiles == null) {

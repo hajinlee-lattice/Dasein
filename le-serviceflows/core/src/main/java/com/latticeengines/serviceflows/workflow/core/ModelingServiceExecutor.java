@@ -29,6 +29,8 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
+import com.latticeengines.serviceflows.workflow.modeling.ProductType;
+import com.latticeengines.serviceflows.workflow.modeling.ProvenanceProperties;
 
 public class ModelingServiceExecutor {
 
@@ -62,17 +64,20 @@ public class ModelingServiceExecutor {
     }
 
     public void runPipeline() throws Exception {
-        writeMetadataFile();
+        writeMetadataFiles();
         loadData();
         sample();
         profile();
         model();
     }
 
-    public void writeMetadataFile() throws Exception {
-        String hdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
+    public void writeMetadataFiles() throws Exception {
+        String metadataHdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
                 builder.getCustomer(), builder.getMetadataTable());
-        HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, builder.getMetadataContents());
+        String rtsHdfsPath = String.format("%s/%s/data/%s/datacomposition.json", modelingServiceHdfsBaseDir,
+                builder.getCustomer(), builder.getMetadataTable());
+        HdfsUtils.writeToFile(yarnConfiguration, metadataHdfsPath, builder.getMetadataContents());
+        HdfsUtils.writeToFile(yarnConfiguration, rtsHdfsPath, builder.getDataCompositionContents());
     }
 
     public void loadData() throws Exception {
@@ -150,7 +155,10 @@ public class ModelingServiceExecutor {
         model.setCustomer(builder.getCustomer());
         model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
         model.setDataFormat("avro");
-        model.setProvenanceProperties("Event_Table_Name=" + builder.getEventTableTable());
+        String provenanceProperties = "Event_Table_Name=" + builder.getEventTableTable();
+        provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
+        
+        model.setProvenanceProperties(provenanceProperties);
 
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setTargetsList(targetAndFeatures.getKey());
@@ -233,8 +241,10 @@ public class ModelingServiceExecutor {
         private String modelingServiceHdfsBaseDir;
         private Configuration yarnConfiguration;
         private String metadataContents;
+        private String dataCompositionContents;
         private String modelName;
         private String eventTableName;
+        private String productType;
 
         private String loadSubmissionUrl = "/rest/load";
         private String modelSubmissionUrl = "/rest/submit";
@@ -329,6 +339,11 @@ public class ModelingServiceExecutor {
             return this;
         }
 
+        public Builder dataCompositionContents(String dataCompositionContents) {
+            this.setDataCompositionContents(dataCompositionContents);
+            return this;
+        }
+
         public Builder modelName(String modelName) {
             this.setModelName(modelName);
             return this;
@@ -378,6 +393,12 @@ public class ModelingServiceExecutor {
             this.setEventTableName(eventTableName);
             return this;
         }
+        
+        public Builder productType(String productType) {
+            this.setProductType(productType);
+            return this;
+        }
+        
 
         public void setHdfsDirToSample(String hdfsDirToSample) {
             this.hdfsDirToSample = hdfsDirToSample;
@@ -515,6 +536,14 @@ public class ModelingServiceExecutor {
             this.metadataContents = metadataContents;
         }
 
+        public String getDataCompositionContents() {
+            return dataCompositionContents;
+        }
+
+        public void setDataCompositionContents(String dataCompositionContents) {
+            this.dataCompositionContents = dataCompositionContents;
+        }
+
         public String getModelName() {
             return modelName;
         }
@@ -585,6 +614,17 @@ public class ModelingServiceExecutor {
 
         public String getEventTableTable() {
             return eventTableName;
+        }
+
+        public String getProductType() {
+            if (productType == null) {
+                productType = ProductType.LP.name();
+            }
+            return productType;
+        }
+
+        public void setProductType(String productType) {
+            this.productType = productType;
         }
 
     }
