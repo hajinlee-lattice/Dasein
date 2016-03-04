@@ -9,7 +9,7 @@ public class VersionManager {
     }
 
     public String getCurrentVersion(){
-        return this.currentVersion;
+        return currentVersion;
     }
 
 }
