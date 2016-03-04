@@ -28,14 +28,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     if (widgetConfig == null || data == null) {
         return;
     }
-    // adds a glowing border when hovered
-    $(".panel-model-fancy").hover(function () {
-        $(this).toggleClass("hover");
-    });
 
-    $(".panel .model-delete a").hover(function () {
-        $(this).toggleClass("hover");
-    });
     
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
@@ -74,6 +67,8 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.data = {name: $scope.$parent.displayName};
     $scope.submitting = false;
     $scope.showNameEditError = false;
+    var displayName = $scope.$parent.displayName;
+    console.log(displayName);
 
     $scope.closeErrorClick = function ($event) {
         if ($event != null) {
@@ -88,7 +83,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
         $scope.showNameEditError = false;
 
-        if ($scope.submitting) return;
+        if ($scope.submitting) {return;}
         $scope.submitting = true;
 
         var validationResult = ModelService.validateModelName($scope.data.name);
@@ -103,12 +98,16 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
             if (result.Success) {
                 $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
+                $scope.nameStatus.editing = false;
             } else {
                 $scope.nameEditErrorMessage = result.ResultErrors;
                 $scope.showNameEditError = true;
                 $scope.submitting = false;
+
             }
+            
         });
+
     };
 
     $scope.cancel = function($event) {
