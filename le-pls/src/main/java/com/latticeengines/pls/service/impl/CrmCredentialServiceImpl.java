@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -18,6 +19,7 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -69,11 +71,12 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         newCrmCredential.setOrgId(orgId);
         crmCredential.setOrgId(orgId);
 
+        List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(tenantId);
-        if (!useEaiToValidate(flags)) {
+        if (!useEaiToValidate(flags) && products.contains(LatticeProduct.LPA)) {
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
-        } else {
+        } else if (products.contains(LatticeProduct.PD)) {
             log.info("Using Eai Service to validate sfdc credentials");
             validateCredentialUsingEai(tenantId, crmType, crmCredential, isProduction);
         }
@@ -101,7 +104,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         String password = crmCredential.getPassword();
         try {
             crmCredential.setPassword(CipherUtils.encrypt(password));
-            
+
             ResponseDocument<?> response = SimpleBooleanResponse.emptyFailedResponse(Collections.<String> emptyList());
             response = validateCredentialProxy.validateCredential(customerSpace.toString(), crmType, crmCredential);
             if (!response.isSuccess()) {
@@ -116,8 +119,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     private CrmCredential updateMarketoConfig(String crmType, String tenantId, CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
-        dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
+        if (products.contains(LatticeProduct.LPA)) {
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+            dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        }
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;
@@ -126,8 +132,11 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private CrmCredential updateEloquaConfig(String crmType, String tenantId, CrmCredential crmCredential) {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
-        String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
-        dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
+        if (products.contains(LatticeProduct.LPA)) {
+            String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
+            dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        }
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
         return newCrmCredential;

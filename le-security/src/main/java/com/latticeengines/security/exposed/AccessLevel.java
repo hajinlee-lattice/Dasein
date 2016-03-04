@@ -22,6 +22,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_USERS, //
             GrantedRight.VIEW_PLS_CONFIGURATIONS, //
             GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
             GrantedRight.VIEW_PLS_MODELS, //
             GrantedRight.VIEW_PLS_JOBS, //
             GrantedRight.EDIT_PLS_JOBS, //
@@ -30,7 +32,9 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_QUOTAS //
             ) //
     ), //
-    THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
+    THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH_TOKEN, //
+            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL //
             )), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -51,6 +55,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_USERS, //
             GrantedRight.VIEW_PLS_CONFIGURATIONS, //
             GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
             GrantedRight.VIEW_PLS_REPORTING, //
             GrantedRight.VIEW_PLS_MODELS, //
             GrantedRight.EDIT_PLS_MODELS, //
@@ -60,7 +66,7 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_TARGETMARKETS, //
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
-            GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
+            GrantedRight.CREATE_PLS_OAUTH_TOKEN //
             )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -70,6 +76,8 @@ public enum AccessLevel {
             GrantedRight.EDIT_PLS_USERS, //
             GrantedRight.VIEW_PLS_CONFIGURATIONS, //
             GrantedRight.EDIT_PLS_CONFIGURATIONS, //
+            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL, //
             GrantedRight.VIEW_PLS_REPORTING, //
             GrantedRight.VIEW_PLS_MODELS, //
             GrantedRight.EDIT_PLS_MODELS, //
@@ -81,7 +89,7 @@ public enum AccessLevel {
             GrantedRight.VIEW_PLS_QUOTAS, //
             GrantedRight.EDIT_PLS_QUOTAS, //
             GrantedRight.CREATE_PLS_QUOTAS, //
-            GrantedRight.CREATE_PLS_OAUTH_APITOKEN //
+            GrantedRight.CREATE_PLS_OAUTH_TOKEN //
             )); //
 
     private List<GrantedRight> grantedRights;

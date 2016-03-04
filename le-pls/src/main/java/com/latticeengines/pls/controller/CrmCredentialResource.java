@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -22,7 +25,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "CRM Credential Verification", description = "REST resource for CRM credential verification")
 @RestController
 @RequestMapping(value = "/credentials")
-@PreAuthorize("hasRole('View_PLS_Configurations')")
+@PreAuthorize("hasRole('View_PLS_CrmCredential')")
 public class CrmCredentialResource {
 
     @Autowired
@@ -37,7 +40,7 @@ public class CrmCredentialResource {
     @RequestMapping(value = "/{crmType}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Verify CRM credential")
-    @PreAuthorize("hasRole('Edit_PLS_Configurations')")
+    @PreAuthorize("hasRole('Edit_PLS_CrmCredential')")
     public CrmCredential verifyCredential(@PathVariable String crmType,
             @RequestParam(value = "tenantId") String tenantId,
             @RequestParam(value = "isProduction", required = false) Boolean isProduction,
@@ -46,8 +49,9 @@ public class CrmCredentialResource {
 
         CrmCredential newCrmCredential = crmCredentialService.verifyCredential(crmType, tenantId, isProduction,
                 crmCredential);
+        List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(tenantId);
-        if (!crmCredentialService.useEaiToValidate(flags)) {
+        if (!crmCredentialService.useEaiToValidate(flags) && products.contains(LatticeProduct.LPA)) {
             if ((verifyOnly == null || !verifyOnly) && (isProduction == null || isProduction)) {
                 CrmConfig crmConfig = new CrmConfig();
                 crmConfig.setCrmCredential(newCrmCredential);

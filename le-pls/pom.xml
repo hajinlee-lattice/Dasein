@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-pls</artifactId>
@@ -25,6 +25,7 @@
         <le.serviceflows.leadprioritization.version>2.0.22-SNAPSHOT</le.serviceflows.leadprioritization.version>
         <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
         <le.metadata.version>2.0.22-SNAPSHOT</le.metadata.version>
+        <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -396,7 +397,7 @@
             <version>${le.swlib.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId>
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -533,8 +534,22 @@
             <artifactId>spring-web</artifactId>
             <version>${spring.version}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+            <!-- <scope>runtime</scope> -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jetty</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 </project>
