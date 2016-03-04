@@ -208,7 +208,6 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         importContext.setProperty(ImportProperty.PRODUCERTEMPLATE, camelContext.createProducerTemplate());
         List<Table> tables = dataExtractionService.extractAndImport(importConfig, importContext);
         System.out.println(tables);
-        assertFalse(tables.get(0).getNameAttributeMap().containsKey("Id"));
         assertTrue(tables.get(0).getNameAttributeMap().containsKey("Id"));
 
         waitForCamelMessagesToComplete(camelContext);
