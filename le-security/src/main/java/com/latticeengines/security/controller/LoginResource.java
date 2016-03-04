@@ -81,8 +81,9 @@ public class LoginResource {
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
             result.setPasswordLastModified(ticket.getPasswordLastModified());
-            List<Tenant> tenants = new ArrayList<>(ticket.getTenants());
-            tenants.retainAll(tenantService.getAllTenants());
+            List<Tenant> tenants = tenantService.getAllTenants();
+            List<Tenant> gaTenants = new ArrayList<>(ticket.getTenants());
+            tenants.retainAll(gaTenants);
             Collections.sort(tenants, new TenantNameSorter());
             result.setTenants(tenants);
             doc.setResult(result);
