@@ -18,6 +18,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -38,6 +39,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
+import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 
 public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -249,6 +251,33 @@ public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
         url = null;
         newUrl = configService.removeDLRestServicePart(url);
         Assert.assertEquals(newUrl, null);
+    }
+
+    @Test(groups = "functional")
+    public void testGetMaxPremiumLeadEnrichmentAttributes() {
+        Camille camille = CamilleEnvironment.getCamille();
+        Path contractPath;
+        CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+
+        contractPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
+                customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
+                new Path(TenantConfigServiceImpl.SERVICES_ZNODE + TenantConfigServiceImpl.PLS_ZNODE
+                        + TenantConfigServiceImpl.ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE));
+        logger.info("The contractPath is " + contractPath);
+        try {
+            camille.delete(contractPath);
+        } catch (Exception ex) {
+            logger.error("Error cleaning up the zookeeper node.");
+        }
+
+        Assert.assertEquals(configService.getMaxPremiumLeadEnrichmentAttributes(tenantId),
+                ValidateEnrichAttributesUtils.DEFAULT_PREMIUM_ENRICHMENT_ATTRIBUTES);
+        try {
+            camille.upsert(contractPath, DocumentUtils.toRawDocument(12), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            logger.error("Error modifying the zookeeper node.");
+        }
+        Assert.assertEquals(configService.getMaxPremiumLeadEnrichmentAttributes(tenantId), 12);
     }
 
     private void testOverwriteFlag(String flagId, Boolean value) {

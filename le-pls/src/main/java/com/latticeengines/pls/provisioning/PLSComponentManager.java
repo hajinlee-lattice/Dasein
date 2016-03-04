@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.service.TenantConfigService;
+import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -61,6 +62,15 @@ public class PLSComponentManager {
             throw new LedpException(LedpCode.LEDP_18028, String.format("Getting tenant document error."), e);
         }
         String tenantName = tenantDocument.getTenantInfo().properties.displayName;
+
+        String maxPremiumEnrichAttributesStr;
+        try {
+            maxPremiumEnrichAttributesStr = configDir.get("/EnrichAttributesMaxNumber").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Cannot parse input configuration"), e);
+        }
+        LOGGER.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
+        ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
 
         String emailListInJson;
         try {

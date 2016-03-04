@@ -8,6 +8,10 @@
       "RootPath": "/PLS",
       "Nodes": [
         {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
           "Node": "LatticeAdminEmails",
           "Data": "[]"
         },

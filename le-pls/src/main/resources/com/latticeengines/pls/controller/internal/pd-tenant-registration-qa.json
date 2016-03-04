@@ -27,6 +27,10 @@
       "RootPath": "/PLS",
       "Nodes": [
         {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
           "Node": "ExternalAdminEmails",
           "Data": "[]"
         },

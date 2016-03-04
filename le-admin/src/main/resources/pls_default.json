@@ -4,6 +4,7 @@
     { "Node": "ExternalAdminEmails", "Data": [] },
     { "Node": "ThirdPartyUserEmails", "Data": [] },
     { "Node": "LatticeAdminEmails", "Data": [ "ysong@lattice-engines.com" ] },
-    { "Node": "SuperAdminEmails", "Data": [ "bnguyen@lattice-engines.com" ] }
+    { "Node": "SuperAdminEmails", "Data": [ "bnguyen@lattice-engines.com" ] },
+    { "Node": "EnrichAttributesMaxNumber", "Data": 10}
   ]
 }

@@ -8,6 +8,8 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.zookeeper.KeeperException.NoNodeException;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -39,6 +42,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
+import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 
 @Component("tenantConfigService")
 public class TenantConfigServiceImpl implements TenantConfigService {
@@ -48,6 +52,10 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     private static final String SPACE_CONFIGURATION_ZNODE = "/SpaceConfiguration";
     private static final String TOPOLOGY_ZNODE = "/Topology";
     private static final String DL_ADDRESS_ZNODE = "/DL_Address";
+    public static final String SERVICES_ZNODE = "/Services";
+    public static final String PLS_ZNODE = "/PLS";
+    public static final String PLS = "PLS";
+    public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
 
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
@@ -80,10 +88,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            Path path = PathBuilder
-                    .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
-                            customerSpace.getTenantId(), customerSpace.getSpaceId())
-                    .append(new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
+            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
+                    new Path(SPACE_CONFIGURATION_ZNODE + TOPOLOGY_ZNODE));
             return CRMTopology.fromName(camille.get(path).getData());
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18033, ex);
@@ -95,10 +102,9 @@ public class TenantConfigServiceImpl implements TenantConfigService {
         try {
             Camille camille = CamilleEnvironment.getCamille();
             CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            Path path = PathBuilder
-                    .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customerSpace.getContractId(),
-                            customerSpace.getTenantId(), customerSpace.getSpaceId())
-                    .append(new Path(SPACE_CONFIGURATION_ZNODE + DL_ADDRESS_ZNODE));
+            Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
+                    new Path(SPACE_CONFIGURATION_ZNODE + DL_ADDRESS_ZNODE));
             return camille.get(path).getData();
         } catch (Exception ex) {
             log.error("Can not get tenant's data loader address from ZK", ex);
@@ -153,6 +159,43 @@ public class TenantConfigServiceImpl implements TenantConfigService {
             log.error("Failed to get product list of tenant " + tenantId, e);
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public int getMaxPremiumLeadEnrichmentAttributes(String tenantId) {
+        String maxPremuimLeadEnrichmentAttributes;
+        Camille camille = CamilleEnvironment.getCamille();
+        Path contractPath = null;
+        try {
+            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
+
+            contractPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                    customerSpace.getContractId(), customerSpace.getTenantId(), customerSpace.getSpaceId()).append(
+                    new Path(SERVICES_ZNODE + PLS_ZNODE + ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE));
+            maxPremuimLeadEnrichmentAttributes = camille.get(contractPath).getData();
+        } catch (NoNodeException ex) {
+            log.error("Will replace maxPremuimLeadEnrichmentAttributes with the default value since there is none for the tenant: "
+                    + tenantId);
+            Path defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
+                    .append(new Path(ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE));
+            String defaultPremuimLeadEnrichmentAttributes;
+            try {
+                defaultPremuimLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
+            }
+            try {
+                camille.upsert(contractPath, DocumentUtils.toRawDocument(defaultPremuimLeadEnrichmentAttributes),
+                        ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
+            }
+            return ValidateEnrichAttributesUtils.validateEnrichAttributes(defaultPremuimLeadEnrichmentAttributes);
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
+        }
+
+        return ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremuimLeadEnrichmentAttributes);
     }
 
     @VisibleForTesting

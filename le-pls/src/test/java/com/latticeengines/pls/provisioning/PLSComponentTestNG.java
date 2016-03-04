@@ -76,7 +76,8 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         } while (state.state.equals(BootstrapState.State.INITIAL) && numOfRetries > 0);
 
         if (!state.state.equals(BootstrapState.State.OK)) {
-            Assert.fail("Bootstrap State is " + state.state + " instead of " + BootstrapState.State.OK + ": " + state.errorMessage);
+            Assert.fail("Bootstrap State is " + state.state + " instead of " + BootstrapState.State.OK + ": "
+                    + state.errorMessage);
         }
 
         Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
@@ -128,6 +129,7 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
         confDir.add("/LatticeAdminEmails", "[ ]");
         confDir.add("/ExternalAdminEmails", "[ ]");
         confDir.add("/ThirdPartyUserEmails", "[ ]");
+        confDir.add("/EnrichAttributesMaxNumber", "10");
         batonService.bootstrap(contractId, tenantId, spaceID, serviceName,
                 new SerializableDocumentDirectory(confDir).flatten());
     }
