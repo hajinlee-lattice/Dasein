@@ -63,12 +63,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
     
 })
-.controller('ChangeModelNameController', function ($scope, $rootScope, NavUtility, ResourceUtility, ModelService) {
+.controller('ChangeModelNameController', function ($scope, $state, $rootScope, NavUtility, ResourceUtility, ModelService) {
     $scope.data = {name: $scope.$parent.displayName};
     $scope.submitting = false;
     $scope.showNameEditError = false;
-    var displayName = $scope.$parent.displayName;
-    console.log(displayName);
+    $scope.displayName = $scope.$parent.displayName;
 
     $scope.closeErrorClick = function ($event) {
         if ($event != null) {
@@ -96,17 +95,23 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         }
 
         ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
+
             if (result.Success) {
                 $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
+
                 $scope.nameStatus.editing = false;
+                $scope.displayName = $scope.data.name;
+
+                $state.go('.', {}, { reload: true });
+
             } else {
                 $scope.nameEditErrorMessage = result.ResultErrors;
                 $scope.showNameEditError = true;
                 $scope.submitting = false;
-
             }
             
         });
+       
 
     };
 
@@ -116,6 +121,9 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         $scope.data = {name: $scope.$parent.displayName};
         $scope.nameStatus.editing = false;
     };
+
+    
+
 })
 .directive('modelListTileWidget', function () {
     var directiveDefinitionObject = {

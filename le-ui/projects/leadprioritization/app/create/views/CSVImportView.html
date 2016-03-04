@@ -10,58 +10,56 @@
             </div>
         </div>
         -->
-        <div id="formName" class="form">
-          <div class="form-group">
-            <label>Model Name <span class="more-info" tooltips tooltip-template="tooltip" tooltip-side="right">&#105;</span></label>
+        <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelName.$invalid && !uploadForm.modelName.$pristine }">
+          <label>Model Name <span class="more-info" tooltips tooltip-append-to-body="true" tooltip-template="tooltip" tooltip-side="right">&#105;</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            name="modelName" 
+            ng-model="modelName" 
+            ng-minlength="1"
+            placeholder="Example: US Enterprise model"
+            required />
+          <p class="help-block">* Model Name must be specified.</p>
+        </div>
 
-            <input 
-              type="text" 
-              class="form-control" 
-              name="modelName" 
-              ng-model="modelName" 
-              ng-minlength="1"
-              placeholder="Example: US Enterprise model"
-              required />
+        <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
 
-            <p class="help-block orange-text" ng-show="uploadForm.modelName.$error.minlength || uploadForm.modelName.$invalid">* Model Name must be specified.</p>
+          <label for="loadfile">Upload CSV File <span class="more-info" tooltips tooltip-append-to-body="true" tooltip-template="tooltip">&#105;</span></label>
+          <input 
+            id="uploadFile" 
+            class="form-control" 
+            disabled="disabled"
+            placeholder="Choose File" />
+          <div class="fileUpload button blue-button">
+              <span>Browse...</span>
+              <input 
+                id="uploadBtn"
+                name="csvFileName"
+                ng-model="csvFileName"
+                required
+                type="file" 
+                class="upload"
+                csv-uploader="csvFile" />
           </div>
+          <p class="help-block">* Please choose a file to upload.</p>
+        </div>
 
-          <div class="form-group file-upload">
-            <label for="loadfile">Upload CSV File <span class="more-info" tooltips tooltip-template="tooltip">&#105;</span></label>
-            <input 
-              id="uploadFile" 
-              class="form-control" 
-              disabled="disabled"
-              placeholder="Choose File" />
-            <div class="fileUpload button blue-button">
-                <span>Browse...</span>
-                <input 
-                  id="uploadBtn"
-                  name="csvFileName"
-                  ng-model="csvFileName"
-                  required
-                  type="file" 
-                  class="upload"
-                  csv-uploader="csvFile" />
-            </div>
-            <p class="help-block orange-text" ng-show="uploadForm.csvFileName.$invalid">* Please choose a file to upload.</p>
-          </div>
+        <!-- Script needed to get filepath and place it into the input field -->
+        <script>
+          document.getElementById("uploadBtn").onchange = function () {
+              document.getElementById("uploadFile").value = this.value.substring(12);
+          };
+        </script>
 
-          <!-- Script needed to get filepath and place it into the input field -->
-          <script>
-            document.getElementById("uploadBtn").onchange = function () {
-                document.getElementById("uploadFile").value = this.value.substring(12);
-            };
-          </script>
+        <div class="form-group">
+          <div class="toggle-check">
+            <label for="account-lead-check">Account Based</label>
+            <input type="checkbox" name="account-lead-check" ng-model="accountLeadCheck" id="account-lead-check" class="toggle-switch" />
+            <label for="account-lead-check">Lead Based</label>
+          </div>          
+        </div>
 
-          <div class="form-group">
-            <div class="toggle-check">
-              <label for="account-lead-check">Account Based</label>
-              <input type="checkbox" name="account-lead-check" ng-model="accountLeadCheck" id="account-lead-check" class="toggle-switch" />
-              <label for="account-lead-check">Lead Based</label>
-            </div>          
-          </div>
-        </div><!-- End .form -->
     </div><!-- End .six.columns -->
   </div><!-- End .container.row -->
 
