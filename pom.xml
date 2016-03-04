@@ -42,6 +42,7 @@
         <module>le-cassandra</module>
         <module>le-propdata</module>
         <module>le-security</module>
+        <module>le-oauth2db</module>
         <module>le-pls</module>
         <module>le-dellebi</module>
         <module>le-job</module>
