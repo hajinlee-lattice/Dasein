@@ -1,0 +1,4 @@
+#!/bin/bash
+rm -rf /opt/jetty/webapps/le-scoringapi-*-SNAPSHOT.war
+rm -rf /tmp/jetty-*
+
