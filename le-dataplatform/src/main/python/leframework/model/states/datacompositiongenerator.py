@@ -67,6 +67,8 @@ class DataCompositionGenerator(State):
                 details["interpretation"] = "COMPANY_COUNTRY"
             elif name == "Website":
                 details["interpretation"] = "WEBSITE"
+            elif name == "Domain":
+                details["interpretation"] = "DOMAIN"
             else:
                 continue
 
