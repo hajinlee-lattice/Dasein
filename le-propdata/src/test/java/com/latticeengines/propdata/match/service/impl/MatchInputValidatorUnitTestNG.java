@@ -2,6 +2,7 @@ package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,7 @@ public class MatchInputValidatorUnitTestNG {
         Assert.assertTrue(failed, "Should failed on missing fields.");
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country"));
 
-        Map<MatchKey, String> keyMap = new HashMap<>();
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
         input.setKeyMap(keyMap);
 
         failed = false;
@@ -65,11 +66,11 @@ public class MatchInputValidatorUnitTestNG {
             failed = true;
         }
         Assert.assertTrue(failed, "Should failed on emtpy key map.");
-        keyMap.put(MatchKey.Domain, "Domain");
-        keyMap.put(MatchKey.Name, "CompanyName");
-        keyMap.put(MatchKey.City, "City");
-        keyMap.put(MatchKey.State, "????");
-        keyMap.put(MatchKey.Country, "Country");
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+        keyMap.put(MatchKey.City, Collections.singletonList("City"));
+        keyMap.put(MatchKey.State, Collections.singletonList("????"));
+        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
 
         failed = false;
         try {
@@ -79,11 +80,11 @@ public class MatchInputValidatorUnitTestNG {
         }
         Assert.assertTrue(failed, "Should failed on missing target field.");
 
-        keyMap.put(MatchKey.Domain, "Domain");
-        keyMap.put(MatchKey.Name, "CompanyName");
-        keyMap.put(MatchKey.City, "City");
-        keyMap.put(MatchKey.State, "State_Province");
-        keyMap.put(MatchKey.Country, "Country");
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+        keyMap.put(MatchKey.City, Collections.singletonList("City"));
+        keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
+        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
 
         failed = false;
         try {

@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
@@ -142,12 +141,10 @@ class RealTimeMatchExecutor implements MatchExecutor {
         List<MatchedAccount> accountMeasurements = new ArrayList<>();
         List<MatchedColumn> columnMeasurements = new ArrayList<>();
         List<InternalOutputRecord> recordList = matchContext.getInternalResults();
-        Map<MatchKey, String> keyMap = input.getKeyMap();
-        List<String> inputFields = input.getFields();
         List<String> outputFields = matchContext.getOutput().getOutputFields();
         for (InternalOutputRecord record : recordList) {
-            List<Object> inputData = record.getInput();
-            MatchKeyDimension keyDimension = new MatchKeyDimension(keyMap, inputFields, inputData);
+            MatchKeyDimension keyDimension =
+                    new MatchKeyDimension(record.getParsedDomain(), record.getParsedNameLocation());
             MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
                     record.isMatched());
             accountMeasurements.add(measurement);

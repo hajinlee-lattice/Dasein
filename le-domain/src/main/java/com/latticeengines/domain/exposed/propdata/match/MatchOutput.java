@@ -29,7 +29,7 @@ public class MatchOutput {
     private static Log log = LogFactory.getLog(MatchOutput.class);
 
     private List<String> inputFields;
-    private Map<MatchKey, String> keyMap;
+    private Map<MatchKey, List<String>> keyMap;
     private List<String> outputFields;
     private List<OutputRecord> result;
     private List<ColumnMetadata> metadata;
@@ -68,12 +68,12 @@ public class MatchOutput {
     }
 
     @JsonProperty("KeyMap")
-    public Map<MatchKey, String> getKeyMap() {
+    public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }
 
     @JsonProperty("KeyMap")
-    public void setKeyMap(Map<MatchKey, String> keyMap) {
+    public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
         this.keyMap = keyMap;
     }
 

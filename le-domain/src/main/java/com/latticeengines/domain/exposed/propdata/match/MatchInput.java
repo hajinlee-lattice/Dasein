@@ -25,7 +25,7 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
 
     // optional, but better to provide. if not, will be resolved from the fields
-    private Map<MatchKey, String> keyMap;
+    private Map<MatchKey, List<String>> keyMap;
 
     // only one of these is needed, custom selection has higher priority
     private ColumnSelection.Predefined predefinedSelection;
@@ -38,12 +38,12 @@ public class MatchInput implements Fact, Dimension {
     private Integer numSelectedColumns;
 
     @JsonProperty("KeyMap")
-    public Map<MatchKey, String> getKeyMap() {
+    public Map<MatchKey, List<String>> getKeyMap() {
         return keyMap;
     }
 
     @JsonProperty("KeyMap")
-    public void setKeyMap(Map<MatchKey, String> keyMap) {
+    public void setKeyMap(Map<MatchKey, List<String>> keyMap) {
         this.keyMap = keyMap;
     }
 

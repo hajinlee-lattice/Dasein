@@ -1,10 +1,13 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
@@ -23,14 +26,22 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Empty list of fields.");
         }
 
-        if (input.getKeyMap() == null || input.getKeyMap().keySet().isEmpty()) {
-            log.info("Did not find KeyMap in the input. Try to resolve the map from field list.");
-            input.setKeyMap(MatchKeyUtils.resolveKeyMap(input.getFields()));
+        Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
+        if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
+            for (Map.Entry<MatchKey, List<String>> entry: input.getKeyMap().entrySet()) {
+                log.info("Overwriting key map entry " + JsonUtils.serialize(entry));
+                keyMap.put(entry.getKey(), entry.getValue());
+            }
         }
+        input.setKeyMap(keyMap);
 
-        for (String field : input.getKeyMap().values()) {
-            if (!input.getFields().contains(field)) {
-                throw new IllegalArgumentException("Cannot find target field " + field + " in claimed field list.");
+        for (List<String> fields : input.getKeyMap().values()) {
+            if (fields != null && !fields.isEmpty()) {
+                for (String field: fields) {
+                    if (!input.getFields().contains(field)) {
+                        throw new IllegalArgumentException("Cannot find target field " + field + " in claimed field list.");
+                    }
+                }
             }
         }
 

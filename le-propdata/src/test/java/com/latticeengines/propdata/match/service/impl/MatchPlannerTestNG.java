@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.match.service.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,12 +31,12 @@ public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
         MatchInput input = new MatchInput();
         input.setTenant(new Tenant("PD_Test"));
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
-        Map<MatchKey, String> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.Domain, "Domain");
-        keyMap.put(MatchKey.Name, "CompanyName");
-        keyMap.put(MatchKey.City, "City");
-        keyMap.put(MatchKey.State, "State_Province");
-        keyMap.put(MatchKey.Country, "Country");
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Domain"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+        keyMap.put(MatchKey.City, Collections.singletonList("City"));
+        keyMap.put(MatchKey.State, Collections.singletonList("State_Province"));
+        keyMap.put(MatchKey.Country, Collections.singletonList("Country"));
         input.setKeyMap(keyMap);
         input.setFields(Arrays.asList("ID", "Domain", "CompanyName", "City", "State_Province", "Country"));
 

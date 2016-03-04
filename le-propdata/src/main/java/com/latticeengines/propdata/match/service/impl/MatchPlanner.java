@@ -72,7 +72,7 @@ class MatchPlanner {
 
     @MatchStep
     private MatchContext scanInputData(MatchInput input, MatchContext context) {
-        Map<MatchKey, Integer> keyPositionMap = getKeyPositionMap(input);
+        Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
         List<InternalOutputRecord> records = new ArrayList<>();
         Set<String> domainSet = new HashSet<>();
@@ -134,7 +134,7 @@ class MatchPlanner {
     }
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(List<Object> inputRecord, int rowNum,
-            int numInputFields, Map<MatchKey, Integer> keyPositionMap, Set<String> domainSet,
+            int numInputFields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
             Set<NameLocation> nameLocationSet) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
@@ -148,15 +148,22 @@ class MatchPlanner {
         }
 
         if (keyPositionMap.containsKey(MatchKey.Domain)) {
-            int domainPos = keyPositionMap.get(MatchKey.Domain);
+            List<Integer> domainPosList = keyPositionMap.get(MatchKey.Domain);
             try {
-                String originalDomain = (String) inputRecord.get(domainPos);
-                String cleanDomain = DomainUtils.parseDomain(originalDomain);
+                String cleanDomain = null;
+                for (Integer domainPos: domainPosList) {
+                    String originalDomain = (String) inputRecord.get(domainPos);
+                    cleanDomain = DomainUtils.parseDomain(originalDomain);
+                    if (StringUtils.isNotEmpty(cleanDomain)) {
+                        break;
+                    }
+                }
                 record.setParsedDomain(cleanDomain);
-                // update domain set
-                domainSet.add(cleanDomain);
                 if (publicDomainService.isPublicDomain(cleanDomain)) {
                     record.addErrorMessage("Parsed to a public domain: " + cleanDomain);
+                } else if (StringUtils.isNotEmpty(cleanDomain)) {
+                    // update domain set
+                    domainSet.add(cleanDomain);
                 }
             } catch (Exception e) {
                 record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
@@ -165,21 +172,29 @@ class MatchPlanner {
 
         if (keyPositionMap.containsKey(MatchKey.Name) && keyPositionMap.containsKey(MatchKey.State)
                 && keyPositionMap.containsKey(MatchKey.Country)) {
-            int namePos = keyPositionMap.get(MatchKey.Name);
-            int statePos = keyPositionMap.get(MatchKey.State);
-            int countryPos = keyPositionMap.get(MatchKey.Country);
+            List<Integer> namePosList = keyPositionMap.get(MatchKey.Name);
+            List<Integer> statePosList = keyPositionMap.get(MatchKey.State);
+            List<Integer> countryPosList = keyPositionMap.get(MatchKey.Country);
 
             try {
-                String originalName = (String) inputRecord.get(namePos);
-                String originalState = (String) inputRecord.get(statePos);
-                String originalCountry = (String) inputRecord.get(countryPos);
-
+                String originalName = null;
+                for (Integer namePos: namePosList) {
+                    originalName =(String) inputRecord.get(namePos);
+                }
                 if (StringUtils.isNotEmpty(originalName)) {
+                    String originalCountry = null;
+                    for (Integer countryPos: countryPosList) {
+                        originalCountry =(String) inputRecord.get(countryPos);
+                    }
                     if (StringUtils.isEmpty(originalCountry)) {
                         originalCountry = LocationUtils.USA;
                     }
-
                     String cleanCountry = LocationUtils.getStandardCountry(originalCountry);
+
+                    String originalState = null;
+                    for (Integer statePos: statePosList) {
+                        originalState =(String) inputRecord.get(statePos);
+                    }
                     String cleanState = LocationUtils.getStandardState(cleanCountry, originalState);
 
                     NameLocation nameLocation = new NameLocation();
@@ -188,8 +203,10 @@ class MatchPlanner {
                     nameLocation.setCountry(cleanCountry);
 
                     if (keyPositionMap.containsKey(MatchKey.City)) {
-                        int cityPos = keyPositionMap.get(MatchKey.City);
-                        String originalCity = (String) inputRecord.get(cityPos);
+                        String originalCity = null;
+                        for (Integer cityPos: keyPositionMap.get(MatchKey.City)) {
+                            originalCity =(String) inputRecord.get(cityPos);
+                        }
                         nameLocation.setCity(originalCity);
                     }
 
@@ -205,16 +222,21 @@ class MatchPlanner {
         return record;
     }
 
-    private static Map<MatchKey, Integer> getKeyPositionMap(MatchInput input) {
-        Map<MatchKey, Integer> posMap = new HashMap<>();
+    private static Map<MatchKey, List<Integer>> getKeyPositionMap(MatchInput input) {
+        Map<String, Integer> fieldPos = new HashMap<>();
         for (int pos = 0; pos < input.getFields().size(); pos++) {
-            String field = input.getFields().get(pos);
-            for (MatchKey key : input.getKeyMap().keySet()) {
-                if (field.equalsIgnoreCase(input.getKeyMap().get(key))) {
-                    posMap.put(key, pos);
-                }
-            }
+            fieldPos.put(input.getFields().get(pos).toLowerCase(), pos);
         }
+
+        Map<MatchKey, List<Integer>> posMap = new HashMap<>();
+        for (MatchKey key : input.getKeyMap().keySet()) {
+            List<Integer> posList = new ArrayList<>();
+            for (String field: input.getKeyMap().get(key)){
+                posList.add(fieldPos.get(field.toLowerCase()));
+            }
+            posMap.put(key, posList);
+        }
+
         return posMap;
     }
 
