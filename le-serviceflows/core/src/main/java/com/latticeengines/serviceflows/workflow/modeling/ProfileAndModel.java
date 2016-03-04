@@ -76,7 +76,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
             bldr = bldr.targets(event.getName()) //
-                    .metadataTable("EventTable-" + event.getDisplayName()) //
+                    .metadataTable(String.format("%s-%s-Metadata", eventTable.getName(), event.getDisplayName())) //
                     .keyColumn("Id").modelName(configuration.getModelName()) //
                     .eventTableName(configuration.getEventTableName()) //
                     .productType(configuration.getProductType());
