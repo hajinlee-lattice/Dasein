@@ -81,12 +81,14 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
 
+            
+            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
+            properties.put(PythonContainerProperty.SWLIBARTIFACT.name(), getSwlibArtifactHdfsPath(classifier));
+            metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
-            properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
-            properties.put(PythonContainerProperty.SWLIBARTIFACT.name(), getSwlibArtifactHdfsPath(classifier));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
