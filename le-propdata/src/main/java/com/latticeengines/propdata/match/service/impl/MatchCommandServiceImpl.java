@@ -50,7 +50,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         return entityMgr.createCommand(
                 request.getSourceTable(),
                 request.getContractExternalID(),
-                request.getDestTables());
+                request.getDestTables(),
+                request.getParameters());
     }
 
     @Override

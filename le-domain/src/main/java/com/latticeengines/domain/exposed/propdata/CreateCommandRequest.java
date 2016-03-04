@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.propdata;
 
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,6 +10,7 @@ public class CreateCommandRequest {
     private String destTables;
     private String contractExternalID;
     private MatchCommandType commandType = MatchCommandType.MATCH_WITH_UNIVERSE;
+    private Map<String, String> parameters;
 
     @JsonProperty("SourceTable")
     public String getSourceTable() {
@@ -31,14 +33,32 @@ public class CreateCommandRequest {
     }
 
     @JsonProperty("ContractExternalID")
-    public String getContractExternalID() { return contractExternalID; }
+    public String getContractExternalID() {
+        return contractExternalID;
+    }
 
     @JsonProperty("ContractExternalID")
-    public void setContractExternalID(String contractExternalID) { this.contractExternalID = contractExternalID; }
+    public void setContractExternalID(String contractExternalID) {
+        this.contractExternalID = contractExternalID;
+    }
 
     @JsonProperty("MatchCommandType")
-    public MatchCommandType getCommandType() { return commandType; }
+    public MatchCommandType getCommandType() {
+        return commandType;
+    }
 
     @JsonProperty("MatchCommandType")
-    public void setCommandType(MatchCommandType commandType) { this.commandType = commandType; }
+    public void setCommandType(MatchCommandType commandType) {
+        this.commandType = commandType;
+    }
+
+    @JsonProperty("Parameters")
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    @JsonProperty("Parameters")
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
 }

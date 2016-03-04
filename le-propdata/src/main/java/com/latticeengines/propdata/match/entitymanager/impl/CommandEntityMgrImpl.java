@@ -2,12 +2,11 @@ package com.latticeengines.propdata.match.entitymanager.impl;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.match.dao.CommandDao;
+import com.latticeengines.propdata.match.dao.CommandParameterDao;
 import com.latticeengines.propdata.match.datasource.MatchClientRoutingDataSource;
 import com.latticeengines.propdata.match.entitymanager.CommandEntityMgr;
 
@@ -26,8 +26,8 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
     @Autowired
     private CommandDao commandDao;
 
-    @Resource(name="sessionFactoryPropDataMatch")
-    private SessionFactory sessionFactory;
+    @Autowired
+    private CommandParameterDao commandParameterDao;
 
     @Autowired
     private MatchClientRoutingDataSource dataSource;
@@ -45,8 +45,15 @@ public class CommandEntityMgrImpl implements CommandEntityMgr {
 
     @Override
     @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-    synchronized public Commands createCommand(String sourceTable, String contractExternalID, String destTables) {
-        return commandDao.createCommandByStoredProcedure(sourceTable, contractExternalID, destTables);
+    synchronized public Commands createCommand(String sourceTable, String contractExternalID, String destTables,
+                                               Map<String, String> parameters) {
+        Commands command = commandDao.createCommandByStoredProcedure(sourceTable, contractExternalID, destTables);
+        if (parameters != null && !parameters.isEmpty()) {
+            for (Map.Entry<String, String> entry: parameters.entrySet()) {
+                commandParameterDao.registerParameter(command.getProcessUID(), entry.getKey(), entry.getValue());
+            }
+        }
+        return command;
     }
 
     @Override

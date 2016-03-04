@@ -1,13 +1,16 @@
 package com.latticeengines.domain.exposed.propdata;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
@@ -15,6 +18,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -31,6 +38,11 @@ public class Commands implements HasPid {
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CommandIds commandIdsEntity;
+
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "command")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Fetch(FetchMode.SUBSELECT)
+    private List<CommandParameter> commandParameters;
 
     @Column(name = "CommandName", nullable = false)
     private String commandName;

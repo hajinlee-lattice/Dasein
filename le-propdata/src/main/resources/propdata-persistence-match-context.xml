@@ -33,4 +33,8 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
     </bean>
 
+    <bean id="commandParameterDao" class="com.latticeengines.propdata.match.dao.impl.CommandParameterDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
+    </bean>
+
 </beans>
