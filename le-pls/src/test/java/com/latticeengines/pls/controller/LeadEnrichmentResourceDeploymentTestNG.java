@@ -20,6 +20,7 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
+        turnOffSslChecking();
         switchToSuperAdmin();
     }
 
@@ -61,7 +62,7 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         assertTrue(exception);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testGetAttributes() {
         switchToSuperAdmin();
         assertGetAttributesSuccess();
