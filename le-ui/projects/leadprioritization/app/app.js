@@ -1,4 +1,4 @@
-//Initial load of the application    
+//Initial load of the application
 var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
@@ -10,6 +10,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.core.services.HelpService',
+    'mainApp.core.services.FeatureFlagService',
     'mainApp.login.controllers.LoginController',
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
@@ -32,14 +33,14 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, FeatureFlagService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
-    
+
     var TIME_INTERVAL_BETWEEN_INACTIVITY_CHECKS = 30 * 1000;
     var TIME_INTERVAL_INACTIVITY_BEFORE_WARNING = 14.5 * 60 * 1000;  // 14.5 minutes
     var TIME_INTERVAL_WARNING_BEFORE_LOGOUT = 30 * 1000;
-    
+
     var inactivityCheckingId = null;
     var warningModalInstance = null;
 
@@ -70,7 +71,7 @@ var mainApp = angular.module('mainApp', [
         startObservingUserActivtyThroughMouseAndKeyboard();
         startCheckingIfSessionIsInactive();
     });
-    
+
     $scope.refreshPreviousSession = function (tenant) {
         //Refresh session and go somewhere
         LoginService.GetSessionDocument(tenant).then(
@@ -79,26 +80,35 @@ var mainApp = angular.module('mainApp', [
                 if (data && data.Success === true) {
                     //Initialize Evergage
                     EvergageUtility.Initialize({
-                        userID: data.Result.User.Identifier, 
+                        userID: data.Result.User.Identifier,
                         title: data.Result.User.Title,
                         datasetPrefix: "pls",
                         company: data.Ticket.Tenants[0].DisplayName
                     });
-                    
+
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
-                    
+
                     startObservingUserActivtyThroughMouseAndKeyboard();
                     startCheckingIfSessionIsInactive();
+                    initializeFlags();
                 }
             },
-            
+
             // Fail
             function (data, status) {
 
             }
         );
     };
-    
+
+    function initializeFlags() {
+        FeatureFlagService.GetAllFlags().then(function() {
+            var flags = FeatureFlagService.Flags();
+            $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
+            $scope.showModelCreationHistory = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
+        });
+    }
+
     // Handle when the copyright footer should be shown
     $scope.$on("ShowFooterEvent", function (event, data) {
         $scope.showFooter = data;

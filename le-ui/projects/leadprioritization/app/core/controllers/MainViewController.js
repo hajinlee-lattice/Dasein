@@ -29,7 +29,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         $compile($("#mainHeaderView").html(html))(scope);
     });
 
-    createMainContentViewAndRefreshFeatures();
+    //createMainContentViewAndRefreshFeatures();
 
     // Handle when the Update Password link is clicked
     $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
@@ -46,22 +46,21 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
-    
+
+    /*
     function createMainContentViewAndRefreshFeatures() {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
-            
-            /* Redirect to DeploymentWizard functionality disabled for LP3 M1
 
-            if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
-                $state.go('deploymentwizard');
+            // Redirect to DeploymentWizard functionality disabled for LP3 M1
+
+            //if (FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE)) {
+            //    $state.go('deploymentwizard');
                 //createDeploymentWizardView();
-            }
-            */
+            //}
         });
     }
 
-    /*
     // Handle when the Manage Credentials link is clicked
     $scope.$on(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
         createManageCredentialsView();

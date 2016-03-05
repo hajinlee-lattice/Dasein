@@ -9,8 +9,8 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 .controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
 
+    /*
     var clientSession = BrowserStorageUtility.getClientSession();
-    
     if (clientSession != null) {
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
@@ -25,6 +25,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $scope.showLeadEnrichment = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
         });
     }
+    */
 
     checkBrowserWidth();
     $(window).resize(checkBrowserWidth);

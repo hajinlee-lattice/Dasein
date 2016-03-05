@@ -11,10 +11,10 @@
                 <li role="presentation" ui-sref-active="active"><a ui-sref="models.import">Create a Model</a></li>
             </ul>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li data-ng-if="showUserManagement" role="presentation" ui-sref-active="active">
             <a ui-sref="users"><span class="ico ico-user ico-light-gray"></span>Manage Users</a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li data-ng-if="showModelCreationHistory" role="presentation" ui-sref-active="active">
             <a ui-sref="history"><span class="ico ico-history ico-light-gray"></span>Model Creation History</a>
         </li>
         <!--
