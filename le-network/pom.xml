@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-network</artifactId>
@@ -11,6 +11,7 @@
         <component-name>network</component-name>
         <le.common.version>2.0.22-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
+        <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
     </properties>
 
     <parent>
@@ -78,6 +79,22 @@
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
             <version>1.2.17</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+            <!-- <scope>runtime</scope> -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jetty</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 </project>

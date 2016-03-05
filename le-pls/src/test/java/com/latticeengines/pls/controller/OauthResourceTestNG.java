@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -27,8 +26,8 @@ public class OauthResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" })
     public void createAccessToken() {
         switchToThirdPartyUser();
-        OAuth2AccessToken token = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/oauth/createacesstoken?tenantId=" + mainTestingTenant.getId(), OAuth2AccessToken.class);
-        assertTrue(StringUtils.isNotEmpty(token.getValue()));
+        String token = restTemplate.getForObject(getRestAPIHostPort()
+                + "/pls/oauth/createacesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
+        assertTrue(StringUtils.isNotEmpty(token));
     }
 }

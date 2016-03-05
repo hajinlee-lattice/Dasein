@@ -13,6 +13,7 @@
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
         <le.network.version>2.0.22-SNAPSHOT</le.network.version>
         <le.security.version>2.0.22-SNAPSHOT</le.security.version>
+        <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
     </properties>
 
     <parent>
@@ -100,5 +101,22 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-oauth2db</artifactId>
+            <version>${le.oauth2.db.version}</version>
+            <!-- <scope>runtime</scope> -->
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jetty</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>log4j-over-slf4j</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
     </dependencies>
 </project>

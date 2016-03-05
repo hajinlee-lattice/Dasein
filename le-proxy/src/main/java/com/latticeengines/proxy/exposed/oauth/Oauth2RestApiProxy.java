@@ -1,16 +1,17 @@
-package com.latticeengines.pls.util;
+package com.latticeengines.proxy.exposed.oauth;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
+import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.pls.service.OauthService;
 import com.latticeengines.security.exposed.util.BaseRestApiProxy;
 
 @Component("oauthRestApiProxy")
-public class OauthRestApiProxy extends BaseRestApiProxy implements OauthService {
+public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interface {
 
     private static final String CLIENT_ID_LP = "lp";
 

@@ -1,8 +1,8 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.network.exposed.oauth;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-public interface OauthService {
+public interface Oauth2Interface {
 
     String createAPIToken(String tenantId);
 
