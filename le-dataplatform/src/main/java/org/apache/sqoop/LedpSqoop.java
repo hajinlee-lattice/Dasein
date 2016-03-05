@@ -14,7 +14,7 @@ import com.cloudera.sqoop.util.OptionsFileUtil;
 @SuppressWarnings("deprecation")
 public class LedpSqoop extends Sqoop {
 
-    
+
     private SqoopTool tool;
     private SqoopOptions options;
     private String[] childPrgmArgs;
@@ -89,10 +89,18 @@ public class LedpSqoop extends Sqoop {
                 tool.appendArgs(this.childPrgmArgs);
                 tool.validateOptions(options);
 
+                LOG.info("SqoopTool Run Options: " + options.toString());
+                try {
+                    LOG.info("SqoopTool Options: " + LedpSqoop.class.getClassLoader().getResource("org/apache/sqoop/LedpSqoop.class"));
+                } catch (Exception e) {
+                    LOG.info("Could not get location for Sqoop jar" + e.getMessage());
+                }
+
+                return tool.run(options);
             } catch (Exception e) {
                 // Couldn't parse arguments.
                 // Log the stack trace for this exception
-                LOG.debug(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
                 // Print exception message.
                 System.err.println(e.getMessage());
                 // Print the tool usage message and exit.
@@ -102,7 +110,6 @@ public class LedpSqoop extends Sqoop {
                 return 1; // Exit on exception here.
             }
         }
-        return tool.run(options);
     }
 
     private String[] stashChildPrgmArgs(String[] argv) {
