@@ -36,11 +36,11 @@ public class ScoreHistorian extends HandlerInterceptorAdapter {
             ScoreHistoryEntry entry = (ScoreHistoryEntry) request.getAttribute(ENTRY_KEY);
 
             String identifier = (String) request.getAttribute(RequestLogInterceptor.IDENTIFIER_KEY);
-            long start = (long) request.getAttribute(RequestLogInterceptor.START_TIME_KEY);
+//            long start = (long) request.getAttribute(RequestLogInterceptor.START_TIME_KEY);
 
             entry.requestID = identifier;
-            entry.received = start;
-            entry.duration = System.currentTimeMillis() - start;
+//            entry.received = start;
+//            entry.duration = System.currentTimeMillis() - start;
 
             entry.request = IOUtils.toString(((BufferedServletRequest) request).getBody(), "UTF-8");
             entry.response = IOUtils.toString(((BufferedServletResponse) response).getBody(), "UTF-8");

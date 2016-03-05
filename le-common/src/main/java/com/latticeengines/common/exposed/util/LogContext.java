@@ -14,6 +14,9 @@ import org.apache.log4j.MDC;
 // Note that for MDC information to be included in a log message, the log pattern
 // needs to include %X -- this is not present by default!
 public class LogContext implements AutoCloseable {
+
+    private final List<String> keys = new ArrayList<String>();
+
     public LogContext(String key, Object value) {
         add(key, value);
     }
@@ -38,5 +41,4 @@ public class LogContext implements AutoCloseable {
         }
     }
 
-    private final List<String> keys = new ArrayList<String>();
 }

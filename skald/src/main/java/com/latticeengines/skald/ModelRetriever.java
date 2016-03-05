@@ -16,7 +16,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.scoringapi.ModelIdentifier;
+import com.latticeengines.domain.exposed.scoringapi.unused.ModelIdentifier;
 
 // Retrieves and caches the actual PMML files and their resultant expensive structures.
 @Service

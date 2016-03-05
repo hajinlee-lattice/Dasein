@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.rest.DetailedErrors;
-
 @Api(value = "score", description = "REST resource for checking health of score API")
 @RestController
 @RequestMapping("/health")
-@DetailedErrors
 public class HealthCheckResource {
 
     public static final String MESSAGE = "Score API is online.";

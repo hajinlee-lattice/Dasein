@@ -16,7 +16,6 @@ import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import com.latticeengines.scoringapi.exception.ExceptionEncodingTranslator;
 
 @Configuration
-// @EnableAutoConfiguration
 @EnableResourceServer
 @EnableWebSecurity
 public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter {

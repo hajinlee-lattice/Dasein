@@ -23,6 +23,7 @@ public class ModelExtractor {
     private static final Log log = LogFactory.getLog(ModelExtractor.class);
 
     public void extractModelArtifacts(String modelFilePath, String targetDir) {
+        log.info(String.format("Extracting %s into %s", modelFilePath, targetDir));
         JsonFactory f = new JsonFactory();
         JsonParser parser = null;
         boolean retrieveSupportFiles = false;
@@ -35,7 +36,7 @@ public class ModelExtractor {
                 if ("CompressedSupportFiles".equals(fieldName)) {
                     retrieveSupportFiles = true;
                 }
-                
+
                 if (retrieveSupportFiles && "Key".equals(fieldName)) {
                     String value = parser.getText();
                     if (fieldName != null && !"Key".equals(value)) {
@@ -62,7 +63,7 @@ public class ModelExtractor {
                 log.warn(e);
             }
         }
-        
+
         for (Map.Entry<String, String> entry : entries) {
             try {
                 FileUtils.write(new File(targetDir + "/" + entry.getKey()), entry.getValue());
@@ -71,7 +72,7 @@ public class ModelExtractor {
             }
         }
     }
-    
+
     private String decodeValue(String value) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             byte[] data = Base64.decodeBase64(value);

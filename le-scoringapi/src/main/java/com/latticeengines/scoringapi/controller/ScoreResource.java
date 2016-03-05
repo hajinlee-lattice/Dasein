@@ -17,26 +17,32 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.rest.DetailedErrors;
+import com.latticeengines.common.exposed.rest.HttpStopWatch;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.scoringapi.exposed.AccountScoreRequest;
-import com.latticeengines.scoringapi.exposed.ContactScoreRequest;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelType;
+import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
+import com.latticeengines.scoringapi.warnings.Warnings;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController
 @RequestMapping("")
-@DetailedErrors
 public class ScoreResource {
 
+    private static final String MDC_CUSTOMERSPACE = "customerspace";
+
     private static final Log log = LogFactory.getLog(ScoreResource.class);
+
+    @Autowired
+    private HttpStopWatch httpStopWatch;
 
     @Autowired
     private ScoreResourceMockData scoreResourceMockData;
@@ -50,16 +56,20 @@ public class ScoreResource {
     @Autowired
     private ScoreRequestProcessor scoreRequestProcessor;
 
+    @Autowired
+    private Warnings warnings;
+
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get active models (only contact type is supported in M1)")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        log.info(String.format("getActiveModels for %s and type %s", customerSpace.toString(), type));
-
-        List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
-
-        return models;
+        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            log.info(type);
+            List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
+            log.info(JsonUtils.serialize(models));
+            return models;
+        }
     }
 
     @RequestMapping(value = "/models/{modelId}/fields", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -67,27 +77,28 @@ public class ScoreResource {
     @ApiOperation(value = "Get fields for a model")
     public Fields getModelFields(HttpServletRequest request, @PathVariable String modelId) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
-        log.info(String.format("getModelFields for %s and modelId %s", customerSpace.toString(), modelId));
-
-        Fields fields = modelRetriever.getModelFields(customerSpace, modelId);
-
-        return fields;
+        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            log.info(modelId);
+            Fields fields = modelRetriever.getModelFields(customerSpace, modelId);
+            log.info(JsonUtils.serialize(fields));
+            return fields;
+        }
     }
 
-    @RequestMapping(value = "/contacts", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Score a contact")
-    public ScoreResponse scoreContact(@RequestBody ContactScoreRequest request) {
-        ScoreResponse response = scoreRequestProcessor.process(request);
-
-        return scoreResourceMockData.simulateScore();
-    }
-
-    @RequestMapping(value = "/accounts", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Score an account (not supported in M1)")
-    public ScoreResponse scoreAccount(@RequestBody AccountScoreRequest request) {
-        return scoreResourceMockData.simulateScore();
+    @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiOperation(value = "Score a record")
+    public ScoreResponse scoreRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+        CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
+            log.info(String.format("{'getTenantFromOAuth':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+            log.info(JsonUtils.serialize(scoreRequest));
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest);
+            if (warnings.hasWarnings()) {
+                response.setWarnings(warnings.getWarnings());
+            }
+            log.info(JsonUtils.serialize(response));
+            return response;
+        }
     }
 
 }

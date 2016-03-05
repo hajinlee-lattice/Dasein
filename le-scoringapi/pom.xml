@@ -93,7 +93,6 @@
                         <artifactId>jetty-maven-plugin</artifactId>
                         <version>${jetty.version}</version>
                         <configuration>
-                            <useTestClasspath>true</useTestClasspath>
                             <webAppConfig>
                                 <extraClasspath>
                                     ${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
@@ -170,6 +169,10 @@
                 </exclusion>
                 <!-- <exclusion> <groupId>org.python</groupId> <artifactId>jython-standalone</artifactId>
                     </exclusion> -->
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -217,14 +220,14 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-<!--
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-oauth2db</artifactId>
-            <version>${le.oauth2.db.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
--->
+
+<!--         <dependency> -->
+<!--             <groupId>com.latticeengines</groupId> -->
+<!--             <artifactId>le-oauth2db</artifactId> -->
+<!--             <version>${le.oauth2.db.version}</version> -->
+<!--             <classifier>intf</classifier> -->
+<!--         </dependency> -->
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
@@ -236,8 +239,24 @@
                     <groupId>org.springframework.boot</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>log4j-over-slf4j</artifactId>
-                    <groupId>org.slf4j</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>
+                        spring-boot-starter-actuator
+                    </artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-boot-starter-jdbc</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>
+                        spring-boot-starter-security
+                    </artifactId>
+                    <groupId>org.springframework.boot</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -290,7 +309,6 @@
             <artifactId>springfox-swagger-ui</artifactId>
             <version>${springfox.swagger.ui.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>

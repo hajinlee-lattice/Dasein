@@ -2,7 +2,9 @@ package com.latticeengines.scoringapi.model;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
@@ -15,18 +17,26 @@ import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
+import org.python.jline.internal.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.scoringapi.unused.ScoreType;
+import com.latticeengines.scoringapi.exposed.ScoreType;
+import com.latticeengines.scoringapi.warnings.Warning;
+import com.latticeengines.scoringapi.warnings.WarningCode;
+import com.latticeengines.scoringapi.warnings.Warnings;
 
 public class ModelEvaluator {
 
     private final PMMLManager manager;
 
-    public ModelEvaluator(InputStream is) {
+    private Warnings warnings;
+
+    public ModelEvaluator(InputStream is, Warnings warnings) {
+        this.warnings = warnings;
         PMML unmarshalled;
         try {
             unmarshalled = IOUtil.unmarshal(is);
@@ -52,10 +62,14 @@ public class ModelEvaluator {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
+        List<String> nullFields = new ArrayList<>();
         for (FieldName name : evaluator.getActiveFields()) {
             Object value = record.get(name.getValue());
             if (value == null) {
-                throw new RuntimeException("Null value for model input " + name.getValue());
+                nullFields.add(name.getValue());
+                continue;
+                // TODO need to do something here.
+//                throw new RuntimeException("Null value for model input " + name.getValue());
             }
             if (value instanceof Long) {
                 value = ((Long) value).doubleValue();
@@ -65,7 +79,11 @@ public class ModelEvaluator {
             }
             arguments.put(name, evaluator.prepare(name, value));
         }
-
+        if (!nullFields.isEmpty()) {
+            String joinedNullFields = Joiner.on(",").join(nullFields);
+            Log.info("Fields with null values:" + joinedNullFields);
+            warnings.addWarning(new Warning(WarningCode.MISSING_VALUE, new String[] { joinedNullFields }));
+        }
         Map<FieldName, ?> results = evaluator.evaluate(arguments);
 
         String target = derivation.target;
@@ -91,7 +109,7 @@ public class ModelEvaluator {
         if (derivation.percentiles != null) {
             for (int index = 0; index < derivation.percentiles.size(); index++) {
                 if (withinRange(derivation.percentiles.get(index), predicted)) {
-                    result.put(ScoreType.PERCENTILE, index);    // TODO Bernard should this be the percentile value, not the index?
+                    result.put(ScoreType.PERCENTILE, index);
                     break;
                 }
             }

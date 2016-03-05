@@ -344,21 +344,42 @@ public enum LedpCode {
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //
 
-    // le-scoringapi
+    // le-scoringapi internal facing errors
     LEDP_31000("Failed to retrieve file from HDFS {0}"), //
     LEDP_31001("Failed to get model json hdfs path from HDFS {0}"), //
     LEDP_31002("Failed to copy model json from hdfs {0} to local {1}"), //
     LEDP_31003("Model file does not exist {0}"), //
-    LEDP_31004("Too many model files exist at {0}");
+    LEDP_31004("Too many model files exist at {0}"), //
+    LEDP_31005("Matched fieldname size {0} does not equal matched fieldvalue size {1}"), //
+    LEDP_31006("Problem creating model artifacts directory {0}"), //
+    LEDP_31007("ModelSummary {0} is missing appId value and there are more than 1 potential appId subfolders {1}"), //
+
+    // le-scoringapi external-facing errors
+    LEDP_31101("missing_model_id", "modelId is required"), //
+    LEDP_31102("invalid_model_id", "{0} is not a valid activated model"), //
+    LEDP_31199("missing_domain", "Domain field(s) are missing {0}");
 
     private String message;
+
+    private String externalCode;
 
     LedpCode(String message) {
         this.message = message;
     }
 
+    LedpCode(String externalCode, String message) {
+        this.externalCode = externalCode;
+        this.message = message;
+    }
+
+
     public String getMessage() {
         return message;
     }
+
+    public String getExternalCode() {
+        return externalCode;
+    }
+
 }
 // @formatter:on

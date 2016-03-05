@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.unused;
+package com.latticeengines.scoringapi.exposed;
 
 /**
  * Output field of a scoring operation.

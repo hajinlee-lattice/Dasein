@@ -4,9 +4,9 @@ public enum FieldInterpretation {
     // Uniquely identifies this record in an external system.
     RECORD_ID,
 
-    // Email address tied to this record.
     EMAIL_ADDRESS,
     WEBSITE,
+    DOMAIN,
     COMPANY_NAME,
     COMPANY_CITY,
     COMPANY_STATE,
