@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "OAUTH2_ACCESS_TOKEN", //
+@javax.persistence.Table(name = "OAUTH_ACCESS_TOKEN", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID" }) })
 @Filters({ //
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
