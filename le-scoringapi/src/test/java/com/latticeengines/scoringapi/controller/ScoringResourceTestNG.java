@@ -56,7 +56,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void scoreRecord() {
         String url = apiHostPort + "/score/record";
         ScoreRequest request = new ScoreRequest();
