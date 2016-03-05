@@ -24,7 +24,7 @@ public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = { "functional" })
-    public void createAccessToken() {
+    public void createOAuth2AccessToken() {
         switchToThirdPartyUser();
         String token = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/oauth/createacesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
