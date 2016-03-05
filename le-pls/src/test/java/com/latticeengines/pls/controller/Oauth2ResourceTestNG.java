@@ -8,7 +8,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class OauthResourceTestNG extends PlsFunctionalTestNGBase {
+public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

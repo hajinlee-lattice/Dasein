@@ -12,7 +12,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class OauthAccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
