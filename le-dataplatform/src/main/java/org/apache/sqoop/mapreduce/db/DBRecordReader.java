@@ -235,23 +235,16 @@ public class DBRecordReader<T extends DBWritable> extends RecordReader<LongWrita
                 LOG.info("Working on split: " + split);
                 this.results = executeQuery(getSelectQuery());
             }
+            if (!results.next()) {
+                return false;
+              }
 
-            while (true) {
-                try {
-                    if (!results.next()) {
-                        return false;
-                    } else {
-                        // Set the key field value as the output key value
-                        key.set(pos + split.getStart());
-                        value.readFields(results);
-                        break;
-                    }
-                } catch (SQLException e) {
-                    LOG.info("results failed, retry!!!");
-                } finally {
-                    pos++;
-                }
-            }
+              // Set the key field value as the output key value
+              key.set(pos + split.getStart());
+
+              value.readFields(results);
+
+              pos++;
 
         } catch (SQLException e) {
             LoggingUtils.logAll(LOG, e);
