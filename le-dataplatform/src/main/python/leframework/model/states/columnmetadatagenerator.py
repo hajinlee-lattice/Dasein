@@ -18,7 +18,7 @@ class ColumnMetadataGenerator(State, JsonGenBase):
         mediator = self.mediator
         
         metadata = mediator.metadata[1]
-        fields = mediator.schema["features"]
+        fields = mediator.schema["original_features"]
         
         fieldsWithTypes = mediator.schema["fields"]
         

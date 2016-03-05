@@ -226,6 +226,7 @@ class ArgumentParser(object):
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["features"] = self.metadataSchema["features"]
+        schema["original_features"] = self.metadataSchema["features"]
         schema["keys"] = parser.getKeys()
         if "data_profile" in self.metadataSchema:
             if schema["data_profile"].rfind('/') > 0 : schema["diagnostics_path"] = schema["data_profile"][0:schema["data_profile"].rfind('/')+1]
