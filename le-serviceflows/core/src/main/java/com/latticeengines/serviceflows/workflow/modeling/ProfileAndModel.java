@@ -64,8 +64,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         for (Attribute attr : eventTable.getAttributes()) {
             if (attr.getApprovedUsage() == null //
-                    || attr.getApprovedUsage().size() == 0 
-                    || attr.getApprovedUsage().get(0).equals("None")) {
+                    || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
             }
         }
@@ -78,7 +77,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             bldr = bldr.targets(event.getName()) //
                     .metadataTable(String.format("%s-%s-Metadata", eventTable.getName(), event.getDisplayName())) //
                     .keyColumn("Id").modelName(configuration.getModelName()) //
-                    .eventTableName(configuration.getEventTableName()) //
+                    .eventTableName(getEventTable().getName()) //
                     .productType(configuration.getProductType());
             if (eventTable.getAttributes(SemanticType.Event).size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");

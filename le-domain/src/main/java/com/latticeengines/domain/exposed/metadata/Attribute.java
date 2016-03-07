@@ -250,11 +250,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         properties.put(key, value);
     }
 
-    /**
-     * Assumes that all properties are strings or arrays of strings.
-     */
     @JsonIgnore
-    public void setPropertyValueFromString(String key, String value) {
+    private void setListPropertyFromString(String key, String value) {
         Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
         Matcher matcher = pattern.matcher(value);
         if (matcher.matches()) {
@@ -269,7 +266,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                 setPropertyValue(key, Arrays.asList(array));
             }
         } else {
-            setPropertyValue(key, value);
+            setPropertyValue(key, Arrays.asList(value));
         }
     }
 
@@ -374,7 +371,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setApprovedUsage(String approvedUsage) {
-        setApprovedUsage(Arrays.<String> asList(new String[] { approvedUsage }));
+        setListPropertyFromString("ApprovedUsage", approvedUsage);
     }
 
     @Transient
@@ -487,7 +484,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setTags(String tags) {
-        setTags(Arrays.<String> asList(new String[] { tags }));
+        setListPropertyFromString("Tags", tags);
     }
 
     @Transient

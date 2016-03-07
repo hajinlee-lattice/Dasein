@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.workflow.CreateModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -42,6 +41,9 @@ public class ModelResource {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
+    @Autowired
+    private ModelMetadataService modelMetadataService;
+
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
@@ -61,16 +63,8 @@ public class ModelResource {
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
         try {
-            String customerSpace = SecurityContextUtils.getCustomerSpace().toString();
-            ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
-            String eventTableName = summary.getEventTableName();
-            Table eventTable = metadataProxy.getTable(customerSpace, eventTableName);
-            if (eventTable == null) {
-                throw new RuntimeException(String.format("Could not find event table with name %s", eventTableName));
-            }
-            Table clone = metadataProxy.cloneTable(customerSpace, eventTable.getName());
-            clone.setAttributes(parameters.getAttributes());
-            metadataProxy.updateTable(customerSpace, clone.getName(), clone);
+            Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
+                    parameters.getAttributes());
 
             return ResponseDocument.successResponse( //
                     modelWorkflowSubmitter.submit(clone.getName(), parameters.getName()).toString());

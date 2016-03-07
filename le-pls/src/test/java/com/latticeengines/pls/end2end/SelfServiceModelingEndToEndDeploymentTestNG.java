@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,10 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -39,13 +38,16 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
@@ -176,25 +178,32 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotEquals(csv.length(), 0);
     }
 
-    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
             "retrieveReport" })
     public void cloneAndRemodel() {
-        Table metadata = restTemplate.getForObject(
-                String.format("%s/pls/metadata/%s", getPLSRestAPIHostPort(), originalModelSummary.getEventTableName()),
-                Table.class);
+        @SuppressWarnings("unchecked")
+        List<Object> rawFields = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/metadata/%s", getPLSRestAPIHostPort(),
+                        originalModelSummary.getId()), List.class);
+        List<VdbMetadataField> fields = new ArrayList<>();
+        for (Object rawField : rawFields) {
+            VdbMetadataField field = new ObjectMapper().convertValue(rawField, VdbMetadataField.class);
+            fields.add(field);
 
-        // Disable some predictors
-        Attribute website = metadata.getAttribute("Website");
-        website.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-        Attribute country = metadata.getAttribute("City");
-        country.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            if (field.getColumnName().equals("Website")) {
+                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+            if (field.getColumnName().equals("City")) {
+                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }
 
         // Now remodel
         CloneModelingParameters parameters = new CloneModelingParameters();
         parameters.setName(modelName + "_clone");
         modelName = parameters.getName();
         parameters.setDescription("clone");
-        parameters.setAttributes(metadata.getAttributes());
+        parameters.setAttributes(fields);
         parameters.setSourceModelSummaryId(originalModelSummary.getId());
 
         ResponseDocument response;
@@ -206,13 +215,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
 
         WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException {
         ModelSummary found = getModelSummary(modelName);
         assertNotNull(found);

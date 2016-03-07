@@ -68,7 +68,7 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
 
     @Override
     public void updateTable(String customerSpace, String tableName, Table table) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}");
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         put("updateTable", url, table);
     }
 

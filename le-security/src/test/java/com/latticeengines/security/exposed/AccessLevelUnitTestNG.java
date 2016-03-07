@@ -19,8 +19,7 @@ public class AccessLevelUnitTestNG {
 
     @Test(groups = "unit")
     public void cardinalityOfAccessLevels() {
-        AccessLevel[] levelsInOrder = new AccessLevel[] { 
-                AccessLevel.SUPER_ADMIN, //
+        AccessLevel[] levelsInOrder = new AccessLevel[] { AccessLevel.SUPER_ADMIN, //
                 AccessLevel.INTERNAL_ADMIN, //
                 AccessLevel.INTERNAL_USER, //
                 AccessLevel.THIRD_PARTY_USER, //

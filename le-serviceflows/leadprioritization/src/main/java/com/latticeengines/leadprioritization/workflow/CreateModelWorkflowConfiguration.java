@@ -114,11 +114,6 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder eventTableName(String eventTableName) {
-            model.setEventTableName(eventTableName);
-            return this;
-        }
-
         public CreateModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);

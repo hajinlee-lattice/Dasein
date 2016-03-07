@@ -14,6 +14,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            model.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);

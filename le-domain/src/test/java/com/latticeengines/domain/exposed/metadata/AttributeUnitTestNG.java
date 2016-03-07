@@ -42,13 +42,13 @@ public class AttributeUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testSetPropertyValueFromString() {
+    public void testSetListPropertyFromString() {
         List<String> approvedUsage = new ArrayList<>();
         approvedUsage.add(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         approvedUsage.add(ModelingMetadata.MODEL_APPROVED_USAGE);
         String string = approvedUsage.toString();
         Attribute attribute = new Attribute();
-        attribute.setPropertyValueFromString("ApprovedUsage", string);
+        attribute.setApprovedUsage(string);
         List<String> result = attribute.getApprovedUsage();
         assertEquals(result.size(), approvedUsage.size());
         for (int i = 0; i < result.size(); ++i) {
@@ -57,8 +57,13 @@ public class AttributeUnitTestNG {
 
         approvedUsage.clear();
         string = approvedUsage.toString();
-        attribute.setPropertyValueFromString("ApprovedUsage", string);
+        attribute.setApprovedUsage(string);
         result = attribute.getApprovedUsage();
         assertEquals(result.size(), 0);
+
+        attribute.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
+        result = attribute.getApprovedUsage();
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0), ModelingMetadata.MODEL_APPROVED_USAGE);
     }
 }

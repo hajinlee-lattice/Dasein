@@ -20,9 +20,11 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelAlertService;
+import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
@@ -46,6 +48,9 @@ public class ModelSummaryResource {
 
     @Autowired
     private ModelAlertService modelAlertService;
+
+    @Autowired
+    private ModelMetadataService modelMetadataService;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -168,5 +173,12 @@ public class ModelSummaryResource {
     public Boolean updatePredictors(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
         modelSummaryService.updatePredictors(modelId, attrMap);
         return true;
+    }
+
+    @RequestMapping(value = "/metadata/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get metadata for the event table used for the specified model")
+    public List<VdbMetadataField> getMetadata(@PathVariable String modelId) {
+        return modelMetadataService.getMetadata(modelId);
     }
 }

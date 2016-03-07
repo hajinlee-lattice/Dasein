@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public class CloneModelingParameters {
     @JsonProperty
@@ -16,7 +15,7 @@ public class CloneModelingParameters {
     private String description;
 
     @JsonProperty
-    private List<Attribute> attributes;
+    private List<VdbMetadataField> attributes;
 
     public String getName() {
         return name;
@@ -34,11 +33,11 @@ public class CloneModelingParameters {
         this.description = description;
     }
 
-    public List<Attribute> getAttributes() {
+    public List<VdbMetadataField> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<Attribute> attributes) {
+    public void setAttributes(List<VdbMetadataField> attributes) {
         this.attributes = attributes;
     }
 

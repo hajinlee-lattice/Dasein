@@ -1,8 +1,10 @@
 package com.latticeengines.eai.service.impl;
 
-import org.testng.annotations.Test;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -20,4 +22,5 @@ public class EaiMetadataServiceImplUnitTestNG {
         assertTrue(table.getExtracts().get(0).getExtractionTimestamp() > 0);
         assertEquals(table.getExtracts().get(0).getName(), "Lead-2015-10-12.avro");
     }
+
 }

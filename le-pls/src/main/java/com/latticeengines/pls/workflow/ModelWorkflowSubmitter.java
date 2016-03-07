@@ -31,6 +31,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName(modelName) //
                 .eventTableName(eventTableName) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);

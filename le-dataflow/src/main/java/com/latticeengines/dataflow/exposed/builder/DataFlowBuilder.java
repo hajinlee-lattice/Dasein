@@ -181,7 +181,7 @@ public abstract class DataFlowBuilder {
                     String key = entry.getKey();
                     String value = entry.getValue();
                     if (key.equals("ApprovedUsage")) {
-                        attribute.setPropertyValueFromString("ApprovedUsage", value);
+                        attribute.setApprovedUsage(value);
                     } else if (key.equals("StatisticalType")) {
                         attribute.setStatisticalType(value);
                     } else if (key.equals("DisplayDiscretizationStrategy")) {
@@ -189,7 +189,7 @@ public abstract class DataFlowBuilder {
                     } else if (key.equals("Category")) {
                         attribute.setCategory(value);
                     } else if (key.equals("Tags")) {
-                        attribute.setPropertyValueFromString("Tags", value);
+                        attribute.setTags(value);
                     } else if (key.equals("FundamentalType")) {
                         attribute.setFundamentalType(value);
                     } else if (key.equals("RTSModuleName")) {

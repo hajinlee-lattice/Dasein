@@ -1,8 +1,7 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
@@ -32,7 +31,6 @@ import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
-import com.mysql.jdbc.StringUtils;
 
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
@@ -129,22 +127,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         Table clone = JsonUtils.clone(existing);
-
-        Pattern pattern = Pattern.compile("^(.*)_clone([0-9]*)$");
-        Matcher matcher = pattern.matcher(clone.getName());
-        if (matcher.matches()) {
-            String counterString = matcher.group(2);
-            int counter;
-            if (StringUtils.isNullOrEmpty(counterString)) {
-                counter = 1;
-            } else {
-                counter = Integer.parseInt(counterString);
-            }
-            counter++;
-            clone.setName(matcher.group(1) + "_clone" + counter);
-        } else {
-            clone.setName(existing.getName() + "_clone");
-        }
+        clone.setName(UUID.randomUUID().toString());
 
         create(clone);
 
@@ -158,10 +141,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             try {
                 HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
             } catch (Exception e) {
-                // throw new
-                // RuntimeException(String.format("Failed to copy in HDFS from %s to %s",
-                // sourcePath.toString(),
-                // destPath.toString()), e);
+                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
+                        destPath.toString()), e);
             }
         }
         return clone;
