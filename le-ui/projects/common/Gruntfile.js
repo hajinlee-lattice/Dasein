@@ -4,7 +4,8 @@ module.exports = function(grunt) {
 		dir: {
 			assets: './assets',
 			app: './app',
-			bower: './lib/bower'
+			bower: './lib/bower',
+			dist: './dist'
 		},
 		sass: {
 			dist: {
@@ -12,24 +13,32 @@ module.exports = function(grunt) {
 					style: 'compressed'
 				},
 				files: {
-					'./assets/css/lattice.css' : './assets/sass/lattice.scss'
+					'<%= dir.dist %>/lattice.css' : './assets/sass/lattice.scss'
 				}
 			}
 		},
 		watch: {
+			js: {
+				files: '<%= dir.app %>/**/*.js',
+				tasks: [
+					'concat:production',
+					'uglify:production',
+					'concat:dist',
+				]
+			},
 			css: {
-				files: './assets/sass/*.scss',
+				files: '<%= dir.assets %>/sass/*.scss',
 				tasks: ['sass:dist']
 			}
 		},
         uglify: {
-            dist: {
+            production: {
                 options: {
                     mangle: false
                 },
                 files: {
-                    '<%= dir.assets %>/js/min/vendor.min.js': [
-                        '<%= dir.bower %>/*.min.js'
+                    '<%= dir.assets %>/js/min/production.min.js': [
+                        '<%= dir.assets %>/js/min/production.min.js'
                     ]
                 }
             }
@@ -44,22 +53,40 @@ module.exports = function(grunt) {
 				],
 				dest: '<%= dir.assets %>/js/min/vendor.min.js'
 			},
-			dist: {
+			production: {
 				src: [
-					'<%= dir.app %>/directives/*.js',
-					'<%= dir.app %>/utilities/*.js',
-					'<%= dir.app %>/services/*.js',
-					'<%= dir.app %>/modals/*.js'
+					'<%= dir.app %>/**/*.js'
 				],
 				dest: '<%= dir.assets %>/js/min/production.min.js'
+			},
+			dist: {
+				src: [
+					'<%= dir.assets %>/js/min/vendor.min.js',
+					'<%= dir.assets %>/js/min/production.min.js'
+				],
+				dest: '<%= dir.dist %>/lattice.js'
 			}
-		}
+		},
+        concurrent: {
+            sentry: ['watch:js','watch:css']
+        }
 	});
+
 	grunt.loadNpmTasks('grunt-contrib-sass');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-concurrent');
 
-	grunt.registerTask('default',['concat:dist','concat:vendor', 'sass:dist']);
-	grunt.registerTask('sentry',['watch:css']);
+	grunt.registerTask('default',[
+		'concat:vendor',
+		'concat:production',
+		'uglify:production',
+		'concat:dist',
+		'sass:dist'
+	]);
+
+	grunt.registerTask('sentry',[
+		'concurrent:sentry'
+	]);
 };

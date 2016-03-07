@@ -7,6 +7,7 @@ module.exports = [
             '/app': '/app',
             '/assets': '/assets',
             '/lib': '/lib',
+            '/dist': '/dist',
             '/bower_components': '/bower_components'
         }
     },{

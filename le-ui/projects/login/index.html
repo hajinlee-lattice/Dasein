@@ -1,92 +1,55 @@
 <!DOCTYPE html>
 <html lang="en" id="ng-app" data-ng-app="mainApp">
+    <head runat="server">
+        <base href="/login/"> 
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+        <title>Login - Lattice Engines</title>
 
-<head runat="server">
-    <base href="/login/"> 
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
-    <title>Login - Lattice Engines</title>
+        <!-- build:css dist/css/style.min.css -->
+        <link rel="stylesheet" type="text/css" href="/dist/lattice.css" />
+        <!-- endbuild -->
 
-    <link rel="stylesheet" href="/assets/css/lattice.css">
+        <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
 
-    <!--[if IE 9]>
-        <link rel="stylesheet" href="/assets/css/ie9.css">
-    <![endif]-->
+        <script src="/lp/lib/js/webfontloader.js" async></script>
+    </head>
 
-    <script src="/assets/js/modernizr.js"></script>
-</head>
+    <body data-ng-controller="MainController" class="blue-background">
+        <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+        <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
 
-<body data-ng-controller="MainController" class="blue-background">
+        <div id="mainView">
+            <div id="mainHeaderView"></div>
+            <div data-ng-view></div>
+        </div>
         
-    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+        <!--[if IE]><div id="isIE"></div><![endif]-->
+    </body>
 
-    <div id="mainView">
-        <div id="mainHeaderView"></div>
-        <div data-ng-view></div>
-    </div>
 
-<!--
-This div will be added to the DOM if the browser is IE
-Use DOMUtil.isIE() to detect internet explorer.
--->
-<!--[if IE]> <div id="isIE"></div> <![endif]-->
+    <!-- 3rd-party libraries -->
+    <script src="/dist/lattice.js"></script>
 
-<script type="text/javascript">
-    WebFontConfig = {
-        google: { families: [ 'Open Sans' ]
-        }
-    };
-</script>
+    <!-- build:js dist/js/optimized.js -->
+    <script src="app/app.js"></script>
 
-<!-- 3rd-party libraries -->
-<script src="/assets/js/min/vendor.min.js"></script>
-<script src="/assets/js/min/production.min.js"></script>
+    <script src="app/controllers/MainViewController.js"></script>
+    <script src="app/controllers/MainHeaderController.js"></script>
+    <script src="app/controllers/LoginController.js"></script>
+    <script src="app/controllers/UpdatePasswordController.js"></script>
 
-<!-- build:remove:dist -->
-<script type="text/javascript">
-    (function() {
-        var wf = document.createElement('script');
-        wf.src = 'lib/js/webfontloader.js';
-        wf.type = 'text/javascript';
-        wf.async = 'true';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(wf, s);
-    })();
-</script>
+    <script src="app/modals/TenantSelectionModal.js"></script>
+    <!-- endbuild -->
 
-<script src="app/app.js"></script>
+    <script type="text/javascript">
+        WebFontConfig = {
+            google: { families: [ 'Open Sans' ] }
+        };
 
-<script src="app/controllers/MainViewController.js"></script>
-<script src="app/controllers/MainHeaderController.js"></script>
-<script src="app/controllers/LoginController.js"></script>
-<script src="app/controllers/UpdatePasswordController.js"></script>
-
-<script src="app/modals/TenantSelectionModal.js"></script>
-<!-- /build -->
-
-<!-- build:js inline -->
-<script src="app/loadjs.js"></script>
-<!-- /build -->
-
-<!-- build:template:dist
-<script type="text/javascript">
-    var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
-    var jslist = [
-        {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
-    ];
-
-    var jsLoader = new JsLoader();
-    var head = jsLoader.toLinkedList(jslist);
-    jsLoader.loadScriptByObj(head);
-</script>
-/build -->
-
-<script>
-    // Create global variable for Evergage to use
-    var _aaq = _aaq || [];
-</script>
-</body>
+        // Create global variable for Evergage to use
+        var _aaq = _aaq || [];
+    </script>
 </html>

@@ -2,7 +2,8 @@ angular.module('mainApp.create.csvImport', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
-    'mainApp.core.utilities.NavUtility'
+    'mainApp.core.utilities.NavUtility',
+    '720kb.tooltips'
 ])
 .service('csvImportStore', function() {
     this.files = {};

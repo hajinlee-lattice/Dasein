@@ -5,215 +5,162 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+
     <title>Lead Prioritization - Lattice Engines</title>
 
-    <!-- build:template:dist
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/qtip2/<%= version.qtip2 %>/jquery.qtip.min.css"/>
+    <link rel="shortcut icon"   type="image/x-icon" href="assets/images/favicon.ico">
+    <link rel="stylesheet"      type="text/css"     href="/assets/css/font-awesome.min.css" />
+    <link rel="stylesheet"      type="text/css"     href="/dist/lattice.css" />
+    <link rel="stylesheet"      type="text/css"     href="/lp/assets/styles/production.css" />
 
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" href="//kendo.cdn.telerik.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/styles/production_<%= versionString %>.min.css"/>
-    /build -->
-    <!-- build:remove:dist -->
-    
-    <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
-    <link rel="stylesheet" type="text/css" href="/assets/css/lattice.css" />
-    <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
-    <!-- /build -->
-
-    <script src="/assets/js/modernizr.js"></script>
+    <script src="/lp/lib/js/webfontloader.js" async></script>
 </head>
-<body data-ng-controller="MainController" class="lp open-nav">
+    <body data-ng-controller="MainController" class="lp open-nav">
 
-    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+        <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
+        <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
 
-    <div id="outer-wrap">
-        <div id="inner-wrap">
-            
-            <nav id="nav" class="primary-nav" role="navigation">
-                <div ui-view="navigation">
-                    <ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>
-                </div>
-            </nav>
-
-            <section id="main" role="main" class="main-content">
-                <div class="content-wrap">
-                    <div id="mainView">
-                        <div id="mainHeaderView"></div>
-                        <div data-ng-view class="container"></div>
+        <div id="outer-wrap">
+            <div id="inner-wrap">
+                
+                <nav id="nav" class="primary-nav" role="navigation">
+                    <div ui-view="navigation">
+                        <ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include>
                     </div>
-                </div>
-            </section>
+                </nav>
 
-        </div><!-- End #inner-wrap -->
-    </div><!-- End #outer-wrap -->
-<!--
-This div will be added to the DOM if the browser is IE
-Use DOMUtil.isIE() to detect internet explorer.
--->
-<!--[if IE]> <div id="isIE"></div> <![endif]-->
+                <section id="main" role="main" class="main-content">
+                    <div class="content-wrap">
+                        <div id="mainView">
+                            <div id="mainHeaderView"></div>
+                            <div data-ng-view class="container"></div>
+                        </div>
+                    </div>
+                </section>
 
-<script type="text/javascript">
-    WebFontConfig = {
-        google: { families: [ 'Open Sans' ]
-        }
-    };
-</script>
+            </div>
+        </div>
 
-<!-- combined common and vendor js -->
-<script src="/assets/js/min/vendor.min.js"></script>
-<script src="/assets/js/min/production.min.js"></script>
+        <!--[if IE]> <div id="isIE"></div> <![endif]-->
 
-<script src="/demo/js/bootstrap-select.min.js"></script>
-<script src="/lib/js/angular/angular-tooltips.js"></script>
+        <!-- combined common and vendor js -->
+        <script src="/dist/lattice.js"></script>
+        <script src="/demo/js/bootstrap-select.min.js"></script>
+        <script src="/lp/lib/js/kendo.all.min.js"></script>
 
-<!-- build:remove:dist -->
-<script type="text/javascript">
-    (function() {
-        var wf = document.createElement('script');
-        wf.src = '/lp/lib/js/webfontloader.js';
-        wf.type = 'text/javascript';
-        wf.async = 'true';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(wf, s);
-    })();
-</script>
+        <!-- build:remove:dist -->
+        <script src="app/app.js"></script>
+        <script src="app/routes.js"></script>
+        <script src="app/AppCommon/utilities/AnimationUtility.js"></script>
+        <script src="app/AppCommon/utilities/AnalyticAttributeUtility.js"></script>
+        <script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
+        <script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
+        <script src="app/AppCommon/services/PlayTileService.js"></script>
+        <script src="app/AppCommon/services/TopPredictorService.js"></script>
+        <script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
+        <script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
+        <script src="app/AppCommon/services/ModelAlertsService.js"></script>
+        <script src="app/AppCommon/services/ManageFieldsService.js"></script>
+        <script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
+        <script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
+        <script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
+        <script src="app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js"></script>
+        <script src="app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
+        <script src="app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js"></script>
+        <script src="app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
+        <script src="app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js"></script>
+        <script src="app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js"></script>
+        <script src="app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js"></script>
+        <script src="app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js"></script>
+        <script src="app/AppCommon/widgets/tabWidget/TabWidget.js"></script>
+        <script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js"></script>
+        <script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js"></script>
+        <script src="app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js"></script>
+        <script src="app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js"></script>
+        <script src="app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js"></script>
+        <script src="app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js"></script>
+        <script src="app/AppCommon/widgets/performanceTabWidget/ThresholdExplorer.js"></script>
+        <script src="app/AppCommon/widgets/performanceTabWidget/LiftChart.js"></script>
+        <script src="app/AppCommon/widgets/performanceTabWidget/DataTable.js"></script>
+        <script src="app/AppCommon/widgets/performanceTabWidget/PerformanceTabWidget.js"></script>
+        <script src="app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js"></script>
+        <script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js"></script>
+        <script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js"></script>
+        <script src="app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js"></script>
+        <script src="app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js"></script>
+        <script src="app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidget.js"></script>
+        <script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
+        <script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
+        <script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
 
-<!-- app specific -->
-<script src="app/app.js"></script>
-<script src="app/routes.js"></script>
+        <script src="app/core/services/WidgetService.js"></script>
+        <script src="app/core/controllers/MainViewController.js"></script>
+        <script src="app/core/controllers/MainHeaderController.js"></script>
+        <script src="app/core/controllers/SalesforceCredentialController.js"></script>
 
-<!-- widgets -->
-<script src="app/AppCommon/utilities/AnimationUtility.js"></script>
-<script src="app/AppCommon/utilities/AnalyticAttributeUtility.js"></script>
-<script src="app/AppCommon/utilities/WidgetConfigUtility.js"></script>
-<script src="app/AppCommon/services/WidgetFrameworkService.js"></script>
-<script src="app/AppCommon/services/PlayTileService.js"></script>
-<script src="app/AppCommon/services/TopPredictorService.js"></script>
-<script src="app/AppCommon/services/ThresholdExplorerService.js"></script>
-<script src="app/AppCommon/services/ModelSummaryValidationService.js"></script>
-<script src="app/AppCommon/services/ModelAlertsService.js"></script>
-<script src="app/AppCommon/services/ManageFieldsService.js"></script>
-<script src="app/AppCommon/widgets/WidgetEventConstantUtility.js"></script>
-<script src="app/AppCommon/widgets/screenWidget/ScreenWidget.js"></script>
-<script src="app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js"></script>
-<script src="app/AppCommon/widgets/repeaterWidget/RepeaterWidget.js"></script>
-<script src="app/AppCommon/widgets/leadDetailsTileWidget/LeadDetailsTileWidget.js"></script>
-<script src="app/AppCommon/widgets/arcChartWidget/ArcChartWidget.js"></script>
-<script src="app/AppCommon/widgets/collapsiblePanelWidget/CollapsiblePanelWidget.js"></script>
-<script src="app/AppCommon/widgets/analyticAttributeTileWidget/AnalyticAttributeTileWidget.js"></script>
-<script src="app/AppCommon/widgets/analyticAttributeListWidget/AnalyticAttributeListWidget.js"></script>
-<script src="app/AppCommon/widgets/playListTileWidget/PlayListTileWidget.js"></script>
-<script src="app/AppCommon/widgets/playDetailsTileWidget/PlayDetailsTileWidget.js"></script>
-<script src="app/AppCommon/widgets/tabWidget/TabWidget.js"></script>
-<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js"></script>
-<script src="app/AppCommon/widgets/talkingPointWidget/TalkingPointWidget.js"></script>
-<script src="app/AppCommon/widgets/modelListTileWidget/ModelListTileWidget.js"></script>
-<script src="app/AppCommon/widgets/modelListCreationHistoryWidget/ModelListCreationHistoryWidget.js"></script>
-<script src="app/AppCommon/widgets/modelDetailsWidget/ModelDetailsWidget.js"></script>
-<script src="app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js"></script>
-<script src="app/AppCommon/widgets/performanceTabWidget/ThresholdExplorer.js"></script>
-<script src="app/AppCommon/widgets/performanceTabWidget/LiftChart.js"></script>
-<script src="app/AppCommon/widgets/performanceTabWidget/DataTable.js"></script>
-<script src="app/AppCommon/widgets/performanceTabWidget/PerformanceTabWidget.js"></script>
-<script src="app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js"></script>
-<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js"></script>
-<script src="app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js"></script>
-<script src="app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js"></script>
-<script src="app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js"></script>
-<script src="app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidget.js"></script>
-<script src="app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidget.js"></script>
-<script src="app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js"></script>
-<script src="app/AppCommon/widgets/manageFieldsWidget/ManageFieldsWidget.js"></script>
+        <script src="app/create/controllers/CSVImportController.js"></script>
 
-<script src="app/core/services/WidgetService.js"></script>
-<script src="app/core/controllers/MainViewController.js"></script>
-<script src="app/core/controllers/MainHeaderController.js"></script>
-<script src="app/core/controllers/SalesforceCredentialController.js"></script>
+        <script src="app/navigation/NavigationController.js"></script>
+        <script src="app/navigation/summary/OneLineController.js"></script>
+        <script src="app/navigation/pagination/PaginationController.js"></script>
+        <script src="app/navigation/table/TableController.js"></script>
 
-<script src="app/create/controllers/CSVImportController.js"></script>
+        <script src="app/jobs/JobsController.js"></script>
+        <script src="app/jobs/JobsRoutes.js"></script>
+        <script src="app/jobs/status/StatusController.js"></script>
+        <script src="app/jobs/import/credentials/CredentialsController.js"></script>
+        <script src="app/jobs/import/file/FileController.js"></script>
+        <script src="app/jobs/import/ready/ImportReadyController.js"></script>
 
-<script src="app/navigation/NavigationController.js"></script>
-<script src="app/navigation/summary/OneLineController.js"></script>
-<script src="app/navigation/pagination/PaginationController.js"></script>
-<script src="app/navigation/table/TableController.js"></script>
+        <script src="app/login/controllers/LoginController.js"></script>
+        <script src="app/login/controllers/UpdatePasswordController.js"></script>
+        <script src="app/login/modals/TenantSelectionModal.js"></script>
 
-<script src="app/jobs/JobsController.js"></script>
-<script src="app/jobs/JobsRoutes.js"></script>
-<script src="app/jobs/status/StatusController.js"></script>
-<script src="app/jobs/import/credentials/CredentialsController.js"></script>
-<script src="app/jobs/import/file/FileController.js"></script>
-<script src="app/jobs/import/ready/ImportReadyController.js"></script>
+        <script src="app/config/controllers/ManageCredentialsController.js"></script>
+        <script src="app/config/modals/EnterCredentialsModal.js"></script>
+        <script src="app/config/services/ConfigService.js"></script>
 
-<script src="app/login/controllers/LoginController.js"></script>
-<script src="app/login/controllers/UpdatePasswordController.js"></script>
-<script src="app/login/modals/TenantSelectionModal.js"></script>
+        <script src="app/models/controllers/ModelListController.js"></script>
+        <script src="app/models/controllers/ModelDetailController.js"></script>
+        <script src="app/models/controllers/AdminInfoController.js"></script>
+        <script src="app/models/controllers/ModelCreationHistoryController.js"></script>
+        <script src="app/models/controllers/ActivateModelController.js"></script>
+        <script src="app/models/modals/DeleteModelModal.js"></script>
+        <script src="app/models/modals/StaleModelModal.js"></script>
+        <script src="app/models/modals/ImportModelModal.js"></script>
+        <script src="app/models/modals/AddSegmentModal.js"></script>
+        <script src="app/models/services/ModelService.js"></script>
 
-<script src="app/config/controllers/ManageCredentialsController.js"></script>
-<script src="app/config/modals/EnterCredentialsModal.js"></script>
-<script src="app/config/services/ConfigService.js"></script>
+        <script src="app/userManagement/controllers/UserManagementController.js"></script>
+        <script src="app/userManagement/modals/AddUserModal.js"></script>
+        <script src="app/userManagement/modals/DeleteUserModal.js"></script>
+        <script src="app/userManagement/modals/EditUserModal.js"></script>
+        <script src="app/userManagement/services/UserManagementService.js"></script>
 
-<script src="app/models/controllers/ModelListController.js"></script>
-<script src="app/models/controllers/ModelDetailController.js"></script>
-<script src="app/models/controllers/AdminInfoController.js"></script>
-<script src="app/models/controllers/ModelCreationHistoryController.js"></script>
-<script src="app/models/controllers/ActivateModelController.js"></script>
-<script src="app/models/modals/DeleteModelModal.js"></script>
-<script src="app/models/modals/StaleModelModal.js"></script>
-<script src="app/models/modals/ImportModelModal.js"></script>
-<script src="app/models/modals/AddSegmentModal.js"></script>
-<script src="app/models/services/ModelService.js"></script>
+        <script src="app/setup/controllers/SetupController.js"></script>
+        <script src="app/setup/controllers/DeploymentWizardController.js"></script>
+        <script src="app/setup/controllers/CredentialsController.js"></script>
+        <script src="app/setup/controllers/ImportAndEnrichDataController.js"></script>
+        <script src="app/setup/controllers/ManageFieldsController.js"></script>
+        <script src="app/setup/controllers/LeadEnrichmentController.js"></script>
+        <script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
+        <script src="app/setup/modals/EditFieldModel.js"></script>
+        <script src="app/setup/modals/CancelDeploymentStepModel.js"></script>
+        <script src="app/setup/modals/ClearDeploymentModel.js"></script>
+        <script src="app/setup/modals/LeadEnrichmentAttributesDetailsModel.js"></script>
+        <script src="app/setup/utilities/SetupUtility.js"></script>
+        <script src="app/setup/services/TenantDeploymentService.js"></script>
+        <script src="app/setup/services/LeadEnrichmentService.js"></script>
+        <script src="app/setup/services/MetadataService.js"></script>
+        <!-- /build -->
 
-<script src="app/userManagement/controllers/UserManagementController.js"></script>
-<script src="app/userManagement/modals/AddUserModal.js"></script>
-<script src="app/userManagement/modals/DeleteUserModal.js"></script>
-<script src="app/userManagement/modals/EditUserModal.js"></script>
-<script src="app/userManagement/services/UserManagementService.js"></script>
+        <script type="text/javascript">
+            WebFontConfig = {
+                google: { families: [ 'Open Sans' ] }
+            };
 
-<script src="app/setup/controllers/SetupController.js"></script>
-<script src="app/setup/controllers/DeploymentWizardController.js"></script>
-<script src="app/setup/controllers/CredentialsController.js"></script>
-<script src="app/setup/controllers/ImportAndEnrichDataController.js"></script>
-<script src="app/setup/controllers/ManageFieldsController.js"></script>
-<script src="app/setup/controllers/LeadEnrichmentController.js"></script>
-<script src="app/setup/modals/DiscardEditFieldsModel.js"></script>
-<script src="app/setup/modals/EditFieldModel.js"></script>
-<script src="app/setup/modals/CancelDeploymentStepModel.js"></script>
-<script src="app/setup/modals/ClearDeploymentModel.js"></script>
-<script src="app/setup/modals/LeadEnrichmentAttributesDetailsModel.js"></script>
-<script src="app/setup/utilities/SetupUtility.js"></script>
-<script src="app/setup/services/TenantDeploymentService.js"></script>
-<script src="app/setup/services/LeadEnrichmentService.js"></script>
-<script src="app/setup/services/MetadataService.js"></script>
-<!-- /build -->
-
-<!-- build:js inline -->
-<script src="app/loadjs.js"></script>
-<!-- /build -->
-
-<!-- build:template:dist
-<script type="text/javascript">
-    var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
-    var jslist = [
-        {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
-    ];
-
-    var jsLoader = new JsLoader();
-    var head = jsLoader.toLinkedList(jslist);
-    jsLoader.loadScriptByObj(head);
-</script>
-/build -->
-
-<script>
-    // Create global variable for Evergage to use
-    var _aaq = _aaq || [];
-</script>
-</body>
+            // Create global variable for Evergage to use
+            var _aaq = _aaq || [];
+        </script>
+    </body>
 </html>
