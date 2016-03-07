@@ -389,7 +389,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @JsonProperty("EventTableName")
-    @Column(name = "Event_Table_Name", nullable = true)
+    @Column(name = "EVENT_TABLE_NAME", nullable = true)
     public void setEventTableName(String eventTableName) {
         this.eventTableName = eventTableName;
     }
