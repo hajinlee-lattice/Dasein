@@ -518,3 +518,5 @@ LEAD_ENRICHMENT_NO_ATTRIBUTES=No Attributes.
 LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_WAIT=Verifying fields ...
 LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_INVALID_LABEL=Following fields do not exist in target table
 LEAD_ENRICHMENT_VERIFY_ATTRIBUTES_ERROR=We are unable to verify fields at this time.
+LEAD_ENRICHMENT_GET_PREMIUM_ATTRIBUTES_LIMITATION_ERROR=We are unable to get premium attributes limitation at this time.
+LEAD_ENRICHMENT_LIMITATION_EXCESS_ATTRIBUTES_ALERT=There are {0} premium attributes ("HG Data" source) were selected that is large than the limitation {1}.

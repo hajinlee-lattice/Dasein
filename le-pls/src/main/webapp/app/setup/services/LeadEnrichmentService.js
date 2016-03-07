@@ -193,4 +193,40 @@ angular.module('mainApp.setup.services.LeadEnrichmentService', [
 
         return deferred.promise;
     };
+
+    this.GetPremiumAttributesLimitation = function () {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/leadenrichment/premiumattributeslimitation?' + new Date().getTime(),
+            headers: {
+                'Content-Type': "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
+            };
+            if (data != null) {
+                result.Success = true;
+                result.ResultObj = data;
+            } else {
+                result.ResultErrors = ResourceUtility.getString('LEAD_ENRICHMENT_GET_PREMIUM_ATTRIBUTES_LIMITATION_ERROR');
+            }
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('LEAD_ENRICHMENT_GET_PREMIUM_ATTRIBUTES_LIMITATION_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 });

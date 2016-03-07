@@ -19,4 +19,6 @@ public interface LeadEnrichmentService {
     void saveAttributes(Tenant tenant, List<LeadEnrichmentAttribute> attributes);
 
     String getTemplateType(Tenant tenant);
+
+    int getPremiumAttributesLimitation(Tenant teannt);
 }

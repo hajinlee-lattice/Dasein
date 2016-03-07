@@ -230,4 +230,13 @@ public class LeadEnrichmentServiceImpl implements LeadEnrichmentService {
             throw new LedpException(LedpCode.LEDP_18080, ex, new String[] { ex.getMessage() });
         }
     }
+
+    @Override
+    public int getPremiumAttributesLimitation(Tenant tenant) {
+        try {
+            return tenantConfigService.getMaxPremiumLeadEnrichmentAttributes(tenant.getId());
+        } catch (Exception ex) {
+            throw new LedpException(LedpCode.LEDP_18089, ex, new String[] { tenant.getName(), ex.getMessage() });
+        }
+    }
 }

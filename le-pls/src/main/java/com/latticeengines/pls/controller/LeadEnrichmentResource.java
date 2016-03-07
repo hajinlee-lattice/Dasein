@@ -74,4 +74,12 @@ public class LeadEnrichmentResource {
         String type = leadEnrichmentService.getTemplateType(tenant);
         return JsonUtils.serialize(type);
     }
+
+    @RequestMapping(value = "/premiumattributeslimitation", method=RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get premium attributes limitation")
+    public Integer getPremiumAttributesLimitation(HttpServletRequest request) {
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
+        return leadEnrichmentService.getPremiumAttributesLimitation(tenant);
+    }
 }

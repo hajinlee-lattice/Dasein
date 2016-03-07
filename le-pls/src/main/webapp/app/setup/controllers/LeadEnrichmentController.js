@@ -29,29 +29,37 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
                     return;
                 }
 
-                var availableAttributes = [];
-                var selectedAttributes = [];
-                var savedAttributes = savedAttributesData.ResultObj;
-                var allAvariableAttributes = avariableAttributesData.ResultObj;
-                for (var i = 0; i < allAvariableAttributes.length; i++) {
-                    var attr = allAvariableAttributes[i];
-                    if (getAttribute(savedAttributes, attr.FieldName) != null) {
-                        selectedAttributes.push(attr);
-                    } else {
-                        availableAttributes.push(attr);
+                LeadEnrichmentService.GetPremiumAttributesLimitation().then(function (premiumAttributesLimitationData) {
+                    if (!premiumAttributesLimitationData.Success) {
+                        handleLoadError(premiumAttributesLimitationData);
+                        return;
                     }
-                }
-                $scope.allAvariableAttributes = sortAttributes(allAvariableAttributes);
-                $scope.availableAttributes = sortAttributes(availableAttributes);
-                $scope.selectedAttributes = sortAttributes(selectedAttributes);
 
-                if (showSavingConfirmation) {
-                    $scope.showAttributesDetails = true;
-                    var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_SAVED_ATTRIBUTES_TITLE');
-                    LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.selectedAttributes);
-                }
+                    var availableAttributes = [];
+                    var selectedAttributes = [];
+                    var savedAttributes = savedAttributesData.ResultObj;
+                    var allAvariableAttributes = avariableAttributesData.ResultObj;
+                    for (var i = 0; i < allAvariableAttributes.length; i++) {
+                        var attr = allAvariableAttributes[i];
+                        if (getAttribute(savedAttributes, attr.FieldName) != null) {
+                            selectedAttributes.push(attr);
+                        } else {
+                            availableAttributes.push(attr);
+                        }
+                    }
+                    $scope.allAvariableAttributes = sortAttributes(allAvariableAttributes);
+                    $scope.availableAttributes = sortAttributes(availableAttributes);
+                    $scope.selectedAttributes = sortAttributes(selectedAttributes);
+                    $scope.premiumAttributesLimitation = premiumAttributesLimitationData.ResultObj;
 
-                $scope.loading = false;
+                    if (showSavingConfirmation) {
+                        $scope.showAttributesDetails = true;
+                        var title = ResourceUtility.getString('LEAD_ENRICHMENT_SETUP_SAVED_ATTRIBUTES_TITLE');
+                        LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.selectedAttributes);
+                    }
+
+                    $scope.loading = false;
+                });
             });
         });
     }
@@ -266,7 +274,9 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
             var attribute = $scope.selectedAttributes[i];
             attributes[i] = { FieldName: attribute.FieldName, DataSource: attribute.DataSource };
         }
-        SaveAttributesModel.show($scope, attributes);
+        if (verifyLimitiation(attributes)) {
+            SaveAttributesModel.show($scope, attributes);
+        }
     };
 
     $scope.saveAttributes = function (attributes) {
@@ -350,5 +360,19 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
             clearTimeout($scope.attributeHoverTimeout);
         }
         $scope.attributeHover.addClass('hide');
+    }
+
+    function verifyLimitiation(attributes) {
+        var source = 'HGData';
+        var limit = $scope.premiumAttributesLimitation;
+        var attrs = _.filter(attributes, function(attr){ return attr.DataSource.indexOf(source) > -1; });
+        if (attrs.length > limit) {
+            $scope.attributesExcessAlert = ResourceUtility.getString('LEAD_ENRICHMENT_LIMITATION_EXCESS_ATTRIBUTES_ALERT',
+                    [attributes.length, limit]);
+            $scope.showAttributesExcessAlert = true;
+            return false;
+        }
+
+        return true;
     }
 });

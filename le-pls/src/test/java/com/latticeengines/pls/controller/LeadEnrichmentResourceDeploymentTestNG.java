@@ -205,4 +205,16 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
         }
         assertTrue(exception);
     }
+
+    @Test(groups = "deployment")
+    public void testGetPremiumAttributesLimitation() {
+        switchToSuperAdmin();
+        assertGetPremiumAttributesLimitationSuccess();
+    }
+
+    private void assertGetPremiumAttributesLimitationSuccess() {
+        String url = getRestAPIHostPort() + "/pls/leadenrichment/premiumattributeslimitation";
+        Integer limitation = restTemplate.getForObject(url, Integer.class);
+        assertNotNull(limitation);
+    }
 }
