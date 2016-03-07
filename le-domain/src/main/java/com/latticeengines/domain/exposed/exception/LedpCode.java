@@ -182,6 +182,7 @@ public enum LedpCode {
     LEDP_18086("Failed to retrieve space configuration from ZK for the tenant {0}."), //
     LEDP_18087("Missing required fields [{0}] in csv file {1}."), //
     LEDP_18088("Could not locate table with name {0}"), //
+    LEDP_18089("Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
