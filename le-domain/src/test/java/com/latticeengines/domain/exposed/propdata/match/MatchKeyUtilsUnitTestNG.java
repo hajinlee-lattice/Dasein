@@ -10,8 +10,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-
 public class MatchKeyUtilsUnitTestNG {
 
     @Test(groups = "unit", dataProvider = "resolveDomainDataProvider")
