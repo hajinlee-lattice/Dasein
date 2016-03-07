@@ -13,7 +13,7 @@ class CuratedProfilingTest(ProfilingTestBase):
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
         
-         # Check if Skew and Kurtosis are being calculated and added to the Profile.
+        # Check if Skew and Kurtosis are being calculated and added to the Profile.
         self.assertSkewnessAndKurtosis(results)
 
     def assertSkewnessAndKurtosis(self, results):
