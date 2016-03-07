@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.propdata.CommandParameter;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
@@ -41,6 +42,10 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         matchCommand.setCommandType(configuration.getMatchCommandType());
         matchCommand.setContractExternalID(configuration.getCustomerSpace().toString());
         matchCommand.setDestTables(configuration.getDestTables());
+
+        Map<String, String> commandParameters = new HashMap<>();
+        commandParameters.put(CommandParameter.KEY_INTERPRETED_DOMAIN, CommandParameter.VALUE_YES);
+        matchCommand.setParameters(commandParameters);
 
         String url = String.format("%s/propdata/matchcommands", configuration.getMicroServiceHostPort());
         Commands response = restTemplate.postForObject(url, matchCommand, Commands.class);
