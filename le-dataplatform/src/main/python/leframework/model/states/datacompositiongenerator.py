@@ -1,6 +1,5 @@
-from collections import OrderedDict
 import logging
-
+from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.state import State
 
@@ -36,8 +35,8 @@ class DataCompositionGenerator(State):
 
             details = OrderedDict()
             details["source"] = "REQUEST"
-            if "DataSource" in metadata and metadata["DataSource"] is not None:
-                if "DerivedColumns" in metadata["DataSource"]:
+            if "Tags" in metadata and metadata["Tags"] is not None:
+                if "External" in metadata["Tags"]:
                     details["source"] = "PROPRIETARY"
 
             # TODO Decide if we need to handle TEMPORAL types or not.
