@@ -99,6 +99,11 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             config.set("mapreduce.reduce.memory.mb", reduceMemorySize);
         }
         config.set(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
+        
+        config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
+        config.set("mapreduce.map.maxattempts", "1");
+        config.set("mapreduce.reduce.maxattempts", "1");
+        
     }
 
     private void setInputFormat(Job mrJob, Properties properties, Configuration config) {
