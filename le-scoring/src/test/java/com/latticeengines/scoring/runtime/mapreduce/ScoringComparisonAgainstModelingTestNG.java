@@ -142,9 +142,9 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
     @Test(groups = "functional")
     public void modelScoreAndCompare() throws Exception {
         prepareDataForModeling();
-        modeling();
+        model();
         prepareDataForScoring();
-        scoring();
+        score();
         assertTrue(compareEvaluationResults());
     }
 
@@ -188,7 +188,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
                 profileMulesoftScoringPath);
     }
 
-    protected void modeling() throws Exception {
+    protected void model() throws Exception {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=0");
@@ -294,7 +294,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         }
     }
 
-    protected void scoring() throws Exception {
+    protected void score() throws Exception {
         ScoringCommand scoringCommand = new ScoringCommand(customer, ScoringCommandStatus.POPULATED, inputLeadsTable,
                 0, 4352, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);

@@ -42,7 +42,7 @@ public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelin
     }
 
     @Override
-    protected void scoring() throws Exception {
+    protected void score() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);
         scoringConfig.setSourceDataDir(dataPath);

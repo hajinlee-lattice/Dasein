@@ -41,7 +41,7 @@ public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImpl
     }
 
     @Override
-    protected void scoring() throws Exception {
+    protected void score() throws Exception {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(tenant);
         scoringConfig.setSourceDataDir(dataPath);
