@@ -20,6 +20,7 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 @Component("sourceFileEntityMgr")
 public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> implements SourceFileEntityMgr {
 
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(SourceFileEntityMgr.class);
 
     @Autowired

@@ -14,6 +14,7 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(CreateModelWorkflowSubmitter.class);
 
     public ApplicationId submit(String eventTableName, String modelName) {

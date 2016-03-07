@@ -21,6 +21,7 @@ import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 
 @Component
 public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(CreateModelWorkflowSubmitter.class);
 
     @Autowired

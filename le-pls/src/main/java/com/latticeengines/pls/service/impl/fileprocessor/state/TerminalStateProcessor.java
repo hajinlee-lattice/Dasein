@@ -30,6 +30,7 @@ public class TerminalStateProcessor extends BaseStateProcessor {
         
         Collection<File> processingFiles = FileUtils.listFiles(processingDir, //
                 new String[] { "json" }, false);
+        @SuppressWarnings("unused")
         WorkflowProxy workflowProxy = getRestApiProxy(properties);
         
         for (File processingFile : processingFiles) {

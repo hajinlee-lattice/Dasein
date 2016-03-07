@@ -119,7 +119,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(response.isSuccess());
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
         ModelingParameters parameters = new ModelingParameters();
@@ -130,6 +129,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         model(parameters);
     }
 
+    @SuppressWarnings("rawtypes")
     private void model(ModelingParameters parameters) {
         ResponseDocument response;
         response = restTemplate.postForObject(

@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -32,8 +31,6 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private InputStream fileInputStream;
 
-    private SourceFile sourceFile;
-
     private File dataFile;
 
     @BeforeClass(groups = "functional")
@@ -48,7 +45,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        sourceFile = fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
+        fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
 
         String contents = HdfsUtils
                 .getHdfsFileContents(
