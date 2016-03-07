@@ -212,7 +212,7 @@ label .more-info {
 }
 $tolerance: 3px;
 $margin-tooltip-arrow: 6px;
-$padding-top-bottom-tooltip: 8px;
+$padding-top-bottom-tooltip: 16px;
 $padding-rigth-left-tooltip: 16px;
 $tooltip-background-color: rgba(0, 0, 0, .85);
 $tooltip-color: #fff;
@@ -299,14 +299,26 @@ tooltip {
     color: $tooltip-color;
     display: none;
     line-height: normal;
-    max-width: 500px;
-    min-width: 100px;
+    width: 500px;
+    height: auto;
     opacity: 0;
     padding: $padding-top-bottom-tooltip $padding-rigth-left-tooltip;
     position: absolute;
-    text-align: center;
-    width: auto;
     will-change: top, left, bottom, right;
+    h4 {
+      color: #fff;
+      text-align: center;
+      font-size: 18px;
+      &.divider {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: rgba(255, 255, 255, 0.6) solid 1px;
+      }
+    }
+    a {
+      display: block;
+      margin-top: 10px;
+    }
     &._hidden {
       display: block;
       visibility: hidden;
@@ -330,8 +342,9 @@ tooltip {
     #close-button {
       cursor: pointer;
       float: right;
-      left: 8%;
-      margin-top: -7%;
+      left: 0;
+      font-size: 26px;
+      margin-top: -12px;
       position: relative;
     }
   }
