@@ -1,6 +1,8 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -29,6 +32,7 @@ import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.mysql.jdbc.StringUtils;
 
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
@@ -120,12 +124,28 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Table clone(String name) {
-        Table clone = findByName(name);
-        if (clone == null) {
+        Table existing = findByName(name);
+        if (existing == null) {
             throw new RuntimeException(String.format("No such table with name %s", name));
         }
 
-        clone.setName(clone.getName() + "_clone");
+        Table clone = JsonUtils.clone(existing);
+
+        Pattern pattern = Pattern.compile("^(.*)_clone([0-9]*)$");
+        Matcher matcher = pattern.matcher(clone.getName());
+        if (matcher.matches()) {
+            String counterString = matcher.group(2);
+            int counter;
+            if (StringUtils.isNullOrEmpty(counterString)) {
+                counter = 1;
+            } else {
+                counter = Integer.parseInt(counterString);
+            }
+            counter++;
+            clone.setName(matcher.group(1) + "_clone" + counter);
+        } else {
+            clone.setName(existing.getName() + "_clone");
+        }
 
         create(clone);
 
@@ -134,13 +154,15 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     SecurityContextUtils.getCustomerSpace());
 
             Path sourcePath = tablesPath.append(name);
-            Path destPath = tablesPath.append(clone.getName());
+            Path destPath = tablesPath.append(existing.getName());
             log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
             try {
                 HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());
             } catch (Exception e) {
-                throw new RuntimeException(String.format("Failed to copy in HDFS from %s to %s", sourcePath.toString(),
-                        destPath.toString()), e);
+                // throw new
+                // RuntimeException(String.format("Failed to copy in HDFS from %s to %s",
+                // sourcePath.toString(),
+                // destPath.toString()), e);
             }
         }
         return clone;

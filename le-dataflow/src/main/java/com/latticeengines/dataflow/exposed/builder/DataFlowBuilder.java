@@ -17,7 +17,6 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -182,7 +181,7 @@ public abstract class DataFlowBuilder {
                     String key = entry.getKey();
                     String value = entry.getValue();
                     if (key.equals("ApprovedUsage")) {
-                        attribute.setApprovedUsage(value);
+                        attribute.setPropertyValueFromString("ApprovedUsage", value);
                     } else if (key.equals("StatisticalType")) {
                         attribute.setStatisticalType(value);
                     } else if (key.equals("DisplayDiscretizationStrategy")) {
@@ -190,7 +189,7 @@ public abstract class DataFlowBuilder {
                     } else if (key.equals("Category")) {
                         attribute.setCategory(value);
                     } else if (key.equals("Tags")) {
-                        attribute.setTags(Arrays.asList(StringUtils.split(value, ",")));
+                        attribute.setPropertyValueFromString("Tags", value);
                     } else if (key.equals("FundamentalType")) {
                         attribute.setFundamentalType(value);
                     } else if (key.equals("RTSModuleName")) {

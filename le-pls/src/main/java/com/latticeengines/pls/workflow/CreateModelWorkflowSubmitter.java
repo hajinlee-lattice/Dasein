@@ -11,7 +11,6 @@ import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameter
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -42,13 +40,6 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
         }
 
-        Table eventTable = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
-                sourceFile.getTableName());
-
-        if (eventTable == null) {
-            throw new LedpException(LedpCode.LEDP_18088, new String[] { parameters.getEventTableName() });
-        }
-
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration.Builder()
@@ -64,7 +55,7 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
-                .matchDestTables("DerivedColumns") //
+                .matchDestTables("DerivedColumnsCache") //
                 .modelName(parameters.getName()) //
                 .eventTableName(sourceFile.getTableName()) //
                 .build();

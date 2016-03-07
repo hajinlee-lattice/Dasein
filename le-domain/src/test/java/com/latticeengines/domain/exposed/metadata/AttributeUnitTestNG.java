@@ -2,9 +2,13 @@ package com.latticeengines.domain.exposed.metadata;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class AttributeUnitTestNG {
 
@@ -35,5 +39,26 @@ public class AttributeUnitTestNG {
         assertEquals(deserializedAttr.getDisplayName(), attr.getDisplayName());
         assertEquals(deserializedAttr.getDataQuality(), attr.getDataQuality());
         assertEquals(deserializedAttr.getSemanticType(), attr.getSemanticType());
+    }
+
+    @Test(groups = "unit")
+    public void testSetPropertyValueFromString() {
+        List<String> approvedUsage = new ArrayList<>();
+        approvedUsage.add(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+        approvedUsage.add(ModelingMetadata.MODEL_APPROVED_USAGE);
+        String string = approvedUsage.toString();
+        Attribute attribute = new Attribute();
+        attribute.setPropertyValueFromString("ApprovedUsage", string);
+        List<String> result = attribute.getApprovedUsage();
+        assertEquals(result.size(), approvedUsage.size());
+        for (int i = 0; i < result.size(); ++i) {
+            assertEquals(result.get(i), approvedUsage.get(i));
+        }
+
+        approvedUsage.clear();
+        string = approvedUsage.toString();
+        attribute.setPropertyValueFromString("ApprovedUsage", string);
+        result = attribute.getApprovedUsage();
+        assertEquals(result.size(), 0);
     }
 }

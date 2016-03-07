@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
 
@@ -19,6 +20,9 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Autowired
     private MetadataService mdService;
+
+    @Autowired
+    private AttributeDao attributeDao;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -42,9 +46,6 @@ public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     @DataProvider(name = "tableProvider")
     public Object[][] tableProvider() {
-        return new Object[][] {
-                { CUSTOMERSPACE1, TABLE1},
-                { CUSTOMERSPACE2, TABLE1},
-        };
+        return new Object[][] { { CUSTOMERSPACE1, TABLE1 }, { CUSTOMERSPACE2, TABLE1 }, };
     }
 }

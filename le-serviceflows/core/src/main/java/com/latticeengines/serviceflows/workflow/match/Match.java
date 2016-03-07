@@ -52,6 +52,8 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
 
     @SuppressWarnings("unchecked")
     private void waitForMatchCommand(Commands commands) {
+        log.info(String.format("Waiting for match command %d to complete", commands.getPid()));
+
         Map<String, String> status = new HashMap<>();
         int maxTries = 1000;
         int i = 0;
@@ -80,5 +82,4 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
 
         } while (matchCommandStatus != null && !TERMINAL_MATCH_STATUS.contains(matchCommandStatus));
     }
-
 }

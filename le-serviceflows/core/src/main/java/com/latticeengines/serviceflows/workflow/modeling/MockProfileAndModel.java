@@ -53,7 +53,8 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
         excludedColumns.add("Event_OpportunityCreated");
 
         for (Attribute attr : eventTable.getAttributes()) {
-            if (attr.getApprovedUsage() == null || attr.getApprovedUsage().get(0).equals("None")) {
+            if (attr.getApprovedUsage() == null || attr.getApprovedUsage().isEmpty()
+                    || attr.getApprovedUsage().get(0).equals("None")) {
                 excludedColumns.add(attr.getName());
             }
         }

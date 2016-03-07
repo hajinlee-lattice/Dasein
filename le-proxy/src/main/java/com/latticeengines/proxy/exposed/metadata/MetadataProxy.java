@@ -74,7 +74,7 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
 
     @Override
     public Table cloneTable(String customerSpace, String tableName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/clone");
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/clone", customerSpace, tableName);
         return post("cloneTable", url, null, Table.class);
     }
 

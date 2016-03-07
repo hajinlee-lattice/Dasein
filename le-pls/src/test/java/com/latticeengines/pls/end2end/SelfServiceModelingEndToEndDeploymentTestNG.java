@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -55,8 +56,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
-    private ModelingParameters modelingParameters;
-
+    private String modelName;
     private ModelSummary originalModelSummary;
 
     @BeforeClass(groups = "deployment.lp")
@@ -122,8 +122,33 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
     public void createModel() {
-        modelingParameters = createModelingParameters(sourceFile.getName(), null);
-        model(modelingParameters);
+        ModelingParameters parameters = new ModelingParameters();
+        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
+        parameters.setDescription("Test");
+        parameters.setFilename(sourceFile.getName());
+        modelName = parameters.getName();
+        model(parameters);
+    }
+
+    private void model(ModelingParameters parameters) {
+        ResponseDocument response;
+        response = restTemplate.postForObject(
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), parameters.getName()), parameters,
+                ResponseDocument.class);
+        assertTrue(response.isSuccess());
+
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
+
+        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
+
+        response = restTemplate.postForObject(
+                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                ResponseDocument.class);
+        assertFalse(response.isSuccess());
+
+        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
@@ -138,7 +163,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
     public void retrieveModelSummary() throws InterruptedException {
-        originalModelSummary = getModelSummary();
+        originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
     }
 
@@ -154,37 +179,42 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
             "retrieveReport" })
     public void cloneAndRemodel() {
-        ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/fileuploads/%s/metadata", getPLSRestAPIHostPort(), sourceFile.getName()),
-                ResponseDocument.class);
-        Table table = new ObjectMapper().convertValue(response.getResult(), Table.class);
-        assertNotNull(table);
+        Table metadata = restTemplate.getForObject(
+                String.format("%s/pls/metadata/%s", getPLSRestAPIHostPort(), originalModelSummary.getEventTableName()),
+                Table.class);
 
         // Disable some predictors
-        Attribute website = table.getAttribute("Website");
+        Attribute website = metadata.getAttribute("Website");
         website.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-        Attribute country = table.getAttribute("City");
+        Attribute country = metadata.getAttribute("City");
         country.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
 
+        // Now remodel
+        CloneModelingParameters parameters = new CloneModelingParameters();
+        parameters.setName(modelName + "_clone");
+        modelName = parameters.getName();
+        parameters.setDescription("clone");
+        parameters.setAttributes(metadata.getAttributes());
+        parameters.setSourceModelSummaryId(originalModelSummary.getId());
+
+        ResponseDocument response;
         response = restTemplate.postForObject(
-                String.format("%s/pls/fileuploads/%s/clone", getPLSRestAPIHostPort(), sourceFile.getName()), table,
+                String.format("%s/pls/models/%s/clone", getPLSRestAPIHostPort(), modelName), parameters,
                 ResponseDocument.class);
         assertTrue(response.isSuccess());
-        SourceFile clonedSourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
 
-        response = restTemplate.getForObject(
-                String.format("%s/pls/fileuploads/%s/metadata", getPLSRestAPIHostPort(), sourceFile.getName()),
-                ResponseDocument.class);
-        Table eventTable = new ObjectMapper().convertValue(response.getResult(), Table.class);
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
-        // Now remodel
-        ModelingParameters parameters = createModelingParameters(null, table.getName());
-        model(parameters);
+        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
+
+        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
     @Test(groups = "deployment.lp", enabled = false, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException {
-        ModelSummary found = getModelSummary();
+        ModelSummary found = getModelSummary(modelName);
         assertNotNull(found);
         List<Predictor> predictors = found.getPredictors();
         assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
@@ -197,7 +227,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }));
     }
 
-    private ModelSummary getModelSummary() throws InterruptedException {
+    private ModelSummary getModelSummary(String modelName) throws InterruptedException {
         ModelSummary found = null;
         // Wait for model downloader
         while (true) {
@@ -206,7 +236,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     String.format("%s/pls/modelsummaries", getPLSRestAPIHostPort()), List.class);
             for (Object rawSummary : summaries) {
                 ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
-                if (summary.getName().equals(modelingParameters.getName())) {
+                if (summary.getName().equals(modelName)) {
                     found = summary;
                 }
             }
@@ -215,28 +245,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             Thread.sleep(1000);
         }
         return found;
-    }
-
-    private void model(ModelingParameters parameters) {
-        ResponseDocument response;
-        modelingParameters = parameters;
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), parameters.getName()), modelingParameters,
-                ResponseDocument.class);
-        assertTrue(response.isSuccess());
-
-        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
-
-        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
-        waitForWorkflowStatus(modelingWorkflowApplicationId, true);
-
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), modelingParameters,
-                ResponseDocument.class);
-        assertFalse(response.isSuccess());
-
-        WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
-        assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
@@ -256,12 +264,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private ModelingParameters createModelingParameters(String fileName, String eventTableName) {
+    private ModelingParameters createModelingParameters(String fileName) {
         ModelingParameters parameters = new ModelingParameters();
         parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDescription("Test");
         parameters.setFilename(fileName);
-        parameters.setEventTableName(eventTableName);
         return parameters;
     }
 }

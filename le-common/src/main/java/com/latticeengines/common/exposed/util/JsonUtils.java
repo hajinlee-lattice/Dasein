@@ -62,4 +62,9 @@ public class JsonUtils {
             return defaultValue;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T clone(T object) {
+        return (T) deserialize(serialize(object), object.getClass());
+    }
 }

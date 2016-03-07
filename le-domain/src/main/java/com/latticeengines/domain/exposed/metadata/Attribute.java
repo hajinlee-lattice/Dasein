@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -20,10 +22,11 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.api.client.util.Lists;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -245,6 +248,29 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Override
     public void setPropertyValue(String key, Object value) {
         properties.put(key, value);
+    }
+
+    /**
+     * Assumes that all properties are strings or arrays of strings.
+     */
+    @JsonIgnore
+    public void setPropertyValueFromString(String key, String value) {
+        Pattern pattern = Pattern.compile("^\\[(.*)\\]$");
+        Matcher matcher = pattern.matcher(value);
+        if (matcher.matches()) {
+            String contents = matcher.group(1);
+            if (contents.isEmpty()) {
+                setPropertyValue(key, Lists.newArrayList());
+            } else {
+                String[] array = contents.split(",");
+                for (int i = 0; i < array.length; ++i) {
+                    array[i] = array[i].trim();
+                }
+                setPropertyValue(key, Arrays.asList(array));
+            }
+        } else {
+            setPropertyValue(key, value);
+        }
     }
 
     @Transient

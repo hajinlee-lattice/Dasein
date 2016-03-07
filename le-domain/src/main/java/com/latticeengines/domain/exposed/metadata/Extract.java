@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +28,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @javax.persistence.Table(name = "METADATA_EXTRACT")
-public class Extract implements HasName, HasPid, HasTenantId, GraphNode {
+public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Serializable {
 
     private Long pid;
     private String name;

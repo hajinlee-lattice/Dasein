@@ -114,6 +114,25 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrMetadata.getTags().get(0), "External");
     }
 
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTable" })
+    public void cloneTable() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s/clone", //
+                getRestAPIHostPort(), CUSTOMERSPACE1, TABLE1);
+        Table clone = restTemplate.postForObject(url, null, Table.class);
+        assertNotNull(clone);
+        url = String.format("%s/metadata/customerspaces/%s/tables/%s", //
+                getRestAPIHostPort(), CUSTOMERSPACE1, TABLE1);
+        Table existing = restTemplate.getForObject(url, Table.class);
+        assertNotNull(existing);
+
+        url = String.format("%s/metadata/customerspaces/%s/tables/%s/clone", //
+                getRestAPIHostPort(), CUSTOMERSPACE1, clone.getName());
+        Table clone2 = restTemplate.postForObject(url, null, Table.class);
+        assertEquals(clone2.getName(), clone.getName() + "2");
+    }
+
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })
     public void getAttributeValidators(String urlType) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);

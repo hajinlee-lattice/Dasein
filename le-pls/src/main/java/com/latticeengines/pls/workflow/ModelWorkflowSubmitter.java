@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.leadprioritization.workflow.ModelWorkflowConfiguration;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
@@ -17,12 +16,11 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     private static final Logger log = Logger.getLogger(CreateModelWorkflowSubmitter.class);
 
-    public ApplicationId submit(ModelingParameters parameters) {
-        Table eventTable = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
-                parameters.getEventTableName());
+    public ApplicationId submit(String eventTableName, String modelName) {
+        Table eventTable = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), eventTableName);
 
         if (eventTable == null) {
-            throw new LedpException(LedpCode.LEDP_18088, new String[] { parameters.getEventTableName() });
+            throw new LedpException(LedpCode.LEDP_18088, new String[] { eventTableName });
         }
 
         ModelWorkflowConfiguration configuration = new ModelWorkflowConfiguration.Builder()
@@ -30,8 +28,8 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .customer(getCustomerSpace()) //
                 .workflow("modelAndEmailWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
-                .modelName(parameters.getName()) //
-                .eventTableName(parameters.getEventTableName()) //
+                .modelName(modelName) //
+                .eventTableName(eventTableName) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);

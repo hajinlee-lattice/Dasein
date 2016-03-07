@@ -110,7 +110,7 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .matchClientDocument(matchCommandProxy.getBestMatchClient(3000)) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
-                .matchDestTables("DerivedColumns") //
+                .matchDestTables("DerivedColumnsCache") //
                 .modelName(UUID.randomUUID().toString()) //
                 .build();
         return workflowConfig;
