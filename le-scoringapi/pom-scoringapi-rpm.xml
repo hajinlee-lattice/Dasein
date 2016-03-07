@@ -31,7 +31,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/buildmachine</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
-                <scoringapi.properties.path>le-scoringapi/conf/env/buildmachine</scoringapi.properties.path>
+                <scoringapi.properties.path>conf/env/buildmachine</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/buildmachine</oauth2db.properties.path>
             </properties>
         </profile>
@@ -47,7 +47,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/development</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/development</proxy.properties.path>
-                <scoringapi.properties.path>le-scoringapi/conf/env/development</scoringapi.properties.path>
+                <scoringapi.properties.path>conf/env/development</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/development</oauth2db.properties.path>
             </properties>
         </profile>
@@ -62,7 +62,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
-                <scoringapi.properties.path>le-scoringapi/conf/env/qacluster</scoringapi.properties.path>
+                <scoringapi.properties.path>conf/env/qacluster</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/qacluster</oauth2db.properties.path>
             </properties>
         </profile>
@@ -77,7 +77,7 @@
             <properties>
                 <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
-                <scoringapi.properties.path>le-scoringapi/conf/env/prodcluster</scoringapi.properties.path>
+                <scoringapi.properties.path>conf/env/prodcluster</scoringapi.properties.path>
                 <oauth2db.properties.path>../le-oauth2db/conf/env/prodcluster</oauth2db.properties.path>
             </properties>
         </profile>
