@@ -31,7 +31,7 @@ public class Oauth2Resource {
         return oauth2Service.createAPIToken(tenantId);
     }
 
-    @RequestMapping(value = "/createacesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/createaccesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Generate an Oauth Access and Refresh Token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_OauthToken')")

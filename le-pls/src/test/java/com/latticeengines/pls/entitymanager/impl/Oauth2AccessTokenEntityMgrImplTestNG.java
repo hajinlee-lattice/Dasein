@@ -71,10 +71,10 @@ public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBas
 
         setupSecurityContext(tenant1);
         assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
-        Oauth2AccessToken token3 = oauth2AccessTokenEntityMgr.findAll().get(0);
+        Oauth2AccessToken token3 = oauth2AccessTokenEntityMgr.get();
         token3.setAccessToken("somevalue3");
         oauth2AccessTokenEntityMgr.createOrUpdate(token3);
         assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
-        assertEquals(oauth2AccessTokenEntityMgr.findAll().get(0).getAccessToken(), "somevalue3");
+        assertEquals(oauth2AccessTokenEntityMgr.get().getAccessToken(), "somevalue3");
     }
 }

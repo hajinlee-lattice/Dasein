@@ -14,9 +14,7 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
 
     @Autowired
     private Oauth2RestApiProxy oauth2RestApiProxy;
-    
-
-    
+ 
     @Autowired
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 

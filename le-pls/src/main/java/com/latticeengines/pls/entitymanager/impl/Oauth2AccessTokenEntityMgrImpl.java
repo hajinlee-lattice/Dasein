@@ -1,7 +1,6 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,18 +37,26 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Oauth2AccessToken get() {
+        List<Oauth2AccessToken> tokens = super.findAll();
+        if (tokens.size() == 1) {
+            return tokens.get(0);
+        }
+        Oauth2AccessToken token = new Oauth2AccessToken();
+        Tenant tenant = SecurityContextUtils.getTenant();
+        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        token.setTenant(tenant);
+        token.setAccessToken("");
+        return token;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void createOrUpdate(Oauth2AccessToken oauth2AccessToken) {
-        List<Oauth2AccessToken> tokens = findAll();
-        if (tokens.size() == 0) {
-            Tenant tenant = SecurityContextUtils.getTenant();
-            tenant = tenantEntityMgr.findByTenantId(tenant.getId());
-            oauth2AccessToken.setTenant(tenant);
-        } else {
-            tokens.get(0).setAccessToken(oauth2AccessToken.getAccessToken());
-            oauth2AccessToken = tokens.get(0);
-        }
-        super.createOrUpdate(oauth2AccessToken);
+        Oauth2AccessToken token = get();
+        token.setAccessToken(oauth2AccessToken.getAccessToken());
+        super.createOrUpdate(token);
     }
 
 }

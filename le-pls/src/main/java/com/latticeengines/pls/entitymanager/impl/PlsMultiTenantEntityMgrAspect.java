@@ -102,9 +102,14 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void allSourceFileMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
-
+    
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.Oauth2AccessTokenEntityMgrImpl.find*(..))")
-    public void findAccessToken(JoinPoint joinPoint) {
+    public void findAllAccessToken(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.Oauth2AccessTokenEntityMgrImpl.get*(..))")
+    public void getAccessToken(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
