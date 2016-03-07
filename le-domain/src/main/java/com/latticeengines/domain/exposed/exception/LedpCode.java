@@ -354,10 +354,14 @@ public enum LedpCode {
     LEDP_31005("Matched fieldname size {0} does not equal matched fieldvalue size {1}"), //
     LEDP_31006("Problem creating model artifacts directory {0}"), //
     LEDP_31007("ModelSummary {0} is missing appId value and there are more than 1 potential appId subfolders {1}"), //
+    LEDP_31008("ModelSummary {0} is missing eventTableName value"), //
+    LEDP_31009("Retrieved null EventTable {0}"), //
+    LEDP_31010("EventTable {0} interpretation is null or empty"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //
     LEDP_31102("invalid_model_id", "{0} is not a valid activated model"), //
+    LEDP_31103("problem_populating_missing_field", "Problem populating missing field {0} with value {1}"), //
     LEDP_31199("missing_domain", "Domain field(s) are missing {0}");
 
     private String message;

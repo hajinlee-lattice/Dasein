@@ -31,11 +31,13 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.Field;
@@ -51,6 +53,7 @@ import com.latticeengines.scoringapi.warnings.Warnings;
 public class ModelRetrieverImpl implements ModelRetriever {
 
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
+    private static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Metadata/";
     private static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     private static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     private static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
@@ -67,6 +70,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
     private int scoreArtifactCacheMaxSize;
+
+    @Autowired
+    MetadataProxy metadataProxy;
 
     @Autowired
     private Warnings warnings;
@@ -93,8 +99,23 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
-                Model model = new Model(map.get("Id"), map.get("Name"), type);
-                models.add(model);
+                String eventTableName = map.get("EventTableName");
+                if (Strings.isNullOrEmpty(eventTableName)) {
+                    throw new LedpException(LedpCode.LEDP_31008, new String[] { map.get("Id") });
+                }
+                Table eventTable = metadataProxy.getTable(customerSpace.toString(), eventTableName);
+
+                if (eventTable == null) {
+                    throw new LedpException(LedpCode.LEDP_31009, new String[] { eventTableName });
+                } else if (Strings.isNullOrEmpty(eventTable.getInterpretation())) {
+                    throw new LedpException(LedpCode.LEDP_31010, new String[] { eventTableName });
+                }
+
+                if ((type == ModelType.ACCOUNT && eventTable.getInterpretation().toLowerCase().contains("account"))
+                        || (type == ModelType.CONTACT && eventTable.getInterpretation().toLowerCase().contains("lead"))) {
+                    Model model = new Model(map.get("Id"), map.get("Name"), type);
+                    models.add(model);
+                }
             }
         }
 
@@ -125,6 +146,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
+        } else if (Strings.isNullOrEmpty(modelSummary.getEventTableName())) {
+            throw new LedpException(LedpCode.LEDP_31008, new String[] { modelId });
         }
 
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
@@ -133,13 +156,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactBaseDir = String.format(HDFS_SCORE_ARTIFACT_BASE_DIR, customerSpace.toString(),
                 modelNameAndVersion.getKey(), modelNameAndVersion.getValue(), appId);
 
+        String hdfsScoreArtifactTableDir = String.format(HDFS_SCORE_ARTIFACT_TABLE_DIR, customerSpace.toString(),
+                modelSummary.getEventTableName());
+
         DataComposition dataComposition = getDataComposition(hdfsScoreArtifactBaseDir);
+        DataComposition metadataDataComposition = getMetadataDataComposition(hdfsScoreArtifactTableDir);
         ScoreDerivation scoreDerivation = getScoreDerivation(hdfsScoreArtifactBaseDir);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
 
-        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary.getId(), dataComposition, scoreDerivation,
-                pmmlEvaluator, modelArtifactsDir);
+        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary.getId(), dataComposition,
+                metadataDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
 
         return artifacts;
     }
@@ -182,6 +209,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     private DataComposition getDataComposition(String hdfsScoreArtifactBaseDir) {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + DATA_COMPOSITION_FILENAME;
+        String content = null;
+        try {
+            content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
+        }
+        DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);
+        return dataComposition;
+    }
+
+    private DataComposition getMetadataDataComposition(String hdfsScoreArtifactTableDir) {
+        String path = hdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);

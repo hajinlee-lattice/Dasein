@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -19,55 +20,56 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 @ControllerAdvice
 public class ScoringApiExceptionHandler {
     private static final Log log = LogFactory.getLog(ScoringApiExceptionHandler.class);
 
-    public ScoringApiExceptionHandler() {
-    }
+    @Autowired
+    private AlertService alertService;
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleException(ScoringApiException ex) {
-        return generateExceptionResponse(ex.getCode().getExternalCode(), ex);
+        return generateExceptionResponse(ex.getCode().getExternalCode(), ex, false);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(LedpException ex) {
-        return generateExceptionResponse("api_error", ex);
+        return generateExceptionResponse("api_error", ex, true);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleException(HttpMessageNotReadableException ex) {
-        return generateExceptionResponse("message_not_readable", ex);
+        return generateExceptionResponse("message_not_readable", ex, false);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(HttpMessageNotWritableException ex) {
-        return generateExceptionResponse("message_not_writable", ex);
+        return generateExceptionResponse("message_not_writable", ex, false);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, Object> handleException(Exception ex) {
-        return generateExceptionResponse("general_error", ex);
+        return generateExceptionResponse("general_error", ex, true);
     }
 
-    private Map<String, Object> generateExceptionResponse(String code, Exception ex) {
-        return generateExceptionResponse(code, ex, false, false);
+    private Map<String, Object> generateExceptionResponse(String code, Exception ex, boolean fireAlert) {
+        return generateExceptionResponse(code, ex, fireAlert, false, false);
     }
 
-    private Map<String, Object> generateExceptionResponse(String code, Exception ex, boolean includeErrors,
-            boolean includeTrace) {
+    private Map<String, Object> generateExceptionResponse(String code, Exception ex, boolean fireAlert,
+            boolean includeErrors, boolean includeTrace) {
         List<String> errorMessages = new ArrayList<String>();
         Throwable cause = ex;
         while (cause != null) {

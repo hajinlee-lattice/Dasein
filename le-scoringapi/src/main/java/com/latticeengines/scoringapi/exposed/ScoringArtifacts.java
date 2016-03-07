@@ -10,15 +10,17 @@ public class ScoringArtifacts {
 
     private final String modelId;
     private final DataComposition dataComposition;
+    private final DataComposition metadataDataComposition;
     private final ScoreDerivation scoreDerivation;
     private final ModelEvaluator pmmlEvaluator;
     private final File modelArtifactsDir;
 
-    public ScoringArtifacts(String modelId, DataComposition dataComposition, ScoreDerivation scoreDerivation,
-            ModelEvaluator pmmlEvaluator, File modelArtifactsDir) {
+    public ScoringArtifacts(String modelId, DataComposition dataComposition, DataComposition metadataDataComposition,
+            ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator, File modelArtifactsDir) {
         super();
         this.modelId = modelId;
         this.dataComposition = dataComposition;
+        this.metadataDataComposition = metadataDataComposition;
         this.scoreDerivation = scoreDerivation;
         this.pmmlEvaluator = pmmlEvaluator;
         this.modelArtifactsDir = modelArtifactsDir;
@@ -30,6 +32,10 @@ public class ScoringArtifacts {
 
     public DataComposition getDataComposition() {
         return dataComposition;
+    }
+
+    public DataComposition getMetadataDataComposition() {
+        return metadataDataComposition;
     }
 
     public ScoreDerivation getScoreDerivation() {

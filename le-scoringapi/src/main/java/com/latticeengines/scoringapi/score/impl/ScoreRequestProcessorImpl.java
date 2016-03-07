@@ -196,7 +196,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
-                scoringArtifacts.getScoreDerivation());
+                scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
         double score = (double) evaluation.get(ScoreType.PROBABILITY);
         if (score > 99 || score < 5) {
             log.warn(String.format("Score out of range: %,.7f", score));
@@ -208,9 +208,12 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     }
 
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {
-        Map<String, Object> transformedRecord = recordTransformer.transform(scoringArtifacts.getModelArtifactsDir()
-                .getAbsolutePath(), scoringArtifacts.getDataComposition().transforms, matchedRecord);
-        return transformedRecord;
+        Map<String, Object> standardTransformedRecord = recordTransformer.transform(scoringArtifacts.getModelArtifactsDir()
+                .getAbsolutePath(), scoringArtifacts.getMetadataDataComposition().transforms, matchedRecord);
+
+        Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(scoringArtifacts.getModelArtifactsDir()
+                .getAbsolutePath(), scoringArtifacts.getDataComposition().transforms, standardTransformedRecord);
+        return datascienceTransformedRecord;
     }
 
 }

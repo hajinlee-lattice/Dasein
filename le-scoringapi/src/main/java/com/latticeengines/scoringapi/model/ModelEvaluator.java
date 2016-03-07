@@ -22,8 +22,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Joiner;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.warnings.Warning;
 import com.latticeengines.scoringapi.warnings.WarningCode;
@@ -58,7 +61,8 @@ public class ModelEvaluator {
         this.manager = new PMMLManager(unmarshalled);
     }
 
-    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation) {
+    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation,
+            Map<String, FieldSchema> fieldSchemas) {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -67,9 +71,22 @@ public class ModelEvaluator {
             Object value = record.get(name.getValue());
             if (value == null) {
                 nullFields.add(name.getValue());
-                continue;
-                // TODO need to do something here.
-//                throw new RuntimeException("Null value for model input " + name.getValue());
+                FieldSchema schema = fieldSchemas.get(name.getValue());
+                switch (schema.type) {
+                case BOOLEAN:
+                    value = 0.0d;
+                    break;
+                case INTEGER:
+                case FLOAT:
+                case LONG:
+                case TEMPORAL:
+                    value = 0.0d;
+                    break;
+                case STRING:
+                    value = 0.0d;
+                default:
+                    break;
+                }
             }
             if (value instanceof Long) {
                 value = ((Long) value).doubleValue();
@@ -77,7 +94,12 @@ public class ModelEvaluator {
             if (value instanceof Integer) {
                 value = ((Integer) value).doubleValue();
             }
-            arguments.put(name, evaluator.prepare(name, value));
+            try {
+                arguments.put(name, evaluator.prepare(name, value));
+            } catch (Exception e) {
+                throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(),
+                        String.valueOf(value) });
+            }
         }
         if (!nullFields.isEmpty()) {
             String joinedNullFields = Joiner.on(",").join(nullFields);

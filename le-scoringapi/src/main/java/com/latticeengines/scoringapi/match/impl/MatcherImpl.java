@@ -121,13 +121,14 @@ public class MatcherImpl implements Matcher {
     }
 
     private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String value) {
+        if (Strings.isNullOrEmpty(value)) {
+            return;
+        }
         List<String> keyFields = keyMap.get(matchKey);
         if (keyFields == null) {
             keyFields = new ArrayList<>();
             keyMap.put(matchKey, keyFields);
         }
-        if (!Strings.isNullOrEmpty(value)) {
-            keyFields.add(value);
-        }
+        keyFields.add(value);
     }
 }
