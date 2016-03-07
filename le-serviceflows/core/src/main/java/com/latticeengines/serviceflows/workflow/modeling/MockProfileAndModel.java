@@ -101,6 +101,7 @@ public class MockProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration
             fs.setTimes(new Path(applicationIdPath + "/enhancements/modelsummary.json"), System.currentTimeMillis(),
                     System.currentTimeMillis());
 
+            @SuppressWarnings("unused")
             boolean renameSucc = fs.rename(fullModelPath, new Path(modelBaseDir.toString() + modelName));
             modelApplicationIdToEventColumn.put(applicationId, eventColumnName);
         }
