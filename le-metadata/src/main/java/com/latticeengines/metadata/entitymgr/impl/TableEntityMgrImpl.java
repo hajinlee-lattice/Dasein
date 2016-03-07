@@ -37,7 +37,6 @@ import com.mysql.jdbc.StringUtils;
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
 
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(MetadataServiceImpl.class);
 
     @Value("${metadata.hive.enabled:false}")
