@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
@@ -197,7 +198,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
-        double score = (double) evaluation.get(ScoreType.PROBABILITY);
+        Object lift = evaluation.get(ScoreType.LIFT);
+        if (lift == null) {
+            throw new LedpException(LedpCode.LEDP_31011, new String[] { scoringArtifacts.getModelId() });
+        }
+        double score = (double) lift;
         if (score > 99 || score < 5) {
             log.warn(String.format("Score out of range: %,.7f", score));
             score = Math.min(score, 99);

@@ -97,8 +97,7 @@ public class ModelEvaluator {
             try {
                 arguments.put(name, evaluator.prepare(name, value));
             } catch (Exception e) {
-                throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(),
-                        String.valueOf(value) });
+                throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(), String.valueOf(value) });
             }
         }
         if (!nullFields.isEmpty()) {
