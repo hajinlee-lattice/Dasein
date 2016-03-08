@@ -1,10 +1,11 @@
 angular.module('mainApp.login.modals.TenantSelectionModal', [
     'mainApp.appCommon.utilities.UnderscoreUtility'
 ])
-.service('TenantSelectionModal', function ($compile, $http, $rootScope, _) {
+.service('TenantSelectionModal', function ($compile, $templateCache, $http, $rootScope, _) {
     this.show = function (tenantList, successCallback) {
-        $http.get('./app/views/TenantSelectionView.html').success(function (html) {
-            
+        $http.get('app/views/TenantSelectionView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             scope.tenantList = _.sortBy(tenantList, 'Indentifier');
             scope.successCallback = successCallback;

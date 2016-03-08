@@ -1,5 +1,4 @@
 angular.module('mainApp.login.controllers.LoginController', [
-    'ngRoute',
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
@@ -15,7 +14,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
+.controller('LoginController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
                                          BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService) {
 
     $("body").addClass("login-body");
@@ -126,7 +125,9 @@ angular.module('mainApp.login.controllers.LoginController', [
     }
 
     function constructMainView() {
-        $http.get('./app/views/MainView.html').success(function (html) {
+        $http.get('app/views/MainView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
 

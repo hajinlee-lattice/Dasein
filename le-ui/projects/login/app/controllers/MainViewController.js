@@ -9,7 +9,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
@@ -17,7 +17,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
 
     // Handle Initial View
-    $http.get('./app/views/MainHeaderView.html').success(function (html) {
+    $http.get('app/views/MainHeaderView.html', {
+        cache: $templateCache
+    }).success(function (html) {
         var scope = $rootScope.$new();
         scope.mandatePasswordChange = $scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays;
         $compile($("#mainHeaderView").html(html))(scope);
@@ -32,7 +34,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.MANAGE_CREDENTIALS_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/config/views/ManageCredentialsView.html').success(function (html) {
+        $http.get('app/config/views/ManageCredentialsView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -51,7 +55,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/views/UpdatePasswordView.html').success(function (html) {
+        $http.get('app/views/UpdatePasswordView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
@@ -62,7 +68,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     function createUpdatePasswordSuccessView() {
         // Set the hash
         window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
-        $http.get('./app/views/UpdatePasswordSuccessView.html').success(function (html) {
+        $http.get('app/views/UpdatePasswordSuccessView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -77,7 +85,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/views/UserManagementView.html').success(function (html) {
+        $http.get('app/views/UserManagementView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -92,7 +102,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.ADMIN_INFO_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
+        $http.get('app/models/views/AdminInfoView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             scope.data = data;
             $compile($("#mainContentView").html(html))(scope);
@@ -105,7 +117,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function modelCreationHistoryView() {
         window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
-        $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
+        $http.get('app/models/views/ModelCreationHistoryView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -127,7 +141,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.MODEL_LIST_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/ModelListView.html').success(function (html) {
+        $http.get('app/models/views/ModelListView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -142,7 +158,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.MODEL_DETAIL_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/ModelDetailView.html').success(function (html) {
+        $http.get('app/models/views/ModelDetailView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             scope.data = data;
             $compile($("#mainContentView").html(html))(scope);
@@ -158,7 +176,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.ACTIVATE_MODEL;
         // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/ActivateModelView.html').success(function (html) {
+        $http.get('app/models/views/ActivateModelView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
@@ -173,7 +193,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Set the hash
         window.location.hash = NavUtility.SETUP_HASH;
         // Fetch the view and make it Angular aware
-        $http.get('./app/setup/views/SetupView.html').success(function (html) {
+        $http.get('app/setup/views/SetupView.html', {
+            cache: $templateCache
+        }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });

@@ -57,16 +57,24 @@ angular
                 }
             },
             */
+            views: {
+                "navigation": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                }
+            },
             redirectTo: 'models'
         })
         .state('models', {
             url: '/models',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
-                    templateUrl: './app/navigation/summary/ModelListView.html'
+                    templateUrl: 'app/navigation/summary/ModelListView.html'
                 },
                 "main@": {
-                    templateUrl: './app/models/views/ModelListView.html'
+                    templateUrl: 'app/models/views/ModelListView.html'
                 }   
             }
         })
@@ -80,10 +88,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/create/views/CSVImportView.html'
+                    templateUrl: 'app/create/views/CSVImportView.html'
                 }   
             }
         })
@@ -112,7 +120,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
@@ -131,7 +139,7 @@ angular
                         }
                     },
                     controllerAs: 'vm',
-                    templateUrl: './app/create/views/CustomFieldsView.html'
+                    templateUrl: 'app/create/views/CustomFieldsView.html'
                 }   
             }
         })
@@ -145,10 +153,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/create/views/CreateModelView.html'
+                    templateUrl: 'app/create/views/CreateModelView.html'
                 }   
             }
         })
@@ -160,7 +168,7 @@ angular
                     controller: function($scope, Model) {
                         $scope.name = Model.ModelDetails.Name;
                     },
-                    templateUrl: './app/navigation/sidebar/ModelView.html'
+                    templateUrl: 'app/navigation/sidebar/ModelView.html'
                 },
                 "summary@": {
                     controller: 'ModelDetailController',
@@ -214,7 +222,7 @@ angular
                     controller: function($scope, $compile, ModelStore) {
                         $scope.data = ModelStore.data;
                     },
-                    templateUrl: './app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
+                    templateUrl: 'app/AppCommon/widgets/adminInfoSummaryWidget/AdminInfoSummaryWidgetTemplate.html'
                 }   
             }
         })
@@ -249,7 +257,7 @@ angular
                     controller: function($scope, ModelStore) {
                         $scope.data = ModelStore.data;
                     },
-                    templateUrl: './app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
+                    templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
             }
         })
@@ -263,7 +271,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     template: UnderConstruction
@@ -275,7 +283,7 @@ angular
             views: {
                 "main@": {
                     controller: 'SetupController',
-                    templateUrl: './app/setup/views/SetupView.html'
+                    templateUrl: 'app/setup/views/SetupView.html'
                 }   
             }
         })
@@ -284,7 +292,7 @@ angular
             redirectto: 'marketosettings.apikey',
             views: {
                 "navigation@": {
-                    templateUrl: './app/navigation/sidebar/MarketoSettingsView.html'
+                    templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
                 },
                 "summary@": {
                     template: ''
@@ -304,10 +312,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/marketo/views/APIKeyView.html'
+                    templateUrl: 'app/marketo/views/APIKeyView.html'
                 }   
             }
         })
@@ -321,10 +329,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/marketo/views/ModelsView.html'
+                    templateUrl: 'app/marketo/views/ModelsView.html'
                 }   
             }
         })
@@ -338,10 +346,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/marketo/views/EnrichmentView.html'
+                    templateUrl: 'app/marketo/views/EnrichmentView.html'
                 }   
             }
         })
@@ -355,10 +363,10 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/marketo/views/WebhookView.html'
+                    templateUrl: 'app/marketo/views/WebhookView.html'
                 }   
             }
         }) 
@@ -372,7 +380,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: function(LoginService) {
@@ -385,6 +393,9 @@ angular
         .state('updatepassword', {
             url: '/updatepassword',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -392,16 +403,19 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/login/views/UpdatePasswordView.html'
+                    templateUrl: 'app/login/views/UpdatePasswordView.html'
                 }
             }
         })
         .state('deploymentwizard', {
             url: '/deploymentwizard',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -409,17 +423,20 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: 'DeploymentWizardController',
-                    templateUrl: './app/setup/views/DeploymentWizardView.html'
+                    templateUrl: 'app/setup/views/DeploymentWizardView.html'
                 }
             }
         })
         .state('activate', {
             url: '/activate',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -427,16 +444,19 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/models/views/ActivateModelView.html'
+                    templateUrl: 'app/models/views/ActivateModelView.html'
                 }
             }
         })
         .state('users', {
             url: '/users',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -444,16 +464,19 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/userManagement/views/UserManagementView.html'
+                    templateUrl: 'app/userManagement/views/UserManagementView.html'
                 }   
             }
         })
         .state('setup', {
             url: '/setup',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -461,16 +484,19 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/config/views/ManageCredentialsView.html'
+                    templateUrl: 'app/config/views/ManageCredentialsView.html'
                 }   
             }
         })
         .state('history', {
             url: '/history',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -478,16 +504,19 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: './app/models/views/ModelCreationHistoryView.html'
+                    templateUrl: 'app/models/views/ModelCreationHistoryView.html'
                 }   
             }
         })
         .state('fields', {
             url: '/fields',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -495,17 +524,20 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: 'SetupController',
-                    templateUrl: './app/setup/views/SetupView.html'
+                    templateUrl: 'app/setup/views/SetupView.html'
                 }   
             }
         })
         .state('dashboard', {
             url: '/dashboard',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -513,7 +545,7 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     template: UnderConstruction
@@ -523,6 +555,9 @@ angular
         .state('enrichment', {
             url: '/enrichment',
             views: {
+                "navigation@": {
+                    templateUrl: 'app/navigation/sidebar/RootView.html'
+                },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -530,11 +565,11 @@ angular
                         }
                     },
                     controller: 'OneLineController',
-                    templateUrl: './app/navigation/summary/OneLineView.html'
+                    templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
                     controller: 'LeadEnrichmentController',
-                    templateUrl: './app/setup/views/LeadEnrichmentView.html'
+                    templateUrl: 'app/setup/views/LeadEnrichmentView.html'
                 }   
             }
         });

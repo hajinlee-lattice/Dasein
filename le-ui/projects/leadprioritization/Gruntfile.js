@@ -7,70 +7,7 @@ module.exports = function (grunt) {
     var appConfig = {
         app:  sourceDir,
         dist: 'dist',
-        version: {
-            "le-common": '0.0.1',
-
-            jquery: '2.1.3',
-            angular: '1.4.2',
-            "angular-ui-bootstrap": '0.12.1',
-            "angular-ui-router": '0.2.15',
-            underscore: '1.8.2',
-            qtip2: '2.2.1',
-            webfont: '1.5.16',
-            alasql: '0.2.0',
-            d3: '3.5.6',
-            crypto: '3.1.2',
-            jStorage: '0.4.12',
-            FileSaver: '2014-11-29',
-
-            bootstrap: '3.3.4',
-            "font-awesome": '4.3.0',
-
-            kendo: '2015.2.805'
-        },
-        env:  {
-            dev:         {
-                url:            'http://localhost:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
-            },
-            integration: {
-                url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.int.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.int.js'
-            },
-            qa:          {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
-            },
-            stage:        {
-                url:            'https://app.lattice-engines.com',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
-            },
-            prod:        {
-                url:            'https://app.lattice-engines.com',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
-            }
-        }
     };
-
-    var env = grunt.option('env') || 'dev';
-    var chosenEnv;
-    if (env === 'dev') {
-        chosenEnv = appConfig.env.dev;
-        process.env.plstest = chosenEnv;
-    } else if (env === 'int') {
-        chosenEnv = appConfig.env.integration;
-    } else if (env === 'qa') {
-        chosenEnv = appConfig.env.qa;
-    } else if (env === 'stage') {
-        chosenEnv = appConfig.env.stage;
-    } else if (env === 'prod') {
-        chosenEnv = appConfig.env.prod;
-    }
 
     // version of our software. This should really be in the package.json
     // but it gets passed in through 
@@ -81,124 +18,7 @@ module.exports = function (grunt) {
 
         // Project settings
         pls:           appConfig,
-        testenv:       chosenEnv,
         versionString: versionStringConfig,
-
-        // download external libraries
-        wget: {
-            // download un-minimized version of vendor javascript libraries from CDN
-            js: {
-                options: {
-                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
-                },
-                src: [
-                    'jquery/<%= pls.version.jquery %>/jquery.js',
-                    'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
-                    'angular-ui-bootstrap/<%= pls.version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.js',
-                    'angular-ui-router/<%= pls.version["angular-ui-router"] %>/angular-ui-router.js',
-                    'qtip2/<%= pls.version.qtip2 %>/jquery.qtip.js',
-                    'underscore.js/<%= pls.version.underscore %>/underscore.js',
-                    'webfont/<%= pls.version.webfont %>/webfontloader.js',
-                    'twitter-bootstrap/<%= pls.version.bootstrap %>/js/bootstrap.js',
-                    'd3/<%= pls.version.d3 %>/d3.js',
-                    'jStorage/<%= pls.version.jStorage %>/jstorage.js',
-                    'alasql/<%= pls.version.alasql %>/alasql.min.js',
-                    'FileSaver.js/<%= pls.version.FileSaver %>/FileSaver.js'
-                ],
-                dest: '<%= pls.app %>/../common/lib/js'
-            },
-
-            angular: {
-                options: {
-                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/angular.js/<%= pls.version.angular %>/'
-                },
-                src: [
-                    'angular.js',
-                    'angular-resource.js',
-                    'angular-route.js',
-                    'angular-sanitize.js',
-                    'angular-mocks.js'
-                ],
-                dest: '<%= pls.app %>/../common/lib/js/angular'
-            },
-
-            crypto: {
-                options: {
-                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/crypto-js/<%= pls.version.crypto %>/components/'
-                },
-                src: [
-                    'core.js',
-                    'sha256.js'
-                ],
-                dest: '<%= pls.app %>/../common/lib/js/crypto'
-            },
-
-            css: {
-                options: {
-                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
-                },
-                src: [
-                    'bootswatch/<%= pls.version.bootstrap %>/simplex/bootstrap.css',
-                    'qtip2/<%= pls.version.qtip2 %>/jquery.qtip.css',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/css/font-awesome.css.map'
-                ],
-                dest: '<%= pls.app %>/../common/lib/css'
-            },
-
-            fonts: {
-                options: {
-                    baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
-                },
-                src: [
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/FontAwesome.otf',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.eot',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.svg',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.ttf',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff',
-                    'font-awesome/<%= pls.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
-                ],
-                dest: '<%= pls.app %>/../common/lib/fonts'
-            },
-
-            kendojs: {
-                options: {
-                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/js/'
-                },
-                src: ['kendo.all.min.js', 'kendo.all.min.js'],
-                dest: '<%= pls.app %>/../common/lib/js'
-            },
-
-            kendocss: {
-                options: {
-                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/'
-                },
-                src: [
-                    'kendo.common-bootstrap.min.css',
-                    'kendo.bootstrap.min.css',
-                    'kendo.dataviz.min.css',
-                    'kendo.dataviz.bootstrap.min.css',
-                    'kendo.mobile.all.min.css'
-                ],
-                dest: '<%= pls.app %>/../common/lib/css'
-            },
-
-            kendofonts: {
-                options: {
-                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/images/'
-                },
-                src: ['kendoui.woff', 'kendoui.woff'],
-                dest: '<%= pls.app %>/../common/lib/css/images'
-            },
-
-            kendoimages: {
-                options: {
-                    baseUrl: 'http://kendo.cdn.telerik.com/<%= pls.version.kendo %>/styles/'
-                },
-                src: ['Bootstrap/sprite.png', 'Bootstrap/loading-image.gif'],
-                dest: '<%= pls.app %>/../common/lib/css/Bootstrap'
-            }
-        },
 
         // Removes unessasary folders and files that are created during the build process
         // Force = true to allow for deleting contents outside of the grunt directory structure
@@ -234,6 +54,15 @@ module.exports = function (grunt) {
                     force: true
                 }
             },
+            build: {
+                files:   [{
+                    dot: true,
+                    src: [ 'dist/*.*' ]
+                }],
+                options: {
+                    force: true
+                }
+            },
             jsAndCss: {
                 files:   [{
                     dot: true,
@@ -259,24 +88,6 @@ module.exports = function (grunt) {
             }
         },
 
-        // concat and compress js files
-        uglify: {
-            dist: {
-                options: {
-                    mangle: false
-                },
-                files: {
-                    '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
-                        '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
-                        '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
-                        '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
-                        '<%= pls.app %>/app/!(AppCommon)/**/*.js',
-                        '<%= pls.app %>/app/app.js'
-                    ]
-                }
-            }
-        },
-
         // Compiles Sass to CSS
         sass: {
             options: {
@@ -292,41 +103,6 @@ module.exports = function (grunt) {
                 files: {
                     '<%= pls.app %>/assets/styles/production.css': '<%= pls.app %>/assets/styles/main.scss'
                 }
-            }
-        },
-
-        // replace long list of local js files to compressed js and CDN links
-        processhtml: {
-            // redirect vendor javascript/css to minimized version on CDN
-            options: {
-                data: {
-                    version: appConfig.version,
-                    versionString: versionStringConfig
-                }
-            },
-
-            dist: {
-                files: {
-                    '<%= pls.app %>/index.html': ['<%= pls.app %>/index.html']
-                }
-            }
-        },
-
-        // predist and dist are used to copy index.html to a temporary folder for the processing
-        // instrumented is to replace js by instrumented version, so that we can cc protractor test
-        copy: {
-            dist: {
-                src:  '.tmp/index.html',
-                dest: '<%= pls.app %>/index.html'
-            },
-
-            instrumented: {
-                files: [{
-                    expand: true,
-                    cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
-                    src: ['**/*'],
-                    dest: './'
-                }]
             }
         },
 
@@ -412,61 +188,6 @@ module.exports = function (grunt) {
             }
         },
 
-        // End to End (e2e) tests (aka UI automation)
-        protractor: {
-            options:          {
-                configFile: '<%= testenv.protractorConf %>',
-                noColor:    false,
-                keepAlive:  false // don't keep browser process alive after failures
-            },
-            chrome:           {
-                options: {
-                    args: {
-                        browser: 'chrome',
-                        baseUrl: '<%= testenv.url %>',
-                        directConnect: true
-                    }
-                }
-            },
-            firefox:          {
-                options: {
-                    args: {
-                        browser: 'firefox',
-                        baseUrl: '<%= testenv.url %>',
-                        directConnect: true
-                    }
-                }
-            },
-            internetexplorer: {
-                options: {
-                    args: {
-                        browser: 'internet explorer',
-                        baseUrl: '<%= testenv.url %>'
-                    }
-                }
-            },
-            safari:           {
-                options: {
-                    args: {
-                        browser: 'safari',
-                        baseUrl: '<%= testenv.url %>'
-                    }
-                }
-            }
-        },
-
-        http: {
-            resetTenants: {
-                options: {
-                    url:     '<%= testenv.url %>/pls/internal/testtenants',
-                    method:  'PUT',
-                    headers: { MagicAuthentication: "Security through obscurity!" },
-                    strictSSL: false
-                }
-            }
-
-        },
-
         rename: {
             moveAppToBak: {
                 src:  '<%= pls.app %>',
@@ -476,54 +197,6 @@ module.exports = function (grunt) {
             moveDistToApp: {
                 src:  '<%= pls.dist %>',
                 dest: '<%= pls.app %>'
-            }
-        },
-
-        // Find all instances of @@versionString in our index.html page and replace
-        // them with the passed in version string (defaults to '')
-        replace: {
-            dist: {
-                options: {
-                    patterns: [
-                        {
-                            match:       'versionString',
-                            replacement: '<%= versionString %>'
-                        }
-                    ]
-                },
-                files:   {
-                    '.tmp/index.html': '.tmp/index.html'
-                }
-            }
-        },
-
-        // Executes the replacement for any js/sass files in our index.html page
-        usemin: {
-            html:    '<%= pls.dist %>/index.html',
-            options: {
-                blockReplacements: {
-                    sass: function (block) {
-                        return '<link rel="stylesheet" href="' + block.dest + '">';
-                    }
-                }
-            }
-        },
-
-        // inspects our (temporary) index.html page, and collects all the needed JS
-        // files for minificaiton. Also generates the uglify and concat grunt commands
-        useminPrepare: {
-            html:    '.tmp/index.html',
-            options: {
-                dest: '<%= pls.dist %>',
-                flow: {
-                    html: {
-                        steps: {
-                            js:  ['concat', 'uglifyjs'],
-                            css: ['concat', 'cssmin']
-                        },
-                        post:  {}
-                    }
-                }
             }
         },
 
@@ -549,25 +222,6 @@ module.exports = function (grunt) {
             }
         },
         
-        // E2E UI Automation with code coverage
-        protractor_coverage: {
-            options: {
-                keepAlive: false,
-                noColor: false,
-                coverageDir: 'target/protractor_coverage',
-                configFile: '<%= testenv.protractorCcConf %>'
-            },
-            chrome:           {
-                options: {
-                    args: {
-                        browser:       'chrome',
-                        baseUrl:       '<%= testenv.url %>'
-                    }
-                }
-            },
-            run: {}
-        },
-
         instrument: {
             files: 'src/main/webapp/app/**/**[!vendor]/*[!Spec].js',
             options: {
@@ -591,8 +245,127 @@ module.exports = function (grunt) {
             mac:     ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
             windows: ['e2eChrome'],
             watch:   ['karma:watch', 'watch:scripts', 'watch:css']
-        }
+        },
 
+        // Find all instances of @@versionString in our index.html page and replace
+        // them with the passed in version string (defaults to '')
+        replace: {
+            dist: {
+                options: {
+                    patterns: [
+                        {
+                            match:       'versionString',
+                            replacement: '<%= versionString %>'
+                        }
+                    ]
+                },
+                files:   {
+                    '.tmp/index.html': '.tmp/index.html'
+                }
+            }
+        },
+
+        // predist and dist are used to copy index.html to a temporary folder for the processing
+        // instrumented is to replace js by instrumented version, so that we can cc protractor test
+        copy: {
+            dist: {
+                src:  'index.html',
+                dest: 'dist/index.html'
+            },
+        },
+
+        // Executes the replacement for any js/sass files in our index.html page
+        usemin: {
+            html:    'dist/index.html',
+            options: {
+                blockReplacements: {
+                    sass: function (block) {
+                        return '<link rel="stylesheet" href="' + block.dest + '">';
+                    }
+                }
+            }
+        },
+
+        // inspects our (temporary) index.html page, and collects all the needed JS
+        // files for minificaiton. Also generates the uglify and concat grunt commands
+        useminPrepare: {
+            html:    'index.html',
+            options: {
+                dest: 'dist',
+                flow: {
+                    html: {
+                        steps: {
+                            js:  ['concat']
+                            //css: ['concat', 'cssmin']
+                        },
+                        post:  {}
+                    }
+                }
+            }
+        },
+
+        ngAnnotate: {
+            dist: {
+                files: {
+                    'dist/app.js': ['dist/app.js']
+                }
+            }
+        },
+
+        // concat and compress js files
+        uglify: {
+            dist: {
+                options: {
+                    mangle: false
+                },
+                files: {
+                    '<%= pls.app %>/app/production_<%= versionString %>.min.js': [
+                        '<%= pls.app %>/app/AppCommon/vendor/date.format.js',
+                        '<%= pls.app %>/app/AppCommon/vendor/ui-bootstrap-jpls-0.13.0.js',
+                        '<%= pls.app %>/app/AppCommon/!(vendor|test)/**/*.js',
+                        '<%= pls.app %>/app/!(AppCommon)/**/*.js',
+                        '<%= pls.app %>/app/app.js'
+                    ]
+                }
+            },
+            production: {
+                options: {
+                    mangle: false
+                },
+                files: {
+                    '<%= pls.dist %>/app.js': [
+                        '<%= pls.dist %>/app.js',
+                        '<%= pls.dist %>/templates.js'
+                    ]
+                }
+            }
+        },
+
+        // replace long list of local js files to compressed js and CDN links
+        processhtml: {
+            // redirect vendor javascript/css to minimized version on CDN
+            options: {
+                data: {
+                    versionString: versionStringConfig
+                }
+            },
+
+            dist: {
+                files: {
+                    '<%= pls.dist %>/index.html': ['<%= pls.dist %>/index.html']
+                }
+            }
+        },
+
+        html2js: {
+            options: {
+                base: ''
+            },
+            main: {
+                src: ['app/**/*.html'],
+                dest: 'dist/templates.js'
+            },
+        }
     });
 
     grunt.loadNpmTasks('grunt-wget');
@@ -604,6 +377,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-html2js');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-ng-annotate');
     grunt.loadNpmTasks('grunt-usemin');
@@ -616,6 +390,20 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-protractor-runner');
     */
+
+    grunt.registerTask('build', [
+        'clean:build',
+        'html2js',
+        'copy:dist',
+        'useminPrepare',
+        'concat:generated',
+        'ngAnnotate',
+        //'cssmin:generated',
+        'uglify:production',
+        //'filerev',
+        'usemin',
+        'processhtml:dist'
+    ]);
 
     grunt.registerTask('init', [
         'clean:lib',

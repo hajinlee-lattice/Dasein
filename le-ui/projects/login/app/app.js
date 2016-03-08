@@ -1,5 +1,6 @@
 //Initial load of the application    
 var mainApp = angular.module('mainApp', [
+    'templates-main',
     'ui.bootstrap',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
@@ -33,15 +34,15 @@ var mainApp = angular.module('mainApp', [
             controller: 'MainController'
         })
         .when('/Credentials', {
-            templateUrl: './app/views/LoginView.html'
+            templateUrl: 'app/views/LoginView.html'
             //controller: 'MainViewController'
         })
         .when('/ForgotPassword', {
-            templateUrl: './app/views/LoginView.html'
+            templateUrl: 'app/views/LoginView.html'
             //controller: 'MainViewController'
         })
         .when('/UserManagement', {
-            templateUrl: './app/userManagement/views/UserManagementView.html', 
+            templateUrl: 'app/userManagement/views/UserManagementView.html', 
             //controller: 'MainController'
             //template: 'GOODBYE'
         })
@@ -51,7 +52,7 @@ var mainApp = angular.module('mainApp', [
 }])
 */
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal, $templateCache) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
     
@@ -76,7 +77,9 @@ var mainApp = angular.module('mainApp', [
             // Create the Login View
             //window.location.hash = '/cred';
             //return;
-            $http.get('./app/views/LoginView.html').success(function (html) {
+            $http.get('app/views/LoginView.html', {
+                cache: $templateCache
+            }).success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -144,7 +147,9 @@ var mainApp = angular.module('mainApp', [
         //window.open("/lp/", "_self");
         //return;
         //ConfigService.GetWidgetConfigDocument().then(function(result) {
-            $http.get('./app/views/MainView.html').success(function (html) {
+            $http.get('app/views/MainView.html', {
+                cache: $templateCache
+            }).success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -197,7 +202,7 @@ var mainApp = angular.module('mainApp', [
             animation: true,
             backdrop: false,
             scope: $scope,
-            templateUrl: 'app/core/views/WarningModal.html'
+            templateUrl: 'app/views/WarningModal.html'
         });
 
         $scope.refreshSession = function() {
@@ -244,7 +249,9 @@ var mainApp = angular.module('mainApp', [
 
     function createMandatoryChangePasswordViewForLocale(locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-            $http.get('./app/views/MainView.html').success(function (html) {
+            $http.get('app/views/MainView.html', {
+                cache: $templateCache
+            }).success(function (html) {
                 var scope = $rootScope.$new();
                 scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
                 scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;

@@ -7,6 +7,7 @@
 
 const Server    = require('./server/server');
 const routes    = require('./server/routes');
+const routes_d  = require('./server/routes_dist');
 const express   = require('express');
 
 const app       = express(); 
@@ -23,13 +24,15 @@ const options   = {
 
 const server = new Server(express, app, options);
 
-options.API_URL     
+options.API_URL
     ? server.useApiProxy(options.API_URL) : null;
 
 options.WHITELIST
     ? server.trustProxy(options.WHITELIST) : null;
 
-server.setAppRoutes(routes);
+options.ENV == 'qa'
+    ? server.setAppRoutes(routes) : server.setAppRoutes(routes);
+
 server.setDefaultRoutes(options.ENV);
 
 module.exports = server.start();

@@ -4,6 +4,11 @@ angular
         $stateProvider
             .state('jobs', {
                 url: '/jobs',
+                views: {
+                    "navigation@": {
+                        templateUrl: 'app/navigation/sidebar/RootView.html'
+                    }
+                },
                 redirectTo: 'jobs.status'
             })
             .state('jobs.status', {
@@ -16,10 +21,10 @@ angular
                             }
                         },
                         controller: 'OneLineController',
-                        templateUrl: './app/navigation/summary/OneLineView.html'
+                        templateUrl: 'app/navigation/summary/OneLineView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/status/StatusView.html'
+                        templateUrl: 'app/jobs/status/StatusView.html'
                     }
                 }
             })
@@ -27,10 +32,10 @@ angular
                 url: '/ready/:jobId',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/table/TableView.html'
+                        templateUrl: 'app/navigation/table/TableView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/ready/ReadyView.html'
+                        templateUrl: 'app/jobs/import/ready/ReadyView.html'
                     }
                 }
             })
@@ -65,7 +70,7 @@ angular
                             }
                         },
                         controller: 'OneLineController',
-                        templateUrl: './app/navigation/summary/OneLineView.html'
+                        templateUrl: 'app/navigation/summary/OneLineView.html'
                     },
                     "main@": {
                         controller: function($scope, JobsService, JobReport) {
@@ -88,7 +93,7 @@ angular
                                 });
                             }
                         },
-                        templateUrl: './app/create/views/ValidateImportView.html'
+                        templateUrl: 'app/create/views/ValidateImportView.html'
                     }   
                 }
             })
@@ -99,10 +104,10 @@ angular
                 url: '/credentials',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/credentials/CredentialsView.html'
+                        templateUrl: 'app/jobs/import/credentials/CredentialsView.html'
                     }
                 }
             })
@@ -110,10 +115,10 @@ angular
                 url: '/file',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/file/FileView.html'
+                        templateUrl: 'app/jobs/import/file/FileView.html'
                     }
                 }
             })
@@ -121,10 +126,10 @@ angular
                 url: '/processing',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/processing/ProcessingView.html'
+                        templateUrl: 'app/jobs/import/processing/ProcessingView.html'
                     }
                 }
             });

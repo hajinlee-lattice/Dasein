@@ -19,11 +19,11 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     // Handle Initial View
-    $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
+    $http.get('app/core/views/MainHeaderView.html', { cache: $templateCache }).success(function (html) {
         var scope = $rootScope.$new();
         scope.mandatePasswordChange = $scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays;
         $compile($("#mainHeaderView").html(html))(scope);
@@ -41,7 +41,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     });
 
     function createUpdatePasswordSuccessView() {
-        $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
+        $http.get('app/login/views/UpdatePasswordSuccessView.html', { cache: $templateCache }).success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });

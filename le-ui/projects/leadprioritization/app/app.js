@@ -1,5 +1,6 @@
 //Initial load of the application
 var mainApp = angular.module('mainApp', [
+    'templates-main',
     'ui.router',
     'ui.bootstrap',
     'mainApp.appCommon.modals.SimpleModal',
@@ -32,7 +33,7 @@ var mainApp = angular.module('mainApp', [
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
 }])
 
-.controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
+.controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
     TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, FeatureFlagService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
@@ -60,7 +61,7 @@ var mainApp = angular.module('mainApp', [
             return;
             $scope.showFooter = false;
             // Create the Login View
-            $http.get('./app/login/views/LoginView.html').success(function (html) {
+            $http.get('app/login/views/LoginView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -135,7 +136,7 @@ var mainApp = angular.module('mainApp', [
     
     $scope.getWidgetConfigDoc = function () {
         ConfigService.GetWidgetConfigDocument().then(function(result) {
-            $http.get('./app/core/views/MainView.html').success(function (html) {
+            $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 $compile($("#mainView").html(html))(scope);
             });
@@ -235,7 +236,7 @@ var mainApp = angular.module('mainApp', [
 
     function createMandatoryChangePasswordViewForLocale(locale) {
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
-            $http.get('./app/core/views/MainView.html').success(function (html) {
+            $http.get('app/core/views/MainView.html', { cache: $templateCache }).success(function (html) {
                 var scope = $rootScope.$new();
                 scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
                 scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;

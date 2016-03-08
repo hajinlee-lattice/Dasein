@@ -8,41 +8,32 @@
         <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
         <title>Login - Lattice Engines</title>
 
-        <!-- build:css dist/css/style.min.css -->
         <link rel="stylesheet" type="text/css" href="/dist/lattice.css" />
-        <!-- endbuild -->
-
-        <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
-
-        <script src="/lp/lib/js/webfontloader.js" async></script>
     </head>
-
     <body data-ng-controller="MainController" class="blue-background">
-        <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-
         <div id="mainView">
             <div id="mainHeaderView"></div>
             <div data-ng-view></div>
         </div>
-        
         <!--[if IE]><div id="isIE"></div><![endif]-->
     </body>
-
-
-    <!-- 3rd-party libraries -->
     <script src="/dist/lattice.js"></script>
 
-    <!-- build:js dist/js/optimized.js -->
+    <!-- build:js app.js -->
     <script src="app/app.js"></script>
-
     <script src="app/controllers/MainViewController.js"></script>
     <script src="app/controllers/MainHeaderController.js"></script>
     <script src="app/controllers/LoginController.js"></script>
     <script src="app/controllers/UpdatePasswordController.js"></script>
-
     <script src="app/modals/TenantSelectionModal.js"></script>
     <!-- endbuild -->
+    
+    <!-- build:remove:dist -->
+    <script type="text/javascript">
+        angular.module('templates-main', []);
+    </script>
+    <!-- /build -->
 
     <script type="text/javascript">
         WebFontConfig = {
