@@ -30,7 +30,7 @@ public class CipherUtils {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
-            return Base64.encodeBase64String(cipher.doFinal(str.getBytes()));
+            return Base64.encodeBase64String(cipher.doFinal(str.getBytes("UTF8")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
