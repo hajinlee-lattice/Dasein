@@ -76,16 +76,16 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
         String json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + sourceDbsJson));
         Path poolPath = dbPoolPath(DataSourcePool.SourceDB);
-        if (!camille.exists(poolPath)) {
-            camille.create(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (!camille.exists(poolPath) || !camille.get(poolPath).getData().equals(json)) {
+            camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
 
         log.info("Uploading target db connection pool to ZK using " + targetDbsJson + " ...");
         json = IOUtils.toString(
                 Thread.currentThread().getContextClassLoader().getResourceAsStream("datasource/" + targetDbsJson));
         poolPath = dbPoolPath(DataSourcePool.TargetDB);
-        if (!camille.exists(poolPath)) {
-            camille.create(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        if (!camille.exists(poolPath) || !camille.get(poolPath).getData().equals(json)) {
+            camille.upsert(poolPath, new Document(json), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
 
         log.info("Read or initializing max real time input ...");
