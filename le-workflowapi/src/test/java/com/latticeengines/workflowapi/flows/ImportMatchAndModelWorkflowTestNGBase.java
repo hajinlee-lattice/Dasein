@@ -18,23 +18,23 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
-import com.latticeengines.metadata.exposed.resolution.ColumnTypeMapping;
-import com.latticeengines.metadata.exposed.resolution.MetadataResolutionStrategy;
-import com.latticeengines.metadata.exposed.resolution.UserDefinedMetadataResolutionStrategy;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
+import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
+import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
-public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
+public class ImportMatchAndModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase {
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
 
@@ -96,8 +96,8 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
         }
     }
 
-    protected CreateModelWorkflowConfiguration generateWorkflowConfig(SourceFile sourceFile) {
-        CreateModelWorkflowConfiguration workflowConfig = new CreateModelWorkflowConfiguration.Builder()
+    protected ImportMatchAndModelWorkflowConfiguration generateWorkflowConfig(SourceFile sourceFile) {
+        ImportMatchAndModelWorkflowConfiguration workflowConfig = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .customer(DEMO_CUSTOMERSPACE) //
                 .microServiceHostPort(microServiceHostPort) //
                 .internalResourceHostPort(internalResourceHostPort) //

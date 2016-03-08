@@ -48,7 +48,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
@@ -154,7 +154,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
         Table file = new Table();
         file.setName(fileName);
-        file.setInterpretation(SchemaInterpretation.SalesforceLead.name());
+        file.setInterpretation(SchemaInterpretation.LP3SalesforceLeadCSV.name());
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());

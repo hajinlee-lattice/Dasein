@@ -28,7 +28,7 @@ angular.module('pd.jobs', [
     
     var dictionary = {
         'fitModelWorkflow': stepsNameDictionary,
-        'createModelWorkflow': {
+        'importMatchAndModelWorkflow': {
             'importData': 'load_data',
             'createEventTableReport': 'load_data',
             'dedupEventTable': 'load_data',

@@ -23,6 +23,7 @@
         <le.network.version>2.0.22-SNAPSHOT</le.network.version>
         <le.metadata.version>2.0.22-SNAPSHOT</le.metadata.version>
         <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
+        <le.pls.version>2.0.22-SNAPSHOT</le.pls.version>
     </properties>
 
     <parent>
@@ -225,6 +226,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-pls</artifactId>
+            <version>${le.pls.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

@@ -15,8 +15,8 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("createModelWorkflow")
-public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowConfiguration> {
+@Component("importMatchAndModelWorkflow")
+public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAndModelWorkflowConfiguration> {
     @Autowired
     private ImportData importData;
 
@@ -39,7 +39,7 @@ public class CreateModelWorkflow extends AbstractWorkflow<CreateModelWorkflowCon
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Bean
-    public Job createModelWorkflowJob() throws Exception {
+    public Job importMatchAndModelWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 

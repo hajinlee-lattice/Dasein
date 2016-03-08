@@ -13,9 +13,9 @@ import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
-public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
+public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
-        private CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration();
+        private ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration();
         private ImportStepConfiguration importData = new ImportStepConfiguration();
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
@@ -34,7 +34,8 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("createModelWorkflow", customerSpace, "CreateModelWorkflow");
+            configuration.setContainerConfiguration("importMatchAndModelWorkflow", customerSpace,
+                    "ImportMatchAndModelWorkflow");
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
@@ -119,7 +120,7 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public CreateModelWorkflowConfiguration build() {
+        public ImportMatchAndModelWorkflowConfiguration build() {
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(dedupEventTable);

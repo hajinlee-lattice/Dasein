@@ -15,14 +15,14 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
-import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 
 @Component
-public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
+public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(CreateModelWorkflowSubmitter.class);
+    private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
     @Autowired
     private SourceFileService sourceFileService;
@@ -43,7 +43,7 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
-        CreateModelWorkflowConfiguration configuration = new CreateModelWorkflowConfiguration.Builder()
+        ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .sourceFileName(sourceFile.getName()) //

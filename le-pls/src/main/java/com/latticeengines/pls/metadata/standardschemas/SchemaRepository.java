@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.exposed.standardschemas;
+package com.latticeengines.pls.metadata.standardschemas;
 
 import java.util.Arrays;
 
@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
@@ -33,9 +33,9 @@ public class SchemaRepository {
 
     public Table getSchema(SchemaInterpretation schema) {
         switch (schema) {
-        case SalesforceAccount:
+        case LP3SalesforceAccountCSV:
             return getSalesforceAccountSchema();
-        case SalesforceLead:
+        case LP3SalesforceLeadCSV:
             return getSalesforceLeadSchema();
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
@@ -43,7 +43,7 @@ public class SchemaRepository {
     }
 
     private Table getSalesforceAccountSchema() {
-        Table table = createTable(SchemaInterpretation.SalesforceAccount);
+        Table table = createTable(SchemaInterpretation.LP3SalesforceAccountCSV);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
@@ -69,7 +69,7 @@ public class SchemaRepository {
     }
 
     private Table getSalesforceLeadSchema() {
-        Table table = createTable(SchemaInterpretation.SalesforceLead);
+        Table table = createTable(SchemaInterpretation.LP3SalesforceLeadCSV);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 

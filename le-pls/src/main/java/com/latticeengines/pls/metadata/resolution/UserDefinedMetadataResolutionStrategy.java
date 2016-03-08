@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.exposed.resolution;
+package com.latticeengines.pls.metadata.resolution;
 
 import java.io.File;
 import java.io.FileReader;
@@ -24,11 +24,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.metadata.exposed.standardschemas.SchemaRepository;
+import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 
 public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStrategy {
     private String csvPath;

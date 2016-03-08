@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
-import com.latticeengines.pls.workflow.CreateModelWorkflowSubmitter;
+import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.wordnik.swagger.annotations.Api;
@@ -31,7 +31,7 @@ public class ModelResource {
     private static final Logger log = Logger.getLogger(ModelResource.class);
 
     @Autowired
-    private CreateModelWorkflowSubmitter createModelWorkflowSubmitter;
+    private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
 
     @Autowired
     private ModelWorkflowSubmitter modelWorkflowSubmitter;
@@ -51,7 +51,7 @@ public class ModelResource {
     public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
         try {
             return ResponseDocument.successResponse( //
-                    createModelWorkflowSubmitter.submit(parameters).toString());
+                    importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
         } catch (Exception e) {
             log.error(String.format("Failure creating a model with name %s", parameters.getName()), e);
             return ResponseDocument.failedResponse(e);

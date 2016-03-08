@@ -24,7 +24,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
@@ -59,14 +59,14 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String path = String.format("/pls/fileuploads/unnamed?schema=%s", SchemaInterpretation.SalesforceAccount);
+            String path = String.format("/pls/fileuploads/unnamed?schema=%s", SchemaInterpretation.LP3SalesforceAccountCSV);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
             String path = String.format("/pls/fileuploads?fileName=file1.csv&schema=%s",
-                    SchemaInterpretation.SalesforceAccount);
+                    SchemaInterpretation.LP3SalesforceAccountCSV);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {

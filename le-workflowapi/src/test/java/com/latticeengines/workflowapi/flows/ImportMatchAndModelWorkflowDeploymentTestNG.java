@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertEquals;
 
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -9,20 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.leadprioritization.workflow.CreateModelWorkflow;
-import com.latticeengines.leadprioritization.workflow.CreateModelWorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 
-public class CreateModelWorkflowDeploymentTestNG extends CreateModelWorkflowTestNGBase {
+public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowTestNGBase {
 
-    private static final Log log = LogFactory.getLog(CreateModelWorkflowDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(ImportMatchAndModelWorkflowDeploymentTestNG.class);
 
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization/csvfiles";
 
     @Autowired
-    private CreateModelWorkflow createModelWorkflow;
+    private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -31,19 +31,19 @@ public class CreateModelWorkflowDeploymentTestNG extends CreateModelWorkflowTest
 
     @Test(groups = "deployment", enabled = false)
     public void testWorkflowAccount() throws Exception {
-        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.SalesforceAccount);
+        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.LP3SalesforceAccountCSV);
         run(sourceFile);
     }
 
     @Test(groups = "deployment", enabled = false)
     public void testWorkflowLead() throws Exception {
-        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.SalesforceLead);
+        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.LP3SalesforceLeadCSV);
         run(sourceFile);
     }
 
     private void run(SourceFile sourceFile) throws Exception {
-        CreateModelWorkflowConfiguration workflowConfig = generateWorkflowConfig(sourceFile);
-        WorkflowExecutionId workflowId = workflowService.start(createModelWorkflow.name(), workflowConfig);
+        ImportMatchAndModelWorkflowConfiguration workflowConfig = generateWorkflowConfig(sourceFile);
+        WorkflowExecutionId workflowId = workflowService.start(importMatchAndModelWorkflow.name(), workflowConfig);
 
         log.info("Workflow id = " + workflowId.getId());
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();

@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.exposed.resolution;
+package com.latticeengines.pls.metadata.resolution;
 
 import java.util.List;
 

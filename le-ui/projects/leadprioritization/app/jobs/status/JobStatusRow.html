@@ -5,7 +5,7 @@
         <span class="columns four {{job.status}}">{{job.status}}
             <span data-ng-show="jobCompleted || jobFailed"> [
                 <a ui-sref="jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">View Report</a>
-                <a ui-sref="jobs.status.csv({jobId: jobId})" ng-show="jobType == 'createModelWorkflow'">View Report</a>
+                <a ui-sref="jobs.status.csv({jobId: jobId})" ng-show="jobType == 'importMatchAndModelWorkflow'">View Report</a>
             ]</span>
             <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>
 
@@ -18,7 +18,7 @@
         </span>
     </div>
     <div class="chevron-row" data-ng-show="jobRowExpanded">
-        <div class="breadcrumb flat" ng-show="jobType == 'createModelWorkflow'">
+        <div class="breadcrumb flat" ng-show="jobType == 'importMatchAndModelWorkflow'">
             <div class="state-finished-{{jobStepsCompletedStates.load_data}}">
                 <span class="chevron-content chevron-content-text">
                     Matching to Data Cloud<br><span class="completion-times">{{ stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma' }}</span>
