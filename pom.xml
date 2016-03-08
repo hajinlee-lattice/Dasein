@@ -51,5 +51,6 @@
         <module>le-liaison</module>
         <module>le-workflow</module>
         <module>le-workflowapi</module>
+        <module>le-scoringapi</module>
     </modules>
 </project>
