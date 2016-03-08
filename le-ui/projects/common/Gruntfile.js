@@ -46,6 +46,7 @@ module.exports = function(grunt) {
         concat: {
 			vendor: {
 				src: [
+					'<%= dir.bower %>/webfontloader.js',
 					'<%= dir.bower %>/min/jquery*.js',
 					'<%= dir.bower %>/min/angular.min.js',
 					'<%= dir.bower %>/min/*.js',

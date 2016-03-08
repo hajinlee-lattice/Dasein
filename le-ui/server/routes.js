@@ -8,7 +8,9 @@ module.exports = [
             '/assets': '/assets',
             '/lib': '/lib',
             '/dist': '/dist',
-            '/bower_components': '/bower_components'
+            '/bower_components': '/bower_components',
+            '/common/assets': '/assets',
+            '/common/dist': '/dist'
         }
     },{
         path: '/projects/login',
