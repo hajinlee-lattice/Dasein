@@ -31,7 +31,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -99,20 +98,21 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
-                String eventTableName = map.get("EventTableName");
-                if (Strings.isNullOrEmpty(eventTableName)) {
-                    throw new LedpException(LedpCode.LEDP_31008, new String[] { map.get("Id") });
-                }
-                Table eventTable = metadataProxy.getTable(customerSpace.toString(), eventTableName);
+//                String eventTableName = map.get("EventTableName");
+//                if (Strings.isNullOrEmpty(eventTableName)) {
+//                    throw new LedpException(LedpCode.LEDP_31008, new String[] { map.get("Id") });
+//                }
+//                Table eventTable = metadataProxy.getTable(customerSpace.toString(), eventTableName);
+//
+//                if (eventTable == null) {
+//                    throw new LedpException(LedpCode.LEDP_31009, new String[] { eventTableName });
+//                } else if (Strings.isNullOrEmpty(eventTable.getInterpretation())) {
+//                    throw new LedpException(LedpCode.LEDP_31010, new String[] { eventTableName });
+//                }
 
-                if (eventTable == null) {
-                    throw new LedpException(LedpCode.LEDP_31009, new String[] { eventTableName });
-                } else if (Strings.isNullOrEmpty(eventTable.getInterpretation())) {
-                    throw new LedpException(LedpCode.LEDP_31010, new String[] { eventTableName });
-                }
-
-                if ((type == ModelType.ACCOUNT && eventTable.getInterpretation().toLowerCase().contains("account"))
-                        || (type == ModelType.CONTACT && eventTable.getInterpretation().toLowerCase().contains("lead"))) {
+//                if ((type == ModelType.ACCOUNT && modelSummary.getInterpretation().toLowerCase().contains("account"))
+//                        || (type == ModelType.CONTACT && modelSummary.getInterpretation().toLowerCase().contains("lead"))) {
+                if (type == ModelType.CONTACT) {
                     Model model = new Model(map.get("Id"), map.get("Name"), type);
                     models.add(model);
                 }
