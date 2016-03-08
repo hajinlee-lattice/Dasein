@@ -1,11 +1,13 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
@@ -41,7 +43,9 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
     public Oauth2AccessToken get() {
         List<Oauth2AccessToken> tokens = super.findAll();
         if (tokens.size() == 1) {
-            return tokens.get(0);
+            Oauth2AccessToken token = tokens.get(0);
+            token.setAccessToken(CipherUtils.decrypt(token.getAccessToken()));
+            return token;
         }
         Oauth2AccessToken token = new Oauth2AccessToken();
         Tenant tenant = SecurityContextUtils.getTenant();
@@ -55,7 +59,7 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
     @Transactional(propagation = Propagation.REQUIRED)
     public void createOrUpdate(Oauth2AccessToken oauth2AccessToken) {
         Oauth2AccessToken token = get();
-        token.setAccessToken(oauth2AccessToken.getAccessToken());
+        token.setAccessToken(CipherUtils.encrypt(oauth2AccessToken.getAccessToken()));
         super.createOrUpdate(token);
     }
 
