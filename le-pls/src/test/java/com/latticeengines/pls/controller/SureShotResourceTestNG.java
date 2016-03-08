@@ -17,13 +17,12 @@ public class SureShotResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void getCredentialAuthenticationLink() {
-        switchToSuperAdmin();
-        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth/createaccesstoken?tenantId="
+        switchToExternalAdmin();
+        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
                 + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
 
-        String url = restTemplate.getForObject(getRestAPIHostPort() + "/pls/sureshot/credentials?tenantId="
-                + mainTestingTenant.getId() + "&crmType=marketo", String.class);
+        String url = restTemplate.getForObject(getRestAPIHostPort() + "/pls/sureshot/credentials?crmType=marketo", String.class);
         System.out.println(url);
         assertTrue(StringUtils.isNotEmpty(url));
     }
@@ -31,12 +30,11 @@ public class SureShotResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" })
     public void getScoringSettingsLink() {
         switchToSuperAdmin();
-        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth/createaccesstoken?tenantId="
+        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
                 + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
 
-        String url = restTemplate.getForObject(getRestAPIHostPort() + "/pls/sureshot/scoring/settings/?tenantId="
-                + mainTestingTenant.getId() + "&crmType=marketo", String.class);
+        String url = restTemplate.getForObject(getRestAPIHostPort() + "/pls/sureshot/scoring/settings/?crmType=marketo", String.class);
         System.out.println(url);
         assertTrue(StringUtils.isNotEmpty(url));
     }

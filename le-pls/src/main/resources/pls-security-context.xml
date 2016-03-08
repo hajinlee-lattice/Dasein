@@ -121,7 +121,7 @@
     </security:http>
 
     <security:http use-expressions="true"
-                   pattern="/pls/oauth/**"
+                   pattern="/pls/oauth2/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

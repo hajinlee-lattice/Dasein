@@ -63,17 +63,17 @@ public class Oauth2ServiceImplTestNG extends PlsFunctionalTestNGBase {
         t.setName(tenantId);
         tenantEntityMgr.create(t);
         setupSecurityContext(t);
-        assertEquals(oauth2AccessTokenEntityMgr.get().getAccessToken(), "");
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), "");
 
-        OAuth2AccessToken accessToken = oauth2Service.createOAuth2AccessToken("MyTestingTenant");
+        OAuth2AccessToken accessToken = oauth2Service.createOAuth2AccessToken(tenantId);
         assertTrue(StringUtils.isNotEmpty(accessToken.getValue()));
         assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
-        assertEquals(oauth2AccessTokenEntityMgr.get().getAccessToken(), accessToken.getValue());
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken.getValue());
 
-        OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken("MyTestingTenant");
+        OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId);
         assertTrue(StringUtils.isNotEmpty(accessToken2.getValue()));
         assertEquals(oauth2AccessTokenEntityMgr.findAll().size(), 1);
-        assertEquals(oauth2AccessTokenEntityMgr.get().getAccessToken(), accessToken2.getValue());
-        assertNotEquals(oauth2AccessTokenEntityMgr.get().getAccessToken(), accessToken.getValue());
+        assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken2.getValue());
+        assertNotEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), accessToken.getValue());
     }
 }

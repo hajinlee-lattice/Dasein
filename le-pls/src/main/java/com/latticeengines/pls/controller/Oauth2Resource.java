@@ -13,30 +13,30 @@ import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "oauth", description = "REST resource for managing PLS tenants")
+@Api(value = "oauth2", description = "REST resource for generating oauth2 token")
 @RestController
-@RequestMapping(value = "/oauth")
+@RequestMapping(value = "/oauth2")
 public class Oauth2Resource {
     private static final Logger log = Logger.getLogger(Oauth2Resource.class);
 
     @Autowired
     private Oauth2Interface oauth2Service;
 
-    @RequestMapping(value = "/createapitoken", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/apitoken", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Generate an Oauth Api Token for a tenant")
-    @PreAuthorize("hasRole('Create_PLS_OauthToken')")
+    @ApiOperation(value = "Generate an Oauth2 Api Token for a tenant")
+    @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createApiToken(@RequestParam(value = "tenantId") String tenantId) {
         log.info("Generating api token for tenant " + tenantId);
         return oauth2Service.createAPIToken(tenantId);
     }
 
-    @RequestMapping(value = "/createaccesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/accesstoken", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Generate an Oauth Access and Refresh Token for a tenant")
-    @PreAuthorize("hasRole('Create_PLS_OauthToken')")
+    @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
+    @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId) {
-        log.info("Generating access token and refresh token for tenant " + tenantId);
+        log.info("Generating access token for tenant " + tenantId);
         return oauth2Service.createOAuth2AccessToken(tenantId).getValue();
     }
 }

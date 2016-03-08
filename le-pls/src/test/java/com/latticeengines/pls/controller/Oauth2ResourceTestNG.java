@@ -17,8 +17,8 @@ public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void createApiToken() {
-        switchToThirdPartyUser();
-        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth/createapitoken?tenantId="
+        switchToExternalAdmin();
+        String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/apitoken?tenantId="
                 + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
     }
@@ -27,7 +27,7 @@ public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
     public void createOAuth2AccessToken() {
         switchToThirdPartyUser();
         String token = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/oauth/createaccesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
+                + "/pls/oauth2/accesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
     }
 }

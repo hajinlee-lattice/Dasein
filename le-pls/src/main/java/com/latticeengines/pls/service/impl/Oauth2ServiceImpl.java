@@ -28,7 +28,7 @@ public class Oauth2ServiceImpl implements Oauth2Interface {
         OAuth2AccessToken oAuth2AccessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId);
         Oauth2AccessToken oauth2AccessToken = new Oauth2AccessToken();
         oauth2AccessToken.setAccessToken(oAuth2AccessToken.getValue());
-        oauth2AccessTokenEntityMgr.createOrUpdate(oauth2AccessToken);
+        oauth2AccessTokenEntityMgr.createOrUpdate(oauth2AccessToken, tenantId);
         return oAuth2AccessToken;
     }
 

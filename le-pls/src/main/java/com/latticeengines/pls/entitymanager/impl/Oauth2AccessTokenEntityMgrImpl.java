@@ -10,12 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.Oauth2AccessTokenDao;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component("oauth2AccessTokenEntityMgr")
 public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2AccessToken> implements
@@ -40,7 +41,7 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Oauth2AccessToken get() {
+    public Oauth2AccessToken get(String tenantId) {
         List<Oauth2AccessToken> tokens = super.findAll();
         if (tokens.size() == 1) {
             Oauth2AccessToken token = tokens.get(0);
@@ -48,8 +49,10 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
             return token;
         }
         Oauth2AccessToken token = new Oauth2AccessToken();
-        Tenant tenant = SecurityContextUtils.getTenant();
-        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+        if (tenant == null) {
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
+        }
         token.setTenant(tenant);
         token.setAccessToken("");
         return token;
@@ -57,8 +60,8 @@ public class Oauth2AccessTokenEntityMgrImpl extends BaseEntityMgrImpl<Oauth2Acce
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void createOrUpdate(Oauth2AccessToken oauth2AccessToken) {
-        Oauth2AccessToken token = get();
+    public void createOrUpdate(Oauth2AccessToken oauth2AccessToken, String tenantId) {
+        Oauth2AccessToken token = get(tenantId);
         token.setAccessToken(CipherUtils.encrypt(oauth2AccessToken.getAccessToken()));
         super.createOrUpdate(token);
     }

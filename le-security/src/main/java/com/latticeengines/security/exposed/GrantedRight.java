@@ -123,10 +123,10 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Quotas";
         }
     }, //
-    CREATE_PLS_OAUTH_TOKEN {
+    CREATE_PLS_OAUTH2_TOKEN {
         @Override
         public String getAuthority() {
-            return "Create_PLS_OauthToken";
+            return "Create_PLS_Oauth2Token";
         }
     }, //
     VIEW_PLS_CRMCREDENTIAL {
