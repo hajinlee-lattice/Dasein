@@ -429,6 +429,7 @@
 ;685;	;HPANumPages;	;HPANumPages;	;Number of total pages detected on company website;	;INT;	;Number Of Website Pages;	;Online Presence;	;RATIO;	;{"geometric": { "minValue":1,"multiplierList":[2,2.5,2],"minSamples":100,"minFreq":0.01,"maxBuckets":5,"maxPercentile":1}};	;NUMERIC;	;ModelAndAllInsights;	;DerivedColumns,Model;
 ;686;	;Intelliscore;	;Intelliscore;	;Company credit score, 1-100. Higher scores indicate lower credit risk;	;FLOAT;	;Credit Score;	;Firmographics;	;RATIO;	;{"linear": { "minValue":0,"stepSize":10,"minSamples":100,"minFreq":0.01,"maxBuckets":5,"maxPercentile":1}};	;;	;Model;	;DerivedColumns,Model;
 ;687;	;IsMatched;	;IsMatched;	;Internal Only;	;BIT;	;Lattice Match Indicator;	;Website Profile;	;NOMINAL;	;;	;NUMERIC;	;None;	;DerivedColumns;
+;911;	;IsPublicDomain;	;IsPublicDomain;	;Indicates whether email represents a public domain, e.g., gmail.com;	;BIT;	;Has Public Email Domain;	;Lead Information;	;NOMINAL;	;;	;BOOLEAN;	;ModelAndAllInsights;	;DerivedColumns,Model;
 ;157;	;JavascriptLibrariesTopAttributes;	;JavascriptLibrariesTopAttributes;	;A popular Javascript Libraries  is detected in use;	;NVARCHAR(500);	;Top Website Technology: Javascript Libraries;	;Website Profile;	;NOMINAL;	;;	;;	;None;	;DerivedColumns;
 ;688;	;JobsAsOf;	;JobsAsOf;	;Date jobs were last identified.;	;DATETIME;	;Date of last Job Posting;	;;	;;	;;	;;	;None;	;DerivedColumns;
 ;689;	;JobsDescription;	;JobsDescription;	;Description of most recent job posting;	;NVARCHAR(1000);	;Job Posting Description;	;;	;;	;;	;;	;None;	;DerivedColumns;
