@@ -1,0 +1,84 @@
+<section class="container apikey-form">
+  <form name="apiKeyForm" ng-controller="" novalidate>
+    
+    <div class="row">
+      <div class="six columns offset-three">
+          <div class="form-group" ng-class="{ 'has-error' : apiKeyForm.userID.$invalid && !apiKeyForm.userID.$pristine }">
+            <label>User ID</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              name="userID" 
+              ng-model="userID" 
+              ng-minlength="1"
+              required />
+            <p class="help-block">* User ID must be specified.</p>
+          </div>
+
+      </div><!-- End .six.columns -->
+    </div><!-- End .row -->
+
+
+    <div class="row">
+      <div class="six columns offset-three">
+          <div class="form-group" ng-class="{ 'has-error' : apiKeyForm.connectionURL.$invalid && !apiKeyForm.connectionURL.$pristine }">
+            <label>Connection URL</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              name="connectionURL" 
+              ng-model="connectionURL" 
+              ng-minlength="1"
+              required />
+            <p class="help-block">* Connection URL must be specified.</p>
+          </div>
+
+      </div><!-- End .six.columns -->
+    </div><!-- End .row -->
+
+
+    <div class="row">
+      <div class="six columns offset-three">
+          <div class="form-group" ng-class="{ 'has-error' : apiKeyForm.encryptionKey.$invalid && !apiKeyForm.encryptionKey.$pristine }">
+            <label>Encryption Key</label>
+            <input 
+              type="text" 
+              class="form-control" 
+              name="encryptionKey" 
+              ng-model="encryptionKey" 
+              ng-minlength="1"
+              required />
+            <p class="help-block">* Encryption Key must be specified.</p>
+          </div>
+
+      </div><!-- End .six.columns -->
+    </div><!-- End .row -->
+
+
+    <div class="row form-actions">
+      <div class="six columns offset-three">
+          <button 
+              type="button" 
+              ui-sref="models"
+              class="button white-button">
+            Cancel
+          </button>
+          <button 
+              type="button" 
+              class="button blue-button"
+              ng-disabled="apiKeyForm.$invalid"
+              ng-click="">
+            Test Connection
+          </button>
+          <button 
+              type="button" 
+              class="button orange-button"
+              ng-disabled="apiKeyForm.$invalid"
+              ng-click="">
+            Save &amp; Setup Models
+          </button>
+      </div>
+    </div>
+
+  </form>
+</section>

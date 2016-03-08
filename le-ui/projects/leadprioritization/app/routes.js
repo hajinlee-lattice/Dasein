@@ -300,14 +300,14 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'API Key';
+                            return 'Marketo API Key';
                         }
                     },
                     controller: 'OneLineController',
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: ''
+                    templateUrl: './app/marketo/views/APIKeyView.html'
                 }   
             }
         })
@@ -324,7 +324,7 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: ''
+                    templateUrl: './app/marketo/views/ModelsView.html'
                 }   
             }
         })
@@ -341,7 +341,7 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: ''
+                    templateUrl: './app/marketo/views/EnrichmentView.html'
                 }   
             }
         })
@@ -358,7 +358,7 @@ angular
                     templateUrl: './app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: ''
+                    templateUrl: './app/marketo/views/WebhookView.html'
                 }   
             }
         }) 
