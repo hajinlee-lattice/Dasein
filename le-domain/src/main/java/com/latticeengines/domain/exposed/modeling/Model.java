@@ -314,7 +314,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonProperty("provenance_properties")
-    @Column(name = "PROVENANCE_PROPERTIES")
+    @Column(name = "PROVENANCE_PROPERTIES", length = 2048)
     public String getProvenanceProperties() {
         return this.provenanceProperties;
     }

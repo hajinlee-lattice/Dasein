@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
+import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.metadata.exposed.standardschemas.SchemaRepository;
@@ -139,6 +140,11 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attribute.setNullable(true);
                 attributes.add(attribute);
             }
+        }
+
+        Attribute lastModified = result.metadata.getAttribute(SemanticType.LastModifiedDate);
+        if (lastModified == null) {
+            result.metadata.setLastModifiedKey(null);
         }
 
         // If there are any unknown columns, the metadata is not fully defined.

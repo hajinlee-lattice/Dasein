@@ -109,6 +109,11 @@ public class CreateModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
         public Builder modelName(String modelName) {
             model.setModelName(modelName);
             return this;

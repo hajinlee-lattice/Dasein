@@ -73,6 +73,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Double top30PercentLift;
     private String applicationId;
     private String eventTableName;
+    private String sourceSchemaInterpretation;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -399,4 +400,13 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         return eventTableName;
     }
 
+    @JsonProperty("SourceSchemaInterpretation")
+    @Column(name = "SOURCE_SCHEMA_INTERPRETATION", nullable = true)
+    public String getSourceSchemaInterpretation() {
+        return sourceSchemaInterpretation;
+    }
+
+    public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
+        this.sourceSchemaInterpretation = sourceSchemaInterpretation;
+    }
 }

@@ -136,7 +136,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     SecurityContextUtils.getCustomerSpace());
 
             Path sourcePath = tablesPath.append(name);
-            Path destPath = tablesPath.append(existing.getName());
+            Path destPath = tablesPath.append(clone.getName());
             log.info(String.format("Copying table data from %s to %s", sourcePath, destPath));
             try {
                 HdfsUtils.copyFiles(yarnConfiguration, sourcePath.toString(), destPath.toString());

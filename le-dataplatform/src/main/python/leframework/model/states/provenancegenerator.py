@@ -24,6 +24,8 @@ class ProvenanceGenerator(State):
                 self.result["QueryName"] = properties["DataLoader_Query"]
             if "Event_Table_Name" in properties.keys():
                 self.result["EventTableName"] = properties["Event_Table_Name"]
+            if "Source_Schema_Interpretation" in properties.keys():
+                self.result["SourceSchemaInterpretation"] = properties["Source_Schema_Interpretation"]
         else:
             self.logger.error("Provenance property is null.")
             self.result = OrderedDict()

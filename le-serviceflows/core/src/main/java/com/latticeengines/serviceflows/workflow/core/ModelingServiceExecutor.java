@@ -1,10 +1,12 @@
 package com.latticeengines.serviceflows.workflow.core;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -35,7 +37,7 @@ import com.latticeengines.serviceflows.workflow.modeling.ProvenanceProperties;
 public class ModelingServiceExecutor {
 
     // TODO externalize this as a step configuration property
-    private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60*60*24;
+    private static final int MAX_SECONDS_WAIT_FOR_MODELING = 60 * 60 * 24;
 
     private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
 
@@ -155,9 +157,16 @@ public class ModelingServiceExecutor {
         model.setCustomer(builder.getCustomer());
         model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
         model.setDataFormat("avro");
-        String provenanceProperties = "Event_Table_Name=" + builder.getEventTableTable();
+        List<String> props = new ArrayList<>();
+        if (builder.getEventTableTable() != null) {
+            props.add("Event_Table_Name=" + builder.getEventTableTable());
+        }
+        if (builder.getSourceSchemaInterpretation() != null) {
+            props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
+        }
+        String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
-        
+
         model.setProvenanceProperties(provenanceProperties);
 
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
@@ -244,6 +253,7 @@ public class ModelingServiceExecutor {
         private String dataCompositionContents;
         private String modelName;
         private String eventTableName;
+        private String sourceSchemaInterpretation;
         private String productType;
 
         private String loadSubmissionUrl = "/rest/load";
@@ -254,7 +264,6 @@ public class ModelingServiceExecutor {
         private String retrieveJobStatusUrl = "/rest/getJobStatus/%s";
         private String modelingJobStatusUrl = "/rest/getJobStatus/%s";
         private String hdfsDirToSample;
-
 
         public Builder() {
         }
@@ -393,12 +402,16 @@ public class ModelingServiceExecutor {
             this.setEventTableName(eventTableName);
             return this;
         }
-        
+
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            this.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
         public Builder productType(String productType) {
             this.setProductType(productType);
             return this;
         }
-        
 
         public void setHdfsDirToSample(String hdfsDirToSample) {
             this.hdfsDirToSample = hdfsDirToSample;
@@ -614,6 +627,14 @@ public class ModelingServiceExecutor {
 
         public String getEventTableTable() {
             return eventTableName;
+        }
+
+        public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            this.sourceSchemaInterpretation = sourceSchemaInterpretation;
+        }
+
+        public String getSourceSchemaInterpretation() {
+            return sourceSchemaInterpretation;
         }
 
         public String getProductType() {

@@ -7,6 +7,7 @@ import org.joda.time.DateTime;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -44,6 +45,7 @@ public class SchemaRepository {
     private Table getSalesforceAccountSchema() {
         Table table = createTable(SchemaInterpretation.SalesforceAccount);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
+        table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
         table.addAttribute(createAttribute("Website", Schema.Type.STRING, false, SemanticType.Website));
@@ -69,6 +71,7 @@ public class SchemaRepository {
     private Table getSalesforceLeadSchema() {
         Table table = createTable(SchemaInterpretation.SalesforceLead);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
+        table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
@@ -102,6 +105,14 @@ public class SchemaRepository {
         lmk.setLastModifiedTimestamp(DateTime.now().getMillis());
         lmk.setAttributes(Arrays.asList(columnName));
         return lmk;
+    }
+
+    private PrimaryKey createPrimaryKey(String columnName) {
+        PrimaryKey pk = new PrimaryKey();
+        pk.setDisplayName(columnName);
+        pk.setName(columnName);
+        pk.setAttributes(Arrays.asList(columnName));
+        return pk;
     }
 
     private Table createTable(SchemaInterpretation interpretation) {

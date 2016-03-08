@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -66,8 +67,11 @@ public class ModelResource {
             Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
                     parameters.getAttributes());
 
+            ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
+
             return ResponseDocument.successResponse( //
-                    modelWorkflowSubmitter.submit(clone.getName(), parameters.getName()).toString());
+                    modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(),
+                            modelSummary.getSourceSchemaInterpretation()).toString());
         } catch (Exception e) {
             log.error(String.format("Failure creating a clone model with name %s", parameters.getName()), e);
             return ResponseDocument.failedResponse(e);

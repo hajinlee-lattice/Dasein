@@ -112,6 +112,7 @@ public class CreateModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBa
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .modelName(UUID.randomUUID().toString()) //
+                .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .build();
         return workflowConfig;
     }

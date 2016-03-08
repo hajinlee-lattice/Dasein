@@ -17,7 +17,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(CreateModelWorkflowSubmitter.class);
 
-    public ApplicationId submit(String eventTableName, String modelName) {
+    public ApplicationId submit(String eventTableName, String modelName, String sourceSchemaInterpretation) {
         Table eventTable = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), eventTableName);
 
         if (eventTable == null) {
@@ -32,6 +32,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .modelName(modelName) //
                 .eventTableName(eventTableName) //
                 .internalResourceHostPort(internalResourceHostPort) //
+                .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);

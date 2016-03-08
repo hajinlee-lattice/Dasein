@@ -43,11 +43,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
@@ -94,14 +92,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new ClassPathResource(RESOURCE_BASE + "/Account.csv"));
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/Mulesoft_SFDC_LP3_1000.csv"));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/pls/fileuploads/unnamed?schema=%s", getPLSRestAPIHostPort(),
-                        SchemaInterpretation.SalesforceAccount), //
+                        SchemaInterpretation.SalesforceLead), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
     }
@@ -167,6 +165,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     public void retrieveModelSummary() throws InterruptedException {
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
+        assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceLead.toString());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -233,6 +233,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
+        assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {

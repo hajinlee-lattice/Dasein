@@ -16,8 +16,10 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String modelName;
 
     private String eventTableName;
-    
+
     private String productType;
+
+    private String sourceSchemaInterpretation;
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
@@ -53,5 +55,13 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setProductType(String productType) {
         this.productType = productType;
+    }
+
+    public String getSourceSchemaInterpretation() {
+        return sourceSchemaInterpretation;
+    }
+
+    public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
+        this.sourceSchemaInterpretation = sourceSchemaInterpretation;
     }
 }

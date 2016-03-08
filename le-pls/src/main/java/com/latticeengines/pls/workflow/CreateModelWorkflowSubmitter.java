@@ -58,6 +58,7 @@ public class CreateModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .modelName(parameters.getName()) //
+                .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .build();
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);
