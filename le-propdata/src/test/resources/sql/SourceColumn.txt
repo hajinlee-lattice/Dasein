@@ -123,8 +123,8 @@
 ;122;	;BuiltWithPivoted;	;WebsiteEncodingStandardsTopAttributes;	;NVARCHAR(500);	;BuiltWithMostRecent;	;;	;1;	;Domain;	;BUILTWITH_TOPATTR;	;{"TechnologyNames":"UTF-8,ISO/IEC 8859,GB 2312,Shift JIS,UTF-16"};	;;
 ;123;	;BuiltWithPivoted;	;WebsiteFrameworksTopAttributes;	;NVARCHAR(500);	;BuiltWithMostRecent;	;;	;1;	;Domain;	;BUILTWITH_TOPATTR;	;{"TechnologyNames":"PHP,ASP.NET,Shockwave Flash,Adobe Dreamweaver,ASP .NET Ajax,J2EE"};	;;
 ;124;	;BuiltWithPivoted;	;WidgetsTopAttributes;	;NVARCHAR(500);	;BuiltWithMostRecent;	;;	;1;	;Domain;	;BUILTWITH_TOPATTR;	;{"TechnologyNames":"Facebook ,Google Font,Google Plus,WordPress,Twitter,AddThis"};	;;
-;125;	;BuiltWithPivoted;	;BusinessTechnologiesRecentTechnologies;	;NVARCHAR(MAX);	;;	;;	;1;	;;	;OTHER;	;;	;;
-;126;	;BuiltWithPivoted;	;BusinessTechnologiesRecentTags;	;NVARCHAR(MAX);	;;	;;	;1;	;;	;OTHER;	;;	;;
+;125;	;BuiltWithPivoted;	;BusinessTechnologiesRecentTechnologies;	;NVARCHAR(1000);	;;	;;	;1;	;;	;OTHER;	;;	;;
+;126;	;BuiltWithPivoted;	;BusinessTechnologiesRecentTags;	;NVARCHAR(1000);	;;	;;	;1;	;;	;OTHER;	;;	;;
 ;127;	;BuiltWithPivoted;	;SystemAlert;	;BIT;	;BuiltWithMostRecent;	;LastMonth;	;1;	;Domain;	;PIVOT_EXISTS;	;{"PivotKeyColumn":"Technology_Name","PivotValueColumn":"Technology_Name","TargetPivotKeys":"Cart Functionality,ATG Commerce,Demandware,IBM Websphere Commerce,Ascentium Commerce Server,Shoprunner,MadMobile,osCommerce,Yahoo Store,Magento Enterprise,GSI Commerce,WooCommerce,Volusion,Ubercart,Miva Merchant,Zen Cart,WP e-commerce,Shopify,BigCommerce,GoDaddy Quick Shopping Cart,ECSHOP","IsNull":false};	;;
 ;128;	;BuiltWithPivoted;	;MarketingAutomationAlert;	;BIT;	;BuiltWithMostRecent;	;LastMonth;	;1;	;Domain;	;PIVOT_EXISTS;	;{"PivotKeyColumn":"Technology_Name","PivotValueColumn":"Technology_Name","TargetPivotKeys":"Marketo,Eloqua,Hubspot,Act-On,Pardot","IsNull":false};	;;
 ;129;	;BuiltWithPivoted;	;CRMAlert;	;BIT;	;BuiltWithMostRecent;	;LastMonth;	;1;	;Domain;	;PIVOT_EXISTS;	;{"PivotKeyColumn":"Technology_Name","PivotValueColumn":"Technology_Name","TargetPivotKeys":"Salesforce","IsNull":false};	;;
