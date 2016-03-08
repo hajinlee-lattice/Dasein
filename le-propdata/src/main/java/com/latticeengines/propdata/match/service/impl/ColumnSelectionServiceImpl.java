@@ -37,12 +37,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Autowired
     private ExternalColumnService externalColumnService;
 
-    @Autowired
-    private DataSourceService dataSourceService;
-
     private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> sourceColumnMapCache;
     private LoadingCache<ColumnSelection.Predefined, Map<String, List<String>>> columnPriorityMapCache;
-    private static final String CACHE_TABLE = "DerivedColumnsCache";
 
     @PostConstruct
     private void postConstruct() {
@@ -102,25 +98,11 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     private Map<String, List<String>> getSourceColumnMapForSelectionModel() {
-        JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-        List<String> columnsByQuery = jdbcTemplate.queryForList("SELECT COLUMN_NAME "
-                + "FROM INFORMATION_SCHEMA.COLUMNS\n"
-                + "WHERE TABLE_NAME = '" + CACHE_TABLE
-                + "' AND TABLE_SCHEMA='dbo'", String.class);
-        Set<String> columnsInSql = new HashSet<>();
-        for (String columnName: columnsByQuery) {
-            columnsInSql.add(columnName.toLowerCase());
-        }
-
         List<ExternalColumn> columns = externalColumnService.columnSelection(ColumnSelection.Predefined.Model);
         Map<String, List<String>> map = new HashMap<>();
         List<String> columnNames = new ArrayList<>();
         for (ExternalColumn column : columns) {
-            if (columnsInSql.contains(column.getDefaultColumnName().toLowerCase())) {
-                columnNames.add(column.getDefaultColumnName());
-            } else {
-                log.warn("Cannot find column " + column.getDefaultColumnName() + " from table " + CACHE_TABLE);
-            }
+            columnNames.add(column.getDefaultColumnName());
         }
         map.put(ColumnSelection.Predefined.Model.getName(), columnNames);
         return map;

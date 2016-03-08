@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +15,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -25,6 +29,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
@@ -56,6 +63,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
     private static final String MODEL = ColumnSelection.Predefined.Model.getName();
     private static final Integer MAX_FETCH_THREADS = 4;
 
+    private LoadingCache<String, Set<String>> tableColumnsCache;
+
     @Autowired
     private DataSourceService dataSourceService;
 
@@ -67,6 +76,11 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     @Autowired
     private PublicDomainService publicDomainService;
+
+    @PostConstruct
+    private void postConstruct() {
+        buildSourceColumnMapCache();
+    }
 
     @Override
     public MatchContext executeMatch(MatchContext matchContext) {
@@ -119,9 +133,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         matchContext.setInternalResults(internalOutputRecords);
         matchContext = mergeResults(matchContext);
 
-        List<ColumnMetadata> allFields = columnMetadataService
-                .fromPredefinedSelection(ColumnSelection.Predefined.Model);
-        matchContext.getOutput().setMetadata(allFields);
+        matchContext = appendMetadata(matchContext);
 
         matchContext.getOutput().setFinishedAt(new Date());
         Long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
@@ -336,6 +348,16 @@ class RealTimeMatchExecutor implements MatchExecutor {
         return matchContext;
     }
 
+    private MatchContext appendMetadata(MatchContext matchContext) {
+        if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
+            List<ColumnMetadata> allFields = columnMetadataService
+                    .fromPredefinedSelection(ColumnSelection.Predefined.Model);
+            matchContext.getOutput().setMetadata(allFields);
+        }
+        return matchContext;
+    }
+
+
     private boolean isDomainSource(String sourceName) {
         return true;
     }
@@ -418,13 +440,30 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains,
                                          Collection<NameLocation> nameLocations) {
+
+            List<String> columnsToQuery = new ArrayList<>();
+            Set<String> columnsInTable;
+            try {
+                columnsInTable = tableColumnsCache.get(tableName);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            
+            for (String columnName: columns) {
+                if (columnsInTable.contains(columnName.toLowerCase())) {
+                    columnsToQuery.add(columnName);
+                } else {
+                    log.warn("Cannot find column " + columnName + " from table " + tableName);
+                }
+            }
+
             String sql = "SELECT "
                     + "[" + domainField + "], "
                     + "[" + nameField + "], "
                     + "[" + countryField + "], "
                     + "[" + stateField + "], "
                     + ( cityField != null ? "[" + cityField + "], " : "" )
-                    + "[" + StringUtils.join(columns, "], [") + "] \n"
+                    + "[" + StringUtils.join(columnsToQuery, "], [") + "] \n"
                     + "FROM [" + tableName + "] WITH(NOLOCK) \n"
                     + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
@@ -537,6 +576,25 @@ class RealTimeMatchExecutor implements MatchExecutor {
             }
         }
 
+    }
+
+    private void buildSourceColumnMapCache() {
+        tableColumnsCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, Set<String>>() {
+                    public Set<String> load(String key) {
+                        JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
+                        List<String> columnsByQuery = jdbcTemplate.queryForList("SELECT COLUMN_NAME "
+                                + "FROM INFORMATION_SCHEMA.COLUMNS\n"
+                                + "WHERE TABLE_NAME = '" + key
+                                + "' AND TABLE_SCHEMA='dbo'", String.class);
+                        Set<String> columnsInSql = new HashSet<>();
+                        for (String columnName: columnsByQuery) {
+                            columnsInSql.add(columnName.toLowerCase());
+                        }
+                        return columnsInSql;
+                    }
+                });
     }
 
 }
