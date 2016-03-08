@@ -98,7 +98,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
             { AccessLevel.SUPER_ADMIN, new Boolean[] {true, true, true, true, true, true} },
             { AccessLevel.INTERNAL_ADMIN, new Boolean[] {true, true, true, true, true, false} },
             { AccessLevel.INTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
-            { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, false, false, false, false} },
+            { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, true, false, false, false} },
             { AccessLevel.EXTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
             { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false} },
         };

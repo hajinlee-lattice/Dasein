@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum AccessLevel {
-
+    THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
+            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
+            GrantedRight.EDIT_PLS_CRMCREDENTIAL //
+            )), //
     EXTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_DATA, //
             GrantedRight.VIEW_PLS_MODELS, //
@@ -33,10 +36,6 @@ public enum AccessLevel {
             GrantedRight.CREATE_PLS_OAUTH2_TOKEN //
             ) //
     ), //
-    THIRD_PARTY_USER(Arrays.asList(GrantedRight.CREATE_PLS_OAUTH2_TOKEN, //
-            GrantedRight.VIEW_PLS_CRMCREDENTIAL, //
-            GrantedRight.EDIT_PLS_CRMCREDENTIAL //
-            )), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
             GrantedRight.VIEW_PLS_REPORTING, //

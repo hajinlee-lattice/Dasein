@@ -19,12 +19,13 @@ public class AccessLevelUnitTestNG {
 
     @Test(groups = "unit")
     public void cardinalityOfAccessLevels() {
-        AccessLevel[] levelsInOrder = new AccessLevel[] { AccessLevel.SUPER_ADMIN, //
+        AccessLevel[] levelsInOrder = new AccessLevel[] { 
+                AccessLevel.SUPER_ADMIN, //
                 AccessLevel.INTERNAL_ADMIN, //
                 AccessLevel.INTERNAL_USER, //
-                AccessLevel.THIRD_PARTY_USER, //
                 AccessLevel.EXTERNAL_ADMIN, //
-                AccessLevel.EXTERNAL_USER //
+                AccessLevel.EXTERNAL_USER, //
+                AccessLevel.THIRD_PARTY_USER //
         };
         for (int i = 0; i < levelsInOrder.length - 1; i++) {
             assertTrue(levelsInOrder[i].compareTo(levelsInOrder[i + 1]) > 0);
