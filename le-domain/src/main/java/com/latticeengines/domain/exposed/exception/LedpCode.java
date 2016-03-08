@@ -357,7 +357,7 @@ public enum LedpCode {
     LEDP_31008("ModelSummary {0} is missing eventTableName value"), //
     LEDP_31009("Retrieved null EventTable {0}"), //
     LEDP_31010("EventTable {0} interpretation is null or empty"), //
-    LEDP_31011("Average probability is 0 for model {0}"), //
+    LEDP_31011("No percentile bucket found for probability {0} in model {1}"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //

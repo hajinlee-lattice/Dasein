@@ -198,26 +198,30 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
-        Object lift = evaluation.get(ScoreType.LIFT);
-        if (lift == null) {
-            throw new LedpException(LedpCode.LEDP_31011, new String[] { scoringArtifacts.getModelId() });
-        }
-        double score = (double) lift;
-        if (score > 99 || score < 5) {
-            log.warn(String.format("Score out of range: %,.7f", score));
-            score = Math.min(score, 99);
-            score = Math.max(score, 5);
+        Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
+        if (percentileObject == null) {
+            throw new LedpException(LedpCode.LEDP_31011, new String[] {
+                    String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
         }
 
-        return score;
+        int percentile = (int) percentileObject;
+        if (percentile > 99 || percentile < 5) {
+            log.warn(String.format("Score out of range: %d", percentile));
+            percentile = Math.min(percentile, 99);
+            percentile = Math.max(percentile, 5);
+        }
+
+        return percentile;
     }
 
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {
-        Map<String, Object> standardTransformedRecord = recordTransformer.transform(scoringArtifacts.getModelArtifactsDir()
-                .getAbsolutePath(), scoringArtifacts.getMetadataDataComposition().transforms, matchedRecord);
+        Map<String, Object> standardTransformedRecord = recordTransformer.transform(scoringArtifacts
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getMetadataDataComposition().transforms,
+                matchedRecord);
 
-        Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(scoringArtifacts.getModelArtifactsDir()
-                .getAbsolutePath(), scoringArtifacts.getDataComposition().transforms, standardTransformedRecord);
+        Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(scoringArtifacts
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getDataComposition().transforms,
+                standardTransformedRecord);
         return datascienceTransformedRecord;
     }
 

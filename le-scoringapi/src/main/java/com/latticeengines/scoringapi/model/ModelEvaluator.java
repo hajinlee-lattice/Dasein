@@ -129,8 +129,10 @@ public class ModelEvaluator {
 
         if (derivation.percentiles != null) {
             for (int index = 0; index < derivation.percentiles.size(); index++) {
-                if (withinRange(derivation.percentiles.get(index), predicted)) {
-                    result.put(ScoreType.PERCENTILE, index);
+                BucketRange percentileRange = derivation.percentiles.get(index);
+                if (withinRange(percentileRange, predicted)) {
+                    // Name of the percentile bucket is the percentile value.
+                    result.put(ScoreType.PERCENTILE, Integer.valueOf(percentileRange.name));
                     break;
                 }
             }
