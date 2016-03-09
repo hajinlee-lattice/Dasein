@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +58,7 @@ public class FileUploadResource {
             @RequestParam("schema") SchemaInterpretation schema, @RequestParam("file") MultipartFile file) {
         try {
             return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
-                    new ByteArrayInputStream(file.getBytes())));
+                    file.getInputStream()));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
         }
