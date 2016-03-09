@@ -99,7 +99,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/pls/fileuploads/unnamed?schema=%s", getPLSRestAPIHostPort(),
-                        SchemaInterpretation.LP3SalesforceLeadCSV), //
+                        SchemaInterpretation.SalesforceLead), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
     }
@@ -166,7 +166,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
-                SchemaInterpretation.LP3SalesforceLeadCSV.toString());
+                SchemaInterpretation.SalesforceLead.toString());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -233,7 +233,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             }
 
         }));
-        assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.LP3SalesforceLeadCSV.toString());
+        assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {

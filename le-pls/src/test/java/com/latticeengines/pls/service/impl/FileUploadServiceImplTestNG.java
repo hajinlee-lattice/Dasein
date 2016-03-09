@@ -45,7 +45,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("file1.csv", SchemaInterpretation.LP3SalesforceAccountCSV, fileInputStream);
+        fileUploadService.uploadFile("file1.csv", SchemaInterpretation.SalesforceAccount, fileInputStream);
 
         String contents = HdfsUtils
                 .getHdfsFileContents(

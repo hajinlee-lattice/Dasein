@@ -154,7 +154,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
 
         Table file = new Table();
         file.setName(fileName);
-        file.setInterpretation(SchemaInterpretation.LP3SalesforceLeadCSV.name());
+        file.setInterpretation(SchemaInterpretation.SalesforceLead.name());
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
             attr.setName(field.getName());

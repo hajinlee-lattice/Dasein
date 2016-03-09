@@ -33,9 +33,9 @@ public class SchemaRepository {
 
     public Table getSchema(SchemaInterpretation schema) {
         switch (schema) {
-        case LP3SalesforceAccountCSV:
+        case SalesforceAccount:
             return getSalesforceAccountSchema();
-        case LP3SalesforceLeadCSV:
+        case SalesforceLead:
             return getSalesforceLeadSchema();
         default:
             throw new RuntimeException(String.format("Unsupported schema %s", schema));
@@ -43,7 +43,7 @@ public class SchemaRepository {
     }
 
     private Table getSalesforceAccountSchema() {
-        Table table = createTable(SchemaInterpretation.LP3SalesforceAccountCSV);
+        Table table = createTable(SchemaInterpretation.SalesforceAccount);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
@@ -69,7 +69,7 @@ public class SchemaRepository {
     }
 
     private Table getSalesforceLeadSchema() {
-        Table table = createTable(SchemaInterpretation.LP3SalesforceLeadCSV);
+        Table table = createTable(SchemaInterpretation.SalesforceLead);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 

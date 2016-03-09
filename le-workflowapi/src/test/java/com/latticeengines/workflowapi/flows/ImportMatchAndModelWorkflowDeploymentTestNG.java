@@ -31,13 +31,13 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
 
     @Test(groups = "deployment", enabled = false)
     public void testWorkflowAccount() throws Exception {
-        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.LP3SalesforceAccountCSV);
+        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.SalesforceAccount);
         run(sourceFile);
     }
 
     @Test(groups = "deployment", enabled = false)
     public void testWorkflowLead() throws Exception {
-        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.LP3SalesforceLeadCSV);
+        SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.SalesforceLead);
         run(sourceFile);
     }
 

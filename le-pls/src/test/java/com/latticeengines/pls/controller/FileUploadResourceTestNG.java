@@ -59,14 +59,14 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String path = String.format("/pls/fileuploads/unnamed?schema=%s", SchemaInterpretation.LP3SalesforceAccountCSV);
+            String path = String.format("/pls/fileuploads/unnamed?schema=%s", SchemaInterpretation.SalesforceAccount);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
             String path = String.format("/pls/fileuploads?fileName=file1.csv&schema=%s",
-                    SchemaInterpretation.LP3SalesforceAccountCSV);
+                    SchemaInterpretation.SalesforceAccount);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + path, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {

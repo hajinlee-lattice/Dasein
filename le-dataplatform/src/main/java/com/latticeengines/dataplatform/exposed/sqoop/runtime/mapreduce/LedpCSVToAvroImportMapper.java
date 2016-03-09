@@ -194,10 +194,10 @@ public class LedpCSVToAvroImportMapper extends
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
             throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getPhysicalName()));
-        } else if (interpretation.equals(SchemaInterpretation.LP3SalesforceAccountCSV.name())
+        } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())
                 && semanticType.equals(SemanticType.Website) && StringUtils.isEmpty(fieldCsvValue)) {
             emailOrWebsiteIsEmpty = true;
-        } else if (interpretation.equals(SchemaInterpretation.LP3SalesforceLeadCSV.name())
+        } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())
                 && semanticType.equals(SemanticType.Email) && StringUtils.isEmpty(fieldCsvValue)) {
             emailOrWebsiteIsEmpty = true;
         } else if (emailOrWebsiteIsEmpty
@@ -205,7 +205,7 @@ public class LedpCSVToAvroImportMapper extends
                         || semanticType.equals(SemanticType.State) || semanticType.equals(SemanticType.Country))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
-            String colName = interpretation.equals(SchemaInterpretation.LP3SalesforceAccountCSV.name()) ? table.getAttribute(
+            String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? table.getAttribute(
                     SemanticType.Website).getPhysicalName() : table.getAttribute(SemanticType.Email).getPhysicalName();
             throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", colName,
                     attr.getPhysicalName()));
