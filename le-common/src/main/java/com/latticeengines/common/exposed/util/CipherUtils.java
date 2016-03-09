@@ -23,6 +23,8 @@ public class CipherUtils {
     // Secret key used for both encryption and decryption
     private static final String KEY = "I03TMIIUftFUUI7bV0zFBw==";
 
+    private static final String CHARSET_UTF8 = "UTF-8";
+
     // Required by CBC block-chaining mode
     private static IvParameterSpec ivspec = new IvParameterSpec(new byte[16]);
 
@@ -30,7 +32,7 @@ public class CipherUtils {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
-            return Base64.encodeBase64String(cipher.doFinal(str.getBytes("UTF8")));
+            return Base64.encodeBase64String(cipher.doFinal(str.getBytes(CHARSET_UTF8)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -40,7 +42,7 @@ public class CipherUtils {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
-            return new String(cipher.doFinal(Base64.decodeBase64(str)));
+            return new String(cipher.doFinal(Base64.decodeBase64(str)), CHARSET_UTF8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
