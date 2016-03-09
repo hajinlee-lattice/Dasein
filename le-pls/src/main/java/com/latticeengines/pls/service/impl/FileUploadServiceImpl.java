@@ -17,8 +17,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -68,7 +68,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18053, e);
+            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         }
     }
 

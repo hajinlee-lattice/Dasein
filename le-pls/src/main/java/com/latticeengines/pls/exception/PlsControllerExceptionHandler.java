@@ -55,6 +55,6 @@ public class PlsControllerExceptionHandler extends SecurityControllerExceptionHa
         this.alertService.triggerCriticalEvent(e.getMessage(), null, details);
 
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
-                "errorMsg", stackTrace));
+                "errorMsg", LedpCode.LEDP_00002.getMessage()));
     }
 }

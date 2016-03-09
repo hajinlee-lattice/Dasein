@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -39,4 +40,8 @@ public class ModelingParameters {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

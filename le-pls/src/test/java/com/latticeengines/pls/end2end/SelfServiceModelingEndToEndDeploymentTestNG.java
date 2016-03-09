@@ -3,7 +3,6 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.AssertJUnit.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
@@ -29,13 +28,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -110,13 +109,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         ResponseDocument response = restTemplate.getForObject(
                 String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
                 ResponseDocument.class);
-        assertTrue(response.isSuccess());
         @SuppressWarnings("unchecked")
         List<Object> unknownColumns = new ObjectMapper().convertValue(response.getResult(), List.class);
         response = restTemplate.postForObject(
                 String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
                 unknownColumns, ResponseDocument.class);
-        assertTrue(response.isSuccess());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -135,17 +132,22 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), parameters.getName()), parameters,
                 ResponseDocument.class);
-        assertTrue(response.isSuccess());
 
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         waitForWorkflowStatus(modelingWorkflowApplicationId, true);
 
-        response = restTemplate.postForObject(
-                String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
-                ResponseDocument.class);
-        assertFalse(response.isSuccess());
+        boolean thrown = false;
+        try {
+            response = restTemplate.postForObject(
+                    String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), UUID.randomUUID()), parameters,
+                    ResponseDocument.class);
+        } catch (Exception e) {
+            thrown = true;
+        }
+
+        assertTrue(thrown);
 
         WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
@@ -210,7 +212,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/%s/clone", getPLSRestAPIHostPort(), modelName), parameters,
                 ResponseDocument.class);
-        assertTrue(response.isSuccess());
 
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 

@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class CloneModelingParameters {
     @JsonProperty
@@ -47,5 +48,10 @@ public class CloneModelingParameters {
 
     public void setSourceModelSummaryId(String sourceModelSummaryId) {
         this.sourceModelSummaryId = sourceModelSummaryId;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

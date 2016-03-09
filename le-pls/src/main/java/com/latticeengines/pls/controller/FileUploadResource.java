@@ -22,8 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
@@ -58,9 +60,8 @@ public class FileUploadResource {
         try {
             return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
                     new ByteArrayInputStream(file.getBytes())));
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseDocument.failedResponse(e);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
         }
     }
 
@@ -77,33 +78,24 @@ public class FileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the metadata of the specified source file")
     public ResponseDocument<Table> getMetadata(@PathVariable String fileName) {
-        try {
-            SourceFile sourceFile = sourceFileService.findByName(fileName);
-            if (sourceFile == null) {
-                return null;
-            }
-            if (sourceFile.getTableName() == null) {
-                return null;
-            }
-            Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
-                    sourceFile.getTableName());
-            return ResponseDocument.successResponse(table);
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseDocument.failedResponse(e);
+
+        SourceFile sourceFile = sourceFileService.findByName(fileName);
+        if (sourceFile == null) {
+            return null;
         }
+        if (sourceFile.getTableName() == null) {
+            return null;
+        }
+        Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
+                sourceFile.getTableName());
+        return ResponseDocument.successResponse(table);
     }
 
     @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Retrieve the list of unknown metadata columns")
     public ResponseDocument<List<ColumnTypeMapping>> getUnknownColumns(@PathVariable String fileName) {
-        try {
-            return ResponseDocument.successResponse(fileUploadService.getUnknownColumns(fileName));
-        } catch (Exception e) {
-            log.error(e);
-            return ResponseDocument.failedResponse(e);
-        }
+        return ResponseDocument.successResponse(fileUploadService.getUnknownColumns(fileName));
     }
 
     @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.POST)
@@ -111,13 +103,8 @@ public class FileUploadResource {
     @ApiOperation(value = "Resolve the metadata given the list of specified columns")
     public SimpleBooleanResponse resolveMetadata(@PathVariable String fileName,
             @RequestBody List<ColumnTypeMapping> unknownColumns) {
-        try {
-            fileUploadService.resolveMetadata(fileName, unknownColumns);
-            return SimpleBooleanResponse.successResponse();
-        } catch (Exception e) {
-            log.error(e);
-            return SimpleBooleanResponse.failedResponse(e);
-        }
+        fileUploadService.resolveMetadata(fileName, unknownColumns);
+        return SimpleBooleanResponse.successResponse();
     }
 
     @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET)
@@ -134,7 +121,7 @@ public class FileUploadResource {
                 return errors;
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to retrieve error csv", e);
+            throw new LedpException(LedpCode.LEDP_18090, e);
         }
     }
 

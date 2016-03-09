@@ -49,13 +49,10 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
-        try {
-            return ResponseDocument.successResponse( //
-                    importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
-        } catch (Exception e) {
-            log.error(String.format("Failure creating a model with name %s", parameters.getName()), e);
-            return ResponseDocument.failedResponse(e);
-        }
+        log.info(String.format("model called with parameters %s", parameters.toString()));
+        return ResponseDocument.successResponse( //
+                importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
+
     }
 
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)
@@ -63,19 +60,15 @@ public class ModelResource {
     @ApiOperation(value = "Clones and remodels with the specified model name.")
     public ResponseDocument<String> cloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
-        try {
-            Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
-                    parameters.getAttributes());
+        log.info(String.format("cloneAndRemodel called with parameters %s", parameters.toString()));
+        Table clone = modelMetadataService.cloneAndUpdateMetadata(parameters.getSourceModelSummaryId(),
+                parameters.getAttributes());
 
-            ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
 
-            return ResponseDocument.successResponse( //
-                    modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(),
-                            modelSummary.getSourceSchemaInterpretation()).toString());
-        } catch (Exception e) {
-            log.error(String.format("Failure creating a clone model with name %s", parameters.getName()), e);
-            return ResponseDocument.failedResponse(e);
-        }
+        return ResponseDocument.successResponse( //
+                modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(),
+                        modelSummary.getSourceSchemaInterpretation()).toString());
     }
 
 }
