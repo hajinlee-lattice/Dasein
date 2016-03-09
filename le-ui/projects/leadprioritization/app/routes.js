@@ -318,7 +318,21 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/marketo/views/APIKeyView.html'
+                    resolve: { 
+                        IFrameUrl: function($q, $http) { 
+                            var deferred = $q.defer();
+                            $http.get("/pls/sureshot/credentials/marketo?crmType=marketo&tenantId=TestElq_20160204_222.TestElq_20160204_222.Production").then(function(result) { 
+                                deferred.promise(result) 
+                            })
+                            return deferred.promise(); 
+                        }
+                    },
+                    controller: { 
+                        function($scope, IFrameUrl) { 
+                            $scope.url = 'app/marketo/views/APIKeyView.html'; 
+                        }
+                    },
+                    template: '<iframe src="{{url}}"></iframe>'
                 }   
             }
         })
@@ -328,48 +342,28 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Models';
+                            return 'Enable Lattice Models in Marketo';
                         }
                     },
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    templateUrl: 'app/marketo/views/ModelsView.html'
-                }   
-            }
-        })
-        .state('marketosettings.enrichment', {
-            url: '/enrichment',
-            views: {
-                "summary@": {
                     resolve: { 
-                        ResourceString: function() {
-                            return 'Enrichment';
+                        IFrameUrl: function($q, $http) { 
+                            var deferred = $q.defer();
+                            $http.get("/pls/sureshot/scoring/settings/marketo?crmType=marketo&tenantId=TestElq_20160204_222.TestElq_20160204_222.Production").then(function(result) { 
+                                deferred.promise(result) 
+                            })
+                            return deferred.promise(); 
                         }
                     },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/marketo/views/EnrichmentView.html'
-                }   
-            }
-        })
-        .state('marketosettings.webhook', {
-            url: '/webhook',
-            views: {
-                "summary@": {
-                    resolve: { 
-                        ResourceString: function() {
-                            return 'How to Create Webhook';
+                    controller: { 
+                        function($scope, IFrameUrl) { 
+                            $scope.url = 'app/marketo/views/ModelsSetupView.html'; 
                         }
                     },
-                    controller: 'OneLineController',
-                    templateUrl: 'app/navigation/summary/OneLineView.html'
-                },
-                "main@": {
-                    templateUrl: 'app/marketo/views/WebhookView.html'
+                    template: '<iframe src="{{url}}"></iframe>'
                 }   
             }
         }) 
