@@ -148,7 +148,8 @@ public class ComponentOrchestrator {
         List<String> newEmailList = new ArrayList<String>();
         List<String> existingEmailList = new ArrayList<String>();
         if (allComponentsSuccessful) {
-            if (prodAndExternalAminInfo.products.contains(LatticeProduct.PD)) {
+            if (prodAndExternalAminInfo.products.contains(LatticeProduct.PD)
+                    || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
                 Set<String> externalEmails = externalEmailMap.keySet();
                 for (String externalEmail : externalEmails) {
