@@ -20,15 +20,11 @@
     </div>
     <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
         <div class="title">
-            <!--
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
-            -->
             <div class="button-area">
+                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_UPDATE_AND_CLONE_LABEL')}}</button>
                 <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
-                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
                 <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
-                <button id="manage-fields-build-model" data-ng-click="buildModelClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary" data-ng-class="{'disabled': !buildModelEnable}">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_LABEL')}}</button>
-                <i id="manage-fields-build-model-spin" data-ng-show="!batchEdit && !buildModelEnable" class="fa fa-refresh fa-spin"></i>
             </div>
         </div>
         <div data-ng-hide="batchEdit">
@@ -77,7 +73,7 @@
     </script>
     <script id="approvedUsageTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'ApprovedUsage')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}" title="{{dataItem.ApprovedUsage}}">{{dataItem.ApprovedUsage}}</span>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}" title="{{dataItem.ApprovedUsage}}">{{dataItem.ApprovedUsage || "None"}}</span>
         <select data-ng-if="batchEdit" data-ng-options="c for c in ApprovedUsageOptions" data-ng-model="dataItem.ApprovedUsage" data-ng-change="valueChanged($event, dataItem, 'ApprovedUsage', '#:ApprovedUsage#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}"></select>
     </script>
     <script id="fundamentalTypeTemplate" type="text/x-kendo-tmpl">

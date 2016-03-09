@@ -187,7 +187,7 @@ angular.module('pd.jobs', [
         });
     }
     
-    var TIME_BETWEEN_JOB_LIST_REFRESH = 45 * 1000;
+    var TIME_BETWEEN_JOB_LIST_REFRESH = 20 * 1000;
     var REFRESH_JOBS_LIST_ID;
     
     getAllJobs();

@@ -4,7 +4,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.setup.utilities.SetupUtility',
-    'mainApp.setup.services.MetadataService'
+    'mainApp.setup.modals.UpdateFieldsModal'
 ])
 
 .service('EditFieldModel', function ($compile, $rootScope, $http) {
@@ -22,7 +22,8 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
 
 })
 
-.controller('EditFieldController', function ($scope, ResourceUtility, BrowserStorageUtility, StringUtility, SetupUtility, MetadataService) {
+.controller('EditFieldController', function ($scope, $state, ResourceUtility, BrowserStorageUtility, StringUtility,
+                                              SetupUtility, UpdateFieldsModal) {
     $scope.manageFieldsScope.showFieldDetails = true;
     $scope.ResourceUtility = ResourceUtility;
 
@@ -42,18 +43,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
         $scope.saveInProgress = true;
         $scope.showEditFieldError = false;
 
-        MetadataService.UpdateField($scope.field).then(function(result){
-            if (result.Success) {
-                $scope.saveInProgress = false;
-                $scope.manageFieldsScope.showFieldDetails = false;
-
-                $scope.$emit(SetupUtility.LOAD_FIELDS_EVENT);
-            } else {
-                $scope.editFieldErrorMessage = result.ResultErrors;
-                $scope.showEditFieldError = true;
-                $scope.saveInProgress = false;
-            }
-        });
+        UpdateFieldsModal.show($scope.modelSummaryId, [$scope.field]);
     };
 
     $scope.cancelClicked = function($event) {

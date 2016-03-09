@@ -6,19 +6,20 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'mainApp.appCommon.services.ManageFieldsService',
     'mainApp.setup.modals.EditFieldModel',
     'mainApp.setup.controllers.DiscardEditFieldsModel',
+    'mainApp.setup.modals.UpdateFieldsModal',
     'kendo.directives'
 ])
 
 .controller('ManageFieldsWidgetController', function (
-    $scope, $rootScope, $timeout, StringUtility, ResourceUtility, SetupUtility,
-    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel
-) {
+    $scope, $rootScope, $timeout, $state, StringUtility, ResourceUtility, SetupUtility,
+    MetadataService, ManageFieldsService, EditFieldModel, DiscardEditFieldsModel, UpdateFieldsModal) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
     $scope.showFieldDetails = false;
-    $scope.buildModelEnable = false;
     $scope.fieldAttributes = [];
+    $scope.eventTableName = $scope.data.EventTableProvenance.EventTableName;
+    $scope.modelSummaryId = $scope.data.ModelId;
 
     getOptionsAndFields();
 
@@ -43,7 +44,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     function loadFields() {
         $scope.loading = true;
-        MetadataService.GetFields().then(function(result) {
+        MetadataService.GetFieldsForModelSummaryId($scope.modelSummaryId).then(function(result) {
             if (result.Success) {
                 $scope.fields = result.ResultObj;
                 renderSelects($scope.fields);
@@ -55,8 +56,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         $scope.fieldAttributes.push(attr);
                     }
                 }
-
-                initBuildModel();
+                $scope.loading = false;
             } else {
                 $scope.showLoadingError = true;
                 $scope.loadingError = result.ResultErrors;
@@ -167,86 +167,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             };
         }
     }
-
-    function initBuildModel() {
-        MetadataService.IsBuildModelGroupRunning().then(function(result) {
-            if (result.Success) {
-                var running = result.ResultObj;
-                $scope.buildModelEnable = !running;
-                if (running) {
-                    startGetBuildModelStatusTimer();
-                }
-            } else {
-                $scope.buildModelErrorMessage = result.ResultErrors;
-                $scope.showBuildModelError = true;
-            }
-            $scope.loading = false;
-        });
-    }
-
-    function startGetBuildModelStatusTimer() {
-        clearBuildModelTimer();
-        $scope.buildModelTimerId = window.setInterval(getBuildModelStatus, 10000);
-    }
-
-    function getBuildModelStatus() {
-        if ($('#manage-fields-build-model').length !== 1) {
-            clearBuildModelTimer();
-            $scope.gettingQueryStatus = false;
-            return;
-        }
-
-        if ($scope.gettingBuildModelStatus === true) {
-            return;
-        }
-        $scope.gettingBuildModelStatus = true;
-        MetadataService.IsBuildModelGroupRunning().then(function(result) {
-            if (result.Success) {
-                var running = result.ResultObj;
-                $scope.buildModelEnable = !running;
-                if (!running) {
-                    clearBuildModelTimer();
-                }
-                $scope.getBuildModelStatusRetries = 0;
-            } else {
-                if ($scope.getBuildModelStatusRetries++ > 10) {
-                    clearBuildModelTimer();
-                    $scope.buildModelErrorMessage = result.ResultErrors;
-                    $scope.showBuildModelError = true;
-                }
-            }
-            $scope.gettingBuildModelStatus = false;
-        });
-    }
-
-    function clearBuildModelTimer() {
-        if ($scope.buildModelTimerId != null) {
-            window.clearInterval($scope.buildModelTimerId);
-            $scope.buildModelTimerId = null;
-        }
-        $scope.getBuildModelStatusRetries = 0;
-    }
-
-    $scope.buildModelClicked = function($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-
-        if (!$scope.buildModelEnable) {
-            return;
-        }
-        $scope.buildModelEnable = false;
-        $scope.showBuildModelError = false;
-        MetadataService.BuildModel().then(function(result){
-            if (result.Success) {
-                startGetBuildModelStatusTimer();
-            } else {
-                $scope.buildModelEnable = true;
-                $scope.buildModelErrorMessage = result.ResultErrors;
-                $scope.showBuildModelError = true;
-            }
-        });
-    };
 
     $scope.categoryEditable = function(dataItem) {
         return ManageFieldsService.CategoryEditable(dataItem);
@@ -402,18 +322,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
         var editedData = getEditedData();
         if (editedData != null && editedData.length > 0) {
-            MetadataService.UpdateFields(editedData).then(function(result){
-                if (result.Success) {
-                    $scope.batchEdit = false;
-                    $scope.saveInProgress = false;
-
-                    loadFields();
-                } else {
-                    $scope.editFieldsErrorMessage = result.ResultErrors;
-                    $scope.showEditFieldsError = true;
-                    $scope.saveInProgress = false;
-                }
-            });
+            UpdateFieldsModal.show($scope.modelSummaryId, editedData);
         } else {
             $scope.batchEdit = false;
             $scope.saveInProgress = false;
@@ -471,6 +380,19 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             }
         }
     };
+
+    function getNewTableFields() {
+        var newTable = getEditedData();
+        var grid = $("#fieldsGrid").data("kendoGrid");
+        var uneditedFields = $.grep(grid.dataSource.data(), function(item) {
+            return ! item.dirty;
+        });
+
+        for (var i = 0; i < uneditedFields.length; i++) {
+            newTable.push(uneditedFields[i]);
+        }
+        return newTable;
+    }
 
     function getEditedData() {
         var grid = $("#fieldsGrid").data("kendoGrid");

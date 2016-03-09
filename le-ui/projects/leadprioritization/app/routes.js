@@ -282,8 +282,11 @@ angular
             url: '/refine',
             views: {
                 "main@": {
-                    controller: 'SetupController',
-                    templateUrl: 'app/setup/views/SetupView.html'
+                    controller: function($scope, $compile, ModelStore) {
+                        $scope.data = ModelStore.data;
+                        $compile($('#manageFieldsPageContainer').html('<div id=manageFieldsTab" class="tab-content" data-manage-fields></div>'))($scope);
+                    },
+                    template: '<div id="manageFieldsPageContainer" class="manage-fields container"></div>'
                 }   
             }
         })

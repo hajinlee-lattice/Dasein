@@ -38,12 +38,12 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.GetFields = function () {
+    this.GetFieldsForModelSummaryId = function (modelSummaryId) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET',
-            url: '/pls/vdbmetadata/fields?' + new Date().getTime(),
+            url: '/pls/modelsummaries/metadata/' + modelSummaryId,
             headers: {
                 'Content-Type': "application/json"
             }
@@ -74,53 +74,23 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.UpdateField = function (field) {
+    this.UpdateAndCloneFields = function (modelName, originalModelSummaryId, fields) {
         var deferred = $q.defer();
 
+        var cloneParams = {
+            name : modelName,
+            description: 'cloned from model: ' + modelName,
+            attributes: fields,
+            sourceModelSummaryId: originalModelSummaryId
+        };
+
         $http({
-            method: 'PUT',
-            url: '/pls/vdbmetadata/fields/' + field.ColumnName,
+            method: 'POST',
+            url: '/pls/models/' + originalModelSummaryId + '/clone',
             headers: {
                 'Content-Type': "application/json"
             },
-            data: field
-        })
-        .success(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultObj: null,
-                ResultErrors: null
-            };
-            if (data !== null) {
-                result.Success = true;
-                result.ResultObj = data;
-            } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR');
-            }
-            deferred.resolve(result);
-        })
-        .error(function (data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
-            var result = {
-                Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR')
-            };
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
-
-    this.UpdateFields = function (fields) {
-        var deferred = $q.defer();
-
-        $http({
-            method: 'PUT',
-            url: '/pls/vdbmetadata/fields',
-            headers: {
-                'Content-Type': "application/json"
-            },
-            data: fields
+            data: cloneParams
         })
         .success(function (data, status, headers, config) {
             var result = {
@@ -148,75 +118,4 @@ angular.module('mainApp.setup.services.MetadataService', [
         return deferred.promise;
     };
 
-    this.IsBuildModelGroupRunning = function () {
-        var deferred = $q.defer();
-
-        var groupName = 'CreateAnalyticPlay';
-        $http({
-            method: 'GET',
-            url: '/pls/vdbmetadata/runninggroups/' + groupName + '?' + new Date().getTime(),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .success(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultObj: null,
-                ResultErrors: null
-            };
-            if (data !== null) {
-                result.Success = true;
-                result.ResultObj = data;
-            } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR');
-            }
-            deferred.resolve(result);
-        })
-        .error(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GET_BUILD_MODEL_GROUP_RUNNING_ERROR')
-            };
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
-
-    this.BuildModel = function () {
-        var deferred = $q.defer();
-
-        var groupName = 'CreateAnalyticPlay';
-        $http({
-            method: 'POST',
-            url: '/pls/vdbmetadata/executegroup/' + groupName,
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .success(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultObj: null,
-                ResultErrors: null
-            };
-            if (data !== null) {
-                result.Success = true;
-                result.ResultObj = data;
-            } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR');
-            }
-            deferred.resolve(result);
-        })
-        .error(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_BUILD_MODEL_ERROR')
-            };
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
 });

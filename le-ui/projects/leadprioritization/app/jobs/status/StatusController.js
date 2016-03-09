@@ -122,6 +122,8 @@ angular
                             var jobStatus = response.resultObj.jobStatus;
                             if (jobStatus == "Completed" || jobStatus == "Failed" || jobStatus == "Cancelled") {
                                 cancelPeriodJobStatusQuery();
+                            }
+                            if (jobStatus == "Completed") {
                                 $scope.showJobSuccessMessage = true;
                                 BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
                             }
