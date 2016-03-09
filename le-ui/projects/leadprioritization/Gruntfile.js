@@ -381,7 +381,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-rename');
     grunt.loadNpmTasks('grunt-replace');
-    grunt.loadNpmTasks('grunt-http');
     /*
     grunt.loadNpmTasks('grunt-protractor-coverage');
     grunt.loadNpmTasks('grunt-istanbul');
