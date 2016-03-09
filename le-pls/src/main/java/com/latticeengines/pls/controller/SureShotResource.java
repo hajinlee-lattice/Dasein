@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
+import com.latticeengines.domain.exposed.pls.SureShotUrls;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
@@ -49,18 +51,23 @@ public class SureShotResource {
         return String.format(mapCredsAuthUrl + crmType + "?tenantId=%s&token=%s", tenantId, token.getAccessToken());
     }
 
-    @RequestMapping(value = "/scoring/settings", method = RequestMethod.GET)
+    @RequestMapping(value = "/urls", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Configure Scoring Settings")
+    @ApiOperation(value = "Get SureShot Urls")
     @PreAuthorize("hasRole('Edit_PLS_Configurations')")
-    public String getScoringSettingsLink(@RequestParam(value = "crmType") String crmType) {
+    public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType) {
         Tenant tenant = SecurityContextUtils.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
-            return null;
+            return ResponseDocument.failedResponse(new RuntimeException("Not able to get the tenant"));
         }
         String tenantId = tenant.getId();
         Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
-        return String.format(scoringSettingsUrl + crmType + "?tenantId=%s&token=%s", tenantId, token.getAccessToken());
+        String credsUrl = String.format(mapCredsAuthUrl + crmType + "?tenantId=%s&token=%s", tenantId,
+                token.getAccessToken()).toString();
+        String settingsUrl = String.format(scoringSettingsUrl + crmType + "?tenantId=%s&token=%s", tenantId,
+                token.getAccessToken()).toString();
+        SureShotUrls urls = new SureShotUrls(credsUrl, settingsUrl);
+        return ResponseDocument.successResponse(urls);
     }
 }
