@@ -6,7 +6,7 @@ module.exports = function (grunt) {
     // Configurable paths for the application
     var appConfig = {
         app:  sourceDir,
-        dist: 'dist',
+        dist: 'assets',
     };
 
     // version of our software. This should really be in the package.json
@@ -270,13 +270,13 @@ module.exports = function (grunt) {
         copy: {
             dist: {
                 src:  'index.html',
-                dest: 'dist/index.html'
+                dest: '<%= pls.dist %>/index.html'
             },
         },
 
         // Executes the replacement for any js/sass files in our index.html page
         usemin: {
-            html:    'dist/index.html',
+            html:    '<%= pls.dist %>/index.html',
             options: {
                 blockReplacements: {
                     sass: function (block) {
@@ -291,12 +291,12 @@ module.exports = function (grunt) {
         useminPrepare: {
             html:    'index.html',
             options: {
-                dest: 'dist',
+                dest: '<%= pls.dist %>',
                 flow: {
                     html: {
                         steps: {
-                            js:  ['concat']
-                            //css: ['concat', 'cssmin']
+                            js:  ['concat'],
+                            css: ['concat']
                         },
                         post:  {}
                     }
@@ -307,7 +307,7 @@ module.exports = function (grunt) {
         ngAnnotate: {
             dist: {
                 files: {
-                    'dist/app.js': ['dist/app.js']
+                    '<%= pls.dist %>/app.js': ['<%= pls.dist %>/app.js']
                 }
             }
         },
@@ -363,7 +363,7 @@ module.exports = function (grunt) {
             },
             main: {
                 src: ['app/**/*.html'],
-                dest: 'dist/templates.js'
+                dest: '<%= pls.dist %>/templates.js'
             },
         }
     });
@@ -394,13 +394,12 @@ module.exports = function (grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'html2js',
+        'sass:dev',
         'copy:dist',
         'useminPrepare',
         'concat:generated',
         'ngAnnotate',
-        //'cssmin:generated',
         'uglify:production',
-        //'filerev',
         'usemin',
         'processhtml:dist'
     ]);

@@ -5,9 +5,12 @@
     See Gruntfile.js to define environment variables
 */
 
-const path        = require('path');
-const exphbs      = require('express-handlebars');
-const request     = require('request');
+const FileStreamRotator = require('file-stream-rotator')
+const path      = require('path');
+const exphbs    = require('express-handlebars');
+const request   = require('request');
+const morgan    = require('morgan');
+const fs        = require('fs');
 
 class Server {
     constructor(express, app, options) {
@@ -19,6 +22,16 @@ class Server {
         this.app.engine('.html', exphbs({ extname: '.html' }));
         this.app.set('view engine', '.html');
         this.app.set('views', options.root);
+
+        let logDirectory = __dirname + '/log';
+        let accessLogStream = FileStreamRotator.getStream({
+            date_format: 'YYYYMMDD',
+            filename: logDirectory + '/access-%DATE%.log',
+            frequency: 'daily',
+            verbose: false
+        });
+
+        app.use(morgan('combined', { stream: accessLogStream }));
 
         //process.on('uncaughtException', err => this.app.close());
         //process.on('SIGTERM', err => this.app.close());

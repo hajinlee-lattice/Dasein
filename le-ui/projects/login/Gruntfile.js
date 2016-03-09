@@ -12,7 +12,7 @@ module.exports = function (grunt) {
             assets: 'assets',
             app: 'app',
             lib: 'lib',
-            dist: 'dist'
+            dist: 'assets'
         },
         versionString: versionStringConfig,
 
@@ -164,13 +164,13 @@ module.exports = function (grunt) {
         copy: {
             dist: {
                 src:  'index.html',
-                dest: 'dist/index.html'
+                dest: '<%= pls.dist %>/index.html'
             },
         },
 
         // Executes the replacement for any js/sass files in our index.html page
         usemin: {
-            html:    'dist/index.html',
+            html:    '<%= pls.dist %>/index.html',
             options: {
                 blockReplacements: {
                     sass: function (block) {
@@ -185,12 +185,12 @@ module.exports = function (grunt) {
         useminPrepare: {
             html:    'index.html',
             options: {
-                dest: 'dist',
+                dest: '<%= pls.dist %>',
                 flow: {
                     html: {
                         steps: {
-                            js:  ['concat']
-                            css: ['concat', 'cssmin']
+                            js:  ['concat'],
+                            css: ['concat']
                         },
                         post:  {}
                     }
@@ -201,7 +201,7 @@ module.exports = function (grunt) {
         ngAnnotate: {
             dist: {
                 files: {
-                    'dist/app.js': ['dist/app.js']
+                    '<%= pls.dist %>/app.js': ['<%= pls.dist %>/app.js']
                 }
             }
         },
@@ -256,8 +256,8 @@ module.exports = function (grunt) {
                 base: ''
             },
             main: {
-                src: ['app/**/*.html'],
-                dest: 'dist/templates.js'
+                src: ['<%= pls.app %>/**/*.html'],
+                dest: '<%= pls.dist %>/templates.js'
             },
         }
     });
@@ -283,7 +283,7 @@ module.exports = function (grunt) {
         'useminPrepare',
         'concat:generated',
         'ngAnnotate',
-        'cssmin:generated',
+        //'cssmin:generated',
         'uglify:production',
         //'filerev',
         'usemin',

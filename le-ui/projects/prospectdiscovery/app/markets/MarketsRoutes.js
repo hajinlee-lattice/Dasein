@@ -10,10 +10,10 @@ angular
                 url: '/dashboard',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/navdash/NavDashView.html'
+                        templateUrl: 'app/navigation/navdash/NavDashView.html'
                     },
                     "main@": {
-                        templateUrl: './app/markets/dashboard/DashboardView.html'
+                        templateUrl: 'app/markets/dashboard/DashboardView.html'
                     }
                 }
             })
@@ -24,7 +24,7 @@ angular
                         template: ''
                     },
                     "main@": {
-                        templateUrl: './app/markets/MarketsView.html'
+                        templateUrl: 'app/markets/MarketsView.html'
                     }
                 }
             })
@@ -35,7 +35,7 @@ angular
                         template: ''
                     },
                     "main@": {
-                        templateUrl: './app/markets/createmarket/CreateMarketView.html'
+                        templateUrl: 'app/markets/createmarket/CreateMarketView.html'
                     }
                 }
             })
@@ -46,7 +46,7 @@ angular
                         template: ''
                     },
                     "main@": {
-                        templateUrl: './app/markets/prospect/ScheduleView.html'
+                        templateUrl: 'app/markets/prospect/ScheduleView.html'
                     }
                 }
             })
@@ -57,7 +57,7 @@ angular
                         template: ''
                     },
                     "main@": {
-                        templateUrl: './app/markets/prospect/ListView.html'
+                        templateUrl: 'app/markets/prospect/ListView.html'
                     }
                 }
             });

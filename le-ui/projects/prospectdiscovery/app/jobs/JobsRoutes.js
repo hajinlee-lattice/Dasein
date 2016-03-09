@@ -10,10 +10,10 @@ angular
                 url: '/status',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/table/TableView.html'
+                        templateUrl: 'app/navigation/table/TableView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/status/StatusView.html'
+                        templateUrl: 'app/jobs/status/StatusView.html'
                     }
                 }
             })
@@ -21,10 +21,10 @@ angular
                 url: '/ready/:jobId',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/table/TableView.html'
+                        templateUrl: 'app/navigation/table/TableView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/ready/ReadyView.html'
+                        templateUrl: 'app/jobs/import/ready/ReadyView.html'
                     }
                 }
             })
@@ -35,10 +35,10 @@ angular
                 url: '/credentials',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/credentials/CredentialsView.html'
+                        templateUrl: 'app/jobs/import/credentials/CredentialsView.html'
                     }
                 }
             })
@@ -46,10 +46,10 @@ angular
                 url: '/file',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/file/FileView.html'
+                        templateUrl: 'app/jobs/import/file/FileView.html'
                     }
                 }
             })
@@ -57,10 +57,10 @@ angular
                 url: '/processing',
                 views: {
                     "summary@": {
-                        templateUrl: './app/navigation/message/MessageView.html'
+                        templateUrl: 'app/navigation/message/MessageView.html'
                     },
                     "main@": {
-                        templateUrl: './app/jobs/import/processing/ProcessingView.html'
+                        templateUrl: 'app/jobs/import/processing/ProcessingView.html'
                     }
                 }
             });

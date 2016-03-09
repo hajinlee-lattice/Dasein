@@ -7,10 +7,10 @@ angular
                 redirectTo: "builder.category",
                 views: {
                     "navigation@": {
-                        templateUrl: './app/navigation/sidebar/BuilderView.html'
+                        templateUrl: 'app/navigation/sidebar/BuilderView.html'
                     },
                     "summary@": {
-                        templateUrl: './app/navigation/subnav/SubNavView.html'
+                        templateUrl: 'app/navigation/subnav/SubNavView.html'
                     }
                 }
             })
@@ -30,7 +30,7 @@ angular
                 },
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/category/CategoryView.html'
+                        templateUrl: 'app/builder/category/CategoryView.html'
                     }
                 }
             })
@@ -38,7 +38,7 @@ angular
                 url: '/intent/:AttrKey/:ParentKey/:ParentValue',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/category/CategoryView.html'
+                        templateUrl: 'app/builder/category/CategoryView.html'
                     }
                 }
             })
@@ -46,7 +46,7 @@ angular
                 url: '/filter_contacts',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/FilterContactsView.html'
+                        templateUrl: 'app/builder/prospects/FilterContactsView.html'
                     },
                     "summary@": {
                         template: ''
@@ -57,7 +57,7 @@ angular
                 url: '/fit_model',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/SetFitCriteriaView.html'
+                        templateUrl: 'app/builder/prospects/SetFitCriteriaView.html'
                     },
                     "summary@": {
                         template: ''
@@ -68,7 +68,7 @@ angular
                 url: '/intent_model',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/SetIntentCriteriaView.html'
+                        templateUrl: 'app/builder/prospects/SetIntentCriteriaView.html'
                     },
                     "summary@": {
                         template: ''
@@ -79,7 +79,7 @@ angular
                 url: '/setup',
                 views: {
                     "main@": {
-                        templateUrl: './app/builder/prospects/SetupProspectingView.html'
+                        templateUrl: 'app/builder/prospects/SetupProspectingView.html'
                     },
                     "summary@": {
                         template: ''

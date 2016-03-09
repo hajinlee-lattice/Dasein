@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html lang="en" id="ng-app" data-ng-app="mainApp">
-<head runat="server">
-    <base href="/lp/"> 
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon"   type="image/x-icon" href="assets/images/favicon.ico">
-
-    <title>Lead Prioritization - Lattice Engines</title>
-
-    <link rel="stylesheet"      type="text/css"     href="/assets/lattice.css" />
-    <link rel="stylesheet"      type="text/css"     href="/assets/css/font-awesome.min.css" />
-    <link rel="stylesheet"      type="text/css"     href="assets/styles/production.css" />
-    <!-- build:css style.min.css -->
-    <!-- endbuild -->
-
-    <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
-</head>
+    <head runat="server">
+        <base href="/lp/"> 
+        <title>Lead Prioritization - Lattice Engines</title>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.ico">
+        <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
+        <!-- build:css app.css -->
+        <link rel="stylesheet" type="text/css" href="../common/assets/css/font-awesome.min.css" />
+        <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
+        <!-- endbuild -->
+        <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
+    </head>
     <body data-ng-controller="MainController" class="lp open-nav">
-
-        <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
         <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-
         <div id="outer-wrap">
             <div id="inner-wrap">
                 
@@ -40,13 +36,10 @@
 
             </div>
         </div>
-
         <!--[if IE]> <div id="isIE"></div> <![endif]-->
-
         <!-- combined common and vendor js -->
         <script src="/assets/lattice.js"></script>
         <script src="lib/js/kendo.all.min.js"></script>
-
         <!-- build:js app.js -->
         <script src="../demo/js/bootstrap-select.min.js"></script>
         <script src="app/app.js"></script>
@@ -155,13 +148,11 @@
         <script src="app/setup/services/LeadEnrichmentService.js"></script>
         <script src="app/setup/services/MetadataService.js"></script>
         <!-- endbuild -->
-        
         <!-- build:remove:dist -->
         <script type="text/javascript">
             angular.module('templates-main', []);
         </script>
         <!-- /build -->
-
         <script type="text/javascript">
             WebFontConfig = {
                 google: { families: [ 'Open Sans' ] }

@@ -1,110 +1,96 @@
 <!DOCTYPE html>
 <html lang="en" id="ng-app" data-ng-app="mainApp">
-<head runat="server">
-    <base href="/pd/"> 
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
-    <title>Prospect Discovery - Lattice Engines</title>
+    <head runat="server">
+        <base href="/pd/"> 
+        <title>Prospect Discovery - Lattice Engines</title>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link rel="shortcut icon" href="assets/images/favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" type="text/css" href="/assets/lattice.css" />
+        <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css" />
+        <!-- build:css app.css -->
+        <link rel="stylesheet" type="text/css" href="assets/styles/production.css">
+        <!-- endbuild -->
+        <!--[if IE 9]><link rel="stylesheet" href="/assets/css/ie9.css"><![endif]-->
+    </head>
+    <body data-ng-controller="MainController" class="open-nav">
+        <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
+        
+        <div id="outer-wrap">
+            <div id="inner-wrap">
 
-    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="/dist/lattice.css" />
-    <link rel="stylesheet" type="text/css" href="assets/styles/production.css">
-    <!--[if IE 9]>
-        <link rel="stylesheet" href="/assets/css/ie9.css">
-    <![endif]-->
+                <nav id="nav" class="primary-nav" role="navigation">
+                    <div ui-view="navigation"><ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include></div>
+                </nav>
 
-    <script src="/demo/js/modernizr.js"></script>
-</head>
-<body data-ng-controller="MainController" class="open-nav">
+                <section id="main" role="main" class="main-content">
+                    <div id="mainHeaderView"></div>
 
-    <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
-    <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-    
-    <div id="outer-wrap">
-        <div id="inner-wrap">
+                    <div id="mainContentView">
+                        <div ui-view="summary"></div>
+                        <div ui-view="main"></div>
+                    </div>
+                </section>
 
-            <nav id="nav" class="primary-nav" role="navigation">
-                <div ui-view="navigation"><ng-include src="'./app/navigation/sidebar/RootView.html'"></ng-include></div>
-            </nav>
+            </div><!-- End #inner-wrap -->
+        </div><!-- End #outer-wrap -->
+        <!-- combined common and vendor js -->
+        <script src="/assets/lattice.js"></script>
+        <!-- build:js app.js -->
+        <script src="../demo/js/responsive-tables.js"></script>
+        <script src="../demo/js/toggle-switch.js"></script>
+        <script src="../demo/js/drop-down.js"></script>
+        <script src="../demo/js/bootstrap-select.min.js"></script>
 
-            <section id="main" role="main" class="main-content">
-                <div id="mainHeaderView"></div>
+        <script src="app/app.js"></script>
+        <script src="app/routes.js"></script>
+        <script src="app/login/LoginController.js"></script>
+        <script src="app/header/HeaderController.js"></script>
 
-                <div id="mainContentView">
-                    <div ui-view="summary"></div>
-                    <div ui-view="main"></div>
-                </div>
-            </section>
+        <script src="app/fingerprints/FingerprintsController.js"></script>
+        
+        <script src="app/navigation/NavigationController.js"></script>
+        <script src="app/navigation/pagination/PaginationController.js"></script>
+        <script src="app/navigation/sidebar/SidebarController.js"></script>
+        <script src="app/navigation/table/TableController.js"></script>
+        <script src="app/navigation/message/MessageController.js"></script>
+        <script src="app/navigation/links/LinksController.js"></script>
+        <script src="app/navigation/subnav/SubNavController.js"></script>
+        <script src="app/navigation/navdash/NavDashController.js"></script>
 
-        </div><!-- End #inner-wrap -->
-    </div><!-- End #outer-wrap -->
+        <script src="app/builder/BuilderController.js"></script>
+        <script src="app/builder/BuilderRoutes.js"></script>
+        <script src="app/builder/category/CategoryController.js"></script>
 
-    <!-- combined common and vendor js -->
-    <script src="/dist/lattice.js"></script>
+        <script src="app/jobs/JobsController.js"></script>
+        <script src="app/jobs/JobsRoutes.js"></script>
+        <script src="app/jobs/status/StatusController.js"></script>
+        <script src="app/jobs/import/credentials/CredentialsController.js"></script>
+        <script src="app/jobs/import/file/FileController.js"></script>
+        <script src="app/jobs/import/ready/ImportReadyController.js"></script>
 
-    <script src="/demo/js/responsive-tables.js"></script>
-    <script src="/demo/js/toggle-switch.js"></script>
-    <script src="/demo/js/drop-down.js"></script>
-    <script src="/demo/js/bootstrap-select.min.js"></script>
+        <script src="app/markets/MarketsController.js"></script>
+        <script src="app/markets/MarketsService.js"></script>
+        <script src="app/markets/MarketsRoutes.js"></script>
+        <script src="app/markets/dashboard/DashboardController.js"></script>
+        <script src="app/markets/createmarket/CreateMarketController.js"></script>
+        <!-- endbuild -->
+        <!-- build:remove:dist -->
+        <script type="text/javascript">
+            angular.module('templates-main', []);
+        </script>
+        <!-- /build -->
 
-    <!-- build:remove:dist -->
-    <!-- app specific -->
-    <script src="app/app.js"></script>
-    <script src="app/routes.js"></script>
-    <script src="app/login/LoginController.js"></script>
-    <script src="app/header/HeaderController.js"></script>
+        <script type="text/javascript">
+            WebFontConfig = {
+                google: { families: [ 'Open Sans' ] }
+            };
 
-    <script src="app/fingerprints/FingerprintsController.js"></script>
-    
-    <script src="app/navigation/NavigationController.js"></script>
-    <script src="app/navigation/pagination/PaginationController.js"></script>
-    <script src="app/navigation/sidebar/SidebarController.js"></script>
-    <script src="app/navigation/table/TableController.js"></script>
-    <script src="app/navigation/message/MessageController.js"></script>
-    <script src="app/navigation/links/LinksController.js"></script>
-    <script src="app/navigation/subnav/SubNavController.js"></script>
-    <script src="app/navigation/navdash/NavDashController.js"></script>
-
-    <script src="app/builder/BuilderController.js"></script>
-    <script src="app/builder/BuilderRoutes.js"></script>
-    <script src="app/builder/category/CategoryController.js"></script>
-
-    <script src="app/jobs/JobsController.js"></script>
-    <script src="app/jobs/JobsRoutes.js"></script>
-    <script src="app/jobs/status/StatusController.js"></script>
-    <script src="app/jobs/import/credentials/CredentialsController.js"></script>
-    <script src="app/jobs/import/file/FileController.js"></script>
-    <script src="app/jobs/import/ready/ImportReadyController.js"></script>
-
-    <script src="app/markets/MarketsController.js"></script>
-    <script src="app/markets/MarketsService.js"></script>
-    <script src="app/markets/MarketsRoutes.js"></script>
-    <script src="app/markets/dashboard/DashboardController.js"></script>
-    <script src="app/markets/createmarket/CreateMarketController.js"></script>
-    <!-- /build -->
-
-    <!-- build:js inline -->
-    <script src="app/loadjs.js"></script>
-    <!-- /build -->
-
-    <!-- build:template:dist
-    <script type="text/javascript">
-        var cdnroot = "//cdnjs.cloudflare.com/ajax/libs/";
-        var jslist = [
-            {path:"app/production_<%= versionString %>.min.js", fallback:"app/production_<%= versionString %>.min.js"}
-        ];
-
-        var jsLoader = new JsLoader();
-        var head = jsLoader.toLinkedList(jslist);
-        jsLoader.loadScriptByObj(head);
-    </script>
-    /build -->
-
-    <script>
-        // Create global variable for Evergage to use
-        var _aaq = _aaq || [];
-    </script>
-</body>
+            // Create global variable for Evergage to use
+            var _aaq = _aaq || [];
+        </script>
+    </body>
 </html>

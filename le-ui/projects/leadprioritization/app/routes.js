@@ -295,6 +295,32 @@ angular
         .state('marketosettings', {
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',
+            resolve: { 
+                urls: function($q, $http) { 
+                    var deferred = $q.defer();
+
+                    $http({
+                        'method': "GET",
+                        'url': "/pls/sureshot/urls",
+                        'params': { 
+                            'crmType': "marketo"
+                        }
+                    }).then(
+                        function onSuccess(response) {
+                            console.log(response);
+                            if (response.data.Success) {
+                                deferred.resolve(response.data.Result);
+                            } else {
+                                deferred.reject(response.data.Errors);
+                            }
+                        }, function onError(response) {
+                            deferred.reject(response.data.Errors);
+                        }
+                    );
+
+                    return deferred.promise; 
+                }
+            },
             views: {
                 "navigation@": {
                     templateUrl: 'app/navigation/sidebar/MarketoSettingsView.html'
@@ -320,27 +346,17 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    resolve: { 
-                        IFrameUrl: function($q, $http) { 
-                            var deferred = $q.defer();
-                            $http.get("/pls/sureshot/credentials/marketo?crmType=marketo&tenantId=TestElq_20160204_222.TestElq_20160204_222.Production").then(function(result) { 
-                                deferred.promise(result) 
-                            })
-                            return deferred.promise(); 
-                        }
+                    controller: function(urls) {
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.creds_url + '" style="position:absolute;left:0;right:0;width:100%;height:100%;"></iframe>');
                     },
-                    controller: { 
-                        function($scope, IFrameUrl) { 
-                            $scope.url = 'app/marketo/views/APIKeyView.html'; 
-                        }
-                    },
-                    template: '<iframe src="{{url}}"></iframe>'
+                    template: '<div id="sureshot_iframe_container"></div>'
                 }   
             }
         })
         .state('marketosettings.models', {
             url: '/models',
-            views: {
+            views: { 
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
@@ -351,21 +367,11 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    resolve: { 
-                        IFrameUrl: function($q, $http) { 
-                            var deferred = $q.defer();
-                            $http.get("/pls/sureshot/scoring/settings/marketo?crmType=marketo&tenantId=TestElq_20160204_222.TestElq_20160204_222.Production").then(function(result) { 
-                                deferred.promise(result) 
-                            })
-                            return deferred.promise(); 
-                        }
+                    controller: function(urls) { 
+                        $('#sureshot_iframe_container')
+                            .html('<iframe src="' + urls.scoring_settings_url + '" style="position:absolute;left:0;right:0;width:100%;height:100%;"></iframe>');
                     },
-                    controller: { 
-                        function($scope, IFrameUrl) { 
-                            $scope.url = 'app/marketo/views/ModelsSetupView.html'; 
-                        }
-                    },
-                    template: '<iframe src="{{url}}"></iframe>'
+                    template: '<div id="sureshot_iframe_container"></div>'
                 }   
             }
         }) 

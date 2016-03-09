@@ -7,7 +7,7 @@ angular
                 url: '/fingerprints',
                 views: {
                     "main": {
-                        templateUrl: './app/fingerprints/FingerprintsView.html'
+                        templateUrl: 'app/fingerprints/FingerprintsView.html'
                     }
                 }
             });

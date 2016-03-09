@@ -1,5 +1,5 @@
 {
-  "name": "le-ui_common",
+  "name": "LE-UI_Common",
   "description": "shared libraries and resources for le-ui web apps",
   "version": "1.0.0",
   "license": "ISC",
@@ -7,11 +7,9 @@
     "type": "svn",
     "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
-  "main": "index.html",
   "scripts": {
-    "postinstall": "bower install && grunt"
+    "postinstall": "bower install"
   },
-  "author": "",
   "dependencies": {
     "bower": "^1.7.7",
     "grunt": "^0.4.5",

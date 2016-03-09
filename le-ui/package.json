@@ -11,42 +11,35 @@
     "concurrently": "^1.0.0",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
+    "file-stream-rotator": "0.0.6",
     "grunt": "^0.4.5",
     "grunt-env": "^0.4.4",
     "grunt-run": "^0.5.2",
+    "morgan": "^1.7.0",
     "nodemon": "^1.8.1",
     "request": "^2.65.0"
   },
   "devDependencies": {},
   "scripts": {
-    "install": "npm run InstallProduction",
+    "install": "npm run InstallDev",
     "postinstall": "npm run sass",
-
     "InstallProduction": "npm run InstallCommon && npm run InstallLP && npm run InstallPD",
-    "InstallDev": "concurrent -k \"npm run InstallDevCommon\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
-
-    "//": "start express server",
+    "InstallDev": "concurrent \"npm run InstallDevCommon\" \"npm run InstallDevLP\" \"npm run InstallDevPD\"",
+    "//": "individual projects",
     "qa": "npm run sass && concurrent -kr \"grunt qa\" \"npm run sentry\"",
     "dev": "npm run sass && concurrent -kr \"grunt dev\" \"npm run sentry\"",
     "prod": "grunt prod",
-
-    "//": "all projects",
     "sass": "concurrent \"npm run commonsass\" \"npm run pdsass\" \"npm run lpsass\" ",
     "sentry": "concurrent \"npm run commonsentry\" \"npm run pdsentry\" \"npm run lpsentry\"",
-    
-    "//": "individual projects",
     "InstallCommon": "cd projects/common/ && npm install --production",
     "InstallPD": "cd projects/prospectdiscovery/ && npm install --production",
     "InstallLP": "cd projects/leadprioritization/ && npm install --production",
-
     "InstallDevCommon": "cd projects/common/ && npm install",
     "InstallDevPD": "cd projects/prospectdiscovery/ && npm install",
     "InstallDevLP": "cd projects/leadprioritization/ && npm install",
-
     "commonsass": "cd projects/common/ && grunt",
     "pdsass": "cd projects/prospectdiscovery/ && grunt sass:dev",
     "lpsass": "cd projects/leadprioritization/ && grunt sass:dev",
-
     "commonsentry": "cd projects/common/ && grunt sentry",
     "pdsentry": "cd projects/prospectdiscovery/ && grunt sentry",
     "lpsentry": "cd projects/leadprioritization/ && grunt sentry"
