@@ -37,7 +37,7 @@ public class DanteComponent extends LatticeComponent {
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
-        return new HashSet<>(Arrays.asList(LatticeProduct.LPA, LatticeProduct.LPA3));
+        return new HashSet<>(Arrays.asList(LatticeProduct.LPA));
     }
 
     @Override
