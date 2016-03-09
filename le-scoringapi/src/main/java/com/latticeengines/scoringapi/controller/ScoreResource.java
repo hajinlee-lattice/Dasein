@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
@@ -28,6 +30,7 @@ import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
+import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.warnings.Warnings;
@@ -87,12 +90,23 @@ public class ScoreResource {
 
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record")
-    public ScoreResponse scoreRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+    public ScoreResponse scorePercentileRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+        return scoreRecord(request, scoreRequest, ScoreType.PERCENTILE);
+    }
+
+    @RequestMapping(value = "/record/probability", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ApiIgnore
+    @ApiOperation(value = "Score probability value for a record")
+    public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
+        return scoreRecord(request, scoreRequest, ScoreType.PROBABILITY);
+    }
+
+    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, ScoreType scoreType) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(String.format("{'getTenantFromOAuth':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
             log.info(JsonUtils.serialize(scoreRequest));
-            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest);
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, scoreType);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
             }
@@ -100,5 +114,6 @@ public class ScoreResource {
             return response;
         }
     }
+
 
 }

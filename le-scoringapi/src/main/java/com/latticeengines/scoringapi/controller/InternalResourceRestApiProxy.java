@@ -30,12 +30,14 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
     }
 
     public ModelSummary getModelSummaryFromModelId(String modelId, CustomerSpace customerSpace) {
+        ModelSummary modelSummary = null;
         try {
-            return restTemplate.getForObject(constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString()),
+            modelSummary = restTemplate.getForObject(constructUrl("pls/internal/modelsummaries/modelid", modelId, customerSpace.toString()),
                     ModelSummary.class);
         } catch (Exception e) {
             throw new RuntimeException("getModelSummaryFromModelId: Remote call failure", e);
         }
+        return modelSummary;
     }
 
 }

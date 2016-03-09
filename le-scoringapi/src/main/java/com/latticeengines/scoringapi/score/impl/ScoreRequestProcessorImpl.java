@@ -58,7 +58,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private Warnings warnings;
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request) {
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request, ScoreType scoreType) {
         log.info(String.format("{'requestPreparationDuration':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
         if (Strings.isNullOrEmpty(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
@@ -79,7 +79,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
         log.info(String.format("{'transformRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
-        double score = score(scoringArtifacts, transformedRecord);
+        double score = score(scoringArtifacts, transformedRecord, scoreType);
         log.info(String.format("{'scoreRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
         ScoreResponse scoreResponse = new ScoreResponse();
@@ -195,23 +195,28 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
     }
 
-    private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
+    private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord, ScoreType scoreType) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
-        Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
-        if (percentileObject == null) {
-            throw new LedpException(LedpCode.LEDP_31011, new String[] {
-                    String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
+        double score = (double) evaluation.get(ScoreType.PROBABILITY);
+        if (scoreType == ScoreType.PERCENTILE) {
+            Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
+            if (percentileObject == null) {
+                throw new LedpException(LedpCode.LEDP_31011, new String[] {
+                        String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
+            }
+
+            int percentile = (int) percentileObject;
+            if (percentile > 99 || percentile < 5) {
+                log.warn(String.format("Score out of range; percentile: %d probability: %,.7f", percentile,
+                        (double) evaluation.get(ScoreType.PROBABILITY)));
+                percentile = Math.min(percentile, 99);
+                percentile = Math.max(percentile, 5);
+            }
+            score = percentile;
         }
 
-        int percentile = (int) percentileObject;
-        if (percentile > 99 || percentile < 5) {
-            log.warn(String.format("Score out of range: %d", percentile));
-            percentile = Math.min(percentile, 99);
-            percentile = Math.max(percentile, 5);
-        }
-
-        return percentile;
+        return score;
     }
 
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {

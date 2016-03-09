@@ -22,6 +22,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Joiner;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -146,6 +147,8 @@ public class ModelEvaluator {
                 }
             }
         }
+
+        Log.info(JsonUtils.serialize(result));
 
         return result;
     }

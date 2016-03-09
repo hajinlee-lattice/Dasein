@@ -43,8 +43,8 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -239,7 +239,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Create a SourceFile")
     public void createSourceFile(@PathVariable("sourceFileName") String sourceFileName,
-             @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody SourceFile sourceFile, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -281,9 +281,10 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, false, true);
-        summary.setPredictors(new ArrayList<Predictor>());
-        summary.setDetails(null);
-
+        if (summary != null) {
+            summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
+        }
         return summary;
     }
 

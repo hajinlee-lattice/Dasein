@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.Field;
@@ -52,7 +51,7 @@ import com.latticeengines.scoringapi.warnings.Warnings;
 public class ModelRetrieverImpl implements ModelRetriever {
 
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
-    private static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Metadata/";
+    private static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
     private static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     private static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     private static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
@@ -69,9 +68,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Value("${scoringapi.scoreartifact.cache.maxsize}")
     private int scoreArtifactCacheMaxSize;
-
-    @Autowired
-    MetadataProxy metadataProxy;
 
     @Autowired
     private Warnings warnings;
@@ -98,21 +94,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
-//                String eventTableName = map.get("EventTableName");
-//                if (Strings.isNullOrEmpty(eventTableName)) {
-//                    throw new LedpException(LedpCode.LEDP_31008, new String[] { map.get("Id") });
-//                }
-//                Table eventTable = metadataProxy.getTable(customerSpace.toString(), eventTableName);
-//
-//                if (eventTable == null) {
-//                    throw new LedpException(LedpCode.LEDP_31009, new String[] { eventTableName });
-//                } else if (Strings.isNullOrEmpty(eventTable.getInterpretation())) {
-//                    throw new LedpException(LedpCode.LEDP_31010, new String[] { eventTableName });
-//                }
-
-//                if ((type == ModelType.ACCOUNT && modelSummary.getInterpretation().toLowerCase().contains("account"))
-//                        || (type == ModelType.CONTACT && modelSummary.getInterpretation().toLowerCase().contains("lead"))) {
-                if (type == ModelType.CONTACT) {
+                if ((type == ModelType.ACCOUNT && map.get("SourceSchemaInterpretation").toLowerCase().contains("account"))
+                        || (type == ModelType.CONTACT && map.get("SourceSchemaInterpretation").toLowerCase().contains("lead"))) {
                     Model model = new Model(map.get("Id"), map.get("Name"), type);
                     models.add(model);
                 }
