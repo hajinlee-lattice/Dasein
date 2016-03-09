@@ -37,6 +37,18 @@ class Executor(object):
     @abstractmethod
     def accept(self, filename): pass
     
+    def getModelDirByContainerId(self, schema):
+        if "CONTAINER_ID" in os.environ:
+            tokens = os.environ['CONTAINER_ID'].split("_")
+            if(tokens[1].startswith("e")):
+                appIdList = tokens[2:4]
+            else:
+                appIdList = tokens[1:3]
+            modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
+            return modelDirPath
+        else:
+            return ""
+    
     def retrieveMetadata(self, schema, depivoted):
         metadata = dict()
         realColNameToRecord = dict()

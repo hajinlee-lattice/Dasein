@@ -160,13 +160,8 @@ class AggregationExecutor(Executor):
 
     @overrides(Executor)
     def getModelDirPath(self, schema):
-        if "CONTAINER_ID" in os.environ:
-            appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
-            modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
-            return modelDirPath
-        else:
-            return ""
-
+        return self.getModelDirByContainerId(schema)
+    
     @overrides(Executor)
     def accept(self, filename):
         badSuffixes = [".p", ".dot", ".gz"]
