@@ -19,9 +19,14 @@ public class DomainUtilsUnitTestNG {
                 {"http://trinid.com/", "trinid.com"},
                 {"maps.google.com", "maps.google.com"},
                 {"adoic@gmail.com", "gmail.com"},
+                {"greg.perrott@rbnz.govt.nz", "rbnz.govt.nz"},
+                {"greg@perrott@rbnz.govt.nz", "rbnz.govt.nz"},
                 {"www.www.com", "www.com"},
                 {"abcdefg", null},
-                {"www.www", null}
+                {"www.www", null},
+                {"@", null},
+                {"greg.perrott@", null},
+                {"greg.perrott@domain", null},
         };
     }
 }
