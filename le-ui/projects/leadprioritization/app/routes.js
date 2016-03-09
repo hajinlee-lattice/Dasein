@@ -59,6 +59,7 @@ angular
             */
             views: {
                 "navigation": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 }
             },
@@ -68,6 +69,7 @@ angular
             url: '/models',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -391,6 +393,7 @@ angular
             url: '/updatepassword',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -411,6 +414,7 @@ angular
             url: '/deploymentwizard',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -432,6 +436,7 @@ angular
             url: '/activate',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -452,6 +457,7 @@ angular
             url: '/users',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -472,6 +478,7 @@ angular
             url: '/setup',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -492,6 +499,7 @@ angular
             url: '/history',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -512,6 +520,7 @@ angular
             url: '/fields',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -533,6 +542,7 @@ angular
             url: '/dashboard',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -553,6 +563,7 @@ angular
             url: '/enrichment',
             views: {
                 "navigation@": {
+                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {

@@ -34,7 +34,7 @@ var mainApp = angular.module('mainApp', [
 }])
 
 .controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, FeatureFlagService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
 
@@ -91,7 +91,6 @@ var mainApp = angular.module('mainApp', [
 
                     startObservingUserActivtyThroughMouseAndKeyboard();
                     startCheckingIfSessionIsInactive();
-                    initializeFlags();
                 }
             },
 
@@ -101,14 +100,6 @@ var mainApp = angular.module('mainApp', [
             }
         );
     };
-
-    function initializeFlags() {
-        FeatureFlagService.GetAllFlags().then(function() {
-            var flags = FeatureFlagService.Flags();
-            $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
-            $scope.showModelCreationHistory = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
-        });
-    }
 
     // Handle when the copyright footer should be shown
     $scope.$on("ShowFooterEvent", function (event, data) {

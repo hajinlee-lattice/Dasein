@@ -13,7 +13,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.ModelId = data.ModelId;
     $scope.TenantId = data.TenantId;
     $scope.TenantName = $scope.data.TenantName;
-    $scope.DataLoaderTenantName = $scope.data.DataLoaderTenantName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.TemplateVersion = data.ModelDetails.TemplateVersion;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
@@ -22,14 +21,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
         alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
     };
-
-    ConfigService.GetCurrentDataLoaderUrl().then(function (data) {
-        if (data.success && data.resultObj != null) {
-            $scope.DataLoaderUrl = data.resultObj;
-        } else {
-            $scope.DataLoaderUrlError = data.resultErrors;
-        }
-    });
 })
 .directive('adminInfoSummaryWidget', function () {
     return {

@@ -15,7 +15,6 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     $scope.showAdminLink = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
     $scope.data.TenantId = clientSession.Tenant.Identifier;
     $scope.data.TenantName = clientSession.Tenant.DisplayName;
-    $scope.data.DataLoaderTenantName = TenantIdParsingUtility.getDataLoaderTenantNameFromTenantId($scope.data.TenantId);
 
     $scope.adminLinkClick = function() {
        $rootScope.$broadcast(NavUtility.ADMIN_INFO_NAV_EVENT, $scope.data);

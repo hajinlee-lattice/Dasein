@@ -6,6 +6,7 @@ angular
                 url: '/jobs',
                 views: {
                     "navigation@": {
+                        controller: 'SidebarRootController',
                         templateUrl: 'app/navigation/sidebar/RootView.html'
                     }
                 },
