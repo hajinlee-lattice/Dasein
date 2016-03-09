@@ -15,14 +15,18 @@ public class NaNSafeDoubleType implements UserType {
         return new int[] { Types.DOUBLE };
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
     public Class returnedClass() {
         return Double.class;
     }
 
+    @Override
     public boolean equals(Object x, Object y) throws HibernateException {
         return (x == y) || (x != null && x.equals(y));
     }
 
+    @Override
     public int hashCode(Object x) throws HibernateException {
         return x.hashCode();
     }
@@ -47,23 +51,28 @@ public class NaNSafeDoubleType implements UserType {
         }
     }
 
+    @Override
     public Object deepCopy(Object value) throws HibernateException {
         // returning value should be OK since doubles are immutable
         return value;
     }
 
+    @Override
     public boolean isMutable() {
         return false;
     }
 
+    @Override
     public Serializable disassemble(Object value) throws HibernateException {
         return (Serializable) value;
     }
 
+    @Override
     public Object assemble(Serializable cached, Object owner) throws HibernateException {
         return cached;
     }
 
+    @Override
     public Object replace(Object original, Object target, Object owner) throws HibernateException {
         return original;
     }
