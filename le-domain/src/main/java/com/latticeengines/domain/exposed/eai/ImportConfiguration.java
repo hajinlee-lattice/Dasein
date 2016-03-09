@@ -6,14 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
+import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ImportConfiguration extends BasePayloadConfiguration {
 
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
     private Map<String, String> properties = new HashMap<>();
+    private ImportType importType = ImportType.ImportTable;
+    private CamelRouteConfiguration camelRouteConfiguration;
 
     @JsonProperty("sources")
     public List<SourceImportConfiguration> getSourceConfigurations() {
@@ -50,9 +55,41 @@ public class ImportConfiguration extends BasePayloadConfiguration {
         return properties.get(key);
     }
 
+    @JsonProperty("importType")
+    public ImportType getImportType() {
+        return importType;
+    }
+
+    @JsonProperty("importType")
+    public void setImportType(ImportType importType) {
+        this.importType = importType;
+    }
+
+    @JsonProperty("camelRouteConfiguration")
+    public CamelRouteConfiguration getCamelRouteConfiguration() {
+        return camelRouteConfiguration;
+    }
+
+    @JsonProperty("camelRouteConfiguration")
+    public void setCamelRouteConfiguration(CamelRouteConfiguration camelRouteConfiguration) {
+        this.camelRouteConfiguration = camelRouteConfiguration;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public static <T extends CamelRouteConfiguration> ImportConfiguration createForCamelRouteConfiguration(
+            T camelRouteConfiguration) {
+        ImportConfiguration importConfiguration = new ImportConfiguration();
+        importConfiguration.setImportType(ImportType.CamelRoute);
+        importConfiguration.setCamelRouteConfiguration(camelRouteConfiguration);
+        return importConfiguration;
+    }
+
+    public enum ImportType {
+        ImportTable, CamelRoute
     }
 
 }

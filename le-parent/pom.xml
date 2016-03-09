@@ -54,6 +54,7 @@
         <sqljdbc4.version>4.0</sqljdbc4.version>
         <joda.version>2.3</joda.version>
         <influxdb.version>2.1</influxdb.version>
+        <jcraft.version>0.1.53</jcraft.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>

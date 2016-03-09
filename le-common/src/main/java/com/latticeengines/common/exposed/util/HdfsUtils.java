@@ -303,4 +303,12 @@ public class HdfsUtils {
             return fs.getFileChecksum(new Path(path));
         }
     }
+
+
+    public static Long getFileSize(Configuration configuration, String filePath) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus status = fs.getFileStatus(new Path(filePath));
+            return status.getLen();
+        }
+    }
 }

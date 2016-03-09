@@ -24,12 +24,28 @@ public class EaiServiceImpl implements EaiService {
     private DataExtractionService dataExtractionService;
 
     @Autowired
+    private CamelRouteJobService camelRouteJobService;
+
+    @Autowired
     private JobService jobService;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId extractAndImport(ImportConfiguration importConfig) {
-        return dataExtractionService.submitExtractAndImportJob(importConfig);
+        ImportConfiguration.ImportType importType = importConfig.getImportType();
+        if (importType == null) {
+            importType = ImportConfiguration.ImportType.ImportTable;
+        }
+
+        switch (importType) {
+            case CamelRoute:
+                log.info("Directing extractAndImport job to " + camelRouteJobService.getClass().getSimpleName());
+                return camelRouteJobService.submitImportJob(importConfig);
+            case ImportTable:
+            default:
+                log.info("Directing extractAndImport job to " + dataExtractionService.getClass().getSimpleName());
+                return dataExtractionService.submitExtractAndImportJob(importConfig);
+        }
     }
 
     @Override

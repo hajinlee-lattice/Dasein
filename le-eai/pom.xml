@@ -586,6 +586,11 @@
             <version>${le.proxy.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>${jcraft.version}</version>
+        </dependency>
     </dependencies>
 </project>
 
