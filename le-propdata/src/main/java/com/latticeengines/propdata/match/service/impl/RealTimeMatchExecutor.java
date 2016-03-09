@@ -60,6 +60,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
     private static final String CACHE_TABLE = "DerivedColumnsCache";
+    private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final String MODEL = ColumnSelection.Predefined.Model.getName();
     private static final Integer MAX_FETCH_THREADS = 4;
 
@@ -181,71 +182,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
             String sourceName = result.getKey();
             if (isCachedSource(sourceName)) {
-                String domainField = getDomainField(sourceName);
-                String nameField = getNameField(sourceName);
-                String cityField = getCityField(sourceName);
-                String stateField = getStateField(sourceName);
-                String countryField = getCountryField(sourceName);
-                for (InternalOutputRecord record : records) {
-                    // try using domain first
-                    boolean matched = false;
-                    String parsedDomain = record.getParsedDomain();
-                    if (StringUtils.isNotEmpty(parsedDomain)) {
-                        for (Map<String, Object> row : result.getValue()) {
-                            if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
-                                record.getResultsInSource().put(sourceName, row);
-                                matched = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!matched) {
-                        NameLocation nameLocation = record.getParsedNameLocation();
-                        if (nameLocation != null) {
-                            String parsedName = nameLocation.getName();
-                            String parsedCountry = nameLocation.getCountry();
-                            String parsedState = nameLocation.getState();
-                            String parsedCity = nameLocation.getCity();
-                            if (StringUtils.isNotEmpty(parsedName)) {
-                                for (Map<String, Object> row : result.getValue()) {
-                                    if (row.get(nameField) == null
-                                            || !parsedName.equalsIgnoreCase((String) row.get(nameField))) {
-                                        continue;
-                                    }
-
-                                    Object countryInRow = row.get(countryField);
-                                    Object stateInRow = row.get(stateField);
-                                    Object cityInRow = row.get(cityField);
-
-                                    if (countryInRow != null
-                                            && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
-                                        continue;
-                                    }
-
-                                    if (countryInRow == null && !LocationUtils.USA.equalsIgnoreCase(parsedCountry)) {
-                                        continue;
-                                    }
-
-                                    if (StringUtils.isNotEmpty(parsedState) && stateInRow != null
-                                            && !parsedState.equalsIgnoreCase((String) stateInRow)) {
-                                        continue;
-                                    }
-
-                                    if (StringUtils.isNotEmpty(parsedCity) && cityInRow != null
-                                            && !parsedCity.equalsIgnoreCase((String) cityInRow)) {
-                                        continue;
-                                    }
-
-                                    record.getResultsInSource().put(sourceName, row);
-                                    break;
-                                }
-                            }
-                        }
-
-                    }
-
-                }
+                distributeCachedSourceResults(records, sourceName, result.getValue());
             } else if (isDomainSource(sourceName)) {
                 String domainField = getDomainField(sourceName);
                 for (InternalOutputRecord record : records) {
@@ -263,6 +200,74 @@ class RealTimeMatchExecutor implements MatchExecutor {
             }
         }
         return records;
+    }
+
+    private void distributeCachedSourceResults(List<InternalOutputRecord> records, String sourceName,
+                                               List<Map<String, Object>> rows) {
+        String domainField = getDomainField(sourceName);
+        String nameField = getNameField(sourceName);
+        String cityField = getCityField(sourceName);
+        String stateField = getStateField(sourceName);
+        String countryField = getCountryField(sourceName);
+        for (InternalOutputRecord record : records) {
+            // try using domain first
+            boolean matched = false;
+            String parsedDomain = record.getParsedDomain();
+            if (StringUtils.isNotEmpty(parsedDomain)) {
+                for (Map<String, Object> row : rows) {
+                    if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
+                        record.getResultsInSource().put(sourceName, row);
+                        matched = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!matched) {
+                NameLocation nameLocation = record.getParsedNameLocation();
+                if (nameLocation != null) {
+                    String parsedName = nameLocation.getName();
+                    String parsedCountry = nameLocation.getCountry();
+                    String parsedState = nameLocation.getState();
+                    String parsedCity = nameLocation.getCity();
+                    if (StringUtils.isNotEmpty(parsedName)) {
+                        for (Map<String, Object> row : rows) {
+                            if (row.get(nameField) == null
+                                    || !parsedName.equalsIgnoreCase((String) row.get(nameField))) {
+                                continue;
+                            }
+
+                            Object countryInRow = row.get(countryField);
+                            Object stateInRow = row.get(stateField);
+                            Object cityInRow = row.get(cityField);
+
+                            if (countryInRow != null
+                                    && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
+                                continue;
+                            }
+
+                            if (countryInRow == null && !LocationUtils.USA.equalsIgnoreCase(parsedCountry)) {
+                                continue;
+                            }
+
+                            if (StringUtils.isNotEmpty(parsedState) && stateInRow != null
+                                    && !parsedState.equalsIgnoreCase((String) stateInRow)) {
+                                continue;
+                            }
+
+                            if (StringUtils.isNotEmpty(parsedCity) && cityInRow != null
+                                    && !parsedCity.equalsIgnoreCase((String) cityInRow)) {
+                                continue;
+                            }
+
+                            record.getResultsInSource().put(sourceName, row);
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     @VisibleForTesting
@@ -290,7 +295,11 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 String field = outputFields.get(i);
                 Object value = null;
                 boolean matched = false;
-                if (columnPriorityMap.containsKey(field)) {
+
+                if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                    matched = true;
+                    value = publicDomainService.isPublicDomain(internalRecord.getParsedDomain());
+                } else if (columnPriorityMap.containsKey(field)) {
                     for (String targetSource : columnPriorityMap.get(field)) {
                         if (results.containsKey(targetSource)) {
                             matched = true;
@@ -302,7 +311,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
                 output.add(value);
 
-                if (matchContext.getInput().getPredefinedSelection().equals(ColumnSelection.Predefined.Model)) {
+                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
                     internalRecord.getColumnMatched().add(value != null);
                 } else {
@@ -356,7 +365,6 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
         return matchContext;
     }
-
 
     private boolean isDomainSource(String sourceName) {
         return true;
@@ -448,7 +456,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
-            
+
             for (String columnName: columns) {
                 if (columnsInTable.contains(columnName.toLowerCase())) {
                     columnsToQuery.add(columnName);

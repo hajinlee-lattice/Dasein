@@ -30,4 +30,16 @@ public class ColumnMetadataResourceDeploymentTestNG extends PropDataApiDeploymen
             }
         }
     }
+
+    @Test(groups = "deployment", enabled = true)
+    public void testLeadEnrichment() {
+        List<ColumnMetadata> columnMetadataList =
+                columnMetadataProxy.columnSelection(ColumnSelection.Predefined.LeadEnrichment);
+        Assert.assertNotNull(columnMetadataList);
+        for (ColumnMetadata columnMetadata : columnMetadataList) {
+            Assert.assertNotNull(columnMetadata.getDisplayName());
+            Assert.assertNotNull(columnMetadata.getDescription());
+            Assert.assertNotNull(columnMetadata.getMatchDestination());
+        }
+    }
 }

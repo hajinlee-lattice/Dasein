@@ -27,4 +27,17 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
+
+    @Test(groups = "functional")
+    public void testIsPublicDomain() {
+        Object[][] data = new Object[][] {
+                { 123, "my@gmail.com", null, null, null, null } };
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = matchService.match(input, true);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+
+        Integer pos = output.getOutputFields().indexOf("IsPublicDomain");
+        Assert.assertTrue(Boolean.TRUE.equals(output.getResult().get(0).getOutput().get(pos)));
+    }
 }
