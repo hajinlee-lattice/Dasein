@@ -724,17 +724,15 @@ Create Model: Validate Import View
 
 
 
-
-/*
-Create Model Form
-============================================================ */
-.setup-import {
-  .help-block {
-    display: none;
-  }
-  .has-error .help-block {
-    display: block;
-  }
+#sureshot_iframe_container iframe {
+  width: 100%;
+  position:absolute;
+  left:0;
+  right:0;
+  height:100%;
+}
+.open-nav #sureshot_iframe_container iframe {
+  width: 75%;
 }
 
 

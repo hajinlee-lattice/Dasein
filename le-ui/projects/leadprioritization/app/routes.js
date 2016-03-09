@@ -348,7 +348,7 @@ angular
                 "main@": {
                     controller: function(urls) {
                         $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.creds_url + '" style="position:absolute;left:0;right:0;width:100%;height:100%;"></iframe>');
+                            .html('<iframe src="' + urls.creds_url + '"></iframe>');
                     },
                     template: '<div id="sureshot_iframe_container"></div>'
                 }   
@@ -369,7 +369,7 @@ angular
                 "main@": {
                     controller: function(urls) { 
                         $('#sureshot_iframe_container')
-                            .html('<iframe src="' + urls.scoring_settings_url + '" style="position:absolute;left:0;right:0;width:100%;height:100%;"></iframe>');
+                            .html('<iframe src="' + urls.scoring_settings_url + '"></iframe>');
                     },
                     template: '<div id="sureshot_iframe_container"></div>'
                 }   
