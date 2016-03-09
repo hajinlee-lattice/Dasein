@@ -34,7 +34,7 @@ public class SureShotResource {
     @Autowired
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
-    @RequestMapping(value = "/credentials", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/credentials", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
     @PreAuthorize("hasRole('Edit_PLS_Configurations')")
@@ -49,7 +49,7 @@ public class SureShotResource {
         return String.format(mapCredsAuthUrl + crmType + "?tenantId=%s&token=%s", tenantId, token.getAccessToken());
     }
 
-    @RequestMapping(value = "/scoring/settings", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/scoring/settings", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Configure Scoring Settings")
     @PreAuthorize("hasRole('Edit_PLS_Configurations')")
