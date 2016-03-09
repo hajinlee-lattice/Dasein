@@ -54,6 +54,12 @@ class Query(object):
         else:
             self.appendColumn(c)
 
+    def renameColumn(self, oldColname, newColname):
+        if oldColname in self.column_names_:
+            idx = self.column_names_.index(oldColname)
+            self.columns_[idx].setName(newColname)
+            self.column_names_[idx] = newColname
+
     def getFilters(self):
         return self.filters_
 

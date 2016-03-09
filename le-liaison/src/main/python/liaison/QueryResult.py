@@ -5,42 +5,41 @@
 # $Rev$
 #
 
-class QueryResult( object ):
- 
-    def __init__( self, conn_mgr, query_handle = None ):
+class QueryResult(object):
+
+    def __init__(self, conn_mgr, query_handle = None):
 
         self._conn_mgr = conn_mgr
         self._qhandle  = query_handle
 
 
-    def IsReady( self ):
-        raise NotImplementedError( 'QueryResult.IsReady()' )
+    def isReady(self):
+        raise NotImplementedError('QueryResult.isReady()')
 
 
-    def GetStatus( self ):
-        raise NotImplementedError( 'QueryResult.GetStatus()' )
+    def getStatus(self):
+        raise NotImplementedError('QueryResult.getStatus()')
 
 
-    def ColumnNames( self ):
-        raise NotImplementedError( 'QueryResult.ColumnNames()' )
+    def columnNames(self):
+        raise NotImplementedError('QueryResult.columnNames()')
 
 
-    def FetchAll( self ):
-        raise NotImplementedError( 'QueryResult.FetchAll()' )
+    def fetchAll(self):
+        raise NotImplementedError('QueryResult.fetchAll()')
 
 
-    def FetchMany( self, n_rows ):
-        raise NotImplementedError( 'QueryResult.FetchMany()' )
+    def fetchMany(self, n_rows):
+        raise NotImplementedError('QueryResult.fetchMany()')
 
 
-    def Reset( self ):
-        raise NotImplementedError( 'QueryResult.Reset()' )
+    def reset(self):
+        raise NotImplementedError('QueryResult.reset()')
 
-    
-    def ConnectionMgr( self ):
+
+    def connectionMgr(self):
         return self._conn_mgr
 
 
-    def QueryHandle( self ):
+    def queryHandle(self):
         return self._qhandle
-    

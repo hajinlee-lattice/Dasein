@@ -23,7 +23,7 @@ except ImportError as ie:
     print ''
     raise ie
 
-import os, datetime, re
+import os, datetime, re, htmlentitydefs
 from .exceptions import HTTPError, EndpointError, TenantNotMappedToURL, TenantNotFoundAtURL, DataLoaderError
 from .exceptions import UnknownVisiDBSpec, UnknownDataLoaderObject, MaudeStringError, XMLStringError
 from .ConnectionMgr import ConnectionMgr
@@ -46,7 +46,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
         if dataloader_url is None:
             dataloader_url = self.__getURLForTenant(tenant_name)
-        
+
         self._url         = dataloader_url
         self._tenant_name = tenant_name
         self._verify      = verify
@@ -63,14 +63,14 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
     def getTable(self, table_name):
 
         table_name_import = table_name + '_Import'
-        
+
         itable_spec = self.getSpec(table_name_import)
         stable_spec = self.getSpec(table_name)
 
         table = TableVDBImpl.initFromDefn(table_name, stable_spec, itable_spec)
 
         return table
-    
+
 
     def setTable(self, table):
 
@@ -84,7 +84,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         expression = NamedExpressionVDBImpl.InitFromDefn(expression_name, spec)
 
         return expression
-    
+
 
     def setNamedExpression(self, expression):
 
@@ -98,7 +98,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         query = QueryVDBImpl.initFromDefn(query_name, spec)
 
         return query
-    
+
 
     def getMetadata(self, query_name):
 
@@ -109,13 +109,13 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         payload['queryName'] = query_name
 
         if self.isVerbose():
-            print self.Type() +': Getting visiDB Metadata for Query \'{0}\'...'.format( payload['queryName'] ),
+            print self.getType() +': Getting visiDB Metadata for Query \'{0}\'...'.format( payload['queryName'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -191,7 +191,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         payload['queryName'] = query_name
 
         if self.isVerbose():
-            print self.Type() +': Executing Query \'{0}\'...'.format( payload['queryName'] ),
+            print self.getType() +': Executing Query \'{0}\'...'.format( payload['queryName'] ),
 
         try:
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -218,7 +218,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to execute query \'{0}\''.format( payload['queryName'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.ExecuteQuery(): {0}'.format(payload['queryName']) )
-        
+
         if self.isVerbose():
             print 'Success'
 
@@ -235,7 +235,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             payload['tenantName'] = self._tenant_name
 
             if self.isVerbose():
-                print self.Type() +': Getting DataLoader Config File...',
+                print self.getType() +': Getting DataLoader Config File...',
 
             try:
                 response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
@@ -275,11 +275,11 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
         return self._lg_mgr
 
- 
+
     def getSpec(self, spec_name):
-        
+
         url = self._url + '/DLRestService/GetSpecDetails'
-        
+
         payload = {}
         payload['tenantName'] = self._tenant_name
         payload['specName'] = spec_name
@@ -291,7 +291,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -315,7 +315,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetSpec(): {0}'.format(payload['tenantName']) )
             else:
                 raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetSpec(): {0}'.format(payload['specName']) )
-        
+
         if self.isVerbose():
             print 'Success'
 
@@ -323,9 +323,9 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
 
     def getAllSpecs(self):
-        
+
         url = self._url + '/DLRestService/DownloadVisiDBStructureFile'
-        
+
         payload = {}
         payload['tenantName'] = self._tenant_name
 
@@ -336,7 +336,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -357,13 +357,13 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to get all specs'
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.GetAllSpecs(): {0}'.format(payload['tenantName']) )
-        
+
         valuedict  = response.json()['Value'][0]
         specfile = valuedict['Value'].encode('ascii', 'xmlcharrefreplace')
-        
+
         specstart_i = specfile.find('<specs>') + 7
         specend_i = specfile.find('</specs>')
-        
+
         #if specs is None:
         #    raise UnknownVisiDBSpec( 'No specs returned' )
 
@@ -451,7 +451,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -478,7 +478,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to set spec \'{0}\''.format( obj_name )
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.SetSpec(): {0}'.format(payload['tenantName']) )
-        
+
         value  = response.json()['Value']
         status2 = value[0]
         info2   = value[1]
@@ -529,7 +529,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to get query status for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetQueryStatus(): {0}'.format(payload['queryHandle']) )
-        
+
         if self.isVerbose():
             print 'Success'
 
@@ -588,7 +588,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to get query results for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
             raise UnknownVisiDBSpec( 'ConnectionMgrVDBImpl.GetQueryResults(): {0}'.format(payload['queryHandle']) )
-        
+
         if self.isVerbose():
             print 'Success'
 
@@ -602,7 +602,8 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         remaining_rows = response.json()['RemainingRows']
 
         rows = []
-        datatable = etree.fromstring( response.json()['DataTable'].encode('ascii', 'xmlcharrefreplace') )
+
+        datatable = etree.fromstring(self.__xmlunescape(response.json()['DataTable']).encode('ascii', 'xmlcharrefreplace'))
         de = datatable.find(".//DocumentElement")
         if de is not None:
             for row_xml in de:
@@ -612,13 +613,13 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 row_xml_iter = iter(row_xml)
                 processing_cols = True
                 while(True):
-                    
+
                     try:
                         name = col_names_iter.next()
                         datatype = col_datatypes_iter.next()
                     except StopIteration:
                         break
-                    
+
                     try:
                         col_xml = row_xml_iter.next()
                         tagname = col_xml.tag.replace('_x0020_',' ')
@@ -633,10 +634,10 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                         except StopIteration:
                             processing_cols = False
                             break
-                    
+
                     if not processing_cols:
                         break
-                    
+
                     value = col_xml.text
                     if datatype == 0:
                         value = bool(col_xml.text)
@@ -677,7 +678,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             v['Key'] = k
             v['Value'] = kwargs[k]
             values.append( v )
-        
+
         payload['values'] = values
 
         if self.isVerbose():
@@ -708,15 +709,15 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to update DataProvider \'{0}\''.format( payload['dataProviderName'] )
                 print errmsg
             raise UnknownDataLoaderObject( 'ConnectionMgrVDBImpl.UpdateDataProvider(): {0}'.format(payload['dataProviderName']) )
-        
+
         if self.isVerbose():
             print 'Success'
 
 
     def executeGroup(self, groupName, userEmail):
-        
+
         url = self._url + '/DLRestService/ExecuteGroup'
-        
+
         payload = {}
         payload['tenantName'] = self._tenant_name
         payload['groupName'] = groupName
@@ -731,7 +732,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -752,10 +753,10 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to execute Load Group \'{0}\''.format( payload['groupName'] )
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.executeGroup(): {0}'.format(payload['tenantName']) )
-        
+
         valuedict  = response.json()['Value'][0]
         launchid = valuedict['Value']
-        
+
         if self.isVerbose():
             print 'Success'
 
@@ -777,7 +778,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
         except requests.exceptions.ConnectionError as e:
             raise EndpointError( e )
-        
+
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
@@ -801,7 +802,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
                 print 'Failed to set config'
                 print errmsg
             raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.installDLConfigFile(): {0}'.format(payload['tenantName']) )
-        
+
         value  = response.json()['Value']
         status2 = value[0]
         info2   = value[1]
@@ -823,7 +824,7 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
         pathname = os.path.dirname(__file__)
         pathname = os.path.join( pathname, '..', '..', 'resources', 'tenant_url.csv' )
-        
+
         with open( pathname ) as fh:
             for line in fh:
                 (ten,url) = line.strip().split(',')
@@ -835,3 +836,18 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             raise TenantNotMappedToURL( tenant )
 
         return theurl
+
+
+    @classmethod
+    def __xmlfixup(cls, m):
+        text = m.group(0)
+        code = int(text[3:-1], 16)
+        if code < 32:
+            return u''
+
+        return text # leave as is
+
+
+    @classmethod
+    def __xmlunescape(cls, text):
+        return re.sub("&#x\w+;", cls.__xmlfixup, text)

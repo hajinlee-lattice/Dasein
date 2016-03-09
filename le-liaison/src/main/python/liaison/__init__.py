@@ -39,6 +39,7 @@ from .Query                  import Query
 from .QueryVDBImpl           import QueryVDBImpl
 from .QueryColumn            import QueryColumn
 from .QueryColumnVDBImpl     import QueryColumnVDBImpl
+from .QueryFilterVDBImpl     import QueryFilterVDBImpl
 from .Table                  import Table
 from .TableVDBImpl           import TableVDBImpl
 from .TableColumn            import TableColumn

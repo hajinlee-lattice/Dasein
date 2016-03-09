@@ -26,7 +26,7 @@ class NamedExpressionVDBImpl( NamedExpression ):
 
     @classmethod
     def InitFromDefn( cls, name, defn ):
-        
+
         s = re.search( '^SpecLatticeFunction\((.*), (DataType(.*?), SpecFunctionType(.*?), SpecFunctionSourceType(.*?), SpecDefaultValue(.*?), SpecDescription\("(.*?)"\))\)$', defn )
         if not s:
             raise MaudeStringError( defn )
@@ -34,13 +34,13 @@ class NamedExpressionVDBImpl( NamedExpression ):
         defn = s.group(1)
         other_specs = s.group(2)
 
-        return cls( name, ExpressionVDBImplFactory.Create(defn), other_specs )
+        return cls( name, ExpressionVDBImplFactory.create(defn), other_specs )
 
 
     @classmethod
-    def Parse( cls, name, str ):
+    def parse( cls, name, str ):
 
-        return cls( name, ExpressionVDBImplFactory.Parse(str) )
+        return cls( name, ExpressionVDBImplFactory.parse(str) )
 
 
     def Object( self ):

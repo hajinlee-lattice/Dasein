@@ -16,7 +16,7 @@ from . import types_vdb
 class ExpressionVDBImplFactory( object ):
 
     @classmethod
-    def Create( cls, defn ):
+    def create( cls, defn ):
 
         if re.search( '^LatticeFunctionExpressionConstant', defn ):
             if re.search( '^LatticeFunctionExpressionConstantNull', defn ):
@@ -25,7 +25,7 @@ class ExpressionVDBImplFactory( object ):
 
         elif re.search( '^LatticeFunctionIdentifier\(ContainerElementName\(', defn ):
             return ExpressionVDBImplFcnRef.InitFromDefn( defn )
-        
+
         elif re.search( '^LatticeFunctionIdentifier\(ContainerElementNameTableQualifiedName\(', defn ):
             return ExpressionVDBImplColRef.InitFromDefn( defn )
 
@@ -36,42 +36,42 @@ class ExpressionVDBImplFactory( object ):
 
 
     @classmethod
-    def Parse( cls, str ):
+    def parse( cls, str ):
 
         g = generate_tokens( StringIO(str).readline )
         tok_iter = iter(g)
-        return cls.GenerateExpression( str, tok_iter )
+        return cls.generateExpression( str, tok_iter )
 
 
     @classmethod
-    def GenerateExpression( cls, str, tok_iter, tok_endmarker = None ):
+    def generateExpression( cls, str, tok_iter, tok_endmarker = None ):
         args = []
         try:
             while(True):
                 (toknum, tokval, _, _, _) = tok_iter.next()
-                
+
                 if ( tok_endmarker is not None and tokval == tok_endmarker ) or ( toknum == token.ENDMARKER ):
                     if len(args) == 1:
                         break
                     else:
                         raise ExpressionSyntaxError( str )
-                
+
                 elif tokval == '(':
-                    args.append( cls.GenerateExpression( str, tok_iter, ')' ) )
-                
+                    args.append( cls.generateExpression( str, tok_iter, ')' ) )
+
                 elif toknum == token.OP and tokval == '.':
                     tablename = args.pop().FcnName()
                     (toknum, colname, _, _, _) = tok_iter.next()
                     if toknum != token.NAME:
                         raise ExpressionSyntaxError( str )
                     args.append( ExpressionVDBImplColRef(colname,tablename) )
-                
+
                 elif toknum == token.NAME:
                     args.append( ExpressionVDBImplFcnRef.InitFromTokens(tokval) )
-                
+
                 elif toknum == token.OP:
                     raise ExpressionNotImplemented( 'Operator not implemented: {0}'.format( tokval ) )
-                
+
                 else:
                     args.append( ExpressionVDBImplConst.InitFromTokens(toknum,tokval) )
 
@@ -84,7 +84,7 @@ class ExpressionVDBImplFactory( object ):
         return args.pop()
 
 
-    
+
 
 
 class ExpressionVDBImpl( object ):

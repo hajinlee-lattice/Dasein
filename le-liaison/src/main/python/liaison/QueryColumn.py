@@ -8,15 +8,15 @@
 from .exceptions import UnknownMetadataValue
 
 class QueryColumn(object):
- 
+
     def __init__(self, name, expression, approved_usage = None, display_name = None,
                  category = None, statistical_type = None, tags = None,
                  fundamental_type = None, description = None,
-                 display_discretization = None):
+                 display_discretization = None, pivot_values = []):
 
         self.initFromValues(name, expression, approved_usage, display_name, category,
                             statistical_type, tags, fundamental_type,
-                            description, display_discretization)
+                            description, display_discretization, pivot_values)
 
 
     def getName(self):
@@ -102,6 +102,12 @@ class QueryColumn(object):
     def setDisplayDiscretization(self, dd):
         self.display_discretization_ = dd
 
+    def getPivotValues(self):
+        return self.pivot_values_
+
+    def setPivotValues(self, pp):
+        self.pivot_values_ = pp
+
     def setMetadata(self, metadata_type, metadata_value):
         if metadata_type == 'ApprovedUsage':
             self.setApprovedUsage(metadata_value)
@@ -119,6 +125,8 @@ class QueryColumn(object):
             self.setDescription(metadata_value)
         elif metadata_type == 'DisplayDiscretization':
             self.setDisplayDiscretization(metadata_value)
+        elif metadata_type == 'PivotValues':
+            self.setPivotValues(metadata_value)
 
     def definition(self):
         raise NotImplementedError('QueryColumn.definition()')
@@ -126,7 +134,7 @@ class QueryColumn(object):
     def initFromValues(self, name, expression, approved_usage = None, display_name = None,
                        category = None, statistical_type = None, tags = None,
                        fundamental_type = None, description = None,
-                       display_discretization = None):
+                       display_discretization = None, pivot_values = []):
 
         self.setName(name)
         self.setExpression(expression)
@@ -138,3 +146,4 @@ class QueryColumn(object):
         self.setFundamentalType(fundamental_type)
         self.setDescription(description)
         self.setDisplayDiscretization(display_discretization)
+        self.setPivotValues(pivot_values)

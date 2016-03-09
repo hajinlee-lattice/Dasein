@@ -18,11 +18,11 @@ class QueryColumnVDBImpl(QueryColumn):
     def __init__(self, name, expression, approved_usage = None, display_name = None,
                  category = None, statistical_type = None, tags = None,
                  fundamental_type = None, description = None,
-                 display_discretization = None):
+                 display_discretization = None, pivot_values = []):
 
         self.initFromValues(name, expression, approved_usage, display_name, category,
                             statistical_type, tags, fundamental_type,
-                            description, display_discretization)
+                            description, display_discretization, pivot_values)
 
 
 ## This is the pythonic way to create multiple constructors.  The call is
@@ -43,44 +43,45 @@ class QueryColumnVDBImpl(QueryColumn):
         md['FundamentalType']  = None
         md['Description']      = None
         md['DisplayDiscretizationStrategy'] = None
+        md['PivotValues'] = []
 
-        c_no_metadata = re.search( '^SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\)$', defn )
+        c_no_metadata = re.search('^SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\)$', defn)
 
         if c_no_metadata:
             name = c_no_metadata.group(1)
-            expression = ExpressionVDBImplFactory.Create( c_no_metadata.group(2) )
+            expression = ExpressionVDBImplFactory.create(c_no_metadata.group(2))
 
-        c_no_metadata_alt = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(empty\)\)$', defn )
+        c_no_metadata_alt = re.search('^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(empty\)\)$', defn)
 
         if c_no_metadata_alt:
             name = c_no_metadata_alt.group(1)
-            expression = ExpressionVDBImplFactory.Create( c_no_metadata_alt.group(2) )
+            expression = ExpressionVDBImplFactory.create(c_no_metadata_alt.group(2))
 
-        c_fcnbndry = re.search( '^SpecQueryNamedFunctionEntityFunctionBoundary$', defn )
+        c_fcnbndry = re.search('^SpecQueryNamedFunctionEntityFunctionBoundary$', defn)
 
         if c_fcnbndry:
             name = 'EntityFunctionBoundary'
-            expression = ExpressionVDBImplFactory.Create( 'SpecQueryNamedFunctionEntityFunctionBoundary' )
-        
-        c_has_metadata = re.search( '^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(\((.*)\)\)\)$', defn )
+            expression = ExpressionVDBImplFactory.create('SpecQueryNamedFunctionEntityFunctionBoundary')
+
+        c_has_metadata = re.search('^SpecQueryNamedFunctionMetadata\(SpecQueryNamedFunctionExpression\(ContainerElementName\(\"(.*?)\"\), (LatticeFunction.*)\), SpecExtractDetails\(\((.*)\)\)\)$', defn)
 
         if c_has_metadata:
             name = c_has_metadata.group(1)
-            expression = ExpressionVDBImplFactory.Create( c_has_metadata.group(2) )
+            expression = ExpressionVDBImplFactory.create(c_has_metadata.group(2))
             sed = c_has_metadata.group(3)
 
             while True:
                 metadata_is_extracted = False
-                
+
                 for md_name in md:
-                    md_found = re.search( '^SpecExtractDetail\(\"{0}\", \"(.*?)\"\)(, SpecExtractDetail\(.*|$)'.format(md_name), sed )
+                    md_found = re.search('^SpecExtractDetail\(\"{0}\", \"(.*?)\"\)(, SpecExtractDetail\(.*|$)'.format(md_name), sed)
                     if md_found:
                         md[md_name] = md_found.group(1).replace('\\"','"')
                         sed = md_found.group(2)[2:]
                         metadata_is_extracted = True
                         break
 
-                    md_found = re.search( '^SpecExtractDetail\(\"{0}\", StringList\(.*?\"(.*?)\"\)\)(, SpecExtractDetail\(.*|$)'.format(md_name), sed )
+                    md_found = re.search('^SpecExtractDetail\(\"{0}\", StringList\(.*?\"(.*?)\"\)\)(, SpecExtractDetail\(.*|$)'.format(md_name), sed)
                     if md_found:
                         md[md_name] = md_found.group(1).replace('\\"','"')
                         sed = md_found.group(2)[2:]
@@ -88,21 +89,21 @@ class QueryColumnVDBImpl(QueryColumn):
                         break
 
                 if not metadata_is_extracted:
-                    md_found = re.search( '^SpecExtractDetail\(.*?\)(, SpecExtractDetail\(.*|$)', sed )
+                    md_found = re.search('^SpecExtractDetail\(.*?\)(, SpecExtractDetail\(.*|$)', sed)
                     if md_found:
                         sed = md_found.group(1)[2:]
                     else:
-                        raise MaudeStringError( 'Unsupported metadata type: {0}'.format(sed) )
+                        raise MaudeStringError('Unsupported metadata type: {0}'.format(sed))
 
                 if sed == '':
                     break
 
         if expression is None:
-            raise MaudeStringError( defn )
-        
+            raise MaudeStringError(defn)
+
         return cls(name, expression, md['ApprovedUsage'], md['DisplayName'], md['Category'],
                    md['StatisticalType'], md['Tags'], md['FundamentalType'], md['Description'],
-                   md['DisplayDiscretizationStrategy'])
+                   md['DisplayDiscretizationStrategy'], md['PivotValues'])
 
 
     def definition(self):
@@ -113,32 +114,41 @@ class QueryColumnVDBImpl(QueryColumn):
         mdsep = ''
         md = ''
         if self.getDisplayName() is not None:
-            md += mdsep + 'SpecExtractDetail("DisplayName", "{0}")'.format( self.getDisplayName().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("DisplayName", "{0}")'.format(self.getDisplayName().replace('"','\\"'))
             mdsep = ', '
         if self.getDescription() is not None:
-            md += mdsep + 'SpecExtractDetail("Description", "{0}")'.format( self.getDescription().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("Description", "{0}")'.format(self.getDescription().replace('"','\\"'))
             mdsep = ', '
         if self.getApprovedUsage() is not None:
-            md += mdsep + 'SpecExtractDetail("ApprovedUsage", "{0}")'.format( self.getApprovedUsage().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("ApprovedUsage", "{0}")'.format(self.getApprovedUsage().replace('"','\\"'))
             mdsep = ', '
         if self.getFundamentalType() is not None:
-            md += mdsep + 'SpecExtractDetail("FundamentalType", "{0}")'.format( self.getFundamentalType().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("FundamentalType", "{0}")'.format(self.getFundamentalType().replace('"','\\"'))
             mdsep = ', '
         if self.getStatisticalType() is not None:
-            md += mdsep + 'SpecExtractDetail("StatisticalType", "{0}")'.format( self.getStatisticalType().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("StatisticalType", "{0}")'.format(self.getStatisticalType().replace('"','\\"'))
             mdsep = ', '
         if self.getTags() is not None:
-            md += mdsep + 'SpecExtractDetail("Tags", "{0}")'.format( self.getTags().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("Tags", "{0}")'.format(self.getTags().replace('"','\\"'))
             mdsep = ', '
         if self.getDisplayDiscretization() is not None:
-            md += mdsep + 'SpecExtractDetail("DisplayDiscretizationStrategy", "{0}")'.format( self.getDisplayDiscretization().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("DisplayDiscretizationStrategy", "{0}")'.format(self.getDisplayDiscretization().replace('"','\\"'))
             mdsep = ', '
         if self.getCategory() is not None:
-            md += mdsep + 'SpecExtractDetail("Category", "{0}")'.format( self.getCategory().replace('"','\\"') )
+            md += mdsep + 'SpecExtractDetail("Category", "{0}")'.format(self.getCategory().replace('"','\\"'))
+            mdsep = ', '
+        if self.getPivotValues():
+            pvsep = ''
+            pv = ''
+            for val in self.getPivotValues():
+                val = val.replace('"','\\"')
+                pv += pvsep + '{0}'.format(val)
+                pvsep = ','
+            md += mdsep + 'SpecExtractDetail("PivotValues", "{0}")'.format(pv)
             mdsep = ', '
 
         sqnf =  'SpecQueryNamedFunctionExpression('
-        sqnf +=   'ContainerElementName("{0}")'.format( self.getName() )
+        sqnf +=   'ContainerElementName("{0}")'.format(self.getName())
         sqnf += ', '+ self.getExpression().definition()
         sqnf += ')'
 
@@ -151,5 +161,5 @@ class QueryColumnVDBImpl(QueryColumn):
         sqnfm += md
         sqnfm +=   '))'
         sqnfm += ')'
-        
+
         return sqnfm
