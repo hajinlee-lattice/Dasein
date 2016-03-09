@@ -5,7 +5,7 @@ module.exports = function(grunt) {
 			assets: './assets',
 			app: './app',
 			bower: './lib/bower',
-			dist: './dist'
+			dist: './assets'
 		},
 		sass: {
 			dist: {
