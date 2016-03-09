@@ -38,6 +38,8 @@ class DataCompositionGenerator(State):
             if "Tags" in metadata and metadata["Tags"] is not None:
                 if "External" in metadata["Tags"]:
                     details["source"] = "PROPRIETARY"
+                elif "Internal" in metadata["Tags"]:
+                    details["source"] = "TRANSFORMS"
 
             # TODO Decide if we need to handle TEMPORAL types or not.
             if dataType == "boolean":
