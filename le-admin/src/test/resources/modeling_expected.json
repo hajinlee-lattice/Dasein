@@ -1,0 +1,10 @@
+{
+  "RootPath":"/",
+      "Node":"FeaturesThreshold",
+       "Data":"-1",
+       "Metadata":{
+        "Type":"number",
+        "Readonly":false
+       }
+    }
+}
