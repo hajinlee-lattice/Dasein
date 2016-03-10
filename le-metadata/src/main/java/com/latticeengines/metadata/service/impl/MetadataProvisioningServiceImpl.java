@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service.impl;
 
 import java.io.File;
 import java.net.URL;
+import java.net.URLDecoder;
 
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -28,11 +29,10 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
 
     @Override
     public void provisionImportTables(CustomerSpace space) {
-        URL url = getClass().getClassLoader().getResource("Tables");
-        File tablesDir = new File(url.getFile());
-        File[] files = tablesDir.listFiles();
-
         try {
+            URL url = getClass().getClassLoader().getResource("Tables");
+            File tablesDir = new File(URLDecoder.decode(url.getPath(), "UTF-8"));
+            File[] files = tablesDir.listFiles();
             for (File file : files) {
                 String str = FileUtils.readFileToString(file);
                 Table table = JsonUtils.deserialize(str, Table.class);
