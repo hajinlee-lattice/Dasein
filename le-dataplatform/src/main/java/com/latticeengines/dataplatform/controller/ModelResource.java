@@ -22,12 +22,13 @@ import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.network.exposed.dataplatform.ModelInterface;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "models", description = "REST resource for machine learning models")
 @RestController
-public class ModelResource {
+public class ModelResource implements ModelInterface {
     private static final Log log = LogFactory.getLog(ModelResource.class);
 
     @Autowired

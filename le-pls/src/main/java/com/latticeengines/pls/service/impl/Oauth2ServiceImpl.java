@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.proxy.exposed.oauth.Oauth2RestApiProxy;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 @Component("oauth2Service")
 public class Oauth2ServiceImpl implements Oauth2Interface {
