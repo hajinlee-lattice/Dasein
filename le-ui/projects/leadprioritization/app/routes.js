@@ -167,8 +167,13 @@ angular
             resolve: ModelDependencies,
             views: {
                 "navigation@": {
-                    controller: function($scope, Model) {
+                    controller: function($scope, Model, FeatureFlagService) {
                         $scope.name = Model.ModelDetails.Name;
+                        FeatureFlagService.GetAllFlags().then(function() {
+                            var flags = FeatureFlagService.Flags();
+                            $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
+                            $scope.showRefine = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
+                        });
                     },
                     templateUrl: 'app/navigation/sidebar/ModelView.html'
                 },

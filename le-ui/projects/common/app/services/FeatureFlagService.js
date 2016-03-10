@@ -37,6 +37,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         DEPLOYMENT_WIZARD_PAGE: 'DeploymentWizardPage',
         REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE: 'RedirectToDeploymentWizardPage',
         LEAD_ENRICHMENT_PAGE: 'LeadEnrichmentPage',
+
+        JOBS_PAGE: 'JobsPage',
+        MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
     };
     this.Flags = function(){ return flags; };
 
@@ -123,6 +126,9 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
         UpdateFlag(flags.DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
         UpdateFlag(flags.LEAD_ENRICHMENT_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+
+        UpdateFlag(flags.JOBS_PAGE, RightsUtility.currentUserMay("View", "Jobs"));
+        UpdateFlag(flags.MARKETO_SETTINGS_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
     }
 
 });

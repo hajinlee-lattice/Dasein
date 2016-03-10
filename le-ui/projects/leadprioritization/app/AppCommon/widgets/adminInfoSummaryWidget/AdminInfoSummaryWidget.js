@@ -14,7 +14,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     $scope.TenantId = data.TenantId;
     $scope.TenantName = $scope.data.TenantName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
-    $scope.TemplateVersion = data.ModelDetails.TemplateVersion;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
 
     $scope.exportThresholdClicked = function () {
