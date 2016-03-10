@@ -4,8 +4,8 @@
  "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
 
-    <display-name>IMPORT-EXPORT SERVICE API</display-name>
-    <description>Lattice Engines Import/Export Service REST API</description>
+    <display-name>MICROSERVICES API DOC</display-name>
+    <description>Lattice Engines Microservices Api-Docs By Swagger</description>
 
     <servlet>
         <servlet-name>doc</servlet-name>
