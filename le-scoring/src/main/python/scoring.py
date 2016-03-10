@@ -24,13 +24,14 @@ ENUMERATED_COLUMN_SCRIPT_NAME="enumeratedcolumntransformstep.py"
 COLUMNTYPE_CONVERSION_SCRIPT_NAME="columntypeconversionstep.py"
 PIVOT_SCRIPT_NAME="pivotstep.py"
 EXPORT_DF_SCRIPT_NAME="exportdfstep.py"
+ASSIGNCONVERSIONRATE_SCRIPT_NAME="assignconversionratetocategoricalcolumns.py"
 
 def main(argv):
-    scoringFiles = [SCORING_SCRIPT_NAME, 
-                    PIPELINE_SCRIPT_NAME, 
-                    PICKLE_FILE_NAME, 
-                    PIPELINEFWK_SCRIPT_NAME, 
-                    ENCODER_SCRIPT_NAME, 
+    scoringFiles = [SCORING_SCRIPT_NAME,
+                    PIPELINE_SCRIPT_NAME,
+                    PICKLE_FILE_NAME,
+                    PIPELINEFWK_SCRIPT_NAME,
+                    ENCODER_SCRIPT_NAME,
                     PIPELINESTEPS_SCRIPT_NAME,
                     IMPUTATION_STEP_SCRIPT_NAME,
                     IMPUTATION_STEP_EVPIPELINE_SCRIPT_NAME,
@@ -43,7 +44,8 @@ def main(argv):
                     ENUMERATED_COLUMN_SCRIPT_NAME,
                     COLUMNTYPE_CONVERSION_SCRIPT_NAME,
                     PIVOT_SCRIPT_NAME,
-                    EXPORT_DF_SCRIPT_NAME]
+                    EXPORT_DF_SCRIPT_NAME,
+                    ASSIGNCONVERSIONRATE_SCRIPT_NAME]
     print scoringFiles
     for index in range(len(argv)):
         leadFiles = []
