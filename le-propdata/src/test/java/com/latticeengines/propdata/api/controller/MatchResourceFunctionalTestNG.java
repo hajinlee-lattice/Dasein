@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -8,6 +10,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
+
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
     private static final String MATCH_ENDPOINT = "propdata/matches/realtime";
@@ -43,7 +46,7 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(6));
     }
 
     @Test(groups = { "api" }, enabled = true, dataProvider = "cachedMatchGoodDataProvider")
@@ -84,9 +87,15 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        Assert.assertTrue(output.getStatistics().getRowsMatched() == 0,
-                String.format("(%s, %s, %s, %s) gives %d matched", name, city, state, country,
-                        output.getStatistics().getRowsMatched()));
+        List<Object> result = output.getResult().get(0).getOutput();
+        Integer notNull = 0;
+        for (Object obj: result) {
+            if (obj != null) {
+                notNull++;
+            }
+        }
+        Assert.assertTrue(notNull == 1, String.format("(%s, %s, %s, %s) gives %d not null result objects",
+                name, city, state, country, notNull));
     }
 
     @DataProvider(name = "cachedMatchBadDataProvider")
