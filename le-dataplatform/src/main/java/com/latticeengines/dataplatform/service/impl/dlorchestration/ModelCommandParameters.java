@@ -178,7 +178,7 @@ public class ModelCommandParameters {
         return numSamples;
     }
 
-    private void setNumSamples(int numSamples) {
+    public void setNumSamples(int numSamples) {
         this.numSamples = numSamples;
     }
 
