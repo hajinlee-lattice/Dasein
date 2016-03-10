@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.serviceflows.workflow.modeling.ProductType;
 import com.latticeengines.serviceflows.workflow.modeling.ProvenanceProperties;
@@ -190,6 +191,52 @@ public class ModelingServiceExecutor {
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
+    
+    public String modelForPMML() throws Exception {
+        PMMLAlgorithm pmmlAlgorithm = new PMMLAlgorithm();
+        pmmlAlgorithm.setPriority(0);
+        pmmlAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
+        pmmlAlgorithm.setSampleName("all");
+
+        ModelDefinition modelDef = new ModelDefinition();
+        modelDef.setName("PMML");
+        modelDef.addAlgorithms(Collections.singletonList((Algorithm) pmmlAlgorithm));
+
+        Model model = new Model();
+        model.setModelDefinition(modelDef);
+        model.setName(builder.getModelName());
+        model.setTable(builder.getTable());
+        model.setMetadataTable(builder.getMetadataTable());
+        model.setCustomer(builder.getCustomer());
+        model.setKeyCols(Arrays.asList(new String[] { builder.getKeyColumn() }));
+        model.setDataFormat("avro");
+        String provenanceProperties = "Event_Table_Name=" + builder.getEventTableTable();
+        provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
+        
+        model.setProvenanceProperties(provenanceProperties);
+
+        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
+        model.setTargetsList(targetAndFeatures.getKey());
+        model.setFeaturesList(targetAndFeatures.getValue());
+
+        AppSubmission submission = restTemplate.postForObject(
+                modelingServiceHostPort + builder.getModelSubmissionUrl(), model, AppSubmission.class);
+        String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for modeling: %s", appId));
+        JobStatus status = waitForModelingAppId(appId);
+        // Wait for 30 seconds before retrieving the result directory
+        Thread.sleep(30 * 1000L);
+        String resultDir = status.getResultDirectory();
+
+        if (resultDir != null) {
+            return appId;
+        } else {
+            log.warn(String.format("No result directory for modeling job %s", appId));
+            System.out.println(String.format("No result directory for modeling job %s", appId));
+            throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
+        }
+    }
+
 
     private JobStatus waitForAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getRetrieveJobStatusUrl());

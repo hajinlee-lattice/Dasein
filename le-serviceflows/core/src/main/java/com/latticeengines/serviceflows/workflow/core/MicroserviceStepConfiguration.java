@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
+    
+    private String podId;
 
     @NotNull
     private CustomerSpace customerSpace;
@@ -40,6 +42,16 @@ public class MicroserviceStepConfiguration extends BaseStepConfiguration {
     @JsonProperty("microServiceHostPort")
     public void setMicroServiceHostPort(String microServiceHostPort) {
         this.microServiceHostPort = microServiceHostPort;
+    }
+
+    @JsonProperty("podId")
+    public String getPodId() {
+        return podId;
+    }
+
+    @JsonProperty("podId")
+    public void setPodId(String podId) {
+        this.podId = podId;
     }
 
 }
