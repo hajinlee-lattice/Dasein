@@ -323,6 +323,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         var editedData = getEditedData();
         if (editedData != null && editedData.length > 0) {
             UpdateFieldsModal.show($scope.modelSummaryId, editedData);
+
+            $scope.saveInProgress = false;
         } else {
             $scope.batchEdit = false;
             $scope.saveInProgress = false;

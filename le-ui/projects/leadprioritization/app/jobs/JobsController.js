@@ -177,7 +177,7 @@ angular.module('pd.jobs', [
 
     this.cancelJob = function(jobId) {
         $http({
-            method: 'GET',
+            method: 'POST',
             url: '/pls/jobs/' + jobId +'/cancel'
         }).then(
             function onSuccess(response) {

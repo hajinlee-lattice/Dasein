@@ -44,6 +44,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
         $scope.showEditFieldError = false;
 
         UpdateFieldsModal.show($scope.modelSummaryId, [$scope.field]);
+        $scope.saveInProgress = false;
     };
 
     $scope.cancelClicked = function($event) {
