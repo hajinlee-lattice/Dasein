@@ -46,6 +46,19 @@ Icons
 		-webkit-mask:  url("/assets/images/ico-bullseye.svg");
 		mask:  url("/assets/images/ico-bullseye.svg");
 	}
+	&.ico-model {
+		background-color: $pearl-white;
+		-webkit-mask:  url("/assets/images/ico-model.svg");
+		mask:  url("/assets/images/ico-model.svg");
+	}
+	&.ico-marketo-apikey {
+		-webkit-mask:  url("/assets/images/ico-marketo-apikey.svg");
+		mask:  url("/assets/images/ico-marketo-apikey.svg");
+	}
+	&.ico-marketo-models {
+		-webkit-mask:  url("/assets/images/ico-marketo-models.svg");
+		mask:  url("/assets/images/ico-marketo-models.svg");
+	}
 	&.ico-cog {
 		background-color: $pearl-white;
 		-webkit-mask:  url("/assets/images/ico-cog.svg");
@@ -121,9 +134,28 @@ Icons
 		mask:  url("/assets/images/ico-performance.svg");
 	}
 	&.ico-alerts {
-		background-color: $pearl-white;
-		-webkit-mask:  url("/assets/images/ico-performance.svg");
-		mask:  url("/assets/images/ico-performance.svg");
+		-webkit-mask:  url("/assets/images/ico-alerts.svg");
+		mask:  url("/assets/images/ico-alerts.svg");
+	}
+	&.ico-scoring {
+		-webkit-mask:  url("/assets/images/ico-scoring.svg");
+		mask:  url("/assets/images/ico-scoring.svg");
+	}
+	&.ico-refine {
+		-webkit-mask:  url("/assets/images/ico-refine.svg");
+		mask:  url("/assets/images/ico-refine.svg");
+	}
+	&.ico-attributes {
+		-webkit-mask:  url("/assets/images/ico-attributes.svg");
+		mask:  url("/assets/images/ico-attributes.svg");
+	}
+	&.ico-leads {
+		-webkit-mask:  url("/assets/images/ico-leads.svg");
+		mask:  url("/assets/images/ico-leads.svg");
+	}
+	&.ico-marketo {
+		-webkit-mask:  url("/assets/images/ico-marketo.svg");
+		mask:  url("/assets/images/ico-marketo.svg");
 	}
 	&.ico-light-gray {
 		background-color: #b3b5b8;
@@ -178,6 +210,9 @@ Icons
 	.ico-bullseye {
 		background-image:  url("/assets/images/ico-bullseye.svg");
 	}
+	.ico-model {
+		background-image:  url("/assets/images/ico-model.svg");
+	}
 	.ico-cog {
 		background-image:  url("/assets/images/ico-cog.svg");
 	}
@@ -202,6 +237,21 @@ Icons
 	.ico-locations {
 		background-image:  url("/assets/images/ico-locations.svg");
 	}
+	.ico-alerts {
+		background-image:  url("/assets/images/ico-alerts.svg");
+	}
+	.ico-scoring {
+		background-image:  url("/assets/images/ico-scoring.svg");
+	}
+	.ico-refine {
+		background-image:  url("/assets/images/ico-refine.svg");
+	}
+	.ico-marketo-apikey {
+		background-image:  url("/assets/images/ico-marketo-apikey.svg");
+	}
+	.ico-marketo-models {
+		background-image:  url("/assets/images/ico-marketo-models.svg");
+	}
 	.ico-tmb-user {
 		background-image:  url("/assets/images/ico-employee-range.svg");
 	}
@@ -219,5 +269,14 @@ Icons
 	}
 	.ico-history {
 		background-image:  url("/assets/images/ico-model-history-10.svg");
+	}
+	.ico-attributes {
+		background-image:  url("/assets/images/ico-attributes.svg");
+	}
+	.ico-leads {
+		background-image:  url("/assets/images/ico-leads.svg");
+	}
+	.ico-marketo {
+		background-image:  url("/assets/images/ico-marketo.svg");
 	}	
 }

@@ -1190,10 +1190,13 @@ select[multiple].input-lg {
   top: 0;
 }
 .help-block {
-  display: block;
+  display: none;
   margin-top: 5px;
   margin-bottom: 10px;
   color: #737373;
+}
+.has-error .help-block {
+  display: block;
 }
 
 @media (min-width: 768px) {
