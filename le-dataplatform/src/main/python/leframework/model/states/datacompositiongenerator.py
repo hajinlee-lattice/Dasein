@@ -56,7 +56,7 @@ class DataCompositionGenerator(State):
                 details["interpretation"] = "FEATURE"
             elif name == "Email":
                 details["interpretation"] = "EMAIL_ADDRESS"
-            elif name == "LeadID" or name == "ExternalId":
+            elif name == "LeadID" or name == "Id":
                 details["interpretation"] = "RECORD_ID"
             elif name == "CompanyName":
                 details["interpretation"] = "COMPANY_NAME"
