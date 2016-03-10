@@ -55,22 +55,22 @@ public class ImportConfiguration extends BasePayloadConfiguration {
         return properties.get(key);
     }
 
-    @JsonProperty("importType")
+    @JsonProperty("import_type")
     public ImportType getImportType() {
         return importType;
     }
 
-    @JsonProperty("importType")
+    @JsonProperty("import_type")
     public void setImportType(ImportType importType) {
         this.importType = importType;
     }
 
-    @JsonProperty("camelRouteConfiguration")
+    @JsonProperty("camel_route_configuration")
     public CamelRouteConfiguration getCamelRouteConfiguration() {
         return camelRouteConfiguration;
     }
 
-    @JsonProperty("camelRouteConfiguration")
+    @JsonProperty("camel_route_configuration")
     public void setCamelRouteConfiguration(CamelRouteConfiguration camelRouteConfiguration) {
         this.camelRouteConfiguration = camelRouteConfiguration;
     }

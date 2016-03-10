@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "className")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "class_name")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = SftpToHdfsRouteConfiguration.class, name = "SftpToHdfsRouteConfiguration")
 })
@@ -16,12 +16,12 @@ public class CamelRouteConfiguration {
         setClassName(getClass().getSimpleName());
     }
 
-    @JsonProperty("className")
+    @JsonProperty("class_name")
     private String getClassName() {
         return className;
     }
 
-    @JsonProperty("className")
+    @JsonProperty("class_name")
     private void setClassName(String className) {
         this.className = className;
     }
