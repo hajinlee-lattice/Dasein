@@ -27,7 +27,6 @@
         <relativePath>../playmaker-pom.xml</relativePath>
     </parent>
 
-
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
