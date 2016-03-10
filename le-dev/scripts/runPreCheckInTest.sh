@@ -179,6 +179,7 @@ def runTestSetupScript():
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--skip-setup', dest='skipsetup', action='store_true', help='skip test setup.')
+    parser.add_argument('--skip-server', dest='skipserver', action='store_true', help='skip check and start jetty servers.')
     parser.add_argument('-w', dest='waitminute', type=int, default=5, help='number of minutes wait for jettys to start up, default = 5 min.')
     args = parser.parse_args()
     return args
@@ -204,7 +205,11 @@ if __name__ == "__main__":
         print 'Skip test setup.'
 
     atexit.register(killAllRunningServers)
-    startAllServers(args.waitminute)
+
+    if not args.skipserver:
+        startAllServers(args.waitminute)
+    else:
+        print 'Skip checking servers.'
 
     print 'Environmental setup finished for PD End to End. Running the actual test.'
     runPDMockedEndToEndTest();
