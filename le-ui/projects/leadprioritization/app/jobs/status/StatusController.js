@@ -60,10 +60,6 @@ angular
                 };
                 
                 function isCompleted() {
-                    if ($scope.job.status == "Completed" || $scope.job.status == "Failed" || $scope.job.status == "Cancelled") {
-                        return true;
-                    }
-
                     for (var step in $scope.jobStepsCompletedStates) {
                         if (! $scope.jobStepsCompletedStates[step]) {
                             return false;
