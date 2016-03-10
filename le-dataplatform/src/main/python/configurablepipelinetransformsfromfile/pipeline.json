@@ -61,6 +61,26 @@
       "OperatesOnColumns": [],
       "NamedParameterListToInit": {},
       "ColumnTransformFilePath": "./lepipeline.tar.gz/exportdfstep.py"
+    }, 
+    "CleanCategoricalColumn":{
+        "KeyWhenSortingByAscending": "6",
+        "Name": "cleancategoricalcolumn",
+        "MainClassName": "CleanCategoricalColumn",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/cleancategoricalcolumn.py"
+    }, 
+    "AssignConversionRateToCategoricalColumns":{
+        "KeyWhenSortingByAscending": "7",
+        "Name": "assignconversionratertocategoricalcolumns",
+        "MainClassName": "AssignConversionRateToCategoricalColumns",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/assignconversionratetocategoricalcolumns.py"
     }
   }
 }

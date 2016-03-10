@@ -1,7 +1,7 @@
 {
-  columnTransformFiles": {
+  "columnTransformFiles": {
     "enumeratedcolumntransformstep": {
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "0",
         "Name": "enumeratedcolumntransformstep",
         "MainClassName": "EnumeratedColumnTransformStep",
         "MainMethodName": "__init__",
@@ -21,7 +21,7 @@
         "ColumnTransformFilePath": "./lepipeline.tar.gz/columntypeconversionstep.py"
     },
     "imputationstepevpipeline":{
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "3",
         "Name": "imputationstepevpipeline",
         "MainClassName": "ImputationStep",
         "MainMethodName": "__init__",
@@ -31,7 +31,7 @@
         "ColumnTransformFilePath": "./lepipeline.tar.gz/imputationstepevpipeline.py"
     },
     "revenuecolumntransformstep": {
-        "KeyWhenSortingByAscending": "1",
+        "KeyWhenSortingByAscending": "2",
         "Name": "revenuecolumntransformstep",
         "MainClassName": "RevenueColumnTransformStep",
         "MainMethodName": "__init__",
@@ -39,6 +39,26 @@
         "OperatesOnColumns": ["Numerical"],
         "NamedParameterListToInit": {"enumMappings": "orderedDictContinuousColumns"},
         "ColumnTransformFilePath": "./lepipeline.tar.gz/revenuecolumntransformstep.py"
+    },
+    "CleanCategoricalColumn":{
+        "KeyWhenSortingByAscending": "5",
+        "Name": "cleancategoricalcolumn",
+        "MainClassName": "CleanCategoricalColumn",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/cleancategoricalcolumn.py"
+    }, 
+    "AssignConversionRateToCategoricalColumns":{
+        "KeyWhenSortingByAscending": "6",
+        "Name": "assignconversionratertocategoricalcolumns",
+        "MainClassName": "AssignConversionRateToCategoricalColumns",
+        "MainMethodName": "__init__",
+        "UniqueColumnTransformName": "",
+        "OperatesOnColumns": ["Categorical"],
+        "NamedParameterListToInit": {"columnsToPivot": "categoricalColumns", "targetColumn": "targetColumn"},
+        "ColumnTransformFilePath": "./lepipeline.tar.gz/assignconversionratetocategoricalcolumns.py"
     }
   }
 }

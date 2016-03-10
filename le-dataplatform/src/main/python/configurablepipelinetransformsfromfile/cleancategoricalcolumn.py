@@ -29,14 +29,18 @@ class CleanCategoricalColumn(PipelineStep):
     cleanCategoriesWithTargetColumn = None
     columnsToPivot = {}
     columnList = []
-    
-    def __init__(self, columnsToPivot):
+    nullValue = 'EMPTY'
+    includedKeys = {}
+    targetColumn = ""
+    currentColumn = None
+
+    def __init__(self, columnsToPivot, targetColumn):
         self.columnsToPivot = columnsToPivot
+        self.targetColumn = targetColumn
         if columnsToPivot:
             self.columnList = columnsToPivot.keys()
         else:
             self.columnList = []
-        pass
 
     def transform(self, dataFrame, configMetadata, test):
         threshold = self.getProperty("threshold")
@@ -45,36 +49,38 @@ class CleanCategoricalColumn(PipelineStep):
         targetColumn = self.getProperty("targetColumn")
         try:
             outputFrame = dataFrame
-            for column, _ in self.columnsToPivot.iteritems():
-                if column in dataFrame.columns:
-                    dataFrameAsList = dataFrame[column].values.tolist()
-                    self.cleanCategoriesWithThreshold = self.__cleanCateg(dataFrameAsList, thresh=threshold)
-                    outputFrame[column] = self.cleanCategoriesWithThreshold
+            if len(self.includedKeys) == 0:
+                logger.info("CleanCategoricalColumn training phase.")
+                for column, _ in self.columnsToPivot.iteritems():
+                    if column in dataFrame.columns:
+                        self.currentColumn = column
+                        dataFrameAsList = dataFrame[column].values.tolist()
+                        self.cleanCategoriesWithThreshold = self.__cleanCateg(dataFrameAsList, thresh=threshold)
+                        outputFrame[column] = self.cleanCategoriesWithThreshold
+                        self.cleanCategoriesWithTargetColumn = self.__cleanCategFull(column, dataFrame)
+                        outputFrame[column] = self.cleanCategoriesWithTargetColumn
+            else:
+                logger.info("CleanCategoricalColumn testing phase.")
+                for column, _ in self.columnsToPivot.iteritems():
+                    if column in dataFrame.columns:
+                        self.currentColumn = column
+                        dataFrameAsList = dataFrame[column].values.tolist()
+                        outputFrame[column] = map(self.applyEmptyValue, dataFrame[column].values.tolist())
 
             return outputFrame
-
         except Exception:
-            logger.exception("Caught Exception trying to use CleanCategoricalColumn Threshold Transformation")
+            logger.exception("Caught Exception trying to use CleanCategolricalColumn Threshold Transformation")
             self.cleanCategoriesWithThreshold = None
             return dataFrame
 
-        if targetColumn is None:
-            if self.cleanCategoriesWithThreshold is not None:
-                return self.cleanCategoriesWithThreshold
+    def applyEmptyValue(self, categoricalValue):
+        if self.currentColumn in self.includedKeys:
+            if categoricalValue in self.includedKeys[self.currentColumn]:
+                return categoricalValue
             else:
-                return dataFrame
-
-        try:
-            self.cleanCategoriesWithTargetColumn = self.__cleanCategFull(self.cleanCategoriesWithThreshold, dataFrame, targetColumn)
-            return self.cleanCategoriesWithTargetColumn
-        except Exception:
-            logger.exception("Caught Exception trying to use CleanCategoricalColumn TargetColumn Statistical Test Transformation")
-            if self.cleanCategoriesWithThreshold:
-                return self.cleanCategoriesWithThreshold
-            else:
-                return dataFrame
-
-        return self.cleanCategoriesWithTargetColumn
+                return categoricalValue
+        else:
+            return self.nullValue
 
     def __convertListToDataFrame(self, listToConvert):
         if type(listToConvert) is list:
@@ -83,6 +89,7 @@ class CleanCategoricalColumn(PipelineStep):
             return listToConvert
 
     def __cleanCateg(self, xlist, thresh=.95, percMin=.01, nullValue='EMPTY'):
+        self.nullValue = nullValue
         cc=Counter(xlist)
         total=len(xlist)*thresh
         cd=sorted(cc.items(), key = lambda x: x[1], reverse=True)
@@ -97,39 +104,37 @@ class CleanCategoricalColumn(PipelineStep):
             if newtotal>total*thresh: break
         cd = None
         cc = None
-        for i in xrange(len(xlist)):
-            if xlist[i] not in includedKeys:
-                xlist[i] = nullValue
-        return xlist
+        self.includedKeys[self.currentColumn] = includedKeys
 
+        return map(self.applyEmptyValue, xlist)
     '''
     This code revisits __cleanCateg results via eventList.
     cleanList is output of __cleanCateg
     The new list re-included those categories that are statistically signficant even though they are rare
     '''
 
-    def __cleanCategFull(self, cleanList,xlist,eventList,nullValue='EMPTY'):
-        fullKeyList=set(xlist)
-        includedKeys=set(cleanList)
-        excludedKeys=set(xlist)-set(cleanList)
+    def __cleanCategFull(self, categoricalColumn, dataFrame):
+        includedKeys=set(self.cleanCategoriesWithThreshold)
+        excludedKeys=set(dataFrame[categoricalColumn])-set(self.cleanCategoriesWithThreshold)
+        xlist = dataFrame[categoricalColumn]
         ylist=[x for x in enumerate(xlist)]
         popCount=len(xlist)
-        popRate=sum(eventList)*1.0/popCount
+        popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
         transferKeyList=[]
         for k in excludedKeys:
             ind=[i for i,x in ylist if x==k]
             count=len(ind)
-            perc=sum([eventList[i] for i in ind])*1.0/count
+            perc=round(sum([dataFrame[self.targetColumn].iloc[i] for i in ind])*1.0/count, 2)
             sd=math.sqrt(perc*(1.0-perc)/count + popRate*(1.0-popRate)/popCount)
             if abs(perc-popRate)>2.0*sd:
                 transferKeyList.append(k)
         transferKeys=set(transferKeyList)
         includedKeys.update(transferKeys)
-        excludedKeys=fullKeyList-includedKeys
-        newDict=dict((k,k) for k in includedKeys)
-        newDict1=dict((k,nullValue) for k in excludedKeys)
-        newDict.update(newDict1)
-        return [newDict[x] for x in xlist]
+        self.includedKeys[self.currentColumn] = includedKeys
+        return map(self.applyEmptyValue, xlist)
+
+    def getIncludedKeys(self):
+        return self.includedKeys
 
     def getOutputColumns(self):
         return [(create_column(k, "LONG"), [k]) for k in self.columnList]

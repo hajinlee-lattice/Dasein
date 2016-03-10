@@ -38,7 +38,7 @@ class ColumnTransform(object):
                             break
             except Exception as e:
                 logger.warn(str(e))
-                logger.exception("Could not load pipeline from provided path:" + pathToPipelineFiles)
+                logger.exception("Could not load pipeline from provided path:" + str(pathToPipelineFiles))
         else:
             logger.info("Configurable pipeline not loaded because empty path provided: %s" % pathToPipelineFiles)
             pass

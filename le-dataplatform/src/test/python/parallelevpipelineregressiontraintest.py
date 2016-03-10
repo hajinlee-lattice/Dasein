@@ -47,12 +47,12 @@ class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
-                self.assertTrue(isinstance(pipeline.getPipeline()[4].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
-                self.assertTrue(isinstance(pipeline.getPipeline()[5], EVModelStep), "No post score step.")
-                self.assertIsNotNone(pipeline.getPipeline()[5].model)
-                self.assertTrue(isinstance(pipeline.getPipeline()[5].model, AggregatedModel), "clf not instance of AggregatedModel.")
-                self.assertTrue(len(pipeline.getPipeline()[5].model.models) == 1, "There no models found.")
-                self.assertTrue(len(pipeline.getPipeline()[5].model.regressionModels) == 1, "There no regression models found.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[6].getModel(), AggregatedModel), "clf not instance of AggregatedModel.")
+                self.assertTrue(isinstance(pipeline.getPipeline()[7], EVModelStep), "No post score step.")
+                self.assertIsNotNone(pipeline.getPipeline()[7].model)
+                self.assertTrue(isinstance(pipeline.getPipeline()[7].model, AggregatedModel), "clf not instance of AggregatedModel.")
+                self.assertTrue(len(pipeline.getPipeline()[7].model.models) == 1, "There no models found.")
+                self.assertTrue(len(pipeline.getPipeline()[7].model.regressionModels) == 1, "There no regression models found.")
                 
             os.rename(fileName, "./results/" + entry["Key"])
 
