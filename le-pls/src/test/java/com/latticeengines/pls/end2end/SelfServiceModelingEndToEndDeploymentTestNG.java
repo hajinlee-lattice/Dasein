@@ -258,16 +258,28 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     private WorkflowStatus waitForWorkflowStatus(String applicationId, boolean running) {
+        int retryOnException = 4;
+        WorkflowStatus status = null;
+
         while (true) {
-            WorkflowStatus status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
-            if (status == null) {
-                continue;
+            try {
+                status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
+            } catch (Exception e) {
+                System.out.println(String.format("Workflow status exception: %s", e.getMessage()));
+
+                status = null;
+                if (--retryOnException == 0)
+                    throw new RuntimeException(e);
             }
-            if ((running && status.getStatus().isRunning()) || (!running && !status.getStatus().isRunning())) {
+
+            if ((status != null) &&
+               ((running && status.getStatus().isRunning()) ||
+                (!running && !status.getStatus().isRunning()))) {
                 return status;
             }
+
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(30000L);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

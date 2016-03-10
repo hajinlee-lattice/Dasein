@@ -252,16 +252,24 @@ public class WorkflowServiceImpl implements WorkflowService {
     public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception {
         WorkflowStatus status = null;
         long start = System.currentTimeMillis();
+        int retryOnException = 16;
 
         // break label for inner loop
         done: do {
-            status = getStatus(workflowId);
-            if (status == null) {
-                break;
-            } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-                break done;
+            try {
+                status = getStatus(workflowId);
+                if (status == null) {
+                    break;
+                } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
+                    break done;
+                }
+            } catch (Exception e) {
+                log.warn(String.format("Error while getting status for workflow %d, with error %s",
+                    workflowId.getId(), e.getMessage()));
+                if (--retryOnException == 0) throw e;
+            } finally {
+                Thread.sleep(10000);
             }
-            Thread.sleep(1000);
         } while (System.currentTimeMillis() - start < maxWaitTime);
 
         return status;
