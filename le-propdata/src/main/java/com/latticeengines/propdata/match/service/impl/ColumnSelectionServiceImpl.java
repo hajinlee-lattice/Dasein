@@ -2,10 +2,8 @@ package com.latticeengines.propdata.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +12,6 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.cache.CacheBuilder;
@@ -23,8 +20,6 @@ import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ExternalColumn;
-import com.latticeengines.propdata.core.datasource.DataSourcePool;
-import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.ExternalColumnService;
