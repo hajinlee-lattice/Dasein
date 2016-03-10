@@ -39,6 +39,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/fileuploads")
 @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class FileUploadResource {
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(FileUploadResource.class);
     private static final int MAX_ERROR_CSV_LENGTH = 65536;
 

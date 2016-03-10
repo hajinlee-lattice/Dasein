@@ -121,6 +121,14 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/metadatauploads/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/pls/oauth2/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
