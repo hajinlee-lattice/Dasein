@@ -71,11 +71,17 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
                     setProgress(progress.floatValue());
                     log.info("Waiting for the camel route to finish: " + progress * 100 + " %");
                 }
-                Thread.sleep(5000L);
             } catch (Exception e) {
                 log.error(e);
-                if (errorTimes++ > 10) {
+                if (++errorTimes >= 10) {
                     throw new RuntimeException("Max error times exceeded: encountered " + errorTimes + " errors.");
+                }
+            } finally {
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    log.error(e);
+                    // ignore
                 }
             }
         }
