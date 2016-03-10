@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 
 public final class PathBuilder {
     public static Path buildPodsPath() {
@@ -64,6 +65,14 @@ public final class PathBuilder {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES);
     }
 
+    public static Path buildMetadataPath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.METADATA);
+    }
+
+    public static Path buildMetadataPathForArtifactType(String podId, CustomerSpace space, String module, ArtifactType artifactType) {
+        return buildMetadataPath(podId, space).append(module).append(artifactType.getPathToken());
+    }
+
     public static Path buildCustomerSpacePath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
     }
@@ -96,5 +105,9 @@ public final class PathBuilder {
 
     public static Path buildMessageQueuePath(String podId, String queueName) {
         return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.QUEUES, queueName);
+    }
+    
+    public static Path buildModelingServicePath(String contractId, String tenantId, String spaceId) {
+        return new Path(String.format("/user/s-analytics/customers/%s.%s.%s", contractId, tenantId, spaceId));
     }
 }

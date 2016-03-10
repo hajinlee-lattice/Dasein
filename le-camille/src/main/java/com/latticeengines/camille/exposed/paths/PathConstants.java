@@ -11,6 +11,7 @@ public final class PathConstants {
     public static final String QUEUES = "Queues";
     public static final String TABLES = "Tables";
     public static final String FILES = "Files";
+    public static final String METADATA = "Metadata";
 
     public static final String DEFAULTCONFIG_NODE = "Default";
     public static final String CONFIGSCHEMA_NODE = "Metadata";
@@ -23,5 +24,6 @@ public final class PathConstants {
     public static final String BOOTSTRAP_LOCK = "lock";
 
     public static final String DEFAULT_SPACE_FILE = "default-space";
+    
     
 }
