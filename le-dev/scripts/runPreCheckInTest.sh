@@ -204,7 +204,7 @@ if __name__ == "__main__":
         print 'Skip test setup.'
 
     atexit.register(killAllRunningServers)
-    # startAllServers(args.waitminute)
+    startAllServers(args.waitminute)
 
     print 'Environmental setup finished for PD End to End. Running the actual test.'
     runPDMockedEndToEndTest();
