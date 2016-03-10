@@ -186,97 +186,110 @@ Icons
 	}
 }
 .no-cssmask {
-	.ico {
-		background-color: inherit;
+	.ico, .menu .active .ico {
+		background-color: transparent;
 	}
 	.ico-search {
-		background-image:  url("/assets/images/ico-search.svg");
+		background-image:  url("/assets/images/ico-search.png");
 	}
 	.ico-filter {
-		background-image:  url("/assets/images/ico-filter.svg");
+		background-image:  url("/assets/images/ico-filter.png");
 	}
 	.ico-sort {
-		background-image:  url("/assets/images/ico-sort.svg");
+		background-image:  url("/assets/images/ico-sort.png");
 	}
 	.ico-grid {
-		background-image:  url("/assets/images/ico-grid.svg");
+		background-image:  url("/assets/images/ico-grid.png");
 	}
 	.ico-list {
-		background-image:  url("/assets/images/ico-list.svg");
+		background-image:  url("/assets/images/ico-list.png");
 	}
 	.ico-fingerprint {
-		background-image:  url("/assets/images/ico-fingerprint.svg");
+		background-image:  url("/assets/images/ico-fingerprint.png");
 	}
 	.ico-bullseye {
-		background-image:  url("/assets/images/ico-bullseye.svg");
+		background-image:  url("/assets/images/ico-bullseye.png");
 	}
 	.ico-model {
-		background-image:  url("/assets/images/ico-model.svg");
+		background-image:  url("/assets/images/ico-model.png");
 	}
 	.ico-cog {
-		background-image:  url("/assets/images/ico-cog.svg");
+		background-image:  url("/assets/images/ico-cog.png");
+		background-size: 20px;
 	}
 	.ico-step-open {
-		background-image: url("/assets/images/ico-step-open.svg");
+		background-image: url("/assets/images/ico-step-open.png");
 	}
 	.ico-step-current {
-		background-image: url("/assets/images/ico-step-current.svg");
+		background-image: url("/assets/images/ico-step-current.png");
 	}
 	.ico-step-checked {
-		background-image: url("/assets/images/ico-step-checked.svg");
+		background-image: url("/assets/images/ico-step-checked.png");
 	}
 	.ico-user {
-		background-image:  url("/assets/images/ico-user.svg");
+		background-image:  url("/assets/images/ico-user.png");
 	}
 	.ico-user-card {
-		background-image:  url("/assets/images/ico-user-card.svg");
+		background-image:  url("/assets/images/ico-user-card.png");
 	}
 	.ico-industry {
-		background-image:  url("/assets/images/ico-industry.svg");
+		background-image:  url("/assets/images/ico-industry.png");
 	}
 	.ico-locations {
-		background-image:  url("/assets/images/ico-locations.svg");
+		background-image:  url("/assets/images/ico-locations.png");
 	}
 	.ico-alerts {
-		background-image:  url("/assets/images/ico-alerts.svg");
+		background-image:  url("/assets/images/ico-alerts.png");
 	}
 	.ico-scoring {
-		background-image:  url("/assets/images/ico-scoring.svg");
+		background-image:  url("/assets/images/ico-scoring.png");
 	}
 	.ico-refine {
-		background-image:  url("/assets/images/ico-refine.svg");
+		background-image:  url("/assets/images/ico-refine.png");
 	}
 	.ico-marketo-apikey {
-		background-image:  url("/assets/images/ico-marketo-apikey.svg");
+		background-image:  url("/assets/images/ico-marketo-apikey.png");
+		background-size: 20px;
 	}
 	.ico-marketo-models {
-		background-image:  url("/assets/images/ico-marketo-models.svg");
+		background-image:  url("/assets/images/ico-marketo-models.png");
+		background-size: 20px;
+	}
+	.ico-performance {
+	    background-image: url("/assets/images/ico-performance.png");
 	}
 	.ico-tmb-user {
-		background-image:  url("/assets/images/ico-employee-range.svg");
+		background-image:  url("/assets/images/ico-employee-range.png");
 	}
 	.ico-tmb-chart {
-		background-image:  url("/assets/images/ico-revenue-range.svg");
+		background-image:  url("/assets/images/ico-revenue-range.png");
 	}
 	.ico-tech-profile {
-		background-image:  url("/assets/images/ico-web.svg");
+		background-image:  url("/assets/images/ico-web.png");
 	}
 	.ico-web {
-		background-image:  url("/assets/images/ico-web.svg");
+		background-image:  url("/assets/images/ico-web.png");
 	}
 	.ico-chip {
-		background-image:  url("/assets/images/ico-chip.svg");
+		background-image:  url("/assets/images/ico-chip.png");
 	}
 	.ico-history {
-		background-image:  url("/assets/images/ico-model-history-10.svg");
+		background-image:  url("/assets/images/ico-model-history-10.png");
 	}
 	.ico-attributes {
-		background-image:  url("/assets/images/ico-attributes.svg");
+		background-image:  url("/assets/images/ico-attributes.png");
+		background-size: 22px;
 	}
 	.ico-leads {
-		background-image:  url("/assets/images/ico-leads.svg");
+		background-image:  url("/assets/images/ico-leads.png");
+		background-size: 20px;
+	}
+	.ico-datatable {
+		background-image:  url("/assets/images/ico-datatable.png");
+		background-size: 18px;
 	}
 	.ico-marketo {
-		background-image:  url("/assets/images/ico-marketo.svg");
+		background-image:  url("/assets/images/ico-marketo.png");
+		background-size: 22px;
 	}	
 }
