@@ -17,7 +17,6 @@ import com.latticeengines.eai.service.DataExtractionService;
 @Component("eaiService")
 public class EaiServiceImpl implements EaiService {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(EaiServiceImpl.class);
 
     @Autowired
