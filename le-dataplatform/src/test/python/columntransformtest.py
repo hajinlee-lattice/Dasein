@@ -38,7 +38,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
-                , "assignconversionratertocategoricalcolumns", "cleancategoricalcolumn"]
+                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/evpipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
 

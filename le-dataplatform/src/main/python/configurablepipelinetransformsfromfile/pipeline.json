@@ -74,7 +74,7 @@
     }, 
     "AssignConversionRateToCategoricalColumns":{
         "KeyWhenSortingByAscending": "7",
-        "Name": "assignconversionratertocategoricalcolumns",
+        "Name": "assignconversionratetocategoricalcolumns",
         "MainClassName": "AssignConversionRateToCategoricalColumns",
         "MainMethodName": "__init__",
         "UniqueColumnTransformName": "",
