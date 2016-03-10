@@ -2,7 +2,7 @@ from trainingtestbase import TrainingTestBase
 import numpy as np
 import pandas as pd
 
-from configurablepipelinetransformsfromfile.assignconversionratertocategoricalcolumns import AssignConversionRateToCategoricalColumns
+from configurablepipelinetransformsfromfile.assignconversionratetocategoricalcolumns import AssignConversionRateToCategoricalColumns
 
 class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
