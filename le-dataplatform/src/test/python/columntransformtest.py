@@ -74,7 +74,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def checkThatTransformsDontThrowExceptions(self):
         keys = ["exportdfstep", "pivotstep", "imputationstep", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
-                , "assignconversionratertocategoricalcolumns", "cleancategoricalcolumn"]
+                , "assignconversionratetocategoricalcolumns", "cleancategoricalcolumn"]
         pipelineFilePath = ["../../main/python/configurablepipelinetransformsfromfile/pipeline.json".lower()]
         colTransform = columntransform.ColumnTransform(pathToPipelineFiles= pipelineFilePath)
 
