@@ -5,11 +5,11 @@ module.exports = [
         path: '/projects/common',
         folders: {
             '/app': '/app',
-            '/assets': '/assets',
             '/lib': '/lib',
-            '/dist': '/dist',
+            '/assets': '/assets',
             '/common/assets': '/assets',
-            '/common/dist': '/dist'
+            '/fonts': '/assets/fonts',
+            '/images': '/assets/images'
         }
     },{
         path: '/projects/login',
