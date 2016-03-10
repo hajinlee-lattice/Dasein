@@ -183,7 +183,8 @@ public enum LedpCode {
     LEDP_18087("Missing required fields [{0}] in csv file {1}."), //
     LEDP_18088("Could not locate table with name {0}"), //
     LEDP_18089("Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
-    LEDP_18090("Failed to retrieve error.csv file"), //
+    LEDP_18090("Metadata type {0} is not supported."), //
+    LEDP_18091("Artifact type {0} with name {1} already exists in module {2}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -334,6 +335,8 @@ public enum LedpCode {
     LEDP_28016("Could not find tenant with id:{0}"), //
     LEDP_28017("Workflow execution to be restarted does not exist:{0}"), //
     LEDP_28018("Workflow execution {0} cannot be restarted since in non-terminated state:{1}"), //
+    LEDP_28019("Problem modeling for PMML:{0}."), //
+    LEDP_28020("Could not find artifact with name {0}."), //
 
     // le-dellebi
     LEDP_29000(

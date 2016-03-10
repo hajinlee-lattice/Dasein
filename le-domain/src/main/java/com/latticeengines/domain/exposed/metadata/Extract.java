@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @javax.persistence.Table(name = "METADATA_EXTRACT")
 public class Extract implements HasName, HasPid, HasTenantId, GraphNode, Serializable {
 
+    private static final long serialVersionUID = -6740417234916797093L;
     private Long pid;
     private String name;
     private String path;
