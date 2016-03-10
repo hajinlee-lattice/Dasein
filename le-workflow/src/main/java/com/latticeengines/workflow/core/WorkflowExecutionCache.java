@@ -167,7 +167,6 @@ public class WorkflowExecutionCache {
         return reports;
     }
 
-    @SuppressWarnings("unchecked")
     private Map<String, String> getOutputs(JobExecution jobExecution) {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.OUTPUTS);
