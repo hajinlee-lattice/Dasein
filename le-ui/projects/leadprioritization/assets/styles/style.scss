@@ -1066,38 +1066,27 @@ Model Details
                 background: #fe864b;
             }
 
+
+
+
+
+/*
+Model List Creation History
+================================================================== */
+.model-list-creation-history .table-header {
+    margin-bottom: 10px;
+}
+
+
 /*
 Manage Users
 ================================================================== */
-.user-list {
-    width: 600px;
-    margin: 8em auto;
+.user-management-list .table-header {
+    margin-bottom: 10px;
 }
-    .user-list:after {
-        display: table;
-        content: "";
-        clear: both;
-    }
-.user-list h2, .user-list table {
-    float: left;
-}
-.user-list h2 {
-    font-family: 'ProximaNova-Regular';
-    font-size: 2em;
-    text-align: right;
-    width: 160px;
-    margin: 0 1em 0 0;
-}
-.user-list table {
-    width: 414px;
-}
-    .user-list td, .user-list th {
-        padding: 10px;
-    }
-.user-list button {
-    margin-left: 196px;
-    margin-top: 1em;
-}
+
+
+
 #add-user-modal ul {
     padding: 0 6em;
 }
@@ -1118,92 +1107,6 @@ Manage Users
 }
 
 
-/*
-Data Tables
-================================================================== */
-.data-table {
-    padding: 2px;
-}
-.data-table table {
-    width: 100%;
-}
-    .data-table table thead, .data-table table tbody {
-        border-bottom: #ccc solid 1px;
-    }
-    .data-table table thead th {
-        background: #fff;
-        text-transform: uppercase;
-        font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
-        font-size: 11px;
-        color: #999;
-        font-weight: normal;
-    }   
-    .data-table table tr {
-        background: #fff;
-    }
-    .data-table table tr:nth-child(odd) {
-        background: #f3f7fb;
-    }
-    .data-table table td, .data-table table th {
-        padding: 0.25em 1em;
-    }
-        #scoring-leads .data-table table td, #scoring-leads .data-table table th {
-            width: 45%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #scoring-leads .data-table table td:nth-child(2), #scoring-leads .data-table table th:nth-child(2) {
-            width: 35%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        #scoring-leads .data-table table td:nth-child(3), #scoring-leads .data-table table th:nth-child(3) {
-            text-align: center;
-            width: 10%;
-        }
-        #scoring-leads .data-table table td:nth-child(4), #scoring-leads .data-table table th:nth-child(4) {
-            text-align: right;
-            width: 10%;
-        }   
-    .data-table table td {
-        color: #333;
-        font-size: 14px;
-    }
-.threshold-data table thead {
-    border-bottom: none;
-}
-.threshold-data table thead th {
-    color: #2579ad;
-    border-top: #cccccc solid 1px;
-    background: #f3f7fb;
-}
-    .threshold-data table thead th, .threshold-data table tbody td {
-        text-align: center;
-        text-transform: uppercase;
-        font-family:'ProximaNova-Semibold','Open Sans',sans-serif;
-        border-right: #eeeeee solid 1px;
-        font-size: 18px;
-        padding: 6px 1em;
-    }
-    .threshold-data table td:first-of-type, .threshold-data table th:first-of-type {
-        text-align: left;
-        font-size: 14px;
-    }
-    .threshold-data table thead th span {
-        display: block;
-        font-size: 10px;
-    }
-    .threshold-data table tbody td {
-        color: #333333;
-    }
-    .threshold-data table tbody {
-        border-bottom: none;
-    }
-    .threshold-data table tr:nth-child(odd) {
-        background: #fff;
-    }
 
 /*
 Modals

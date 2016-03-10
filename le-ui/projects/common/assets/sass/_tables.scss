@@ -64,7 +64,15 @@ table {
         }
     }
 }
-
+.edit-icons {
+    text-align: right;
+    a:link, a:visited  {
+        color: #333;
+    }
+    i {
+        padding: 0 10px;
+    }
+}
 
 
 

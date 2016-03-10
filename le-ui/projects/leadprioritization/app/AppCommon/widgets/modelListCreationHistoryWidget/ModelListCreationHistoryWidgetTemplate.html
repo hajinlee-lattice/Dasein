@@ -1,10 +1,11 @@
-<div class="panel panel-default" data-ng-controller="ModelListCreationHistoryWidgetController">
-    <div class="panel-body model-mgmt">
-        <div data-ng-if="showUploadModel" class="text-left"><p>
-            <button id="model-mgmt-import-model-btn" class="btn btn-primary" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
-        </p></div>
-        <div class="table data-table">
-            <h4>{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</h4>
+<div data-ng-controller="ModelListCreationHistoryWidgetController" class="model-list-creation-history">
+    <div data-ng-if="showUploadModel" class="row table-header">
+        <div class="eight columns offset-two">
+            <button id="model-mgmt-import-model-btn" class="button orange-button" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="eight columns offset-two">
             <table>
                 <thead>
                   <tr>

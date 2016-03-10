@@ -375,19 +375,6 @@ Model-detail
   margin-left: 20%;
 }
 
-.model-mgmt table {
-  width: 60%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.model-mgmt table th {
-  min-width: 150px;
-}
-
-.model-mgmt table tbody tr:last-of-type {
-  border-bottom: #ccc solid 1px;
-}
 
 .model-mgmt-error {
   border-radius: 4px 4px 4px 4px;
@@ -452,7 +439,6 @@ User-list
 }
 
 .user-list {
-  width: 800px;
 
   h2 {
     font-family: 'ProximaNova-Regular';
@@ -460,38 +446,6 @@ User-list
     text-align: left;
     margin: auto;
     float: none;
-  }
-
-  table {
-    width: 100%;
-    float: none;
-
-    thead th {
-      border-bottom: #ccc solid 1px;
-      background: #fff;
-      text-transform: uppercase;
-      color: #999;
-      font-weight: bold;
-    }
-
-    tbody {
-      tr.shaded {
-        background: #eaeaea;
-      }
-
-      tr:hover {
-        background: #B3D5F3;
-      }
-
-      tr td.edit-icons {
-        width: 10%;
-
-        i {
-          padding: 0 2px;
-        }
-
-      }
-    }
   }
 
   button {

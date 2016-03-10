@@ -1,6 +1,15 @@
-<div class="panel panel-default user-list">
-    <div novalidate data-ng-controller="UserManagementWidgetController">
-        <div class="panel-body">
+<div novalidate data-ng-controller="UserManagementWidgetController" class="user-management-list">
+
+    <div class="row">
+        <div class="eight columns offset-two table-header">
+            <button id="usermgmt-btn-add-user" class="button orange-button" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)">
+                {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="eight columns offset-two">
             <table>
                 <thead>
                     <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
@@ -22,11 +31,6 @@
                     </tr>
                 </tbody>
             </table>
-            <div class="text-left">
-                <button id="usermgmt-btn-add-user" class="btn btn-primary" data-ng-if="mayAddUsers" data-ng-click="addUserClicked($event)">
-                    {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
-                </button>
-            </div>
         </div>
     </div>
 </div>
