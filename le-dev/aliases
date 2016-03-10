@@ -85,3 +85,7 @@ alias runjettydfapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdw
 alias runjettyscoringapi='bash -c "rm -f /var/log/ledp/le-scoringapi*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4004,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Djetty.port=8077 clean jetty:run'
 
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
+
+alias deploytomcatpls='rm $CATALINA_HOME/webapps_pls/*.war; cp target/le-pls*.war $CATALINA_HOME/webapps_pls/ROOT\#\#`leversion`.war'
+alias deploytomcatadmin='rm $CATALINA_HOME/webapps_admin/*.war; cp target/le-admin*.war $CATALINA_HOME/webapps_admin/ROOT\#\#`leversion`.war'
+alias deploytomcatms='bash ../le-dev/scripts/deployms.sh'
