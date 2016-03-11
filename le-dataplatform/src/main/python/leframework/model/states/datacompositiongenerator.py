@@ -51,25 +51,43 @@ class DataCompositionGenerator(State):
             else:
                 details["type"] = "STRING"
 
-            # TODO Should identify interesting non-feature columns through metadata.
+            # Should identify interesting non-feature columns through metadata.  Keep in sync with SemanticType
             if name in schema["features"]:
                 details["interpretation"] = "FEATURE"
+            elif name == "Id" or name == "LeadID" or name == "ExternalId":
+                details["interpretation"] = "ID"
+            elif name == "Event":
+                details["interpretation"] = "EVENT"
+            elif name == "Domain":
+                details["interpretation"] = "DOMAIN"
+            elif name == "LastModifiedDate":
+                details["interpretation"] = "LAST_MODIFIED_DATE"
+            elif name == "CreatedDate":
+                details["interpretation"] = "CREATED_DATE"
+            elif name == "FirstName":
+                details["interpretation"] = "FIRST_NAME"
+            elif name == "LastName":
+                details["interpretation"] = "LAST_NAME"
+            elif name == "Title":
+                details["interpretation"] = "TITLE"
             elif name == "Email":
                 details["interpretation"] = "EMAIL_ADDRESS"
-            elif name == "LeadID" or name == "Id":
-                details["interpretation"] = "RECORD_ID"
-            elif name == "CompanyName":
-                details["interpretation"] = "COMPANY_NAME"
             elif name == "City":
                 details["interpretation"] = "COMPANY_CITY"
             elif name == "State":
                 details["interpretation"] = "COMPANY_STATE"
+            elif name == "PostalCode":
+                details["interpretation"] = "POSTAL_CODE"
             elif name == "Country":
                 details["interpretation"] = "COMPANY_COUNTRY"
+            elif name == "PhoneNumber":
+                details["interpretation"] = "PHONE_NUMBER"
             elif name == "Website":
                 details["interpretation"] = "WEBSITE"
-            elif name == "Domain":
-                details["interpretation"] = "DOMAIN"
+            elif name == "CompanyName":
+                details["interpretation"] = "COMPANY_NAME"
+            elif name == "Industry":
+                details["interpretation"] = "INDUSTRY"
             else:
                 continue
 
