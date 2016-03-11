@@ -14,6 +14,7 @@ sys.path.append( os.path.join(os.path.dirname(__file__),'..','..','..','..','..'
 from .Applicability  import Applicability
 from .AppArgs        import AppArgs
 from .AppSequence    import AppSequence
+from .AppSequence_MLR    import AppSequence_MLR
 from .StepBase       import StepBase
 from .LPCheckVersion import LPCheckVersion
 from .LPSetVersion   import LPSetVersion

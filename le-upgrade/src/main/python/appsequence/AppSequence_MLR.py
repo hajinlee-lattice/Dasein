@@ -1,8 +1,8 @@
 
 #
-# $LastChangedBy$
-# $LastChangedDate$
-# $Rev$
+# $LastChangedBy: lyan $
+# $LastChangedDate: 2015-12-24 17:00:02 +0800 (Thu, 24 Dec 2015) $
+# $Rev: 71849 $
 #
 
 from liaison import *
@@ -11,21 +11,20 @@ from .Applicability import Applicability
 from .StepBase      import StepBase
 import traceback
 
-class AppSequence( object ):
+class AppSequence_MLR( object ):
 
-  def __init__( self, tenantFileName, resultsFileName, sequence, checkOnly ):
-    self._tenantFileName  = tenantFileName
+  def __init__( self, tenantName,resultsFileName, sequence,checkOnly):
+  #  AppSequence.__init__(self, tenantName, resultsFileName, sequence, checkOnly)
+    self._tenantFileName  = None
     self._resultsFileName = resultsFileName
     self._sequence        = sequence
-    self._checkOnly       = checkOnly
+    self._checkOnly       = False
     self._text            = {}
-    self._tenants         = []
+    self._tenants         = [tenantName]
     self._resultsFile     = None
     self._conn_mgr        = None
     self._lg_mgr          = None
     self._mode            = 'Upgrading'
-    if checkOnly:
-      self._mode            = 'Checking'
 
   def execute( self ):
     self.beginJob()
@@ -34,12 +33,7 @@ class AppSequence( object ):
 
 
   def beginJob( self ):
-    if self._tenantFileName is not None:
-      with open( self._tenantFileName ) as tenantFile:
-        for line in tenantFile:
-          cols = line.strip().split(',')
-          self._tenants.append(cols[0])
-    elif self._tenants is None:
+    if self._tenants is None:
       raise ValueError( 'The input tenant name should not be None' )
 
 
