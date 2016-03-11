@@ -14,7 +14,7 @@ const app       = express();
 
 // node doesn't support destructuring yet, which would have been nice here.
 const options   = {
-    ENV:        app.get('env')          || 'qa',
+    ENV:        app.get('env')          || 'production',
     USE_PORT:   process.env.USE_PORT    || 3000,
     API_URL:    process.env.API_URL     || 'http://bodcdevhdpweb53.dev.lattice.local:8080',
     WHITELIST:  process.env.WHITELIST   || false,
@@ -32,7 +32,7 @@ options.WHITELIST
     ? server.trustProxy(options.WHITELIST) : null;
 
 options.ENV == 'qa'
-    ? server.setAppRoutes(routes) : server.setAppRoutes(routes);
+    ? server.setAppRoutes(routes) : server.setAppRoutes(routes_d);
 
 server.setDefaultRoutes(options.ENV);
 
