@@ -8,11 +8,9 @@
 const rotator   = require('file-stream-rotator');
 const path      = require('path');
 const exphbs    = require('express-handlebars');
-const bodyParser = require('body-parser');
 const request   = require('request');
 const morgan    = require('morgan');
 const fs        = require('fs');
-const busboy    = require('busboy');
 
 class Server {
     constructor(express, app, options) {
