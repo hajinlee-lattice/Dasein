@@ -29,6 +29,7 @@ class CleanCategoricalColumnTransformTest(TrainingTestBase):
         cleanedColumns = cleanCategoricalColumn.transform(trainingDataFrame, configMetadata=None, test=None)
 
         includedKeys = cleanCategoricalColumn.getIncludedKeys()
+        print includedKeys
 
         for index, convertedValue in cleanedColumns[columnsToPivot.keys()].itertuples():
             originalValueBeforeConversion = copyOfTraining['A'].iloc[index]

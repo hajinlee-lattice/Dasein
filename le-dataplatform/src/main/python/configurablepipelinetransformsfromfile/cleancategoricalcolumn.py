@@ -33,6 +33,7 @@ class CleanCategoricalColumn(PipelineStep):
     includedKeys = {}
     targetColumn = ""
     currentColumn = None
+    trainingMode = False
 
     def __init__(self, columnsToPivot, targetColumn):
         self.columnsToPivot = columnsToPivot
@@ -49,7 +50,7 @@ class CleanCategoricalColumn(PipelineStep):
         targetColumn = self.getProperty("targetColumn")
         try:
             outputFrame = dataFrame
-            if len(self.includedKeys) == 0:
+            if self.trainingMode is False:
                 logger.info("CleanCategoricalColumn training phase.")
                 for column, _ in self.columnsToPivot.iteritems():
                     if column in dataFrame.columns:
@@ -59,6 +60,7 @@ class CleanCategoricalColumn(PipelineStep):
                         outputFrame[column] = self.cleanCategoriesWithThreshold
                         self.cleanCategoriesWithTargetColumn = self.__cleanCategFull(column, dataFrame)
                         outputFrame[column] = self.cleanCategoriesWithTargetColumn
+                self.trainingMode = True
             else:
                 logger.info("CleanCategoricalColumn testing phase.")
                 for column, _ in self.columnsToPivot.iteritems():
@@ -119,7 +121,10 @@ class CleanCategoricalColumn(PipelineStep):
         xlist = dataFrame[categoricalColumn]
         ylist=[x for x in enumerate(xlist)]
         popCount=len(xlist)
-        popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
+        if self.targetColumn in list(dataFrame.columns.values):
+            popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
+        else:
+            return map(self.applyEmptyValue, xlist)
         transferKeyList=[]
         for k in excludedKeys:
             ind=[i for i,x in ylist if x==k]
