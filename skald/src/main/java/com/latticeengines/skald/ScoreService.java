@@ -88,7 +88,7 @@ public class ScoreService {
                             request.record.put(name, value);
                         }
 
-                        if (field.interpretation == FieldInterpretation.RECORD_ID) {
+                        if (field.interpretation == FieldInterpretation.ID) {
                             history.recordID = value.toString();
                         }
 
