@@ -13,7 +13,14 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 <configuration>
-
+    <property>
+        <name>yarn.nodemanager.log.retain-seconds</name>
+        <value>2592000</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.disk-health-checker.min-healthy-disks</name>
+        <value>0</value>
+    </property>
     <property>
       <name>yarn.nodemanager.resource.memory-mb</name>
       <value>15360</value>
