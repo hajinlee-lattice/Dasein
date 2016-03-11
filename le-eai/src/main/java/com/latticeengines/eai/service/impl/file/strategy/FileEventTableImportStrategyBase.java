@@ -20,6 +20,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.relique.jdbc.csv.CsvDriver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import util.HdfsUriGenerator;
@@ -55,6 +56,9 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     @Autowired
     private VersionManager versionManager;
+
+    @Value("${eai.file.csv.error.lines:1000}")
+    private int errorLineNumber;
 
     public FileEventTableImportStrategyBase() {
         this("File.EventTable");
@@ -117,6 +121,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         Properties props = new Properties();
         props.put("importType", "File.CSV");
+        props.put("errorLineNumber", errorLineNumber + "");
         props.put("importMapperClass", LedpCSVToAvroImportMapper.class.toString());
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersion()));

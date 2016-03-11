@@ -53,6 +53,9 @@ import java.util.Comparator;
 @SuppressWarnings("deprecation")
 public class LedpCSVToAvroImportMapper extends
         AutoProgressMapper<LongWritable, SqoopRecord, AvroWrapper<GenericRecord>, NullWritable> {
+
+    private static final String ERROR_FILE = "error.csv";
+
     private final AvroWrapper<GenericRecord> wrapper = new AvroWrapper<GenericRecord>();
     private Schema schema;
     private Table table;
@@ -66,20 +69,20 @@ public class LedpCSVToAvroImportMapper extends
     private boolean missingRequiredColValue;
     private boolean fieldMalFormed;
     private long lineNum = 2;
+    private int errorLineNumber;
     private Parser parser = new Parser();
-
-    private static final String ERROR_FILE = "error.csv";
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         schema = AvroJob.getMapOutputSchema(conf);
         Log.info("schema is: " + schema.toString());
-        table = JsonUtils.deserialize(context.getConfiguration().get("lattice.eai.file.schema"), Table.class);
+        table = JsonUtils.deserialize(conf.get("lattice.eai.file.schema"), Table.class);
         attributes = table.getAttributes();
         interpretation = table.getInterpretation();
         LOG.info("table is:" + table);
         LOG.info(interpretation);
+        errorLineNumber = conf.getInt("errorLineNumber", 1000);
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         lobLoader = new LargeObjectLoader(conf, FileOutputFormat.getWorkOutputPath(context));
@@ -91,6 +94,7 @@ public class LedpCSVToAvroImportMapper extends
         CSVDBRecordReader.csvFilePrinter = csvFilePrinter;
         CSVDBRecordReader.ignoreRecordsCounter = context.getCounter(RecordImportCounter.IGNORED_RECORDS);
         CSVDBRecordReader.rowErrorCounter = context.getCounter(RecordImportCounter.ROW_ERROR);
+        CSVDBRecordReader.MAX_ERROR_LINE = errorLineNumber;
         errorMap = new HashMap<>();
     }
 
@@ -123,8 +127,10 @@ public class LedpCSVToAvroImportMapper extends
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
             lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
                     + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
-            csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
-            csvFilePrinter.flush();
+            if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() <= errorLineNumber) {
+                csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
+                csvFilePrinter.flush();
+            }
             errorMap.clear();
         }
     }

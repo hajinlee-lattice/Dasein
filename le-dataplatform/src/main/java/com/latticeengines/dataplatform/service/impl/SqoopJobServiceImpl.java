@@ -399,6 +399,11 @@ public class SqoopJobServiceImpl {
             if (importType != null) {
                 yarnConfiguration.set("importType", importType);
             }
+
+            String errorLineNumber = props.getProperty("errorLineNumber");
+            if (errorLineNumber != null) {
+                yarnConfiguration.set("errorLineNumber", errorLineNumber);
+            }
         }
         List<String> jarFilePaths = MRJobUtil.getPlatformShadedJarPathList(yarnConfiguration, version);
         for (String jarFilePath : jarFilePaths) {
@@ -411,8 +416,8 @@ public class SqoopJobServiceImpl {
         }
         yarnConfiguration.set("yarn.mr.am.class.name", LedpMRAppMaster.class.getName());
         // MR_AM_COMMAND_OPTS
-//         yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
-//         "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
+        // yarnConfiguration.set(MRJobConfig.MAP_JAVA_OPTS,
+        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y");
 
         try {
             return runTool(cmds, yarnConfiguration, sync, uuid);
