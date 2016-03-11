@@ -55,10 +55,10 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>
+                                    <!--<argLine>
                                         ${maxpermsize}
                                         ${argLine}
-                                    </argLine>
+                                    </argLine>-->
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
