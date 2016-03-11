@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+
+<!-- =============================================================== -->
+<!-- Mixin the RewriteHandler                                        -->
+<!-- =============================================================== -->
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+
+    <!-- =========================================================== -->
+    <!-- configure rewrite handler                                   -->
+    <!-- =========================================================== -->
+    <Get id="oldhandler" name="handler"/>
+
+    <Set name="handler">
+        <New id="Rewrite" class="org.eclipse.jetty.rewrite.handler.RewriteHandler">
+            <Set name="handler"><Ref refid="oldhandler"/></Set>
+            <Set name="rewriteRequestURI"><Property name="rewrite.rewriteRequestURI" default="true"/></Set>
+            <Set name="rewritePathInfo"><Property name="rewrite.rewritePathInfo" default="false"/></Set>
+            <Set name="originalPathAttribute"><Property name="rewrite.originalPathAttribute" default="requestedPath"/></Set>
+            <Set name="rules">
+                <Array type="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">/favicon.ico</Set>
+                            <Set name="name">Cache-Control</Set>
+                            <Set name="value">Max-Age=3600,public</Set>
+                            <Set name="terminating">true</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.html</Set>
+                            <Set name="name">Cache-Control</Set>
+                            <Set name="value">Max-Age=3600,public</Set>
+                            <Set name="terminating">true</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.html</Set>
+                            <Set name="name">Content-Type</Set>
+                            <Set name="value">text/html;charset=utf-8</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*</Set>
+                            <Set name="name">X-Content-Type-Options</Set>
+                            <Set name="value">nosniff</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*</Set>
+                            <Set name="name">X-XSS-Protection</Set>
+                            <Set name="value">1; mode=block</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.html</Set>
+                            <Set name="name">X-Content-Type-Options</Set>
+                            <Set name="value">nosniff</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.html</Set>
+                            <Set name="name">X-XSS-Protection</Set>
+                            <Set name="value">1; mode=block</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.js</Set>
+                            <Set name="name">X-Content-Type-Options</Set>
+                            <Set name="value">nosniff</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.js</Set>
+                            <Set name="name">X-XSS-Protection</Set>
+                            <Set name="value">1; mode=block</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.css</Set>
+                            <Set name="name">X-Content-Type-Options</Set>
+                            <Set name="value">nosniff</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.css</Set>
+                            <Set name="name">X-XSS-Protection</Set>
+                            <Set name="value">1; mode=block</Set>
+                        </New>
+                    </Item>
+                    <Item>
+                        <New class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
+                            <Set name="pattern">*.woff</Set>
+                            <Set name="name">Content-Type</Set>
+                            <Set name="value">application/x-font-woff</Set>
+                        </New>
+                    </Item>
+                </Array>
+            </Set>
+        </New>
+    </Set>
+
+    <!-- for example rules see jetty-demo.xml -->
+
+</Configure>
