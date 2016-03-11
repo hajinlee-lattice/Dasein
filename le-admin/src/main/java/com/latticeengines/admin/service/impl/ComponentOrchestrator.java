@@ -2,6 +2,7 @@ package com.latticeengines.admin.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -147,9 +148,9 @@ public class ComponentOrchestrator {
             String tenantId) {
         List<String> newEmailList = new ArrayList<String>();
         List<String> existingEmailList = new ArrayList<String>();
+        List<LatticeProduct> products = prodAndExternalAminInfo.products;
         if (allComponentsSuccessful) {
-            if (prodAndExternalAminInfo.products.contains(LatticeProduct.PD)
-                    || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
+            if (products.contains(LatticeProduct.PD) || prodAndExternalAminInfo.products.contains(LatticeProduct.LPA3)) {
                 Map<String, Boolean> externalEmailMap = prodAndExternalAminInfo.getExternalEmailMap();
                 Set<String> externalEmails = externalEmailMap.keySet();
                 for (String externalEmail : externalEmails) {
@@ -161,11 +162,11 @@ public class ComponentOrchestrator {
                 }
             }
         }
-        sendExistingEmails(existingEmailList, tenantId);
-        sendNewEmails(newEmailList);
+        sendExistingEmails(existingEmailList, tenantId, products);
+        sendNewEmails(newEmailList, products);
     }
 
-    private void sendNewEmails(List<String> emailList) {
+    private void sendNewEmails(List<String> emailList, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -187,11 +188,17 @@ public class ComponentOrchestrator {
             ResponseEntity<String> tempPassword = restTemplate.exchange(plsEndHost + "/pls/admin/temppassword",
                     HttpMethod.PUT, requestEntity, String.class);
 
-            emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
+            if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
+                emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
+            } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
+                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
+            } else {
+                log.info("The user clicked both PD and LPA3");
+            }
         }
     }
 
-    private void sendExistingEmails(List<String> emailList, String tenantId) {
+    private void sendExistingEmails(List<String> emailList, String tenantId, List<LatticeProduct> products) {
         for (String email : emailList) {
             User user = userService.findByEmail(email);
             if (user == null) {
@@ -201,7 +208,13 @@ public class ComponentOrchestrator {
             log.info("tenantId is " + tenantId);
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
-            emailService.sendPdExistingExternalUserEmail(tenant, user, apiHostPort);
+            if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
+                emailService.sendPdExistingExternalUserEmail(tenant, user, apiHostPort);
+            } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
+                emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
+            } else {
+                log.info("The user clicked both PD and LPA3");
+            }
         }
     }
 
