@@ -559,7 +559,7 @@ Model List
     margin-top: 20px;
 }
 .model {
-    background: #fff url(/lp/assets/images/bkg-active-model-lp.jpg) no-repeat center center;
+    background: #fff url(/assets/images/bkg-active-model-lp.jpg) no-repeat center center;
     background-size: 130px;
     border: #e0e3e6 solid 2px;
     position: relative;
@@ -1117,12 +1117,9 @@ Modals
             box-shadow: 0px 0px 0px 7px rgba(0,0,0,0.15);
     margin-top: 100px;
 }
-.modal-backdrop {
-    background-color: #ceddef;
-}
 .modal-backdrop.in {
-    opacity: .9;
-    filter: alpha(opacity=90);
+    opacity: .2;
+    filter: alpha(opacity=20);
 }
 .modal-content {
      -webkit-border-radius: 3px;
@@ -1130,7 +1127,6 @@ Modals
     border-radius: 3px;
 }
 .modal-header {
-    background:#477cba;
     color:#fff;
     font-weight:700;
       -webkit-border-radius: 2px 2px 0 0;
@@ -1138,14 +1134,14 @@ Modals
     border-radius: 2px 2px 0 0;
 }
 .modal-header .close {
-    color:#fff;
-    opacity:.5;
+    float: right;
+    opacity:.8;
+    font-size: 24px;
+    border: none;
+    background: transparent;
 }
 .modal-header .close:hover {
     opacity:1;
-}
-.modal-header .close:active {
-    color:#ccc;
 }
 .modal-body {
     padding: 40px;
