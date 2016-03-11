@@ -206,9 +206,11 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
     private Long checkDestFileSize(SftpToHdfsRouteConfiguration config) {
         try {
             String fileName = config.getFileName() + "." + OPEN_SUFFIX;
-            String hdfsFullPath = cleanDirPath(config.getHdfsDir()) + fileName;
-            if (HdfsUtils.fileExists(yarnConfiguration, hdfsFullPath)) {
-                return HdfsUtils.getFileSize(yarnConfiguration, hdfsFullPath);
+            String hdfsDir = cleanDirPath(config.getHdfsDir());
+            if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir + fileName)) {
+                return HdfsUtils.getFileSize(yarnConfiguration, hdfsDir + fileName);
+            } else if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir + config.getFileName())) {
+                return HdfsUtils.getFileSize(yarnConfiguration, hdfsDir + config.getFileName());
             } else {
                 return 0L;
             }
