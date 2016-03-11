@@ -59,7 +59,7 @@
                                         ${maxpermsize}
                                         ${argLine}
                                     </argLine>
-                                    <skip>true</skip>
+                                    <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
                                         <exclude>${functional.classes.exclude}</exclude>
