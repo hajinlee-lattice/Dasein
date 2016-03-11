@@ -22,7 +22,7 @@ public class WaitForDownloadedModelSummaries {
 
     private static final Log log = LogFactory.getLog(WaitForDownloadedModelSummaries.class);
 
-    private static final int MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES = 6 * 60;
+    private static final int MAX_TEN_SECOND_ITERATIONS_TO_WAIT_FOR_DOWNLOADED_MODELSUMMARIES = 60;
 
     public <T extends MicroserviceStepConfiguration> List<ModelSummary> wait(T configuration,
             Collection<String> modelApplicationIds) {
