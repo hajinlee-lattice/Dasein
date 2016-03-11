@@ -38,6 +38,8 @@ class CleanCategoricalColumn(PipelineStep):
     def __init__(self, columnsToPivot, targetColumn):
         self.columnsToPivot = columnsToPivot
         self.targetColumn = targetColumn
+        self.threshold = 0.95
+        self.includedKeys = {}
         if columnsToPivot:
             self.columnList = columnsToPivot.keys()
         else:
@@ -45,7 +47,7 @@ class CleanCategoricalColumn(PipelineStep):
 
     def transform(self, dataFrame, configMetadata, test):
         threshold = self.getProperty("threshold")
-        if threshold is None:
+        if self.threshold is None:
             threshold = 0.8
         targetColumn = self.getProperty("targetColumn")
         try:
@@ -56,7 +58,7 @@ class CleanCategoricalColumn(PipelineStep):
                     if column in dataFrame.columns:
                         self.currentColumn = column
                         dataFrameAsList = dataFrame[column].values.tolist()
-                        self.cleanCategoriesWithThreshold = self.__cleanCateg(dataFrameAsList, thresh=threshold)
+                        self.cleanCategoriesWithThreshold = self.__cleanCateg(dataFrameAsList, thresh=self.threshold)
                         outputFrame[column] = self.cleanCategoriesWithThreshold
                         self.cleanCategoriesWithTargetColumn = self.__cleanCategFull(column, dataFrame)
                         outputFrame[column] = self.cleanCategoriesWithTargetColumn
@@ -121,10 +123,7 @@ class CleanCategoricalColumn(PipelineStep):
         xlist = dataFrame[categoricalColumn]
         ylist=[x for x in enumerate(xlist)]
         popCount=len(xlist)
-        if self.targetColumn in list(dataFrame.columns.values):
-            popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
-        else:
-            return map(self.applyEmptyValue, xlist)
+        popRate=(dataFrame[self.targetColumn].sum()*1.0) / popCount
         transferKeyList=[]
         for k in excludedKeys:
             ind=[i for i,x in ylist if x==k]

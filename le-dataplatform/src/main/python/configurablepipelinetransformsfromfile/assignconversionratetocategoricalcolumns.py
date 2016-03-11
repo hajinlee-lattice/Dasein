@@ -11,15 +11,20 @@ logger = get_logger("pipeline")
 class AssignConversionRateToCategoricalColumns(PipelineStep):
 
     columnList = []
-    categoricalColumnMapping = {}
+    categoricalColumnMapping = None
     currentColumn = None
     totalPositiveThreshold = 12
     trainingMode = False
+    columnsToPivot = {}
+    targetColumn = ""
 
     def __init__(self, columnsToPivot, targetColumn, totalPositiveThreshold=12):
+        self.trainingMode = False
         self.totalPositiveThreshold = totalPositiveThreshold
         self.columnsToPivot = columnsToPivot
         self.targetColumn = targetColumn
+        if self.categoricalColumnMapping is None:
+            self.categoricalColumnMapping = {}
         if columnsToPivot:
             self.columnList = columnsToPivot.keys()
         else:
@@ -37,8 +42,8 @@ class AssignConversionRateToCategoricalColumns(PipelineStep):
                     outputFrame[column] = self.__assignConversionRateToCategoricalColumns(column, dataFrame, self.targetColumn)
                     
                     logger.info("self.assignConversionRateMapping " + str(self.categoricalColumnMapping))
-            
-            trainingMode = True
+
+            self.trainingMode = True
             return outputFrame
         except Exception:
             logger.exception("Caught Exception trying to use CleanCategoricalColumn Threshold Transformation")
