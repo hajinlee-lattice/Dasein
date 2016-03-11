@@ -173,5 +173,9 @@ if __name__ == "__main__":
       for line in tenantFile:
         cols = line.strip().split(',')
         tenantName = cols[0]
-        downloadSpecsAndConfig(tenantName, tenantName)
+        if not cols[1]:
+          fileNameBase = tenantName
+        else:
+          fileNameBase = cols[1]
+        downloadSpecsAndConfig(tenantName, fileNameBase)
         print 'Completed tenant: {0}\n'.format(tenantName)
