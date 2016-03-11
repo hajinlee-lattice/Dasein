@@ -33,7 +33,7 @@ class CleanCategoricalColumnTransformTest(TrainingTestBase):
         for index, convertedValue in cleanedColumns[columnsToPivot.keys()].itertuples():
             originalValueBeforeConversion = copyOfTraining['A'].iloc[index]
             if originalValueBeforeConversion not in includedKeys['A']:
-                self.assertEqual(convertedValue, 'EMPTY' , msg="Categorical Value not cleaned correctly")
+                self.assertEqual(convertedValue, '0' , msg="Categorical Value not cleaned correctly")
 
         # In training mode, we do not re-learn the labels. 
         # Check this by generating a new dataset with different distribution and check that only the includedKeys get converted
@@ -61,7 +61,7 @@ class CleanCategoricalColumnTransformTest(TrainingTestBase):
         for index, convertedValue in cleanedColumns[columnsToPivot.keys()].itertuples():
             originalValueBeforeConversion = copyOfTesting['A'].iloc[index]
             if originalValueBeforeConversion not in includedKeys['A']:
-                self.assertEqual(convertedValue, 'EMPTY' , msg="Categorical Value not cleaned correctly")
+                self.assertEqual(convertedValue, '0' , msg="Categorical Value not cleaned correctly")
 
         # Get the column that was not trained on and make sure it was not touched
         for index, unConvertedValue in cleanedColumns[columnsNotToPivot.keys()].itertuples():
