@@ -96,7 +96,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         return true;
     }
 
-    @Test(groups = "functional", dataProvider = "tenants")
+    @Test(groups = "functional", dataProvider = "tenants", enabled = false)
     public void transform(String tenantPath, String keyColumn) throws Exception {
         String modelFilePath = tenantPath + "/model.json";
         String dataToScorePath = tenantPath + "/datatoscore.avro";
