@@ -7,7 +7,8 @@
                 <a ui-sref="jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">[View Report]</a>
                 <a ui-sref="jobs.status.csv({jobId: jobId})" ng-show="jobType == 'importMatchAndModelWorkflow'">[View Report]</a>
             </span>
-            <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>
+            <span data-ng-show="jobRunning && ! cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">[Cancel Job]</a></span>
+            <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>
 
             <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow'">
                 <span><i class="fa fa-angle-double-down fa-lg"></i></span>

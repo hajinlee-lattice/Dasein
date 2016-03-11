@@ -1,5 +1,5 @@
 <div data-ng-controller="JobsCtrl" class="container">
-    <div data-ng-show="showJobSuccessMessage" class="job-success-message">
+    <div data-ng-show="succeeded" class="job-success-message">
         <div>Success! Data has been imported.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobSuccessMessage()"></i></a></div>
         <span>Analytics are now available.</span>
     </div>
@@ -50,8 +50,9 @@
                         limitTo: pagesize" 
                     job="job" 
                     statuses="statuses" 
-                    expanded="expanded" 
-                    showJobSuccessMessage="showJobSuccessMessage" 
+                    expanded="expanded"
+                    cancelling="cancelling"
+                    succeeded="succeeded"
                     class="job-td-row">
                 </div>
                 <div data-ng-show="showEmptyJobsMessage">

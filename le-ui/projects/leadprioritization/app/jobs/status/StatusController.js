@@ -10,22 +10,25 @@ angular
                 job: '=',
                 statuses: '=',
                 expanded: '=',
-                showJobSuccessMessage: '='
+                cancelling: '=',
+                succeeded: '='
             },
             controller: ['$scope', '$state', 'JobsService', function ($scope, $state, JobsService) {
                 $scope.jobRunning = false;
-                $scope.jobRowExpanded = $scope.expanded[$scope.job.id] ? true : false;
-                $scope.jobCompleted = false;
                 $scope.jobId = $scope.job.id;
+                $scope.jobRowExpanded = $scope.expanded[$scope.jobId] ? true : false;
+                $scope.jobCompleted = false;
+                $scope.cancelClicked = ( $scope.cancelling[$scope.jobId] ? true : false );
                 $scope.jobType = $scope.job.jobType;
                 $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;
-                $scope.showJobSuccessMessage;
 
                 var periodicQueryId;
                 var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;
 
                 $scope.cancelJob = function(jobId) {
+                    $scope.cancelClicked = true;
+                    $scope.cancelling[$scope.jobId] = true;
                     JobsService.cancelJob(jobId);
                 };
 
@@ -124,7 +127,7 @@ angular
                                 cancelPeriodJobStatusQuery();
                             }
                             if (jobStatus == "Completed") {
-                                $scope.showJobSuccessMessage = true;
+                                $scope.succeeded = true;
                                 BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
                             }
                             updateStatesBasedOnJobStatus(response.resultObj);

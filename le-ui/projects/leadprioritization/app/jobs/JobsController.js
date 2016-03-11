@@ -235,8 +235,9 @@ angular.module('pd.jobs', [
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
+    $scope.cancelling = {};
     $scope.showEmptyJobsMessage = false;
-    $scope.showJobSuccessMessage = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
+    $scope.succeeded = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -263,7 +264,7 @@ angular.module('pd.jobs', [
     });
     
     $scope.closeJobSuccessMessage = function() {
-        $scope.showJobSuccessMessage = false;
+        $scope.succeeded = false;
         BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(false);
     };
 });
