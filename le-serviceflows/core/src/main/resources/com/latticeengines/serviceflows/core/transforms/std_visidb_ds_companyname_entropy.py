@@ -24,11 +24,11 @@ def argument_length(n):
 
 
 def std_visidb_ds_companyname_entropy(s):
-    s = s.lower()
-    base = 2
-
     if s is None or argument_length(s) == 0:
         return None
+
+    s = s.lower()
+    base = 2
 
     occurences = {}
     for c in s:
