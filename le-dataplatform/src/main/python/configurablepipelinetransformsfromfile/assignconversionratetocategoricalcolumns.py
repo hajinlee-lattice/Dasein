@@ -64,13 +64,13 @@ class AssignConversionRateToCategoricalColumns(PipelineStep):
                     else:
                         keyConversionRate[key] = 0.0
                 self.categoricalColumnMapping[column] = keyConversionRate
-                return dataFrame[column].apply(self.applyConversionRate)
+                return map(self.applyConversionRate, dataFrame[column].values.tolist())
             else:
                 return dataFrame[column]
         else:
             # Apply the conversion rates learnt during training
             logger.info("AssignConversionRate testing phase. Converting column: " + column)
-            return dataFrame[column].apply(self.applyConversionRate)
+            return map(self.applyConversionRate, dataFrame[column].values.tolist())
 
     def applyConversionRate(self, categoryValue):
         if self.currentColumn in self.categoricalColumnMapping:

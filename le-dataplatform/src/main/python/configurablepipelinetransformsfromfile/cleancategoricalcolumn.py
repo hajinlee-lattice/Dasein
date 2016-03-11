@@ -29,7 +29,7 @@ class CleanCategoricalColumn(PipelineStep):
     cleanCategoriesWithTargetColumn = None
     columnsToPivot = {}
     columnList = []
-    nullValue = 'EMPTY'
+    nullValue = '0'
     includedKeys = {}
     targetColumn = ""
     currentColumn = None
@@ -78,9 +78,9 @@ class CleanCategoricalColumn(PipelineStep):
             if categoricalValue in self.includedKeys[self.currentColumn]:
                 return categoricalValue
             else:
-                return categoricalValue
+                return self.nullValue
         else:
-            return self.nullValue
+            return categoricalValue
 
     def __convertListToDataFrame(self, listToConvert):
         if type(listToConvert) is list:
@@ -88,7 +88,7 @@ class CleanCategoricalColumn(PipelineStep):
         else:
             return listToConvert
 
-    def __cleanCateg(self, xlist, thresh=.95, percMin=.01, nullValue='EMPTY'):
+    def __cleanCateg(self, xlist, thresh=.95, percMin=.01, nullValue='0'):
         self.nullValue = nullValue
         cc=Counter(xlist)
         total=len(xlist)*thresh
