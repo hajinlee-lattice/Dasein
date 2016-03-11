@@ -1,6 +1,0 @@
-{
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "FeaturesThreshold", "Data": {"Type": "number", "Required": false} }
-  ]
-}
