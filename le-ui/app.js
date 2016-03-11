@@ -16,7 +16,7 @@ const app       = express();
 const options   = {
     ENV:        app.get('env')          || 'production',
     USE_PORT:   process.env.USE_PORT    || 3000,
-    API_URL:    process.env.API_URL     || 'http://bodcdevhdpweb53.dev.lattice.local:8080',
+    API_URL:    process.env.API_URL     || 'http://bodcdevhdpweb52.dev.lattice.local:8080',
     WHITELIST:  process.env.WHITELIST   || false,
     root:       __dirname 
 }

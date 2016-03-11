@@ -17,16 +17,6 @@ class Server {
         this.options = options;
         this.express = express;
         this.app = app;
-/*
-        this.app.use(
-            bodyParser({ 
-                keepExtensions: true, 
-                uploadDir: "uploads" 
-            })
-        );                     
-*/
-        
-        //busboy.extend(this.app)
 
         // set up view engine for handlebars
         this.app.engine('.html', exphbs({ extname: '.html' }));
@@ -75,7 +65,6 @@ class Server {
 
                     try {
                         if (req.method === 'POST') {
-                            console.log(req);
                             r = request.post({ 
                                 uri: url, 
                                 json: req.body
@@ -88,11 +77,11 @@ class Server {
 
                         req.pipe(r).pipe(res);
                     } catch(err) {
-                        console.log(err.msg);
+                        console.log(err);
                     }
                 });
             } catch (err) {
-                console.log(err.msg);
+                console.log(err);
             }
         }
     }
