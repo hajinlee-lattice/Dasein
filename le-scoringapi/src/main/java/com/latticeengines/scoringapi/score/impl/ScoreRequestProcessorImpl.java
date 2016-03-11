@@ -109,7 +109,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
 
             switch (schema.interpretation) {
-            case RECORD_ID:
+            case ID:
                 interpretedFields.setRecordId(fieldName);
                 break;
             case EMAIL_ADDRESS:
