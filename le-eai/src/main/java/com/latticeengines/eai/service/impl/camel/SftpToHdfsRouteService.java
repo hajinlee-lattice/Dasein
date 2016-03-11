@@ -207,7 +207,11 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         try {
             String fileName = config.getFileName() + "." + OPEN_SUFFIX;
             String hdfsFullPath = cleanDirPath(config.getHdfsDir()) + fileName;
-            return HdfsUtils.getFileSize(yarnConfiguration, hdfsFullPath);
+            if (HdfsUtils.fileExists(yarnConfiguration, hdfsFullPath)) {
+                return HdfsUtils.getFileSize(yarnConfiguration, hdfsFullPath);
+            } else {
+                return 0L;
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
