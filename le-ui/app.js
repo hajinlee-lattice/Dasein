@@ -14,15 +14,16 @@ const app       = express();
 
 // node doesn't support destructuring yet, which would have been nice here.
 const options   = {
-    ENV:        app.get('env')          || 'development',
+    ENV:        app.get('env')          || 'qa',
     USE_PORT:   process.env.USE_PORT    || 3000,
-    API_URL:    process.env.API_URL     || false,
-    PROXY_IP:   process.env.PROXY_IP    || false,
+    API_URL:    process.env.API_URL     || 'http://bodcdevhdpweb53.dev.lattice.local:8080',
     WHITELIST:  process.env.WHITELIST   || false,
     root:       __dirname 
 }
 
 const server = new Server(express, app, options);
+
+server.startLogging('/log');
 
 options.API_URL
     ? server.useApiProxy(options.API_URL) : null;

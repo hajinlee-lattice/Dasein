@@ -5,36 +5,51 @@
     See Gruntfile.js to define environment variables
 */
 
-const FileStreamRotator = require('file-stream-rotator')
+const rotator   = require('file-stream-rotator');
 const path      = require('path');
 const exphbs    = require('express-handlebars');
+const bodyParser = require('body-parser');
 const request   = require('request');
 const morgan    = require('morgan');
 const fs        = require('fs');
+const busboy    = require('busboy');
 
 class Server {
     constructor(express, app, options) {
+        this.options = options;
         this.express = express;
         this.app = app;
-        this.options = options;
+/*
+        this.app.use(
+            bodyParser({ 
+                keepExtensions: true, 
+                uploadDir: "uploads" 
+            })
+        );                     
+*/
         
+        //busboy.extend(this.app)
+
         // set up view engine for handlebars
         this.app.engine('.html', exphbs({ extname: '.html' }));
         this.app.set('view engine', '.html');
         this.app.set('views', options.root);
 
-        let logDirectory = __dirname + '/log';
-        let accessLogStream = FileStreamRotator.getStream({
+        //process.on('uncaughtException', err => this.app.close());
+        //process.on('SIGTERM', err => this.app.close());
+    }
+
+    startLogging(log_path) {
+        let logDirectory = __dirname + log_path;
+
+        let accessLogStream = rotator.getStream({
             date_format: 'YYYYMMDD',
             filename: logDirectory + '/access-%DATE%.log',
             frequency: 'daily',
             verbose: false
         });
 
-        app.use(morgan('combined', { stream: accessLogStream }));
-
-        //process.on('uncaughtException', err => this.app.close());
-        //process.on('SIGTERM', err => this.app.close());
+        this.app.use(morgan('combined', { stream: accessLogStream }));
     }
 
     // trust the load balancer/proxy in production
@@ -62,10 +77,13 @@ class Server {
 
                     try {
                         if (req.method === 'POST') {
+                            console.log(req);
                             r = request.post({ 
                                 uri: url, 
-                                json: req.body 
+                                json: req.body
                             });
+
+                            res.setTimeout(900000);
                         } else {
                             r = request(url);
                         }

@@ -75,6 +75,10 @@ angular
                     },
                     "main@": {
                         controller: function($scope, JobsService, JobReport) {
+                            if (!JobReport) {
+                                return;
+                            }
+                            
                             $scope.report = JobReport;
                             $scope.data = data = JSON.parse(JobReport.json.Payload);
                             $scope.data.total_records = data.imported_records + data.ignored_records;
