@@ -56,24 +56,6 @@
             </properties>
         </profile>
         <profile>
-            <id>integration</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>intcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <api.properties.path>conf/env/intcluster</api.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/intcluster
-                </dataplatform.properties.path>
-                <db.properties.path>../le-db/conf/env/intcluster</db.properties.path>
-                <bin.env.path>bin/env/intcluster</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
             <id>qa</id>
             <activation>
                 <property>
