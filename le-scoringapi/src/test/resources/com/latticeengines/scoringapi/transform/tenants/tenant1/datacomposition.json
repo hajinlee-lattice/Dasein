@@ -93,7 +93,7 @@
         "LeadID": {
             "source": "REQUEST", 
             "type": "STRING", 
-            "interpretation": "RECORD_ID"
+            "interpretation": "ID"
         }, 
         "DerogatoryIndicator": {
             "source": "REQUEST", 

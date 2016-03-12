@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.avro.Schema;
@@ -151,11 +153,17 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         BlockingQueue<QueueEntry<Double, Double>> outputQueue = new PriorityBlockingQueue<>();
         BlockingQueue<QueueEntry<Double, Double>> errorQueue = new PriorityBlockingQueue<>();
         
+        ExecutorService transformService = Executors.newFixedThreadPool(10);
+        
+        transformService.execute(new RecordTransformerCallable(schema, inputQueue, outputQueue, errorQueue, //
+                    keyColumn, modelExtractionDir.getAbsolutePath(), transforms, derivation, recordTransformer, //
+                    pmmlEvaluator, expectedScores));
+        /*
         for (int j = 0; j < 10; j++) {
             new RecordTransformerCallable(schema, inputQueue, outputQueue, errorQueue, //
                     keyColumn, modelExtractionDir.getAbsolutePath(), transforms, derivation, recordTransformer, //
-                    pmmlEvaluator, expectedScores).start();
-        }
+                    pmmlEvaluator, expectedScores);//.start();
+        }*/
         
         for (GenericRecord record : reader) {
             inputQueue.put(record);
@@ -186,7 +194,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         return scores;
     }
     
-    private static class RecordTransformerCallable extends Thread implements Callable<Void>, Runnable {
+    private static class RecordTransformerCallable implements Callable<Void>, Runnable {
         
         private final BlockingQueue<GenericRecord> inputQueue;
         private final BlockingQueue<QueueEntry<Double, Double>> outputQueue;
@@ -292,8 +300,10 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         
     }
     
-    static class QueueEntry<K, V> extends AbstractMap.SimpleEntry<K, V> implements Comparable {
+    static class QueueEntry<K extends Comparable<K>, V extends Comparable<V>> extends AbstractMap.SimpleEntry<K, V> implements Comparable<QueueEntry<K, V>> {
         
+        private static final long serialVersionUID = 1L;
+
         public QueueEntry(K key, V value) {
             super(key, value);
         }
@@ -303,8 +313,8 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         }
 
         @Override
-        public int compareTo(Object o) {
-            return 1;
+        public int compareTo(QueueEntry<K, V> o) {
+            return o.getKey().compareTo(getKey());
         }
         
     }
