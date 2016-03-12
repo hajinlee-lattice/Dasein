@@ -1,0 +1,14 @@
+#!/bin/bash
+rm -rf /tmp/webapps/admin/le-admin-*.war
+rm -rf /etc/ledp/*.properties
+rm -rf /etc/ledp/admin
+rm -rf /etc/httpd/conf.d/admin
+rm -rf /home/yarn/admin
+adduser yarn
+groupadd yarn
+mkdir -p /var/log/ledp
+mkdir -p /home/yarn/logs
+chmod -R 755 /var/log/ledp
+chmod -R 755 /home/yarn/logs
+chown -R yarn:yarn /var/log/ledp
+chown -R yarn:yarn /home/yarn/logs

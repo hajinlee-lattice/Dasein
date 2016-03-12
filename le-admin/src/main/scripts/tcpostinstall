@@ -1,0 +1,28 @@
+#!/bin/bash -x
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+
+echo "copying files"
+cd /tmp/webapps/admin
+JAVAFILE=`ls le-admin-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if SNAPSHOT='SNAPSHOT'
+then
+    VERSION=VERSION-SNAPSHOT
+fi
+
+cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps_admin/admin\#\#$VERSION.war
+cp /etc/ledp/admin/$ENV_TYPE/*.properties /etc/ledp/
+cp /etc/ledp/admin/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
+cp /etc/ledp/admin/$ENV_TYPE/404.html /etc/ledp/
+
+echo "cleaning up"
+rm -rf /tmp/webapps/admin/le-admin-*.war
+rm -rf /etc/ledp/admin
+rm -rf /home/yarn/admin
+rm -rf /home/yarn/logs/*
+
+echo "finishing"
+ls $CATALINA_HOME/webapps_admin/*.war
