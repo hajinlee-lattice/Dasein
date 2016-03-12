@@ -72,11 +72,79 @@
             </properties>
         </profile>
         <profile>
+            <id>qaclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/qacluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
+                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>qaclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/qacluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
+                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
             <id>production</id>
             <activation>
                 <property>
                     <name>environment.type</name>
                     <value>prodcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/prodcluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <bin.env.path>bin/env/prodcluster</bin.env.path>
+                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>productiona</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/prodcluster</admin.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <bin.env.path>bin/env/prodcluster</bin.env.path>
+                <jks.name>laca-ldap.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>productionb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclusterb</value>
                 </property>
             </activation>
             <properties>

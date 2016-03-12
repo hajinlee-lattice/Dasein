@@ -73,11 +73,79 @@
             </properties>
         </profile>
         <profile>
+            <id>qaclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/qacluster</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/qacluster
+                </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qaclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/qacluster</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/qacluster
+                </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
             <id>production</id>
             <activation>
                 <property>
                     <name>environment.type</name>
                     <value>prodcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/deployment</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/prodcluster
+                </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <bin.env.path>bin/env/prodcluster</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productiona</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/deployment</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/prodcluster
+                </dataplatform.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <bin.env.path>bin/env/prodcluster</bin.env.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productionb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclusterb</value>
                 </property>
             </activation>
             <properties>

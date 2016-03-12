@@ -53,6 +53,30 @@
             </properties>
         </profile>
         <profile>
+            <id>qaclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/qaclustera</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qaclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/qaclusterb</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
             <id>stage</id>
             <activation>
                 <property>
@@ -74,6 +98,30 @@
             </activation>
             <properties>
                 <ui.environ.variables.path>conf/env/prodcluster</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>prodclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/prodclustera</ui.environ.variables.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>prodclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <ui.environ.variables.path>conf/env/prodclusterb</ui.environ.variables.path>
             </properties>
         </profile>
     </profiles>

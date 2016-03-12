@@ -91,11 +91,99 @@
             </properties>
         </profile>
         <profile>
+            <id>qaclustera</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>qaclusterb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qaclusterb</value>
+                </property>
+            </activation>
+            <properties>
+                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
+            </properties>
+        </profile>
+        <profile>
             <id>production</id>
             <activation>
                 <property>
                     <name>environment.type</name>
                     <value>prodcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productiona</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclustera</value>
+                </property>
+            </activation>
+            <properties>
+                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>productionb</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prodclusterb</value>
                 </property>
             </activation>
             <properties>
