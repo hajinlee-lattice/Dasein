@@ -518,13 +518,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setCategory(String category) {
-        setExtensionValue("Category", category);
+        setPropertyValue("Category", category);
     }
 
     @Transient
     @JsonIgnore
     public String getCategory() {
-        return getExtensionValue("Category");
+        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString() : null;
     }
 
     /**
@@ -533,49 +533,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setDataType(String dataType) {
-        setExtensionValue("DataType", dataType);
+        setPropertyValue("DataType", dataType);
     }
 
     @Transient
     @JsonIgnore
     public String getDataType() {
-        return getExtensionValue("DataType");
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    private void setExtensionValue(String key, String value) {
-        List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
-        boolean keyFound = false;
-        if (entries != null) {
-            for (Map<String, String> entry : entries) {
-                if (entry.containsKey(key)) {
-                    keyFound = true;
-                    entry.put(key, value);
-                }
-            }
-        } else {
-            entries = new ArrayList<>();
-        }
-        if (!keyFound) {
-            Map<String, String> map = new HashMap<>();
-            map.put(key, value);
-            entries.add(map);
-            properties.put("Extensions", entries);
-        }
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    private String getExtensionValue(String key) {
-        List<Map<String, String>> entries = (List<Map<String, String>>) properties.get("Extensions");
-
-        if (entries != null) {
-            for (Map<String, String> entry : entries) {
-                if (entry.containsKey(key)) {
-                    return entry.get(key);
-                }
-            }
-        }
-        return null;
+        return getPropertyValue("DataType") != null ? getPropertyValue("DataType").toString() : null;
     }
 
     @Transient

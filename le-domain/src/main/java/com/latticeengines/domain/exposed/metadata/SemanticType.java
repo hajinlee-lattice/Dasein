@@ -23,4 +23,10 @@ public enum SemanticType {
 
     CompanyName, //
     Industry, //
+    LeadSource, //
+    IsClosed, //
+    StageName, //
+    AnnualRevenue, //
+    NumberOfEmployees, //
+    YearStarted
 }

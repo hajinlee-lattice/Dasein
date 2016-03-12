@@ -200,6 +200,10 @@ public abstract class DataFlowBuilder {
                         attribute.setRTS(Boolean.valueOf(value));
                     } else if (key.equals("SemanticType")) {
                         attribute.setSemanticTypeString(value);
+                    } else if (key.equals("Category")) {
+                        attribute.setCategory(value);
+                    } else if (key.equals("DataType")) {
+                        attribute.setDataType(value);
                     }
                 }
 

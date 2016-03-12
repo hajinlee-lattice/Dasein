@@ -1,14 +1,16 @@
 package com.latticeengines.pls.controller;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.rmi.server.UID;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.python.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.latticeengines.common.exposed.util.ZipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -41,7 +44,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class FileUploadResource {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(FileUploadResource.class);
-    private static final int MAX_ERROR_CSV_LENGTH = 65536;
 
     @Autowired
     private SourceFileService sourceFileService;
@@ -52,14 +54,28 @@ public class FileUploadResource {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Value("${pls.fileupload.maxUpload.bytes}")
+    private long maxUploadSize;
+
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public ResponseDocument<SourceFile> uploadFile(@RequestParam("fileName") String fileName,
-            @RequestParam("schema") SchemaInterpretation schema, @RequestParam("file") MultipartFile file) {
+    public ResponseDocument<SourceFile> uploadFile( //
+            @RequestParam("fileName") String fileName, //
+            @RequestParam("schema") SchemaInterpretation schema, //
+            @RequestParam(value = "compressed", required = false) boolean compressed, //
+            @RequestParam("file") MultipartFile file) {
         try {
-            return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
-                    file.getInputStream()));
+            if (file.getSize() >= maxUploadSize) {
+                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
+            }
+            if (compressed) {
+                return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
+                        ZipUtils.decompressStream(file.getInputStream())));
+            } else {
+                return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
+                        file.getInputStream()));
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
         }
@@ -68,10 +84,12 @@ public class FileUploadResource {
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file. The server will create a unique name for the file")
-    public ResponseDocument<SourceFile> uploadFile(@RequestParam("schema") SchemaInterpretation schema,
+    public ResponseDocument<SourceFile> uploadFile( //
+            @RequestParam("schema") SchemaInterpretation schema, //
+            @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam("file") MultipartFile file) {
         String filename = new UID().toString().replace("-", "").replace(":", "") + ".csv";
-        return uploadFile(filename, schema, file);
+        return uploadFile(filename, schema, compressed, file);
     }
 
     @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET)
@@ -107,22 +125,18 @@ public class FileUploadResource {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET)
+    @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "text/plain")
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
-    public String getImportErrors(@PathVariable String fileName) {
-        try (InputStream is = fileUploadService.getImportErrorStream(fileName)) {
-            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                IOUtils.copy(is, os, MAX_ERROR_CSV_LENGTH);
-                String errors = new String(os.toByteArray());
-                if (errors.length() >= MAX_ERROR_CSV_LENGTH) {
-                    errors += "\n...Too many errors.  Data truncated...";
-                }
-                return errors;
-            }
+    @SuppressWarnings("unchecked")
+    public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
+        try {
+            InputStream is = fileUploadService.getImportErrorStream(fileName);
+            response.setContentType("text/plain");
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "errors.csv"));
+            IOUtils.copy(is, response.getOutputStream());
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18090, e);
+            throw new LedpException(LedpCode.LEDP_18093, e);
         }
     }
-
 }

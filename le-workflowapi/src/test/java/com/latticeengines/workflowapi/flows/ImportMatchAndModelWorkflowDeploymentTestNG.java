@@ -2,7 +2,6 @@ package com.latticeengines.workflowapi.flows;
 
 import static org.testng.Assert.assertEquals;
 
-import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -13,6 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowTestNGBase {

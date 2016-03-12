@@ -122,8 +122,10 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         for (DataFlowSource source : dataFlowConfig.getDataSources()) {
             if (source.getPurgeAfterUse()) {
                 Table table = proxy.getMetadata(dataFlowConfig.getCustomerSpace(), source.getName());
-                table.setMarkedForPurge(true);
-                proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+                if (table != null) {
+                    table.setMarkedForPurge(true);
+                    proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+                }
             }
         }
     }

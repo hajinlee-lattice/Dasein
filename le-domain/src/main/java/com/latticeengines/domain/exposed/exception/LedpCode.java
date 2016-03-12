@@ -185,6 +185,8 @@ public enum LedpCode {
     LEDP_18089("Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
     LEDP_18090("Metadata type {0} is not supported."), //
     LEDP_18091("Artifact type {0} with name {1} already exists in module {2}."), //
+    LEDP_18092("File exceeds maximum allowed limit of {0}"), //
+    LEDP_18093("Failed to download errors file"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
@@ -280,8 +282,7 @@ public enum LedpCode {
     LEDP_24004("ZK operation exception: {0}"), //
 
     // le-propdata
-    LEDP_25000("Can not create new derived entitlement package {0}."),
-    LEDP_25001("Derived entitlement resource error."), //
+    LEDP_25000("Can not create new derived entitlement package {0}."), LEDP_25001("Derived entitlement resource error."), //
     LEDP_25002("Source entitlement resource error."), //
     LEDP_25003("Source column entitlement resource error."), //
     LEDP_25004("Match client {0} is not available"), //
@@ -384,7 +385,6 @@ public enum LedpCode {
         this.externalCode = externalCode;
         this.message = message;
     }
-
 
     public String getMessage() {
         return message;

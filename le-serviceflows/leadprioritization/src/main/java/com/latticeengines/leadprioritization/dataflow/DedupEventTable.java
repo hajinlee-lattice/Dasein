@@ -50,8 +50,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                         true, //
                         false);
         last = last.merge(emptyDomains);
-        last = last.rename(new FieldList(DOMAIN), new FieldList("Domain"));
-        return last.discard(new FieldList(SORT));
+        return last.discard(new FieldList(SORT, DOMAIN));
     }
 
     private Node addSortColumn(Node last, Node source, String field) {

@@ -17,5 +17,5 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="extractWAR">true</Set>
 
-    <Set name="maxFormContentSize">250000000</Set>
+    <Set name="maxFormContentSize">1000000000</Set>
 </Configure>

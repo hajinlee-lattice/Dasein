@@ -1,11 +1,11 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.AssertJUnit.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -45,6 +49,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
@@ -57,6 +62,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -174,14 +182,19 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
     public void retrieveErrorsFile() {
         // Relies on error in Account.csv
-        String csv = restTemplate.getForObject(
+        restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = restTemplate.exchange(
                 String.format("%s/pls/fileuploads/%s/import/errors", getPLSRestAPIHostPort(), sourceFile.getName()),
-                String.class);
-        assertNotEquals(csv.length(), 0);
+                HttpMethod.GET, entity, byte[].class);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+        String errors = new String(response.getBody());
+        assertTrue(errors.length() > 0);
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveErrorsFile", "retrieveModelSummary",
-            "retrieveReport" })
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummary" })
     public void cloneAndRemodel() {
         @SuppressWarnings("unchecked")
         List<Object> rawFields = restTemplate.getForObject(
@@ -254,6 +267,20 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 break;
             Thread.sleep(1000);
         }
+        assertNotNull(found);
+
+        @SuppressWarnings("unchecked")
+        List<Object> predictors = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/predictors/all/%s", getPLSRestAPIHostPort(), found.getId()),
+                List.class);
+        assertTrue(Iterables.any(predictors, new Predicate<Object>() {
+
+            @Override
+            public boolean apply(@Nullable Object raw) {
+                Predictor predictor = new ObjectMapper().convertValue(raw, Predictor.class);
+                return predictor.getCategory() != null;
+            }
+        }));
         return found;
     }
 
@@ -272,9 +299,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     throw new RuntimeException(e);
             }
 
-            if ((status != null) &&
-               ((running && status.getStatus().isRunning()) ||
-                (!running && !status.getStatus().isRunning()))) {
+            if ((status != null)
+                    && ((running && status.getStatus().isRunning()) || (!running && !status.getStatus().isRunning()))) {
                 return status;
             }
 
