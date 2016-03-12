@@ -103,4 +103,4 @@ class ReadoutSampleTest(TrainingTestBase):
         dataFrameCopy = dataFrame.copy()
         dataFrameCopy.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
         for value, copyValue in zip(dataFrame[scoreColumnName].as_matrix(), dataFrameCopy[scoreColumnName].as_matrix()):
-            self.assertEqual(value, copyValue)
+            self.assertAlmostEqual(value, copyValue, delta=0.1)
