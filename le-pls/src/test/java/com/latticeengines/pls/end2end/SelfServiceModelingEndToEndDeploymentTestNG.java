@@ -49,7 +49,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
@@ -62,9 +61,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
-
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
