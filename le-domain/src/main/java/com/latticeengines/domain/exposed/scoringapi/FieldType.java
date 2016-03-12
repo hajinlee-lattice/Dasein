@@ -14,14 +14,19 @@ public enum FieldType {
     // Milliseconds since the unix epoch stored in an int64.
     TEMPORAL(Timestamp.class),
     LONG(Long.class);
-    
+
     private static Map<Class<?>, FieldType> javaToFieldTypeMap = new HashMap<>();
-    
+
     static {
         for (FieldType fieldType : FieldType.values()) {
             javaToFieldTypeMap.put(fieldType.type(), fieldType);
         }
     }
+
+    public static void main(String[] args) {
+//        Boolean.valueOf("hola");
+    }
+
 
     private FieldType(Class<?> type) {
         this.type = type;
@@ -32,9 +37,17 @@ public enum FieldType {
     public Class<?> type() {
         return type;
     }
-    
+
     public static FieldType getFromJavaType(Class<?> javaType) {
         return javaToFieldTypeMap.get(javaType);
+    }
+
+    public static Object parse(FieldType fieldtype, Object rawvalue) {
+        if (rawvalue == null) {
+            return null;
+        } else {
+            return parse(fieldtype, String.valueOf(rawvalue));
+        }
     }
 
     public static Object parse(FieldType fieldtype, String rawvalue) {

@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
@@ -34,6 +35,7 @@ import com.latticeengines.scoringapi.warnings.Warnings;
 @Component("matcher)")
 public class MatcherImpl implements Matcher {
 
+    public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final Log log = LogFactory.getLog(MatcherImpl.class);
 
     @Autowired
@@ -45,13 +47,13 @@ public class MatcherImpl implements Matcher {
     private MatchInput buildMatchInput(CustomerSpace space, InterpretedFields interpreted, Map<String, Object> record) {
         MatchInput matchInput = new MatchInput();
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress());
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain());
-        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite());
-        addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName());
-        addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity());
-        addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState());
-        addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry());
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getEmailAddress(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getDomain(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Domain, interpreted.getWebsite(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Name, interpreted.getCompanyName(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.City, interpreted.getCompanyCity(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         matchInput.setKeyMap(keyMap);
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.Model);
         matchInput.setTenant(new Tenant(space.toString()));
@@ -75,6 +77,7 @@ public class MatcherImpl implements Matcher {
     public Map<String, Object> matchAndJoin(CustomerSpace space, InterpretedFields interpreted,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         MatchInput matchInput = buildMatchInput(space, interpreted, record);
+        log.info("matchInput:" + JsonUtils.serialize(matchInput));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput, true);
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
@@ -101,13 +104,26 @@ public class MatcherImpl implements Matcher {
                     throw new LedpException(LedpCode.LEDP_31005, new String[] { String.valueOf(matchFieldNames.size()),
                             String.valueOf(matchFieldValues.size()) });
                 }
+                // Handle IsPublicDomain specifically
+                boolean isPublicDomain = false;
                 for (int i = 0; i < matchFieldNames.size(); i++) {
                     String fieldName = matchFieldNames.get(i);
+                    if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
+                        isPublicDomain = true;
+                    }
                     FieldSchema schema = fieldSchemas.get(fieldName);
                     if (schema != null && schema.source == FieldSource.PROPRIETARY) {
-                        Object fieldValue = matchFieldValues.get(i);
+                        Object fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
                         record.put(fieldName, fieldValue);
+                        if (fieldValue == null) {
+                            log.debug(String.format("Received null value for matched field:%s", fieldName));
+                        }
                     }
+                }
+                if (isPublicDomain) {
+                    record.put(IS_PUBLIC_DOMAIN, true);
+                } else {
+                    record.put(IS_PUBLIC_DOMAIN, false);
                 }
             } else {
                 warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
@@ -120,8 +136,10 @@ public class MatcherImpl implements Matcher {
         return record;
     }
 
-    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String value) {
-        if (Strings.isNullOrEmpty(value)) {
+    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String field, Map<String, Object> record) {
+        Object value = record.get(field);
+
+        if (value == null || Strings.isNullOrEmpty(String.valueOf(value))) {
             return;
         }
         List<String> keyFields = keyMap.get(matchKey);
@@ -129,6 +147,6 @@ public class MatcherImpl implements Matcher {
             keyFields = new ArrayList<>();
             keyMap.put(matchKey, keyFields);
         }
-        keyFields.add(value);
+        keyFields.add(field);
     }
 }

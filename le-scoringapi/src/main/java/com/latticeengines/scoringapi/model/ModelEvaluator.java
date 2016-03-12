@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
@@ -17,13 +19,13 @@ import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
-import org.python.jline.internal.Log;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
@@ -34,6 +36,8 @@ import com.latticeengines.scoringapi.warnings.WarningCode;
 import com.latticeengines.scoringapi.warnings.Warnings;
 
 public class ModelEvaluator {
+
+    private static final Log log = LogFactory.getLog(ModelEvaluator.class);
 
     private final PMMLManager manager;
 
@@ -98,23 +102,34 @@ public class ModelEvaluator {
             try {
                 arguments.put(name, evaluator.prepare(name, value));
             } catch (Exception e) {
-                throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(), String.valueOf(value) });
+                throw new ScoringApiException(LedpCode.LEDP_31103, new String[] { name.getValue(),
+                        String.valueOf(value) });
             }
         }
+        String nullFieldsMsg = "";
         if (!nullFields.isEmpty()) {
-            String joinedNullFields = Joiner.on(",").join(nullFields);
-            Log.info("Fields with null values:" + joinedNullFields);
-            warnings.addWarning(new Warning(WarningCode.MISSING_VALUE, new String[] { joinedNullFields }));
+            nullFieldsMsg = Joiner.on(",").join(nullFields);
+            log.info("Preevaluated fields with null values:" + nullFieldsMsg);
+            warnings.addWarning(new Warning(WarningCode.MISSING_VALUE, new String[] { nullFieldsMsg }));
         }
-        Map<FieldName, ?> results = evaluator.evaluate(arguments);
+
+        Map<FieldName, ?> results = null;
+        try {
+            log.info(JsonUtils.serialize(arguments));
+            results = evaluator.evaluate(arguments);
+        } catch (Exception e) {
+            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
+        }
+
+        if (results == null) {
+            throw new LedpException(LedpCode.LEDP_31013);
+        } else if (results.size() != 1) {
+            throw new LedpException(LedpCode.LEDP_31012, new String[] { String.valueOf(results.size()) });
+        }
 
         String target = derivation.target;
         if (target == null) {
-            if (results.size() == 1) {
-                target = results.keySet().iterator().next().getValue();
-            } else {
-                throw new RuntimeException("PMML model has multiple results and no target was specified");
-            }
+            target = results.keySet().iterator().next().getValue();
         }
 
         @SuppressWarnings("unchecked")
@@ -148,7 +163,7 @@ public class ModelEvaluator {
             }
         }
 
-        Log.info(JsonUtils.serialize(result));
+        log.info(JsonUtils.serialize(result));
 
         return result;
     }

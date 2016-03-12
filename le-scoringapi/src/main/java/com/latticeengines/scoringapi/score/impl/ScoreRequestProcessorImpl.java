@@ -22,9 +22,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.scoringapi.controller.ScoreResource;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
+import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -58,7 +61,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private Warnings warnings;
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, ScoreType scoreType) {
+    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
         log.info(String.format("{'requestPreparationDuration':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
         if (Strings.isNullOrEmpty(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
@@ -69,78 +72,51 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         log.info(String.format("{'retrieveModelArtifacts':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
         checkForMissingFields(fieldSchemas, request.getRecord());
-        InterpretedFields interpretedFields = examineRecord(fieldSchemas, request.getRecord());
-        log.info(String.format("{'inspectRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
+                fieldSchemas, request.getRecord());
+        log.info(String.format("{'parseRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
-        Map<String, Object> matchedRecord = matcher.matchAndJoin(space, interpretedFields, fieldSchemas,
-                request.getRecord());
+        Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
+                fieldSchemas, parsedRecordAndInterpretedFields.getKey());
         log.info(String.format("{'matchRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
         Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
         log.info(String.format("{'transformRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
-        double score = score(scoringArtifacts, transformedRecord, scoreType);
+        ScoreResponse scoreResponse = null;
+        if (isDebug) {
+            scoreResponse = generateDebugScoreResponse(scoringArtifacts, transformedRecord);
+        } else {
+            scoreResponse = generateScoreResponse(scoringArtifacts, transformedRecord);
+        }
         log.info(String.format("{'scoreRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
-        ScoreResponse scoreResponse = new ScoreResponse();
-        scoreResponse.setScore(score);
         return scoreResponse;
     }
 
-    private InterpretedFields examineRecord(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+    private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+        Map<String, Object> parsedRecord = new HashMap<String, Object>(record.size());
+        parsedRecord.putAll(record);
+
         InterpretedFields interpretedFields = new InterpretedFields();
 
         List<String> extraFields = new ArrayList<>();
         Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes = new HashMap<>();
-        for (String fieldName : record.keySet()) {
+        for (String fieldName : parsedRecord.keySet()) {
             if (!fieldSchemas.containsKey(fieldName)) {
                 extraFields.add(fieldName);
                 continue;
             }
 
             FieldSchema schema = fieldSchemas.get(fieldName);
-            Object fieldValue = record.get(fieldName);
-            if (schema.source == FieldSource.REQUEST && fieldValue != null) {
-                Class<?> typeClass = schema.type.type();
-                if (!typeClass.isInstance(fieldValue)) {
-                    mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(typeClass,
-                            fieldValue));
-                }
-            }
-
-            switch (schema.interpretation) {
-            case ID:
-                interpretedFields.setRecordId(fieldName);
-                break;
-            case EMAIL_ADDRESS:
-                interpretedFields.setEmailAddress(fieldName);
-                break;
-            case WEBSITE:
-                interpretedFields.setWebsite(fieldName);
-                break;
-            case COMPANY_NAME:
-                interpretedFields.setCompanyName(fieldName);
-                break;
-            case COMPANY_CITY:
-                interpretedFields.setCompanyCity(fieldName);
-                break;
-            case COMPANY_STATE:
-                interpretedFields.setCompanyState(fieldName);
-                break;
-            case COMPANY_COUNTRY:
-                interpretedFields.setCompanyCountry(fieldName);
-                break;
-            case DOMAIN:
-                interpretedFields.setDomain(fieldName);
-                break;
-            default:
-                break;
-            }
+            setFieldTypes(mismatchedDataTypes, parsedRecord, fieldName, schema);
+            interpretFields(interpretedFields, fieldName, schema);
         }
         if (!extraFields.isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.EXTRA_FIELDS, new String[] { Joiner.on(",").join(extraFields) }));
             for (String extraField : extraFields) {
-                record.remove(extraField);
+                parsedRecord.remove(extraField);
             }
         }
         if (!mismatchedDataTypes.isEmpty()) {
@@ -148,7 +124,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                     .serialize(mismatchedDataTypes) }));
         }
 
-        return interpretedFields;
+        return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
 
     private void checkForMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
@@ -195,28 +171,43 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
     }
 
-    private double score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord, ScoreType scoreType) {
+    private ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts,
+            Map<String, Object> transformedRecord) {
+        ScoreResponse scoreResponse = new ScoreResponse();
+        int percentile = score(scoringArtifacts, transformedRecord).getPercentile();
+        scoreResponse.setScore(percentile);
+        return scoreResponse;
+    }
+
+    private DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
+            Map<String, Object> transformedRecord) {
+        DebugScoreResponse debugScoreResponse = new DebugScoreResponse();
+        ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
+        debugScoreResponse.setProbability(scoreEvaluation.getProbability());
+        debugScoreResponse.setScore(scoreEvaluation.getPercentile());
+
+        return debugScoreResponse;
+    }
+
+    private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
                 scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
-        double score = (double) evaluation.get(ScoreType.PROBABILITY);
-        if (scoreType == ScoreType.PERCENTILE) {
-            Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
-            if (percentileObject == null) {
-                throw new LedpException(LedpCode.LEDP_31011, new String[] {
-                        String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
-            }
-
-            int percentile = (int) percentileObject;
-            if (percentile > 99 || percentile < 5) {
-                log.warn(String.format("Score out of range; percentile: %d probability: %,.7f", percentile,
-                        (double) evaluation.get(ScoreType.PROBABILITY)));
-                percentile = Math.min(percentile, 99);
-                percentile = Math.max(percentile, 5);
-            }
-            score = percentile;
+        double probability = (double) evaluation.get(ScoreType.PROBABILITY);
+        Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
+        if (percentileObject == null) {
+            throw new LedpException(LedpCode.LEDP_31011, new String[] {
+                    String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
         }
 
-        return score;
+        int percentile = (int) percentileObject;
+        if (percentile > 99 || percentile < 5) {
+            log.warn(String.format("Score out of range; percentile: %d probability: %,.7f", percentile,
+                    (double) evaluation.get(ScoreType.PROBABILITY)));
+            percentile = Math.min(percentile, 99);
+            percentile = Math.max(percentile, 5);
+        }
+
+        return new ScoreEvaluation(probability, percentile);
     }
 
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {
@@ -228,6 +219,53 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getDataComposition().transforms,
                 standardTransformedRecord);
         return datascienceTransformedRecord;
+    }
+
+    private void interpretFields(InterpretedFields interpretedFields, String fieldName, FieldSchema schema) {
+        switch (schema.interpretation) {
+        case ID:
+            interpretedFields.setRecordId(fieldName);
+            break;
+        case EMAIL_ADDRESS:
+            interpretedFields.setEmailAddress(fieldName);
+            break;
+        case WEBSITE:
+            interpretedFields.setWebsite(fieldName);
+            break;
+        case COMPANY_NAME:
+            interpretedFields.setCompanyName(fieldName);
+            break;
+        case COMPANY_CITY:
+            interpretedFields.setCompanyCity(fieldName);
+            break;
+        case COMPANY_STATE:
+            interpretedFields.setCompanyState(fieldName);
+            break;
+        case COMPANY_COUNTRY:
+            interpretedFields.setCompanyCountry(fieldName);
+            break;
+        case DOMAIN:
+            interpretedFields.setDomain(fieldName);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void setFieldTypes(Map<String, AbstractMap.SimpleEntry<Class<?>, Object>> mismatchedDataTypes,
+            Map<String, Object> record, String fieldName, FieldSchema schema) {
+        Object fieldValue = record.get(fieldName);
+        if (schema.source == FieldSource.REQUEST && fieldValue != null) {
+            FieldType fieldType = schema.type;
+
+            try {
+                fieldValue = FieldType.parse(fieldType, fieldValue);
+                record.put(fieldName, fieldValue);
+            } catch (Exception e) {
+                mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(),
+                        fieldValue));
+            }
+        }
     }
 
 }

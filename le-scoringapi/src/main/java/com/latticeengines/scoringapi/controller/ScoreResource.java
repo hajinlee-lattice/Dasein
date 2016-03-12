@@ -30,7 +30,6 @@ import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
-import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.warnings.Warnings;
@@ -91,22 +90,22 @@ public class ScoreResource {
     @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Score a record")
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
-        return scoreRecord(request, scoreRequest, ScoreType.PERCENTILE);
+        return scoreRecord(request, scoreRequest, false);
     }
 
-    @RequestMapping(value = "/record/probability", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiIgnore
-    @ApiOperation(value = "Score probability value for a record")
+    @ApiOperation(value = "Score a record including debug info such as probability")
     public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, @RequestBody ScoreRequest scoreRequest) {
-        return scoreRecord(request, scoreRequest, ScoreType.PROBABILITY);
+        return scoreRecord(request, scoreRequest, true);
     }
 
-    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, ScoreType scoreType) {
+    private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(String.format("{'getTenantFromOAuth':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
             log.info(JsonUtils.serialize(scoreRequest));
-            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, scoreType);
+            ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
             }
@@ -114,6 +113,5 @@ public class ScoreResource {
             return response;
         }
     }
-
 
 }

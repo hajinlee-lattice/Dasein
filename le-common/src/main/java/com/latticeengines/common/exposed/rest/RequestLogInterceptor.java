@@ -15,8 +15,9 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @Component("requestLogInterceptor")
 public class RequestLogInterceptor extends HandlerInterceptorAdapter {
 
-    private static final String URI_KEY = "com.latticeengines.uri";
     public static final String IDENTIFIER_KEY = "com.latticeengines.requestid";
+    public static final String REQUEST_ID = "Request-Id";
+    private static final String URI_KEY = "com.latticeengines.uri";
 
     private static final Log log = LogFactory.getLog(RequestLogInterceptor.class);
 
@@ -28,7 +29,7 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
 
         String identifier = UUID.randomUUID().toString();
         request.setAttribute(IDENTIFIER_KEY, identifier);
-        response.addHeader("Request-Id", identifier);
+        response.addHeader(REQUEST_ID, identifier);
         // It's safe to assume nothing has added to the MDC on this thread
         // already, so we can use it directly rather than through LogContext.
         MDC.put(IDENTIFIER_KEY, identifier);

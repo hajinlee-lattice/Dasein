@@ -362,11 +362,14 @@ public enum LedpCode {
     LEDP_31009("Retrieved null EventTable {0}"), //
     LEDP_31010("EventTable {0} interpretation is null or empty"), //
     LEDP_31011("No percentile bucket found for probability {0} in model {1}"), //
+    LEDP_31012("PMML model has multiple ({0}) results and no target was specified"), //
+    LEDP_31013("PMML model evaluation returned no results"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //
     LEDP_31102("invalid_model_id", "{0} is not a valid activated model"), //
     LEDP_31103("problem_populating_missing_field", "Problem populating missing field {0} with value {1}"), //
+    LEDP_31104("problem_scoring_missing_fields", "Problem scoring the record due to missing fields {0}"), //
     LEDP_31199("missing_domain", "Domain field(s) are missing {0}");
 
     private String message;

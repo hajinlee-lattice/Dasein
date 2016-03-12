@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -19,13 +21,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 @ControllerAdvice
 public class ScoringApiExceptionHandler {
+
     private static final Log log = LogFactory.getLog(ScoringApiExceptionHandler.class);
+    private static final String SPLUNK_URL = "http://splunk.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
 
     @Autowired
     private AlertService alertService;
@@ -103,10 +108,9 @@ public class ScoringApiExceptionHandler {
         }
 
         Map<String, Object> details = new HashMap<String, Object>();
+        String errorMessage = ex.getMessage();
         details.put("error", code);
-        details.put("error_description", ex.getMessage());
-
-
+        details.put("error_description", errorMessage);
 
         if (includeErrors) {
             details.put("errors", errorMessages);
@@ -119,7 +123,18 @@ public class ScoringApiExceptionHandler {
             trace = sw.toString();
         }
 
-        log.error(JsonUtils.serialize(details) + "\n" + trace);
+        String errorMsg = JsonUtils.serialize(details) + "\n" + trace;
+        log.error(errorMsg);
+
+        if (fireAlert) {
+            List<BasicNameValuePair> alertDetails = new ArrayList<>();
+            alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, MDC
+                    .get(RequestLogInterceptor.IDENTIFIER_KEY)));
+            alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
+
+            String logUrl = SPLUNK_URL + MDC.get(RequestLogInterceptor.IDENTIFIER_KEY) + "%22";
+            alertService.triggerCriticalEvent(errorMessage, logUrl, alertDetails);
+        }
 
         return details;
     }
