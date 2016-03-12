@@ -24,5 +24,6 @@
         <module>le-playmaker/pom-playmaker-rpm.xml</module>
         <module>le-oauth2/pom-oauth2-rpm.xml</module>
         <module>le-scoringapi/pom-scoringapi-rpm.xml</module>
+        <module>le-common</module>
     </modules>
 </project>
