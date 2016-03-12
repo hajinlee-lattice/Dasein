@@ -16,5 +16,6 @@
 
     <modules>
         <module>le-admin/pom-admin-tc-rpm.xml</module>
+        <module>le-microservice/pom-microservice-tc-rpm.xml</module>
     </modules>
 </project>
