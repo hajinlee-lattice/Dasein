@@ -23,5 +23,3 @@ for f in $(find . -name "*.war"); do
 done
 
 ls $CATALINA_HOME/webapps/*.war
-
-service tomcat restart
