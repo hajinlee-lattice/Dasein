@@ -26,7 +26,7 @@ public class RecordTransformer {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
 
-        JythonEngine engine = retriever.getTransform(modelPath);
+        JythonEngine engine = new JythonEngine(modelPath);
 
         for (TransformDefinition entry : definitions) {
             Object value = null;
