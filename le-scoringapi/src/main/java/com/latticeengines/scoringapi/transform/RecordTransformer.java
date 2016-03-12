@@ -31,18 +31,20 @@ public class RecordTransformer {
         for (TransformDefinition entry : definitions) {
             Object value = null;
             boolean successfulInvocation = false;
-
+            Exception failedInvocationException = null;
             for (int numTries = 0; numTries < 2; numTries++) {
                 try {
                     value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
                     successfulInvocation = true;
                 } catch (Exception e) {
-                    log.debug(String.format("Problem invoking %s", entry.name), e);
+                    failedInvocationException = e;
                 }
             }
             if (successfulInvocation) {
                 record.put(entry.output, value);
                 result.put(entry.output, value);
+            } else {
+                log.info(String.format("Problem invoking %s", entry.name), failedInvocationException);
             }
         }
 

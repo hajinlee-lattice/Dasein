@@ -27,7 +27,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
-import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.ScoreType;
@@ -66,8 +65,7 @@ public class ModelEvaluator {
         this.manager = new PMMLManager(unmarshalled);
     }
 
-    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation,
-            Map<String, FieldSchema> fieldSchemas) {
+    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation) {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -76,22 +74,7 @@ public class ModelEvaluator {
             Object value = record.get(name.getValue());
             if (value == null) {
                 nullFields.add(name.getValue());
-                FieldSchema schema = fieldSchemas.get(name.getValue());
-                switch (schema.type) {
-                case BOOLEAN:
-                    value = 0.0d;
-                    break;
-                case INTEGER:
-                case FLOAT:
-                case LONG:
-                case TEMPORAL:
-                    value = 0.0d;
-                    break;
-                case STRING:
-                    value = 0.0d;
-                default:
-                    break;
-                }
+                value = 0.0d; // TODO questioning whether I should actually do this or instead let this record fail
             }
             if (value instanceof Long) {
                 value = ((Long) value).doubleValue();

@@ -33,6 +33,7 @@ import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.match.Matcher;
+import com.latticeengines.scoringapi.model.ModelEvaluator;
 import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
@@ -191,7 +192,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private ScoreEvaluation score(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         Map<ScoreType, Object> evaluation = scoringArtifacts.getPmmlEvaluator().evaluate(transformedRecord,
-                scoringArtifacts.getScoreDerivation(), scoringArtifacts.getDataComposition().fields);
+                scoringArtifacts.getScoreDerivation());
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
         if (percentileObject == null) {
