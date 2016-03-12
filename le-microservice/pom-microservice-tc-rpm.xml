@@ -228,10 +228,10 @@
                         <scriptFile>core/src/main/scripts/preremove</scriptFile>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
-                        <scriptFile>core/src/main/scripts/preinstall</scriptFile>
+                        <scriptFile>core/src/main/scripts/preinstall_tc</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>core/src/main/scripts/postinstall</scriptFile>
+                        <scriptFile>core/src/main/scripts/postinstall_tc</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
