@@ -3,7 +3,7 @@ angular.module('mainApp.login.modals.TenantSelectionModal', [
 ])
 .service('TenantSelectionModal', function ($compile, $http, $rootScope, _) {
     this.show = function (tenantList, successCallback) {
-        $http.get('./app/login/views/TenantSelectionView.html').success(function (html) {
+        $http.get('app/login/views/TenantSelectionView.html').success(function (html) {
             
             var scope = $rootScope.$new();
             scope.tenantList = _.sortBy(tenantList, 'Indentifier');

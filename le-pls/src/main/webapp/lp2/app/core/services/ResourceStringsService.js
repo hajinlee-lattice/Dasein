@@ -11,7 +11,7 @@ angular.module('mainApp.core.services.ResourceStringsService', [
             locale = this.DefaultLocale;
         }
         
-        var webAddress = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStringsExternal.txt";
+        var webAddress = "assets/resources/" + locale + "/" + "ResourceStringsExternal.txt";
         return getResourceStringsAtWebAddress(webAddress);
     };
 
@@ -20,7 +20,7 @@ angular.module('mainApp.core.services.ResourceStringsService', [
             locale = this.DefaultLocale;
         }
         
-        var webAddress = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStrings.txt";
+        var webAddress = "assets/resources/" + locale + "/" + "ResourceStrings.txt";
         return getResourceStringsAtWebAddress(webAddress);
     };
 

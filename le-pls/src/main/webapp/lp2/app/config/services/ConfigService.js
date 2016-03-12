@@ -24,7 +24,7 @@ angular.module('mainApp.config.services.ConfigService', [
         }
         
         var test = URLUtility.GetBaseUrl();
-        var webServer = URLUtility.GetWebServerAddress("/") + "/assets/resources/WidgetConfigurationDocument.json";
+        var webServer = "assets/resources/WidgetConfigurationDocument.json";
         
         $http({
             method: 'GET', 
