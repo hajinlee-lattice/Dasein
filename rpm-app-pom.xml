@@ -21,8 +21,6 @@
         <module>le-ui/pom-ui-rpm.xml</module>
         <module>le-admin/pom-admin-rpm.xml</module>
         <module>le-microservice/pom-microservice-rpm.xml</module>
-        <module>le-playmaker/pom-playmaker-rpm.xml</module>
-        <module>le-oauth2/pom-oauth2-rpm.xml</module>
         <module>le-scoringapi/pom-scoringapi-rpm.xml</module>
         <module>le-common</module>
     </modules>
