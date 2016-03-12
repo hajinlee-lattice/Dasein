@@ -1,1 +1,8 @@
+cd /tmp/le-ui
+tar xzf le-ui.tar.gz
+cp ENV_VARS le-ui/
 
+cd le-ui
+cp -rf . /opt/node/latest
+
+chmod -R 755 /opt/node/latest

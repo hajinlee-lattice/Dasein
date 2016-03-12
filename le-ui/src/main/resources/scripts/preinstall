@@ -4,3 +4,8 @@ if [ ! -d "/opt/node/latest" ]; then
     mkdir -p /opt/node/latest
 fi
 rm -rf /opt/node/latest/*
+
+if [ ! -d "/tmp/le-ui" ]; then
+    mkdir -p /tmp/le-ui
+fi
+rm -rf /tmp/le-ui/*

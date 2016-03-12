@@ -140,21 +140,13 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/opt/node/latest</directory>
+                            <directory>/tmp/le-ui</directory>
                             <filemode>755</filemode>
                             <username>build</username>
                             <groupname>build</groupname>
                             <sources>
                                 <source>
-                                    <location>.</location>
-                                    <excludes>
-                                        <exclude>
-                                            **/test/**
-                                        </exclude>
-                                        <exclude>
-                                            **/ENV_VARS
-                                        </exclude>
-                                    </excludes>
+                                    <location>../le-ui.tar.gz</location>
                                 </source>
                                 <source>
                                     <location>${ui.environ.variables.path}/ENV_VARS</location>
