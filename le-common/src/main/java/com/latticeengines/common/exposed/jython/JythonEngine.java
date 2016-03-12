@@ -83,16 +83,18 @@ public class JythonEngine {
     }
 
     public <T> T invoke(String function, Map<String, Object> arguments, Map<String, Object> record, Class<T> returnType) {
-        String script = functionScriptMap.get(function);
+        
+        String threadId = "x" + Thread.currentThread().getId();
+        String script = functionScriptMap.get(function + "-" + threadId);
 
         if (script == null) {
-            script = String.format("import %s; x = %s.transform(args, record)", function, function);
-            functionScriptMap.put(function, script);
+            script = String.format("import %s; %s = %s.transform(args, record)", function, threadId, function);
+            functionScriptMap.put(function + "-" + threadId, script);
         }
         interpreter.set("args", arguments);
         interpreter.set("record", record);
         interpreter.exec(script);
-        PyObject x = interpreter.get("x");
+        PyObject x = interpreter.get(threadId);
         if (x instanceof PyFloat) {
             return returnType.cast(((PyFloat) x).getValue());
         } else if (x instanceof PyString) {
