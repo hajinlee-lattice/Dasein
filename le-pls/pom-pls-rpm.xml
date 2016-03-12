@@ -97,11 +97,11 @@
             </properties>
         </profile>
         <profile>
-            <id>qaclustera</id>
+            <id>qaclusterb</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>qaclustera</value>
+                    <value>qaclusterb</value>
                 </property>
             </activation>
             <properties>

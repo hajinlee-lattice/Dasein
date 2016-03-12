@@ -20,7 +20,7 @@
         <module>le-job/pom-job-rpm.xml</module>
         <module>le-pls/pom-pls-rpm.xml</module>
         <module>le-admin/pom-admin-rpm.xml</module>
-        
+
         <module>le-ui/pom-ui-rpm.xml</module>
 
         <module>le-admin/pom-admin-tc-rpm.xml</module>
