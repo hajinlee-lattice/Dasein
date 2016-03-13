@@ -8,7 +8,6 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${JOB_PROPDIR:/etc/ledp}/job.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
                 <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
                 <value>file:${PROPDATA_PROPDIR:/etc/ledp}/propdata.properties</value>

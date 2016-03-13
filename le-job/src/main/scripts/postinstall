@@ -1,3 +1,2 @@
 #!/bin/bash -x
 echo "finishing"
-service jetty restart > /opt/jetty/logs/start.log 2>&1

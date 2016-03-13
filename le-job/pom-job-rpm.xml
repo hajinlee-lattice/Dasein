@@ -20,102 +20,6 @@
 
     <profiles>
         <profile>
-            <id>buildmachine</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>buildmachine</value>
-                </property>
-            </activation>
-            <properties>
-                <job.properties.path>conf/env/buildmachine</job.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/buildmachine
-                </dataplatform.properties.path>
-                <dataflow.properties.path>
-                    ../le-dataflow/conf/env/buildmachine
-                </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/buildmachine</db.properties.path>
-                <propdata.properties.path>
-                    ../le-propdata/conf/env/buildmachine
-                </propdata.properties.path>
-                <score.properties.path>
-                    ../le-scoring/conf/env/buildmachine
-                </score.properties.path>
-                <dellebi.properties.path>
-                    ../le-dellebi/conf/env/buildmachine
-                </dellebi.properties.path>
-                <pls.properties.path>
-                    ../le-pls/conf/env/buildmachine
-                </pls.properties.path>
-                <proxy.properties.path>
-                    ../le-proxy/conf/env/buildmachine
-                </proxy.properties.path>
-                <workflow.properties.path>
-                    ../le-workflow/conf/env/buildmachine
-                </workflow.properties.path>
-                <security.properties.path>
-                    ../le-security/conf/env/buildmachine
-                </security.properties.path>
-                <camille.properties.path>
-                    ../le-camille/conf/env/buildmachine
-                </camille.properties.path>
-                <monitor.properties.path>
-                    ../le-monitor/conf/env/buildmachine
-                </monitor.properties.path>
-                <bin.env.path>bin/env/buildmachine</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>development</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>devcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <job.properties.path>conf/env/devcluster</job.properties.path>
-                <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/devcluster
-                </dataplatform.properties.path>
-                <dataflow.properties.path>
-                    ../le-dataflow/conf/env/devcluster
-                </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/devcluster</db.properties.path>
-                <propdata.properties.path>
-                    ../le-propdata/conf/env/devcluster
-                </propdata.properties.path>
-                <score.properties.path>
-                    ../le-scoring/conf/env/devcluster
-                </score.properties.path>
-                <dellebi.properties.path>
-                    ../le-dellebi/conf/env/devcluster
-                </dellebi.properties.path>
-                <pls.properties.path>
-                    ../le-pls/conf/env/devcluster
-                </pls.properties.path>
-                <security.properties.path>
-                    ../le-security/conf/env/devcluster
-                </security.properties.path>
-                <proxy.properties.path>
-                    ../le-proxy/conf/env/devcluster
-                </proxy.properties.path>
-                <workflow.properties.path>
-                    ../le-workflow/conf/env/devcluster
-                </workflow.properties.path>
-                <camille.properties.path>
-                    ../le-camille/conf/env/devcluster
-                </camille.properties.path>
-                <monitor.properties.path>
-                    ../le-monitor/conf/env/devcluster
-                </monitor.properties.path>
-                <bin.env.path>bin/env/devcluster</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
             <id>qa</id>
             <activation>
                 <property>
@@ -124,7 +28,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/qacluster</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
@@ -171,7 +74,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/qacluster</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
@@ -218,7 +120,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/qacluster</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
@@ -265,7 +166,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/deployment</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
@@ -312,7 +212,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/deployment</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
@@ -359,7 +258,6 @@
                 </property>
             </activation>
             <properties>
-                <job.properties.path>conf/env/deployment</job.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
@@ -431,9 +329,6 @@
                             <username>root</username>
                             <groupname>root</groupname>
                             <sources>
-                                <source>
-                                    <location>${job.properties.path}/job.properties</location>
-                                </source>
                                 <source>
                                     <location>${dataplatform.properties.path}/dataplatform.properties</location>
                                 </source>

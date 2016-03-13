@@ -93,7 +93,6 @@ HADOOP_CONF=--lib=/etc/hadoop/conf:/etc/tez/conf:$JAVA_HOME/lib/tools.jar:$HADOO
 SQOOP_HOME=/usr/hdp/current/sqoop-server
 
 JAVA_OPTIONS=(-Xms1g -Xmx6g -XX:MaxPermSize=2048m -Dsqoop.throwOnError=true)
-JAVA_OPTIONS+=(-DJOB_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-DCAMILLE_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-DDATAPLATFORM_PROPDIR=/etc/ledp)
 JAVA_OPTIONS+=(-DDATAFLOW_PROPDIR=/etc/ledp)
