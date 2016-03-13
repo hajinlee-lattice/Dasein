@@ -156,7 +156,7 @@ class Server {
             console.log(
                 '> HOST: http://localhost:' + options.USE_PORT + '/' + 
                 '\tENV:', options.ENV, '\n' +
-                '> API:', options.API_URL
+                '> API:', options.API_URL   + '\n> COMPRESSED: ' + options.COMPRESSED
             );
         });
     }

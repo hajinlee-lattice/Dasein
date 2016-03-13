@@ -21,17 +21,23 @@ var mainApp = angular.module('mainApp', [
 ])
 
 .config(['$httpProvider', function($httpProvider) {
+    /*
     //initialize get if not there
     if (!$httpProvider.defaults.headers.get) {
         $httpProvider.defaults.headers.get = {};    
     }
-
     // disable IE ajax request caching
     $httpProvider.defaults.headers.get['If-Modified-Since'] = 'Mon, 26 Jul 1997 05:00:00 GMT';
     // extra
     $httpProvider.defaults.headers.get['Cache-Control'] = 'no-cache';
     $httpProvider.defaults.headers.get['Pragma'] = 'no-cache';
+    */
 }])
+
+// {{ foobar | escape }}
+.filter('escape', function() {
+  return window.escape;
+})
 
 .controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
     TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
@@ -238,23 +244,25 @@ var mainApp = angular.module('mainApp', [
 });
 
 mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
-  return {
-    request: function (config) {
-      config.headers = config.headers || {};
-      if (BrowserStorageUtility.getTokenDocument()) {
-        config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
-      }
-      return config;
-    },
-    response: function (response) {
-      if (response.status === 401) {
-        // handle the case where the user is not authenticated
-      }
-      return response || $q.when(response);
-    }
-  };
+    return {
+        request: function (config) {
+            config.headers = config.headers || {};
+            
+            if (BrowserStorageUtility.getTokenDocument()) {
+                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+            }
+            
+            return config;
+        },
+        response: function (response) {
+            if (response.status === 401) {
+                // handle the case where the user is not authenticated
+            }
+            return response || $q.when(response);
+        }
+    };
 });
 
 mainApp.config(function ($httpProvider) {
-  $httpProvider.interceptors.push('authInterceptor');
+    $httpProvider.interceptors.push('authInterceptor');
 });

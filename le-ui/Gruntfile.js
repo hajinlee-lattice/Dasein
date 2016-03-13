@@ -12,27 +12,39 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'http://localhost:8081'
+                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                COMPRESSED: false,
+                USE_PORT: 3000
+            },
+            local: {
+                NODE_ENV: 'development',
+                API_URL: 'http://localhost:8081',
+                COMPRESSED: false,
+                USE_PORT: 3000
             },
             integration: {
                 NODE_ENV: 'integration',
                 API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                COMPRESSED: true,
                 USE_PORT: 3000
             },
             qa: {
                 NODE_ENV: 'qa',
                 API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                COMPRESSED: true,
                 USE_PORT: 3000
             },
             stage: {
                 NODE_ENV: 'stage',
                 API_URL: 'https://app.lattice-engines.com',
+                COMPRESSED: true,
                 USE_PORT: 8080
             },
-            prod: {
+            production: {
                 NODE_ENV: 'production',
                 API_URL: false,  // load balancer will handle api routing
                 USE_PORT: 8080,
+                COMPRESSED: true,
                 WHITELIST: [
                     '10.0.0.1',
                     '10.0.10.1'
@@ -64,18 +76,30 @@ module.exports = function (grunt) {
 
     var defaultText = 'Run Express Server in Production';
     grunt.registerTask('default', defaultText, [
-        'env:prod',
+        'env:production',
         'run:node'
     ]);
 
     grunt.registerTask('prod', defaultText, [
-        'env:prod',
+        'env:production',
+        'run:node'
+    ]);
+
+
+    grunt.registerTask('production', defaultText, [
+        'env:production',
+        'run:node'
+    ]);
+
+    var devText = 'Run Express Server using external API (52?)';
+    grunt.registerTask('dev', devText, [
+        'env:dev',
         'run:node'
     ]);
 
     var devText = 'Run Express Server, using Local API Endpoints';
-    grunt.registerTask('dev', devText, [
-        'env:dev',
+    grunt.registerTask('local', devText, [
+        'env:local',
         'run:node'
     ]);
 
@@ -99,7 +123,7 @@ module.exports = function (grunt) {
 
 
     var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('qa2', qaText, [
+    grunt.registerTask('qa_nodemon', qaText, [
         'env:qa',
         'run:nodemon'
     ]);
