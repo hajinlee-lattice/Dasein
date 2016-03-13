@@ -112,7 +112,7 @@ class AggregationExecutor(Executor):
         params["allDataPreTransform"] = test
         
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        stringColumns = params["parser"].getStringColumns()
+        stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
 
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline

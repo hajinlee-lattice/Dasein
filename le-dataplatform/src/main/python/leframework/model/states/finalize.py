@@ -76,7 +76,6 @@ class Finalize(State):
             json.dump(self.mediator.enhancedsummary, f, indent=4)
         
         with open(os.path.join(base, "datacomposition.json"), "wb") as f:
-            print self.mediator.data_composition
             json.dump(self.mediator.data_composition, f, indent=4)
             
         with open(os.path.join(base, "scorederivation.json"), "wb") as f:

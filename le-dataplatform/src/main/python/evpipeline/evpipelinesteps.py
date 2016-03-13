@@ -208,7 +208,7 @@ class ImputationStep(PipelineStep):
      
     def __createBins(self, x, y, numBins=20):
         if len(x) != len(y):
-            print "Warning: Number of records and number of labels are different."
+            logger.warn("Warning: Number of records and number of labels are different.")
      
         pairs = []
         numberOfPoints = min(len(x), len(y))

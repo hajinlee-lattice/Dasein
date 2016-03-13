@@ -109,7 +109,7 @@ class LearningExecutor(Executor):
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
         configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None 
-        stringColumns = params["parser"].getStringColumns()
+        stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
         
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
