@@ -22,7 +22,7 @@ for f in $(find . -name "*.war"); do
     fn=`echo $f | cut -d - -f 2`
     if [ $fn = "microservice" ]
     then
-        fn=doc
+        fn=ROOT
     fi
     cp $f $CATALINA_HOME/webapps/$fn\#\#$VERSION.war;
 done
