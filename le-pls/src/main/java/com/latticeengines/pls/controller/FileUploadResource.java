@@ -128,7 +128,6 @@ public class FileUploadResource {
     @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "text/plain")
     @ResponseBody
     @ApiOperation(value = "Retrieve file import errors")
-    @SuppressWarnings("unchecked")
     public void getImportErrors(@PathVariable String fileName, HttpServletResponse response) {
         try {
             InputStream is = fileUploadService.getImportErrorStream(fileName);

@@ -73,7 +73,7 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
+        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id, null, ModelingMetadata.NONE_APPROVED_USAGE));
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
         table.addAttribute(createAttribute("IsConverted", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
@@ -143,12 +143,17 @@ public class SchemaRepository {
 
     private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType,
             String otherFieldForValidator) {
+        return createAttribute(name, dataType, nullable, semanticType, null, ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+    }
+
+    private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType,
+            String otherFieldForValidator, String approvedUsage) {
         Attribute attribute = new Attribute();
         attribute.setName(name);
         attribute.setPhysicalDataType(dataType.toString());
         attribute.setDisplayName(name);
         attribute.setNullable(nullable);
-        attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
+        attribute.setApprovedUsage(approvedUsage);
         attribute.setSemanticType(semanticType);
 
         if (otherFieldForValidator != null) {
@@ -157,5 +162,4 @@ public class SchemaRepository {
 
         return attribute;
     }
-
 }
