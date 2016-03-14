@@ -228,9 +228,11 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         @JsonProperty("fieldValue")
         private Object fieldValue;
 
+        @SuppressWarnings("unused")
         public Field() {
         }
 
+        @SuppressWarnings("unused")
         public Field(String fieldName, FieldType fieldType) {
             this.fieldName = fieldName;
             this.fieldType = fieldType;
@@ -240,6 +242,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
             return fieldName;
         }
 
+        @SuppressWarnings("unused")
         public FieldType getFieldType() {
             return fieldType;
         }
@@ -256,10 +259,12 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         @JsonProperty("fields")
         private List<Field> fields;
 
+        @SuppressWarnings("unused")
         public String getModelId() {
             return modelId;
         }
 
+        @SuppressWarnings("unused")
         public void setModelId(String modelId) {
             this.modelId = modelId;
         }
@@ -268,6 +273,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
             return fields;
         }
 
+        @SuppressWarnings("unused")
         public void setFields(List<Field> fields) {
             this.fields = fields;
         }
@@ -280,6 +286,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         @JsonProperty("record")
         private Map<String, Object> record;
 
+        @SuppressWarnings("unused")
         public String getModelId() {
             return modelId;
         }
@@ -288,6 +295,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
             this.modelId = modelId;
         }
 
+        @SuppressWarnings("unused")
         public Map<String, Object> getRecord() {
             return record;
         }
@@ -308,14 +316,17 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
             return score;
         }
 
+        @SuppressWarnings("unused")
         public void setScore(double score) {
             this.score = score;
         }
 
+        @SuppressWarnings("unused")
         public List<String> getWarnings() {
             return warnings;
         }
 
+        @SuppressWarnings("unused")
         public void setWarnings(List<String> warnings) {
             this.warnings = warnings;
         }
