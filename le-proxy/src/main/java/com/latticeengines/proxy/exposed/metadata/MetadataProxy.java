@@ -49,6 +49,12 @@ public class MetadataProxy extends BaseRestApiProxy implements MetadataInterface
     }
 
     @Override
+    public void deleteTable(String customerSpace, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
+        delete("deleteImportTable", url);
+    }
+
+    @Override
     public void deleteImportTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
         delete("deleteImportTable", url);

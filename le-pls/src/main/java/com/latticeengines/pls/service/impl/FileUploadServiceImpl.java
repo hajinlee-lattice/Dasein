@@ -93,7 +93,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         String customerSpace = SecurityContextUtils.getTenant().getId().toString();
 
         if (sourceFile.getTableName() != null) {
-            metadataProxy.deleteImportTable(customerSpace, sourceFile.getTableName());
+            metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
         }
 
         Table table = strategy.getMetadata();

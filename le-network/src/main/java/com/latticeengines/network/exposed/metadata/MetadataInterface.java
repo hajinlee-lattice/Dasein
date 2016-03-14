@@ -14,6 +14,8 @@ public interface MetadataInterface {
 
     Table getImportTable(String customerSpace, String tableName);
 
+    void deleteTable(String customerSpace, String tableName);
+
     void deleteImportTable(String customerSpace, String tableName);
 
     List<String> getTableNames(String customerSpace);
