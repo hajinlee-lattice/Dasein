@@ -9,9 +9,9 @@ var app = angular.module('mainApp.userManagement.modals.EditUserModal', [
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
-app.service('EditUserModal', function ($compile, $rootScope, $http) {
+app.service('EditUserModal', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function (userToBeEdited) {
-        $http.get('./app/userManagement/views/EditUserView.html').success(function (html) {
+        $http.get('app/userManagement/views/EditUserView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.user = userToBeEdited;

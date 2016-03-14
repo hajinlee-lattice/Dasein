@@ -1,10 +1,10 @@
 angular.module('mainApp.models.modals.StaleModelModal', [
     'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.service('StaleModelModal', function ($compile, $rootScope, $http) {
+.service('StaleModelModal', function ($compile, $templateCache, $rootScope, $http) {
     var self = this;
     this.show = function (modelId) {
-        $http.get('./app/models/views/StaleModelConfirmView.html').success(function (html) {
+        $http.get('app/models/views/StaleModelConfirmView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.modelId = modelId;

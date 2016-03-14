@@ -4,7 +4,7 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
     'mainApp.config.services.ConfigService'
 ])
 
-.service('EnterCredentialsModal', function ($compile, $rootScope, $http, ResourceUtility) {
+.service('EnterCredentialsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
     
     this.TopologyType = {
@@ -14,7 +14,7 @@ angular.module('mainApp.config.modals.EnterCredentialsModal', [
     };
     
     this.show = function (topologyType, previousCredentials, successCallback) {
-        $http.get('./app/config/views/EnterCredentialsView.html').success(function (html) {
+        $http.get('app/config/views/EnterCredentialsView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.topologyType = topologyType;

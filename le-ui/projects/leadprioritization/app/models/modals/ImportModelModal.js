@@ -59,9 +59,9 @@ angular.module('mainApp.models.modals.ImportModelModal', [
     };
 
 }])
-.service('ImportModelModal', function ($compile, $rootScope, $http, NavUtility) {
+.service('ImportModelModal', function ($compile, $templateCache, $rootScope, $http, NavUtility) {
     this.show = function () {
-        $http.get('./app/models/views/ImportModelModalView.html').success(function (html) {
+        $http.get('app/models/views/ImportModelModalView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
 

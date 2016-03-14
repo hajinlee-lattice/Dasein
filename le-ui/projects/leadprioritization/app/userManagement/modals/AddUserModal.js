@@ -9,9 +9,9 @@ var app = angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
-app.service('AddUserModal', function ($compile, $rootScope, $http) {
+app.service('AddUserModal', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function (emails) {
-        $http.get('./app/userManagement/views/AddUserView.html').success(function (html) {
+        $http.get('app/userManagement/views/AddUserView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.emails = emails;

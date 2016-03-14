@@ -2,7 +2,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.setup.services.MetadataService'
 ])
-.service('UpdateFieldsModal', function ($compile, $rootScope, $http, $templateCache, ResourceUtility) {
+.service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
     this.show = function (modelSummaryId, editedData) {
         $http.get('app/setup/views/UpdateFieldsView.html', { cache: $templateCache }).success(function (html) {

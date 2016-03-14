@@ -4,10 +4,10 @@ angular.module('mainApp.setup.controllers.CancelDeploymentStepModel', [
     'mainApp.setup.utilities.SetupUtility'
 ])
 
-.service('CancelDeploymentStepModel', function ($compile, $rootScope, $http, ResourceUtility) {
+.service('CancelDeploymentStepModel', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
 
     this.show = function ($parentScope, link) {
-        $http.get('./app/setup/views/CancelDeploymentStepConfirmView.html').success(function (html) {
+        $http.get('app/setup/views/CancelDeploymentStepConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.parentScope = $parentScope;

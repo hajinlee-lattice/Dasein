@@ -4,10 +4,10 @@ angular.module('mainApp.setup.controllers.ClearDeploymentModel', [
     'mainApp.setup.services.TenantDeploymentService'
 ])
 
-.service('ClearDeploymentModel', function ($compile, $rootScope, $http) {
+.service('ClearDeploymentModel', function ($compile, $templateCache, $rootScope, $http) {
 
     this.show = function () {
-        $http.get('./app/setup/views/ClearDeploymentConfirmView.html').success(function (html) {
+        $http.get('app/setup/views/ClearDeploymentConfirmView.html', { cache: $templateCache }).success(function (html) {
 
             var modalElement = $("#modalContainer");
             var scope = $rootScope.$new();

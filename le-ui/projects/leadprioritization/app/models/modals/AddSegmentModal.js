@@ -42,9 +42,9 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
     };
 })
 
-.service('AddSegmentModal', function ($compile, $rootScope, $http) {
+.service('AddSegmentModal', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function (segments, models, successCallback) {
-        $http.get('./app/models/views/AddSegmentView.html').success(function (html) {
+        $http.get('app/models/views/AddSegmentView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.segments = segments;

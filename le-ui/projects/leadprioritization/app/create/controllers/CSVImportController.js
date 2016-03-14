@@ -33,12 +33,12 @@ angular.module('mainApp.create.csvImport', [
         
         (xhr.upload || xhr).addEventListener('progress', function(e) {
             console.log(e.total / 1024, e);
-            if (e.total / 1024 > 246000) {
+            if (e.total / 1024 > 386000) {
                 xhr.abort();
-                $('div.loader').css({display:'none'});
+                $('div.loader').css({'display':'none'});
 
                 $('#file_progress')
-                    .html('ERROR: Over file size limit.  File must be below 246MB');
+                    .html('ERROR: Over file size limit.  File must be below 386MB');
 
                 return;
             }

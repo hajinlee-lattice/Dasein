@@ -7,7 +7,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.setup.modals.UpdateFieldsModal'
 ])
 
-.service('EditFieldModel', function ($compile, $rootScope, $http, $templateCache) {
+.service('EditFieldModel', function ($compile, $templateCache, $rootScope, $http) {
 
     this.show = function(fieldToBeEdited, $manageFieldsScope) {
         $http.get('app/setup/views/EditFieldView.html', { cache: $templateCache }).success(function (html) {

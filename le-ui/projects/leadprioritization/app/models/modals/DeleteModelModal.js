@@ -4,10 +4,10 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
     'mainApp.models.services.ModelService',
     'mainApp.core.utilities.NavUtility'
 ])
-.service('DeleteModelModal', function ($compile, $rootScope, $http, ResourceUtility, ModelService) {
+.service('DeleteModelModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility, ModelService) {
     var self = this;
     this.show = function (modelId) {
-        $http.get('./app/models/views/DeleteModelConfirmView.html').success(function (html) {
+        $http.get('app/models/views/DeleteModelConfirmView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.modelId = modelId;

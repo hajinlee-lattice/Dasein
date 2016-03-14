@@ -4,10 +4,10 @@ angular.module('mainApp.setup.controllers.DiscardEditFieldsModel', [
     'mainApp.setup.utilities.SetupUtility'
 ])
 
-.service('DiscardEditFieldsModel', function ($compile, $rootScope, $http, ResourceUtility) {
+.service('DiscardEditFieldsModel', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
 
     this.show = function ($manageFieldsScope) {
-        $http.get('./app/setup/views/DiscardEditFieldsView.html').success(function (html) {
+        $http.get('app/setup/views/DiscardEditFieldsView.html', { cache: $templateCache }).success(function (html) {
 
             var scope = $rootScope.$new();
             scope.manageFieldsScope = $manageFieldsScope;

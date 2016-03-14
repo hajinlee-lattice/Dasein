@@ -9,9 +9,9 @@ var app = angular.module('mainApp.userManagement.modals.DeleteUserModal', [
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
-app.service('DeleteUserModal', function ($compile, $rootScope, $http) {
+app.service('DeleteUserModal', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function (userToBeDeleted) {
-        $http.get('./app/userManagement/views/DeleteUserView.html').success(function (html) {
+        $http.get('app/userManagement/views/DeleteUserView.html', { cache: $templateCache }).success(function (html) {
             
             var scope = $rootScope.$new();
             scope.user = userToBeDeleted;

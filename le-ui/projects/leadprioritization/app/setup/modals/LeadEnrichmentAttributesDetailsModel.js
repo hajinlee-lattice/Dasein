@@ -7,9 +7,9 @@ angular.module('mainApp.setup.modals.LeadEnrichmentAttributesDetailsModel', [
     'mainApp.setup.services.LeadEnrichmentService'
 ])
 
-.service('LeadEnrichmentAttributesDetailsModel', function ($compile, $rootScope, $http) {
+.service('LeadEnrichmentAttributesDetailsModel', function ($compile, $templateCache, $rootScope, $http) {
     this.show = function($parentScope) {
-        $http.get('./app/setup/views/LeadEnrichmentAttributesDetailsView.html').success(function (html) {
+        $http.get('app/setup/views/LeadEnrichmentAttributesDetailsView.html', { cache: $templateCache }).success(function (html) {
             var scope = $parentScope.$new();
             var contentContainer = $('#leadEnrichmentAttributesDetails');
             $compile(contentContainer.html(html))(scope);
