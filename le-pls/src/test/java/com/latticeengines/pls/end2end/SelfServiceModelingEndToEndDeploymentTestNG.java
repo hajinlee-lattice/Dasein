@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
@@ -50,6 +51,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
+@Component
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private WorkflowProxy workflowProxy;
@@ -157,6 +159,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
+    public Tenant getTenant() {
+        return tenantToAttach;
+    }
+
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
     public void retrieveReport() {
         Job job = restTemplate.getForObject( //
@@ -168,11 +174,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
-    public void retrieveModelSummary() throws InterruptedException {
+    public ModelSummary retrieveModelSummary() throws InterruptedException {
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
+        return originalModelSummary;
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
