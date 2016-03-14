@@ -27,7 +27,7 @@ const server = new Server(express, app, options);
 server.startLogging('/log');
 
 // when false, API proxy is disabled
-options.API_URL === true || options.API_URL === 'true'
+options.API_URL && options.API_URL != 'false'
     ? server.useApiProxy(options.API_URL) : null;
 
 // whitelist for proxies
