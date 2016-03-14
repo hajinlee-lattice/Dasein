@@ -3,6 +3,7 @@
 /*
        Lattice Engines Express Server Application
     See Gruntfile.js to define environment variables
+    See /server/server.js for the actual server code
 */
 
 const Server    = require('./server/server');
@@ -25,13 +26,14 @@ const options   = {
 const server = new Server(express, app, options);
 
 server.startLogging('/log');
+//server.useApiProxy("http://testapp.lattice-engines.com", '/lp2')
 
 // when false, API proxy is disabled
 options.API_URL && options.API_URL != 'false'
     ? server.useApiProxy(options.API_URL) : null;
 
 // whitelist for proxies
-options.WHITELIST === true || options.WHITELIST === 'true'
+options.WHITELIST && options.API_URL != 'false'
     ? server.trustProxy(options.WHITELIST) : null;
 
 // when files are compressed, strip routing to essential areas only

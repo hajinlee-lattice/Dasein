@@ -56,11 +56,14 @@ class Server {
     }
 
     // forward API requests for dev
-    useApiProxy(API_URL) {
+    useApiProxy(API_URL, API_PATH) {
         if (API_URL) {
+            API_PATH = API_PATH || '/pls';
+
             try {
-                this.app.use('/pls', (req, res) => {
-                    const url = API_URL + '/pls' + req.url;
+                console.log('> REDIRECT:',API_PATH,' -> ',API_URL);
+                this.app.use(API_PATH, (req, res) => {
+                    const url = API_URL + API_PATH + req.url;
                     let r = null;
 
                     try {

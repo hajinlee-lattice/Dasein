@@ -132,13 +132,26 @@ angular.module('mainApp.login.controllers.LoginController', [
             scope.isLoggedInWithTempPassword = $scope.isLoggedInWithTempPassword;
 
             if (!scope.isLoggedInWithTempPassword) {
-                window.open("/lp", "_self");
-                return;
+                return $scope.redirectToLP();
             }
 
             scope.isPasswordOlderThanNinetyDays = $scope.isPasswordOlderThanNinetyDays;
             $compile($("#mainView").html(html))(scope);
         });
+    }
+
+    $scope.redirectToLP = function () {
+        var ClientSession = BrowserStorageUtility.getClientSession();
+        var Tenant = ClientSession.Tenant;
+        var UIVersion = Tenant.UIVersion || "2.0";
+        var pathMap = {
+            "3.0": "/lp",
+            "2.0": "/lp2"
+        };
+
+        //console.log('login', lpMap[UIVersion], ClientSession, Tenant, UIVersion);
+
+        return window.open(pathMap[UIVersion] || "/lp2", "_self");
     }
 
     $scope.showLoginHeaderMessage = function (message) {
