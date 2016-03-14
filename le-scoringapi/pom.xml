@@ -23,6 +23,7 @@
         <le.monitor.version>2.0.22-SNAPSHOT</le.monitor.version>
         <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
         <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
+        <le.testframework.version>2.0.22-SNAPSHOT</le.testframework.version>
         <jpmml.version>2.0.0</jpmml.version>
         <jackson.version>2.4.1</jackson.version>
         <springfox.swagger.version>2.2.2</springfox.swagger.version>
@@ -219,18 +220,10 @@
             <scope>test</scope>
         </dependency>
 
-<!--         <dependency> -->
-<!--             <groupId>com.latticeengines</groupId> -->
-<!--             <artifactId>le-oauth2db</artifactId> -->
-<!--             <version>${le.oauth2.db.version}</version> -->
-<!--             <classifier>intf</classifier> -->
-<!--         </dependency> -->
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-oauth2db</artifactId>
             <version>${le.oauth2.db.version}</version>
-<!--             <scope>runtime</scope>  -->
             <exclusions>
                 <exclusion>
                     <artifactId>spring-boot-starter-jetty</artifactId>
@@ -263,6 +256,14 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${le.proxy.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-testframework</artifactId>
+            <version>${le.testframework.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
         </dependency>
 
         <dependency>

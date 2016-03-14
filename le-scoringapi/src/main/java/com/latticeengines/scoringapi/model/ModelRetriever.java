@@ -15,4 +15,8 @@ public interface ModelRetriever {
     Fields getModelFields(CustomerSpace customerSpace, String modelId);
 
     ScoringArtifacts getModelArtifacts(CustomerSpace customerSpace, String modelId);
+
+    ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId);
+
+    void setLocalPathToPersist(String localPathToPersist);
 }

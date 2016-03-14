@@ -7,7 +7,7 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTes
 
 public class HealthCheckResourceTestNG extends ScoringApiControllerTestNGBase {
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void getHealthCheck() {
         String url = apiHostPort + "/score/health";
         String result = oAuth2RestTemplate.getForObject(url, String.class);

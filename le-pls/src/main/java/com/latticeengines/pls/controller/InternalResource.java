@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.CrmCredentialService;
+import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -94,6 +95,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
 
     @Autowired
     private UserService userService;
@@ -244,6 +248,28 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
 
         sourceFileService.create(sourceFile);
+    }
+
+    @RequestMapping(value = "/modelsummaries/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Create a ModelSummary")
+    public void createModelSummary(@PathVariable("tenantId") String tenantId, @RequestBody ModelSummary modelSummary,
+            HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        modelSummaryService.createModelSummary(modelSummary, tenantId);
+    }
+
+    @RequestMapping(value = "/modelsummaries/{modelId}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a model summary")
+    public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        modelSummaryEntityMgr.deleteByModelId(modelId);
+        return true;
     }
 
     @RequestMapping(value = "/modelsummaries/active/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")

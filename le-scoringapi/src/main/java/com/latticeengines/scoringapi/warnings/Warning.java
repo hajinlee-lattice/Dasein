@@ -14,6 +14,10 @@ public class Warning {
     @JsonIgnore
     private WarningCode code;
 
+    public Warning() {
+
+    }
+
     public Warning(WarningCode code, String[] params) {
         this.code = code;
         this.warning = code.getExternalCode();

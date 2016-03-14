@@ -47,9 +47,6 @@ public class ScoreResource {
     private HttpStopWatch httpStopWatch;
 
     @Autowired
-    private ScoreResourceMockData scoreResourceMockData;
-
-    @Autowired
     private ModelRetriever modelRetriever;
 
     @Autowired

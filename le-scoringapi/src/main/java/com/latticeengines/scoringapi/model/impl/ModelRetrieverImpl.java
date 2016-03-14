@@ -51,14 +51,14 @@ import com.latticeengines.scoringapi.warnings.Warnings;
 public class ModelRetrieverImpl implements ModelRetriever {
 
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
-    private static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
-    private static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
-    private static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
-    private static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
-    private static final String PMML_FILENAME = "rfpmml.xml";
-    private static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
-    private static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
-    private static final String MODEL_JSON_SUFFIX = "_model.json";
+    public static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
+    public static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
+    public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
+    public static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
+    public static final String PMML_FILENAME = "rfpmml.xml";
+    public static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
+    public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
+    public static final String MODEL_JSON = "model.json";
     private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
                                                                                             // modelId
     private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
@@ -79,6 +79,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     private LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ScoringArtifacts> scoreArtifactCache;
 
+    private String localPathToPersist = null;
+
     @PostConstruct
     public void initialize() throws Exception {
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -94,8 +96,10 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
-                if ((type == ModelType.ACCOUNT && map.get("SourceSchemaInterpretation").toLowerCase().contains("account"))
-                        || (type == ModelType.CONTACT && map.get("SourceSchemaInterpretation").toLowerCase().contains("lead"))) {
+                if ((type == ModelType.ACCOUNT && map.get("SourceSchemaInterpretation").toLowerCase()
+                        .contains("account"))
+                        || (type == ModelType.CONTACT && map.get("SourceSchemaInterpretation").toLowerCase()
+                                .contains("lead"))) {
                     Model model = new Model(map.get("Id"), map.get("Name"), type);
                     models.add(model);
                 }
@@ -125,7 +129,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
-    private ScoringArtifacts retrieveModelArtifacts(CustomerSpace customerSpace, String modelId) {
+    @Override
+    public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
@@ -195,6 +200,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
@@ -207,6 +215,10 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + "metadata-"
+                        + DATA_COMPOSITION_FILENAME);
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
@@ -219,6 +231,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + SCORE_DERIVATION_FILENAME);
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
@@ -235,6 +250,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             is = fs.open(new Path(path));
             modelEvaluator = new ModelEvaluator(is, warnings);
+            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
+            }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
@@ -248,7 +266,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     new HdfsFilenameFilter() {
                         @Override
                         public boolean accept(String filename) {
-                            if (filename.endsWith(MODEL_JSON_SUFFIX)) {
+                            if (filename.endsWith(MODEL_JSON)) {
                                 return true;
                             } else {
                                 return false;
@@ -269,6 +287,10 @@ public class ModelRetrieverImpl implements ModelRetriever {
         if (modelJsonHdfsPath.size() == 1) {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
+                if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                    HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
+                            + MODEL_JSON);
+                }
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_31002, new String[] { modelJsonHdfsPath.get(0),
                         localModelJsonCacheDir });
@@ -302,8 +324,13 @@ public class ModelRetrieverImpl implements ModelRetriever {
                     public ScoringArtifacts load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
                         log.info("Loading model artifacts");
 
-                        return retrieveModelArtifacts(key.getKey(), key.getValue());
+                        return retrieveModelArtifactsFromHdfs(key.getKey(), key.getValue());
                     }
                 });
+    }
+
+    @Override
+    public void setLocalPathToPersist(String localPathToPersist) {
+        this.localPathToPersist = localPathToPersist;
     }
 }
