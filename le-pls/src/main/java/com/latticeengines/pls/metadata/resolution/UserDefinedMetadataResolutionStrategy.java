@@ -1,14 +1,13 @@
 package com.latticeengines.pls.metadata.resolution;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -17,17 +16,18 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 
 public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStrategy {
@@ -160,21 +160,24 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     }
 
     private Set<String> getHeaderFields() {
+        Set<String> fields = new HashSet<>();
         try {
-            String localPath = "/tmp/UserDefinedMetadataResolutionStrategy/" + UUID.randomUUID().toString() + "/"
-                    + new File(csvPath).getName();
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, csvPath, localPath);
-            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-            try (CSVParser parser = new CSVParser(new FileReader(localPath), format)) {
-                return parser.getHeaderMap().keySet();
-            } catch (IOException e) {
-                throw new RuntimeException(String.format( //
-                        "Failed to read csv from local path %s (originally copied from HDFS at %s) ", //
-                        localPath, csvPath));
+            try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
+                try (InputStream is = fs.open(new Path(csvPath))) {
+
+                    try (InputStreamReader reader = new InputStreamReader(is)) {
+                        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+                        try (CSVParser parser = new CSVParser(reader, format)) {
+                            return parser.getHeaderMap().keySet();
+                        } catch (IOException e) {
+                            throw new LedpException(LedpCode.LEDP_18094, e);
+                        }
+                    }
+
+                }
             }
-        } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to retrieve header fields from csv file at path %s",
-                    csvPath));
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
 

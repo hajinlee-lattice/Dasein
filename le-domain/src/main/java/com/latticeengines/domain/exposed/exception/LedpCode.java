@@ -181,12 +181,13 @@ public enum LedpCode {
     LEDP_18085("Failed to retrieve errors for file {0}."), //
     LEDP_18086("Failed to retrieve space configuration from ZK for the tenant {0}."), //
     LEDP_18087("Missing required fields [{0}] in csv file {1}."), //
-    LEDP_18088("Could not locate table with name {0}"), //
+    LEDP_18088("Could not locate table with name {0}."), //
     LEDP_18089("Failed to retrieve premium attributes limitation from ZK for the tenant {0}, error: {1}."), //
     LEDP_18090("Metadata type {0} is not supported."), //
     LEDP_18091("Artifact type {0} with name {1} already exists in module {2}."), //
-    LEDP_18092("File exceeds maximum allowed limit of {0}"), //
-    LEDP_18093("Failed to download errors file"), //
+    LEDP_18092("File exceeds maximum allowed limit of {0}."), //
+    LEDP_18093("Failed to download errors file."), //
+    LEDP_18094("Failed to read from CSV file."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
