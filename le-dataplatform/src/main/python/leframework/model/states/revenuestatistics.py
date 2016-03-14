@@ -32,7 +32,13 @@ class RevenueStatistics(State):
     
     @overrides(State)
     def execute(self):
+
         mediator = self.getMediator()
+        # slow on production, only for testing
+        if not hasattr(mediator, "revenueStatisticsTest"):
+            mediator.revenueStatistics = None
+            return;
+    
         if mediator.revenueColumn == None:
             return
         predictedRevenue = mediator.data[mediator.schema["reserved"]["predictedrevenue"]].as_matrix()
@@ -49,8 +55,6 @@ class RevenueStatistics(State):
         except Exception as e:
             self.logger.error(str(e))
             mediator.revenueStatistics = None
-        
-        
         
     def basicStats(self, x):
         mn = float(sum(x)) / len(x)
