@@ -180,7 +180,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             if (attr.getSemanticType() != null) {
                 attr.setName(attr.getSemanticType().name());
             }
-            if (attrMetadata != null && attr.getLogicalDataType() != null) {
+            if (attrMetadata != null && attr.getLogicalDataType() == null) {
                 attr.setLogicalDataType(attrMetadata.getDataType());
             } else {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
