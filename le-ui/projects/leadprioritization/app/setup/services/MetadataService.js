@@ -78,7 +78,7 @@ angular.module('mainApp.setup.services.MetadataService', [
         var deferred = $q.defer();
 
         var cloneParams = {
-            name : modelName,
+            name : modelName + "-" + new Date().getTime(),
             description: 'cloned from model: ' + modelName,
             attributes: fields,
             sourceModelSummaryId: originalModelSummaryId

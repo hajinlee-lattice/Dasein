@@ -27,7 +27,7 @@
                 <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
             </div>
         </div>
-        <div data-ng-hide="batchEdit">
+        <div>
             <div class="form-group">
                 <input data-ng-model="field" data-ng-keypress="keyEnterFilter($event)" class="form-control" placeholder="{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SEARCH_FEILD_PLACEHOLDER')}}"/>
                 <button id="manage-fields-search" data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>

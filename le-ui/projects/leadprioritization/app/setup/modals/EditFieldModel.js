@@ -7,10 +7,10 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.setup.modals.UpdateFieldsModal'
 ])
 
-.service('EditFieldModel', function ($compile, $rootScope, $http) {
+.service('EditFieldModel', function ($compile, $rootScope, $http, $templateCache) {
 
     this.show = function(fieldToBeEdited, $manageFieldsScope) {
-        $http.get('./app/setup/views/EditFieldView.html').success(function (html) {
+        $http.get('app/setup/views/EditFieldView.html', { cache: $templateCache }).success(function (html) {
             var scope = $manageFieldsScope.$new();
             scope.field = angular.copy(fieldToBeEdited);
             scope.manageFieldsScope = $manageFieldsScope;

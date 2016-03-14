@@ -20,7 +20,8 @@ angular.module('pd.jobs', [
         "registerImportSummaryReport": "generate_insights", 
         "sample": "generate_insights", 
         "profileAndModel": "create_global_model",
-        "chooseModel": "create_global_model", 
+        "chooseModel": "create_global_model",
+        "activateModel": "create_global_model",
         "score": "create_global_target_market", 
         "runScoreTableDataFlow": "create_global_target_market", 
         "runAttributeLevelSummaryDataFlows": "create_global_target_market" 
@@ -35,8 +36,10 @@ angular.module('pd.jobs', [
             'loadHdfsTableToPDServer': 'generate_insights',
             'match': 'generate_insights',
             'createEventTableFromMatchResult': 'generate_insights',
+            'addStandardAttributes': 'create_global_target_market',
             'sample': 'create_global_target_market',
-            'profileAndModel': 'create_global_target_market'
+            'profileAndModel': 'create_global_target_market',
+            'activateModel': 'create_global_target_market'
         }
     };
 
@@ -123,6 +126,7 @@ angular.module('pd.jobs', [
                 var jobInfo = response.data;
                 var stepRunning = getStepRunning(jobInfo);
                 var stepsCompleted = getStepsCompleted(jobInfo);
+                var stepFailed = getStepFailed(jobInfo);
 
                 result = {
                     success: true,
@@ -135,6 +139,7 @@ angular.module('pd.jobs', [
                             startTimestamp: jobInfo.startTimestamp,
                             stepRunning: stepRunning,
                             stepsCompleted: stepsCompleted,
+                            stepFailed: stepFailed,
                             completedTimes: getCompletedStepTimes(jobInfo, stepRunning, stepsCompleted),
                             reports: jobInfo.reports
                         }
@@ -187,7 +192,17 @@ angular.module('pd.jobs', [
             }
         );
     }
-    
+
+    function getStepFailed(job) {
+        for (var i = 0; i < job.steps.length; i++) {
+            var stepRunning = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+            if (stepRunning && job.steps[i].stepStatus == "Failed") {
+                return dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+            }
+        }
+        return null;
+    }
+
     function getStepRunning(job) {
         if (job.jobStatus != "Running") {
             //return null;

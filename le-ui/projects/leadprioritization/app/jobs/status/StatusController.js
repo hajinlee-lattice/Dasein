@@ -86,6 +86,7 @@ angular
                 }
 
                 function updateStatesBasedOnJobStatus(jobStatus) {
+                    $scope.job.status = jobStatus.jobStatus;
                     for (var i = 0; i < jobStatus.stepsCompleted.length; i++) {
                         $scope.jobStepsCompletedStates[jobStatus.stepsCompleted[i]] = true;
                         $scope.jobStepsRunningStates[jobStatus.stepsCompleted[i]] = false;
@@ -95,15 +96,27 @@ angular
                         $scope.jobStepsRunningStates[jobStatus.stepRunning] = true;
                         $scope.jobStepsCompletedStates[jobStatus.stepRunning] = false;
                     }
+
                     $scope.stepsCompletedTimes = jobStatus.completedTimes;
+
+                    var stepFailed = jobStatus.stepFailed;
+                    if (stepFailed) {
+                        $scope.jobStepsRunningStates[stepFailed] = false;
+                        $scope.jobStepsCompletedStates[stepFailed] = false;
+
+                        if ($scope.stepsCompletedTimes[stepFailed]) {
+                            delete $scope.stepsCompletedTimes[stepFailed];
+                        }
+                    }
+
                     saveJobStatusInParentScope();
-                    
+
                     if (jobStatus.jobStatus == "Completed") {
                         $scope.jobRunning = false;
                         $scope.jobCompleted = true;
                     }
                 }
-                
+
                 function saveJobStatusInParentScope() {
                     if (! $scope.statuses[$scope.jobId]) {
                         $scope.statuses[$scope.jobId] = {};
@@ -112,13 +125,13 @@ angular
                     $scope.statuses[$scope.jobId]["completed"] = $scope.jobStepsCompletedStates;
                     $scope.statuses[$scope.jobId]["completedTimes"] = $scope.stepsCompletedTimes;
                 }
-                
+
                 function periodicQueryJobStatus(jobId) {
                     periodicQueryId = setInterval(function() {
                             queryJobStatusAndSetStatesVariables(jobId);
                         }, TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS);
                 }
-                
+
                 function queryJobStatusAndSetStatesVariables(jobId) {
                     JobsService.getJobStatus(jobId).then(function(response) {
                         if (response.success) {
