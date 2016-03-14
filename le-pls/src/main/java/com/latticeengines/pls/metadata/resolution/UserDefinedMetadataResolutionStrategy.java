@@ -140,6 +140,9 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attribute.setNullable(true);
                 attributes.add(attribute);
             }
+            if (ctm.getColumnType().equalsIgnoreCase(Schema.Type.LONG.name())) {
+                attribute.setSemanticType(SemanticType.Date);
+            }
         }
 
         Attribute lastModified = result.metadata.getAttribute(SemanticType.LastModifiedDate);

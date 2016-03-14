@@ -229,7 +229,8 @@ public class LedpCSVToAvroImportMapper extends
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
                 if (attr.getSemanticType().equals(SemanticType.CreatedDate)
-                        || attr.getSemanticType().equals(SemanticType.LastModifiedDate)) {
+                        || attr.getSemanticType().equals(SemanticType.LastModifiedDate)
+                        || attr.getSemanticType().equals(SemanticType.Date)) {
                     Log.info("Date value from csv: " + fieldCsvValue);
                     List<DateGroup> groups = parser.parse(fieldCsvValue);
                     List<Date> dates = groups.get(0).getDates();
