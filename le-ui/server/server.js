@@ -5,11 +5,11 @@
     See Gruntfile.js to define environment variables
 */
 
-const rotator   = require('file-stream-rotator');
 const path      = require('path');
 const exphbs    = require('express-handlebars');
 const request   = require('request');
 const morgan    = require('morgan');
+const rotator   = require('file-stream-rotator');
 const fs        = require('fs');
 
 class Server {
@@ -70,6 +70,7 @@ class Server {
                                 json: req.body
                             });
 
+                            // prevent large-ish files from timing out on upload
                             res.setTimeout(900000);
                         } else {
                             r = request(url);
@@ -154,9 +155,9 @@ class Server {
         const options = this.options;
         const server = this.app.listen(options.USE_PORT, () => {
             console.log(
-                '> HOST: http://localhost:' + options.USE_PORT + '/' + 
-                '\tENV:', options.ENV, '\n' +
-                '> API:', options.API_URL   + '\n> COMPRESSED: ' + options.COMPRESSED
+                '> WEB HOST: http://localhost:' + options.USE_PORT + '/' + 
+                '\tENVIRONMENT:', options.ENV, '\n' +
+                '> API PROXY URL:', options.API_URL + '\n> COMPRESSED: ' + options.COMPRESSED
             );
         });
     }

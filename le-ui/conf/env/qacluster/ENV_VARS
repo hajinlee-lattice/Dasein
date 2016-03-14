@@ -1,3 +1,4 @@
-export NODE_ENV=production
+export NODE_ENV=qa
 export API_URL=http://bodcdevhdpweb52.dev.lattice.local:8080
 export USE_PORT=3000
+export COMPRESSED=true

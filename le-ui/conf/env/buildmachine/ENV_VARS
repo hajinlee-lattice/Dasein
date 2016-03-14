@@ -1,4 +1,4 @@
 export NODE_ENV=integration
 export API_URL=http://bodcdevhdpweb53.dev.lattice.local:8080
 export USE_PORT=3000
-
+export COMPRESSED=true

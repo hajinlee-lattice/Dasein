@@ -1,3 +1,4 @@
 export NODE_ENV=development
 export API_URL=http:/localhost:8080
 export USE_PORT=3000
+export COMPRESSED=false

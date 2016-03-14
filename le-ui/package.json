@@ -30,7 +30,7 @@
     "local": "npm run sass && concurrent -kr \"grunt local\" \"npm run sentry\"",
     "qa": "grunt qa",
     "prod": "grunt prod",
-    "build": "concurrent \"npm run loginbuild\" \"npm run pdbuild\" \"npm run lpbuild\" ",
+    "build": "concurrent \"npm run commonbuild\" \"npm run loginbuild\" \"npm run pdbuild\" \"npm run lpbuild\" ",
     "sass": "concurrent \"npm run commonsass\" \"npm run pdsass\" \"npm run lpsass\" ",
     "sentry": "concurrent \"npm run commonsentry\" \"npm run pdsentry\" \"npm run lpsentry\"",
     "InstallCommon": "cd projects/common/ && npm install --production",
