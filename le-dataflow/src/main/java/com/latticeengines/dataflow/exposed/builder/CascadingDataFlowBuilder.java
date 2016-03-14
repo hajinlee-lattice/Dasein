@@ -437,7 +437,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                                 .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
                                         field.name(), table.getName(), avroValue, metadataValue));
                     }
-                    fm.setPropertyValue(key, metadataValue.toString());
+                    fm.setPropertyValue(key, metadataValue != null ? metadataValue.toString() : null);
                 }
             } else {
                 log.warn(String.format(

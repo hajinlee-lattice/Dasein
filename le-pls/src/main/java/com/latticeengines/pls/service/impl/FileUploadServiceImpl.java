@@ -66,6 +66,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             HdfsUtils
                     .copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
+
             return sourceFileService.findByName(file.getName());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });

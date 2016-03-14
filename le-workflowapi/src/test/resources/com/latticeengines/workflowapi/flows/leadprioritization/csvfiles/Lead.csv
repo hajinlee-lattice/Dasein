@@ -1,4 +1,4 @@
-Id,LastName,FirstName,Salutation,Title,Company,Street,City,State,PostalCode,Country,Email,LeadSource,Status,Industry,AnnualRevenue,NumberOfEmployees,OwnerId,IsConverted,ConvertedOpportunityId,CreatedDate,LastModifiedDate
+Id,LastName,FirstName,Salutation,Title,Company,Street,City,State,PostalCode,Country,Email,LeadSource,Status,Industry,AnnualRevenue,NumberOfEmployees,OwnerId,Event,ConvertedOpportunityId,CreatedDate,LastModifiedDate
 00QC000001NNrQXMA1,Sousa,Kristen,,Director of Human Resources,Demand Gen Report,,,New Jersey,,United States,kristen@gthreecom.com,Event: Content2Conversion April 2014,Prospect,,0.0,0,005C0000005qR5UIAU,false,,1401826874000,1411632556000
 00QC000001NNrUFMA1,Hewardt,Robert,,Head of Marketing Operations,Red Hat,,,Massachusetts,,United States,rhewardt@hotmail.com,Event: Content2Conversion April 2014,Prospect,,0.0,0,005C0000005qR5UIAU,false,,1401826912000,1411418810000
 00QC000001NNrQYMA1,Connolly,Kristen,,"Manager, Digital Media Partnerships and Strategy",AccuWeather,,,Pennsylvania,,United States,connollyk@accuweather.com,Event: Content2Conversion April 2014,Prospect,,0.0,0,005C0000007D6AmIAK,false,,1401826920000,1414001278000

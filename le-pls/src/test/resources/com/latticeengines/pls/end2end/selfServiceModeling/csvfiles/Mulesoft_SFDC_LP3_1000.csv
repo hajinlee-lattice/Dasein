@@ -1,4 +1,4 @@
-﻿Id,Email,CreatedDate,Company,LastName,FirstName,IsConverted,AnnualRevenue,CompanySize,LeadSource,City,State,Country,Title,Phone,Industry,Closed,StageName
+﻿Id,Email,CreatedDate,CompanyName,LastName,FirstName,Event,AnnualRevenue,CompanySize,LeadSource,City,State,Country,Title,PhoneNumber,Industry,IsClosed,StageName
 00Q8000000vnPnBEAU,greg.perrott@rbnz.govt.nz,2012-08-29 18:25:01,Reserve Bank of New Zealand,Perrott,Greg,0,,,Sales Generated - Enterprise,,,New Zealand,Software Architect,,,,
 00Q8000001NWXtsEAH,kasetsu.takahagi@epcs.co.jp,2014-10-15 21:09:32,EP Consulting Services Corporation,Takahagi,Kasetsu,0,,120,Web - Enterprise,Tokyo,Tokyo,Japan,Systems Engineer,03-4577-1700,IT Services & Consulting,,
 00Q8000001G4HS4EAN,dm@diymtb.com.au,2014-05-21 20:19:38,DIY MTB,Miller,Duncan,0,,,Web - Enterprise,Sydney,New South Wales,Australia,,02 4446 4636,,,

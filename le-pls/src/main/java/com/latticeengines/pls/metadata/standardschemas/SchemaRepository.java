@@ -49,13 +49,13 @@ public class SchemaRepository {
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
         table.addAttribute(createAttribute("Website", Schema.Type.STRING, false, SemanticType.Website));
-        table.addAttribute(createAttribute("IsWon", Schema.Type.BOOLEAN, false, SemanticType.Event));
+        table.addAttribute(createAttribute("Event", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
-        table.addAttribute(createAttribute("Name", Schema.Type.STRING, SemanticType.CompanyName, "Website"));
-        table.addAttribute(createAttribute("BillingCity", Schema.Type.STRING, SemanticType.City, "Website"));
-        table.addAttribute(createAttribute("BillingState", Schema.Type.STRING, SemanticType.State, "Website"));
-        table.addAttribute(createAttribute("BillingCountry", Schema.Type.STRING, SemanticType.Country, "Website"));
-        table.addAttribute(createAttribute("BillingPostalCode", Schema.Type.STRING, SemanticType.PostalCode));
+        table.addAttribute(createAttribute("CompanyName", Schema.Type.STRING, SemanticType.CompanyName, "Website"));
+        table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City, "Website"));
+        table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State, "Website"));
+        table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country, "Website"));
+        table.addAttribute(createAttribute("PostalCode", Schema.Type.STRING, SemanticType.PostalCode));
 
         table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
         table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
@@ -63,7 +63,7 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
         table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG, SemanticType.LastModifiedDate));
         table.addAttribute(createAttribute("YearStarted", Schema.Type.STRING, SemanticType.YearStarted));
-        table.addAttribute(createAttribute("Phone", Schema.Type.STRING, SemanticType.PhoneNumber));
+        table.addAttribute(createAttribute("PhoneNumber", Schema.Type.STRING, SemanticType.PhoneNumber));
 
         return table;
     }
@@ -75,9 +75,9 @@ public class SchemaRepository {
 
         table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id, null, ModelingMetadata.NONE_APPROVED_USAGE));
         table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
-        table.addAttribute(createAttribute("IsConverted", Schema.Type.BOOLEAN, false, SemanticType.Event));
+        table.addAttribute(createAttribute("Event", Schema.Type.BOOLEAN, false, SemanticType.Event));
 
-        table.addAttribute(createAttribute("Company", Schema.Type.STRING, SemanticType.CompanyName, "Email"));
+        table.addAttribute(createAttribute("CompanyName", Schema.Type.STRING, SemanticType.CompanyName, "Email"));
         table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City, "Email"));
         table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State, "Email"));
         table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country, "Email"));
@@ -89,9 +89,9 @@ public class SchemaRepository {
         table.addAttribute(createAttribute("LastName", Schema.Type.STRING, SemanticType.LastName));
         table.addAttribute(createAttribute("Title", Schema.Type.STRING, SemanticType.Title));
         table.addAttribute(createAttribute("LeadSource", Schema.Type.STRING, SemanticType.LeadSource));
-        table.addAttribute(createAttribute("Closed", Schema.Type.BOOLEAN, SemanticType.IsClosed));
+        table.addAttribute(createAttribute("IsClosed", Schema.Type.BOOLEAN, SemanticType.IsClosed));
         table.addAttribute(createAttribute("StageName", Schema.Type.STRING, SemanticType.StageName));
-        table.addAttribute(createAttribute("Phone", Schema.Type.STRING, SemanticType.PhoneNumber));
+        table.addAttribute(createAttribute("PhoneNumber", Schema.Type.STRING, SemanticType.PhoneNumber));
         table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
         table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT, SemanticType.NumberOfEmployees));
         table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
