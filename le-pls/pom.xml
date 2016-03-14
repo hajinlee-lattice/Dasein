@@ -65,10 +65,6 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>
-                                        ${maxpermsize}
-                                        ${argLine}
-                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
@@ -157,10 +153,6 @@
                                         <numOfRuns>${RUNS_NUMBER}</numOfRuns>
                                         <threadSleep>${SLEEP_TIME}</threadSleep>
                                     </systemPropertyVariables>
-                                    <argLine>
-                                        ${maxpermsize}
-                                        ${argLine}
-                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${load.classes.include}</include>

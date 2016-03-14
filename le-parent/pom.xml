@@ -13,7 +13,7 @@
 
     <properties>
         <branchPath>trunk</branchPath>
-        <argLine/>
+        <argLine>-XX:MaxPermSize=1024m -Dsqoop.throwOnError=true</argLine>
         <svnrepourl/>
         <nexusrepourl/>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -278,7 +278,6 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>${maxpermsize} ${argLine} -Dsqoop.throwOnError=true</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
@@ -336,9 +335,6 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>${maxpermsize}
-                                        ${argLine}
-                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
@@ -400,9 +396,6 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>${maxpermsize}
-                                        ${argLine}
-                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${infrastructure.classes.include}</include>
