@@ -109,7 +109,13 @@ public class WorkflowResource implements WorkflowInterface {
     @Override
     public WorkflowStatus getWorkflowStatusFromApplicationId(@PathVariable String applicationId) {
         WorkflowExecutionId workflowId = getWorkflowIdFromAppId(applicationId);
-        return workflowId == null ? null : workflowService.getStatus(workflowId);
+        WorkflowStatus status = null;
+        if (workflowId != null) {
+            status = workflowService.getStatus(workflowId);
+            log.info("Found workflowId " + workflowId + "for app " + applicationId +
+                     " status=" + status.getStatus());
+        }
+        return status;
     }
 
     @RequestMapping(value = "/yarnapps/jobs/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
