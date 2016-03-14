@@ -466,12 +466,11 @@ class RealTimeMatchExecutor implements MatchExecutor {
             }
 
             String sql = "SELECT "
-                    + "[" + domainField + "], "
                     + "[" + nameField + "], "
                     + "[" + countryField + "], "
                     + "[" + stateField + "], "
                     + ( cityField != null ? "[" + cityField + "], " : "" )
-                    + "[" + StringUtils.join(columnsToQuery, "], [") + "] \n"
+                    + "[" + StringUtils.join(columnsToQuery, "], [") + domainField + "] \n"
                     + "FROM [" + tableName + "] WITH(NOLOCK) \n"
                     + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
@@ -519,7 +518,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
-            return "SELECT [Domain], [" + StringUtils.join(columns, "], [") + "] \n" + "FROM [" + tableName
+            return "SELECT [" + StringUtils.join(columns, "], [") + "Domain] \n" + "FROM [" + tableName
                     + "] WITH(NOLOCK) \n" + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
         }
     }
