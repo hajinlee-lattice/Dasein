@@ -18,6 +18,7 @@ export SCORINGAPI_PROPDIR=$WSHOME/le-scoringapi/conf/env/dev
 export PLS_PROPDIR=$WSHOME/le-pls/conf/env/dev
 export WORKFLOW_PROPDIR=$WSHOME/le-workflow/conf/env/dev
 export OAUTH2_DB_PROPDIR=$WSHOME/le-oauth2db/conf/env/dev
+export MICROSERVICE_PROPDIR=$WSHOME/le-microservice/core/conf/env/dev
 export JAVA_OPTIONS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n -XX:MaxPermSize=1024m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/share/hadoop/common/hadoop-common-2.6.0.2.2.0.0-2041.jar:$HADOOP_HOME/etc/hadoop"
 export CLASSPATH=$CLASSPATH:$HADOOP_HOME/etc/hadoop
 

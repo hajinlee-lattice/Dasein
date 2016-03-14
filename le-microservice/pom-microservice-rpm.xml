@@ -45,6 +45,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/buildmachine</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/buildmachine</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/buildmachine</camille.properties.path>
+                <microservice.properties.path>core/conf/env/buildmachine</microservice.properties.path>
                 <bin.env.path>bin/env/buildmachine</bin.env.path>
             </properties>
         </profile>
@@ -72,6 +73,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/devcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/devcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/devcluster</camille.properties.path>
+                <microservice.properties.path>core/conf/env/devcluster</microservice.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
@@ -100,6 +102,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/qacluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
+                <microservice.properties.path>core/conf/env/qacluster</microservice.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -128,6 +131,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/prodcluster</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
+                <microservice.properties.path>core/conf/env/prodcluster</microservice.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -224,6 +228,9 @@
                                 </source>
                                 <source>
                                     <location>${camille.properties.path}/camille.properties</location>
+                                </source>
+                                <source>
+                                    <location>${microservice.properties.path}/microservice.properties</location>
                                 </source>
                             </sources>
                         </mapping>

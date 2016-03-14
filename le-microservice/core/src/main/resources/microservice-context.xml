@@ -13,6 +13,7 @@
     <context:component-scan base-package="com.latticeengines.microservice">
         <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.swagger.SwaggerConfig" />
         <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.doc.AppProvider" />
+        <context:exclude-filter type="assignable" expression="com.latticeengines.microservice.controller.StatusController" />
     </context:component-scan>
 
     <mvc:annotation-driven/>
