@@ -58,7 +58,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     private static String tenant;
     private static Tenant tenantToAttach;
 
-    @BeforeClass(groups = { "deployment.lp", "deployment.production" })
+    @BeforeClass(groups = { "lpe2e", "deployment.production" })
     public void setup() throws Exception {
         deleteAndCreateTwoTenants();
         setupTestEnvironment();
@@ -121,7 +121,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
         return new ModelingServiceExecutor(bldr);
     }
 
-    @Test(groups = { "deployment.lp", "deployment.production" }, enabled = true, dataProvider = "modelMetadataProvider")
+    @Test(groups = { "lpe2e", "deployment.production" }, enabled = true, dataProvider = "modelMetadataProvider")
     public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
         LOGGER.info(String.format("Running pipeline for model %s in tenant %s using table %s", modelName, tenant,
                 tableName));
@@ -131,7 +131,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = { "deployment.lp", "deployment.production" }, enabled = true, dependsOnMethods = { "runPipeline" })
+    @Test(groups = { "lpe2e", "deployment.production" }, enabled = true, dependsOnMethods = { "runPipeline" })
     public void checkModels() throws InterruptedException {
         UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
         useSessionDoc(doc);
