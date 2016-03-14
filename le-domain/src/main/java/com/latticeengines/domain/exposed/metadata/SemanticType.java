@@ -28,6 +28,5 @@ public enum SemanticType {
     StageName, //
     AnnualRevenue, //
     NumberOfEmployees, //
-    YearStarted, //
-    Date
+    YearStarted
 }

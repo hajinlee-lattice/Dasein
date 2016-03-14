@@ -141,7 +141,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attributes.add(attribute);
             }
             if (ctm.getColumnType().equalsIgnoreCase(Schema.Type.LONG.name())) {
-                attribute.setSemanticType(SemanticType.Date);
+                attribute.setLogicalDataType("Date");
             }
         }
 
