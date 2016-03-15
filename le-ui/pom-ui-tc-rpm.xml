@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
+    <artifactId>le-ui-tc-rpm</artifactId>
+    <packaging>rpm</packaging>
+    <version>2.0.22-SNAPSHOT</version>
+    <description>LE UI TOMCAT RPM</description>
+
+    <properties>
+        <le.rpm.version>2.0.22-SNAPSHOT</le.rpm.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- license>GPL (c) 2005, SWWDC</license -->
+                    <!--distribution>Trash 2005</distribution -->
+                    <group>Application/Collectors</group>
+                    <changelogFile>src/main/resources/changelog</changelogFile>
+                    <defineStatements>
+                        <defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+                    </defineStatements>
+                    <mappings>
+                        <mapping>
+                            <directory>/tmp/le-ui</directory>
+                            <filemode>755</filemode>
+                            <username>build</username>
+                            <groupname>build</groupname>
+                            <sources>
+                                <source>
+                                    <location>../le-ui.tar.gz</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        
+                        <mapping>
+                            <directory>/opt/node/latest/ui/qaclusterb</directory>
+                            <filemode>755</filemode>
+                            <username>build</username>
+                            <groupname>build</groupname>
+                            <sources>
+                                <source>
+                                    <location>conf/env/qaclusterb/ENV_VARS</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        
+                        <mapping>
+                            <directory>/opt/node/latest/ui/prodclusterb</directory>
+                            <filemode>755</filemode>
+                            <username>build</username>
+                            <groupname>build</groupname>
+                            <sources>
+                                <source>
+                                    <location>conf/env/prodclusterb/ENV_VARS</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        
+                        <mapping>
+                            <directory>/opt/node/latest/ui/qaclustera</directory>
+                            <filemode>755</filemode>
+                            <username>build</username>
+                            <groupname>build</groupname>
+                            <sources>
+                                <source>
+                                    <location>conf/env/qaclustera/ENV_VARS</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        
+                        <mapping>
+                            <directory>/opt/node/latest/ui/prodclustera</directory>
+                            <filemode>755</filemode>
+                            <username>build</username>
+                            <groupname>build</groupname>
+                            <sources>
+                                <source>
+                                    <location>conf/env/prodclustera/ENV_VARS</location>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                    </mappings>
+                    <preremoveScriptlet>
+                        <scriptFile>src/main/resources/scripts/tcpreremove</scriptFile>
+                    </preremoveScriptlet>
+                    <preinstallScriptlet>
+                        <scriptFile>src/main/resources/scripts/tcpreinstall</scriptFile>
+                    </preinstallScriptlet>
+                    <postinstallScriptlet>
+                        <scriptFile>src/main/resources/scripts/tcpostinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

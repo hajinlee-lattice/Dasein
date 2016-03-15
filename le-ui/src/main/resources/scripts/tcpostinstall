@@ -1,0 +1,20 @@
+#!/bin/bash -x
+source /etc/profile
+
+echo "getting environment information"
+echo $ENV_TYPE
+
+echo "copying files"
+cd /tmp/le-ui
+tar xzf le-ui.tar.gz
+cd le-ui
+cp -rf . /opt/node/latest
+cp /opt/node/latest/ui/$ENV_TYPE/ENV_VARS /opt/node/latest
+chmod -R 755 /opt/node/latest
+
+echo "cleaning up"
+rm -rf /opt/node/latest/ui
+
+echo "finishing"
+
+
