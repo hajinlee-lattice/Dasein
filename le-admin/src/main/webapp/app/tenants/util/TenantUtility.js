@@ -153,6 +153,11 @@ app.service('TenantUtility', function(_){
             result.reason = "Tenant ID must not contain slashes";
             return result;
         }
+        if (tenantId.indexOf("-") > -1) {
+            result.valid = false;
+            result.reason = "Tenant ID must not contain dashes";
+            return result;
+        }
         return result;
     };
 
