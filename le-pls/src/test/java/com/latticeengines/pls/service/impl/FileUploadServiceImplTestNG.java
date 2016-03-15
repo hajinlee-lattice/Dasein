@@ -52,7 +52,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
                 .getHdfsFileContents(
                         yarnConfiguration, //
                         String.format( //
-                                "/Pods/Default/Contracts/%sPLSTenant2/Tenants/%sPLSTenant2/Spaces/Production/Data/Files/file1.csv", //
+                                "/Pods/Default/Contracts/%sPLSTenant2/Tenants/%sPLSTenant2/Spaces/Production/Data/Files/fileUploadServiceImplTestNG.csv", //
                                 contractId, contractId));
         String expectedContents = FileUtils.readFileToString(dataFile);
         assertEquals(contents, expectedContents);
