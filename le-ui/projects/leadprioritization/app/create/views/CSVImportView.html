@@ -28,7 +28,7 @@
 
           <label for="loadfile">Upload CSV File <span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><a href='#'>More information</a><h4 class='divider'>Required Fields</h4><p>Required fields are Email, Customer ID, and Success.</p><p>Additional fields may be added to help the system learn. Fields should be chosen carefully to ensure they add value and do not degrade the model.</p><a href='#'>More information</a>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
           <input 
-            id="uploadFile" 
+            id="uploadFileInput" 
             class="form-control" 
             disabled="disabled"
             placeholder="Choose File" />
@@ -49,7 +49,7 @@
         <!-- Script needed to get filepath and place it into the input field -->
         <script>
           document.getElementById("uploadBtn").onchange = function () {
-              document.getElementById("uploadFile").value = this.value.substring(12);
+              document.getElementById("uploadFileInput").value = this.value.substring(12);
           };
         </script>
 
