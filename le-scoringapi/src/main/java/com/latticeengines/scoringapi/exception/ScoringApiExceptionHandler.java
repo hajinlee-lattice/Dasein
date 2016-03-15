@@ -44,7 +44,7 @@ public class ScoringApiExceptionHandler {
 
     @ExceptionHandler
     @ResponseBody
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, Object> handleException(UncheckedExecutionException ex) {
         Throwable cause = ex.getCause();
         if (cause instanceof ScoringApiException) {
