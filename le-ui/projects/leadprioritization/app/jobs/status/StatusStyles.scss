@@ -97,7 +97,7 @@
     margin-top: 10px;
 }
 .importMatchAndModelWorkflow .breadcrumb div {
-    width: 326px;
+    width: 33%;
 }
 .breadcrumb div:first-child:before {
     left: 14px;
@@ -109,6 +109,9 @@
 span.chevron-content.chevron-content-text {
     padding-left: 30px !important;
     font-size: 14px;
+}
+.jobs-table {
+    min-width: 860px;
 }
 .jobs-table-content {
     color: black;
@@ -158,6 +161,7 @@ span.chevron-content.chevron-content-text {
 }
 
 .breadcrumb.flat {
+    width: 90%;
     padding: 0px 0px;
     border-radius: 0px;
 }
