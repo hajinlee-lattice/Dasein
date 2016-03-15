@@ -470,7 +470,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     + "[" + countryField + "], "
                     + "[" + stateField + "], "
                     + ( cityField != null ? "[" + cityField + "], " : "" )
-                    + "[" + StringUtils.join(columnsToQuery, "], [") + domainField + "] \n"
+                    + "[" + StringUtils.join(columnsToQuery, "], [") + "], [" + domainField + "] \n"
                     + "FROM [" + tableName + "] WITH(NOLOCK) \n"
                     + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
