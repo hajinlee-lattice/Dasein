@@ -27,12 +27,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBase {
 
-    protected static final String TEST_MODEL_FOLDERNAME = "allRows";
+    protected static final String TEST_MODEL_FOLDERNAME = "2MulesoftAllRows20160314_112802";
 
     protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME +"_";
     protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME +"/";
@@ -180,6 +181,13 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
         String dataCompositionContents = Files.toString(new File(dataCompositionUrl.getFile()),
                 Charset.defaultCharset());
         dataComposition = JsonUtils.deserialize(dataCompositionContents, DataComposition.class);
+    }
+
+    protected ScoreRequest getScoreRequest() throws IOException {
+        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "score_request.json");
+        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
+        ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
+        return scoreRequest;
     }
 
 }

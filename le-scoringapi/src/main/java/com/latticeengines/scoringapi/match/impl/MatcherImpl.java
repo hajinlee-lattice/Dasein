@@ -2,8 +2,10 @@ package com.latticeengines.scoringapi.match.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,6 +81,9 @@ public class MatcherImpl implements Matcher {
         MatchInput matchInput = buildMatchInput(space, interpreted, record);
         log.info("matchInput:" + JsonUtils.serialize(matchInput));
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput, true);
+        log.info("matchOutput:" + JsonUtils.serialize(matchOutput));
+
+        record.put(IS_PUBLIC_DOMAIN, null);
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
                     JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
@@ -97,35 +102,22 @@ public class MatcherImpl implements Matcher {
                     outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()), nameLocationStr,
                     errorMessages));
 
+            Set<String> fieldNameSet = null;
             if (outputRecord.isMatched()) {
-                List<Object> matchFieldValues = outputRecord.getOutput();
-
-                if (matchFieldNames.size() != matchFieldValues.size()) {
-                    throw new LedpException(LedpCode.LEDP_31005, new String[] { String.valueOf(matchFieldNames.size()),
-                            String.valueOf(matchFieldValues.size()) });
-                }
-                // Handle IsPublicDomain specifically
-                boolean isPublicDomain = false;
-                for (int i = 0; i < matchFieldNames.size(); i++) {
-                    String fieldName = matchFieldNames.get(i);
-                    if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
-                        isPublicDomain = true;
-                    }
-                    FieldSchema schema = fieldSchemas.get(fieldName);
-                    if (schema != null && schema.source == FieldSource.PROPRIETARY) {
-                        Object fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
-                        record.put(fieldName, fieldValue);
-                        if (fieldValue == null) {
-                            log.debug(String.format("Received null value for matched field:%s", fieldName));
-                        }
-                    }
-                }
-                if (isPublicDomain) {
-                    record.put(IS_PUBLIC_DOMAIN, true);
-                } else {
-                    record.put(IS_PUBLIC_DOMAIN, false);
-                }
+                fieldNameSet = mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
             } else {
+                fieldNameSet = handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record,
+                        nameLocationStr);
+            }
+
+            // Handle IsPublicDomain specially
+            if (fieldNameSet.contains(IS_PUBLIC_DOMAIN)) {
+                record.put(IS_PUBLIC_DOMAIN, true);
+            } else {
+                record.put(IS_PUBLIC_DOMAIN, false);
+            }
+
+            if (!outputRecord.isMatched()) {
                 warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
                         JsonUtils.serialize(matchInput.getKeyMap()),
                         Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
@@ -136,7 +128,52 @@ public class MatcherImpl implements Matcher {
         return record;
     }
 
-    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String field, Map<String, Object> record) {
+    private Set<String> handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput,
+            OutputRecord outputRecord, Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
+            String nameLocationStr) {
+        Set<String> fieldNameSet = new HashSet<>();
+        for (int i = 0; i < matchFieldNames.size(); i++) {
+            String fieldName = matchFieldNames.get(i);
+            fieldNameSet.add(fieldName);
+            FieldSchema schema = fieldSchemas.get(fieldName);
+            if (schema != null && schema.source == FieldSource.PROPRIETARY) {
+                record.put(fieldName, null);
+            }
+        }
+        warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
+                JsonUtils.serialize(matchInput.getKeyMap()),
+                Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
+
+        return fieldNameSet;
+    }
+
+    private Set<String> mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+        List<Object> matchFieldValues = outputRecord.getOutput();
+
+        if (matchFieldNames.size() != matchFieldValues.size()) {
+            throw new LedpException(LedpCode.LEDP_31005, new String[] { String.valueOf(matchFieldNames.size()),
+                    String.valueOf(matchFieldValues.size()) });
+        }
+
+        Set<String> fieldNameSet = new HashSet<>();
+        for (int i = 0; i < matchFieldNames.size(); i++) {
+            String fieldName = matchFieldNames.get(i);
+            fieldNameSet.add(fieldName);
+            FieldSchema schema = fieldSchemas.get(fieldName);
+            if (schema != null && schema.source == FieldSource.PROPRIETARY) {
+                Object fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
+                record.put(fieldName, fieldValue);
+                if (fieldValue == null) {
+                    log.debug(String.format("Received null value for matched field:%s", fieldName));
+                }
+            }
+        }
+        return fieldNameSet;
+    }
+
+    private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String field,
+            Map<String, Object> record) {
         Object value = record.get(field);
 
         if (value == null || Strings.isNullOrEmpty(String.valueOf(value))) {

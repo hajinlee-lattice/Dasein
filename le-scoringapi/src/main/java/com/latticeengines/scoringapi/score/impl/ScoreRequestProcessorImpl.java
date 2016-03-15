@@ -33,7 +33,6 @@ import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.match.Matcher;
-import com.latticeengines.scoringapi.model.ModelEvaluator;
 import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
@@ -79,6 +78,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
         Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
                 fieldSchemas, parsedRecordAndInterpretedFields.getKey());
+        addMissingFields(fieldSchemas, matchedRecord);
         log.info(String.format("{'matchRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
 
         Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
@@ -128,6 +128,16 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);
     }
 
+    private void addMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
+        // Ensure all non-tranform keys are represented in the record
+        for (String fieldName : fieldSchemas.keySet()) {
+            if (!record.containsKey(fieldName)) {
+                record.put(fieldName, null);
+            }
+        }
+        log.info(JsonUtils.serialize(record));
+    }
+
     private void checkForMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         List<String> missingMatchFields = new ArrayList<>();
         List<String> missingFields = new ArrayList<>();
@@ -141,8 +151,10 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         // PropData does not use City and will default Country to US
         boolean hasCompanyName = false;
         boolean hasCompanyState = false;
+
         for (String fieldName : fieldSchemas.keySet()) {
             FieldSchema fieldSchema = fieldSchemas.get(fieldName);
+
             if (fieldSchema.source != FieldSource.REQUEST) {
                 continue;
             }
@@ -150,16 +162,19 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 missingFields.add(fieldName);
             }
 
-            if (expectedMatchFields.contains(fieldSchema.interpretation) && !record.containsKey(fieldName)) {
+            Object fieldValue = record.get(fieldName);
+            if (expectedMatchFields.contains(fieldSchema.interpretation) && objectIsNullOrEmptyString(fieldValue)) {
                 missingMatchFields.add(fieldName);
             }
-            if (expectedDomainFields.contains(fieldSchema.interpretation) && record.containsKey(fieldName)) {
+            if (expectedDomainFields.contains(fieldSchema.interpretation) && !objectIsNullOrEmptyString(fieldValue)) {
                 hasOneOfDomain = true;
             }
 
-            if (fieldSchema.interpretation == FieldInterpretation.COMPANY_NAME && record.containsKey(fieldName)) {
+            if (fieldSchema.interpretation == FieldInterpretation.COMPANY_NAME
+                    && !objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyName = true;
-            } else if (fieldSchema.interpretation == FieldInterpretation.COMPANY_STATE && record.containsKey(fieldName)) {
+            } else if (fieldSchema.interpretation == FieldInterpretation.COMPANY_STATE
+                    && !objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyState = true;
             }
         }
@@ -172,8 +187,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
     }
 
-    private ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts,
-            Map<String, Object> transformedRecord) {
+    private ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord) {
         ScoreResponse scoreResponse = new ScoreResponse();
         int percentile = score(scoringArtifacts, transformedRecord).getPercentile();
         scoreResponse.setScore(percentile);
@@ -266,6 +280,15 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(),
                         fieldValue));
             }
+        }
+    }
+
+    private boolean objectIsNullOrEmptyString(Object obj) {
+        if (obj == null) {
+            return true;
+        } else {
+            String value = String.valueOf(obj);
+            return Strings.isNullOrEmpty(value);
         }
     }
 
