@@ -110,7 +110,6 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                 if (result.Success) {
                     $("#changePasswordSuccessAlert").fadeIn();
                     $rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
-                    window.open("/pd/#/jobs/import/credentials", "_self");
                 } else {
                     if (result.Status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
