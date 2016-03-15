@@ -86,6 +86,10 @@ alias runjettyscoringapi='bash -c "rm -f /var/log/ledp/le-scoringapi*.log" && MA
 
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
 
-alias deploytomcatpls='rm $CATALINA_HOME/webapps_pls/*.war; cp target/le-pls*.war $CATALINA_HOME/webapps_pls/ROOT\#\#`leversion`.war'
-alias deploytomcatadmin='rm $CATALINA_HOME/webapps_admin/*.war; cp target/le-admin*.war $CATALINA_HOME/webapps_admin/ROOT\#\#`leversion`.war'
-alias deploytomcatms='bash ../le-dev/scripts/deployms.sh'
+alias plsdpltc='pushd $WSHOME/le-pls; rm $CATALINA_HOME/webapps/pls/*.war; cp target/le-pls*.war $CATALINA_HOME/webapps/pls/ROOT\#\#`leversion`.war; popd'
+alias admindpltc='pushd $WSHOME/le-admin; rm $CATALINA_HOME/webapps/admin/*.war; cp target/le-admin*.war $CATALINA_HOME/webapps/admin/ROOT\#\#`leversion`.war; popd'
+alias oauthdpltc='pushd $WSHOME/le-oauth2; rm $CATALINA_HOME/webapps/oauth/*.war; cp target/le-oauth*.war $CATALINA_HOME/webapps/oauth/ROOT\#\#`leversion`.war; popd'
+alias pmdpltc='pushd $WSHOME/le-playmaker; rm $CATALINA_HOME/webapps/playmaker/*.war; cp target/le-playmaker*.war $CATALINA_HOME/webapps/playmaker/ROOT\#\#`leversion`.war; popd'
+alias sapidpltc='pushd $WSHOME/le-scoringapi; rm $CATALINA_HOME/webapp/scoringapi/*.war; cp target/le-scoringapi*.war $CATALINA_HOME/webapps/scoringapi/ROOT\#\#`leversion`.war; popd'
+alias msdpltc='pushd $WSHOME/le-microservice; bash ../le-dev/scripts/deployms.sh; popd'
+alias dpltc='$CATALINA_HOME/bin/shutdown.sh; plsdpltc; admindpltc; oauthdpltc; pmdpltc; sapidpltc; msdpltc; $CATALINA_HOME/bin/startup.sh;'
