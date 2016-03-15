@@ -215,7 +215,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
             String parsedDomain = record.getParsedDomain();
             if (StringUtils.isNotEmpty(parsedDomain)) {
                 for (Map<String, Object> row : rows) {
-                    if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
+                    if (row.containsKey(domainField) && parsedDomain.equals(row.get(domainField))) {
                         record.getResultsInSource().put(sourceName, row);
                         matched = true;
                         break;

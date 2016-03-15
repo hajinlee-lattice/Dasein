@@ -1,15 +1,23 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
@@ -104,6 +112,29 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
                 { "chevron corporation", "Nowhere", null, null },
                 { "Royal Dutch Shell plc", "The Hague", "South Holland", null }
         };
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "api")
+    public void testNull() {
+        Tenant tenant = new Tenant("PD_Test");
+        List<Object> row = Arrays.<Object>asList("Syntel", "prafulla_bhangale@syntelinc.com");
+        List<List<Object>> data = Collections.singletonList(row);
+
+        Map<MatchKey, List<String>> keyMap = new HashMap<>();
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Email"));
+        keyMap.put(MatchKey.Name, Collections.singletonList("CompanyName"));
+
+        MatchInput matchInput = new MatchInput();
+        matchInput.setTenant(tenant);
+        matchInput.setFields(Arrays.asList("CompanyName", "Email"));
+        matchInput.setData(data);
+        matchInput.setKeyMap(keyMap);
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.Model);
+
+        String url = getRestAPIHostPort() + MATCH_ENDPOINT;
+        MatchOutput output = restTemplate.postForObject(url, matchInput, MatchOutput.class);
+        Assert.assertNotNull(output);
     }
 
 }
