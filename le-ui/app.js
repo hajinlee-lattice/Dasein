@@ -17,7 +17,7 @@ const app       = express();
 const options   = {
     ENV:        app.get('env')          || process.env.NODE_ENV || 'production',
     USE_PORT:   process.env.USE_PORT    || 3000,
-    API_URL:    process.env.API_URL     || 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+    API_URL:    process.env.API_URL     || false,
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || true,
     root:       __dirname 
@@ -26,7 +26,6 @@ const options   = {
 const server = new Server(express, app, options);
 
 server.startLogging('/log');
-//server.useApiProxy("http://testapp.lattice-engines.com", '/lp2')
 
 // when false, API proxy is disabled
 options.API_URL && options.API_URL != 'false'

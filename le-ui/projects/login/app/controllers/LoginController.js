@@ -145,8 +145,8 @@ angular.module('mainApp.login.controllers.LoginController', [
         var Tenant = ClientSession.Tenant;
         var UIVersion = Tenant.UIVersion || "2.0";
         var pathMap = {
-            "3.0": "/lp",
-            "2.0": "/lp2"
+            "3.0": "/lp/",
+            "2.0": "/lp2/"
         };
 
         //console.log('login', lpMap[UIVersion], ClientSession, Tenant, UIVersion);

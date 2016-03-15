@@ -2,3 +2,4 @@ export NODE_ENV=production
 export API_URL=false
 export USE_PORT=3000
 export WHITELIST=10.0.0.1
+export COMPRESSED=true
