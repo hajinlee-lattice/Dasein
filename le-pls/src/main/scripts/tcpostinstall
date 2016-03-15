@@ -1,0 +1,28 @@
+#!/bin/bash -x
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+cd /tmp/webapps/pls
+
+JAVAFILE=`ls le-pls-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if test $SNAPSHOT='SNAPSHOT'
+then
+    VERSION=$VERSION-$SHAPSHOT
+fi
+
+echo "copying files from temporary folders"
+cp le-pls-*.war $CATALINA_HOME/webapp_pls/pls\#\#$VERSION.war
+cp /etc/ledp/pls/$ENV_TYPE/*.properties /etc/ledp/
+cp /etc/ledp/pls/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
+
+echo "cleaning up"
+rm -rf /etc/ledp/pls
+rm -rf /home/yarn/pls
+rm -rf /home/yarn/logs/*
+rm -rf /tmp/webapps/pls
+
+echo "finishing"
+ls $CATALINA_HOME/webapp_pls/*.war

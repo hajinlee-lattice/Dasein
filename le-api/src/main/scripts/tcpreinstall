@@ -1,0 +1,17 @@
+#!/bin/bash
+rm -rf $CATALINA_HOME/webapp_api/*.war
+rm -rf /tmp/webapps/api/le-api-*.war
+rm -rf /etc/ledp/api.properties
+rm -rf /etc/ledp/api
+rm -rf /etc/ledp/dataplatform.properties
+rm -rf /etc/ledp/db.properties
+rm -rf /home/yarn/api
+adduser yarn
+groupadd yarn
+groupadd hadoop
+mkdir -p /var/log/ledp
+mkdir -p /home/yarn/logs
+chmod -R 755 /var/log/ledp
+chmod -R 755 /home/yarn/logs
+chown -R yarn:yarn /var/log/ledp
+chown -R yarn:yarn /home/yarn/logs

@@ -1,0 +1,24 @@
+#!/bin/bash -x
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+
+cd /tmp/webapps/job
+JAVAFILE=`ls le-job-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if test $SNAPSHOT='SNAPSHOT'
+then
+    VERSION=$VERSION-$SHAPSHOT
+fi
+
+echo "copying files"
+cp le-job-*.war $CATALINA_HOME/webapp_job/job\#\#$VERSION.war
+cp /etc/ledp/job/$ENV_TYPE/*.properties /etc/ledp/
+
+echo "cleaning up"
+rm -rf /home/yarn/job
+rm -rf /etc/ledp/job
+
+echo "finishing"
+service jetty restart > /opt/jetty/logs/start.log 2>&1

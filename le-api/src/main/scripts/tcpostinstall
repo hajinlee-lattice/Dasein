@@ -1,0 +1,26 @@
+#!/bin/bash -x
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+
+cd /tmp/webapps/api
+JAVAFILE=`ls le-api-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if test $SNAPSHOT='SNAPSHOT'
+then
+    VERSION=$VERSION-$SHAPSHOT
+fi
+
+echo "copying files"
+cp le-api-*.war $CATALINA_HOME/webapp_api/api\#\#$VERSION.war
+cp /etc/ledp/api/$ENV_TYPE/*.properties /etc/ledp/
+
+echo "cleaning up"
+rm -rf /etc/ledp/api
+rm -rf /home/yarn/api
+rm -rf /tmp/webapps/api
+
+echo "finishing"
+ls $CATALINA_HOME/webapp_api/*.war

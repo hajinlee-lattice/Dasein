@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-admin-tc-rpm</artifactId>
+    <artifactId>le-pls-tc-rpm</artifactId>
     <packaging>rpm</packaging>
-    <description>LE ADMIN TOMCAT RPM</description>
+    <description>LE PLS TOMCAT RPM</description>
 
     <properties>
         <le.rpm.version>2.0.22-SNAPSHOT</le.rpm.version>
@@ -32,121 +32,133 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/admin</directory>
+                            <directory>/tmp/webapps/pls</directory>
                             <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>target/le-admin-${le.rpm.version}.war</location>
+                                    <location>target/le-pls-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/admin/qaclustera</directory>
+                            <directory>/etc/ledp/pls/qaclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
                             <sources>
-                                <source>
-                                    <location>conf/env/qaclustera/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/qaclustera/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
-                                </source>
-                                <source>
-                                    <location>src/main/webapp/404.html</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/admin/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclusterb/admin.properties</location>
-                                </source>
                                 <source>
                                     <location>../le-db/conf/env/qaclusterb/db.properties</location>
+                                </source>
+                                <source>
+                                    <location>conf/env/qaclusterb/pls.properties</location>
                                 </source>
                                 <source>
                                     <location>../le-security/conf/env/qaclusterb/security.properties</location>
                                 </source>
                                 <source>
-                                    <location>../le-camille/conf/env/qaclusterb/camille.properties</location>
+                                    <location>../le-proxy/conf/env/qaclusterb/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-workflow/conf/env/qaclusterb/workflow.properties</location>
                                 </source>
                                 <source>
                                     <location>certificates/laca-ldap.dev.lattice.local.jks</location>
                                 </source>
                                 <source>
-                                    <location>src/main/webapp/404.html</location>
+                                    <location>../le-monitor/conf/env/qaclusterb/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/ledp/admin/prodclustera</directory>
+                            <directory>/etc/ledp/pls/prodclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
                             <sources>
-                                <source>
-                                    <location>conf/env/prodclustera/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/prodclustera/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
-                                </source>
-                                <source>
-                                    <location>src/main/webapp/404.html</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/etc/ledp/admin/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclusterb/admin.properties</location>
-                                </source>
                                 <source>
                                     <location>../le-db/conf/env/prodclusterb/db.properties</location>
+                                </source>
+                                <source>
+                                    <location>conf/env/prodclusterb/pls.properties</location>
                                 </source>
                                 <source>
                                     <location>../le-security/conf/env/prodclusterb/security.properties</location>
                                 </source>
                                 <source>
-                                    <location>../le-camille/conf/env/prodclusterb/camille.properties</location>
+                                    <location>../le-proxy/conf/env/prodclusterb/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-workflow/conf/env/prodclusterb/workflow.properties</location>
                                 </source>
                                 <source>
                                     <location>certificates/laca-ldap.dev.lattice.local.jks</location>
                                 </source>
                                 <source>
-                                    <location>src/main/webapp/404.html</location>
+                                    <location>../le-monitor/conf/env/prodclusterb/monitor.properties</location>
+                                </source>
+                            </sources>
+                        </mapping>
+
+                        <mapping>
+                            <directory>/etc/ledp/pls/qaclustera</directory>
+                            <filemode>755</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
+                                </source>
+                                <source>
+                                    <location>conf/env/qaclustera/pls.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-security/conf/env/qaclustera/security.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-proxy/conf/env/qaclustera/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-workflow/conf/env/qaclustera/workflow.properties</location>
+                                </source>
+                                <source>
+                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
+                                </source>
+                                <source>
+                                    <location>../le-monitor/conf/env/qaclustera/monitor.properties</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        
+                        <mapping>
+                            <directory>/etc/ledp/pls/prodclustera</directory>
+                            <filemode>755</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
+                                </source>
+                                <source>
+                                    <location>conf/env/prodclustera/pls.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-security/conf/env/prodclustera/security.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-proxy/conf/env/prodclustera/proxy.properties</location>
+                                </source>
+                                <source>
+                                    <location>../le-workflow/conf/env/prodclustera/workflow.properties</location>
+                                </source>
+                                <source>
+                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
+                                </source>
+                                <source>
+                                    <location>../le-monitor/conf/env/prodclustera/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>

@@ -1,6 +1,10 @@
 #!/bin/bash
+rm -rf $CATALINA_HOME/webapps_admin/*.war
 rm -rf /tmp/webapps/admin/le-admin-*.war
-rm -rf /etc/ledp/*.properties
+rm -rf /etc/ledp/admin.properties
+rm -rf /etc/ledp/db.properties
+rm -rf /etc/ledp/security.properties
+rm -rf /etc/ledp/camille.properties
 rm -rf /etc/ledp/admin
 rm -rf /etc/httpd/conf.d/admin
 rm -rf /home/yarn/admin

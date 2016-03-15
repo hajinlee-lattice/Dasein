@@ -1,6 +1,5 @@
 #!/bin/bash -x
 source /etc/profile
-
 echo "getting environment information"
 echo $ENV_TYPE
 echo $CATALINA_HOME
@@ -10,9 +9,9 @@ cd /tmp/webapps/admin
 JAVAFILE=`ls le-admin-*.war`
 VERSION=`echo $JAVAFILE | cut -d\- -f3`
 SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if SNAPSHOT='SNAPSHOT'
+if test $SNAPSHOT="SNAPSHOT"
 then
-    VERSION=VERSION-SNAPSHOT
+    VERSION=$VERSION-"SNAPSHOT"
 fi
 
 cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps_admin/admin\#\#$VERSION.war
