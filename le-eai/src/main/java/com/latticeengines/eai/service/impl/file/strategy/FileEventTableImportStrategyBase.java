@@ -182,7 +182,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             }
             if (attrMetadata != null && attr.getLogicalDataType() == null) {
                 attr.setLogicalDataType(attrMetadata.getDataType());
-            } else {
+            } else if (attrMetadata == null) {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
         }
