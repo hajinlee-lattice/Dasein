@@ -55,7 +55,7 @@ public class AlexaMostRecent implements MostRecentSource, DomainBased, HasSqlPre
 
     @Override
     public Long periodToKeep() {
-        return TimeUnit.DAYS.toMillis(365);
+        return TimeUnit.DAYS.toMillis(365 * 2);
     }
 
     @Override
