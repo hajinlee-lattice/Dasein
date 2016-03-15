@@ -92,4 +92,4 @@ alias oauthdpltc='pushd $WSHOME/le-oauth2; rm $CATALINA_HOME/webapps/oauth/*.war
 alias pmdpltc='pushd $WSHOME/le-playmaker; rm $CATALINA_HOME/webapps/playmaker/*.war; cp target/le-playmaker*.war $CATALINA_HOME/webapps/playmaker/ROOT\#\#`leversion`.war; popd'
 alias sapidpltc='pushd $WSHOME/le-scoringapi; rm $CATALINA_HOME/webapp/scoringapi/*.war; cp target/le-scoringapi*.war $CATALINA_HOME/webapps/scoringapi/ROOT\#\#`leversion`.war; popd'
 alias msdpltc='pushd $WSHOME/le-microservice; bash ../le-dev/scripts/deployms.sh; popd'
-alias dpltc='$CATALINA_HOME/bin/shutdown.sh; plsdpltc; admindpltc; oauthdpltc; pmdpltc; sapidpltc; msdpltc; $CATALINA_HOME/bin/startup.sh;'
+alias dpltc='$CATALINA_HOME/bin/shutdown.sh; plsdpltc; admindpltc; oauthdpltc; pmdpltc; sapidpltc; msdpltc; pushd $CATALINA_HOME; bin/startup.sh; popd'
