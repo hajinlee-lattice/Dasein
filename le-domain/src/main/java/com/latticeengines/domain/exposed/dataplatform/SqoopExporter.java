@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 
@@ -146,7 +148,21 @@ public class SqoopExporter {
             exporter.setYarnConfiguration(this.yarnConfiguration);
             exporter.setSync(this.sync);
 
-            this.addHadoopArg("-Dmapreduce.job.queuename=" + this.queue);
+            Set<String> hadoopArgKeys = new HashSet<>();
+            for (String arg: this.hadoopArgs) {
+                if (arg.contains("=")) {
+                    hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
+                }
+            }
+
+            if (!hadoopArgKeys.contains("-Dmapreduce.job.queuename")) {
+                this.addHadoopArg("-Dmapreduce.job.queuename=" + this.queue);
+            }
+
+            if (!hadoopArgKeys.contains("-Dmapreduce.task.timeout")) {
+                this.addHadoopArg("-Dmapreduce.task.timeout=600000");
+            }
+
             exporter.setHadoopArgs(new ArrayList<>(this.hadoopArgs));
             exporter.setOtherOptions(new ArrayList<>(this.otherOptions));
 

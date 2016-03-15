@@ -270,7 +270,7 @@ public class ExportJobBase extends JobBase {
      * Submit the Map Reduce Job.
      */
     protected boolean doSubmitJob(Job job) throws IOException, InterruptedException, ClassNotFoundException {
-        LOG.info("Using ledp ImportJobBase.");
+        LOG.info("Using ledp ExportJobBase.");
         boolean doSync = job.getConfiguration().getBoolean("sqoop.sync", false);
         boolean success = true;
         if (doSync) {

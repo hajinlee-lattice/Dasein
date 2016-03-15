@@ -53,14 +53,14 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapreduce.job.queuename=" + queue);
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
-        cmds.add("-m");
-        cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(table);
         cmds.add("--mapreduce-job-name");
         cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(sourceDir);
+        cmds.add("-m");
+        cmds.add(Integer.toString(numMappers));
         String uuid = UUID.randomUUID().toString();
         cmds.add("--bindir");
         cmds.add(getBinaryInputDir(uuid));
@@ -107,14 +107,14 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(exporter.getDbCreds()));
-        cmds.add("-m");
-        cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(exporter.getTable());
         cmds.add("--mapreduce-job-name");
         cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(exporter.getSourceDir());
+        cmds.add("-m");
+        cmds.add(Integer.toString(numMappers));
         String uuid = UUID.randomUUID().toString();
         cmds.add("--bindir");
         cmds.add(getBinaryInputDir(uuid));
@@ -193,8 +193,6 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--connect");
         cmds.add(connectionUrl);
-        cmds.add("-m");
-        cmds.add(Integer.toString(numMappers));
 
         if (SqoopImporter.Mode.TABLE.equals(importer.getMode())) {
             cmds.add("--table");
@@ -217,6 +215,8 @@ public class SqoopJobServiceImpl {
             cmds.add("--split-by");
             cmds.add(importer.getSplitColumn());
         }
+        cmds.add("-m");
+        cmds.add(Integer.toString(numMappers));
         cmds.add("--target-dir");
         cmds.add(importer.getTargetDir());
         String uuid = UUID.randomUUID().toString();
@@ -313,8 +313,6 @@ public class SqoopJobServiceImpl {
         cmds.add("-Dmapreduce.job.queuename=" + queue);
         cmds.add("--connect");
         cmds.add(connectionUrl);
-        cmds.add("-m");
-        cmds.add(Integer.toString(numMappers));
 
         if (query == null) {
             cmds.add("--table");
@@ -342,6 +340,8 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--split-by");
         cmds.add(StringUtils.join(splitCols, ","));
+        cmds.add("-m");
+        cmds.add(Integer.toString(numMappers));
         cmds.add("--target-dir");
         cmds.add(targetDir);
         String uuid = UUID.randomUUID().toString();
