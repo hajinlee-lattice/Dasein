@@ -158,6 +158,12 @@ app.service('TenantUtility', function(_){
             result.reason = "Tenant ID must not contain dashes";
             return result;
         }
+        var regexp = /^[a-zA-Z0-9_]+$/;
+        if(!tenantId.match(regexp)) {
+            result.valid = false;
+            result.reason = "Tenant ID must be alpha numeric";
+            return result;
+        }
         return result;
     };
 
