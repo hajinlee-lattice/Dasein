@@ -163,6 +163,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return tenantToAttach;
     }
 
+    public ModelSummary getModelSummary() {
+        return originalModelSummary;
+    }
+
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
     public void retrieveReport() {
         Job job = restTemplate.getForObject( //
@@ -174,12 +178,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
-    public ModelSummary retrieveModelSummary() throws InterruptedException {
+    public void retrieveModelSummary() throws InterruptedException {
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
-        return originalModelSummary;
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")

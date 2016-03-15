@@ -29,6 +29,9 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertTrue;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -71,20 +74,21 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         Tenant tenant = selfServiceModeling.getTenant();
         System.out.println(tenant);
         String accessToken = getAccessToken(tenant.getId());
-        // String accessToken = "64935b4d-2e99-4b27-811e-27af6a9eb8b4";
+        // String accessToken = "c2b9e2dd-0692-462a-a900-eaaeb9e43e85";
         System.out.println("access_token: " + accessToken);
         AuthorizationHeaderHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(
                 accessToken);
         scoringRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));
     }
 
-    @Test(groups = "deployment.lp", enabled = false)
+    @Test(groups = "deployment.lp", enabled = true)
     public void testEndToEnd() throws InterruptedException, IOException {
         selfServiceModeling.uploadFile();
         selfServiceModeling.resolveMetadata();
         selfServiceModeling.createModel();
+        selfServiceModeling.retrieveModelSummary();
+        ModelSummary modelSummary = selfServiceModeling.getModelSummary();
 
-        ModelSummary modelSummary = selfServiceModeling.retrieveModelSummary();
         String modelId = modelSummary.getId();
         System.out.println("modeling id: " + modelId);
 
@@ -92,27 +96,36 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         JobStatus modelingJobStatus = modelProxy.getJobStatus(modelingAppId);
         String modelResultDir = modelingJobStatus.getResultDirectory();
         // String modelResultDir =
-        // "/user/s-analytics/customers/DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production/models/RunMatchWithLEUniverse_151997_DerivedColumnsCache_with_std_attrib/b857be12-eeac-4b5e-b170-67fe1d3b3a9f/1457631683969_0092";
-        // String modelId = "ms__b857be12-eeac-4b5e-b170-67fe1d3b3a9f-SelfServ";
+        // "/user/s-analytics/customers/DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production/models/RunMatchWithLEUniverse_152044_DerivedColumnsCache_with_std_attrib/95a410c5-7278-44ce-9740-380c3ec340a9/1457979567285_0016";
+        // String modelId = "ms__95a410c5-7278-44ce-9740-380c3ec340a9-SelfServ";
         System.out.println("modeling result dir: " + modelResultDir);
         saveExpectedScores(modelResultDir);
 
         Fields fields = getModelingFields(modelId);
         System.out.println("fields: " + fields.getFields());
         List<Map<String, Object>> records = createRecords(fields.getFields());
+        List<String> largeScoreVarianceList = new ArrayList<>();
         for (Map<String, Object> record : records) {
             System.out.println(record);
             ScoringResponse response = score(record, modelId);
             System.out.println("scoring response: " + response);
-            compareScoreResult(record, response.getScore());
+            compareScoreResult(record, response.getProbability(), largeScoreVarianceList);
         }
+        for (String warning : largeScoreVarianceList) {
+            System.out.println(warning);
+        }
+        assertTrue(largeScoreVarianceList.size() < records.size(),
+                "All Scores have high variance after comparing with modeling scores");
+
     }
 
-    private void compareScoreResult(Map<String, Object> record, double probability) {
-        double expectedScore = expectedScores.get(record.get("Id"));
+    private void compareScoreResult(Map<String, Object> record, double probability, List<String> largeScoreVarianceList) {
+        double expectedScore = expectedScores.get(record.get(SemanticType.Id.name()));
         if (Math.abs(expectedScore - probability) > 0.0000001) {
-            System.out.println(String.format("Record id %d has value %f, expected is %f", record.get("Id"),
-                    probability, expectedScore));
+            String warning = String.format("Record id %s has value %f, expected is %f",
+                    record.get(SemanticType.Id.name()), probability, expectedScore);
+            largeScoreVarianceList.add(warning);
+            System.out.println(warning);
         }
     }
 
@@ -138,7 +151,9 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
                             String domain = StringUtils.substringAfter(email, "@");
                             scoreRecord.put(fieldName, domain);
                         }
-                        if (csvRecord.get(csvHeader).equals("")) {
+                        if (csvRecord.get(csvHeader).equals("")
+                                || csvHeader.equalsIgnoreCase(SemanticType.CreatedDate.name())
+                                || csvHeader.equalsIgnoreCase(SemanticType.LastModifiedDate.name())) {
                             scoreRecord.put(fieldName, null);
                         }
                     }
@@ -151,13 +166,13 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
 
     private String getCSVHeader(String fieldName) {
         if (fieldName.equals(SemanticType.CompanyName.name())) {
-            return "Company";
+            return "CompanyName";
         } else if (fieldName.equals(SemanticType.Event.name())) {
-            return "IsConverted";
+            return "Event";
         } else if (fieldName.equals(SemanticType.PhoneNumber.name())) {
-            return "Phone";
+            return "PhoneNumber";
         } else if (fieldName.endsWith(SemanticType.IsClosed.name())) {
-            return "Closed";
+            return "IsClosed";
         }
         return fieldName;
     }
@@ -310,8 +325,21 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         private double score;
 
         @JsonProperty("warnings")
-        private List<String> warnings = new ArrayList<>();
+        private List<Warning> warnings = new ArrayList<>();
 
+        @JsonProperty("probability")
+        private double probability;
+
+        public double getProbability() {
+            return probability;
+        }
+
+        @SuppressWarnings("unused")
+        public void setProbability(double probability) {
+            this.probability = probability;
+        }
+
+        @SuppressWarnings("unused")
         public double getScore() {
             return score;
         }
@@ -322,13 +350,102 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         }
 
         @SuppressWarnings("unused")
-        public List<String> getWarnings() {
+        public List<Warning> getWarnings() {
             return warnings;
         }
 
         @SuppressWarnings("unused")
-        public void setWarnings(List<String> warnings) {
+        public void setWarnings(List<Warning> warnings) {
             this.warnings = warnings;
+        }
+
+        public String toString() {
+            return JsonUtils.serialize(this);
+        }
+    }
+
+    private static class Warning {
+
+        @JsonProperty("warning")
+        private String warning;
+
+        @JsonProperty("warning_description")
+        private String description;
+
+        @JsonIgnore
+        private WarningCode code;
+
+        @SuppressWarnings("unused")
+        public Warning() {
+
+        }
+
+        @SuppressWarnings("unused")
+        public Warning(WarningCode code, String[] params) {
+            this.code = code;
+            this.warning = code.getExternalCode();
+            this.description = buildDescription(code, params);
+        }
+
+        @SuppressWarnings("unused")
+        public String getWarning() {
+            return warning;
+        }
+
+        @SuppressWarnings("unused")
+        public void setWarning(String warning) {
+            this.warning = warning;
+        }
+
+        @SuppressWarnings("unused")
+        public String getDescription() {
+            return description;
+        }
+
+        @SuppressWarnings("unused")
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public static String buildDescription(WarningCode code, String[] params) {
+            String description = code.getDescription();
+
+            for (int i = 0; i < params.length; i++) {
+                description = description.replaceAll("\\{" + i + "\\}", params[i]);
+            }
+            return description;
+        }
+    }
+
+    private enum WarningCode {
+
+        // @formatter:off
+        MISSING_COLUMN("missing_column",
+                "Input record has fewer columns than what the model expects; missing columns: {0}"), MISSING_VALUE(
+                "missing_value",
+                "Input record has missing values for certain expected columns; columns with missing values: {0}"), NO_MATCH(
+                "no_match",
+                "No match found for record in Lattice Data Cloud; domain key values: {0}; matched key values: {1}"), MISMATCHED_DATATYPE(
+                "mismatched_datatype", "Input record contains columns that do not match expected datatypes: {0}"), PUBLIC_DOMAIN(
+                "public_domain", "A public domain key was passed in for this record: {0}"), EXTRA_FIELDS(
+                "extra_fields", "Input record contains extra columns: {0}");
+        // @formatter:on
+
+        private String externalCode;
+
+        private String description;
+
+        WarningCode(String externalCode, String description) {
+            this.externalCode = externalCode;
+            this.description = description;
+        }
+
+        public String getExternalCode() {
+            return externalCode;
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 
