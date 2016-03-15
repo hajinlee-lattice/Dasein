@@ -38,7 +38,7 @@ public class FeatureMostRecent implements MostRecentSource, DomainBased {
     public CollectedSource[] getBaseSources() { return new CollectedSource[] { baseSource }; }
 
     @Override
-    public Long periodToKeep() {  return TimeUnit.DAYS.toMillis(365 * 2); }
+    public Long periodToKeep() {  return TimeUnit.DAYS.toMillis(365); }
 
     @Override
     public String getDefaultCronExpression() { return cronExpression; }
