@@ -16,6 +16,7 @@ import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntit
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -250,8 +251,15 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
     }
 
     protected void createIndicesOnStageTable() {
-        jdbcTemplateCollectionDB.execute("CREATE INDEX IX_Timtstamp ON [" + getStageTableName() + "] " + "(["
+        jdbcTemplateCollectionDB.execute("CREATE INDEX IX_TIMESTAMP ON [" + getStageTableName() + "] " + "(["
                 + getSource().getTimestampField() + "])");
+
+        if (getSource() instanceof DomainBased) {
+            DomainBased domainBased = (DomainBased) getSource();
+            jdbcTemplateCollectionDB.execute("CREATE INDEX IX_DOMAIN ON [" + getStageTableName() + "] " + "(["
+                    + domainBased.getDomainField() + "])");
+        }
+
     }
 
     protected SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer) {
