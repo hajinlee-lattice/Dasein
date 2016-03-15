@@ -9,16 +9,19 @@ module.exports = function (grunt) {
         env:  {
             dev:         {
                 url:            'http://localhost:8081/lp2',
+                apiUrl:         'http://localhost:8081',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
                 url:            'http://bodcdevhdpweb52.dev.lattice.local:8080/lp2',
+                apiUrl:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
             },
             prod:        {
                 url:            'https://app.lattice-engines.com/lp2',
+                apiUrl:         'https://app.lattice-engines.com',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             }
@@ -154,7 +157,7 @@ module.exports = function (grunt) {
         http: {
             resetTenants: {
                 options: {
-                    url:     '<%= testenv.url %>/pls/internal/testtenants',
+                    url:     '<%= testenv.apiUrl %>/pls/internal/testtenants',
                     method:  'PUT',
                     headers: { MagicAuthentication: "Security through obscurity!" },
                     strictSSL: false
