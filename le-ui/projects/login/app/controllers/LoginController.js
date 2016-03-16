@@ -172,6 +172,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $event.preventDefault();
         }
 
+        $scope.showLoginError = false;
         $scope.showLoginForm = false;
         $scope.showForgotPassword = true;
     };
