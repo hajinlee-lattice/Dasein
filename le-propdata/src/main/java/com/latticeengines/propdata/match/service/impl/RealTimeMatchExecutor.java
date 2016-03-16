@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
@@ -156,6 +157,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         List<InternalOutputRecord> recordList = matchContext.getInternalResults();
         List<String> outputFields = matchContext.getOutput().getOutputFields();
         for (InternalOutputRecord record : recordList) {
+            if (record.getFailed()) { continue; }
             MatchKeyDimension keyDimension =
                     new MatchKeyDimension(record.getParsedDomain(), record.getParsedNameLocation());
             MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
@@ -210,6 +212,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         String stateField = getStateField(sourceName);
         String countryField = getCountryField(sourceName);
         for (InternalOutputRecord record : records) {
+            if (record.getFailed()) { continue; }
             // try using domain first
             boolean matched = false;
             String parsedDomain = record.getParsedDomain();
@@ -287,6 +290,16 @@ class RealTimeMatchExecutor implements MatchExecutor {
         int totalMatched = 0;
 
         for (InternalOutputRecord internalRecord : records) {
+            if (internalRecord.getFailed()) {
+                OutputRecord outputRecord = new OutputRecord();
+                outputRecord.setInput(internalRecord.getInput());
+                outputRecord.setMatched(false);
+                outputRecord.setRowNumber(internalRecord.getRowNumber());
+                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
+                outputRecords.add(outputRecord);
+                continue;
+            }
+
             internalRecord.setColumnMatched(new ArrayList<Boolean>());
             List<Object> output = new ArrayList<>();
             Map<String, Map<String, Object>> results = internalRecord.getResultsInSource();
@@ -296,7 +309,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 Object value = null;
                 boolean matched = false;
 
-                if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                if (matchContext.getInput().getKeyMap().containsKey(MatchKey.Domain)
+                        && !matchContext.getInput().getKeyMap().get(MatchKey.Domain).isEmpty()
+                        && IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
                     matched = true;
                     value = publicDomainService.isPublicDomain(internalRecord.getParsedDomain());
                 } else if (columnPriorityMap.containsKey(field)) {
@@ -320,6 +335,19 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 }
 
                 matchedAnyColumn = matchedAnyColumn || matched;
+            }
+
+
+            // make IsMatched are not null
+            if (matchedAnyColumn) {
+                for (int i = 0; i < outputFields.size(); i++) {
+                    String field = outputFields.get(i);
+                    Object value = output.get(i);
+                    if (field.toLowerCase().contains("ismatched") && value == null) {
+                        value = false;
+                        output.set(i, value);
+                    }
+                }
             }
 
             internalRecord.setOutput(output);
@@ -357,7 +385,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
         return matchContext;
     }
 
-    private MatchContext appendMetadata(MatchContext matchContext) {
+    private Matc..
+    hContext appendMetadata(MatchContext matchContext) {
         if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
             List<ColumnMetadata> allFields = columnMetadataService
                     .fromPredefinedSelection(ColumnSelection.Predefined.Model);
@@ -470,7 +499,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     + "[" + countryField + "], "
                     + "[" + stateField + "], "
                     + ( cityField != null ? "[" + cityField + "], " : "" )
-                    + "[" + StringUtils.join(columnsToQuery, "], [") + "], [" + domainField + "] \n"
+                    + (columnsToQuery.isEmpty() ? "" : "[" + StringUtils.join(columnsToQuery, "], [") + "], ")
+                    + "[" + domainField + "] \n"
                     + "FROM [" + tableName + "] WITH(NOLOCK) \n"
                     + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 

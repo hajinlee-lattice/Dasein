@@ -142,6 +142,7 @@ class MatchPlanner {
         record.setInput(inputRecord);
 
         if (inputRecord.size() != numInputFields) {
+            record.setFailed(true);
             record.addErrorMessage("The number of objects in this row [" + inputRecord.size()
                     + "] does not match the number of fields claimed [" + numInputFields + "]");
             return record;
@@ -166,6 +167,7 @@ class MatchPlanner {
                     domainSet.add(cleanDomain);
                 }
             } catch (Exception e) {
+                record.setFailed(true);
                 record.addErrorMessage("Error when cleanup domain field: " + e.getMessage());
             }
         }
@@ -215,6 +217,7 @@ class MatchPlanner {
                 }
             } catch (Exception e) {
                 log.error(ExceptionUtils.getFullStackTrace(e));
+                record.setFailed(true);
                 record.addErrorMessage("Error when cleanup name and location fields: " + e.getMessage());
             }
         }

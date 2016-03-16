@@ -13,6 +13,7 @@ class InternalOutputRecord extends OutputRecord {
     private NameLocation parsedNameLocation;
     private Map<String, Map<String, Object>> resultsInSource = new HashMap<>();
     private List<Boolean> columnMatched;
+    private Boolean failed = false;
 
     String getParsedDomain() {
         return parsedDomain;
@@ -44,5 +45,13 @@ class InternalOutputRecord extends OutputRecord {
 
     public void setColumnMatched(List<Boolean> columnMatched) {
         this.columnMatched = columnMatched;
+    }
+
+    public Boolean getFailed() {
+        return failed;
+    }
+
+    public void setFailed(Boolean failed) {
+        this.failed = failed;
     }
 }
