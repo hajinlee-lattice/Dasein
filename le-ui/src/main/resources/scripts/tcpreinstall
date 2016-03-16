@@ -1,5 +1,8 @@
 #!/bin/bash -x
 
+adduser ledp
+groupadd ledp
+
 if [ ! -d "/opt/node/latest" ]; then
     mkdir -p /opt/node/latest
 fi

@@ -19,6 +19,31 @@
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>globalauthservicegen</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>tar</executable>
+                            <workingDirectory>..</workingDirectory>
+                            <arguments>
+                                <argument>czf</argument>
+                                <argument>le-ui.tar.gz</argument>
+                                <argument>--exclude='*tests*'</argument>
+                                <argument>--exclude='le-ui/target'</argument>
+                                <argument>--exclude='le-ui/src'</argument>
+                                <argument>le-ui</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>rpm-maven-plugin</artifactId>
                 <version>2.1-alpha-4</version>
                 <extensions>true</extensions>
@@ -34,8 +59,8 @@
                         <mapping>
                             <directory>/tmp/le-ui</directory>
                             <filemode>755</filemode>
-                            <username>build</username>
-                            <groupname>build</groupname>
+                            <username>ledp</username>
+                            <groupname>ledp</groupname>
                             <sources>
                                 <source>
                                     <location>../le-ui.tar.gz</location>
