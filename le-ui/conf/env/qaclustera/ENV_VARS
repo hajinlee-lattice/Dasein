@@ -2,3 +2,6 @@ export NODE_ENV=qa
 export API_URL=false
 export USE_PORT=3000
 export COMPRESSED=true
+export HTTPS=false
+export HTTPS_KEY=/certs/qa/privatekey.key
+export HTTPS_CRT=/certs/qa/certificate.crt

@@ -20,8 +20,9 @@
             ng-minlength="1"
             ng-maxlength="35"
             placeholder="Example: US Enterprise model"
+            ng-pattern="/^[a-zA-Z0-9\-_]*$/"
             required />
-          <p class="help-block">* Model Name must be specified.</p>
+          <p class="help-block">* Model Name must be present and contain no special characters.</p>
         </div>
 
         <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">

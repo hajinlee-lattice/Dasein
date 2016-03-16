@@ -12,11 +12,27 @@ const morgan    = require('morgan');
 const rotator   = require('file-stream-rotator');
 const fs        = require('fs');
 
+
 class Server {
     constructor(express, app, options) {
         this.options = options;
         this.express = express;
         this.app = app;
+
+        if (options.HTTPS) {
+            const https = require('https');
+            const httpsKey = fs.readFileSync(__dirname + options.HTTPS_KEY, 'utf8');
+            const httpsCert = fs.readFileSync(__dirname + options.HTTPS_CRT, 'utf8');
+            const credentials = {
+                key: httpsKey, 
+                cert: httpsCert
+            };
+
+            this.server = https.createServer(credentials, this.app);
+        } else {
+            const http = require('http');
+            this.server = http.createServer(this.app);
+        }
 
         // set up view engine for handlebars
         this.app.engine('.html', exphbs({ extname: '.html' }));
@@ -156,11 +172,15 @@ class Server {
 
     start() {
         const options = this.options;
-        const server = this.app.listen(options.USE_PORT, () => {
+        this.server.listen(options.USE_PORT, () => {
             console.log(
-                '> WEB HOST: http://localhost:' + options.USE_PORT + '/' + 
-                '\tENVIRONMENT:', options.ENV, '\n' +
-                '> API PROXY URL:', options.API_URL + '\n> COMPRESSED: ' + options.COMPRESSED
+                '> WEB HOST: http' + (options.HTTPS ? 's' : '') + 
+                '://localhost:' + options.USE_PORT + '/',
+                '\tENVIRONMENT:', options.ENV, 
+                '\n> API PROXY URL:', options.API_URL,
+                '\n> COMPRESSED:', options.COMPRESSED, 
+                '\tHTTPS:', options.HTTPS,
+                '\tLOGGING:', options.LOGGING
             );
         });
     }

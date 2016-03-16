@@ -33,12 +33,12 @@ angular.module('mainApp.create.csvImport', [
         
         (xhr.upload || xhr).addEventListener('progress', function(e) {
             console.log(e.total / 1024, e);
-            if (e.total / 1024 > 386000) {
+            if (e.total / 1024 > 486000) {
                 xhr.abort();
                 $('div.loader').css({'display':'none'});
 
                 $('#file_progress')
-                    .html('ERROR: Over file size limit.  File must be below 386MB');
+                    .html('ERROR: Over file size limit.  File must be below 486MB');
 
                 return;
             }
@@ -263,13 +263,13 @@ angular.module('mainApp.create.csvImport', [
         this.cancelDeferred = cancelDeferred = $q.defer();
 
         csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
-            console.log('Upload Successful:' + result.Success, result);
+            console.log('# Upload Successful:' + result.Success, result);
             if (result.Success && result.Result) {
                 var fileName = result.Result.name,
                     metaData = result.Result,
                     modelName = $scope.modelName;
 
-                console.log('#CSV Upload Complete', fileName, modelName, metaData);
+                console.log('# CSV Upload Complete', fileName, modelName, metaData);
                 metaData.modelName = modelName;
 
                 csvImportStore.Set(fileName, metaData);
@@ -287,8 +287,8 @@ angular.module('mainApp.create.csvImport', [
     };
 
     $scope.cancelClicked = function() {
-        console.log('cancelled');
+        console.log('# Upload Cancelled');
         csvImportStore.Get('cancelXHR', true).abort();
-        $state.go('models');
+        $state.go('models.import');
     };
 }]);

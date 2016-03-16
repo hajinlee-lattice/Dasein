@@ -121,10 +121,15 @@ module.exports = function (grunt) {
         'run:node'
     ]);
 
+    var qaText = 'Run Express Server, using API Endpoints on 52';
+    grunt.registerTask('qamon', qaText, [
+        'env:qa',
+        'run:nodemon'
+    ]);
 
     var qaText = 'Run Express Server, using API Endpoints on 52';
-    grunt.registerTask('qa_nodemon', qaText, [
-        'env:qa',
+    grunt.registerTask('devmon', qaText, [
+        'env:dev',
         'run:nodemon'
     ]);
 

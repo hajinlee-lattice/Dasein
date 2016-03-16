@@ -48,6 +48,17 @@ module.exports = [
             '/lp/lib': '/lib'
         }
     },{
+        path: '/projects/lp2',
+        pages: {
+            '/lp2/': 'index.html',
+            '/lp2/index': 'index.html'
+        },
+        folders: {
+            '/lp2/app': '/app',
+            '/lp2/assets': '/assets',
+            '/lp2/lib': '/lib'
+        }
+    },{
         path: '/projects/demo',
         pages: {
             '/demo/': 'index.html',
