@@ -21,7 +21,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.eventTableName = $scope.data.EventTableProvenance.EventTableName;
     $scope.modelSummaryId = $scope.data.ModelId;
     $scope.dirtyRows = {};
-    $scope.indexToOldFields = {};
+    $scope.indexToOldFieldsForSingleFieldPage = {};
+    $scope.indexToOldFieldsForListFieldsPage = {};
 
     getOptionsAndFields();
 
@@ -358,18 +359,15 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
         $scope.dirtyRows = {};
+
+        $scope.indexToOldFieldsForListFieldsPage = {};
+        $scope.indexToOldFieldsForSingleFieldPage = {};
     };
 
     $scope.discardAllChanges = function() {
         discardChangesOnPage();
 
-        for (var index in $scope.indexToOldFields) {
-            $scope.fields[index] = $scope.indexToOldFields[index];
-        }
-        $scope.indexToOldFields = {};
-
-        renderSelects($scope.fields);
-        renderGrid($scope.fields);
+        loadFields();
     };
 
     $scope.textboxClicked = function ($event) {
@@ -380,12 +378,43 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
     };
 
+    function getFieldIndexInFields(field) {
+        for (var i = 0; i < $scope.fields.length; i++) {
+            if ($scope.fields[i]['ColumnName'] == field['ColumnName']) {
+                return i;
+            }
+        }
+    }
+
+    function hasFieldChanged(oldField, newField) {
+        for (var i = 0; i < attributesEditable.length; i++) {
+            if (oldField[attributesEditable[i]] != newField[attributesEditable[i]]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     $scope.valueChanged = function ($event, dataItem, field, originalValue) {
         if ($event != null) {
             $event.preventDefault();
         }
 
         $scope.showEditFieldsError = false;
+        var index = getFieldIndexInFields(dataItem);
+        if ($scope.indexToOldFieldsForListFieldsPage[index] == null) {
+            $scope.indexToOldFieldsForListFieldsPage[index] = $scope.fields[index];
+        } else {
+            // this means user has chagned the value but decided to change it back
+            // and we should not be submit this field to clone & remodel
+            if (! hasFieldChanged($scope.indexToOldFieldsForListFieldsPage[index], dataItem)) {
+                delete $scope.indexToOldFieldsForListFieldsPage[index];
+            }
+        }
+        if (dataItem[field] != originalValue) {
+            $scope.fields[index] = dataItem;
+        }
+
         var dirtyRow = $scope.dirtyRows[dataItem.uid] || {};
         if (dirtyRow[field] == null) {
             dirtyRow[field] = { dirty: true, ov: originalValue };
@@ -405,17 +434,18 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     };
 
     function getEditedDataOnPage() {
-        var grid = $("#fieldsGrid").data("kendoGrid");
-        return $.grep(grid.dataSource.data(), function(item) {
-            return item.dirty;
-        });
+        var editedData = [];
+        for (var index in $scope.indexToOldFieldsForListFieldsPage) {
+            editedData.push($scope.fields[index]);
+        }
+        return editedData;
     }
 
     function getAllEditedData() {
         var editedData = getEditedDataOnPage();
 
-        for (var index in $scope.indexToOldFields) {
-            editedData.push($scope.indexToOldFields[index]);
+        for (var index in $scope.indexToOldFieldsForSingleFieldPage) {
+            editedData.push($scope.fields[index]);
         }
 
         return editedData;
@@ -436,26 +466,23 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     var attributesEditable = [ 'DisplayName', 'Description', 'ApprovedUsage', 'DisplayDiscretization', 'FundamentalType', 'StatisticalType' ];
 
-    function hasFieldChanged(oldField, newField) {
-        for (var i = 0; i < attributesEditable.length; i++) {
-            if (oldField[attributesEditable[i]] != newField[attributesEditable[i]]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     $scope.$on(SetupUtility.LOAD_FIELDS_EVENT, function (event, oldField, newField) {
         $scope.loading = true;
 
         if (hasFieldChanged(oldField, newField)) {
-            for (var i = 0; i < $scope.fields.length; i++) {
-                if ($scope.fields[i]['ColumnName'] == newField['ColumnName']) {
-                    $scope.indexToOldFields[i] = oldField;
-                    $scope.fields[i] = newField;
-                }
+            var index = getFieldIndexInFields(newField);
+            if ($scope.indexToOldFieldsForSingleFieldPage[index] != null
+                && ! hasFieldChanged(newField, $scope.indexToOldFieldsForSingleFieldPage[index])) {
+                // this is when user changed the field value and then decide to change it back
+                delete $scope.indexToOldFieldsForSingleFieldPage[index];
+            } else {
+                $scope.indexToOldFieldsForSingleFieldPage[index] = oldField;
             }
+
+            $scope.fields[index] = newField;
         }
+
+        renderGrid($scope.fields);
         $scope.loading = false;
     });
 

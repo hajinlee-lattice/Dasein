@@ -6,25 +6,33 @@
         </div>
         <div class="modal-body">
             <div class="row">
-                <form class="col-sm-12 text-center">
-                    <form name="form-group">
-                        <label class="control-table ng-binding">Please Confirm & Enter New Model Name</label>
-                        <input name="modelname" type="text" class="form-control {{ modelNameInvalid ? 'error' : '' }}" ng-maxlength="35" data-ng-model="modelName">
+                <div class="form-group" ng-class="{ 'has-error' : modelform.modelName.$invalid && !modelform.modelName.$pristine }">
+                    <form name="modelform">
+                        <label>Please Confirm & Enter New Model Name <span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p><a href='#'>More information</a>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+                        <input
+                                type="text"
+                                class="form-control"
+                                name="modelName"
+                                ng-model="modelName"
+                                ng-minlength="1"
+                                ng-maxlength="35"
+                                placeholder="Example: US Enterprise model"
+                                ng-pattern="/^[a-zA-Z0-9\-_]*$/"
+                                required />
+                        <p class="help-block">* Model Name must be present, less than 35 character and contain no special characters.</p>
+
                     </form>
-                    <div class="row alert-holder">
-                        <div id="updateFieldsError" class="alert-danger">
-                            {{updateFieldsErrorMessage}}
-                        </div>
-                        <div ng-messages="form-group.modelname.$error" role="alert">
-                            <div class="alert-danger" ng-message="maxlength">Max length here is 35</div>
-                        </div>
+                </div>
+                <div class="row alert-holder">
+                    <div id="updateFieldsError" class="alert-danger">
+                        {{updateFieldsErrorMessage}}
                     </div>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
             <button class="button blue-button" type="button" data-ng-click="cancelClicked()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
-            <a class="button orange-button" href="#" data-ng-click="updateFieldsClicked($event)">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</a>
+            <button class="button orange-button" href="#" ng-disabled="{{ updateClicked }}" data-ng-click="updateFieldsClicked($event)">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</button>
         </div>
     </div>
 </div>

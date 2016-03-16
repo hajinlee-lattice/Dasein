@@ -31,6 +31,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 .controller('UpdateFieldsController', function ($scope, $rootScope, $state, ResourceUtility, MetadataService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.modelNameInvalid = false;
+    $scope.updateClicked = false;
 
     $scope.updateFieldsClicked = function ($event) {
         if ($event != null) {
@@ -41,6 +42,11 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             $scope.modelNameInvalid = true;
             return;
         }
+
+        if ($scope.updateClicked) {
+            return;
+        }
+        $scope.updateClicked = true;
 
         MetadataService.UpdateAndCloneFields($scope.modelName, $scope.modelSummaryId, $scope.editedData).then(function(result){
             if (result.Success) {
@@ -59,6 +65,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
     };
 
     $scope.cancelClicked = function () {
+        $scope.isCancelClicked = true;
         $("#modalContainer").modal('hide');
     };
 });
