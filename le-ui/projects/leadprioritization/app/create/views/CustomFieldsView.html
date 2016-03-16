@@ -20,9 +20,9 @@
 	<div class="error-message text-center" ng-show="vm.errors">{{ vm.errors }}</div>
 	<div class="six columns offset-three">
 
-		<p>Displaying {{ vm.data.length }}.</p>
+		<p ng-hide="vm.errors">Displaying {{ vm.data.length }}.</p>
 
-		<table class="unstyled">
+		<table ng-hide="vm.errors" class="unstyled">
 			<thead>
 				<tr>
 					<th>Custom Field Name</th>
