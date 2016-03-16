@@ -24,9 +24,9 @@
     <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
-                <value>file:${PLAYMAKER_PROPDIR}/playmaker.properties
+                <value>file:${PLAYMAKER_PROPDIR:/etc/ledp}/playmaker.properties
                 </value>
-                <value>file:${OAUTH2_DB_PROPDIR}/oauth2.properties</value>
+                <value>file:${OAUTH2_DB_PROPDIR:/etc/ledp}/oauth2.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

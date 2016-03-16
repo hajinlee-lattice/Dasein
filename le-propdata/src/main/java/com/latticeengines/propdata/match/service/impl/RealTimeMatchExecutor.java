@@ -344,8 +344,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     String field = outputFields.get(i);
                     Object value = output.get(i);
                     if (field.toLowerCase().contains("ismatched") && value == null) {
-                        value = false;
-                        output.set(i, value);
+                        output.set(i, false);
                     }
                 }
             }
