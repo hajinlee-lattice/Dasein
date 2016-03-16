@@ -14,6 +14,11 @@ public class HttpStopWatchImpl implements HttpStopWatch {
     private static final String STOPWATCH_LASTSPLITTIME_KEY = "com.latticeengines.stopwatch.lastsplittime";
 
     @Override
+    public String getLogStatement(String key) {
+        return String.format("{'%sDurationMS':'%d'}", key, splitAndGetTimeSinceLastSplit());
+    }
+
+    @Override
     public void start() {
         getOrCreate().start();
     }

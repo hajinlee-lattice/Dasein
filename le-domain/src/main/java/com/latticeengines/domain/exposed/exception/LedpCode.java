@@ -366,6 +366,7 @@ public enum LedpCode {
     LEDP_31011("No percentile bucket found for probability {0} in model {1}"), //
     LEDP_31012("PMML model has multiple ({0}) results and no target was specified"), //
     LEDP_31013("PMML model evaluation returned no results"), //
+    LEDP_31014("Problem scoring the record {0}"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //

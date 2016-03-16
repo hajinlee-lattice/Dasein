@@ -9,18 +9,18 @@ import com.latticeengines.scoringapi.model.ModelEvaluator;
 public class ScoringArtifacts {
 
     private final String modelId;
-    private final DataComposition dataComposition;
-    private final DataComposition metadataDataComposition;
+    private final DataComposition dataScienceDataComposition;
+    private final DataComposition eventTableDataComposition;
     private final ScoreDerivation scoreDerivation;
     private final ModelEvaluator pmmlEvaluator;
     private final File modelArtifactsDir;
 
-    public ScoringArtifacts(String modelId, DataComposition dataComposition, DataComposition metadataDataComposition,
+    public ScoringArtifacts(String modelId, DataComposition dataScienceDataComposition, DataComposition eventTableDataComposition,
             ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator, File modelArtifactsDir) {
         super();
         this.modelId = modelId;
-        this.dataComposition = dataComposition;
-        this.metadataDataComposition = metadataDataComposition;
+        this.dataScienceDataComposition = dataScienceDataComposition;
+        this.eventTableDataComposition = eventTableDataComposition;
         this.scoreDerivation = scoreDerivation;
         this.pmmlEvaluator = pmmlEvaluator;
         this.modelArtifactsDir = modelArtifactsDir;
@@ -30,12 +30,12 @@ public class ScoringArtifacts {
         return modelId;
     }
 
-    public DataComposition getDataComposition() {
-        return dataComposition;
+    public DataComposition getDataScienceDataComposition() {
+        return dataScienceDataComposition;
     }
 
-    public DataComposition getMetadataDataComposition() {
-        return metadataDataComposition;
+    public DataComposition getEventTableDataComposition() {
+        return eventTableDataComposition;
     }
 
     public ScoreDerivation getScoreDerivation() {

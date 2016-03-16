@@ -117,7 +117,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         fields.setFields(fieldList);
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
-        Map<String, FieldSchema> mapFields = artifacts.getDataComposition().fields;
+        Map<String, FieldSchema> mapFields = artifacts.getEventTableDataComposition().fields;
         for (String fieldName : mapFields.keySet()) {
             FieldSchema fieldSchema = mapFields.get(fieldName);
             if (fieldSchema.source.equals(FieldSource.REQUEST)) {
@@ -147,14 +147,14 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactTableDir = String.format(HDFS_SCORE_ARTIFACT_TABLE_DIR, customerSpace.toString(),
                 modelSummary.getEventTableName());
 
-        DataComposition dataComposition = getDataComposition(hdfsScoreArtifactBaseDir);
-        DataComposition metadataDataComposition = getMetadataDataComposition(hdfsScoreArtifactTableDir);
+        DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
+        DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
         ScoreDerivation scoreDerivation = getScoreDerivation(hdfsScoreArtifactBaseDir);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
 
-        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary.getId(), dataComposition,
-                metadataDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
+        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary.getId(), dataScienceDataComposition,
+                eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
 
         return artifacts;
     }
@@ -195,7 +195,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return appId;
     }
 
-    private DataComposition getDataComposition(String hdfsScoreArtifactBaseDir) {
+    private DataComposition getDataScienceDataComposition(String hdfsScoreArtifactBaseDir) {
         String path = hdfsScoreArtifactBaseDir + HDFS_ENHANCEMENTS_DIR + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
@@ -210,7 +210,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return dataComposition;
     }
 
-    private DataComposition getMetadataDataComposition(String hdfsScoreArtifactTableDir) {
+    private DataComposition getEventTableDataComposition(String hdfsScoreArtifactTableDir) {
         String path = hdfsScoreArtifactTableDir + DATA_COMPOSITION_FILENAME;
         String content = null;
         try {
@@ -249,7 +249,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         try {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             is = fs.open(new Path(path));
-            modelEvaluator = new ModelEvaluator(is, warnings);
+            modelEvaluator = new ModelEvaluator(is);
             if (!Strings.isNullOrEmpty(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }

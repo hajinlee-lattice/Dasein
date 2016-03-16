@@ -62,27 +62,27 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
-        log.info(String.format("{'requestPreparationDuration':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        logSplitTime("requestPreparation");
         if (Strings.isNullOrEmpty(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
         }
 
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
-        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getDataComposition().fields;
-        log.info(String.format("{'retrieveModelArtifacts':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getEventTableDataComposition().fields;
+        logSplitTime("retrieveModelArtifacts");
 
         checkForMissingFields(fieldSchemas, request.getRecord());
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
                 fieldSchemas, request.getRecord());
-        log.info(String.format("{'parseRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        logSplitTime("parseRecord");
 
         Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
                 fieldSchemas, parsedRecordAndInterpretedFields.getKey());
         addMissingFields(fieldSchemas, matchedRecord);
-        log.info(String.format("{'matchRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        logSplitTime("matchRecord");
 
         Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
-        log.info(String.format("{'transformRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        logSplitTime("transformRecord");
 
         ScoreResponse scoreResponse = null;
         if (isDebug) {
@@ -90,9 +90,13 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         } else {
             scoreResponse = generateScoreResponse(scoringArtifacts, transformedRecord);
         }
-        log.info(String.format("{'scoreRecord':%sms}", httpStopWatch.splitAndGetTimeSinceLastSplit()));
+        logSplitTime("scoreRecord");
 
         return scoreResponse;
+    }
+
+    private void logSplitTime(String key) {
+        log.info(httpStopWatch.getLogStatement(key));
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
@@ -180,7 +184,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 hasCompanyState = true;
             }
         }
-        if (!hasOneOfDomain && (!hasCompanyName && !hasCompanyState)) {
+        if (!hasOneOfDomain && (!hasCompanyName || !hasCompanyState)) {
             throw new ScoringApiException(LedpCode.LEDP_31199, new String[] { Joiner.on(",").join(missingMatchFields) });
         }
         if (!missingFields.isEmpty()) {
@@ -229,11 +233,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private Map<String, Object> transform(ScoringArtifacts scoringArtifacts, Map<String, Object> matchedRecord) {
         Map<String, Object> standardTransformedRecord = recordTransformer.transform(scoringArtifacts
-                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getMetadataDataComposition().transforms,
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getEventTableDataComposition().transforms,
                 matchedRecord);
 
         Map<String, Object> datascienceTransformedRecord = recordTransformer.transform(scoringArtifacts
-                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getDataComposition().transforms,
+                .getModelArtifactsDir().getAbsolutePath(), scoringArtifacts.getDataScienceDataComposition().transforms,
                 standardTransformedRecord);
         return datascienceTransformedRecord;
     }

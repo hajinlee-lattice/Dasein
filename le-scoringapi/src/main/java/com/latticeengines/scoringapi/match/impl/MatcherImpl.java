@@ -113,6 +113,8 @@ public class MatcherImpl implements Matcher {
             // Handle IsPublicDomain specially
             if (fieldNameSet.contains(IS_PUBLIC_DOMAIN)) {
                 record.put(IS_PUBLIC_DOMAIN, true);
+                warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
+                        .nullToEmpty(outputRecord.getMatchedDomain()) }));
             } else {
                 record.put(IS_PUBLIC_DOMAIN, false);
             }

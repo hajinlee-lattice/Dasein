@@ -11,4 +11,6 @@ public interface HttpStopWatch {
 
     long getTime();
 
+    String getLogStatement(String key);
+
 }

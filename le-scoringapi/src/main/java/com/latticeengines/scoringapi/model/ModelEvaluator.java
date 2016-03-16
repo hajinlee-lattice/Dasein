@@ -30,9 +30,6 @@ import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.ScoreType;
-import com.latticeengines.scoringapi.warnings.Warning;
-import com.latticeengines.scoringapi.warnings.WarningCode;
-import com.latticeengines.scoringapi.warnings.Warnings;
 
 public class ModelEvaluator {
 
@@ -40,10 +37,7 @@ public class ModelEvaluator {
 
     private final PMMLManager manager;
 
-    private Warnings warnings;
-
-    public ModelEvaluator(InputStream is, Warnings warnings) {
-        this.warnings = warnings;
+    public ModelEvaluator(InputStream is) {
         PMML unmarshalled;
         try {
             unmarshalled = IOUtil.unmarshal(is);
@@ -74,7 +68,7 @@ public class ModelEvaluator {
             Object value = record.get(name.getValue());
             if (value == null) {
                 nullFields.add(name.getValue());
-                value = 0.0d; // TODO questioning whether I should actually do this or instead let this record fail
+                value = 0.0d;
             }
             if (value instanceof Long) {
                 value = ((Long) value).doubleValue();
@@ -92,8 +86,9 @@ public class ModelEvaluator {
         String nullFieldsMsg = "";
         if (!nullFields.isEmpty()) {
             nullFieldsMsg = Joiner.on(",").join(nullFields);
-            log.info("Preevaluated fields with null values:" + nullFieldsMsg);
-            warnings.addWarning(new Warning(WarningCode.MISSING_VALUE, new String[] { nullFieldsMsg }));
+            log.warn("Preevaluated fields with null values:" + nullFieldsMsg);
+            // TODO uncomment the below after working through all of the transform invoking exceptions
+//            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
         }
 
         Map<FieldName, ?> results = null;
@@ -101,7 +96,7 @@ public class ModelEvaluator {
             log.info(JsonUtils.serialize(arguments));
             results = evaluator.evaluate(arguments);
         } catch (Exception e) {
-            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
+            throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
         }
 
         if (results == null) {
