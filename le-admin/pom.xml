@@ -99,16 +99,6 @@
                                 <artifactId>asm-commons</artifactId>
                                 <version>5.0.2</version>
                             </dependency>
-                            <dependency>
-                                <groupId>org.slf4j</groupId>
-                                <artifactId>slf4j-api</artifactId>
-                                <version>1.5.8</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.slf4j</groupId>
-                                <artifactId>slf4j-nop</artifactId>
-                                <version>1.5.8</version>
-                            </dependency>
                         </dependencies>
                     </plugin>
                 </plugins>
@@ -208,41 +198,13 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
-            <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
+            <classifier>intf</classifier>            
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-baton</artifactId>
             <version>${le.baton.version}</version>
             <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>ch.qos.logback</groupId>
-                    <artifactId>logback-classic</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 	    <dependency>
             <groupId>com.latticeengines</groupId>
@@ -307,16 +269,31 @@
             <artifactId>sqljdbc4</artifactId>
             <version>${sqljdbc4.version}</version>
         </dependency>
-         <dependency>
-	         <groupId>com.sun.mail</groupId>
-	         <artifactId>javax.mail</artifactId>
-	         <version>1.5.4</version>
-         </dependency>
+        <dependency>
+	<groupId>com.sun.mail</groupId>
+	    <artifactId>javax.mail</artifactId>
+	    <version>1.5.4</version>
+        </dependency>
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>${reflections.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        <version>1.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.4</version>
+       </dependency>
+       <dependency>
+	    <groupId>org.slf4j</groupId>
+       	    <artifactId>slf4j-log4j12</artifactId>
+       	    <version>1.7.5</version>
+       </dependency>
     </dependencies>
 
 </project>
