@@ -16,7 +16,9 @@
 
     <modules>
         <module>le-common</module>
-        <module>le-api/pom-api-tc-rpm.xml</module>
+        <module>le-oauth2/pom-oauth2-tc-rpm.xml</module>
+        <module>le-scoringapi/pom-scoringapi-tc-rpm.xml</module>
+        <module>le-playmaker/pom-playmaker-tc-rpm.xml</module>
         <module>le-pls/pom-pls-tc-rpm.xml</module>
         <module>le-ui/pom-ui-rpm.xml</module>
         <module>le-admin/pom-admin-tc-rpm.xml</module>
