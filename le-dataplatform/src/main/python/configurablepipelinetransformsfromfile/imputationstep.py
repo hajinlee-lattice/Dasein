@@ -85,6 +85,8 @@ class ImputationStep(PipelineStep):
                             imputationBins = self.__createBins(outputFrame[column], outputFrame[self.targetColumn])
                             imputationValue = self.__matchValue(expectedLabelValue, imputationBins)
                             imputationValues[column] = imputationValue
+                        else:
+                            imputationValues[column] = value
                     except KeyError:
                         imputationValues[column] = value
         return imputationValues
