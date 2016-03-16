@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,7 +75,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         bldr = bldr.profileExcludeList(excludeList);
 
         for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
-            bldr = bldr.targets(event.getName()) //
+            bldr = bldr.targets(getTargets(eventTable, event)) //
                     .metadataTable(String.format("%s-%s-Metadata", eventTable.getName(), event.getDisplayName())) //
                     .keyColumn("Id").modelName(configuration.getModelName()) //
                     .eventTableName(getEventTable().getName()) //
@@ -90,5 +91,54 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             modelApplicationIdToEventColumn.put(modelAppId, event.getName());
         }
         return modelApplicationIdToEventColumn;
+    }
+    
+    private String[] getTargets(Table eventTable, Attribute event) {
+        List<String> targets = new ArrayList<>();
+        
+        targets.add("Event: " + event.getName());
+        
+        Attribute companyName = eventTable.getAttribute(SemanticType.CompanyName);
+        if (companyName != null) {
+            targets.add("Company: " + companyName.getName());
+        } else {
+            log.info("No company attribute in this event table.");
+        }
+        
+        Attribute lastName = eventTable.getAttribute(SemanticType.LastName);
+        if (lastName != null) {
+            targets.add("LastName: " + lastName.getName());
+        } else {
+            log.info("No last name attribute in this event table.");
+        }
+        Attribute firstName = eventTable.getAttribute(SemanticType.FirstName);
+        if (firstName != null) {
+            targets.add("FirstName: " + firstName.getName());
+        } else {
+            log.info("No company attribute in this event table.");
+        }
+        
+        Attribute id = eventTable.getAttribute(SemanticType.Id);
+        Attribute email = eventTable.getAttribute(SemanticType.Email);
+        Attribute creationDate = eventTable.getAttribute(SemanticType.CreatedDate);
+        
+        List<String> readoutAttributes = new ArrayList<>(); 
+        if (id != null) {
+            readoutAttributes.add(id.getName());
+        }
+        if (email != null) {
+            readoutAttributes.add(email.getName());
+        }
+        if (creationDate != null) {
+            readoutAttributes.add(creationDate.getName());
+        }
+        
+        if (readoutAttributes.size() > 0) {
+            targets.add("Readouts: " + StringUtils.join(readoutAttributes, "|"));
+        } else {
+            log.info("No id, email or creation date attribute in this event table.");
+        }
+        
+        return targets.toArray(new String[targets.size()]);
     }
 }
