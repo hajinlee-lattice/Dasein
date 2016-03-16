@@ -17,6 +17,9 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -24,6 +27,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -174,6 +178,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
         switchToInternalAdmin();
         assertChangeModelNameSuccess();
+
+        switchToInternalAdmin();
+        assertChangeModelIdFail();
 
         switchToInternalUser();
         assertChangeModelNameGet403();
@@ -418,6 +425,20 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
         assertEquals(summary.getName(), originalName);
+    }
+
+    @SuppressWarnings({ "rawtypes" })
+    private void assertChangeModelIdFail() {
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Name", "xyz");
+        HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
+        ResponseEntity<Boolean> responseEntity = restTemplate.exchange(getRestAPIHostPort() + "/pls/modelsummaries/"
+                + "ms__4192dfb1-d78c-4521-80d5-cebf477b2978-Ron’s_Mo", HttpMethod.PUT, requestEntity, Boolean.class);
+        Boolean responseDoc = responseEntity.getBody();
+        Assert.assertFalse(responseDoc.booleanValue());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

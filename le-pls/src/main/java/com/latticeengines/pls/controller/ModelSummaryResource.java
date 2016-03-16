@@ -2,10 +2,13 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +39,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/modelsummaries")
 @PreAuthorize("hasRole('View_PLS_Models')")
 public class ModelSummaryResource {
+
+    private static final Logger log = Logger.getLogger(ModelSummaryResource.class);
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -136,6 +141,13 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
+        Pattern pattern = Pattern.compile("[\\w-]+");
+        Matcher matcher = pattern.matcher(modelId);
+        if (!matcher.matches()) {
+            log.error(String.format("Not qualified modelId %s contains unsupported characters.", modelId));
+            return false;
+        }
+
         ModelSummary modelSummary = new ModelSummary();
         modelSummary.setId(modelId);
         modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
