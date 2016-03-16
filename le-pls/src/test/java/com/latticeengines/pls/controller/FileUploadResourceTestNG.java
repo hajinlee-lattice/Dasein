@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -21,6 +22,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ZipUtils;
@@ -69,7 +71,8 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
-            String uri = String.format("/pls/fileuploads?fileName=file1.csv&schema=%s&compressed=%s",
+            String filename = DateTime.now().getMillis() + ".csv";
+            String uri = String.format("/pls/fileuploads?fileName=%s&schema=%s&compressed=%s", filename,
                     SchemaInterpretation.SalesforceAccount, compressed);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
@@ -83,22 +86,22 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         switchToExternalAdmin();
         ResponseDocument<SourceFile> response = submitFile(false, PATH, false);
         assertTrue(response.isSuccess());
-        String path = String.format( //
-                "/Pods/Default/Contracts/%sPLSTenant1/Tenants/%sPLSTenant1/Spaces/Production/Data/Files/file1.csv", //
-                contractId, contractId);
-        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
+        SourceFile fileResponse = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+        String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, fileResponse.getPath());
         String expectedContents = FileUtils.readFileToString(new File(ClassLoader.getSystemResource(PATH).getPath()));
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileEntityMgr.findAll();
+        String path = fileResponse.getPath();
+
         boolean found = false;
         for (SourceFile file : files) {
             if (file.getPath().equals(path)) {
-                assertEquals(file.getName(), "file1.csv");
+                String[] split = path.split("/");
+                assertEquals(file.getName(), split[split.length - 1]);
                 found = true;
             }
         }
-
         assertTrue(found);
     }
 
