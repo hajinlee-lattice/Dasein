@@ -24,6 +24,10 @@ const options   = {
     HTTPS_CRT:  process.env.HTTPS_CRT   || '/certs/dev/certificate.crt',
     LOGGING:    process.env.LOGGING     || true,
     root:       __dirname 
+};
+
+if (options['HTTPS'] === 'false') {
+    options['HTTPS'] = false;
 }
 
 const server = new Server(express, app, options);

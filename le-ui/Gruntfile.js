@@ -34,16 +34,10 @@ module.exports = function (grunt) {
                 COMPRESSED: true,
                 USE_PORT: 3000
             },
-            stage: {
-                NODE_ENV: 'stage',
-                API_URL: 'https://app.lattice-engines.com',
-                COMPRESSED: true,
-                USE_PORT: 8080
-            },
             production: {
                 NODE_ENV: 'production',
                 API_URL: false,  // load balancer will handle api routing
-                USE_PORT: 8080,
+                USE_PORT: 3000,
                 COMPRESSED: true,
                 WHITELIST: [
                     '10.0.0.1',
