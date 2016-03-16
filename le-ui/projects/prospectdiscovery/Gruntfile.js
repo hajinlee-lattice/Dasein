@@ -280,6 +280,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', [
         'clean:build',
+        'sass:dev',
         'html2js',
         'copy:dist',
         'useminPrepare',
