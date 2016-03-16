@@ -186,11 +186,11 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         CustomerSpace space = CustomerSpace.parse(command.getDeploymentExternalId());
         DataInterfaceSubscriber subscriber = new DataInterfaceSubscriber(interfaceName, space);
 
-        Path relativePath = new Path(zkArtifactsPath + "ScoreDerivation.json");
+        Path relativePath = new Path(zkArtifactsPath + "scorederivation.json");
         Document document = subscriber.get(relativePath);
         Assert.assertEquals(document.getData(), scoreDerivationContents);
 
-        relativePath = new Path(zkArtifactsPath + "DataComposition.json");
+        relativePath = new Path(zkArtifactsPath + "datacomposition.json");
         document = subscriber.get(relativePath);
         Assert.assertEquals(document.getData(), dataCompositionContents);
     }
