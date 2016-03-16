@@ -131,8 +131,10 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     private void addMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         // Ensure all non-tranform keys are represented in the record
         for (String fieldName : fieldSchemas.keySet()) {
-            if (!record.containsKey(fieldName)) {
-                record.put(fieldName, null);
+            if (fieldSchemas.get(fieldName).source != FieldSource.TRANSFORMS) {
+                if (!record.containsKey(fieldName)) {
+                    record.put(fieldName, null);
+                }
             }
         }
         log.info(JsonUtils.serialize(record));
