@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -139,9 +140,9 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
             }
         }
         
-        List<TransformDefinition> transformDefinitions = table.getRealTimeTransformationMetadata();
-        assertEquals(transformDefinitions.size(), 1);
-        TransformDefinition transform = transformDefinitions.get(0);
+        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transformDefinitions = table.getRealTimeTransformationMetadata();
+        assertEquals(transformDefinitions.getValue().size(), 1);
+        TransformDefinition transform = transformDefinitions.getValue().get(0);
         assertEquals(transform.name, "encoder");
         assertEquals(transform.type, FieldType.LONG);
         assertEquals(transform.arguments.get("column"), "Domain");
