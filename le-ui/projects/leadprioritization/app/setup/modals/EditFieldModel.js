@@ -2,7 +2,6 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.modals.UpdateFieldsModal'
 ])
@@ -22,7 +21,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
 
 })
 
-.controller('EditFieldController', function ($scope, $state, ResourceUtility, BrowserStorageUtility, StringUtility,
+.controller('EditFieldController', function ($scope, $state, ResourceUtility, StringUtility,
                                               SetupUtility, UpdateFieldsModal) {
     $scope.manageFieldsScope.showFieldDetails = true;
     $scope.ResourceUtility = ResourceUtility;
@@ -33,6 +32,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     $scope.fundamentalTypesToSelect = $scope.$parent.FundamentalTypeOptions;
     $scope.statisticalTypesToSelect = $scope.$parent.StatisticalTypeOptions;
     $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
+    $scope.fieldCopy = angular.copy($scope.field);
 
     $scope.saveClicked = function($event) {
         if ($event != null) {
@@ -43,8 +43,9 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
         $scope.saveInProgress = true;
         $scope.showEditFieldError = false;
 
-        UpdateFieldsModal.show($scope.modelSummaryId, [$scope.field]);
         $scope.saveInProgress = false;
+        $scope.manageFieldsScope.showFieldDetails = false;
+        $scope.$emit(SetupUtility.LOAD_FIELDS_EVENT, $scope.fieldCopy, $scope.field);
     };
 
     $scope.cancelClicked = function($event) {

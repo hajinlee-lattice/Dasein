@@ -20,6 +20,8 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     $scope.fieldAttributes = [];
     $scope.eventTableName = $scope.data.EventTableProvenance.EventTableName;
     $scope.modelSummaryId = $scope.data.ModelId;
+    $scope.dirtyRows = {};
+    $scope.indexToOldFields = {};
 
     getOptionsAndFields();
 
@@ -73,8 +75,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     }
 
     function renderGrid(fields) {
-        $scope.dirtyRows = {};
-
         var grid = $("#fieldsGrid").data("kendoGrid");
         if (grid != null && grid.dataSource != null) {
             var state = kendo.stringify({
@@ -308,6 +308,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             $event.preventDefault();
         }
 
+        $scope.showEditFieldsError = false;
         $scope.batchEdit = true;
     };
 
@@ -316,44 +317,63 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             $event.preventDefault();
         }
 
-        if ($scope.saveInProgress) { return; }
-        $scope.saveInProgress = true;
+        $scope.batchEdit = false;
         $scope.showEditFieldsError = false;
-
-        var editedData = getEditedData();
-        if (editedData != null && editedData.length > 0) {
-            UpdateFieldsModal.show($scope.modelSummaryId, editedData);
-
-            $scope.saveInProgress = false;
-        } else {
-            $scope.batchEdit = false;
-            $scope.saveInProgress = false;
-        }
+        $scope.saveInProgress = false;
     };
 
-    $scope.cancelClicked = function($event) {
+    $scope.discardChangesClicked = function($event) {
         if ($event != null) {
             $event.preventDefault();
         }
 
         if ($scope.saveInProgress) { return; }
 
-        var editedData = getEditedData();
+        var editedData = getAllEditedData();
         if (editedData != null && editedData.length > 0) {
             DiscardEditFieldsModel.show($scope);
         } else {
-            $scope.discardChanges();
+            $scope.showEditFieldsError = true;
+            $scope.editFieldsErrorMessage = "No fields changed. Cannot discard changes.";
         }
     };
 
-    $scope.discardChanges = function () {
+    $scope.remodelClicked = function($event) {
+        if ($scope.saveInProgress) { return; }
+        $scope.showEditFieldsError = false;
+
+        var editedData = getAllEditedData();
+        if (editedData != null && editedData.length > 0) {
+            UpdateFieldsModal.show($scope.modelSummaryId, editedData);
+
+            $scope.saveInProgress = false;
+        } else {
+            $scope.showEditFieldsError = true;
+            $scope.editFieldsErrorMessage = "No fields changed. Plesae update fields before cloning";
+        }
+    };
+
+    function discardChangesOnPage() {
         $("#fieldsGrid").data("kendoGrid").cancelChanges();
         $scope.showEditFieldsError = false;
         $scope.batchEdit = false;
         $scope.dirtyRows = {};
     };
 
+    $scope.discardAllChanges = function() {
+        discardChangesOnPage();
+
+        for (var index in $scope.indexToOldFields) {
+            $scope.fields[index] = $scope.indexToOldFields[index];
+        }
+        $scope.indexToOldFields = {};
+
+        renderSelects($scope.fields);
+        renderGrid($scope.fields);
+    };
+
     $scope.textboxClicked = function ($event) {
+        $scope.showEditFieldsError = false;
         if ($scope.activeTextbox != $event.target) {
             $event.target.select();
             $scope.activeTextbox = $event.target;
@@ -365,6 +385,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             $event.preventDefault();
         }
 
+        $scope.showEditFieldsError = false;
         var dirtyRow = $scope.dirtyRows[dataItem.uid] || {};
         if (dirtyRow[field] == null) {
             dirtyRow[field] = { dirty: true, ov: originalValue };
@@ -383,24 +404,21 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
     };
 
-    function getNewTableFields() {
-        var newTable = getEditedData();
-        var grid = $("#fieldsGrid").data("kendoGrid");
-        var uneditedFields = $.grep(grid.dataSource.data(), function(item) {
-            return ! item.dirty;
-        });
-
-        for (var i = 0; i < uneditedFields.length; i++) {
-            newTable.push(uneditedFields[i]);
-        }
-        return newTable;
-    }
-
-    function getEditedData() {
+    function getEditedDataOnPage() {
         var grid = $("#fieldsGrid").data("kendoGrid");
         return $.grep(grid.dataSource.data(), function(item) {
             return item.dirty;
         });
+    }
+
+    function getAllEditedData() {
+        var editedData = getEditedDataOnPage();
+
+        for (var index in $scope.indexToOldFields) {
+            editedData.push($scope.indexToOldFields[index]);
+        }
+
+        return editedData;
     }
 
     $scope.isChanged = function (uid, field) {
@@ -416,8 +434,29 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         EditFieldModel.show(field, $scope);
     };
 
-    $scope.$on(SetupUtility.LOAD_FIELDS_EVENT, function (event, data) {
-        loadFields();
+    var attributesEditable = [ 'DisplayName', 'Description', 'ApprovedUsage', 'DisplayDiscretization', 'FundamentalType', 'StatisticalType' ];
+
+    function hasFieldChanged(oldField, newField) {
+        for (var i = 0; i < attributesEditable.length; i++) {
+            if (oldField[attributesEditable[i]] != newField[attributesEditable[i]]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    $scope.$on(SetupUtility.LOAD_FIELDS_EVENT, function (event, oldField, newField) {
+        $scope.loading = true;
+
+        if (hasFieldChanged(oldField, newField)) {
+            for (var i = 0; i < $scope.fields.length; i++) {
+                if ($scope.fields[i]['ColumnName'] == newField['ColumnName']) {
+                    $scope.indexToOldFields[i] = oldField;
+                    $scope.fields[i] = newField;
+                }
+            }
+        }
+        $scope.loading = false;
     });
 
     $scope.isEmpty = function(value) {

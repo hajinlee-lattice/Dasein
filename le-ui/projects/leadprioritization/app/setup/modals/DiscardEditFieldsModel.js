@@ -38,7 +38,7 @@ angular.module('mainApp.setup.controllers.DiscardEditFieldsModel', [
             $event.preventDefault();
         }
 
-        $scope.manageFieldsScope.discardChanges();
+        $scope.manageFieldsScope.discardAllChanges();
         $("#modalContainer").modal('hide');
     };
 

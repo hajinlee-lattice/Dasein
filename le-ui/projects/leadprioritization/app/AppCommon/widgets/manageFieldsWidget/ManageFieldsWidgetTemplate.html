@@ -14,16 +14,13 @@
         <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{editFieldsErrorMessage}}</span>
         <button class="close btn btn-link" data-ng-click="showEditFieldsError = false;"><i class="fa fa-times fa-inverse"></i></button>
     </div>
-    <div class="global-error local-error" data-ng-show="showBuildModelError">
-        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{buildModelErrorMessage}}</span>
-        <button class="close btn btn-link" data-ng-click="showBuildModelError = false;"><i class="fa fa-times fa-inverse"></i></button>
-    </div>
     <div data-ng-hide="loading || showFieldDetails || saveInProgress || showLoadingError">
         <div class="title">
             <h2>{{ResourceUtility.getString('SETUP_NAV_NODE_MANAGE_FIELDS')}}</h2>
             <div class="button-area">
-                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_UPDATE_AND_CLONE_LABEL')}}</button>
-                <button id="manage-fields-cancel" data-ng-click="cancelClicked($event)" data-ng-show="batchEdit" class="btn btn-secondary">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                <button id="manage-fields-save" data-ng-click="saveClicked($event)" data-ng-show="batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
+                <button id="manage-fields-remodel" data-ng-click="remodelClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</button>
+                <button id="manage-fields-discard" data-ng-click="discardChangesClicked($event)" data-ng-show="!batchEdit" class="btn btn-secondary">{{ResourceUtility.getString('BUTTON_DISCARD_CHANGES_LABEL')}}</button>
                 <button id="manage-fields-edit" data-ng-click="editClicked($event)" data-ng-show="!batchEdit" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_EDIT_LABEL')}}</button>
             </div>
         </div>
