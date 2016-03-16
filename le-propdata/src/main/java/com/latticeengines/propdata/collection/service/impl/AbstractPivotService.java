@@ -43,15 +43,4 @@ public abstract class AbstractPivotService extends AbstractRefreshService implem
         return null;
     }
 
-    @Override
-    protected void createIndicesOnStageTable() {
-        if (getSource() instanceof DomainBased) {
-            String domainField = ((DomainBased) getSource()).getDomainField();
-            jdbcTemplateCollectionDB.execute(
-                    "CREATE CLUSTERED INDEX IX_DOMAIN ON [" + getStageTableName() + "] " +
-                            "([" + domainField + "])");
-        }
-        super.createIndicesOnStageTable();
-    }
-
 }
