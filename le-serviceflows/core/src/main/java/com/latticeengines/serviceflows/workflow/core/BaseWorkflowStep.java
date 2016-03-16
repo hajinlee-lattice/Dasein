@@ -25,6 +25,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -111,8 +113,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     
     private String getDataCompositionContents(Table eventTable) {
         DataComposition dataComposition = new DataComposition();
-        dataComposition.fields = new HashMap<>();
-        dataComposition.transforms = eventTable.getRealTimeTransformationMetadata();
+        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transforms = eventTable.getRealTimeTransformationMetadata();
+        dataComposition.fields = transforms.getKey();
+        dataComposition.transforms = transforms.getValue();
         return JsonUtils.serialize(dataComposition);
     }
 
