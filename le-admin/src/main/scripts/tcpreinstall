@@ -1,5 +1,6 @@
 #!/bin/bash
-rm -rf $CATALINA_HOME/webapps_admin/*.war
+source /etc/profile
+rm -rf $CATALINA_HOME/webapps/admin/*.war
 rm -rf /tmp/webapps/admin/le-admin-*.war
 rm -rf /etc/ledp/admin.properties
 rm -rf /etc/ledp/db.properties

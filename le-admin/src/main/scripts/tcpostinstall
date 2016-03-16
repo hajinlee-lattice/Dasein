@@ -14,7 +14,7 @@ then
     VERSION=$VERSION-"SNAPSHOT"
 fi
 
-cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps_admin/admin\#\#$VERSION.war
+cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps/admin/admin\#\#$VERSION.war
 cp /etc/ledp/admin/$ENV_TYPE/*.properties /etc/ledp/
 cp /etc/ledp/admin/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
 cp /etc/ledp/admin/$ENV_TYPE/404.html /etc/ledp/

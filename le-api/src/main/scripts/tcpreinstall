@@ -1,5 +1,6 @@
 #!/bin/bash
-rm -rf $CATALINA_HOME/webapp_api/*.war
+source /etc/profile
+rm -rf $CATALINA_HOME/webapps/api/*.war
 rm -rf /tmp/webapps/api/le-api-*.war
 rm -rf /etc/ledp/api.properties
 rm -rf /etc/ledp/api

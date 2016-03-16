@@ -1,5 +1,6 @@
 #!/bin/bash
-rm -rf $CATALINA_HOME/webapp_pls/le-pls-*.war
+source /etc/profile
+rm -rf $CATALINA_HOME/webapps/pls/le-pls-*.war
 rm -rf /tmp/webapps/pls/le-pls-*.war
 rm -rf /etc/ledp/db.properties
 rm -rf /etc/ledp/pls.properties

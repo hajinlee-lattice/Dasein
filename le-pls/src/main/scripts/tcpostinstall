@@ -14,7 +14,7 @@ then
 fi
 
 echo "copying files from temporary folders"
-cp le-pls-*.war $CATALINA_HOME/webapp_pls/pls\#\#$VERSION.war
+cp le-pls-*.war $CATALINA_HOME/webapps/pls/pls\#\#$VERSION.war
 cp /etc/ledp/pls/$ENV_TYPE/*.properties /etc/ledp/
 cp /etc/ledp/pls/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
 

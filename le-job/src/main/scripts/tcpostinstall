@@ -1,4 +1,5 @@
 #!/bin/bash -x
+source /etc/profile
 echo "getting environment information"
 echo $ENV_TYPE
 echo $CATALINA_HOME
@@ -13,7 +14,7 @@ then
 fi
 
 echo "copying files"
-cp le-job-*.war $CATALINA_HOME/webapp_job/job\#\#$VERSION.war
+cp le-job-*.war $CATALINA_HOME/webapps/job/job\#\#$VERSION.war
 cp /etc/ledp/job/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"

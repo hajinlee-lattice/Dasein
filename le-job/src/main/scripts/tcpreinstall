@@ -1,4 +1,6 @@
 #!/bin/bash
+source /etc/profile
+rm -rf  $CATALINA_HOME/webapps/job/*.war
 rm -rf /tmp/webapps/job/le-job-*.war
 rm -rf /etc/ledp/job.properties
 rm -rf /etc/ledp/dataplatform.properties
