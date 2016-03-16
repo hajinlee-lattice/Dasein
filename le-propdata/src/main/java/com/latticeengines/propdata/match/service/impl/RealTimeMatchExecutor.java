@@ -385,8 +385,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         return matchContext;
     }
 
-    private Matc..
-    hContext appendMetadata(MatchContext matchContext) {
+    private MatchContext appendMetadata(MatchContext matchContext) {
         if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
             List<ColumnMetadata> allFields = columnMetadataService
                     .fromPredefinedSelection(ColumnSelection.Predefined.Model);
