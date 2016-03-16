@@ -1,12 +1,15 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.Basic;
@@ -48,6 +51,9 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -383,8 +389,9 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
 
     @SuppressWarnings("unchecked")
     @Transient
-    public List<TransformDefinition> getRealTimeTransformationMetadata() {
+    public Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> getRealTimeTransformationMetadata() {
         List<TransformDefinition> rtsTransforms = new ArrayList<>();
+        Map<String, FieldSchema> fields = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         for (Attribute attr : getAttributes()) {
             if (!attr.getRTS()) {
@@ -401,7 +408,101 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
                 throw new RuntimeException(e);
             }
         }
-        return rtsTransforms;
+        
+        Set<String> requestTargets = new HashSet<>();
+        for (Attribute attr : getAttributes()) {
+            requestTargets.add(attr.getName());
+        }
+        for (TransformDefinition rtsTransform : rtsTransforms) {
+            String output = rtsTransform.output;
+            boolean equal = false;
+            for (Object argument : rtsTransform.arguments.values()) {
+                String argumentAsString = (String) argument;
+                if (output.equals(argumentAsString)) {
+                    equal = true;
+                }
+            }
+            if (!equal) {
+                requestTargets.remove(output);
+            }
+        }
+        for (Attribute attr : getAttributes()) {
+            fields.put(attr.getName(), createField(attr, requestTargets.contains(attr.getName())));
+        }
+        return new AbstractMap.SimpleEntry<>(fields, rtsTransforms);
+    }
+    
+    
+    
+    private FieldSchema createField(Attribute attr, boolean request) {
+        // Same logic as datacompositiongenerator.py
+        FieldSchema fieldSchema = new FieldSchema();
+        
+        List<String> tags = attr.getTags();
+        if (tags != null && !tags.isEmpty() && tags.get(0).equals("External")) {
+            fieldSchema.source = FieldSource.PROPRIETARY;
+        } else if (request) {
+            fieldSchema.source = FieldSource.REQUEST;
+        } else {
+            fieldSchema.source = FieldSource.TRANSFORMS;
+        }
+        
+        String avroType = attr.getPhysicalDataType();
+        FieldType type = null;
+        
+
+        if (avroType.equals("boolean")) {
+            type = FieldType.BOOLEAN;
+        } else if (avroType.equals("int") || avroType.equals("long")) {
+            type = FieldType.INTEGER;
+        } else if (avroType.equals("float") || avroType.equals("double")) {
+            type = FieldType.FLOAT;
+        } else {
+            type = FieldType.STRING;
+        }
+        fieldSchema.type = type;
+        
+        String name = attr.getName();
+        
+        if (name.equals("Id") || name.equals("LeadID") || name.equals("ExternalId")) {
+            fieldSchema.interpretation = FieldInterpretation.ID;
+        } else if (name.equals("Event")) {
+            fieldSchema.interpretation = FieldInterpretation.EVENT;
+        } else if (name.equals("Domain")) {
+            fieldSchema.interpretation = FieldInterpretation.DOMAIN;
+        } else if (name.equals("LastModifiedDate")) {
+            fieldSchema.interpretation = FieldInterpretation.LAST_MODIFIED_DATE;
+        } else if (name.equals("CreatedDate")) {
+            fieldSchema.interpretation = FieldInterpretation.CREATED_DATE;
+        } else if (name.equals("FirstName")) {
+            fieldSchema.interpretation = FieldInterpretation.FIRST_NAME;
+        } else if (name.equals("LastName")) {
+            fieldSchema.interpretation = FieldInterpretation.LAST_NAME;
+        } else if (name.equals("Title")) {
+            fieldSchema.interpretation = FieldInterpretation.TITLE;
+        } else if (name.equals("Email")) {
+            fieldSchema.interpretation = FieldInterpretation.EMAIL_ADDRESS;
+        } else if (name.equals("City")) {
+            fieldSchema.interpretation = FieldInterpretation.COMPANY_CITY;
+        } else if (name.equals("State")) {
+            fieldSchema.interpretation = FieldInterpretation.COMPANY_STATE;
+        } else if (name.equals("PostalCode")) {
+            fieldSchema.interpretation = FieldInterpretation.POSTAL_CODE;
+        } else if (name.equals("Country")) {
+            fieldSchema.interpretation = FieldInterpretation.COMPANY_COUNTRY;
+        } else if (name.equals("PhoneNumber")) {
+            fieldSchema.interpretation = FieldInterpretation.PHONE_NUMBER;
+        } else if (name.equals("Website")) {
+            fieldSchema.interpretation = FieldInterpretation.WEBSITE;
+        } else if (name.equals("CompanyName")) {
+            fieldSchema.interpretation = FieldInterpretation.COMPANY_NAME;
+        } else if (name.equals("Industry")) {
+            fieldSchema.interpretation = FieldInterpretation.INDUSTRY;
+        } else {
+            fieldSchema.interpretation = FieldInterpretation.FEATURE;
+        }
+
+        return fieldSchema;
     }
 
     @Transient

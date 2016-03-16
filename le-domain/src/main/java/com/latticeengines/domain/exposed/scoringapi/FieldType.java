@@ -23,11 +23,6 @@ public enum FieldType {
         }
     }
 
-    public static void main(String[] args) {
-//        Boolean.valueOf("hola");
-    }
-
-
     private FieldType(Class<?> type) {
         this.type = type;
     }
