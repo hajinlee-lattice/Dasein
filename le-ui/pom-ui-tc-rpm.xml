@@ -42,55 +42,6 @@
                                 </source>
                             </sources>
                         </mapping>
-                        
-                        <mapping>
-                            <directory>/opt/node/latest/ui/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>build</username>
-                            <groupname>build</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclusterb/ENV_VARS</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/opt/node/latest/ui/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>build</username>
-                            <groupname>build</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclusterb/ENV_VARS</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/opt/node/latest/ui/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>build</username>
-                            <groupname>build</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclustera/ENV_VARS</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/opt/node/latest/ui/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>build</username>
-                            <groupname>build</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclustera/ENV_VARS</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/resources/scripts/tcpreremove</scriptFile>
