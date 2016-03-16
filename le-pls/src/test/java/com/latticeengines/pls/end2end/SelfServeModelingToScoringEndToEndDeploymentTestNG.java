@@ -14,7 +14,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +66,8 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @Value("${pls.scoringapi.rest.endpoint.hostport}")
     private String scoringApiHostPort;
 
+    private String fileName = "Mulesoft_SFDC_LP3_1000.csv";
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
@@ -74,7 +75,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         Tenant tenant = selfServiceModeling.getTenant();
         System.out.println(tenant);
         String accessToken = getAccessToken(tenant.getId());
-        // String accessToken = "c2b9e2dd-0692-462a-a900-eaaeb9e43e85";
+        // String accessToken = "01e4019e-81fb-40a7-b643-2288cf13c36d";
         System.out.println("access_token: " + accessToken);
         AuthorizationHeaderHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(
                 accessToken);
@@ -83,6 +84,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
 
     @Test(groups = "deployment.lp", enabled = true)
     public void testEndToEnd() throws InterruptedException, IOException {
+        selfServiceModeling.setFileName(fileName);
         selfServiceModeling.uploadFile();
         selfServiceModeling.resolveMetadata();
         selfServiceModeling.createModel();
@@ -96,8 +98,8 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         JobStatus modelingJobStatus = modelProxy.getJobStatus(modelingAppId);
         String modelResultDir = modelingJobStatus.getResultDirectory();
         // String modelResultDir =
-        // "/user/s-analytics/customers/DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production/models/RunMatchWithLEUniverse_152044_DerivedColumnsCache_with_std_attrib/95a410c5-7278-44ce-9740-380c3ec340a9/1457979567285_0016";
-        // String modelId = "ms__95a410c5-7278-44ce-9740-380c3ec340a9-SelfServ";
+        // "/user/s-analytics/customers/DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production/models/RunMatchWithLEUniverse_152089_DerivedColumnsCache_with_std_attrib/9e3a9f01-73f4-43c5-b1e7-f09699ae4b06/1457979567285_0027";
+        // String modelId = "ms__9e3a9f01-73f4-43c5-b1e7-f09699ae4b06-SelfServ";
         System.out.println("modeling result dir: " + modelResultDir);
         saveExpectedScores(modelResultDir);
 
@@ -114,6 +116,9 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         for (String warning : largeScoreVarianceList) {
             System.out.println(warning);
         }
+        System.out.println("Number of records compared:" + records.size());
+        System.out.println("Number of records having scores largely different from modeling scores:"
+                + largeScoreVarianceList.size());
         assertTrue(largeScoreVarianceList.size() < records.size(),
                 "All Scores have high variance after comparing with modeling scores");
 
@@ -134,7 +139,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         Set<String> ids = expectedScores.keySet();
         System.out.println("ids: " + ids);
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-        ClassPathResource csvResource = new ClassPathResource(RESOURCE_BASE + "/Mulesoft_SFDC_LP3_1000.csv");
+        ClassPathResource csvResource = new ClassPathResource(RESOURCE_BASE + "/" + fileName);
         try (CSVParser parser = new CSVParser(new InputStreamReader(new BOMInputStream(csvResource.getInputStream())),
                 format)) {
             for (CSVRecord csvRecord : parser) {
@@ -143,17 +148,10 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
                     Map<String, Object> scoreRecord = new HashMap<>();
                     for (Field field : fields) {
                         String fieldName = field.getFieldName();
-                        String csvHeader = getCSVHeader(fieldName);
-                        if (!fieldName.equals(SemanticType.Domain.name())) {
-                            scoreRecord.put(fieldName, csvRecord.get(csvHeader));
-                        } else {
-                            String email = csvRecord.get(SemanticType.Email.name());
-                            String domain = StringUtils.substringAfter(email, "@");
-                            scoreRecord.put(fieldName, domain);
-                        }
-                        if (csvRecord.get(csvHeader).equals("")
-                                || csvHeader.equalsIgnoreCase(SemanticType.CreatedDate.name())
-                                || csvHeader.equalsIgnoreCase(SemanticType.LastModifiedDate.name())) {
+                        scoreRecord.put(fieldName, csvRecord.get(fieldName));
+                        if (csvRecord.get(fieldName).equals("")
+                                || fieldName.equalsIgnoreCase(SemanticType.CreatedDate.name())
+                                || fieldName.equalsIgnoreCase(SemanticType.LastModifiedDate.name())) {
                             scoreRecord.put(fieldName, null);
                         }
                     }
@@ -162,19 +160,6 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
             }
         }
         return records;
-    }
-
-    private String getCSVHeader(String fieldName) {
-        if (fieldName.equals(SemanticType.CompanyName.name())) {
-            return "CompanyName";
-        } else if (fieldName.equals(SemanticType.Event.name())) {
-            return "Event";
-        } else if (fieldName.equals(SemanticType.PhoneNumber.name())) {
-            return "PhoneNumber";
-        } else if (fieldName.endsWith(SemanticType.IsClosed.name())) {
-            return "IsClosed";
-        }
-        return fieldName;
     }
 
     private String getAccessToken(String tenantId) {

@@ -63,6 +63,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
+    private String fileName;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -83,6 +84,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         log.info("Test environment setup finished.");
         System.out.println("Test environment setup finished.");
+
+        fileName = "Mulesoft_SFDC_LP3_1000.csv";
     }
 
     private void deleteTwoTenants() throws Exception {
@@ -93,11 +96,15 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
-        map.add("file", new ClassPathResource(RESOURCE_BASE + "/Mulesoft_SFDC_LP3_1000.csv"));
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
