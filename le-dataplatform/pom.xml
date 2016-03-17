@@ -15,7 +15,6 @@
         <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.22-SNAPSHOT</le.scheduler.version>
         <le.camille.version>2.0.22-SNAPSHOT</le.camille.version>
-	<le.baton.version>2.0.22-SNAPSHOT</le.baton.version>
         <le.monitor.version>2.0.22-SNAPSHOT</le.monitor.version>
         <le.remote.version>2.0.22-SNAPSHOT</le.remote.version>
         <le.swlib.version>2.0.22-SNAPSHOT</le.swlib.version>
@@ -88,7 +87,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.19.1</version>
+                        <version>${maven.surefire.version}</version>
                         <executions>
                             <execution>
                                 <id>unit-test</id>
@@ -141,7 +140,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.19.1</version>
+                        <version>${maven.surefire.version}</version>
                         <executions>
                             <execution>
                                 <id>unit-test</id>
@@ -471,12 +470,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
-            <classifier>intf</classifier>
-        </dependency>
-	<dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-baton</artifactId>
-            <version>${le.baton.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>

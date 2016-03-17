@@ -8,13 +8,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Joiner;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
@@ -62,6 +68,49 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
         setupDBConfig();
         int featureThreshold = 30;
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, featureThreshold);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
+                command, commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, command,
+                commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, command,
+                commandParameters);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
+
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, command,
+                commandParameters);
+        waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
+    }
+
+    @Test(groups = "functional")
+    public void testModelSelectionUsingCamille(String customer) throws Exception{
+        int featureThreshold = -1;
+        String modelingServiceName = "Modeling";
+
+        Camille camille = CamilleEnvironment.getCamille();
+        Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(customer), modelingServiceName);
+        try {
+            camille.delete(docPath);
+        } catch (Exception e) {
+        }
+
+        Path featuresThresholdDocPath = docPath.append("FeaturesThreshold");
+        try {
+            camille.create(featuresThresholdDocPath, new Document(String.valueOf(featureThreshold)), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (Exception e) {
+            log.error("Failed to create FeaturesThreshold document in Camille. " + e.toString());
+        }
+
+        cleanUpHdfs("Nutanix");
+        cleanUpHdfs(CustomerSpace.parse("Nutanix").toString());
+        setupDBConfig();
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(1L, featureThreshold);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 

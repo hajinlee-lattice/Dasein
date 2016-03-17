@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,17 +8,27 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
@@ -35,6 +46,8 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 
 @Component("modelStepYarnProcessor")
 public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
+
+    private static final Log log = LogFactory.getLog(ModelStepYarnProcessorImpl.class);
 
     private static final String AVRO = "avro";
     private static final String SAMPLENAME_PREFIX = "s";
@@ -75,6 +88,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Autowired
     private DataLoaderService dataLoaderService;
+
+    private final static String FEATURES_THRESHOLD = "FeaturesThreshold";
+    private final static String MODELING_SERVICE_NAME = "Modeling";
 
     @VisibleForTesting
     void setDBConfig(String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, String dbType) {
@@ -309,12 +325,53 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
         model.setProvenanceProperties(generateProvenanceProperties(commandParameters));
+        setModelConfigurationFromCamille(model, customer);
         model.setFeaturesThreshold(generateFeatureThreshold(commandParameters));
 
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
 
         return model;
+    }
+
+    private void setModelConfigurationFromCamille(Model model, String deploymentExternalId) {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode featuresThresholdNode = null;
+        try {
+            Document document = getFeatureThresholdConfigDocumentDirectory(CustomerSpace.parse(deploymentExternalId).toString());
+            String featuresThresholdDocument = document.getData();
+            featuresThresholdNode = mapper.readTree(featuresThresholdDocument);
+            int featureThreshold = featuresThresholdNode.asInt();
+            if(featureThreshold < 1) {
+                //-1 is a special value for features threshold. -1 instructs the model to use all features
+                //This if block checks if the value has been set to 0 or <1, and in that case, sets it to the special value of -1.
+                model.setFeaturesThreshold(-1);
+            } else if (featureThreshold < 50) {
+                model.setFeaturesThreshold(-1);
+            }
+            else {
+                model.setFeaturesThreshold(featureThreshold);
+            }
+        } catch (JsonProcessingException e) {
+            log.error("Could not parse Features Threshold from JSON:" + featuresThresholdNode + e.toString());
+        } catch (IOException e) {
+            log.error("IO Error getting features threshold:" + featuresThresholdNode + e.toString());
+        } catch(Exception e) {
+            log.error("Error getting features threshold:" + featuresThresholdNode + e.toString());
+        }
+    }
+
+    public Document getFeatureThresholdConfigDocumentDirectory(String customerSpace) {
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            Path docPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(),
+                    CustomerSpace.parse(customerSpace), MODELING_SERVICE_NAME);
+            docPath = docPath.append(FEATURES_THRESHOLD);
+            return camille.get(docPath);
+        } catch (Exception e) {
+            log.error("Error getting features threshold configs from Cusomter Space:" + customerSpace);
+            return null;
+        }
     }
 
     private void addTemplateVersion(ModelCommandParameters commandParameters) {
