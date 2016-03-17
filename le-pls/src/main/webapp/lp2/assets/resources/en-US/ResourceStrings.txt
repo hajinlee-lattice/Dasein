@@ -93,6 +93,7 @@ ACCESS_LEVEL_EXTERNAL_ADMIN=Admin
 ACCESS_LEVEL_INTERNAL_USER=User
 ACCESS_LEVEL_INTERNAL_ADMIN=Lattice Admin
 ACCESS_LEVEL_SUPER_ADMIN=Super Admin
+ACCESS_LEVEL_THIRD_PARTY_USER=Third Party User
 ADD_USER_TITLE=Add A New User
 ADD_USER_MESSAGE=The new user's name will appear on your list after they accept your invitation.
 ADD_USER_ACCESS_LEVEL_LABEL=Access Level

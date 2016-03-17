@@ -5,11 +5,12 @@ var app = angular.module('mainApp.core.utilities.RightsUtility',
 app.service('RightsUtility', function (_, BrowserStorageUtility) {
 
     this.accessLevel = {
-        EXTERNAL_USER: {name: 'EXTERNAL_USER', ordinal: 0},
-        EXTERNAL_ADMIN: {name: 'EXTERNAL_ADMIN', ordinal: 1},
-        INTERNAL_USER: {name: 'INTERNAL_USER', ordinal: 2},
-        INTERNAL_ADMIN: {name: 'INTERNAL_ADMIN', ordinal: 3},
-        SUPER_ADMIN: {name: 'SUPER_ADMIN', ordinal: 4}
+        THIRD_PARTY_USER: {name: 'THIRD_PARTY_USER', ordinal: 0},
+        EXTERNAL_USER: {name: 'EXTERNAL_USER', ordinal: 1},
+        EXTERNAL_ADMIN: {name: 'EXTERNAL_ADMIN', ordinal: 2},
+        INTERNAL_USER: {name: 'INTERNAL_USER', ordinal: 3},
+        INTERNAL_ADMIN: {name: 'INTERNAL_ADMIN', ordinal: 4},
+        SUPER_ADMIN: {name: 'SUPER_ADMIN', ordinal: 5}
     };
 
     this.getAccessLevel = function(s) {
