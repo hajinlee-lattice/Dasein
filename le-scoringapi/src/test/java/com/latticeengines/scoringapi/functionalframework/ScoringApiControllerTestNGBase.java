@@ -33,7 +33,7 @@ import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBase {
 
-    protected static final String TEST_MODEL_FOLDERNAME = "2MulesoftAllRows20160314_112802";
+    protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
 
     protected static final String MODEL_ID = "ms__" + TEST_MODEL_FOLDERNAME +"_";
     protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME +"/";
@@ -69,7 +69,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
 
     protected InternalResourceRestApiProxy plsRest = null;
 
-    protected DataComposition dataComposition;
+    protected DataComposition eventTableDataComposition;
 
     protected OAuthUser oAuthUser;
 
@@ -156,7 +156,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
                 .getSystemResource(LOCAL_MODEL_PATH + "metadata-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
         URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.PMML_FILENAME);
-        URL dataCompositionUrl = ClassLoader
+        URL dataScienceDataCompositionUrl = ClassLoader
                 .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL scoreDerivationUrl = ClassLoader
                 .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
@@ -171,16 +171,16 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, eventTableDataCompositionUrl.getFile(), artifactTableDir
                 + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelJsonUrl.getFile(), artifactBaseDir
-                + "allRows_1_2016-03-10_21-12_model.json");
+                + TEST_MODEL_FOLDERNAME + "_model.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, rfpmmlUrl.getFile(), artifactBaseDir + ModelRetrieverImpl.PMML_FILENAME);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataCompositionUrl.getFile(), enhancementsDir
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataScienceDataCompositionUrl.getFile(), enhancementsDir
                 + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, scoreDerivationUrl.getFile(), enhancementsDir
                 + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 
-        String dataCompositionContents = Files.toString(new File(dataCompositionUrl.getFile()),
+        String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());
-        dataComposition = JsonUtils.deserialize(dataCompositionContents, DataComposition.class);
+        eventTableDataComposition = JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class);
     }
 
     protected ScoreRequest getScoreRequest() throws IOException {

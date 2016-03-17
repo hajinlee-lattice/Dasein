@@ -44,11 +44,17 @@ public class RecordTransformer {
                 record.put(entry.output, value);
                 result.put(entry.output, value);
             } else {
-                log.info(String.format("Problem invoking %s", entry.name), failedInvocationException);
+                System.out.println(String.format("Problem invoking %s", entry.name));
+                failedInvocationException.printStackTrace();
+                if (log.isWarnEnabled()) {
+                    log.warn(String.format("Problem invoking %s", entry.name), failedInvocationException);
+                }
             }
         }
 
-        log.info(JsonUtils.serialize(result));
+        if (log.isDebugEnabled()) {
+            log.debug(JsonUtils.serialize(result));
+        }
         return result;
     }
 

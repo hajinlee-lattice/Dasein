@@ -87,13 +87,17 @@ public class ModelEvaluator {
         if (!nullFields.isEmpty()) {
             nullFieldsMsg = Joiner.on(",").join(nullFields);
             log.warn("Preevaluated fields with null values:" + nullFieldsMsg);
-            // TODO uncomment the below after working through all of the transform invoking exceptions
-//            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
+            // TODO uncomment the below after working through all of the
+            // transform invoking exceptions
+            // throw new ScoringApiException(LedpCode.LEDP_31104, new String[] {
+            // nullFieldsMsg });
         }
 
         Map<FieldName, ?> results = null;
         try {
-            log.info(JsonUtils.serialize(arguments));
+            if (log.isDebugEnabled()) {
+                log.debug(JsonUtils.serialize(arguments));
+            }
             results = evaluator.evaluate(arguments);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
@@ -141,7 +145,9 @@ public class ModelEvaluator {
             }
         }
 
-        log.info(JsonUtils.serialize(result));
+        if (log.isDebugEnabled()) {
+            log.debug(JsonUtils.serialize(result));
+        }
 
         return result;
     }

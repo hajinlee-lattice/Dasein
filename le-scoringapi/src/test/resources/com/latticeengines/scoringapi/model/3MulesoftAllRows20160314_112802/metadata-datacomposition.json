@@ -1,0 +1,3759 @@
+{
+    "fields": {
+        "Account_Classification__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "ActiveRetirementParticipants": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Activity_Count_Click_Email": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Click_Link": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Email_Bounced_Soft": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Fill_Out_Form": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Any": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Email": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Event": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Multiple": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Pricing": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Search": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_Webinar": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Interesting_Moment_key_web_page": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Open_Email": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Unsubscribe_Email": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Activity_Count_Visit_Webpage": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "AdvertisingTechnologiesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexLinksIn": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaAUPageViews": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaAURank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaAUUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaCAPageViews": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaCARank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaCAUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaCategories": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaDomains": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaGBPageViews": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaGBRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaGBUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaKeywords": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaLanguage": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaOnlineSince": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaReachPerMillion": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaReachRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaRelatedLinks": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaTimeseries_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "AlexaTitle": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AlexaUSPageViews": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaUSRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AlexaUSUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaViewsPerMillion": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaViewsPerUser": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AlexaViewsRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_Rank_12Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_Rank_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_Rank_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_Rank_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_Rank_PctChange_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_Rank_PctChange_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_Rank_PctChange_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_ReachRank_12Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ReachRank_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ReachRank_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ReachRank_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ReachRank_PctChange_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_ReachRank_PctChange_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_ReachRank_PctChange_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Alexa_ViewsRank_12Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ViewsRank_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ViewsRank_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ViewsRank_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Alexa_ViewsRank_PctChange_3Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_ViewsRank_PctChange_6Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Alexa_ViewsRank_PctChange_9Month": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "AnalyticsTechnologiesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AssetsStartOfYear": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "AudioVideoMediaTechnologiesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AwardCategory": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AwardWebsite": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "AwardYear": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Awards_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "BankruptcyFiled": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BuiltWith_Pivoted_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "BusinessAddress1": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessAnnualSalesAbs": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessCity": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessCompanyPhone": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessCountry": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessECommerceSite": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessEmail": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessEmailSuffix": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessEmployeesRange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessEstablishedMonth": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "BusinessEstablishedYear": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "BusinessEstimatedAnnualSales": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessEstimatedAnnualSales_k": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessEstimatedEmployees": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessFax": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessFirmographicsParentEmployees": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessFirmographicsParentRevenue": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessFocus": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessIndustry": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessIndustry2": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessLastSocialActivity": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessNAICSDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessName": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessPrimaryNAICS": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessPrimarySIC4Digit": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessRetirementParticipants": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessRevenueRange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessSICDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessSocialPresence": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessState": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesAds": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesAnalytics": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesCdn": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesCms": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesDocinfo": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesEncoding": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesFeeds": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesFirstDetected": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesFramework": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesHosting": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesJavascript": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesMapping": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesMarketingAutomation": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesMedia": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesMx": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesNs": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesOpenSourceAdoption": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesParked": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesPayment": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesRecentTags": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesRecentTechnologies": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesRecentlyDetected": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesSeoHeaders": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesSeoMeta": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesSeoTitle": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesServer": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesShop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesSocialMediaPresence": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessTechnologiesSsl": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesWebMaster": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesWebServer": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTechnologiesWidgets": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessTwitter": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessType": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessUltimateParentName": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessUrlNumPages": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "BusinessVCFunded": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessWebsite": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "BusinessZip": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CRMAlert": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "City": {
+            "interpretation": "COMPANY_CITY",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Citysearch_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "CloudTechnologies_AcademicEduMgmtSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ApplicationDevelopmentMgmt": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_AssetPerformanceManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_AutomatedProcessWorkflowSystems": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_BPM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_BusinessIntelligence": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CRM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CRM_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CRM_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CaseManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ChangeManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CloudInfrastructureComputing": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CloudService_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CloudService_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Collaboration": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CommTech_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CommTech_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Commerce": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CommunicationsTechnology": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Construction": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ConsumerElectronics": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ContactCenterManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_CustomerOrderManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DR": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DataArchivingBackUpRecovery": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DataCenterSolutions_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DataCenterSolutions_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DataManagementStorageHardware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DatabaseManagementSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DesignPublishing": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_DocumentManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EBS": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ECM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EDA": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EDI": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EPM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ERP": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Email": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EnterpriseApplications_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EnterpriseApplications_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EnterpriseContent_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EnterpriseContent_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_EnterpriseLearning": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_FinancialAnalyticalApplications": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_GRC": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_HRMS_HCM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_HardwareBasic_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_HardwareBasic_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_HardwareOther": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_HelpDeskManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Hypervisor": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ITGovernance_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ITGovernance_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ITInfrastructureOperations": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ITManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_IaaS": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_InventoryManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_LeanKaizenValueStreamMapping": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_LegalProfessionalServices": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MainframeComputers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ManufacturingEngineering": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MarketingPerfMgmt_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MarketingPerfMgmt_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MarketingPerformanceMeasurement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Media": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Medical": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MiddlewareSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MidrangeComputers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MobileEnterpriseManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_MobileTechnologies": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_NetworkComputing_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_NetworkComputing_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_NetworkManagementHardware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_NetworkManagementSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_NewTechnologyDetected": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CloudTechnologies_OSComputingLanguages": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_OVP": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_PLM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_PPM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_PaaS": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_PartnerManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Philanthropic": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Printers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Procurement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProductivitySltns_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProductivitySltns_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProductivitySolutions": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProjectManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProjectMgnt_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ProjectMgnt_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_QualityManagementSystem": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_RealEstate": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_RemoteComputerServerSolutions": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ReportingSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Retail": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SCM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SIEM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SRM": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SearchEngine": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ServerTechnologiesHardware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ServerTechnologiesSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_ServiceFieldSupportManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SocialMediaSystems": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SoftwareBasic_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SoftwareBasic_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SoftwareOther": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SustainabilityGreenEnterprise": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SystemAnalyticsMonitoring": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_SystemSecurityServices": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_Telephony": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_TravelandExpenseManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VerticalMarkets_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VerticalMarkets_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VirtualizationAppDesktop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VirtualizationPlatformMgmt": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VirtualizationServerDataCenter": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_VisualizationSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_WCMS": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_WebOrntdArch_One": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_WebOrntdArch_Two": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "CloudTechnologies_WebPortalTechnology": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Cloud_Plan__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Company": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "CompanyName": {
+            "interpretation": "COMPANY_NAME",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "CompanyName_Entropy": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "FLOAT"
+        },
+        "CompanyName_Length": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "INTEGER"
+        },
+        "CompeteDate": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CompeteDate2": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CompeteDate3": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CompeteUniqueVisitors": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CompeteUniqueVisitors2": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "CompeteUniqueVisitors3": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Compete_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "ConsolidatedIndustry": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ContentDeliveryNetworksTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ContentManagementSystemsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Country": {
+            "interpretation": "COMPANY_COUNTRY",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "CreatedDate": {
+            "interpretation": "CREATED_DATE",
+            "source": "REQUEST",
+            "type": "INTEGER"
+        },
+        "Custom_ClassificationIsCommercial": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Custom_ClassificationIsEnterprise": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Custom_ClassificationIsStrategic": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "DNSProvidersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "DataFeedsTechnologiesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "DerogatoryIndicator": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "DisposableEmail": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "DomainParkingTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Domain_Length": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "INTEGER"
+        },
+        "EcommerceTechnologiesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Email": {
+            "interpretation": "EMAIL_ADDRESS",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "EmailProvidersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Event": {
+            "interpretation": "EVENT",
+            "source": "REQUEST",
+            "type": "BOOLEAN"
+        },
+        "ExperianCreditRating": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ExperianParent_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Experian_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Facebook_Likes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Facebook_Url": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FeatureAverageDocumentSizeFetched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureAverageDocumentSizeProcessed": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureExecutionEvaluate": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureExecutionFetch": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureExecutionFull": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalProduct": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalShop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureGlobalStore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureHtmlDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FeatureHtmlKeywords": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FeatureHtmlTitle": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FeatureInputValueAddItem": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureInputValueAddToBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureInputValueAddToBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureInputValueAddToCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptProduct": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptShop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureJavaScriptStore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureNumDocumentsFetched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureNumDocumentsProcessed": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureProcessed": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FeatureRefSrcBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureRefSrcBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureRefSrcCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureRefSrcProduct": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureRefSrcShop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureRefSrcStore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermAddItem": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermAddToBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermAddToBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermAddToCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermAssociationManagementSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBag": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBargain": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBasket": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBillingAddress": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBillingSolution": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBusinessManagementSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermBuy": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCart": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCatalog": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCheckout": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCommerceSolutions": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermContinueShopping": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCreateAccount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCreateaFreeWebsite": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCreateastore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCrossChannelCommerce": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCrowdfunding": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCustomerService": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermCustomerSupport": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermDeal": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermEcommercePlatformSolutions": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermEcommerceSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermEcommerceSoftwareSolutions": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermEventManagement": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFormBuilder": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFreeOnlineStore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFreeShipping": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFrequentlyAskedQuestion": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFundraising": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermFundraisingSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermMarketplace": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermMembershipManagementSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermMyAccount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermOnlineStoreBuilder": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermOrderHistory": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermOrderStatus": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPaymentMethod": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPaymentOption": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPaymentProcessing": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPaymentSolution": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPaywall": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPluginforWordPress": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermPrice": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermProduct": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermRecurringBilling": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermRetail": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermReturnPolicy": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermReview": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSale": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSchedulingandAppointmentSoftware": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSearch": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSecureOrder": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSellDigitalDownloads": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSellOnline": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSellTickets": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShippingAddress": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShippingAndHandling": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShippingInfo": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShippingPolicy": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShop": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShopBy": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermShoppingCartPlatform": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermSoftwareforNonprofits": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermStore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermWebBuilder": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermWebsiteBuilder": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermWishList": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermYourAccount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermYourstore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermphpecommerceplatform": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FeatureTermshoppingcartsolution": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Feature_Pivoted_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "FiftyFiveHundred_Main_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "FiftyFiveHundred_smallFirms_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "FirstName": {
+            "interpretation": "FIRST_NAME",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "FirstName_SameAs_LastName": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "BOOLEAN"
+        },
+        "FraudOrDishonesty": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Free_Email_Address__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "FundingAmount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "FundingContractAmount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingContractCategory": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FundingContractDate": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingContractDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FundingContractNaics": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingDate": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingFinanceRound": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FundingFiscalYear": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingGovAgency": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FundingStage": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "FundingStage1": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "FundingTotalContractedAmount": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "GooglePlus_Url": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "GovernmentContracts_MostRecent_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "HGData_Pivoted_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "HPAEmailSuffix": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "HPAExecutionFull": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "HPANumPages": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "HPA_New_Pivoted_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "HPA_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "HasAnypointLogin": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "HasCEDownload": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "HasEEDownload": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "HostingProvidersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Id": {
+            "interpretation": "ID",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Industry": {
+            "interpretation": "INDUSTRY",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Industry_Group": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "STRING"
+        },
+        "Intelliscore": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "Interest_esb__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Interest_tcat__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "IsClosed": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "BOOLEAN"
+        },
+        "IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "IsPublicDomain": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "JavascriptLibrariesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "JobsAsOf": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "JobsDescription": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "JobsLink": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "JobsRecentJobs": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "JobsTitle": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "JobsTrendString": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "JobsTrendString1": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Kompass_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "LE_Crunchbase_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "LE_Jobs_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "LICompanies_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "LastName": {
+            "interpretation": "LAST_NAME",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Lead_Source_Asset__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Lead_Type__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "LeasingTrades": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "LinkedIn_Url": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ML_30Day_APIsServices_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_APIsServices_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_APIsServices_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_APIsServices_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_AdTech_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_AdTech_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_AdTech_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_AdTech_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_AnalyticsReporting_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_AnalyticsReporting_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_AnalyticsReporting_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_AnalyticsReporting_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Benefits_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Benefits_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Benefits_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Benefits_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Businesssolutions_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Businesssolutions_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Businesssolutions_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Businesssolutions_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_CRM_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_CRM_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_CRM_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_CRM_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Cloud_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Cloud_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Cloud_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Cloud_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_ConsumerTechnology_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_ConsumerTechnology_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_ConsumerTechnology_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_ConsumerTechnology_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_CreativitySoftware_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_CreativitySoftware_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_CreativitySoftware_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_CreativitySoftware_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_DataCenterManagement_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_DataCenterManagement_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_DataCenterManagement_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_DataCenterManagement_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Database_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Database_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Database_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Database_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_DocumentManagement_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_DocumentManagement_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_DocumentManagement_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_DocumentManagement_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_EmergingTech_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_EmergingTech_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_EmergingTech_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_EmergingTech_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_EnergyConstructionManufacturing_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_EnergyConstructionManufacturing_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_EnergyConstructionManufacturing_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_EnergyConstructionManufacturing_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Enterprise_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Enterprise_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Enterprise_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Enterprise_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_FinanceIT_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_FinanceIT_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_FinanceIT_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_FinanceIT_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Finance_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Finance_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Finance_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Finance_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Fortune500_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Fortune500_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Fortune500_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Fortune500_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_GeneralBusiness_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_GeneralBusiness_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_GeneralBusiness_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_GeneralBusiness_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Government_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Government_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Government_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Government_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HardwareITManagement_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HardwareITManagement_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HardwareITManagement_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HardwareITManagement_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HealthInsurance_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HealthInsurance_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HealthInsurance_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HealthInsurance_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HealthTechnology_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HealthTechnology_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HealthTechnology_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HealthTechnology_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Healthcare_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Healthcare_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Healthcare_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Healthcare_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResourcesPayrollPerformance_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResourcesPayrollPerformance_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResourcesPayrollPerformance_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResourcesPayrollPerformance_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResourcesTechnology_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResourcesTechnology_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResourcesTechnology_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResourcesTechnology_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResources_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResources_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_HumanResources_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_HumanResources_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MarketingDemandGenEmail_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MarketingDemandGenEmail_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MarketingDemandGenEmail_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MarketingDemandGenEmail_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MarketingSearch_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MarketingSearch_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MarketingSearch_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MarketingSearch_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Marketing_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Marketing_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Marketing_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Marketing_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Medical_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Medical_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Medical_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Medical_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MessagingCommunications_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MessagingCommunications_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MessagingCommunications_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MessagingCommunications_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MobileWireless_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MobileWireless_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_MobileWireless_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_MobileWireless_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_NetworkMonitoring_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_NetworkMonitoring_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_NetworkMonitoring_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_NetworkMonitoring_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_OperatingSystemsProgrammingLanguages_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_OperatingSystemsProgrammingLanguages_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_OperatingSystemsProgrammingLanguages_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_OperatingSystemsProgrammingLanguages_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_ProductDevelopmentQA_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_ProductDevelopmentQA_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_ProductDevelopmentQA_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_ProductDevelopmentQA_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_RecruitmentHiringOnboarding_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_RecruitmentHiringOnboarding_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_RecruitmentHiringOnboarding_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_RecruitmentHiringOnboarding_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Sales_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Sales_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Sales_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Sales_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Servers_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Servers_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Servers_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Servers_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_SoftwareEngineering_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_SoftwareEngineering_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_SoftwareEngineering_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_SoftwareEngineering_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_StorageVirtualization_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_StorageVirtualization_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_StorageVirtualization_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_StorageVirtualization_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TradingInvesting_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TradingInvesting_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TradingInvesting_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TradingInvesting_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TrainingDevelopment_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TrainingDevelopment_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TrainingDevelopment_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TrainingDevelopment_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TransactionsPayments_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TransactionsPayments_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_TransactionsPayments_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_TransactionsPayments_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Web_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Web_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_Web_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_Web_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_eCommerce_Total": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_eCommerce_Total_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "ML_30Day_eCommerce_UniqueUsers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "ML_30Day_eCommerce_UniqueUsers_PctChange": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "MadisonLogicAggregated_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "MapsPluginsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "MarketingAutomationAlert": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "MarketingAutomationTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "MatchedDomain": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ModelAction": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "ModelAction1": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "NetProspex_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "OperatingSystemsAndServersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "OrbIntelligence_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "PatentApplicationFiled": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "PatentApplicationID": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "PatentGranted": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "PatentID": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "PatentsAsOf": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Patents_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "PaymentProvidersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "PercentileModel": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "PhoneNumber": {
+            "interpretation": "PHONE_NUMBER",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Phone_Entropy": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "FLOAT"
+        },
+        "RelatedLinks_Count": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "RetirementAssetsEOY": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "RetirementAssetsYOY": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SAL_Classification__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "SICCode": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "SSLCertificatesTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "SemrushAdwordsCost": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushAdwordsKeywords": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushAdwordsTraffic": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushOrganicCost": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushOrganicKeywords": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushOrganicTraffic": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "SemrushRank": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Semrush_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Source_Detail__c": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "SpamIndicator": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "INTEGER"
+        },
+        "StageName": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "State": {
+            "interpretation": "COMPANY_STATE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "SystemAlert": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Tech_Used": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Title": {
+            "interpretation": "TITLE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "Title_IsAcademic": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "BOOLEAN"
+        },
+        "Title_IsTechRelated": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "BOOLEAN"
+        },
+        "Title_Length": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "INTEGER"
+        },
+        "Title_Level": {
+            "interpretation": "FEATURE",
+            "source": "TRANSFORMS",
+            "type": "INTEGER"
+        },
+        "TotalParticipantsSOY": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Total_Amount_Raised": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Twitter_Followers": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Twitter_Following": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "Twitter_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "Twitter_Tweets": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "UCCFilings": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "FLOAT"
+        },
+        "UCCFilingsPresent": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Unsubscribed": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "VCAsOf": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "VC_Source_IsMatched": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "BOOLEAN"
+        },
+        "WebMasterRegistrationsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "WebServersTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "WebsiteDocumentStandardsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "WebsiteEncodingStandardsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "WebsiteFrameworksTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "Website_Age_Months": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "INTEGER"
+        },
+        "WidgetsTopAttributes": {
+            "interpretation": "FEATURE",
+            "source": "PROPRIETARY",
+            "type": "STRING"
+        },
+        "kickboxAcceptAll": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "kickboxDisposable": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "kickboxFree": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        },
+        "kickboxStatus": {
+            "interpretation": "FEATURE",
+            "source": "REQUEST",
+            "type": "STRING"
+        }
+    },
+    "transforms": [
+        {
+            "arguments": {
+                "column": "CompanyName"
+            },
+            "name": "std_visidb_ds_companyname_entropy",
+            "output": "CompanyName_Entropy",
+            "type": "FLOAT"
+        },
+        {
+            "arguments": {
+                "column": "Title"
+            },
+            "name": "std_length",
+            "output": "Title_Length",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "CompanyName"
+            },
+            "name": "std_length",
+            "output": "CompanyName_Length",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "AlexaRelatedLinks"
+            },
+            "name": "std_visidb_ds_pd_alexa_relatedlinks_count",
+            "output": "RelatedLinks_Count",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "Email"
+            },
+            "name": "std_length",
+            "output": "Domain_Length",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "PhoneNumber"
+            },
+            "name": "std_entropy",
+            "output": "Phone_Entropy",
+            "type": "FLOAT"
+        },
+        {
+            "arguments": {
+                "column": "AlexaOnlineSince"
+            },
+            "name": "std_visidb_alexa_monthssinceonline",
+            "output": "Website_Age_Months",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "ModelAction"
+            },
+            "name": "std_visidb_ds_pd_modelaction_ordered",
+            "output": "ModelAction1",
+            "type": "STRING"
+        },
+        {
+            "arguments": {
+                "column1": "FirstName",
+                "column2": "LastName",
+                "column3": "Title",
+                "column4": "PhoneNumber",
+                "column5": "CompanyName"
+            },
+            "name": "std_visidb_ds_spamindicator",
+            "output": "SpamIndicator",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "Title"
+            },
+            "name": "std_visidb_ds_title_level",
+            "output": "Title_Level",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "Title"
+            },
+            "name": "std_visidb_ds_title_istechrelated",
+            "output": "Title_IsTechRelated",
+            "type": "BOOLEAN"
+        },
+        {
+            "arguments": {
+                "column": "JobsTrendString"
+            },
+            "name": "std_visidb_ds_pd_jobstrendstring_ordered",
+            "output": "JobsTrendString1",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "FundingStage"
+            },
+            "name": "std_visidb_ds_pd_fundingstage_ordered",
+            "output": "FundingStage1",
+            "type": "INTEGER"
+        },
+        {
+            "arguments": {
+                "column": "Title"
+            },
+            "name": "std_visidb_ds_title_isacademic",
+            "output": "Title_IsAcademic",
+            "type": "BOOLEAN"
+        },
+        {
+            "arguments": {
+                "column1": "FirstName",
+                "column2": "LastName"
+            },
+            "name": "std_visidb_ds_firstname_sameas_lastname",
+            "output": "FirstName_SameAs_LastName",
+            "type": "BOOLEAN"
+        },
+        {
+            "arguments": {
+                "column": "Industry"
+            },
+            "name": "std_visidb_ds_industry_group",
+            "output": "Industry_Group",
+            "type": "STRING"
+        }
+    ]
+}

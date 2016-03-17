@@ -24,11 +24,11 @@ public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
      */
     @Test(groups = "functional", enabled = false)
     public void downloadModelToLocal() throws Exception {
-        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/2MulesoftAllRows20160314_112802-1458018263382/";
+        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/3MulesoftAllRows20160314_112802/";
         File file = new File(localPathToPersist);
         boolean result = file.mkdirs();
         String tenantId = "DevelopTestPLSTenant1.DevelopTestPLSTenant1.Production";
-        String modelId = "ms__ac8b4830-e32f-485c-8329-d9c074d42021-2Mulesof";
+        String modelId = "ms__66586bed-6e94-4a7a-9543-3a0d569a8f49-2nd_0316";
 
         log.info(String.format("Downloading model-score artifacts from HDFS for tenant:%s model%s to %s", tenantId,
                 modelId, localPathToPersist));

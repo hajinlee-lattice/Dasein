@@ -96,7 +96,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     }
 
     private void logSplitTime(String key) {
-        log.info(httpStopWatch.getLogStatement(key));
+        if (log.isInfoEnabled()) {
+            log.info(httpStopWatch.getLogStatement(key));
+        }
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(
@@ -141,7 +143,9 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 }
             }
         }
-        log.info(JsonUtils.serialize(record));
+        if (log.isDebugEnabled()) {
+            log.debug(JsonUtils.serialize(record));
+        }
     }
 
     private void checkForMissingFields(Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {

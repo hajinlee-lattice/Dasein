@@ -79,9 +79,13 @@ public class MatcherImpl implements Matcher {
     public Map<String, Object> matchAndJoin(CustomerSpace space, InterpretedFields interpreted,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         MatchInput matchInput = buildMatchInput(space, interpreted, record);
-        log.info("matchInput:" + JsonUtils.serialize(matchInput));
+        if (log.isDebugEnabled()) {
+            log.debug("matchInput:" + JsonUtils.serialize(matchInput));
+        }
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput, true);
-        log.info("matchOutput:" + JsonUtils.serialize(matchOutput));
+        if (log.isDebugEnabled()) {
+            log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
+        }
 
         record.put(IS_PUBLIC_DOMAIN, null);
         if (matchOutput.getResult().isEmpty()) {
@@ -97,10 +101,12 @@ public class MatcherImpl implements Matcher {
             String errorMessages = outputRecord.getErrorMessages() == null ? "" : Joiner.on(",").join(
                     outputRecord.getErrorMessages());
 
-            log.info(String.format(
-                    "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
-                    outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()), nameLocationStr,
-                    errorMessages));
+            if (log.isDebugEnabled()) {
+                log.debug(String.format(
+                        "{ 'isMatched':'%s', 'matchedDomain':'%s', 'matchedNameLocation':'%s', 'matchErrors':'%s' }",
+                        outputRecord.isMatched(), Strings.nullToEmpty(outputRecord.getMatchedDomain()),
+                        nameLocationStr, errorMessages));
+            }
 
             Set<String> fieldNameSet = null;
             if (outputRecord.isMatched()) {
@@ -125,8 +131,9 @@ public class MatcherImpl implements Matcher {
                         Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
             }
         }
-
-        log.info(JsonUtils.serialize(record));
+        if (log.isDebugEnabled()) {
+            log.debug(JsonUtils.serialize(record));
+        }
         return record;
     }
 
