@@ -1,0 +1,27 @@
+#!/bin/bash -x
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+cd /tmp/webapps/scoringapi
+
+JAVAFILE=`ls le-scoringapi-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if test $SNAPSHOT='SNAPSHOT'
+then
+    VERSION=$VERSION-$SHAPSHOT
+fi
+
+echo "copying files from temporary folders"
+cp le-scoringapi-*.war $CATALINA_HOME/webapps/scoringapi/scoringapi\#\#$VERSION.war
+cp /etc/ledp/scoringapi/$ENV_TYPE/*.properties /etc/ledp/
+
+echo "cleaning up"
+rm -rf /etc/ledp/scoringapi
+rm -rf /home/yarn/scoringapi
+rm -rf /home/yarn/logs/*
+rm -rf /tmp/webapps/scoringapi
+
+echo "finishing"
+ls $CATALINA_HOME/webapps/scoringapi/*.war
