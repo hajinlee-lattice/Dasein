@@ -54,7 +54,7 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(6));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
     }
 
     @Test(groups = { "api" }, enabled = true, dataProvider = "cachedMatchGoodDataProvider")
@@ -95,15 +95,8 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
-        List<Object> result = output.getResult().get(0).getOutput();
-        Integer notNull = 0;
-        for (Object obj: result) {
-            if (obj != null) {
-                notNull++;
-            }
-        }
-        Assert.assertTrue(notNull == 1, String.format("(%s, %s, %s, %s) gives %d not null result objects",
-                name, city, state, country, notNull));
+        Assert.assertFalse(output.getResult().get(0).isMatched(),
+                String.format("(%s, %s, %s, %s) should not be matched.", name, city, state, country));
     }
 
     @DataProvider(name = "cachedMatchBadDataProvider")

@@ -309,9 +309,10 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 Object value = null;
                 boolean matched = false;
 
-                if (matchContext.getInput().getKeyMap().containsKey(MatchKey.Domain)
+                if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
+                        && matchContext.getInput().getKeyMap().containsKey(MatchKey.Domain)
                         && !matchContext.getInput().getKeyMap().get(MatchKey.Domain).isEmpty()
-                        && IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())) {
                     matched = true;
                     value = publicDomainService.isPublicDomain(internalRecord.getParsedDomain());
                 } else if (columnPriorityMap.containsKey(field)) {
