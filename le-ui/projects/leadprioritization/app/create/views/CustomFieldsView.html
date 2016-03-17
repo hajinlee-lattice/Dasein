@@ -17,7 +17,10 @@
 	}
 </style>
 <section class="container row custom-fields">
-	<div class="error-message text-center" ng-show="vm.errors">{{ vm.errors }}</div>
+	<div class="error-message text-center" ng-show="vm.errors">
+		<div>{{ vm.errors }}</div>
+	</div>
+
 	<div class="six columns offset-three">
 
 		<p ng-hide="vm.errors">Displaying {{ vm.data.length }}.</p>
@@ -47,7 +50,10 @@
 		</table>
 
 		<div class="row">
-			<div class="six columns">
+			<div class="six columns offset-two" ng-show="vm.errors">
+				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
+			</div>
+			<div class="six columns" ng-hide="vm.errors">
 				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
 			</div>
 			<div class="six columns" ng-hide="vm.errors">
