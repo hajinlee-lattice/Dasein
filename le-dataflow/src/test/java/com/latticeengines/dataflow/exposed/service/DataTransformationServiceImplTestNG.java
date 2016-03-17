@@ -144,7 +144,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         assertEquals(transformDefinitions.getValue().size(), 1);
         TransformDefinition transform = transformDefinitions.getValue().get(0);
         assertEquals(transform.name, "encoder");
-        assertEquals(transform.type, FieldType.LONG);
+        assertEquals(transform.type, FieldType.INTEGER);
         assertEquals(transform.arguments.get("column"), "Domain");
         assertEquals(transform.output, "DomainHashCode");
     }
