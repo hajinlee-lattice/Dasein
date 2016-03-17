@@ -519,12 +519,13 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         try:
             success = response.json()['Success']
             errmsg = response.json()['ErrorMessage']
+            proginfo = response.json()['ProgressInfo']
         except ValueError as e:
             if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
             raise EndpointError( e )
 
-        if not success:
+        if not success or proginfo is None:
             if self.isVerbose():
                 print 'Failed to get query status for handle \'{0}\''.format( payload['queryHandle'] )
                 print errmsg
@@ -535,7 +536,6 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
 
         status   = response.json()['Status']
         progress = response.json()['Progress']
-        proginfo = response.json()['ProgressInfo']
 
         if status == 3:
             return 'Completed'

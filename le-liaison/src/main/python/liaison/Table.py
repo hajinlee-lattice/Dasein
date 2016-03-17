@@ -24,6 +24,12 @@ class Table(object):
     def getColumnNames(self):
         return self.column_names_
 
+    def getColumn(self, colname):
+        if colname in self.column_names_:
+            idx = self.column_names_.index(colname)
+            return self.columns_[idx]
+        return None
+
     def setColumns(self, cc):
         self.columns_ = cc
         self.column_names_ = []
