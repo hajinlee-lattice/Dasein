@@ -28,6 +28,7 @@ public class AlexaRefreshFlow extends MostRecentFlow {
     @Override
     public Node construct(MostRecentDataFlowParameters parameters) {
         Node source = addSource(parameters.getSourceTable());
+        source = source.filter("Rank == null || Rank > 0", new FieldList("Rank"));
         source = findMostRecent(source, parameters);
 
         DateTimeCleanupFunction function = new DateTimeCleanupFunction("OnlineSince");
