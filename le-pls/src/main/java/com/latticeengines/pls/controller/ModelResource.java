@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +25,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
 @RequestMapping("/models")
-@PreAuthorize("hasRole('Edit_PLS_Data')")
+//@PreAuthorize("hasRole('Edit_PLS_Data')")
 public class ModelResource {
     private static final Logger log = Logger.getLogger(ModelResource.class);
 

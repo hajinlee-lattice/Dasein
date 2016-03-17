@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +28,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "metadata", description = "REST resource for metadata in VisiDB")
 @RestController
 @RequestMapping(value = "/vdbmetadata")
-@PreAuthorize("hasRole('Edit_PLS_Configurations')")
+//@PreAuthorize("hasRole('Edit_PLS_Configurations')")
 public class VdbMetadataResource {
 
     private static final Log log = LogFactory.getLog(VdbMetadataResource.class);

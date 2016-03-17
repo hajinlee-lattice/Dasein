@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "jobs", description = "REST resource for jobs")
 @RestController
 @RequestMapping("/jobs")
-@PreAuthorize("hasRole('View_PLS_Jobs')")
+//@PreAuthorize("hasRole('View_PLS_Jobs')")
 public class JobResource {
 
     private static final Log log = LogFactory.getLog(JobResource.class);
