@@ -19,6 +19,11 @@ public class Matched implements Fact {
         return matched;
     }
 
+    @MetricField(name = "Unmatched", fieldType = MetricField.FieldType.BOOLEAN)
+    public Boolean getUnmatched() {
+        return !matched;
+    }
+
     public void setMatched(Boolean matched) {
         this.matched = matched;
     }
