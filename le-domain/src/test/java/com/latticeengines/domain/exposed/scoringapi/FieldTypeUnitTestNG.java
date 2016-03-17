@@ -1,9 +1,8 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import com.latticeengines.domain.exposed.scoringapi.FieldType;
 
 public class FieldTypeUnitTestNG {
     @Test(groups = "unit")
@@ -45,10 +44,21 @@ public class FieldTypeUnitTestNG {
         Assert.assertEquals(actual, "foo");
     }
 
-    @Test(groups = "unit")
-    public void testParseTemporal() {
-        FieldType type = FieldType.TEMPORAL;
-        Object actual = FieldType.parse(type, "1234");
-        Assert.assertEquals(actual, new Long(1234));
+    @Test(groups = "unit", dataProvider = "allTypes")
+    public void testAvroTypes(String avroType, FieldType type) {
+        Assert.assertEquals(FieldType.getFromAvroType(avroType), type);
+    }
+    
+    @DataProvider(name = "allTypes")
+    public Object[][] allTypes() {
+        return new Object[][] { //
+            { "boolean", FieldType.BOOLEAN }, //
+            { "int", FieldType.INTEGER }, //
+            { "long", FieldType.INTEGER }, //
+            { "float", FieldType.FLOAT }, //
+            { "double", FieldType.FLOAT }, //
+            { "string", FieldType.STRING } //
+        };
+        
     }
 }

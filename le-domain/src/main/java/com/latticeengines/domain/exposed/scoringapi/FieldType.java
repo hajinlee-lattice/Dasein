@@ -1,40 +1,50 @@
 package com.latticeengines.domain.exposed.scoringapi;
 
-import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
 public enum FieldType {
-    BOOLEAN(Boolean.class), //
-    INTEGER(Long.class), //
+    BOOLEAN(Boolean.class, "boolean"), //
+    INTEGER(Long.class, "int", "long"), //
     // Typical stored as a double precision value.
-    FLOAT(Double.class), //
+    FLOAT(Double.class, "float", "double"), //
     // Encoded with UTF-8.
-    STRING(String.class), //
-    // Milliseconds since the unix epoch stored in an int64.
-    TEMPORAL(Timestamp.class),
-    LONG(Long.class);
+    STRING(String.class, "string");
 
     private static Map<Class<?>, FieldType> javaToFieldTypeMap = new HashMap<>();
+    private static Map<String, FieldType> avroToFieldTypeMap = new HashMap<>();
 
     static {
         for (FieldType fieldType : FieldType.values()) {
             javaToFieldTypeMap.put(fieldType.type(), fieldType);
+            for (String avroType : fieldType.avroTypes) {
+                avroToFieldTypeMap.put(avroType, fieldType);
+            }
         }
     }
 
-    private FieldType(Class<?> type) {
+    private FieldType(Class<?> type, String... avroTypes) {
         this.type = type;
+        this.avroTypes = avroTypes;
     }
 
     private final Class<?> type;
+    private final String[] avroTypes;
 
     public Class<?> type() {
         return type;
     }
+    
+    public String[] avroTypes() {
+        return avroTypes;
+    }
 
     public static FieldType getFromJavaType(Class<?> javaType) {
         return javaToFieldTypeMap.get(javaType);
+    }
+
+    public static FieldType getFromAvroType(String avroType) {
+        return avroToFieldTypeMap.get(avroType);
     }
 
     public static Object parse(FieldType fieldtype, Object rawvalue) {
@@ -63,7 +73,6 @@ public enum FieldType {
             case FLOAT:
                 return Double.parseDouble(rawvalue);
             case INTEGER:
-            case TEMPORAL:
                 return Long.parseLong(rawvalue);
             case STRING:
                 return rawvalue;

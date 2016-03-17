@@ -42,7 +42,6 @@ import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.graph.GraphNode;
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -397,12 +396,11 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             if (!attr.getRTS()) {
                 continue;
             }
-            Class<?> javaType = AvroUtils.getJavaType(Schema.Type.valueOf(attr.getPhysicalDataType().toUpperCase()));
             Map<String, Object> args;
             try {
                 args = mapper.readValue(attr.getRTSArguments(), Map.class);
                 TransformDefinition transform = new TransformDefinition(attr.getRTSModuleName(), //
-                        attr.getName(), FieldType.getFromJavaType(javaType), args);
+                        attr.getName(), FieldType.getFromAvroType(attr.getPhysicalDataType()), args);
                 rtsTransforms.add(transform);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -427,12 +425,14 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             }
         }
         for (Attribute attr : getAttributes()) {
+            if (attr.getApprovedUsage() == null //
+                    || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None")) {
+                continue;
+            }
             fields.put(attr.getName(), createField(attr, requestTargets.contains(attr.getName())));
         }
         return new AbstractMap.SimpleEntry<>(fields, rtsTransforms);
     }
-    
-    
     
     private FieldSchema createField(Attribute attr, boolean request) {
         // Same logic as datacompositiongenerator.py
@@ -448,19 +448,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         }
         
         String avroType = attr.getPhysicalDataType();
-        FieldType type = null;
-        
-
-        if (avroType.equals("boolean")) {
-            type = FieldType.BOOLEAN;
-        } else if (avroType.equals("int") || avroType.equals("long")) {
-            type = FieldType.INTEGER;
-        } else if (avroType.equals("float") || avroType.equals("double")) {
-            type = FieldType.FLOAT;
-        } else {
-            type = FieldType.STRING;
-        }
-        fieldSchema.type = type;
+        fieldSchema.type = FieldType.getFromAvroType(avroType);
         
         String name = attr.getName();
         
