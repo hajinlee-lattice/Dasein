@@ -44,6 +44,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/qaclustera</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/qaclustera</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/qaclustera</camille.properties.path>
+                <microservice.properties.path>core/conf/env/qaclustera</microservice.properties.path>
             </properties>
         </profile>
         <profile>
@@ -71,6 +72,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/qaclusterb</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/qaclusterb</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/qaclusterb</camille.properties.path>
+                <microservice.properties.path>core/conf/env/qaclusterb</microservice.properties.path>
             </properties>
         </profile>
         <profile>
@@ -98,6 +100,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/prodclustera</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/prodclustera</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/prodclustera</camille.properties.path>
+                <microservice.properties.path>core/conf/env/prodclustera</microservice.properties.path>
             </properties>
         </profile>
         <profile>
@@ -125,6 +128,7 @@
                 <proxy.properties.path>../le-proxy/conf/env/prodclusterb</proxy.properties.path>
                 <dataflow.properties.path>../le-dataflow/conf/env/prodclusterb</dataflow.properties.path>
                 <camille.properties.path>../le-camille/conf/env/prodclusterb</camille.properties.path>
+                <microservice.properties.path>core/conf/env/prodclusterb</microservice.properties.path>
             </properties>
         </profile>
     </profiles>
@@ -220,6 +224,9 @@
                                 </source>
                                 <source>
                                     <location>${camille.properties.path}/camille.properties</location>
+                                </source>
+                                <source>
+                                    <location>${microservice.properties.path}/microservice.properties</location>
                                 </source>
                             </sources>
                         </mapping>
