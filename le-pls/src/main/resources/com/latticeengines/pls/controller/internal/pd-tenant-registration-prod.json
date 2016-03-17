@@ -51,6 +51,15 @@
     {
       "RootPath": "/Metadata",
       "Nodes": []
+    },
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+        ]
     }
   ],
   "CustomerSpaceInfo": {

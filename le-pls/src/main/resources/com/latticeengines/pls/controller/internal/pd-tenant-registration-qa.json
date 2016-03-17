@@ -24,6 +24,15 @@
       ]
     },
     {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+        ]
+    },
+    {
       "RootPath": "/PLS",
       "Nodes": [
         {
