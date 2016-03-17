@@ -26,4 +26,4 @@ rm -rf /home/yarn/admin
 rm -rf /home/yarn/logs/*
 
 echo "finishing"
-ls $CATALINA_HOME/webapps_admin/*.war
+ls $CATALINA_HOME/webapps/admin/*.war
