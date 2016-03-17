@@ -107,6 +107,9 @@ public class JythonEngine {
             if (returnType == Double.class) {
                 return returnType.cast(Double.valueOf((double) value));
             }
+            if (returnType == Boolean.class) {
+                return returnType.cast(value == 1);
+            }
             return returnType.cast(((PyInteger) x).getValue());
         } else if (x instanceof PyLong) {
             Long value = ((PyLong) x).getValue().longValue();
