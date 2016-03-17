@@ -44,6 +44,7 @@ public class RecordTransformer {
                 record.put(entry.output, value);
                 result.put(entry.output, value);
             } else {
+                // TODO remove after we resolve our transform issues
                 System.out.println(String.format("Problem invoking %s", entry.name));
                 failedInvocationException.printStackTrace();
                 if (log.isWarnEnabled()) {
