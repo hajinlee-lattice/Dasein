@@ -76,7 +76,7 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getServiceNames() throws Exception {
         orchestrator = new ComponentOrchestrator(originalComponents);
-        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate")) {
+        for (String name : Arrays.asList("BardJams", "PLS", "DLTemplate", "VisiDBDL", "Dante", "VisiDBTemplate", "Modeling")) {
             Assert.assertTrue(orchestrator.getServiceNames().contains(name));
         }
     }

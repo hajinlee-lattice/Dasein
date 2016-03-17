@@ -30,6 +30,7 @@ import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
 import com.latticeengines.admin.tenant.batonadapter.eai.EaiComponent;
 import com.latticeengines.admin.tenant.batonadapter.metadata.MetadataComponent;
+import com.latticeengines.admin.tenant.batonadapter.modeling.ModelingComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
@@ -264,6 +265,11 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                 .getDefaultServiceConfig(DanteComponent.componentName);
         danteConfig.setRootPath("/" + DanteComponent.componentName);
 
+        // Modeling
+        SerializableDocumentDirectory modelingConfig = serviceService
+                        .getDefaultServiceConfig(ModelingComponent.componentName);
+                modelingConfig.setRootPath("/" + ModelingComponent.componentName);
+
         // Combine configurations
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
         configDirs.add(jamsConfig);
@@ -272,6 +278,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         configDirs.add(vdbTplConfig);
         configDirs.add(dlTplConfig);
         configDirs.add(danteConfig);
+        configDirs.add(modelingConfig);
 
         // Orchestrate tenant
         TenantRegistration reg = new TenantRegistration();
@@ -315,7 +322,9 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                             || (vdbTplSkipped && component.equals(VisiDBTemplateComponent.componentName))
                             || (jamsSkipped && component.equals(BardJamsComponent.componentName))
                             || component.equals(EaiComponent.componentName)
-                            || component.equals(MetadataComponent.componentName)) {
+                            || component.equals(MetadataComponent.componentName)
+                            || component.equals(ModelingComponent.componentName)
+                            ) {
                         return BootstrapState.constructOKState(1);
                     } else {
                         return waitUntilStateIsNotInitial(contractId, tenantId, component, 600);
@@ -381,11 +390,6 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         log.info(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class));
         Assert.assertEquals(magicRestTemplate.getForObject(url + dataStoreServer + "/" + tenantId, List.class).size(),
                 3);
-    }
-
-    @SuppressWarnings("unused")
-    private void verifyDanteTenantExists(int tenantIdx) {
-        // if (danteSkipped) return;
     }
 
     private void verifyPLSTenantKnowsTopology() {
