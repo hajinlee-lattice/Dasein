@@ -11,6 +11,8 @@ from lxml import etree
 from copy import deepcopy
 from liaison import *
 
+STD_REPORT_COLS = ['LeadID','Email','CreationDate','Company','LastName','FirstName','P1_Event']
+
 STD_TMPL_COLS =      ['ModelingID']
 
 STD_DS_COLS =        ['Website_Age_Months','Uses_Public_Email_Provider','CompanyName_Length','Domain_Length'
@@ -42,7 +44,7 @@ def generateLeadDatasets(tenants):
         print '\nGenerating lead datasets for \'{0}\':'.format(t)
 
         try:
-            conn_mgr = ConnectionMgrFactory.Create('visiDB', tenant_name=t, verbose=True)
+            conn_mgr = ConnectionMgrFactory.Create('visiDB', tenant_name=t, verbose=False)
         except TenantNotMappedToURL:
             print 'Not on LP DataLoader; skipping'
             continue
@@ -88,6 +90,28 @@ def generateLeadDatasets(tenants):
         except UnknownVisiDBSpec:
             pass
 
+        if template_type == 'SFDC':
+            entityname = 'SFDC_Lead_Contact_ID'
+        elif template_type == 'MKTO':
+            entityname = 'MKTO_LeadRecord_ID'
+        elif template_type == 'ELQ':
+            entityname = 'ELQ_Contact_ContactID'
+        else:
+            print 'Unsupported template type \'{0}\'; skipping'.format(template_type)
+            continue
+
+        filterModel = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("NOT"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Like"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"), LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}"))))), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpressionConstantScalar("0|5", DataTypeVarChar(3)))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}")))))'.format(entityname))
+        q_pls_modeling.getFilters().append(filterModel)
+        q_pls_modeling.setName("Q_LP3_Modeling")
+        conn_mgr.setQuery(q_pls_modeling)
+        q_pls_modeling.getFilters().remove(filterModel)
+
+
+        colnames_exclude = []
+        for c in q_pls_modeling.getColumns():
+            if c.getApprovedUsage() == 'None':                
+                colnames_exclude.append(c.getName())
+
         for c in colnames_modeling:
             if c == 'EntityFunctionBoundary':
                 continue
@@ -106,16 +130,21 @@ def generateLeadDatasets(tenants):
             elif c in colnames_dc:
                 q_pls_modeling.removeColumn(c)
                 continue
+            elif c in colnames_exclude and c not in STD_REPORT_COLS:
+                print 'ApprovedUsage=="None" for "{0}"'.format(c)
+                q_pls_modeling.removeColumn(c)
+                continue
 
         if template_type == 'SFDC':
-            adjustQuerySFDC(conn_mgr, q_pls_modeling)
+            adjustQuerySFDC(conn_mgr, q_pls_modeling, filterModel)
         elif template_type == 'MKTO':
-            adjustQueryMKTO(conn_mgr, q_pls_modeling)
+            adjustQueryMKTO(conn_mgr, q_pls_modeling, filterModel)
         elif template_type == 'ELQ':
-            adjustQueryELQ(conn_mgr, q_pls_modeling)
+            adjustQueryELQ(conn_mgr, q_pls_modeling, filterModel)
         else:
             print 'Unsupported template type \'{0}\'; skipping'.format(template_type)
             continue
+
 
         addDataProviderLP2ModelingData(conn_mgr)
         addCreateAnalyticPlayWithArchive(conn_mgr, t)
@@ -130,20 +159,20 @@ def generateLeadDatasets(tenants):
         executeModelBuild(conn_mgr)
 
 
-def adjustQuerySFDC(conn_mgr, q_pls_modeling):
+def adjustQuerySFDC(conn_mgr, q_pls_modeling, filterModel):
     cols = []
-    cols.append(QueryColumnVDBImpl('Company', ExpressionVDBImplFactory.parse('SFDC_Company')))
     cols.append(QueryColumnVDBImpl('City', ExpressionVDBImplFactory.parse('SFDC_City')))
     cols.append(QueryColumnVDBImpl('State', ExpressionVDBImplFactory.parse('SFDC_State')))
     cols.append(QueryColumnVDBImpl('Country', ExpressionVDBImplFactory.parse('SFDC_Country')))
     cols.append(QueryColumnVDBImpl('Title', ExpressionVDBImplFactory.parse('SFDC_Title')))
-    cols.append(QueryColumnVDBImpl('Phone', ExpressionVDBImplFactory.parse('SFDC_Phone')))
+    cols.append(QueryColumnVDBImpl('PhoneNumber', ExpressionVDBImplFactory.parse('SFDC_Phone')))
     cols.append(QueryColumnVDBImpl('Industry', ExpressionVDBImplFactory.parse('SFDC_Industry')))
-    cols.append(QueryColumnVDBImpl('Closed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
+    cols.append(QueryColumnVDBImpl('IsClosed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
     cols.append(QueryColumnVDBImpl('StageName', ExpressionVDBImplFactory.parse('SFDC_Opportunity.StageName')))
     entityname = 'SFDC_Lead_Contact_ID'
-    filterSample = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"),LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID"))))),LatticeFunctionExpressionConstant("2",DataTypeInt)),LatticeFunctionExpressionConstant("00",DataTypeVarChar(2))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("SFDC_Lead_Contact_ID")))))')
-
+    mapTable = 'Map_Lead_Contact_ID_PropDataID'
+    colPropDataID = 'SFDC_Lead_Contact_PropDataID'
+    
     if 'LeadSource' not in q_pls_modeling.getColumnNames():
         q_pls_modeling.renameColumn('From_SFDC_LeadSource', 'LeadSource')
     else:
@@ -159,56 +188,72 @@ def adjustQuerySFDC(conn_mgr, q_pls_modeling):
     else:
         q_pls_modeling.removeColumn('From_SFDC_CompanySize')
 
-    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, filterSample, cols)
+    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDataID, cols, filterModel)
 
 
-def adjustQueryMKTO(conn_mgr, q_pls_modeling):
+def adjustQueryMKTO(conn_mgr, q_pls_modeling, filterModel):
     cols = []
-    cols.append(QueryColumnVDBImpl('Company', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Company')))
     cols.append(QueryColumnVDBImpl('City', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.City')))
     cols.append(QueryColumnVDBImpl('State', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.State')))
     cols.append(QueryColumnVDBImpl('Country', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Country')))
     cols.append(QueryColumnVDBImpl('Title', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Title')))
-    cols.append(QueryColumnVDBImpl('Phone', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Phone')))
+    cols.append(QueryColumnVDBImpl('PhoneNumber', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Phone')))
     cols.append(QueryColumnVDBImpl('Industry', ExpressionVDBImplFactory.parse('MKTO_LeadRecord.Industry')))
-    cols.append(QueryColumnVDBImpl('Closed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
+    cols.append(QueryColumnVDBImpl('IsClosed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
     cols.append(QueryColumnVDBImpl('StageName', ExpressionVDBImplFactory.parse('SFDC_Opportunity.StageName')))
     entityname = 'MKTO_LeadRecord_ID'
-    filterSample = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"),LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID"))))),LatticeFunctionExpressionConstant("2",DataTypeInt)),LatticeFunctionExpressionConstant("00",DataTypeVarChar(2))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("MKTO_LeadRecord_ID")))))')
+    mapTable = 'Map_LeadID_PropDataID'
+    colPropDataID = 'MKTO_LeadRecord_PropDataID'
+    
+    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDataID, cols, filterModel)
 
-    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, filterSample, cols)
 
-
-def adjustQueryELQ(conn_mgr, q_pls_modeling):
+def adjustQueryELQ(conn_mgr, q_pls_modeling, filterModel):
     cols = []
-    cols.append(QueryColumnVDBImpl('Company', ExpressionVDBImplFactory.parse('ELQ_Contact.C_Company')))
     cols.append(QueryColumnVDBImpl('City', ExpressionVDBImplFactory.parse('ELQ_Contact.C_City')))
     cols.append(QueryColumnVDBImpl('State', ExpressionVDBImplFactory.parse('ELQ_Contact.C_State_Prov')))
     cols.append(QueryColumnVDBImpl('Country', ExpressionVDBImplFactory.parse('ELQ_Contact.C_Country')))
     cols.append(QueryColumnVDBImpl('Title', ExpressionVDBImplFactory.parse('ELQ_Contact.C_Title')))
-    cols.append(QueryColumnVDBImpl('Phone', ExpressionVDBImplFactory.parse('ELQ_Contact.C_BusPhone')))
+    cols.append(QueryColumnVDBImpl('PhoneNumber', ExpressionVDBImplFactory.parse('ELQ_Contact.C_BusPhone')))
     cols.append(QueryColumnVDBImpl('Industry', ExpressionVDBImplFactory.parse('ELQ_Contact.C_Industry1')))
-    cols.append(QueryColumnVDBImpl('Closed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
+    cols.append(QueryColumnVDBImpl('IsClosed', ExpressionVDBImplFactory.parse('SFDC_Opportunity.IsClosed')))
     cols.append(QueryColumnVDBImpl('StageName', ExpressionVDBImplFactory.parse('SFDC_Opportunity.StageName')))
     entityname = 'ELQ_Contact_ContactID'
-    filterSample = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Equal"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"),LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID"))))),LatticeFunctionExpressionConstant("2",DataTypeInt)),LatticeFunctionExpressionConstant("00",DataTypeVarChar(2))),LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("ELQ_Contact_ContactID")))))')
+    mapTable = 'Map_ContactID_PropDataID'
+    colPropDataID = 'ELQ_Contact_PropDataID'
+    
+    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDataID, cols, filterModel)
 
-    adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, filterSample, cols)
 
-
-def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, filterSample, cols):
+def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, mapTable, colPropDataID, cols, filterModel):
 
     for c in cols:
         c.setApprovedUsage("None")
         q_pls_modeling.appendColumn(c)
 
-    q_pls_modeling.renameColumn('P1_Event', 'IsConverted')
+    q_pls_modeling.renameColumn('P1_Event', 'Event')
     q_pls_modeling.renameColumn('CreationDate', 'CreatedDate')
     q_pls_modeling.renameColumn('LeadID', 'Id')
+    q_pls_modeling.renameColumn('Company', 'CompanyName')
 
+    q_pls_modeling.getFilters().append(filterModel)
     q_pls_modeling.setName("Q_LP3_ModelingLead_OneLeadPerDomain")
     conn_mgr.setQuery(q_pls_modeling)
 
+    sep = ''
+    lasmspec = ''
+    for f in q_pls_modeling.getFilters():
+        lasmspec += sep+f.definition()
+        sep = ', '
+
+    q_pls_modeling.getFilters().remove(filterModel)
+
+    filterSample = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Like"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Right"), LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("ConvertToString"), LatticeFunctionExpressionAddressID(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}"))))), LatticeFunctionExpressionConstant("1", DataTypeInt)), LatticeFunctionExpressionConstantScalar("0|5", DataTypeVarChar(3))), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}")))))'.format(entityname))
+
+    q_pls_modeling.getFilters().append(filterSample)
+    q_pls_modeling.setName("Q_LP3_ScoringLead")
+    conn_mgr.setQuery(q_pls_modeling)
+    q_pls_modeling.getFilters().remove(filterSample)
 
     filtersToRemove = []
     for f in q_pls_modeling.getFilters():
@@ -220,14 +265,42 @@ def adjustQueryCommon(conn_mgr, q_pls_modeling, entityname, filterSample, cols):
         q_pls_modeling.getFilters().remove(f)
 
     filterIsConsideredForModeling = QueryFilterVDBImpl('LatticeAddressSetFcn(LatticeFunctionIdentifier(ContainerElementName("AppData_Lead_IsConsideredForModeling")), LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{0}")))))'.format(entityname))
+    filterAllInSample = QueryFilterVDBImpl('LatticeAddressSetIdentifier(ContainerElementName("LP3AllInSampleLeadsByPropDataID"))')
 
     q_pls_modeling.getFilters().append(filterIsConsideredForModeling)
+    q_pls_modeling.getFilters().append(filterAllInSample)
     q_pls_modeling.setName("Q_LP3_ModelingLead_AllRows")
     conn_mgr.setQuery(q_pls_modeling)
 
-    q_pls_modeling.getFilters().append(filterSample)
-    q_pls_modeling.setName("Q_LP3_ScoringLead")
-    conn_mgr.setQuery(q_pls_modeling)
+    filterAllInSampleSpec = 'SpecLatticeNamedElements((SpecLatticeNamedElement(SpecLatticeAliasDeclaration(\
+                               LatticeAddressSetFcn(\
+                                 LatticeFunctionExpression(\
+                                   LatticeFunctionOperatorIdentifier("Equal")\
+                                 , LatticeFunctionIdentifier(\
+                                     ContainerElementNameTableQualifiedName(\
+                                       LatticeSourceTableIdentifier(ContainerElementName("{0}"))\
+                                     , ContainerElementName("{1}")\
+                                     )\
+                                   )\
+                                 , LatticeFunctionExpressionTransform(\
+                                     LatticeFunctionExpressionTransform(\
+                                       LatticeFunctionIdentifier(\
+                                         ContainerElementNameTableQualifiedName(\
+                                           LatticeSourceTableIdentifier(ContainerElementName("{0}"))\
+                                         , ContainerElementName("{1}")\
+                                         )\
+                                       )\
+                                     , LatticeAddressSetMeet(({3}))\
+                                     , FunctionAggregationOperator("Combine")\
+                                     )\
+                                   , LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("PropDataID"))))\
+                                   , FunctionAggregationOperator("Combine")\
+                                   )\
+                                 )\
+                               , LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("{2}"))))\
+                               )\
+                             ), ContainerElementName("LP3AllInSampleLeadsByPropDataID"))))'.format(mapTable, colPropDataID, entityname, lasmspec)
+    conn_mgr.setSpec('LP3AllInSampleLeadsByPropDataID', filterAllInSampleSpec)
 
 
 def executeModelBuild(conn_mgr):
@@ -254,7 +327,7 @@ def addCreateAnalyticPlayWithArchive(conn_mgr, tenant):
 
     capwaTqxml = ' \
     <targetQueries> \
-        <targetQuery w="Workspace" t="2" name="Q_PLS_Modeling" alias="Q_PLS_Modeling" isc="True" threshold="10000" fsTableName="{0}" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="2" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="SQL" destDataProvider="SQL_LP2EventTables" cto="1"> \
+        <targetQuery w="Workspace" t="2" name="Q_LP3_Modeling" alias="Q_LP3_Modeling" isc="True" threshold="10000" fsTableName="{0}" sourceType="1" jobType="20" ignoreOptionsValue="0" exportToDestDirectly="True" exportRule="2" fileExt="bcp" rowTerminator="\\0\\r" columnTerminator="\\0" edts="False" destType="SQL" destDataProvider="SQL_LP2EventTables" cto="1"> \
           <schemas /> \
           <specs /> \
           <fsColumnMappings /> \
@@ -267,12 +340,16 @@ def addCreateAnalyticPlayWithArchive(conn_mgr, tenant):
     '.format(tenant)
     capwaTqsxml = ' \
       <targetQuerySequences> \
-        <sequence w="Workspace" queryName="Q_PLS_Modeling" sequence="1" /> \
+        <sequence w="Workspace" queryName="Q_LP3_Modeling" sequence="1" /> \
       </targetQuerySequences> \
     '
 
     lgMgr.setLoadGroupFunctionality('CreateAnalyticPlayWithArchive', capwaTqxml)
     lgMgr.setLoadGroupFunctionality('CreateAnalyticPlayWithArchive', capwaTqsxml)
+
+    capwaLsxml = lgMgr.getLoadGroupFunctionality('CreateAnalyticPlayWithArchive', 'leadscroings')
+    capwaLsxml = capwaLsxml.replace('Q_PLS_Modeling', 'Q_LP3_Modeling')
+    lgMgr.setLoadGroupFunctionality('CreateAnalyticPlayWithArchive', capwaLsxml)
 
 
 def writeQueryToCSV(conn_mgr, t, queryName, dt):
@@ -323,6 +400,8 @@ def createUnicodeDelimited(e, d):
         has_quote = False
         if (w is not None) and (u'"' in unicode(w)):
             w = w.replace('"','""')
+            has_quote = True
+        if (w is not None) and (u'\n' in unicode(w)):
             has_quote = True
         if (w is not None) and (d in unicode(w) or has_quote):
             w = u'"' + w + u'"'
