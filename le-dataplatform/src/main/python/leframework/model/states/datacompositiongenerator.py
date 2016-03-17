@@ -51,7 +51,7 @@ class DataCompositionGenerator(State):
             else:
                 details["type"] = "STRING"
 
-            # Should identify interesting non-feature columns through metadata.  Keep in sync with SemanticType
+            # Should identify interesting non-feature columns through metadata.  Keep in sync with Logical Data Type
             if name in schema["features"]:
                 details["interpretation"] = "FEATURE"
             elif name == "Id" or name == "LeadID" or name == "ExternalId":

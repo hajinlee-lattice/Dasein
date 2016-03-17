@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,7 +22,7 @@ import com.latticeengines.security.exposed.exception.SecurityControllerException
 
 @ControllerAdvice
 public class MetadataControllerExceptionHandler extends SecurityControllerExceptionHandler {
-    private static final Log log = LogFactory.getLog(MetadataControllerExceptionHandler.class);
+    private static final Logger log = Logger.getLogger(MetadataControllerExceptionHandler.class);
 
     @Autowired
     private AlertService alertService;
@@ -36,7 +35,8 @@ public class MetadataControllerExceptionHandler extends SecurityControllerExcept
     public ModelAndView handleException(LedpException e) {
         MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
         String stackTrace = e.getCause() != null ? //
-                ExceptionUtils.getFullStackTrace(e.getCause()) : //
+        ExceptionUtils.getFullStackTrace(e.getCause())
+                : //
                 ExceptionUtils.getStackTrace(e);
         log.error(e.getCode() + "\n" + stackTrace);
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //

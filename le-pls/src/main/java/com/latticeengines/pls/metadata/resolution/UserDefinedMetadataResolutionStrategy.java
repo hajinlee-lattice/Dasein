@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -24,7 +25,6 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -141,11 +141,11 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
                 attributes.add(attribute);
             }
             if (ctm.getColumnType().equalsIgnoreCase(Schema.Type.LONG.name())) {
-                attribute.setLogicalDataType("Date");
+                attribute.setSourceLogicalDataType("Date");
             }
         }
 
-        Attribute lastModified = result.metadata.getAttribute(SemanticType.LastModifiedDate);
+        Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
         if (lastModified == null) {
             result.metadata.setLastModifiedKey(null);
         }

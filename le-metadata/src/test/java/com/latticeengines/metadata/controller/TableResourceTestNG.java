@@ -41,7 +41,7 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
     public void createTableWithResource(String urlType) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        Table table = createTable(null, TABLE2, TABLE_LOCATION2);
+        Table table = createTable(null, TABLE2, tableLocation2.append(TABLE2).toString());
 
         log.info("Creating TABLE2 for " + CUSTOMERSPACE1 + " with url type " + urlType);
         String url = String.format("%s/metadata/customerspaces/%s/%s/%s", getRestAPIHostPort(), CUSTOMERSPACE1,
@@ -126,11 +126,6 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
                 getRestAPIHostPort(), CUSTOMERSPACE1, TABLE1);
         Table existing = restTemplate.getForObject(url, Table.class);
         assertNotNull(existing);
-
-        url = String.format("%s/metadata/customerspaces/%s/tables/%s/clone", //
-                getRestAPIHostPort(), CUSTOMERSPACE1, clone.getName());
-        Table clone2 = restTemplate.postForObject(url, null, Table.class);
-        assertEquals(clone2.getName(), clone.getName() + "2");
     }
 
     @Test(groups = "functional", dataProvider = "urlTypes", enabled = true, dependsOnMethods = { "getTable" })

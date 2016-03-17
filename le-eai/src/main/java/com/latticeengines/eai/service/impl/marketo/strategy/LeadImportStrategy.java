@@ -47,7 +47,7 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
                 continue;
             }
             attribute.setDisplayName((String) lead.get("displayName"));
-            attribute.setLogicalDataType((String) lead.get("dataType"));
+            attribute.setSourceLogicalDataType((String) lead.get("dataType"));
             attribute.setLength((Integer) lead.get("length"));
         }
 

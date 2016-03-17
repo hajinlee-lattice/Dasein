@@ -3,18 +3,13 @@ package com.latticeengines.dataplatform.exposed.sqoop.runtime.mapreduce;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
-import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -37,15 +32,18 @@ import org.mortbay.log.Log;
 import com.cloudera.sqoop.lib.LargeObjectLoader;
 import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
-
-import java.util.Comparator;
 
 /**
  * Imports records by transforming them to Avro records in an Avro data file.
@@ -150,9 +148,9 @@ public class LedpCSVToAvroImportMapper extends
                         return attribute.getPhysicalName().equals(s);
                     }
                 });
-                SemanticType semanticType = attr.getSemanticType();
-                if (semanticType != null
-                        && (semanticType.equals(SemanticType.Email) || semanticType.equals(SemanticType.Website))) {
+                InterfaceName interfaceName = attr.getInterfaceName();
+                if (interfaceName != null
+                        && (interfaceName.equals(InterfaceName.Email) || interfaceName.equals(InterfaceName.Website))) {
                     return -1;
                 } else
                     return o1.compareTo(o2);
@@ -193,26 +191,27 @@ public class LedpCSVToAvroImportMapper extends
     }
 
     private void validateRowValueBeforeConvertToAvro(String interpretation, Attribute attr, String fieldCsvValue) {
-        SemanticType semanticType = attr.getSemanticType();
-        if (semanticType == null) {
-            Log.info("SemanticType for attribute " + attr.getName() + " is null.");
-        } else if ((semanticType.equals(SemanticType.Id) || semanticType.equals(SemanticType.Event))
+        InterfaceName interfaceName = attr.getInterfaceName();
+        if (interfaceName == null) {
+            Log.info("InterfaceName for attribute " + attr.getName() + " is null.");
+        } else if ((interfaceName.equals(InterfaceName.Id) || interfaceName.equals(InterfaceName.Event))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
             throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getPhysicalName()));
         } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())
-                && semanticType.equals(SemanticType.Website) && StringUtils.isEmpty(fieldCsvValue)) {
+                && interfaceName.equals(InterfaceName.Website) && StringUtils.isEmpty(fieldCsvValue)) {
             emailOrWebsiteIsEmpty = true;
         } else if (interpretation.equals(SchemaInterpretation.SalesforceLead.name())
-                && semanticType.equals(SemanticType.Email) && StringUtils.isEmpty(fieldCsvValue)) {
+                && interfaceName.equals(InterfaceName.Email) && StringUtils.isEmpty(fieldCsvValue)) {
             emailOrWebsiteIsEmpty = true;
         } else if (emailOrWebsiteIsEmpty
-                && (semanticType.equals(SemanticType.CompanyName) || semanticType.equals(SemanticType.City)
-                        || semanticType.equals(SemanticType.State) || semanticType.equals(SemanticType.Country))
+                && (interfaceName.equals(InterfaceName.CompanyName) || interfaceName.equals(InterfaceName.City)
+                        || interfaceName.equals(InterfaceName.State) || interfaceName.equals(InterfaceName.Country))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
             String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? table.getAttribute(
-                    SemanticType.Website).getPhysicalName() : table.getAttribute(SemanticType.Email).getPhysicalName();
+                    InterfaceName.Website).getPhysicalName() : table.getAttribute(InterfaceName.Email)
+                    .getPhysicalName();
             throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", colName,
                     attr.getPhysicalName()));
         }
@@ -228,9 +227,9 @@ public class LedpCSVToAvroImportMapper extends
             case INT:
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
-                if (attr.getSemanticType().equals(SemanticType.CreatedDate)
-                        || attr.getSemanticType().equals(SemanticType.LastModifiedDate)
-                        || (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals("Date"))) {
+                if (attr.getInterfaceName().equals(InterfaceName.CreatedDate)
+                        || attr.getInterfaceName().equals(InterfaceName.LastModifiedDate)
+                        || (attr.getSourceLogicalDataType() != null && attr.getSourceLogicalDataType().equals("Date"))) {
                     Log.info("Date value from csv: " + fieldCsvValue);
                     List<DateGroup> groups = parser.parse(fieldCsvValue);
                     List<Date> dates = groups.get(0).getDates();

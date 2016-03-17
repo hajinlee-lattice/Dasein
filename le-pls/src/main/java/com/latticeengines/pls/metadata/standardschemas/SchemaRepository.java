@@ -6,9 +6,10 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTime;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -47,23 +48,35 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id));
-        table.addAttribute(createAttribute("Website", Schema.Type.STRING, false, SemanticType.Website));
-        table.addAttribute(createAttribute("Event", Schema.Type.BOOLEAN, false, SemanticType.Event));
+        table.addAttribute(attr("Id").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Id)
+                .logicalType(LogicalDataType.Id).build());
+        table.addAttribute(attr("Website").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Website)
+                .build());
+        table.addAttribute(attr("Event").type(Schema.Type.BOOLEAN).required().interfaceName(InterfaceName.Event)
+                .logicalType(LogicalDataType.Event).build());
 
-        table.addAttribute(createAttribute("CompanyName", Schema.Type.STRING, SemanticType.CompanyName, "Website"));
-        table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City, "Website"));
-        table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State, "Website"));
-        table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country, "Website"));
-        table.addAttribute(createAttribute("PostalCode", Schema.Type.STRING, SemanticType.PostalCode));
+        table.addAttribute(attr("CompanyName").type(Schema.Type.STRING).interfaceName(InterfaceName.CompanyName)
+                .withValidator("Website").build());
+        table.addAttribute(attr("City").type(Schema.Type.STRING).interfaceName(InterfaceName.City)
+                .withValidator("Website").build());
+        table.addAttribute(attr("State").type(Schema.Type.STRING).interfaceName(InterfaceName.State)
+                .withValidator("Website").build());
+        table.addAttribute(attr("Country").type(Schema.Type.STRING).interfaceName(InterfaceName.Country)
+                .withValidator("Website").build());
+        table.addAttribute(attr("PostalCode").type(Schema.Type.STRING).interfaceName(InterfaceName.PostalCode).build());
 
-        table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
-        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
-        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT, SemanticType.NumberOfEmployees));
-        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
-        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG, SemanticType.LastModifiedDate));
-        table.addAttribute(createAttribute("YearStarted", Schema.Type.STRING, SemanticType.YearStarted));
-        table.addAttribute(createAttribute("PhoneNumber", Schema.Type.STRING, SemanticType.PhoneNumber));
+        table.addAttribute(attr("Industry").type(Schema.Type.STRING).interfaceName(InterfaceName.Industry).build());
+        table.addAttribute(attr("AnnualRevenue").type(Schema.Type.DOUBLE).interfaceName(InterfaceName.AnnualRevenue)
+                .build());
+        table.addAttribute(attr("NumberOfEmployees").type(Schema.Type.INT)
+                .interfaceName(InterfaceName.NumberOfEmployees).build());
+        table.addAttribute(attr("CreatedDate").type(Schema.Type.LONG).interfaceName(InterfaceName.CreatedDate).build());
+        table.addAttribute(attr("LastModifiedDate").type(Schema.Type.LONG)
+                .interfaceName(InterfaceName.LastModifiedDate).build());
+        table.addAttribute(attr("YearStarted").type(Schema.Type.STRING).interfaceName(InterfaceName.YearStarted)
+                .build());
+        table.addAttribute(attr("PhoneNumber").type(Schema.Type.STRING).interfaceName(InterfaceName.PhoneNumber)
+                .build());
 
         return table;
     }
@@ -73,28 +86,38 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(createAttribute("Id", Schema.Type.STRING, false, SemanticType.Id, null, ModelingMetadata.NONE_APPROVED_USAGE));
-        table.addAttribute(createAttribute("Email", Schema.Type.STRING, false, SemanticType.Email));
-        table.addAttribute(createAttribute("Event", Schema.Type.BOOLEAN, false, SemanticType.Event));
+        table.addAttribute(attr("Id").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Id)
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+        table.addAttribute(attr("Email").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Email).build());
+        table.addAttribute(attr("Event").type(Schema.Type.BOOLEAN).required().interfaceName(InterfaceName.Event)
+                .logicalType(LogicalDataType.Event).build());
 
-        table.addAttribute(createAttribute("CompanyName", Schema.Type.STRING, SemanticType.CompanyName, "Email"));
-        table.addAttribute(createAttribute("City", Schema.Type.STRING, SemanticType.City, "Email"));
-        table.addAttribute(createAttribute("State", Schema.Type.STRING, SemanticType.State, "Email"));
-        table.addAttribute(createAttribute("Country", Schema.Type.STRING, SemanticType.Country, "Email"));
-        table.addAttribute(createAttribute("PostalCode", Schema.Type.STRING, SemanticType.PostalCode));
+        table.addAttribute(attr("CompanyName").type(Schema.Type.STRING).interfaceName(InterfaceName.CompanyName)
+                .withValidator("Email").build());
+        table.addAttribute(attr("City").type(Schema.Type.STRING).interfaceName(InterfaceName.City)
+                .withValidator("Email").build());
+        table.addAttribute(attr("State").type(Schema.Type.STRING).interfaceName(InterfaceName.State)
+                .withValidator("Email").build());
+        table.addAttribute(attr("Country").type(Schema.Type.STRING).interfaceName(InterfaceName.Country)
+                .withValidator("Email").build());
+        table.addAttribute(attr("PostalCode").type(Schema.Type.STRING).interfaceName(InterfaceName.PostalCode).build());
 
-        table.addAttribute(createAttribute("CreatedDate", Schema.Type.LONG, SemanticType.CreatedDate));
-        table.addAttribute(createAttribute("LastModifiedDate", Schema.Type.LONG, SemanticType.LastModifiedDate));
-        table.addAttribute(createAttribute("FirstName", Schema.Type.STRING, SemanticType.FirstName));
-        table.addAttribute(createAttribute("LastName", Schema.Type.STRING, SemanticType.LastName));
-        table.addAttribute(createAttribute("Title", Schema.Type.STRING, SemanticType.Title));
-        table.addAttribute(createAttribute("LeadSource", Schema.Type.STRING, SemanticType.LeadSource));
-        table.addAttribute(createAttribute("IsClosed", Schema.Type.BOOLEAN, SemanticType.IsClosed));
-        table.addAttribute(createAttribute("StageName", Schema.Type.STRING, SemanticType.StageName));
-        table.addAttribute(createAttribute("PhoneNumber", Schema.Type.STRING, SemanticType.PhoneNumber));
-        table.addAttribute(createAttribute("AnnualRevenue", Schema.Type.DOUBLE, SemanticType.AnnualRevenue));
-        table.addAttribute(createAttribute("NumberOfEmployees", Schema.Type.INT, SemanticType.NumberOfEmployees));
-        table.addAttribute(createAttribute("Industry", Schema.Type.STRING, SemanticType.Industry));
+        table.addAttribute(attr("CreatedDate").type(Schema.Type.LONG).interfaceName(InterfaceName.CreatedDate).build());
+        table.addAttribute(attr("LastModifiedDate").type(Schema.Type.LONG)
+                .interfaceName(InterfaceName.LastModifiedDate).build());
+        table.addAttribute(attr("FirstName").type(Schema.Type.STRING).interfaceName(InterfaceName.FirstName).build());
+        table.addAttribute(attr("LastName").type(Schema.Type.STRING).interfaceName(InterfaceName.LastName).build());
+        table.addAttribute(attr("Title").type(Schema.Type.STRING).interfaceName(InterfaceName.Title).build());
+        table.addAttribute(attr("LeadSource").type(Schema.Type.STRING).interfaceName(InterfaceName.LeadSource).build());
+        table.addAttribute(attr("IsClosed").type(Schema.Type.BOOLEAN).interfaceName(InterfaceName.IsClosed).build());
+        table.addAttribute(attr("StageName").type(Schema.Type.STRING).interfaceName(InterfaceName.StageName).build());
+        table.addAttribute(attr("PhoneNumber").type(Schema.Type.STRING).interfaceName(InterfaceName.PhoneNumber)
+                .build());
+        table.addAttribute(attr("AnnualRevenue").type(Schema.Type.DOUBLE).interfaceName(InterfaceName.AnnualRevenue)
+                .build());
+        table.addAttribute(attr("NumberOfEmployees").type(Schema.Type.INT)
+                .interfaceName(InterfaceName.NumberOfEmployees).build());
+        table.addAttribute(attr("Industry").type(Schema.Type.STRING).interfaceName(InterfaceName.Industry).build());
         return table;
     }
 
@@ -124,42 +147,59 @@ public class SchemaRepository {
         return table;
     }
 
-    private Attribute createAttribute(String name, Schema.Type dataType) {
-        return createAttribute(name, dataType, null);
+    private AttributeBuilder attr(String name) {
+        AttributeBuilder builder = new AttributeBuilder();
+        builder.name(name);
+        return builder;
     }
 
-    private Attribute createAttribute(String name, Schema.Type dataType, SemanticType semanticType) {
-        return createAttribute(name, dataType, true, semanticType);
-    }
+    private static class AttributeBuilder {
+        private Attribute attribute = new Attribute();
 
-    private Attribute createAttribute(String name, Schema.Type dataType, SemanticType semanticType,
-            String otherFieldForValidator) {
-        return createAttribute(name, dataType, true, semanticType, otherFieldForValidator);
-    }
-
-    private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType) {
-        return createAttribute(name, dataType, nullable, semanticType, null);
-    }
-
-    private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType,
-            String otherFieldForValidator) {
-        return createAttribute(name, dataType, nullable, semanticType, null, ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
-    }
-
-    private Attribute createAttribute(String name, Schema.Type dataType, boolean nullable, SemanticType semanticType,
-            String otherFieldForValidator, String approvedUsage) {
-        Attribute attribute = new Attribute();
-        attribute.setName(name);
-        attribute.setPhysicalDataType(dataType.toString());
-        attribute.setDisplayName(name);
-        attribute.setNullable(nullable);
-        attribute.setApprovedUsage(approvedUsage);
-        attribute.setSemanticType(semanticType);
-
-        if (otherFieldForValidator != null) {
-            attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherFieldForValidator));
+        public AttributeBuilder() {
+            attribute.setNullable(true);
+            attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         }
 
-        return attribute;
+        public Attribute build() {
+            return attribute;
+        }
+
+        public AttributeBuilder name(String name) {
+            attribute.setName(name);
+            attribute.setDisplayName(name);
+            return this;
+        }
+
+        public AttributeBuilder type(Schema.Type type) {
+            attribute.setPhysicalDataType(type.toString());
+            return this;
+        }
+
+        public AttributeBuilder interfaceName(InterfaceName interfaceName) {
+            attribute.setInterfaceName(interfaceName);
+            return this;
+        }
+
+        public AttributeBuilder withValidator(String otherField) {
+            attribute.addValidator(new RequiredIfOtherFieldIsEmpty(otherField));
+            return this;
+        }
+
+        public AttributeBuilder required() {
+            attribute.setNullable(false);
+            return this;
+        }
+
+        public AttributeBuilder approvedUsage(String approvedUsage) {
+            attribute.setApprovedUsage(approvedUsage);
+            return this;
+        }
+
+        public AttributeBuilder logicalType(LogicalDataType logicalDataType) {
+            attribute.setLogicalDataType(logicalDataType);
+            return this;
+        }
     }
+
 }

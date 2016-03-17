@@ -24,7 +24,7 @@ public class AttributeUnitTestNG {
         attr.setDisplayName("Attribute 1");
         attr.setDataSource("DerivedColumns");
         attr.setDataQuality("xyz");
-        attr.setSemanticType(SemanticType.City);
+        attr.setInterfaceName(InterfaceName.City);
 
         String serializedStr = JsonUtils.serialize(attr);
 
@@ -38,7 +38,7 @@ public class AttributeUnitTestNG {
         assertEquals(deserializedAttr.getDisplayDiscretizationStrategy(), attr.getDisplayDiscretizationStrategy());
         assertEquals(deserializedAttr.getDisplayName(), attr.getDisplayName());
         assertEquals(deserializedAttr.getDataQuality(), attr.getDataQuality());
-        assertEquals(deserializedAttr.getSemanticType(), attr.getSemanticType());
+        assertEquals(deserializedAttr.getInterfaceName(), attr.getInterfaceName());
     }
 
     @Test(groups = "unit")

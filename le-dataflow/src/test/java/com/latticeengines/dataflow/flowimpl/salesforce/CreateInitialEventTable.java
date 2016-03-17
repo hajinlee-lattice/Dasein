@@ -38,7 +38,6 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         domain.setPropertyValue("length", "255");
         domain.setPropertyValue("precision", "0");
         domain.setPropertyValue("scale", "0");
-        domain.setPropertyValue("logicalType", "domain");
 
         String addDomain = addFunction(normalizeEmail, //
                 "CleanEmail.substring(CleanEmail.indexOf('@') + 1)", //

@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -255,8 +255,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
             @Override
             public boolean apply(@Nullable Predictor predictor) {
-                return predictor.getName().equals(SemanticType.Website.toString())
-                        || predictor.getName().equals(SemanticType.Country.toString());
+                return predictor.getName().equals(InterfaceName.Website.toString())
+                        || predictor.getName().equals(InterfaceName.Country.toString());
             }
 
         }));

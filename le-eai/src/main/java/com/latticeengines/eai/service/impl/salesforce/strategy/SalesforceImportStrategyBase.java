@@ -173,9 +173,9 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                 attr.setDataType(attrFromImportTables.getDataType());
                 attr.setFundamentalType(attrFromImportTables.getFundamentalType());
                 attr.setPhysicalName(attr.getName());
-                attr.setSemanticType(attrFromImportTables.getSemanticType());
-                if (attr.getSemanticType() != null) {
-                    attr.setName(attr.getSemanticType().toString());
+                attr.setInterfaceName(attrFromImportTables.getInterfaceName());
+                if (attr.getInterfaceName() != null) {
+                    attr.setName(attr.getInterfaceName().toString());
                 }
                 attr.setStatisticalType(attrFromImportTables.getStatisticalType());
                 attr.setTags(Arrays.asList(new String[] { ModelingMetadata.INTERNAL_TAG }));
@@ -186,7 +186,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
                     throw new RuntimeException("Could not find avro type for sfdc type " + type);
                 }
                 attr.setPhysicalDataType(avroType.name());
-                attr.setLogicalDataType(type);
+                attr.setSourceLogicalDataType(type);
 
                 if (type.equals("picklist")) {
                     List<PickListValue> values = descField.getPicklistValues();

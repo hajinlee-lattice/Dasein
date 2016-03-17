@@ -165,29 +165,29 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     }
 
     @JsonIgnore
-    public Attribute getAttribute(final SemanticType semanticType) {
-        if (semanticType == null) {
+    public Attribute getAttribute(final InterfaceName interfaceName) {
+        if (interfaceName == null) {
             return null;
         }
         return Iterables.find(attributes, new Predicate<Attribute>() {
 
             @Override
             public boolean apply(@Nullable Attribute attribute) {
-                return semanticType == attribute.getSemanticType();
+                return interfaceName == attribute.getInterfaceName();
             }
         }, null);
     }
 
     @JsonIgnore
-    public List<Attribute> getAttributes(final SemanticType semanticType) {
-        if (semanticType == null) {
+    public List<Attribute> getAttributes(final LogicalDataType logicalDataType) {
+        if (logicalDataType == null) {
             return null;
         }
         return findAttributes(new Predicate<Attribute>() {
 
             @Override
             public boolean apply(@Nullable Attribute attribute) {
-                return attribute.getSemanticType() == semanticType;
+                return attribute.getLogicalDataType() == logicalDataType;
             }
         });
     }

@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -73,7 +74,8 @@ public abstract class DataFlowBuilder {
 
             if (dataFlowCtx != null && dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
                 String logicalType = props.get("logicalType");
-                if (logicalType != null && (logicalType.equals("id") || logicalType.equals("reference"))) {
+                if (logicalType != null && (logicalType.equals(LogicalDataType.Id.toString()) ||
+                        logicalType.equals(LogicalDataType.Reference.toString()))) {
                     continue;
                 }
             }
@@ -165,7 +167,8 @@ public abstract class DataFlowBuilder {
                     attribute.setLength(Integer.parseInt(fm.getPropertyValue("length")));
                 }
 
-                attribute.setLogicalDataType(fm.getPropertyValue("logicalType"));
+                attribute.setSourceLogicalDataType(fm.getPropertyValue("sourceLogicalType"));
+                attribute.setLogicalDataTypeString(fm.getPropertyValue("logicalType"));
                 attribute.setNullable(true);
                 attribute.setPhysicalDataType(fm.getAvroType().toString().toLowerCase());
 
@@ -198,8 +201,8 @@ public abstract class DataFlowBuilder {
                         attribute.setRTSArguments(value);
                     } else if (key.equals("RTSAttribute")) {
                         attribute.setRTS(Boolean.valueOf(value));
-                    } else if (key.equals("SemanticType")) {
-                        attribute.setSemanticTypeString(value);
+                    } else if (key.equals("InterfaceName")) {
+                        attribute.setInterfaceNameString(value);
                     } else if (key.equals("Category")) {
                         attribute.setCategory(value);
                     } else if (key.equals("DataType")) {

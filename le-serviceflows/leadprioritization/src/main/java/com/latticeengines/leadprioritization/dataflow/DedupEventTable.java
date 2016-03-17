@@ -1,12 +1,12 @@
 package com.latticeengines.leadprioritization.dataflow;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
@@ -21,9 +21,9 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         Node eventTable = addSource(parameters.eventTable);
         Node last = eventTable;
 
-        Attribute websiteColumn = eventTable.getSourceAttribute(SemanticType.Website);
-        Attribute domainColumn = eventTable.getSourceAttribute(SemanticType.Domain);
-        Attribute emailColumn = eventTable.getSourceAttribute(SemanticType.Email);
+        Attribute websiteColumn = eventTable.getSourceAttribute(InterfaceName.Website);
+        Attribute domainColumn = eventTable.getSourceAttribute(InterfaceName.Domain);
+        Attribute emailColumn = eventTable.getSourceAttribute(InterfaceName.Email);
 
         if (domainColumn != null) {
             last = last.rename(new FieldList(domainColumn.getName()), new FieldList(DOMAIN));
@@ -56,7 +56,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
     private Node addSortColumn(Node last, Node source, String field) {
         FieldMetadata targetField = new FieldMetadata(field, String.class);
 
-        Attribute event = source.getSourceAttribute(SemanticType.Event);
+        Attribute event = source.getSourceAttribute(InterfaceName.Event);
         String eventColumn = event.getName();
 
         Table sourceSchema = source.getSourceSchema();

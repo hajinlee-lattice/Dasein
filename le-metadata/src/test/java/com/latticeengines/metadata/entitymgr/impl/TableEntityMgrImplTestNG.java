@@ -52,7 +52,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrs.get(3).getStatisticalType(), "ratio");
         assertEquals(attrs.get(3).getFundamentalType(), "numeric");
         assertEquals(attrs.get(3).getTags().get(0), "External");
-        assertEquals(attrs.get(3).getLogicalDataType(), "Integer");
+        assertEquals(attrs.get(3).getSourceLogicalDataType(), "Integer");
         assertEquals(attrs.get(3).getApprovedUsage().get(0), "Model");
         assertEquals(attrs.get(3).getFundamentalType(), "numeric");
         assertEquals(attrs.get(3).getStatisticalType(), "ratio");

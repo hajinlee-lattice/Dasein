@@ -1,5 +1,7 @@
 package com.latticeengines.pls.end2end;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,14 +30,12 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertTrue;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -125,10 +125,10 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     }
 
     private void compareScoreResult(Map<String, Object> record, double probability, List<String> largeScoreVarianceList) {
-        double expectedScore = expectedScores.get(record.get(SemanticType.Id.name()));
+        double expectedScore = expectedScores.get(record.get(InterfaceName.Id.name()));
         if (Math.abs(expectedScore - probability) > 0.0000001) {
             String warning = String.format("Record id %s has value %f, expected is %f",
-                    record.get(SemanticType.Id.name()), probability, expectedScore);
+                    record.get(InterfaceName.Id.name()), probability, expectedScore);
             largeScoreVarianceList.add(warning);
             System.out.println(warning);
         }
@@ -143,15 +143,15 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         try (CSVParser parser = new CSVParser(new InputStreamReader(new BOMInputStream(csvResource.getInputStream())),
                 format)) {
             for (CSVRecord csvRecord : parser) {
-                String id = csvRecord.get(SemanticType.Id.name());
+                String id = csvRecord.get(InterfaceName.Id.name());
                 if (ids.contains(id)) {
                     Map<String, Object> scoreRecord = new HashMap<>();
                     for (Field field : fields) {
                         String fieldName = field.getFieldName();
                         scoreRecord.put(fieldName, csvRecord.get(fieldName));
                         if (csvRecord.get(fieldName).equals("")
-                                || fieldName.equalsIgnoreCase(SemanticType.CreatedDate.name())
-                                || fieldName.equalsIgnoreCase(SemanticType.LastModifiedDate.name())) {
+                                || fieldName.equalsIgnoreCase(InterfaceName.CreatedDate.name())
+                                || fieldName.equalsIgnoreCase(InterfaceName.LastModifiedDate.name())) {
                             scoreRecord.put(fieldName, null);
                         }
                     }

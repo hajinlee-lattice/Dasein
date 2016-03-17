@@ -86,7 +86,7 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
                 Attribute attr = new Attribute();
                 attr.setName(name.replace(" ", "_"));
                 attr.setDisplayName(name);
-                attr.setLogicalDataType(dataType);
+                attr.setSourceLogicalDataType(dataType);
                 newAttributes.add(attr);
             }
         }

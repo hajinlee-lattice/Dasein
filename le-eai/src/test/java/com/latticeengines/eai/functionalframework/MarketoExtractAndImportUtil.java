@@ -13,23 +13,23 @@ public class MarketoExtractAndImportUtil {
         Attribute id = new Attribute();
         id.setName("id");
         id.setDisplayName("Id");
-        id.setLogicalDataType("String");
+        id.setSourceLogicalDataType("String");
         Attribute leadId = new Attribute();
         leadId.setName("leadId");
         leadId.setDisplayName("Lead Id");
-        leadId.setLogicalDataType("Int");
+        leadId.setSourceLogicalDataType("Int");
         Attribute activityDate = new Attribute();
         activityDate.setName("activityDate");
         activityDate.setDisplayName("Activity Date");
-        activityDate.setLogicalDataType("Timestamp");
+        activityDate.setSourceLogicalDataType("Timestamp");
         Attribute activityTypeId = new Attribute();
         activityTypeId.setName("activityTypeId");
         activityTypeId.setDisplayName("Activity Type Id");
-        activityTypeId.setLogicalDataType("Int");
+        activityTypeId.setSourceLogicalDataType("Int");
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
         lastModifiedDate.setDisplayName("LastModifiedDate");
-        lastModifiedDate.setLogicalDataType("Timestamp");
+        lastModifiedDate.setSourceLogicalDataType("Timestamp");
         table.addAttribute(id);
         table.addAttribute(leadId);
         table.addAttribute(activityDate);
@@ -54,27 +54,27 @@ public class MarketoExtractAndImportUtil {
         Attribute id = new Attribute();
         id.setName("id");
         id.setDisplayName("Id");
-        id.setLogicalDataType("String");
+        id.setSourceLogicalDataType("String");
 
         Attribute name = new Attribute();
         name.setName("name");
         name.setDisplayName("Name");
-        name.setLogicalDataType("String");
+        name.setSourceLogicalDataType("String");
 
         Attribute description = new Attribute();
         description.setName("description");
         description.setDisplayName("Description");
-        description.setLogicalDataType("String");
+        description.setSourceLogicalDataType("String");
 
         Attribute attributes = new Attribute();
         attributes.setName("attributes");
         attributes.setDisplayName("Attributes");
-        attributes.setLogicalDataType("String");
+        attributes.setSourceLogicalDataType("String");
         
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
         lastModifiedDate.setDisplayName("LastModifiedDate");
-        lastModifiedDate.setLogicalDataType("Timestamp");
+        lastModifiedDate.setSourceLogicalDataType("Timestamp");
 
         table.addAttribute(id);
         table.addAttribute(name);
@@ -143,7 +143,7 @@ public class MarketoExtractAndImportUtil {
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
         lastModifiedDate.setDisplayName("LastModifiedDate");
-        lastModifiedDate.setLogicalDataType("Timestamp");
+        lastModifiedDate.setSourceLogicalDataType("Timestamp");
 
         table.addAttribute(id);
         table.addAttribute(anonymousIP);

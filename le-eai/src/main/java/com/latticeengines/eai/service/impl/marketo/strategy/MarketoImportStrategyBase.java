@@ -65,15 +65,15 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
         List<Attribute> attributes = table.getAttributes();
         for (Attribute attribute : attributes) {
             log.info(String.format("Processing attribute %s with logical type %s.", attribute.getName(),
-                    attribute.getLogicalDataType()));
+                    attribute.getSourceLogicalDataType()));
             assert (attribute != null);
             assert (converter != null);
-            assert (converter.convertTypeToAvro(attribute.getLogicalDataType()) != null);
+            assert (converter.convertTypeToAvro(attribute.getSourceLogicalDataType()) != null);
 
-            if (attribute.getLogicalDataType() != null) {
-                attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
+            if (attribute.getSourceLogicalDataType() != null) {
+                attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getSourceLogicalDataType()).name());
 
-                if (attribute.getLogicalDataType().equals("Date") || attribute.getLogicalDataType().equals("date")) {
+                if (attribute.getSourceLogicalDataType().equals("Date") || attribute.getSourceLogicalDataType().equals("date")) {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }

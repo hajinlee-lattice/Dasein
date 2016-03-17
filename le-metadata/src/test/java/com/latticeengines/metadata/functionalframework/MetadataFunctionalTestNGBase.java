@@ -22,7 +22,11 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.validators.RequiredIfOtherFieldIsEmpty;
@@ -50,8 +54,9 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected static final String TABLE2 = "Account2";
     protected static final String TABLE_RESOURCE1 = "com/latticeengines/metadata/controller/Account1";
     protected static final String TABLE_RESOURCE2 = "com/latticeengines/metadata/controller/Account2";
-    protected static final String TABLE_LOCATION1 = "/tmp/metadataFunctionalTestDir/Account1";
-    protected static final String TABLE_LOCATION2 = "/tmp/metadataFunctionalTestDir/Account2";
+
+    protected Path tableLocation1;
+    protected Path tableLocation2;
 
     protected Configuration yarnConfiguration = new Configuration();
 
@@ -87,6 +92,11 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     }
 
     public void setup() {
+        tableLocation1 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(CUSTOMERSPACE1));
+        tableLocation2 = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
+                CustomerSpace.parse(CUSTOMERSPACE2));
+
         if (hiveEnabled) {
             dropAllHiveTables();
         }
@@ -102,10 +112,12 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
                     "file:///",
                     "$HADOOP_HOME/etc/hadoop must be on the classpath, and configured to use a hadoop cluster in order for this test to run");
 
-            HdfsUtils.rmdir(yarnConfiguration, "/tmp/metadataFunctionalTestDir");
-            HdfsUtils.mkdir(yarnConfiguration, "/tmp/metadataFunctionalTestDir");
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE1, "/tmp/metadataFunctionalTestDir");
-            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE2, "/tmp/metadataFunctionalTestDir");
+            HdfsUtils.rmdir(yarnConfiguration, tableLocation1.toString());
+            HdfsUtils.mkdir(yarnConfiguration, tableLocation1.toString());
+            HdfsUtils.rmdir(yarnConfiguration, tableLocation2.toString());
+            HdfsUtils.mkdir(yarnConfiguration, tableLocation2.toString());
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE1, tableLocation1.toString());
+            HdfsUtils.copyLocalResourceToHdfs(yarnConfiguration, TABLE_RESOURCE2, tableLocation2.toString());
         } catch (Exception e) {
             throw new RuntimeException("Failed to setup hdfs for metadata test", e);
         }
@@ -130,13 +142,13 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         tenantEntityMgr.create(tenant2);
 
         // Tenant1, Type=DATATABLE
-        Table tbl = createTable(tenant1, TABLE1, TABLE_LOCATION1);
+        Table tbl = createTable(tenant1, TABLE1, tableLocation1.append(TABLE1).toString());
         createTableByRestCall(tenant1, tbl, false);
         // Tenant1, Type=IMPORTTABLE
         createTableByRestCall(tenant1, tbl, true);
 
         // Tenant2, Type=DATATABLE
-        tbl = createTable(tenant2, TABLE1, TABLE_LOCATION1);
+        tbl = createTable(tenant2, TABLE1, tableLocation1.append(TABLE1).toString());
         createTableByRestCall(tenant2, tbl, false);
         // Tenant2, Type=IMPORTTABLE
         createTableByRestCall(tenant2, tbl, true);
@@ -199,7 +211,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         table.setName(tableName);
         table.setTenant(tenant);
         Attribute attribute = table.getAttributes().get(3);
-        attribute.setLogicalDataType("Integer");
+        attribute.setSourceLogicalDataType("Integer");
         attribute.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
         attribute.setCategory("Firmographics");
         attribute.setDataType("Int");

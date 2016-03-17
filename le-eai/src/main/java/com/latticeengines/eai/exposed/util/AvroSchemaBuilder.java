@@ -42,6 +42,7 @@ public class AvroSchemaBuilder {
             String precision = field.getProp("precision");
             String scale = field.getProp("scale");
             String logicalType = field.getProp("logicalType");
+            String sourceLogicalType = field.getProp("sourceLogicalType");
             String uuid = field.getProp("uuid");
             String enumValues = field.getProp("enumValues");
             Type type = field.schema().getTypes().get(0).getType();
@@ -61,8 +62,12 @@ public class AvroSchemaBuilder {
                     scale = attr.getScale().toString();
                 }
 
+                if (attr.getSourceLogicalDataType() != null) {
+                    sourceLogicalType = attr.getSourceLogicalDataType();
+                }
+
                 if (attr.getLogicalDataType() != null) {
-                    logicalType = attr.getLogicalDataType();
+                    logicalType = attr.getLogicalDataType().toString();
                 }
 
                 if (attr.getEnumValues().size() > 0) {
@@ -77,6 +82,7 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("length", length);
             fieldBuilder = fieldBuilder.prop("precision", precision);
             fieldBuilder = fieldBuilder.prop("scale", scale);
+            fieldBuilder = fieldBuilder.prop("sourceLogicalType", sourceLogicalType);
             fieldBuilder = fieldBuilder.prop("logicalType", logicalType);
             fieldBuilder = fieldBuilder.prop("uuid", uuid);
 
@@ -130,7 +136,10 @@ public class AvroSchemaBuilder {
             if (attr.getScale() != null) {
                 fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
             }
-            fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
+            if (attr.getLogicalDataType() != null) {
+                fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType().toString());
+            }
+            fieldBuilder = fieldBuilder.prop("sourceLogicalType", attr.getSourceLogicalDataType());
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
             for (Map.Entry<String, Object> entry : attr.getEntries()) {

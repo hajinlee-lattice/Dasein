@@ -29,14 +29,14 @@
         "StatisticalType": "",
         "PhysicalName": "Id",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Lead ID",
-      "logical_type": "id",
+      "source_logical_type": "id",
       "enum_values": ""
     },
     {
@@ -66,14 +66,14 @@
         "StatisticalType": "",
         "PhysicalName": "LastName",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Last Name",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -103,14 +103,14 @@
         "StatisticalType": "",
         "PhysicalName": "FirstName",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "First Name",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -140,14 +140,14 @@
         "StatisticalType": "",
         "PhysicalName": "Salutation",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Salutation",
-      "logical_type": "picklist",
+      "source_logical_type": "picklist",
       "enum_values": "Mr_,Ms_,Mrs_,Dr_,Prof_,_"
     },
     {
@@ -177,14 +177,14 @@
         "StatisticalType": "",
         "PhysicalName": "Title",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Title",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -214,14 +214,14 @@
         "StatisticalType": "",
         "PhysicalName": "Company",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Company",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -251,14 +251,14 @@
         "StatisticalType": "",
         "PhysicalName": "Street",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Street",
-      "logical_type": "textarea",
+      "source_logical_type": "textarea",
       "enum_values": ""
     },
     {
@@ -288,14 +288,14 @@
         "StatisticalType": "",
         "PhysicalName": "City",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "City",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -325,14 +325,14 @@
         "StatisticalType": "",
         "PhysicalName": "State",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "State/Province",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -362,14 +362,14 @@
         "StatisticalType": "",
         "PhysicalName": "PostalCode",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Zip/Postal Code",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -399,14 +399,14 @@
         "StatisticalType": "",
         "PhysicalName": "Country",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Country",
-      "logical_type": "string",
+      "source_logical_type": "string",
       "enum_values": ""
     },
     {
@@ -436,14 +436,14 @@
         "StatisticalType": "",
         "PhysicalName": "Email",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Email",
-      "logical_type": "email",
+      "source_logical_type": "email",
       "enum_values": ""
     },
     {
@@ -473,14 +473,14 @@
         "StatisticalType": "",
         "PhysicalName": "Website",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Website",
-      "logical_type": "url",
+      "source_logical_type": "url",
       "enum_values": ""
     },
     {
@@ -510,14 +510,14 @@
         "StatisticalType": "",
         "PhysicalName": "LeadSource",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Lead Source",
-      "logical_type": "picklist",
+      "source_logical_type": "picklist",
       "enum_values": "Web,Phone_Inquiry,Partner_Referral,Purchased_List,Other,POET,new_lead_source_test_06_27_2014,Test_Lead_source_up_to_40_characters___,PlayMaker,_"
     },
     {
@@ -547,14 +547,14 @@
         "StatisticalType": "",
         "PhysicalName": "Status",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Status",
-      "logical_type": "picklist",
+      "source_logical_type": "picklist",
       "enum_values": "Open___Not_Contacted,Working___Contacted,Closed___Converted,Closed___Not_Converted,Test_Status_added_062714,Test_status_added_up_to_40_characters_,_"
     },
     {
@@ -584,14 +584,14 @@
         "StatisticalType": "",
         "PhysicalName": "Industry",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Industry",
-      "logical_type": "picklist",
+      "source_logical_type": "picklist",
       "enum_values": "Agriculture,Apparel,Banking,Biotechnology,Chemicals,Communications,Construction,Consulting,Education,Electronics,Energy,Engineering,Entertainment,Environmental,Finance,Food___Beverage,Government,Healthcare,Hospitality,Insurance,Machinery,Manufacturing,Media,Not_For_Profit,Recreation,Retail,Shipping,Technology,Telecommunications,Transportation,Utilities,Other,_"
     },
     {
@@ -621,14 +621,14 @@
         "StatisticalType": "",
         "PhysicalName": "AnnualRevenue",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Annual Revenue",
-      "logical_type": "currency",
+      "source_logical_type": "currency",
       "enum_values": ""
     },
     {
@@ -658,14 +658,14 @@
         "StatisticalType": "",
         "PhysicalName": "NumberOfEmployees",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Employees",
-      "logical_type": "int",
+      "source_logical_type": "int",
       "enum_values": ""
     },
     {
@@ -695,14 +695,14 @@
         "StatisticalType": "",
         "PhysicalName": "OwnerId",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Owner ID",
-      "logical_type": "reference",
+      "source_logical_type": "reference",
       "enum_values": ""
     },
     {
@@ -732,14 +732,14 @@
         "StatisticalType": "",
         "PhysicalName": "IsConverted",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Converted",
-      "logical_type": "boolean",
+      "source_logical_type": "boolean",
       "enum_values": ""
     },
     {
@@ -769,14 +769,14 @@
         "StatisticalType": "",
         "PhysicalName": "ConvertedOpportunityId",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Converted Opportunity ID",
-      "logical_type": "reference",
+      "source_logical_type": "reference",
       "enum_values": ""
     },
     {
@@ -807,14 +807,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "CreatedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Created Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     },
     {
@@ -845,14 +845,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "LastModifiedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Last Modified Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     }
   ],
@@ -872,6 +872,6 @@
     "attributes": [
       "LastModifiedDate"
     ],
-    "last_modified_ts": 1237387254000
+    "last_modified_ts": null
   }
 }

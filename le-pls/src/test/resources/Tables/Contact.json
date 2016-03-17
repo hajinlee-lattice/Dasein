@@ -29,14 +29,14 @@
         "StatisticalType": "",
         "PhysicalName": "Id",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Contact ID",
-      "logical_type": "id",
+      "source_logical_type": "id",
       "enum_values": ""
     },
     {
@@ -66,14 +66,14 @@
         "StatisticalType": "",
         "PhysicalName": "AccountId",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Account ID",
-      "logical_type": "reference",
+      "source_logical_type": "reference",
       "enum_values": ""
     },
     {
@@ -103,14 +103,14 @@
         "StatisticalType": "",
         "PhysicalName": "Email",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Email",
-      "logical_type": "email",
+      "source_logical_type": "email",
       "enum_values": ""
     },
     {
@@ -141,14 +141,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "CreatedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Created Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     },
     {
@@ -179,14 +179,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "LastModifiedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Last Modified Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     }
   ],

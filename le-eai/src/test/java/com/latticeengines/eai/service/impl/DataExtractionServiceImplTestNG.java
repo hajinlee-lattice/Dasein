@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -40,7 +41,6 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -153,7 +153,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testAttributeWithSemanticType() throws Exception {
+    public void testAttributeWithInterfaceName() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath = dataExtractionService.createTargetPath(customer) + "/"
                 + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
@@ -164,7 +164,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.setName("Account");
         Attribute attr = new Attribute();
         attr.setName("Id");
-        attr.setSemanticType(SemanticType.Id);
+        attr.setInterfaceName(InterfaceName.Id);
         attr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
         attr.setDataSource("");
         attr.setDataQuality("");
@@ -183,7 +183,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         Attribute lmd = new Attribute();
         lmd.setName("LastModifiedDate");
-        lmd.setSemanticType(SemanticType.LastModifiedDate);
+        lmd.setInterfaceName(InterfaceName.LastModifiedDate);
         lmd.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
         lmd.setDataSource("");
         lmd.setDataQuality("");

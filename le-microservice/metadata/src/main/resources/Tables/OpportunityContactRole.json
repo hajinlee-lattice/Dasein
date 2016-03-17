@@ -29,14 +29,14 @@
         "StatisticalType": "",
         "PhysicalName": "Id",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Contact Role ID",
-      "logical_type": "id",
+      "source_logical_type": "id",
       "enum_values": ""
     },
     {
@@ -66,14 +66,14 @@
         "StatisticalType": "",
         "PhysicalName": "OpportunityId",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Opportunity ID",
-      "logical_type": "reference",
+      "source_logical_type": "reference",
       "enum_values": ""
     },
     {
@@ -103,14 +103,14 @@
         "StatisticalType": "",
         "PhysicalName": "ContactId",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Contact ID",
-      "logical_type": "reference",
+      "source_logical_type": "reference",
       "enum_values": ""
     },
     {
@@ -140,14 +140,14 @@
         "StatisticalType": "",
         "PhysicalName": "Role",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Role",
-      "logical_type": "picklist",
+      "source_logical_type": "picklist",
       "enum_values": "Business_User,Decision_Maker,Economic_Buyer,Economic_Decision_Maker,Evaluator,Executive_Sponsor,Influencer,Technical_Buyer,Other,_"
     },
     {
@@ -177,14 +177,14 @@
         "StatisticalType": "",
         "PhysicalName": "IsPrimary",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Primary",
-      "logical_type": "boolean",
+      "source_logical_type": "boolean",
       "enum_values": ""
     },
     {
@@ -215,14 +215,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "CreatedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Created Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     },
     {
@@ -253,14 +253,14 @@
         "dateFormat": "YYYY-MM-DD'T'HH:mm:ss.sssZ",
         "PhysicalName": "LastModifiedDate",
         "DataQuality": "",
-        "SemanticType": "",
+        "InterfaceName": "",
         "ApprovedUsage": [
           ""
         ],
         "DisplayDiscretizationStrategy": ""
       },
       "display_name": "Last Modified Date",
-      "logical_type": "datetime",
+      "source_logical_type": "datetime",
       "enum_values": ""
     }
   ],

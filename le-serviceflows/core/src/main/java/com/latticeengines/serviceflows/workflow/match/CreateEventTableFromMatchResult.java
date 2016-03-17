@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -173,19 +174,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         for (Attribute preMatchAttribute : preMatchEventTable.getAttributes()) {
             Attribute postMatchAttribute = eventTable.getAttribute(preMatchAttribute.getName());
             if (postMatchAttribute != null) {
-                Map<String, Object> preMatchProperties = preMatchAttribute.getProperties();
-                for (String preMatchPropertyKey : preMatchProperties.keySet()) {
-                    if (postMatchAttribute.getPropertyValue(preMatchPropertyKey) == null) {
-                        log.info(String.format("Adding property %s with value %s to attribute %s in post-match table",
-                                preMatchPropertyKey, preMatchProperties.get(preMatchPropertyKey),
-                                postMatchAttribute.getName()));
-                        postMatchAttribute.setPropertyValue(preMatchPropertyKey,
-                                preMatchProperties.get(preMatchPropertyKey));
-                    } else {
-                        log.info(String.format("Post-match attribute %s already has property %s defined",
-                                postMatchAttribute.getName(), preMatchPropertyKey));
-                    }
-                }
+                AttributeUtils.mergeAttributes(preMatchAttribute, postMatchAttribute);
             }
         }
     }

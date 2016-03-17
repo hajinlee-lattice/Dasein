@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -49,7 +51,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     private Integer length;
     private Boolean nullable = Boolean.FALSE;
     private String physicalDataType;
-    private String logicalDataType;
+    private String sourceLogicalDataType;
+    private LogicalDataType logicalDataType;
     private Integer precision;
     private Integer scale;
     private List<String> cleanedUpEnumValues = new ArrayList<String>();
@@ -128,35 +131,56 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         this.physicalDataType = physicalDataType;
     }
 
-    /**
-     * Effectively the semantic type of the source. For example, in the case of
-     * SFDC which has a semantic type called PhoneNumber, this would be set to
-     * PhoneNumber.
-     */
     @Column(name = "LOGICAL_DATA_TYPE", nullable = true)
     @JsonProperty("logical_type")
-    public String getLogicalDataType() {
+    @Enumerated(EnumType.STRING)
+    public LogicalDataType getLogicalDataType() {
         return logicalDataType;
     }
 
     @JsonProperty("logical_type")
-    public void setLogicalDataType(String logicalDataType) {
+    public void setLogicalDataType(LogicalDataType logicalDataType) {
         this.logicalDataType = logicalDataType;
     }
 
+    @JsonIgnore
+    public void setLogicalDataTypeString(String logicalDataTypeString) {
+        LogicalDataType logicalDataType = null;
+        try {
+            logicalDataType = LogicalDataType.valueOf(logicalDataTypeString);
+        } catch (Exception e) {
+            // pass
+        }
+        if (logicalDataType != null) {
+            setLogicalDataType(logicalDataType);
+        }
+    }
+
     /**
-     * Lattice's semantic interpretation of the type. Mapped to a strict
-     * enumeration of possible values.
+     * The logical data type of the source. For example, in the case of SFDC
+     * which has a logical data type called PhoneNumber, this would be set to
+     * PhoneNumber.
      */
+    @Column(name = "SOURCE_LOGICAL_DATA_TYPE", nullable = true)
+    @JsonProperty("source_logical_type")
+    public String getSourceLogicalDataType() {
+        return sourceLogicalDataType;
+    }
+
+    @JsonProperty("source_logical_type")
+    public void setSourceLogicalDataType(String sourceLogicalDataType) {
+        this.sourceLogicalDataType = sourceLogicalDataType;
+    }
+
     @Transient
     @JsonIgnore
-    public SemanticType getSemanticType() {
-        Object raw = properties.get("SemanticType");
+    public InterfaceName getInterfaceName() {
+        Object raw = properties.get("InterfaceName");
         if (raw == null) {
             return null;
         }
         try {
-            return SemanticType.valueOf(raw.toString());
+            return InterfaceName.valueOf(raw.toString());
         } catch (Exception e) {
             return null;
         }
@@ -164,23 +188,23 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setSemanticType(SemanticType semanticType) {
-        if (semanticType != null) {
-            properties.put("SemanticType", semanticType.toString());
+    public void setInterfaceName(InterfaceName interfaceName) {
+        if (interfaceName != null) {
+            properties.put("InterfaceName", interfaceName.toString());
         }
     }
 
     @Transient
     @JsonIgnore
-    public void setSemanticTypeString(String semanticTypeString) {
-        SemanticType semanticType = null;
+    public void setInterfaceNameString(String interfaceNameString) {
+        InterfaceName interfaceName = null;
         try {
-            semanticType = SemanticType.valueOf(semanticTypeString);
+            interfaceName = InterfaceName.valueOf(interfaceNameString);
         } catch (Exception e) {
             // pass
         }
-        if (semanticType != null) {
-            setSemanticType(semanticType);
+        if (interfaceName != null) {
+            setInterfaceName(interfaceName);
         }
     }
 

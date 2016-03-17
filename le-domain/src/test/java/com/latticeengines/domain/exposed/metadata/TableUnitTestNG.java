@@ -70,7 +70,7 @@ public class TableUnitTestNG {
         pkAttr.setPrecision(10);
         pkAttr.setScale(10);
         pkAttr.setPhysicalDataType(Schema.Type.INT.toString());
-        pkAttr.setLogicalDataType("Identity");
+        pkAttr.setSourceLogicalDataType("Identity");
         pkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
 
         Attribute lkAttr = new Attribute();
@@ -80,7 +80,7 @@ public class TableUnitTestNG {
         lkAttr.setPrecision(20);
         lkAttr.setScale(20);
         lkAttr.setPhysicalDataType(Schema.Type.LONG.toString());
-        lkAttr.setLogicalDataType("Date");
+        lkAttr.setSourceLogicalDataType("Date");
         lkAttr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
 
         Attribute spamIndicator = new Attribute();
@@ -90,7 +90,7 @@ public class TableUnitTestNG {
         spamIndicator.setPrecision(-1);
         spamIndicator.setScale(-1);
         spamIndicator.setPhysicalDataType(Schema.Type.BOOLEAN.toString());
-        spamIndicator.setLogicalDataType("Boolean");
+        spamIndicator.setSourceLogicalDataType("Boolean");
         spamIndicator.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
 
         Attribute activeRetirementParticipants = new Attribute();
@@ -100,7 +100,7 @@ public class TableUnitTestNG {
         activeRetirementParticipants.setPrecision(0);
         activeRetirementParticipants.setScale(0);
         activeRetirementParticipants.setPhysicalDataType(Schema.Type.INT.toString());
-        activeRetirementParticipants.setLogicalDataType("Integer");
+        activeRetirementParticipants.setSourceLogicalDataType("Integer");
         activeRetirementParticipants.setApprovedUsage(ModelingMetadata.MODEL_APPROVED_USAGE);
         activeRetirementParticipants.setCategory("Firmographics");
         activeRetirementParticipants.setDataType("Int");

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -19,7 +18,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public class MetadataConverter {
@@ -154,7 +152,8 @@ public class MetadataConverter {
             attribute.setDisplayName(displayName);
             String type = getType(field.schema());
             attribute.setPhysicalDataType(type);
-            attribute.setLogicalDataType(field.getProp("logicalType"));
+            attribute.setSourceLogicalDataType(field.getProp("sourceLogicalType"));
+            attribute.setLogicalDataTypeString(field.getProp("logicalType"));
             if (field.getProp("scale") != null) {
                 attribute.setScale(Integer.parseInt(field.getProp("scale")));
             }
@@ -177,14 +176,7 @@ public class MetadataConverter {
                 attribute.setCleanedUpEnumValues(enumValues);
                 attribute.setEnumValues(enumValues);
             }
-            if (!StringUtils.isEmpty(field.getProp("SemanticType"))) {
-                try {
-                    SemanticType semanticType = SemanticType.valueOf(field.getProp("SemanticType"));
-                    attribute.setSemanticType(semanticType);
-                } catch (Exception e) {
-                    // pass
-                }
-            }
+            attribute.setInterfaceNameString(field.getProp("InterfaceName"));
 
             return attribute;
         } catch (Exception e) {

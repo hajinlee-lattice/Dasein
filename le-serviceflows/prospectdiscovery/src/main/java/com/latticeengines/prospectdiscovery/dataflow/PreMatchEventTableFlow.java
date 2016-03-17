@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
 @Component("preMatchEventTableFlow")
@@ -63,7 +64,6 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("AccountId"));
 
         FieldMetadata domain = new FieldMetadata("Domain", String.class);
-        domain.setPropertyValue("logicalType", "domain");
         domain.setPropertyValue("displayName", "Domain");
         Node domainsForEachAccount = joinedWithAccounts.addFunction(
                 "Website != null && !Website.trim().isEmpty() ? Website : ContactDomain", //
@@ -223,8 +223,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
     private FieldMetadata getEventFieldMetadata(String column) {
         FieldMetadata event = new FieldMetadata(column, Boolean.class);
-        event.setPropertyValue("LogicalType", "event");
-        event.setPropertyValue("SemanticType", "Event");
+        event.setPropertyValue("logicalType", LogicalDataType.Event.toString());
         event.setPropertyValue("DisplayName", column);
         return event;
     }

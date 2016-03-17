@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
-public enum SemanticType {
+public enum InterfaceName {
     Id, //
     Event, //
     Domain, //

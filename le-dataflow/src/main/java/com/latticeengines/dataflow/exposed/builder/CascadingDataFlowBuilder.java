@@ -99,7 +99,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 @SuppressWarnings("rawtypes")
@@ -345,8 +346,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return builder.getSourceMetadata(identifier);
         }
 
-        public Attribute getSourceAttribute(final SemanticType semanticType) {
-            return getSourceSchema().getAttribute(semanticType);
+        public Attribute getSourceAttribute(final InterfaceName interfaceName) {
+            return getSourceSchema().getAttribute(interfaceName);
         }
 
         public Attribute getSourceAttribute(String attributeName) {
@@ -428,6 +429,31 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             // Merge in properties from Attribute on the Table
             Attribute attribute = table.getAttribute(field.name());
             if (attribute != null) {
+                if (fm.getPropertyValue("displayName") == null) {
+                    fm.setPropertyValue("displayName", attribute.getDisplayName());
+                }
+                if (fm.getPropertyValue("length") == null) {
+                    fm.setPropertyValue("length", attribute.getLength() != null ? attribute.getLength().toString()
+                            : null);
+                }
+                if (fm.getPropertyValue("sourceLogicalType") == null) {
+                    fm.setPropertyValue("sourceLogicalType", attribute.getSourceLogicalDataType());
+                }
+                if (fm.getPropertyValue("logicalType") == null) {
+                    fm.setPropertyValue("logicalType", attribute.getLogicalDataType() != null ? attribute
+                            .getLogicalDataType().toString() : null);
+                }
+                if (fm.getPropertyValue("precision") != null) {
+                    fm.setPropertyValue("precision", attribute.getPrecision() != null ? attribute.getPrecision()
+                            .toString() : null);
+                }
+                if (fm.getPropertyValue("scale") != null) {
+                    fm.setPropertyValue("scale", attribute.getScale() != null ? attribute.getScale().toString() : null);
+                }
+                if (fm.getPropertyValue("enumValues") != null) {
+                    fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
+                }
+
                 Map<String, Object> properties = attribute.getProperties();
                 for (String key : properties.keySet()) {
                     Object metadataValue = properties.get(key);
@@ -1297,7 +1323,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), prior), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
-        rowIdFm.setPropertyValue("logicalType", "rowid");
+        rowIdFm.setPropertyValue("logicalType", LogicalDataType.RowId.toString());
         rowIdFm.setPropertyValue("displayName", "Row ID");
         newFm.add(rowIdFm);
 

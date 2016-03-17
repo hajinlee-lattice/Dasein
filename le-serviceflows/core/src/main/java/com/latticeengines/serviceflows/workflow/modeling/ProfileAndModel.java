@@ -15,7 +15,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.SemanticType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -59,7 +60,11 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
         List<String> excludedColumns = new ArrayList<>();
 
-        for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
+        List<Attribute> events = eventTable.getAttributes(LogicalDataType.Event);
+        if (events.isEmpty()) {
+            throw new RuntimeException("No events in event table");
+        }
+        for (Attribute event : events) {
             excludedColumns.add(event.getName());
         }
 
@@ -74,14 +79,14 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         excludedColumns.toArray(excludeList);
         bldr = bldr.profileExcludeList(excludeList);
 
-        for (Attribute event : eventTable.getAttributes(SemanticType.Event)) {
+        for (Attribute event : events) {
             bldr = bldr.targets(getTargets(eventTable, event)) //
                     .metadataTable(String.format("%s-%s-Metadata", eventTable.getName(), event.getDisplayName())) //
                     .keyColumn("Id").modelName(configuration.getModelName()) //
                     .eventTableName(getEventTable().getName()) //
                     .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                     .productType(configuration.getProductType());
-            if (eventTable.getAttributes(SemanticType.Event).size() > 1) {
+            if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");
             }
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
@@ -92,37 +97,37 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         }
         return modelApplicationIdToEventColumn;
     }
-    
+
     private String[] getTargets(Table eventTable, Attribute event) {
         List<String> targets = new ArrayList<>();
-        
+
         targets.add("Event: " + event.getName());
-        
-        Attribute companyName = eventTable.getAttribute(SemanticType.CompanyName);
+
+        Attribute companyName = eventTable.getAttribute(InterfaceName.CompanyName);
         if (companyName != null) {
             targets.add("Company: " + companyName.getName());
         } else {
             log.info("No company attribute in this event table.");
         }
-        
-        Attribute lastName = eventTable.getAttribute(SemanticType.LastName);
+
+        Attribute lastName = eventTable.getAttribute(InterfaceName.LastName);
         if (lastName != null) {
             targets.add("LastName: " + lastName.getName());
         } else {
             log.info("No last name attribute in this event table.");
         }
-        Attribute firstName = eventTable.getAttribute(SemanticType.FirstName);
+        Attribute firstName = eventTable.getAttribute(InterfaceName.FirstName);
         if (firstName != null) {
             targets.add("FirstName: " + firstName.getName());
         } else {
             log.info("No company attribute in this event table.");
         }
-        
-        Attribute id = eventTable.getAttribute(SemanticType.Id);
-        Attribute email = eventTable.getAttribute(SemanticType.Email);
-        Attribute creationDate = eventTable.getAttribute(SemanticType.CreatedDate);
-        
-        List<String> readoutAttributes = new ArrayList<>(); 
+
+        Attribute id = eventTable.getAttribute(InterfaceName.Id);
+        Attribute email = eventTable.getAttribute(InterfaceName.Email);
+        Attribute creationDate = eventTable.getAttribute(InterfaceName.CreatedDate);
+
+        List<String> readoutAttributes = new ArrayList<>();
         if (id != null) {
             readoutAttributes.add(id.getName());
         }
@@ -132,13 +137,13 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         if (creationDate != null) {
             readoutAttributes.add(creationDate.getName());
         }
-        
+
         if (readoutAttributes.size() > 0) {
             targets.add("Readouts: " + StringUtils.join(readoutAttributes, "|"));
         } else {
             log.info("No id, email or creation date attribute in this event table.");
         }
-        
+
         return targets.toArray(new String[targets.size()]);
     }
 }
