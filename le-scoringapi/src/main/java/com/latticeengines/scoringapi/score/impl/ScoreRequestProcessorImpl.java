@@ -68,7 +68,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
 
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
-        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getEventTableDataComposition().fields;
+        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getDataScienceDataComposition().fields;
         logSplitTime("retrieveModelArtifacts");
 
         checkForMissingFields(fieldSchemas, request.getRecord());

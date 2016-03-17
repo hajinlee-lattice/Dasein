@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -36,6 +39,7 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.Field;
@@ -117,7 +121,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         fields.setFields(fieldList);
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
-        Map<String, FieldSchema> mapFields = artifacts.getEventTableDataComposition().fields;
+        Map<String, FieldSchema> mapFields = artifacts.getDataScienceDataComposition().fields;
         for (String fieldName : mapFields.keySet()) {
             FieldSchema fieldSchema = mapFields.get(fieldName);
             if (fieldSchema.source.equals(FieldSource.REQUEST)) {
@@ -149,6 +153,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
         DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
+        removeDroppedDataScienceFieldEventTableTransforms(eventTableDataComposition, dataScienceDataComposition);
         ScoreDerivation scoreDerivation = getScoreDerivation(hdfsScoreArtifactBaseDir);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
@@ -157,6 +162,40 @@ public class ModelRetrieverImpl implements ModelRetriever {
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
 
         return artifacts;
+    }
+
+    @VisibleForTesting
+    void removeDroppedDataScienceFieldEventTableTransforms(DataComposition eventTableDataComposition,
+            DataComposition dataScienceDataComposition) {
+        Set<String> difference = new HashSet<>(eventTableDataComposition.fields.keySet());
+        if (log.isDebugEnabled()) {
+            log.debug("Difference in datacompositions:" + JsonUtils.serialize(difference));
+        }
+        difference.removeAll(dataScienceDataComposition.fields.keySet());
+
+        List<TransformDefinition> transformsToKeep = new ArrayList<>();
+
+        for (TransformDefinition transformDefinition : eventTableDataComposition.transforms) {
+            boolean keepTransform = true;
+            for (Object argObject : transformDefinition.arguments.values()) {
+                if (argObject != null) {
+                    String argValue = String.valueOf(argObject);
+                    if (difference.contains(argValue)) {
+                        keepTransform = false;
+                    }
+                }
+            }
+            if (keepTransform) {
+                transformsToKeep.add(transformDefinition);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removing this transform:" + JsonUtils.serialize(transformDefinition));
+                }
+            }
+
+        }
+
+        eventTableDataComposition.transforms = transformsToKeep;
     }
 
     private AbstractMap.SimpleEntry<String, String> parseModelNameAndVersion(ModelSummary modelSummary) {

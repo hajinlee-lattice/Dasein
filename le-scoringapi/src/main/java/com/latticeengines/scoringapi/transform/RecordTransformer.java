@@ -36,6 +36,7 @@ public class RecordTransformer {
                 try {
                     value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
                     successfulInvocation = true;
+                    break;
                 } catch (Exception e) {
                     failedInvocationException = e;
                 }
