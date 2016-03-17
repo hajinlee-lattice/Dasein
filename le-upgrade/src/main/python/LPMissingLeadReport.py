@@ -14,7 +14,7 @@ print ''
 
 (tenantName,resultsFileName) = appsequence.AppArgs.get(sys.argv)
 sequence = []
-sequence.append(appsequence.LPCheckVersion('2.4.0'))
+sequence.append(appsequence.LPCheckVersion(''))
 sequence.append(lpMissingLeadsReport.MissingLeadsReport())
 app = appsequence.AppSequence_MLR(tenantName, resultsFileName, sequence,False)
 app.execute()
