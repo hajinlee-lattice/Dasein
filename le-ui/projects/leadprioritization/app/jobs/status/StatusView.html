@@ -19,7 +19,7 @@
             <div class="eight columns text-right">
                 <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
                 <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
-                    <span class="ico ico-search"></span>
+                    <span class="fa fa-search"></span>
                 </a>
                 <a ui-sref="jobs.status" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
                     <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
