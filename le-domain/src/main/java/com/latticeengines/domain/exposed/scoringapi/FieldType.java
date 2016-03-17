@@ -5,9 +5,10 @@ import java.util.Map;
 
 public enum FieldType {
     BOOLEAN(Boolean.class, "boolean"), //
-    INTEGER(Long.class, "int", "long"), //
+    INTEGER(Long.class, "int"), //
     // Typical stored as a double precision value.
     FLOAT(Double.class, "float", "double"), //
+    LONG(Long.class, "long"), //
     // Encoded with UTF-8.
     STRING(String.class, "string");
 

@@ -54,7 +54,7 @@ public class FieldTypeUnitTestNG {
         return new Object[][] { //
             { "boolean", FieldType.BOOLEAN }, //
             { "int", FieldType.INTEGER }, //
-            { "long", FieldType.INTEGER }, //
+            { "long", FieldType.LONG }, //
             { "float", FieldType.FLOAT }, //
             { "double", FieldType.FLOAT }, //
             { "string", FieldType.STRING } //
