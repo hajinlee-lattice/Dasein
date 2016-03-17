@@ -4,15 +4,4 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-
-    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
-        <property name="locations">
-            <list>
-                <value>file:${MICROSERVICE_PROPDIR:/etc/ledp}/microservice.properties</value>
-            </list>
-        </property>
-        <property name="ignoreUnresolvablePlaceholders" value="false"/>
-        <property name="ignoreResourceNotFound" value="false"/>
-    </bean>
-
 </beans>
