@@ -102,9 +102,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                     model: {
                         fields: {
                             ColumnName: { type: "string", editable: false },
-                            SourceToDisplay: { type: "string", editable: false },
                             DisplayName: { type: "string" },
-                            Tags: { type: "string", editable: false },
                             Category: { type: "string" },
                             ApprovedUsage: { type: "string" },
                             FundamentalType: { type: "string" }
@@ -135,19 +133,9 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         width: 184
                     },
                     {
-                        field: "SourceToDisplay", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_SOURCE'),
-                        template: kendo.template($("#sourceTemplate").html()),
-                        width: 108
-                    },
-                    {
                         field: "DisplayName", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME'),
                         template: kendo.template($("#displayNameTemplate").html()),
                         width: 150
-                    },
-                    {
-                        field: "Tags", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS'),
-                        template: kendo.template($("#tagsTemplate").html()),
-                        width: 90
                     },
                     {
                         field: "Category", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY'),
@@ -229,9 +217,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         }
 
         var andFilters = [];
-        if (!StringUtility.IsEmptyString($scope.source)) {
-            andFilters.push({ field: "SourceToDisplay", operator: "eq", value: $scope.source });
-        }
         if (!StringUtility.IsEmptyString($scope.category)) {
             andFilters.push({ field: "Category", operator: "eq", value: $scope.category });
         }
@@ -240,20 +225,17 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         if ($scope.onlyShowErrorFields) {
             var columns = $scope.gridOptions.columns;
             for (var i = 0; i < columns.length; i++) {
-                if (columns[i].field !== "SourceToDisplay" && columns[i].field !== "Tags") {
-                    if (columns[i].field === "Category") {
-                        errorFilters.push({
-                            logic: "and",
-                            filters: [
-                                { field: "Tags", operator: "eq", value: "Internal" },
-                                { field: "ApprovedUsage", operator: "neq", value: "None" },
-                                { field: "ApprovedUsage", operator: "neq", value: "Model" },
-                                { field: columns[i].field, operator: "eq", value: "" }
-                            ]
-                        });
-                    } else {
-                        errorFilters.push({ field: columns[i].field, operator: "eq", value: "" });
-                    }
+                if (columns[i].field === "Category") {
+                    errorFilters.push({
+                        logic: "and",
+                        filters: [
+                            { field: "ApprovedUsage", operator: "neq", value: "None" },
+                            { field: "ApprovedUsage", operator: "neq", value: "Model" },
+                            { field: columns[i].field, operator: "eq", value: "" }
+                        ]
+                    });
+                } else {
+                    errorFilters.push({ field: columns[i].field, operator: "eq", value: "" });
                 }
             }
         }

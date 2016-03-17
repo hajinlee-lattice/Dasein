@@ -29,30 +29,11 @@
                     </tr>
                        <tr data-ng-class="shaded">
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME')}}</td>
-                           <td><input type="text" class="form-control" data-ng-model="field.DisplayName" /></td>
-                       </tr>
-                       <tr>
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DESCRIPTION')}}</td>
-                           <td><textarea class="form-control" data-ng-model="field.Description"></textarea></td>
+                           <td>{{field.DisplayName}}</td>
                        </tr>
                        <tr data-ng-class="shaded">
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE')}}</td>
                            <td><select class="form-control" data-ng-options="u as u for u in approvedUsagesToSelect" data-ng-model="field.ApprovedUsage"></select></td>
-                       </tr>
-                       <tr>
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_CATEGORY')}}</td>
-                           <td>
-                               <select class="form-control" data-ng-if="categoryEditable" data-ng-options="c as c for c in categoriesToSelect" data-ng-model="field.Category"></select>
-                               <span data-ng-if="!categoryEditable">{{field.Category}}<input type="hidden" data-ng-model="Category"/></span>
-                           </td>
-                       </tr>
-                       <tr data-ng-class="shaded">
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_TAGS')}}</td>
-                           <td><span>{{field.Tags}}<input type="hidden" data-ng-model="Tags"/></span></td>
-                       </tr>
-                       <tr>
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_DISCRETIZATION')}}</td>
-                           <td><textarea class="form-control" data-ng-model="field.DisplayDiscretization"></textarea></td>
                        </tr>
                        <tr data-ng-class="shaded">
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE')}}</td>
