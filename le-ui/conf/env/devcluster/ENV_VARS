@@ -1,5 +1,6 @@
 export NODE_ENV=development
 export API_URL=http://localhost:8081
-export USE_PORT=3000
+export HTTP_PORT=3000
+export HTTPS_PORT=false
 export COMPRESSED=false
-export HTTPS=false
+export LOGGING=/log

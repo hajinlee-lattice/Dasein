@@ -32,7 +32,6 @@ angular.module('mainApp.create.csvImport', [
         var xhr = new XMLHttpRequest();
         
         (xhr.upload || xhr).addEventListener('progress', function(e) {
-            console.log(e.total / 1024, e);
             if (e.total / 1024 > 486000) {
                 xhr.abort();
                 $('div.loader').css({'display':'none'});
@@ -66,13 +65,13 @@ angular.module('mainApp.create.csvImport', [
         xhr.addEventListener('load', function(e) {
             var result = JSON.parse(this.responseText);
 
-            console.log('xhr upload load', e, result);
+            console.log('# xhr upload load', e, result);
 
             deferred.resolve(result);
         });
 
         xhr.addEventListener('error', function(e) {
-            console.log('xhr upload error', e, this.responseText);
+            console.log('# xhr upload error', e, this.responseText);
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('MODEL_IMPORT_GENERAL_ERROR'),
@@ -83,7 +82,7 @@ angular.module('mainApp.create.csvImport', [
         });
 
         xhr.addEventListener('abort', function(e) {
-            console.log('xhr upload cancel', e, this.responseText);
+            console.log('# xhr upload cancel', e, this.responseText);
             deferred.resolve(this.responseText);
         });
 

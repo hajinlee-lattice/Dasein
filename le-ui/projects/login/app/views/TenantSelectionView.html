@@ -3,9 +3,33 @@
         <div class="modal-header">
             <h4 class="modal-title">{{ResourceUtility.getString("TENANT_SELECTION_FORM_TITLE")}}</h4>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" ng-init="SortDirection = ''">
+            <span>LP Version:&nbsp;</span>
+            <input id="tenantSelection2" type="radio" ng-model="version" value="2.0">
+            <label for="tenantSelection2">2.0</label>&nbsp;
+            <input id="tenantSelection3" type="radio" ng-model="version" value="3.0">
+            <label for="tenantSelection3">3.0</label>&nbsp;
+            <button 
+                    type="button" 
+                    class="button white-button" style="width: 6em;padding:.25em;float:right;margin-bottom:.5em;"
+                    ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
+                >
+                <span class="fa 
+                        fa-sort-number-{{ 
+                            SortDirection == '' 
+                                ? 'asc' 
+                                : 'desc' 
+                        }}"
+                    >
+                    alpha: {{ SortDirection == '' ? 'asc' : 'desc' }}
+                </span>
+            </button>
             <select id="tenantSelectionInput" data-ng-model="select_value" data-ng-change="handleTenantSelected()" size="20">
-                <option data-ng-repeat="tenant in tenantList" value="{{tenant.Identifier}}">{{tenant.UIVersion}} - {{tenant.DisplayName}}</option>
+                <option 
+                        data-ng-repeat="tenant in tenantList | filter: { 'UIVersion': version } | orderBy: SortDirection + 'DisplayName'" 
+                        value="{{tenant.Identifier}}">
+                    {{tenant.UIVersion}} - {{tenant.DisplayName}}
+                </option>
             </select>
         </div>
     </div>

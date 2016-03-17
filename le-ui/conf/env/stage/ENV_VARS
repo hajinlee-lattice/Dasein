@@ -1,7 +1,8 @@
 export NODE_ENV=stage
 export API_URL=https://app.lattice-engines.com
-export USE_PORT=8080
+export HTTP_PORT=3000
+export HTTPS_PORT=3001
+export HTTPS_KEY=/certs/privatekey.key
+export HTTPS_CRT=/certs/certificate.crt
+export LOGGING=/var/log/ledp
 export COMPRESSED=true
-export HTTPS=true
-export HTTPS_KEY=/certs/qa/privatekey.key
-export HTTPS_CRT=/certs/qa/certificate.crt

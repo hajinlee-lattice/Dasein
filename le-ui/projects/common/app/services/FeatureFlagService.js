@@ -47,7 +47,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
     function GetAllFlagsAsync(promise) {
         // feature flag cached
-        if (flagValues.length > 0) {
+        if (Object.keys(flagValues).length > 0) {
             promise.resolve(flagValues);
             return;
         }

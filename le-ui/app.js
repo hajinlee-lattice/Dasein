@@ -1,52 +1,54 @@
 "use strict";
 
 /*
-       Lattice Engines Express Server Application
-    See Gruntfile.js to define environment variables
-    See /server/server.js for the actual server code
+              Lattice Engines Express Server Application
+    See Gruntfile.js to define environment variables for local dev
+    See /conf/env/* to define environment variables for QA/PROD/etc
+           See /server/server.js for the actual server code
 */
 
 const Server    = require('./server/server');
-const routes    = require('./server/routes');
-const routes_d  = require('./server/routes_dist');
 const express   = require('express');
 const app       = express(); 
 
 // node doesn't support destructuring yet, which would have been nice here.
 const options   = {
-    ENV:        app.get('env')          || process.env.NODE_ENV || 'production',
-    USE_PORT:   process.env.USE_PORT    || 3000,
+    NODE_ENV:   app.get('env')          || process.env.NODE_ENV || 'production',
+    HTTP_PORT:  process.env.HTTP_PORT   || false,
+    HTTPS_PORT: process.env.HTTPS_PORT  || 3000,
+    HTTPS_KEY:  process.env.HTTPS_KEY   || '/certs/privatekey.key',
+    HTTPS_CRT:  process.env.HTTPS_CRT   || '/certs/certificate.crt',
     API_URL:    process.env.API_URL     || false,
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || true,
-    HTTPS:      process.env.HTTPS       || false,
-    HTTPS_KEY:  process.env.HTTPS_KEY   || '/certs/dev/privatekey.key',
-    HTTPS_CRT:  process.env.HTTPS_CRT   || '/certs/dev/certificate.crt',
-    LOGGING:    process.env.LOGGING     || true,
-    root:       __dirname 
+    LOGGING:    process.env.LOGGING     || '/var/log/ledp',
+    APP_ROOT:   __dirname 
 };
 
-if (options['HTTPS'] === 'false') {
-    options['HTTPS'] = false;
-}
+// force boolean true/false for options
+Object.keys(options).forEach(key => {
+    options[key] === 'false' ? options[key] = false : null;
+    options[key] === 'true'  ? options[key] = true  : null;
+});
 
 const server = new Server(express, app, options);
+const routes = require('./server/routes_' + (options.COMPRESSED ? 'dist' : 'dev'));
 
-options.COMPRESSED === true || options.COMPRESSED === 'true'
-    ? server.startLogging('/log') : null;
+options.LOGGING
+    ? server.startLogging(options.LOGGING) : null;
 
 // when false, API proxy is disabled
-options.API_URL && options.API_URL != 'false'
+options.API_URL
     ? server.useApiProxy(options.API_URL) : null;
 
 // whitelist for proxies
-options.WHITELIST && options.API_URL != 'false'
+options.WHITELIST
     ? server.trustProxy(options.WHITELIST) : null;
 
-// when files are compressed, strip routing to essential areas only
-options.COMPRESSED === true || options.COMPRESSED === 'true'
-    ? server.setAppRoutes(routes_d) : server.setAppRoutes(routes);
+// when files are compressed, keep routing to essential areas only
+server.setAppRoutes(routes);
 
-server.setDefaultRoutes(options.ENV);
+// for 404/other
+server.setDefaultRoutes(options.NODE_ENV);
 
 module.exports = server.start();

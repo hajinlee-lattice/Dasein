@@ -266,7 +266,7 @@ angular
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
             }
-        })
+        })/*
         .state('model.scoring', {
             url: '/scoring',
             views: {
@@ -283,7 +283,7 @@ angular
                     template: UnderConstruction
                 }   
             }
-        })
+        })*/
         .state('model.refine', {
             url: '/refine',
             views: {

@@ -19,25 +19,32 @@ class Server {
         this.express = express;
         this.app = app;
 
-        if (options.HTTPS) {
-            const https = require('https');
-            const httpsKey = fs.readFileSync(__dirname + options.HTTPS_KEY, 'utf8');
-            const httpsCert = fs.readFileSync(__dirname + options.HTTPS_CRT, 'utf8');
-            const credentials = {
-                key: httpsKey, 
-                cert: httpsCert
-            };
-
-            this.server = https.createServer(credentials, this.app);
-        } else {
+        if (options.HTTP_PORT) {
             const http = require('http');
-            this.server = http.createServer(this.app);
+
+            this.httpServer = http.createServer(this.app);
         }
+
+        if (options.HTTPS_PORT) {
+            try {
+                const https = require('https');
+                const httpsKey = fs.readFileSync(__dirname + options.HTTPS_KEY, 'utf8');
+                const httpsCert = fs.readFileSync(__dirname + options.HTTPS_CRT, 'utf8');
+                const credentials = {
+                    key: httpsKey, 
+                    cert: httpsCert
+                };
+
+                this.httpsServer = https.createServer(credentials, this.app);
+            } catch(err) {
+                console.log(err);
+            }
+        } 
 
         // set up view engine for handlebars
         this.app.engine('.html', exphbs({ extname: '.html' }));
         this.app.set('view engine', '.html');
-        this.app.set('views', options.root);
+        this.app.set('views', options.APP_ROOT);
 
         //process.on('uncaughtException', err => this.app.close());
         //process.on('SIGTERM', err => this.app.close());
@@ -46,12 +53,7 @@ class Server {
     startLogging(log_path) {
         let logDirectory = __dirname + log_path;
 
-        let accessLogStream = rotator.getStream({
-            date_format: 'YYYYMMDD',
-            filename: logDirectory + '/access-%DATE%.log',
-            frequency: 'daily',
-            verbose: false
-        });
+        var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
 
         this.app.use(morgan('combined', { stream: accessLogStream }));
     }
@@ -107,9 +109,8 @@ class Server {
     }
 
     setAppRoutes(routes) {
-        console.log('> WEB ROOT:',this.options.root);
         routes.forEach(route => {
-            const dir = this.options.root + route.path;
+            const dir = this.options.APP_ROOT + route.path;
             var displayString = '';
             console.log('> PATH:\t'+route.path);
             // set up the static routes for app files
@@ -139,7 +140,7 @@ class Server {
         });
     }
 
-    setDefaultRoutes(ENV) {
+    setDefaultRoutes(NODE_ENV) {
         // catch 404 and forwarding to error handler
         this.app.use((req, res, next) => {
             const err = new Error('Not Found');
@@ -148,13 +149,13 @@ class Server {
         });
 
         // print stack trace for dev environment
-        if (ENV === 'development') {
+        if (NODE_ENV === 'development') {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('./server/error', {
                     message: err.message,
                     error: err,
-                    env: ENV
+                    env: NODE_ENV
                 });
             });
         }
@@ -165,24 +166,28 @@ class Server {
             res.render('./server/error', {
                 message: err.message,
                 error: 'hidden',
-                env: ENV
+                env: NODE_ENV
             });
         });
     }
 
     start() {
         const options = this.options;
-        this.server.listen(options.USE_PORT, () => {
-            console.log(
-                '> WEB HOST: http' + (options.HTTPS ? 's' : '') + 
-                '://localhost:' + options.USE_PORT + '/',
-                '\tENVIRONMENT:', options.ENV, 
-                '\n> API PROXY URL:', options.API_URL,
-                '\n> COMPRESSED:', options.COMPRESSED, 
-                '\tHTTPS:', options.HTTPS,
-                '\tLOGGING:', options.LOGGING
-            );
+
+        console.log('> SERVER OPTIONS:');
+        Object.keys(options).forEach(key => {
+            var value = options[key];
+
+            console.log('\t' + key + ':\t' + value + ' (' + typeof value + ')');
         });
+
+        if (this.httpServer) {
+            this.httpServer.listen(options.HTTP_PORT, () => { console.log('> LISTENING: http://localhost:' + options.HTTP_PORT); });
+        }
+
+        if (this.httpsServer) {
+            this.httpsServer.listen(options.HTTPS_PORT, () => { console.log('> LISTENING: https://localhost:' + options.HTTPS_PORT); });
+        }
     }
 }
 

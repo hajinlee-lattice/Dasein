@@ -1,5 +1,6 @@
 export NODE_ENV=integration
 export API_URL=http://bodcdevhdpweb53.dev.lattice.local:8080
-export USE_PORT=3000
+export HTTP_PORT=3000
+export HTTPS_PORT=false
 export COMPRESSED=true
-export HTTPS=false
+export LOGGING=/var/log/ledp

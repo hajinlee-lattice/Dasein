@@ -14,31 +14,51 @@ module.exports = function (grunt) {
                 NODE_ENV: 'development',
                 API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 COMPRESSED: false,
-                USE_PORT: 3000
+                LOGGING: '/log',
+                HTTP_PORT: 3000,
+                HTTPS_PORT: 3001,
+                HTTPS_KEY: '/certs/privatekey.key',
+                HTTPS_CRT: '/certs/certificate.crt'
             },
             local: {
                 NODE_ENV: 'development',
                 API_URL: 'http://localhost:8081',
                 COMPRESSED: false,
-                USE_PORT: 3000
+                LOGGING: '/log',
+                HTTP_PORT: 3000,
+                HTTPS_PORT: 3001,
+                HTTPS_KEY: '/certs/privatekey.key',
+                HTTPS_CRT: '/certs/certificate.crt'
             },
             integration: {
                 NODE_ENV: 'integration',
                 API_URL: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
                 COMPRESSED: true,
-                USE_PORT: 3000
+                LOGGING: '/var/log/ledp',
+                HTTP_PORT: false,
+                HTTPS_PORT: 3000,
+                HTTPS_KEY: '/certs/privatekey.key',
+                HTTPS_CRT: '/certs/certificate.crt'
             },
             qa: {
                 NODE_ENV: 'qa',
                 API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 COMPRESSED: true,
-                USE_PORT: 3000
+                LOGGING: '/var/log/ledp',
+                HTTP_PORT: 3000,
+                HTTPS_PORT: 3001,
+                HTTPS_KEY: '/certs/privatekey.key',
+                HTTPS_CRT: '/certs/certificate.crt'
             },
             production: {
                 NODE_ENV: 'production',
-                API_URL: false,  // load balancer will handle api routing
-                USE_PORT: 3000,
+                API_URL: false,
                 COMPRESSED: true,
+                LOGGING: '/var/log/ledp',
+                HTTP_PORT: false,
+                HTTPS_PORT: 3000,
+                HTTPS_KEY: '/certs/privatekey.key',
+                HTTPS_CRT: '/certs/certificate.crt',
                 WHITELIST: [
                     '10.0.0.1',
                     '10.0.10.1'
