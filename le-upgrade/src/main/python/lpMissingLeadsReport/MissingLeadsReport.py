@@ -31,7 +31,7 @@ class MissingLeadsReport(StepBase):
     q_scoring = conn_mgr.getQuery('Q_PLS_Scoring_Incremental')
     q_unscored = conn_mgr.getQuery('Q_Diagnostic_DownloadedUnscoredLeads')
     q_missing = conn_mgr.getQuery('Q_Diagnostic_MissingDownloadedLeads')
-
+    defaultFileterSpec = 'LatticeAddressSetIdentifier(ContainerElementName("SelectedForScoringIncr"))'
     for filter in q_scoring.getFilters():
       if filter.definition() not in [i.definition() for i in q_unscored.getFilters()]:
         q_unscored.filters_.append(filter)
@@ -40,7 +40,7 @@ class MissingLeadsReport(StepBase):
     conn_mgr.setSpec('Q_Diagnostic_DownloadedUnscoredLeads', q_unscored.SpecLatticeNamedElements())
 
     for filter in q_scoring.getFilters():
-      if filter.definition() not in [i.definition() for i in q_missing.getFilters()]:
+      if filter.definition() not in [i.definition() for i in q_missing.getFilters()] and filter.definition() != defaultFileterSpec:
         q_missing.filters_.append(filter)
       else:
         pass
@@ -1127,12 +1127,12 @@ class MissingLeadsReport(StepBase):
     lgm.setLoadGroup(step1_xml)
 
     # Modified score/score-date fields of Diagnostic_LoadLeads_Bulk
-    step1 = etree.fromstring(lgm.getLoadGroup('Diagnostic_LoadLeads').encode('ascii', 'xmlcharrefreplace'))
-
-    step1.set('name', 'Diagnostic_LoadLeads_Bulk')
-    step1.set('alias', 'Diagnostic_LoadLeads_Bulk')
-
-    lgm.setLoadGroup(etree.tostring(step1))
+    # step1 = etree.fromstring(lgm.getLoadGroup('Diagnostic_LoadLeads_Bulk').encode('ascii', 'xmlcharrefreplace'))
+    #
+    # step1.set('name', 'Diagnostic_LoadLeads_Bulk')
+    # step1.set('alias', 'Diagnostic_LoadLeads_Bulk')
+    #
+    # lgm.setLoadGroup(etree.tostring(step1))
     diag_rdss_xml = lgm.getLoadGroupFunctionality('Diagnostic_LoadLeads_Bulk', "rdss")
 
     if type == 'MKTO':
@@ -1150,17 +1150,11 @@ class MissingLeadsReport(StepBase):
       diag_rdss_xml=diag_rdss_xml.replace('__SCORE_FIELD__ ', scoreField)
 
     elif type == 'SFDC':
-      diag_rdss_xml = re.sub(r'<rds n=\"SFDC_Contact_Validation\".*f=\"@.*?\"',
-                             ' f="@datediff(now, month(6)) AND ( __CONTACT_SCORE_DATE_FIELD__ &lt; '
-                             '#Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_FIELD__ = null )"',
-                             diag_rdss_xml)
-      diag_rdss_xml.replace('__CONTACT_SCORE_DATE_FIELD__', sfdcContactScoreDateField)
-      diag_rdss_xml.replace('__CONTACT_SCORE_FIELD__', sfdcContactScoreField)
-      diag_rdss_xml = re.sub(r'<rds n=\"SFDC_Lead_Validation\".*f=\"@.*?\"',
-                             ' f="@datediff(now, month(6)) AND ( __LEAD_SCORE_DATE_FIELD__ &lt; '
-                             '#Diagnostic_RescoreThreshold_Contact OR __LEAD_SCORE_DATE_FIELD__ = null )"',
-                             diag_rdss_xml)
-      diag_rdss_xml.replace('__LEAD_SCORE_DATE_FIELD__', sfdcLeadScoreDateField)
+      diag_rdss_xml = '<rdss><rds n="SFDC_Contact_Validation" w="Workspace" sn="SFDC_Contact_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@datediff(now, month(6)) AND ( __CONTACT_SCORE_DATE_FIELD__ &lt; #Diagnostic_RescoreThreshold_Contact OR __CONTACT_SCORE_DATE_FIELD__ = null )" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2"><ts><t n="Diagnostic_RescoreThreshold_Contact" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_RescoreThreshold_Contact" m="0"><schemas/><specs/></t></ts><mcs><mc cn="CreatedDate"/><mc cn="Id"/><mc cn="LastModifiedDate"/><mc cn="__CONTACT_SCORE_DATE_FIELD__"/><mc cn="__CONTACT_SCORE_FIELD__"/></mcs></rds><rds n="SFDC_Lead_Validation" w="Workspace" sn="SFDC_Lead_Validation" cn="SFDC_DataProvider" u="False" ss="" tn="Lead" nmo="1" f="@datediff(now, month(6)) AND ( __LEAD_SCORE_DATE_FIELD__ &lt; #Diagnostic_RescoreThreshold_Lead OR __LEAD_SCORE_DATE_FIELD__ = null )" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="2"><ts><t n="Diagnostic_RescoreThreshold_Lead" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_RescoreThreshold_Lead" m="0"><schemas/><specs/></t></ts><mcs><mc cn="CreatedDate"/><mc cn="Id"/><mc cn="LastModifiedDate"/><mc cn="__LEAD_SCORE_DATE_FIELD__"/><mc cn="__LEAD_SCORE_FIELD__"/></mcs></rds></rdss>'
+      diag_rdss_xml=diag_rdss_xml.replace('__CONTACT_SCORE_DATE_FIELD__', sfdcContactScoreDateField)
+      diag_rdss_xml=diag_rdss_xml.replace('__CONTACT_SCORE_FIELD__', sfdcContactScoreField)
+      diag_rdss_xml=diag_rdss_xml.replace('__LEAD_SCORE_DATE_FIELD__', sfdcLeadScoreDateField)
+      diag_rdss_xml=diag_rdss_xml.replace('__LEAD_SCORE_FIELD__', sfdcLeadScoreField)
 
     lgm.setLoadGroupFunctionality('Diagnostic_LoadLeads_Bulk', diag_rdss_xml)
 

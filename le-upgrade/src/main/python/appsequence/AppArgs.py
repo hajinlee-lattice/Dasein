@@ -17,6 +17,19 @@ class AppArgs( object ):
     
     exit( exit_code )
 
+  @classmethod
+  def getoption( cls, argv ):
+    cmd = ''
+    path = ''
+    i = argv[0].rfind('\\')
+    if( i != -1 ):
+      path = argv[0][:i]
+      cmd = argv[0][i+1:]
+
+    if len(argv) == 1:
+      cls.usage( cmd, 0 )
+    option = argv[1]
+    return  (option)
 
   @classmethod
   def get( cls, argv ):

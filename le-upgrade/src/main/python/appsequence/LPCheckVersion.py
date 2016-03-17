@@ -5,8 +5,9 @@
 # $Rev$
 #
 
-import re
+import re,sys
 import requests
+from AppArgs import AppArgs
 from lxml import etree
 
 from liaison import *
@@ -95,7 +96,9 @@ class LPCheckVersion( StepBase ):
 
     if version == self._template_version:
       return Applicability.canApply
-
+    elif AppArgs.getoption(sys.argv) == '--missingLead':
+      print AppArgs.getoption(sys.argv)
+      return Applicability.canApply
     return Applicability.cannotApplyFail
 
   def getSFDCContactFromTargetQuery(self, str):
