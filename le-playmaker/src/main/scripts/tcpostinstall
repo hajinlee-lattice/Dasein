@@ -1,0 +1,28 @@
+#!/bin/bash -x
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+echo $CATALINA_HOME
+cd /tmp/webapps/playmaker
+
+JAVAFILE=`ls le-playmaker-*.war`
+VERSION=`echo $JAVAFILE | cut -d\- -f3`
+SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
+if test $SNAPSHOT='SNAPSHOT'
+then
+    VERSION=$VERSION-$SHAPSHOT
+fi
+
+echo "copying files from temporary folders"
+cp le-playmaker-*.war $CATALINA_HOME/webapps/playmaker/playmaker\#\#$VERSION.war
+cp ROOT.war $CATALINA_HOME/webapps/playmaker/ROOT.war
+cp /etc/ledp/playmaker/$ENV_TYPE/*.properties /etc/ledp/
+
+echo "cleaning up"
+rm -rf /etc/ledp/playmaker
+rm -rf /home/yarn/playmaker
+rm -rf /home/yarn/logs/*
+rm -rf /tmp/webapps/playmaker
+
+echo "finishing"
+ls $CATALINA_HOME/webapps/playmaker/*.war
