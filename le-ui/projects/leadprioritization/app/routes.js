@@ -172,7 +172,6 @@ angular
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
-                            $scope.showRefine = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
                         });
                     },
                     templateUrl: 'app/navigation/sidebar/ModelView.html'

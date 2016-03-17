@@ -7,7 +7,7 @@
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="models"><span class="ico ico-model ico-light-gray"></span>Prediction Models <span class="badge blue-badge pull-right" ng-show="totalmodels">{{totalmodels}}</span></a>
-            <ul data-ng-if="showCreateModel" >
+            <ul>
                 <li role="presentation" ui-sref-active="active"><a ui-sref="models.import">Create a Model</a></li>
             </ul>
         </li>
@@ -34,10 +34,10 @@
             <a ui-sref="dashboard"><span class="fa fa-dashboard"></span>Scoring Dashboard</a>
         </li>
         -->
-        <li data-ng-if="showJobs" role="presentation" ui-sref-active="active">
+        <li role="presentation" ui-sref-active="active">
             <a ui-sref="jobs.status" ui-sref-opts="{reload: true}"><span class="ico ico-cog ico-light-gray"></span>Jobs</a>
         </li>
-        <li data-ng-if="showMarketoSettings" role="presentation" ui-sref-active="active">
+        <li role="presentation" ui-sref-active="active">
             <a ui-sref="marketosettings.apikey"><span class="ico ico-marketo ico-light-gray"></span>Marketo Settings</a>
         </li>
     </ul>
