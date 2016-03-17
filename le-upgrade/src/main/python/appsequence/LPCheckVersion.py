@@ -96,8 +96,8 @@ class LPCheckVersion( StepBase ):
 
     if version == self._template_version:
       return Applicability.canApply
-    elif AppArgs.getoption(sys.argv) == '--missingLead':
-      print AppArgs.getoption(sys.argv)
+    elif AppArgs.getOptionByIndex(sys.argv,1) == '--missingLead':
+      print AppArgs.getOptionByIndex(sys.argv,1)
       return Applicability.canApply
     return Applicability.cannotApplyFail
 

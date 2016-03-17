@@ -18,7 +18,7 @@ class AppArgs( object ):
     exit( exit_code )
 
   @classmethod
-  def getoption( cls, argv ):
+  def getOptionByIndex( cls, argv ,index):
     cmd = ''
     path = ''
     i = argv[0].rfind('\\')
@@ -28,7 +28,7 @@ class AppArgs( object ):
 
     if len(argv) == 1:
       cls.usage( cmd, 0 )
-    option = argv[1]
+    option = argv[index]
     return  (option)
 
   @classmethod
