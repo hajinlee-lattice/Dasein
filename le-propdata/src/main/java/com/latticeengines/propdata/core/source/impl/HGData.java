@@ -4,9 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
-import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
@@ -29,7 +29,7 @@ public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[]{"URL", "Supplier_Name", "Segment_Name",
+        return new String[]{"Domain", "Supplier_Name", "Segment_Name",
                 "HG_Category_1", "HG_Category_2", "HG_Category_1_Parent", "HG_Category_2_Parent"};
     }
 
@@ -37,7 +37,7 @@ public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
     public String getTimestampField() { return "LE_Last_Upload_Date"; }
 
     @Override
-    public String getDomainField() {  return "URL"; }
+    public String getDomainField() {  return "Domain"; }
 
     @Override
     public Source[] getBaseSources() { return new Source[]{ baseSource }; }
