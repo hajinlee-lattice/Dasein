@@ -71,13 +71,14 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         return true;
     }
     
-    $scope.cancelClick = function ($event) {
+    $scope.cancelAndLogoutClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
 
         if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
             clearChangePasswordField();
+            LoginService.Logout();
         } else {
             $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
         }
@@ -109,6 +110,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                 $scope.saveInProgess = false;
                 if (result.Success) {
                     $("#changePasswordSuccessAlert").fadeIn();
+                    BrowserStorageUtility.clear(false);
                     $rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
                 } else {
                     if (result.Status == 401) {
