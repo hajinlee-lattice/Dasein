@@ -1,0 +1,25 @@
+List of Contents
+
+0. Setting up environment
+1. Sourcing Alias File 
+2. Starting Admin-Console for le-pls EndToEnd tests
+3. Starting PLS server
+
+0. Setting up common environment
+
+First "source" the "aliases" file by running the following from ledp(Your WS_HOME)
+
+source le-dev/aliases
+
+1. Starting Admin-Console for le-pls EndToEnd tests
+
+First start the le-admin dev console using the following command.
+
+MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4005,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DADMIN_PROPDIR=conf/env/dev -Pfunctional -Djetty.port=8085 -Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks -Dcom.latticeengines.registerBootstrappers=true jetty:run
+
+Then login to http://localhost:8085/#/tenants/ with the username/password of testuser1/Lattice1
+
+2. Starting PLS server 
+
+Enter "runjettypls"
+
