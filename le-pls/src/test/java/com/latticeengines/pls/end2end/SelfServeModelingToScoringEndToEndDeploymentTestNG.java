@@ -120,16 +120,20 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         System.out.println("fields: " + fields.getFields());
         List<Map<String, Object>> records = createRecords(fields.getFields());
         List<String> largeScoreVarianceList = new ArrayList<>();
+        int count = 0;
         for (Map<String, Object> record : records) {
+            if (count >= 50)
+                break;
             System.out.println(record);
             ScoringResponse response = score(record, modelId);
             System.out.println("scoring response: " + response);
             compareScoreResult(record, response.getProbability(), largeScoreVarianceList);
+            count++;
         }
         for (String warning : largeScoreVarianceList) {
             System.out.println(warning);
         }
-        System.out.println("Number of records compared:" + records.size());
+        System.out.println("Number of records compared:" + (records.size() >= 50 ? 50 : records.size()));
         System.out.println("Number of records having scores largely different from modeling scores:"
                 + largeScoreVarianceList.size());
         assertTrue(largeScoreVarianceList.size() == 0,
