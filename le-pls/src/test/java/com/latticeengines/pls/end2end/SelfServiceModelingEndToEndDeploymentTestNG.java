@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -100,6 +101,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         this.fileName = fileName;
     }
 
+    public SourceFile getSourceFile() {
+        return sourceFile;
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
@@ -114,6 +123,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                         SchemaInterpretation.SalesforceLead), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+        System.out.println(sourceFile.getName());
     }
 
     @SuppressWarnings("rawtypes")

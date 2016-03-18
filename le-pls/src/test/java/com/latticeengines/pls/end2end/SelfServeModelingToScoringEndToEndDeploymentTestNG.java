@@ -8,10 +8,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -32,11 +34,15 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -66,7 +72,9 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @Value("${pls.scoringapi.rest.endpoint.hostport}")
     private String scoringApiHostPort;
 
-    private String fileName = "Mulesoft_SFDC_LP3_1000.csv";
+    private SourceFile sourceFile;
+
+    private String fileName = "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_20160316_170113.csv";
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -85,8 +93,13 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @Test(groups = "deployment.lp", enabled = true)
     public void testEndToEnd() throws InterruptedException, IOException {
         selfServiceModeling.setFileName(fileName);
+        System.out.println("Uploading File");
         selfServiceModeling.uploadFile();
-        selfServiceModeling.resolveMetadata();
+        sourceFile = selfServiceModeling.getSourceFile();
+        System.out.println(sourceFile.getName());
+        System.out.println("Resolving Metadata");
+        resolveMetadata();
+        System.out.println("Creatinging Model");
         selfServiceModeling.createModel();
         selfServiceModeling.retrieveModelSummary();
         ModelSummary modelSummary = selfServiceModeling.getModelSummary();
@@ -122,6 +135,41 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         assertTrue(largeScoreVarianceList.size() < records.size(),
                 "All Scores have high variance after comparing with modeling scores");
 
+    }
+
+    @SuppressWarnings("rawtypes")
+    private void resolveMetadata() {
+        RestTemplate restTemplate = selfServiceModeling.getRestTemplate();
+        ResponseDocument response = restTemplate.getForObject(
+                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
+                ResponseDocument.class);
+        @SuppressWarnings("unchecked")
+        List<LinkedHashMap> unknownColumns = new ObjectMapper().convertValue(response.getResult(), List.class);
+        setUnknowColumnType(unknownColumns);
+        response = restTemplate.postForObject(
+                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
+                unknownColumns, ResponseDocument.class);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void setUnknowColumnType(List<LinkedHashMap> unknownColumns) {
+        Set<String> booleanSet = Sets.newHashSet(new String[] { "Interest_esb__c", "Interest_tcat__c",
+                "kickboxAcceptAll", "Free_Email_Address__c", "kickboxFree", "Unsubscribed", "kickboxDisposable",
+                "HasAnypointLogin", "HasCEDownload", "HasEEDownload" });
+        Set<String> strSet = Sets.newHashSet(new String[] { "Lead_Source_Asset__c", "kickboxStatus", "SICCode",
+                "Source_Detail__c", "Cloud_Plan__c" });
+        System.out.println(unknownColumns);
+        for (LinkedHashMap<String, String> map : unknownColumns) {
+            String columnName = map.get("columnName");
+            if (booleanSet.contains(columnName)) {
+                map.put("columnType", Schema.Type.BOOLEAN.name());
+            } else if (strSet.contains(columnName)) {
+                map.put("columnType", Schema.Type.STRING.name());
+            } else if (columnName.startsWith("Activity_Count_")) {
+                map.put("columnType", Schema.Type.INT.name());
+            }
+        }
+        System.out.println(unknownColumns);
     }
 
     private void compareScoreResult(Map<String, Object> record, double probability, List<String> largeScoreVarianceList) {
