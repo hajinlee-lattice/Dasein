@@ -1006,7 +1006,7 @@ class MissingLeadsReport(StepBase):
       <targetQueries />
       <targetQuerySequences />
       <rdss>
-        <rds n="ELQ_Contact_Validation" w="Workspace" sn="ELQ_Contact_Validation" cn="Eloqua_Bulk_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@recordCOUNT(1000) AND&#xD;&#xA;(C_DateModified &gt; #Diagnostic_LowerLimitTime AND C_DateModified &lt; #Diagnostic_UpperLimitTime AND (__SCORE_DATE_FIELD__ &lt; #Diagnostic_RescoreThreshold OR __SCORE_FIELD__ = 0 ))" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
+        <rds n="ELQ_Contact_Validation" w="Workspace" sn="ELQ_Contact_Validation" cn="Eloqua_Bulk_DataProvider" u="False" ss="" tn="Contact" nmo="1" f="@recordCOUNT(1000) AND&#xD;&#xA;(C_DateModified &gt; #Diagnostic_LowerLimitTime AND C_DateModified &lt; #Diagnostic_UpperLimitTime AND (__SCORE_DATE_FIELD__ &lt; #Diagnostic_RescoreThreshold OR __SCORE_DATE_FIELD__ = null ))" ad="False" em="False" td="False" ic="" dd="" l="1000" tw="False" sr="50000" htw="24" mtw="60" emt="False" acd="False" mgf="False" eo="2" emd="False" eo_sftp="1">
           <ts>
             <t n="Diagnostic_LowerLimitTime" t="1" qn="Q_Diagnostic_ExtractLeadsRange" cn="Diagnostic_LowerLimitTime" m="0">
               <schemas />
@@ -1144,7 +1144,7 @@ class MissingLeadsReport(StepBase):
     elif type == 'ELQ':
       diag_rdss_xml = re.sub(r' f=\"@.*?\"',
                              ' f="@datediff(now, month(6)) AND (__SCORE_DATE_FIELD__ &lt; '
-                             '#Diagnostic_RescoreThreshold OR __SCORE_FIELD__ = 0 )"',
+                             '#Diagnostic_RescoreThreshold OR __SCORE_DATE_FIELD__ = null )"',
                              diag_rdss_xml)
       diag_rdss_xml=diag_rdss_xml.replace('__SCORE_DATE_FIELD__ ', scoreDateField)
       diag_rdss_xml=diag_rdss_xml.replace('__SCORE_FIELD__ ', scoreField)
