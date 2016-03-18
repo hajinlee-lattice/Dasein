@@ -298,12 +298,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getAccountExtensionSchema() {
         String sql = "SELECT C.Column_Name AS Field, C.Column_Type AS Type, C.String_Length AS StringLength, "
-                + "(SELECT DISTINCT S.value FROM ConfigResource S JOIN [ExtensionColumnSpec] "
-                + "ON S.Key_Name = C.Display_Name_Key) AS DisplayName "
+                + "S.Value AS DisplayName "
                 + "FROM [ExtensionColumnSpec] C JOIN [ExtensionTableSpec] T ON C.Parent_ID = T.ExtensionTableSpec_ID "
                 + "AND T.External_ID = 'LEAccount' "
                 + "JOIN [ConfigTableColumn] CC on C.Column_Name = CC.Column_Lookup_ID "
                 + "JOIN [ConfigTable] CT ON CC.[ConfigTable_ID] = CT.ConfigTable_ID "
+                + "JOIN [ConfigResource] S ON CC.Column_Display_Key = S.Key_Name AND S.Locale_ID = -1 "
                 + "WHERE CC.IsActive = 1 and CC.Column_IsVisible = 1 and CT.External_ID = 'Sales-AccountList'";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
