@@ -53,7 +53,7 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
         try {
             httpStopWatch.stop();
             long duration = httpStopWatch.getTime();
-            log.info(String.format("{'requestDurationMS':'%d'}", duration));
+            log.info(String.format("{\"requestDurationMS\":\"%d\"}", duration));
         } finally {
             // If this doesn't get called, memory can permanently leak.
             MDC.remove(URI_KEY);

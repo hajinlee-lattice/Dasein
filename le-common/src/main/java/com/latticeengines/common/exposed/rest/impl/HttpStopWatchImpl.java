@@ -15,7 +15,7 @@ public class HttpStopWatchImpl implements HttpStopWatch {
 
     @Override
     public String getLogStatement(String key) {
-        return String.format("{'%sDurationMS':'%d'}", key, splitAndGetTimeSinceLastSplit());
+        return String.format("{\"%sDurationMS\":\"%d\"}", key, splitAndGetTimeSinceLastSplit());
     }
 
     @Override
