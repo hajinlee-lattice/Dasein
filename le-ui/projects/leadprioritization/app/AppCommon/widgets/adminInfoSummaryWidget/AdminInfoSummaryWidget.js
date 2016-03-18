@@ -5,14 +5,16 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.services.SessionService'
 ])
-.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService, ConfigService) {
+.controller('AdminInfoSummaryWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService, ConfigService, BrowserStorageUtility) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
+    var clientSession = BrowserStorageUtility.getClientSession();
     var data = $scope.data;
+
     $scope.ModelId = data.ModelId;
-    $scope.TenantId = data.TenantId;
-    $scope.TenantName = $scope.data.TenantName;
+    $scope.TenantId = clientSession.Tenant.Identifier;
+    $scope.TenantName = clientSession.Tenant.DisplayName;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
     $scope.modelUploaded = data.ModelDetails.Uploaded;
 
@@ -30,7 +32,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
     return {
         restrict: 'E',
         template: '{{score | number: 4}}&nbsp;&nbsp;&nbsp;&nbsp;<strong class="{{healthClass}}">{{healthLevel}}</strong>',
-        scope:    {score: '='},
+        scope: {score: '='},
         controller: ['$scope', 'ResourceUtility', function ($scope, ResourceUtility) {
 
             if ($scope.score >= 0.75) {

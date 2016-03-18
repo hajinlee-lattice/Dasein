@@ -53,9 +53,12 @@ class Server {
     startLogging(log_path) {
         let logDirectory = __dirname + log_path;
 
-        var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
-
-        this.app.use(morgan('combined', { stream: accessLogStream }));
+        try {
+            var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
+            this.app.use(morgan('combined', { stream: accessLogStream }));
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     // trust the load balancer/proxy in production

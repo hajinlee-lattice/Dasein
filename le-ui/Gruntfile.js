@@ -44,7 +44,7 @@ module.exports = function (grunt) {
                 NODE_ENV: 'qa',
                 API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 COMPRESSED: true,
-                LOGGING: '/var/log/ledp',
+                LOGGING: '/log',
                 HTTP_PORT: 3000,
                 HTTPS_PORT: 3001,
                 HTTPS_KEY: '/certs/privatekey.key',

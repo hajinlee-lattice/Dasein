@@ -68,7 +68,7 @@ span.logo {
 }
 
 #topPredictorAttributeHover {
-    position: fixed;
+    position: absolute;
     -webkit-transform: translateY(-50%);
     -moz-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
@@ -619,11 +619,15 @@ Create Model: Custom Fields Page
       width: 50%;
       padding: 0 0 4px;
       vertical-align: top;
+      display: inline-block;
+      word-wrap: break-word;
       &:first-child {
         padding-right: 4px;
+        width: 70%;
       }
       &:last-child {
         padding-left: 4px;
+        width: 29%;
       }
     }
   }

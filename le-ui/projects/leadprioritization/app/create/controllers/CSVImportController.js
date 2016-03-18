@@ -29,37 +29,40 @@ angular.module('mainApp.create.csvImport', [
         
         formData.append('file', file);
 
-        var xhr = new XMLHttpRequest();
+        var xhr = new XMLHttpRequest(),
+            html = '';
         
         (xhr.upload || xhr).addEventListener('progress', function(e) {
             if (e.total / 1024 > 486000) {
                 xhr.abort();
                 $('div.loader').css({'display':'none'});
 
-                $('#file_progress')
-                    .html('ERROR: Over file size limit.  File must be below 486MB');
+                html = 'ERROR: Over file size limit.  File must be below 486MB';
+            } else {
+                var done = e.loaded / 1024,
+                    total = e.total / 1024,
+                    percent = Math.round(done / total * 100),
+                    currentTime = new Date(),
+                    seconds = Math.floor((currentTime - startTime) / 1000),
+                    minutes = Math.floor(seconds / 60),
+                    hours = Math.floor(minutes / 60),
+                    speed = done / seconds,
+                    seconds = seconds % 60,
+                    minutes = minutes % 60,
+                    hours = hours % 24,
+                    seconds = (seconds < 10 ? '0' + seconds : seconds),
+                    minutes = (minutes < 10 ? '0' + minutes : minutes),
+                    r = Math.round;
 
-                return;
+                if (percent < 100) {
+                    var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
+                                '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>';
+                } else {
+                    var html =  'Processing...';
+                }
             }
 
-            var done = e.loaded / 1024,
-                total = e.total / 1024,
-                percent = Math.round(done / total*100),
-                currentTime = new Date(),
-                seconds = Math.floor((currentTime - startTime) / 1000),
-                minutes = Math.floor(seconds / 60),
-                hours = Math.floor(minutes / 60),
-                speed = done / seconds,
-                seconds = seconds % 60,
-                minutes = minutes % 60,
-                hours = hours % 24,
-                seconds = (seconds < 10 ? '0' + seconds : seconds),
-                minutes = (minutes < 10 ? '0' + minutes : minutes),
-                r = Math.round;
-
-            $('#file_progress')
-                .html('<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
-                      '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>');
+            $('#file_progress').html(html);
         });
 
         xhr.addEventListener('load', function(e) {
@@ -288,6 +291,6 @@ angular.module('mainApp.create.csvImport', [
     $scope.cancelClicked = function() {
         console.log('# Upload Cancelled');
         csvImportStore.Get('cancelXHR', true).abort();
-        $state.go('models.import');
+        $state.go('models');
     };
 }]);
