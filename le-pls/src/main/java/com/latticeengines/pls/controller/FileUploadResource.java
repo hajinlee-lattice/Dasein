@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "fileuploads", description = "REST resource for uploading data files")
 @RestController
 @RequestMapping("/fileuploads")
-//@PreAuthorize("hasRole('Edit_PLS_Data')")
+@PreAuthorize("hasRole('Edit_PLS_Data')")
 public class FileUploadResource {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(FileUploadResource.class);
