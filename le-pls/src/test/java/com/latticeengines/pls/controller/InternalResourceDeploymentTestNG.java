@@ -28,7 +28,8 @@ public class InternalResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private TenantConfigService tenantConfigService;
 
-    //TODO: to enable this test, we need a REST endpoint for ZK operations, and tenantConfigService
+    // TODO: to enable this test, we need a REST endpoint for ZK operations, and
+    // tenantConfigService
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment", enabled = false)
     public void provisionThroughTenantConsole() throws Exception {

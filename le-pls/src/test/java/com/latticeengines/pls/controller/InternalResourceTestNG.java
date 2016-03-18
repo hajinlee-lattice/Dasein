@@ -16,7 +16,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -102,11 +101,4 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         Assert.assertFalse((boolean) result.get("Exists"));
     }
 
-    @Test(groups = "functional")
-    public void calculate() {
-        String restAPIHostPort = getRestAPIHostPort();
-        String url = String.format("%s/pls/internal/add/1/2", restAPIHostPort);
-        Status status = restTemplate.getForObject(url, Status.class);
-        Assert.assertNotNull(status);
-    }
 }

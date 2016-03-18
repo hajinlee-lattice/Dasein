@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -16,7 +17,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +32,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
-import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -263,7 +262,8 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/modelsummaries/{modelId}/" + TENANT_ID_PATH, method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a model summary")
-    public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+    public Boolean deleteModelSummary(@PathVariable String modelId, @PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
 
@@ -528,41 +528,10 @@ public class InternalResource extends InternalResourceBase {
         return SimpleBooleanResponse.successResponse();
     }
 
-    @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
-    @ResponseBody
-    @ApiOperation(value = "Status check for this endpoint")
-    public Status calculate(@PathVariable("op") String op, @PathVariable("left") int left,
-            @PathVariable("right") int right) {
-        Assert.notNull(op);
-        Assert.notNull(left);
-        Assert.notNull(right);
-        Status result = new Status();
-        result.setOperation(op);
-        result.setLeft(left);
-        result.setRight(right);
-        return doCalc(result);
-    }
-
     public List<String> getTestTenantIds() {
         String tenant1Id = contractId + "PLSTenant1." + contractId + "PLSTenant1.Production";
         String tenant2Id = contractId + "PLSTenant2." + contractId + "PLSTenant2.Production";
         return Arrays.asList(tenant1Id, tenant2Id);
-    }
-
-    private Status doCalc(Status c) {
-        String op = c.getOperation();
-        int left = c.getLeft();
-        int right = c.getRight();
-        if (op.equalsIgnoreCase("subtract")) {
-            c.setResult(left - right);
-        } else if (op.equalsIgnoreCase("multiply")) {
-            c.setResult(left * right);
-        } else if (op.equalsIgnoreCase("divide")) {
-            c.setResult(left / right);
-        } else {
-            c.setResult(left + right);
-        }
-        return c;
     }
 
     private void provisionThroughTenantConsole(String tupleId, String topology, String tenantRegJson)
