@@ -47,7 +47,7 @@
         "Title": null,
         "Unsubscribed": null,
         "kickboxAcceptAll": null,
-        "kickboxDisposable": null,
+        "kickboxDisposable": "",
         "kickboxFree": 1,
         "kickboxStatus": "valid"
     }

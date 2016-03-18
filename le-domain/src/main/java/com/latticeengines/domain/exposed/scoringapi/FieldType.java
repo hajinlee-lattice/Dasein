@@ -35,7 +35,7 @@ public enum FieldType {
     public Class<?> type() {
         return type;
     }
-    
+
     public String[] avroTypes() {
         return avroTypes;
     }
@@ -59,6 +59,11 @@ public enum FieldType {
     public static Object parse(FieldType fieldtype, String rawvalue) {
         if (rawvalue == null) {
             return null;
+        } else if (!fieldtype.equals(FieldType.STRING)) {
+            rawvalue = rawvalue.trim();
+            if (rawvalue.isEmpty()) {
+                return null;
+            }
         }
 
         try {
@@ -74,6 +79,7 @@ public enum FieldType {
             case FLOAT:
                 return Double.parseDouble(rawvalue);
             case INTEGER:
+            case LONG:
                 return Long.parseLong(rawvalue);
             case STRING:
                 return rawvalue;
@@ -84,5 +90,4 @@ public enum FieldType {
             throw new RuntimeException("Failure converting value " + rawvalue + " to FieldType " + fieldtype, e);
         }
     }
-
 }

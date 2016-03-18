@@ -70,11 +70,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
 
         DebugScoreResponse scoreResponse = response.getBody();
         Assert.assertEquals(scoreResponse.getScore(), 99.0d);
-        Assert.assertEquals(scoreResponse.getProbability(), 0.514962673486726d); // TODO
-                                                                                   // find
-                                                                                   // the
-                                                                                   // actual
-                                                                                   // value
+        Assert.assertEquals(scoreResponse.getProbability(), 0.514962673486726d);
     }
 
 }
