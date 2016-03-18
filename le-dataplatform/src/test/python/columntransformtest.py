@@ -30,11 +30,11 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
 
     def assertLengthOfEVPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 6, "Pipeline should have 8 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(len(pipeline), 6, "Pipeline should have 6 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def assertLengthOfPipeline(self, pipeline):
         lenOfPipeline = len(pipeline)
-        self.assertEqual(len(pipeline), 7, "Pipeline should have 7 members, each representing a transform. Got: " + str(lenOfPipeline))
+        self.assertEqual(len(pipeline), 5, "Pipeline should have 5 members, each representing a transform. Got: " + str(lenOfPipeline))
 
     def checkThatEVTransformsDontThrowExceptions(self):
         keys = ["revenuecolumntransformstep", "pivotstep", "imputationstepevpipeline", "columntypeconversionstep", "enumeratedcolumntransformstep", "cleancategoricalcolumn"
