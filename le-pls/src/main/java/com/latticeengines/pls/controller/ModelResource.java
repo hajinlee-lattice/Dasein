@@ -1,5 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.ModelNameUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
@@ -25,7 +29,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "models", description = "REST resource for interacting with modeling workflows")
 @RestController
 @RequestMapping("/models")
-//@PreAuthorize("hasRole('Edit_PLS_Data')")
+// @PreAuthorize("hasRole('Edit_PLS_Data')")
 public class ModelResource {
     private static final Logger log = Logger.getLogger(ModelResource.class);
 
@@ -48,6 +52,11 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
+        if (!ModelNameUtils.validateModelName(modelName)) {
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
+            log.error(message);
+            return ResponseDocument.failedResponse(new RuntimeException(message));
+        }
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return ResponseDocument.successResponse( //
                 importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
