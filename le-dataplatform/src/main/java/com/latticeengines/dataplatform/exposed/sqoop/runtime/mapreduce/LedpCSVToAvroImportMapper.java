@@ -228,8 +228,7 @@ public class LedpCSVToAvroImportMapper extends
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
                 if ((attr.getInterfaceName() != null && (attr.getInterfaceName().equals(InterfaceName.CreatedDate) || attr
-                        .getInterfaceName().equals(InterfaceName.LastModifiedDate)))
-                        || (attr.getSourceLogicalDataType() != null && attr.getSourceLogicalDataType().equals("Date"))) {
+                        .getInterfaceName().equals(InterfaceName.LastModifiedDate)))) {
 
                     Log.info("Date value from csv: " + fieldCsvValue);
                     List<DateGroup> groups = parser.parse(fieldCsvValue);
@@ -252,8 +251,8 @@ public class LedpCSVToAvroImportMapper extends
                 return fieldCsvValue;
             default:
                 fieldMalFormed = true;
-                throw new RuntimeException("Not supported Field, avroType:" + avroType + ", logicalType:"
-                        + attr.getLogicalDataType());
+                throw new RuntimeException("Not supported Field, avroType:" + avroType + ", physicalDatalType:"
+                        + attr.getPhysicalDataType());
             }
         } catch (NumberFormatException e) {
             fieldMalFormed = true;
