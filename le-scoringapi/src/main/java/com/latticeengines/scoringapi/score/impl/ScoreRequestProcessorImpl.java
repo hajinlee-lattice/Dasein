@@ -127,8 +127,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
         }
         if (!mismatchedDataTypes.isEmpty()) {
-            warnings.addWarning(new Warning(WarningCode.MISMATCHED_DATATYPE, new String[] { JsonUtils
-                    .serialize(mismatchedDataTypes) }));
+            throw new ScoringApiException(LedpCode.LEDP_31105,
+                    new String[] { JsonUtils.serialize(mismatchedDataTypes) });
         }
 
         return new AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields>(parsedRecord, interpretedFields);

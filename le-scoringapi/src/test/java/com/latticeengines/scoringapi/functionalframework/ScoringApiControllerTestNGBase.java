@@ -71,6 +71,8 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
 
     protected DataComposition eventTableDataComposition;
 
+    protected DataComposition dataScienceDataComposition;
+
     protected OAuthUser oAuthUser;
 
     protected OAuth2RestTemplate oAuth2RestTemplate = null;
@@ -181,6 +183,10 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
         String eventTableDataCompositionContents = Files.toString(new File(eventTableDataCompositionUrl.getFile()),
                 Charset.defaultCharset());
         eventTableDataComposition = JsonUtils.deserialize(eventTableDataCompositionContents, DataComposition.class);
+
+        String dataScienceDataCompositionContents = Files.toString(new File(dataScienceDataCompositionUrl.getFile()),
+                Charset.defaultCharset());
+        dataScienceDataComposition = JsonUtils.deserialize(dataScienceDataCompositionContents, DataComposition.class);
     }
 
     protected ScoreRequest getScoreRequest() throws IOException {

@@ -2,10 +2,8 @@ package com.latticeengines.scoringapi.match.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -87,7 +85,6 @@ public class MatcherImpl implements Matcher {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
         }
 
-        record.put(IS_PUBLIC_DOMAIN, null);
         if (matchOutput.getResult().isEmpty()) {
             warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
                     JsonUtils.serialize(matchInput.getKeyMap()), "No result" }));
@@ -108,21 +105,11 @@ public class MatcherImpl implements Matcher {
                         nameLocationStr, errorMessages));
             }
 
-            Set<String> fieldNameSet = null;
             if (outputRecord.isMatched()) {
-                fieldNameSet = mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
+                mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
             } else {
-                fieldNameSet = handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record,
+                handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record,
                         nameLocationStr);
-            }
-
-            // Handle IsPublicDomain specially
-            if (fieldNameSet.contains(IS_PUBLIC_DOMAIN)) {
-                record.put(IS_PUBLIC_DOMAIN, true);
-                warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
-                        .nullToEmpty(outputRecord.getMatchedDomain()) }));
-            } else {
-                record.put(IS_PUBLIC_DOMAIN, false);
             }
 
             if (!outputRecord.isMatched()) {
@@ -137,13 +124,11 @@ public class MatcherImpl implements Matcher {
         return record;
     }
 
-    private Set<String> handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput,
+    private void handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput,
             OutputRecord outputRecord, Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
             String nameLocationStr) {
-        Set<String> fieldNameSet = new HashSet<>();
         for (int i = 0; i < matchFieldNames.size(); i++) {
             String fieldName = matchFieldNames.get(i);
-            fieldNameSet.add(fieldName);
             FieldSchema schema = fieldSchemas.get(fieldName);
             if (schema != null && schema.source == FieldSource.PROPRIETARY) {
                 record.put(fieldName, null);
@@ -152,11 +137,9 @@ public class MatcherImpl implements Matcher {
         warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
                 JsonUtils.serialize(matchInput.getKeyMap()),
                 Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
-
-        return fieldNameSet;
     }
 
-    private Set<String> mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
+    private void mergeMatchedOutput(List<String> matchFieldNames, OutputRecord outputRecord,
             Map<String, FieldSchema> fieldSchemas, Map<String, Object> record) {
         List<Object> matchFieldValues = outputRecord.getOutput();
 
@@ -165,20 +148,23 @@ public class MatcherImpl implements Matcher {
                     String.valueOf(matchFieldValues.size()) });
         }
 
-        Set<String> fieldNameSet = new HashSet<>();
         for (int i = 0; i < matchFieldNames.size(); i++) {
             String fieldName = matchFieldNames.get(i);
-            fieldNameSet.add(fieldName);
             FieldSchema schema = fieldSchemas.get(fieldName);
             if (schema != null && schema.source == FieldSource.PROPRIETARY) {
                 Object fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
                 record.put(fieldName, fieldValue);
                 if (fieldValue == null) {
-                    log.debug(String.format("Received null value for matched field:%s", fieldName));
+//                    log.debug(String.format("Received null value for matched field:%s", fieldName));
+                } else if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
+                    Boolean isPublicDomain = (Boolean) fieldValue;
+                    if (isPublicDomain) {
+                        warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
+                                .nullToEmpty(outputRecord.getMatchedDomain()) }));
+                    }
                 }
             }
         }
-        return fieldNameSet;
     }
 
     private void addToKeyMapIfValueExists(Map<MatchKey, List<String>> keyMap, MatchKey matchKey, String field,

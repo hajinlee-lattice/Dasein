@@ -20,7 +20,7 @@ import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTes
 
 public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void getModels() {
         String url = apiHostPort + "/score/models/CONTACT";
         ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
@@ -31,7 +31,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
         String url = apiHostPort + "/score/models/" + modelId + "/fields";
@@ -43,12 +43,12 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         Assert.assertEquals(fields.getModelId(), modelId);
 
         for (Field field : fields.getFields()) {
-            FieldSchema expectedSchema = eventTableDataComposition.fields.get(field.getFieldName());
+            FieldSchema expectedSchema = dataScienceDataComposition.fields.get(field.getFieldName());
             Assert.assertEquals(expectedSchema.type, field.getFieldType());
         }
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void scoreRecord() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -57,7 +57,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
                 ScoreResponse.class);
 
         ScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), 93.0d);
+        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -69,8 +69,8 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
                 DebugScoreResponse.class);
 
         DebugScoreResponse scoreResponse = response.getBody();
-        Assert.assertEquals(scoreResponse.getScore(), 93.0d);
-        Assert.assertEquals(scoreResponse.getProbability(), 0.1785552460735831d); // TODO
+        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+        Assert.assertEquals(scoreResponse.getProbability(), 0.514962673486726d); // TODO
                                                                                    // find
                                                                                    // the
                                                                                    // actual

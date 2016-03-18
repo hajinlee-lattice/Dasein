@@ -32,10 +32,13 @@ public class RecordTransformer {
             Object value = null;
             boolean successfulInvocation = false;
             Exception failedInvocationException = null;
-            for (int numTries = 0; numTries < 2; numTries++) {
+            for (int numTries = 1; numTries < 3; numTries++) {
                 try {
                     value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
                     successfulInvocation = true;
+                    if (numTries > 1) {
+                        log.warn(String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
+                    }
                     break;
                 } catch (Exception e) {
                     failedInvocationException = e;
@@ -45,9 +48,6 @@ public class RecordTransformer {
                 record.put(entry.output, value);
                 result.put(entry.output, value);
             } else {
-                // TODO remove after we resolve our transform issues
-                System.out.println(String.format("Problem invoking %s", entry.name));
-                failedInvocationException.printStackTrace();
                 if (log.isWarnEnabled()) {
                     log.warn(String.format("Problem invoking %s", entry.name), failedInvocationException);
                 }

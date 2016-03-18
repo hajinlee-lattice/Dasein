@@ -68,6 +68,10 @@ public class ModelEvaluator {
             Object value = record.get(name.getValue());
             if (value == null) {
                 nullFields.add(name.getValue());
+                /*
+                 * Set this in order to get through prepare so that we can
+                 * collect all null fields before throwing an exception
+                 */
                 value = 0.0d;
             }
             if (value instanceof Long) {
@@ -87,10 +91,7 @@ public class ModelEvaluator {
         if (!nullFields.isEmpty()) {
             nullFieldsMsg = Joiner.on(",").join(nullFields);
             log.warn("Preevaluated fields with null values:" + nullFieldsMsg);
-            // TODO uncomment the below after working through all of the
-            // transform invoking exceptions
-            // throw new ScoringApiException(LedpCode.LEDP_31104, new String[] {
-            // nullFieldsMsg });
+            throw new ScoringApiException(LedpCode.LEDP_31104, new String[] { nullFieldsMsg });
         }
 
         Map<FieldName, ?> results = null;

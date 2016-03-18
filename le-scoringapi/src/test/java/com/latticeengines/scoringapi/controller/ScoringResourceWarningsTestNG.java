@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.SetUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.springframework.http.ResponseEntity;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
@@ -19,7 +22,9 @@ import com.latticeengines.scoringapi.warnings.WarningCode;
 
 public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBase {
 
-    @Test(groups = "functional", enabled = false)
+    private static final Log log = LogFactory.getLog(ScoringResourceWarningsTestNG.class);
+
+    @Test(groups = "functional", enabled = true)
     public void missingColumn() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -39,10 +44,10 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
     public void noMatch() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
-        scoreRequest.getRecord().put("Email", "johndoe@qpwoeiritkgjdjsjdkckdfk.com");
-        scoreRequest.getRecord().put("CompanyName", "qpwoeiritkgjdjsjdkckdfk");
+        scoreRequest.getRecord().put("Email", "johndoe@latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk.com");
+        scoreRequest.getRecord().put("CompanyName", "latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk");
         List<String> values = new ArrayList<>();
-        values.add("qpwoeiritkgjdjsjdkckdfk");
+        values.add("latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk");
 
         Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
         expectedWarningCodeAndMessageValues.put(WarningCode.NO_MATCH.getExternalCode(), values);
@@ -50,22 +55,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = false)
-    public void mismatchedDatatypes() throws IOException {
-        String url = apiHostPort + "/score/record";
-        ScoreRequest scoreRequest = getScoreRequest();
-        scoreRequest.getRecord().put("Activity_Count_Click_Email", "ModelExpects this to be a number");
-
-        List<String> values = new ArrayList<>();
-        values.add("Activity_Count_Click_Email");
-
-        Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
-        expectedWarningCodeAndMessageValues.put(WarningCode.MISMATCHED_DATATYPE.getExternalCode(), values);
-
-        postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
-    }
-
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void publicDomain() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -79,7 +69,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void extraFields() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -102,6 +92,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
             Map<String, List<String>> expectedWarningCodeAndMessageValues) {
         ResponseEntity<ScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
                 ScoreResponse.class);
+        log.info(JsonUtils.serialize(response));
 
         Map<String, String> observedWarningCodes = new HashMap<>();
         ScoreResponse scoreResponse = response.getBody();
