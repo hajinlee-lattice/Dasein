@@ -51,7 +51,7 @@ class Server {
     }
 
     startLogging(log_path) {
-        let logDirectory = __dirname + log_path;
+        let logDirectory = log_path;
 
         try {
             var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
