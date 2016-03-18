@@ -71,7 +71,7 @@ angular.module('mainApp.login.controllers.LoginController', [
                 $scope.handleTenantSelection(result.Result.Tenants);
             } else {
                 // Need to fail gracefully if we get no service response at all
-                $scope.showLoginHeaderMessage(ResourceUtility.getString("LOGIN_UNKNOWN_ERROR"));
+                $scope.showLoginHeaderMessage(result.errorMessage);
             }
         });
     };
