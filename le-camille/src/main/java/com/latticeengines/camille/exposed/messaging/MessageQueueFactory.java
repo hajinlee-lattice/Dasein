@@ -3,11 +3,16 @@ package com.latticeengines.camille.exposed.messaging;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class MessageQueueFactory {
+
+    private Log log = LogFactory.getLog(MessageQueueFactory.class);
 
     public static MessageQueueFactory instance() {
         if (instance == null) {
@@ -30,6 +35,7 @@ public class MessageQueueFactory {
         Path path;
         try {
             path = constructPath(queueName);
+            log.info("Construct ZK queue " + path);
         } catch (Exception e) {
             throw new RuntimeException(String.format("Queue name %s is invalid: %s", queueName, e.getMessage()), e);
         }
@@ -59,7 +65,12 @@ public class MessageQueueFactory {
     }
 
     private Path constructPath(String queueName) {
-        return PathBuilder.buildMessageQueuePath(CamilleEnvironment.getPodId(), queueName);
+        if (CamilleEnvironment.isSharedQueue(queueName)) {
+            return PathBuilder.buildMessageQueuePath(CamilleEnvironment.getPodId(), queueName);
+        } else {
+            return PathBuilder.buildMessageQueuePath(CamilleEnvironment.getPodId(),
+                                                     CamilleEnvironment.getDivision(), queueName);
+        }
     }
 
     private Map<Path, Object> queues = new HashMap<Path, Object>();

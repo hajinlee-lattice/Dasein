@@ -31,6 +31,8 @@
                 <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
                     <constructor-arg value="${upgrade.zk.pod.id:Default}" />
                     <constructor-arg value="${upgrade.zk.connectionString:localhost:2181}" />
+                    <constructor-arg value="${upgrade.zk.division:}" />
+                    <constructor-arg value="${upgrade.zk.sharedQueues:}" />
                 </bean>
             </list>
         </property>

@@ -84,6 +84,11 @@ public class CamilleEnvironment {
             }
             break;
         }
+        log.info("Camille env started pod " + camilleConfig.getPodId() +
+                 "conn " + camilleConfig.getConnectionString() +
+                 "div " + camilleConfig.getDivision() +
+                 "shareQ " + camilleConfig.getSharedQueues());
+
     }
 
     private static PodInfo getAutogenPodInfo() {
@@ -100,6 +105,28 @@ public class CamilleEnvironment {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }
         return camilleConfig.getPodId();
+    }
+
+    public synchronized static String getDivision() {
+        if (camilleConfig == null) {
+            throw new IllegalStateException("CamilleEnvironment has not been started");
+        }
+        return camilleConfig.getDivision();
+    }
+
+    public synchronized static void setDivision(String division, String sharedQueues) {
+        if (camilleConfig == null) {
+            throw new IllegalStateException("CamilleEnvironment has not been started");
+        }
+        camilleConfig.setDivision(division);
+        camilleConfig.setSharedQueues(sharedQueues);
+    }
+
+    public synchronized static boolean isSharedQueue(String queueName) {
+        if (camilleConfig == null) {
+            throw new IllegalStateException("CamilleEnvironment has not been started");
+        }
+        return camilleConfig.isSharedQueue(queueName);
     }
 
     /**

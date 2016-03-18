@@ -9,6 +9,7 @@ public final class PathConstants {
     public static final String SPACES = "Spaces";
     public static final String SERVICES = "Services";
     public static final String QUEUES = "Queues";
+    public static final String DIVISION = "Divisions";
     public static final String TABLES = "Tables";
     public static final String FILES = "Files";
     public static final String METADATA = "Metadata";

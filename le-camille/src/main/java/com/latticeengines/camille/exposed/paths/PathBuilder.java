@@ -103,10 +103,14 @@ public final class PathBuilder {
                 contractId, tenantId, spaceId);
     }
 
+    public static Path buildMessageQueuePath(String podId, String division, String queueName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.QUEUES, PathConstants.DIVISION, queueName);
+    }
+
     public static Path buildMessageQueuePath(String podId, String queueName) {
         return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.QUEUES, queueName);
     }
-    
+
     public static Path buildModelingServicePath(String contractId, String tenantId, String spaceId) {
         return new Path(String.format("/user/s-analytics/customers/%s.%s.%s", contractId, tenantId, spaceId));
     }

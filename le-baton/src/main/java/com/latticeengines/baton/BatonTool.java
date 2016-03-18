@@ -53,6 +53,8 @@ public class BatonTool {
 
         parser.addArgument("--podId").help("Camille PodId");
         parser.addArgument("--connectionString", "--cs").help("Connection string for ZooKeeper");
+        parser.addArgument("--division").help("Camille division");
+        parser.addArgument("--sharedQueues", "--sq").help("Shared queues among divisions for ZooKeeper");
         parser.addArgument("--camilleJson").help(
                 "Path to camille.json.  Specify instead of explicitly specifying podId and connectionString.");
 
@@ -86,6 +88,8 @@ public class BatonTool {
 
         String connectionString = (String) namespace.get("connectionString");
         String podId = (String) namespace.get("podId");
+        String division = (String) namespace.get("division");
+        String sharedQueues = (String) namespace.get("sharedQueues");
         String camilleJsonPath = (String) namespace.get("camilleJson");
 
         try {
@@ -94,10 +98,14 @@ public class BatonTool {
                 config = new ObjectMapper().readValue(new File(camilleJsonPath), CamilleConfiguration.class);
                 podId = config.getPodId();
                 connectionString = config.getConnectionString();
+                division = config.getDivision();
+                sharedQueues = config.getSharedQueues();
             } else {
                 config = new CamilleConfiguration();
                 config.setConnectionString(connectionString);
                 config.setPodId(podId);
+                config.setDivision(division);
+                config.setSharedQueues(sharedQueues);
             }
 
             CamilleEnvironment.start(Mode.BOOTSTRAP, config);

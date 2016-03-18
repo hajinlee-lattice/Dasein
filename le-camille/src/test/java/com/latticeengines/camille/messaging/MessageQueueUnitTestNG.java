@@ -105,4 +105,30 @@ public class MessageQueueUnitTestNG {
         Thread.sleep(1000);
         // Not sure how we'd test that no consumer was triggered internally.
     }
+
+    @Test(groups = "unit", timeOut = 60000)
+    public void testDivAndShare() throws InterruptedException {
+        CamilleTestEnvironment.setDivision("a", "bootstrap_Dante, bootstrap_Me");
+        MessageQueueFactory factory = MessageQueueFactory.instance();
+        factory.clearCache();
+        Consumer consumerA = new Consumer();
+        MessageQueue<Message> queue = factory.construct(Message.class, "myqueue", consumerA);
+        queue.put(new Message());
+        while (true) {
+            if (consumerA.received) {
+                break;
+            }
+            Thread.sleep(1000);
+        }
+
+        Consumer consumerB = new Consumer();
+        queue = factory.construct(Message.class, "bootstrap_Dante", consumerB);
+        queue.put(new Message());
+        while (true) {
+            if (consumerB.received) {
+                break;
+            }
+            Thread.sleep(1000);
+        }
+    }
 }

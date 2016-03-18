@@ -112,7 +112,7 @@ public class WorkflowResource implements WorkflowInterface {
         WorkflowStatus status = null;
         if (workflowId != null) {
             status = workflowService.getStatus(workflowId);
-            log.info("Found workflowId " + workflowId + "for app " + applicationId +
+            log.info("Found workflowId " + workflowId.getId() + " for app " + applicationId +
                      " status=" + status.getStatus());
         }
         return status;

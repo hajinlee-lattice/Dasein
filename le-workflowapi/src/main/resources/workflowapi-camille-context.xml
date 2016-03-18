@@ -29,6 +29,8 @@
                 <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
                     <constructor-arg value="${workflowapi.zk.pod.id:Default}" />
                     <constructor-arg value="${workflowapi.zk.connectionString:localhost:2181}" />
+                    <constructor-arg value="${workflowapi.zk.division:}" />
+                    <constructor-arg value="${workflowapi.zk.sharedQueues:}" />
                 </bean>
             </list>
         </property>

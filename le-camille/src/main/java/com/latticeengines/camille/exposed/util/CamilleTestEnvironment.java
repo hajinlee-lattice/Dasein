@@ -24,6 +24,8 @@ public class CamilleTestEnvironment {
     }.getClass().getEnclosingClass());
 
     private static TestingServer server;
+    private static String division = null;
+    private static String sharedQueues = null;
 
     /**
      * Starts a testing cluster and the camille environment.
@@ -35,6 +37,8 @@ public class CamilleTestEnvironment {
                 server.close();
             }
 
+            log.info("Starting Camille environment");
+
             server = new TestingServer();
 
             CamilleEnvironment.stop();
@@ -42,6 +46,10 @@ public class CamilleTestEnvironment {
             CamilleConfiguration config = new CamilleConfiguration();
             config.setConnectionString(server.getConnectString());
             config.setPodId(getPodId());
+            config.setDivision("");
+            config.setSharedQueues("");
+            division = null;
+            sharedQueues = null;
 
             CamilleEnvironment.start(Mode.BOOTSTRAP, config);
 
@@ -87,6 +95,20 @@ public class CamilleTestEnvironment {
 
     public static CustomerSpaceInfo getCustomerSpaceInfo() {
         return new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
+    }
+
+    public static String getDivision() {
+        return division;
+    }
+
+    public static String getSharedQueues() {
+        return sharedQueues;
+    }
+
+    public synchronized static void setDivision(String div, String sharedQs) {
+        division = div;
+        sharedQueues = sharedQs;
+        CamilleEnvironment.setDivision(div, sharedQs);
     }
 
     /**

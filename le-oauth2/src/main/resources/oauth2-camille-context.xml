@@ -36,6 +36,8 @@
                     <constructor-arg value="${oauth2.zk.pod.id:Default}" />
                     <constructor-arg
                         value="${oauth2.zk.connectionString:localhost:2181}" />
+                    <constructor-arg value="${oauth2.zk.division:}" />
+                    <constructor-arg value="${oauth2.zk.sharedQueues:}" />
                 </bean>
             </list>
         </property>
