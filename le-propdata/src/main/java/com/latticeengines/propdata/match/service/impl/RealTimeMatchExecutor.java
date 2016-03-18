@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
-import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
@@ -310,11 +309,10 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 boolean matched = false;
 
                 if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)
-                        && matchContext.getInput().getKeyMap().containsKey(MatchKey.Domain)
-                        && !matchContext.getInput().getKeyMap().get(MatchKey.Domain).isEmpty()
-                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())) {
+                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
+                        && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
                     matched = true;
-                    value = publicDomainService.isPublicDomain(internalRecord.getParsedDomain());
+                    value = true;
                 } else if (columnPriorityMap.containsKey(field)) {
                     for (String targetSource : columnPriorityMap.get(field)) {
                         if (results.containsKey(targetSource)) {
@@ -346,6 +344,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     Object value = output.get(i);
                     if (field.toLowerCase().contains("ismatched") && value == null) {
                         output.set(i, false);
+                    }
+                    if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                        output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
                     }
                 }
             }

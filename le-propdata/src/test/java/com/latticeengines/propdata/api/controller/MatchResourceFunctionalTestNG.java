@@ -39,6 +39,38 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
     }
 
     @Test(groups = { "api" })
+    public void testPublicDomain() {
+        String url = getRestAPIHostPort() + MATCH_ENDPOINT;
+
+        Object[][] data = new Object[][] {
+                { 123, "gmail.com", null, null, null, null } };
+
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
+        Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
+        Assert.assertFalse(output.getResult().get(0).getOutput().isEmpty(), "result record should contain result list");
+    }
+
+    @Test(groups = { "api" })
+    public void testBadDomain() {
+        String url = getRestAPIHostPort() + MATCH_ENDPOINT;
+
+        Object[][] data = new Object[][] {
+                { 123, "notexists123454321fadsfsdacv.com", null, null, null, null } };
+
+        MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
+        Assert.assertNotNull(output);
+        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertTrue(output.getStatistics().getRowsMatched() == 0);
+        Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
+        Assert.assertNull(output.getResult().get(0).getOutput(), "result record should not contain result list");
+    }
+
+    @Test(groups = { "api" })
     public void testCachedLocationMatchBulk() {
         String url = getRestAPIHostPort() + MATCH_ENDPOINT;
 
