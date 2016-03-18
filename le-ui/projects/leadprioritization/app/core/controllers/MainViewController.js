@@ -47,6 +47,21 @@ angular.module('mainApp.core.controllers.MainViewController', [
         });
     }
 
+    // Handle when the User Management link is clicked
+    $scope.$on(NavUtility.USER_MANAGEMENT_NAV_EVENT, function (event, data) {
+        createUserManagementView();
+    });
+
+    function createUserManagementView() {
+        // Set the hash
+        //window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
+
+        // Fetch the view and make it Angular aware
+        $http.get('app/userManagement/views/UserManagementView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
     /*
     function createMainContentViewAndRefreshFeatures() {
         FeatureFlagService.GetAllFlags().then(function() {

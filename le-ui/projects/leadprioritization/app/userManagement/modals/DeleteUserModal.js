@@ -57,8 +57,8 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
                 //TODO:song handle error
                 alert(result.Errors[0]);
             }
-            $scope.deleteInProgress = false;
         });
+        $scope.deleteInProgress = false;
     };
     
     $scope.cancelClick = function () {
