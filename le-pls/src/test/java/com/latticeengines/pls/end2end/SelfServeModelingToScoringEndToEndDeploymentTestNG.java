@@ -132,8 +132,8 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         System.out.println("Number of records compared:" + records.size());
         System.out.println("Number of records having scores largely different from modeling scores:"
                 + largeScoreVarianceList.size());
-        assertTrue(largeScoreVarianceList.size() < records.size(),
-                "All Scores have high variance after comparing with modeling scores");
+        assertTrue(largeScoreVarianceList.size() == 0,
+                "There exists score(s) having high variance after comparing with modeling scores");
 
     }
 
