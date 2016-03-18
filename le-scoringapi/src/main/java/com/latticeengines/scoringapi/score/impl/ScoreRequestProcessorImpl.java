@@ -92,7 +92,19 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         }
         logSplitTime("scoreRecord");
 
+        setIdIfAvailable(scoreResponse, parsedRecordAndInterpretedFields.getValue(), transformedRecord);
+
         return scoreResponse;
+    }
+
+    private void setIdIfAvailable(ScoreResponse scoreResponse, InterpretedFields interpretedFields,
+            Map<String, Object> record) {
+        if (!Strings.isNullOrEmpty(interpretedFields.getRecordId())) {
+            Object id = record.get(interpretedFields.getRecordId());
+            if (!objectIsNullOrEmptyString(id)) {
+                scoreResponse.setId(String.valueOf(id));
+            }
+        }
     }
 
     private void logSplitTime(String key) {

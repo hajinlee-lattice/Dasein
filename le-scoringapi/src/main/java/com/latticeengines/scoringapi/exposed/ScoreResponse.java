@@ -17,6 +17,18 @@ public class ScoreResponse {
     @JsonProperty("warnings")
     private List<Warning> warnings = new ArrayList<>();
 
+    @JsonProperty("id")
+    @ApiModelProperty(required = true)
+    private String id = "";
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public double getScore() {
         return score;
     }

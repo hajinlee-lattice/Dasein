@@ -111,12 +111,6 @@ public class MatcherImpl implements Matcher {
                 handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record,
                         nameLocationStr);
             }
-
-            if (!outputRecord.isMatched()) {
-                warnings.addWarning(new Warning(WarningCode.NO_MATCH, new String[] {
-                        JsonUtils.serialize(matchInput.getKeyMap()),
-                        Strings.nullToEmpty(outputRecord.getMatchedDomain()) + nameLocationStr }));
-            }
         }
         if (log.isDebugEnabled()) {
             log.debug(JsonUtils.serialize(record));

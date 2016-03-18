@@ -40,14 +40,14 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void noMatch() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
-        scoreRequest.getRecord().put("Email", "johndoe@latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk.com");
-        scoreRequest.getRecord().put("CompanyName", "latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk");
+        scoreRequest.getRecord().put("Email", "johndoe@abcdwrwr");
+        scoreRequest.getRecord().put("CompanyName", "abcdwrwr");
         List<String> values = new ArrayList<>();
-        values.add("latticenotavaliddomainqp234142woeiritkgjdjsjdkckdfk");
+        values.add("abcdwrwr");
 
         Map<String, List<String>> expectedWarningCodeAndMessageValues = new HashMap<>();
         expectedWarningCodeAndMessageValues.put(WarningCode.NO_MATCH.getExternalCode(), values);
