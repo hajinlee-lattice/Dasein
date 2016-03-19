@@ -2,6 +2,9 @@
 
 adduser ledp
 groupadd ledp
+groupadd tomcat
+groupadd tomcat
+groupadd tomcat
 
 if [ ! -d "/opt/node/latest" ]; then
     mkdir -p /opt/node/latest

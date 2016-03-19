@@ -16,5 +16,7 @@ echo "cleaning up"
 rm -rf /opt/node/latest/conf
 
 echo "finishing"
+chown -R root:tomcat $CATALINA_HOME/webapps
+chown -R root:tomcat $CATALINA_HOME/webapps
 
 
