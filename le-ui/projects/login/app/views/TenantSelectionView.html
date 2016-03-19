@@ -1,28 +1,37 @@
 <style>
+    button.button.icon-button, 
     a.button.icon-button, 
     .button.icon-button {
-        padding: 0.25em .75em;
-        margin: 0.5em auto .5em;
+        padding: 0.4em 0.8em 0.4em;
+        font-size: 16px;
+        line-height: 1em;
+        color: #555555;
+        margin-bottom: 0.2em;
     }
     div.pd-pagination {
         text-align: center;
         font-size: .9em;
     }
     select#tenantSelectionInput {
-        overflow: hidden;
-        border: none;
+        border: 1px solid #ccc;
         height: 24em;
+        margin-top: .5em;
     }
     select#tenantSelectionInput option {
         padding: 0.2em 0.3em;
         cursor: pointer;
     }
     select#tenantSelectionInput option:hover {
-        background: #6fbe4a;
+        background: #26639b;
         color: #fff;
     }
     div#tenantSelectionFormContainer {
-        width: 26em;
+        width: 27em;
+    }
+    input.tenant-selection-search {
+        width: 10em;
+        display: inline;
+        line-height: 1em;
     }
 </style>
 <div id="tenantSelectionFormContainer" class="modal-dialog modal-sm" data-ng-controller="TenantSelectionController">
@@ -39,10 +48,15 @@
                 <label for="tenantSelection3">
                 <input id="tenantSelection3" type="radio" ng-model="version" value="3.0">
                 3</label>&nbsp;
+                <input 
+                        type="text" 
+                        class="form-control tenant-selection-search" 
+                        ng-model="SearchValue"
+                        ng-init="$element.focus()"
+                    />
                 <button 
                         type="button" 
-                        class="button white-button" 
-                        style="width:3em;padding:.25em;position:absolute;top:.7em;right:1em;"
+                        class="button white-button icon-button" 
                         ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
                     >
                     <span class="fa 
@@ -55,21 +69,18 @@
                     </span>
                 </button>
             </div>
-            <div class="row" ng-init="pagesize = 15; current = 1" ng-show="max > 1">
-                <div class="twelve columns">
-                    <pd-pagination-controls current="current" max="max = ((tenantList | filter: { 'UIVersion': version }).length / pagesize)">
-                    </pd-pagination-controls>
-                </div>
-            </div>
-            <select id="tenantSelectionInput" data-ng-model="select_value" data-ng-change="handleTenantSelected()" size="15">
-                <option 
-                    data-ng-repeat="tenant in tenantList | 
-                        filter: { 'UIVersion': version } | 
-                        orderBy: SortDirection + 'DisplayName' |
-                        startFrom: (current - 1) * pagesize |
-                        limitTo: pagesize" 
-                    value="{{tenant.Identifier}}"
+            <select 
+                    id="tenantSelectionInput" 
+                    data-ng-model="select_value" 
+                    data-ng-change="handleTenantSelected()" 
+                    size="15"
                 >
+                <option 
+                        data-ng-repeat="tenant in tenantList | 
+                            filter: { 'UIVersion': version, 'DisplayName': SearchValue } | 
+                            orderBy: SortDirection + 'DisplayName'"
+                        value="{{tenant.Identifier}}"
+                    >
                     {{tenant.UIVersion}} - {{tenant.DisplayName}}
                 </option>
             </select>

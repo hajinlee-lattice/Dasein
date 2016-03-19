@@ -22,16 +22,25 @@ angular.module('mainApp.login.modals.TenantSelectionModal', [
             modalElement.on('hidden.bs.modal', function (evt) {
                 modalElement.empty();
             });
+
+            setTimeout(function() {
+                $('input.tenant-selection-search').focus();
+            },800);
         });
     };
 })
 .controller('TenantSelectionController', function ($scope, ResourceUtility) {
     $scope.ResourceUtility = ResourceUtility;
+    
+
     $scope.handleTenantSelected = function () {
         if (this.select_value != null) {
             var tenant = _.find($scope.tenantList, {'Identifier': this.select_value});
             $scope.successCallback(tenant);
             $("#modalContainer").modal('hide');
         }
+    };
+    $scope.handleTenantScroll = function($event, $delta, $deltaX, $deltaY) {
+        console.log($event, $delta, $deltaX, $deltaY);
     };
 });
