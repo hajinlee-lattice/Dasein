@@ -20,7 +20,7 @@
         <module>le-scoringapi/pom-scoringapi-tc-rpm.xml</module>
         <module>le-playmaker/pom-playmaker-tc-rpm.xml</module>
         <module>le-pls/pom-pls-tc-rpm.xml</module>
-        <module>le-ui/pom-ui-rpm.xml</module>
+        <module>le-ui/pom-ui-tc-rpm.xml</module>
         <module>le-admin/pom-admin-tc-rpm.xml</module>
         <module>le-microservice/pom-microservice-tc-rpm.xml</module>
     </modules>
