@@ -54,11 +54,11 @@ def updateContents(environment, filename, conents, dictionary, file):
         if (not line.startswith( '#' )) and (not line.isspace() ):
             pair = line.split('=', 1)
             if ('${INSIDE_TOMCAT}' in pair[1]):
-                line = pair[0] + '=' + dictionary[pair[0]] \
-                    .replace('${INSIDE_TOMCAT}', dictionary['.%s.inside.tomcat' % environment])
+                line = pair[0] + '=' + pair[1] \
+                    .replace('${INSIDE_TOMCAT}', dictionary['%s.inside.tomcat' % environment])
             if ('${OUTSIDE_TOMCAT}' in pair[1]):
-                line = pair[0] + '=' + dictionary[pair[0]] \
-                    .replace('${OUTSIDE_TOMCAT}', dictionary['.%s.outside.tomcat' % environment])
+                line = pair[0] + '=' + pair[1] \
+                    .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print environment + ' : ' + filename + " : " + line.replace('\n', '')
         file.write(line)
 
