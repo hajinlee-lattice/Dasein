@@ -5,17 +5,18 @@ echo $ENV_TYPE
 echo $CATALINA_HOME
 cd /tmp/webapps/oauth2
 
-JAVAFILE=`ls le-oauth2-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
+JARFILE=`ls le-oauth2-*.war`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
 fi
+echo $VERSION
 
 echo "copying files from temporary folders"
-cp le-oauth2-*.war $CATALINA_HOME/webapps/oauth2/oauth2\#\#$VERSION.war
-cp ROOT.war $CATALINA_HOME/webapps/oauth2/ROOT.war
+cp le-oauth2-*.war $CATALINA_HOME/webapps/oauth/ROOT.war
 cp /etc/ledp/oauth2/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
@@ -25,4 +26,4 @@ rm -rf /home/yarn/logs/*
 rm -rf /tmp/webapps/oauth2
 
 echo "finishing"
-ls $CATALINA_HOME/webapps/oauth2/*.war
+ls $CATALINA_HOME/webapps/oauth/*.war

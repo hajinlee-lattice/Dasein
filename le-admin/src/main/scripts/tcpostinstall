@@ -3,18 +3,20 @@ source /etc/profile
 echo "getting environment information"
 echo $ENV_TYPE
 echo $CATALINA_HOME
+cd /tmp/webapps/admin
+
+JARFILE=`ls le-admin-*.war`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
+fi
+echo $VERSION
 
 echo "copying files"
-cd /tmp/webapps/admin
-JAVAFILE=`ls le-admin-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT="SNAPSHOT"
-then
-    VERSION=$VERSION-"SNAPSHOT"
-fi
-
-cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps/admin/admin\#\#$VERSION.war
+cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps/admin/ROOT.war
 cp /etc/ledp/admin/$ENV_TYPE/*.properties /etc/ledp/
 cp /etc/ledp/admin/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
 cp /etc/ledp/admin/$ENV_TYPE/404.html /etc/ledp/

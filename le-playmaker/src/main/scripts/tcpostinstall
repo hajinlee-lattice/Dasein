@@ -12,10 +12,10 @@ if test $SNAPSHOT='SNAPSHOT'
 then
     VERSION=$VERSION-$SHAPSHOT
 fi
+echo $VERSION
 
 echo "copying files from temporary folders"
-cp le-playmaker-*.war $CATALINA_HOME/webapps/playmaker/playmaker\#\#$VERSION.war
-cp ROOT.war $CATALINA_HOME/webapps/playmaker/ROOT.war
+cp le-playmaker-*.war $CATALINA_HOME/webapps/playmaker/ROOT.war
 cp /etc/ledp/playmaker/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"

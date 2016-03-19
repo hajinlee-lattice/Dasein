@@ -5,16 +5,18 @@ echo $ENV_TYPE
 echo $CATALINA_HOME
 cd /tmp/webapps/pls
 
-JAVAFILE=`ls le-pls-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
+JARFILE=`ls le-pls-*.war`
+VERSION=`echo $JARFILE | cut -d \- -f 3`
+SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
+
+if test $SNAPSHOT = "SNAPSHOT"
+    then
+        VERSION=$VERSION-"SNAPSHOT"
 fi
+echo $VERSION
 
 echo "copying files from temporary folders"
-cp le-pls-*.war $CATALINA_HOME/webapps/pls/pls\#\#$VERSION.war
+cp le-pls-*.war $CATALINA_HOME/webapps/pls/ROOT.war
 cp /etc/ledp/pls/$ENV_TYPE/*.properties /etc/ledp/
 cp /etc/ledp/pls/$ENV_TYPE/laca-ldap.dev.lattice.local.jks /etc/ledp/
 
@@ -25,4 +27,4 @@ rm -rf /home/yarn/logs/*
 rm -rf /tmp/webapps/pls
 
 echo "finishing"
-ls $CATALINA_HOME/webapp_pls/*.war
+ls $CATALINA_HOME/webapp/pls/*.war
