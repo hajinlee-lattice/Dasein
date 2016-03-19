@@ -49,7 +49,7 @@
 		</table>
 
 		<div class="row">
-			<div class="six columns offset-two" ng-show="vm.errors">
+			<div class="six columns offset-two" ng-if="vm.errors">
 				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
 			</div>
 			<div class="six columns" ng-hide="vm.errors">

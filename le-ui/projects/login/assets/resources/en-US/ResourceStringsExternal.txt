@@ -23,5 +23,5 @@ RESET_PASSWORD_USERNAME_INVALID=The username you entered is not in our system. P
 RETURN_TO_LOGIN=Return to Login
 FORGOT_PASSWORD_EMAIL_SENT_TITLE=We have sent you an email.
 FORGOT_PASSWORD_EMAIL_SENT_BODY=It should appear in your inbox momentarily.
-TENANT_SELECTION_FORM_TITLE=Choose the PLS Tenant
+TENANT_SELECTION_FORM_TITLE=Choose Your Tenant
 NO_TENANT_MESSAGE=This user is not associated with any tenants.

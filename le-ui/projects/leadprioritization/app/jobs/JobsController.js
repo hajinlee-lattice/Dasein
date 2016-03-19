@@ -56,7 +56,8 @@ angular.module('pd.jobs', [
         
         $http({
             method: 'GET',
-            url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors'
+            url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors',
+            headers: { 'Accept': 'text/plain' }
         }).then(
             function onSuccess(response) {
                 var result = response.data;

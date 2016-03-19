@@ -43,6 +43,8 @@ Tabs
   border-right: 1px solid #ccc; 
   border-bottom: 1px solid white;
   z-index: 2;
+  outline: none;
+  border: none;
 }
 [type=radio]:checked ~ label ~ .content {
   z-index: 1;
