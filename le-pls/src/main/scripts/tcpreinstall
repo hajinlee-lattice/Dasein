@@ -14,6 +14,7 @@ rm -rf /etc/ledp/pls
 rm -rf /home/yarn/pls
 adduser yarn
 groupadd yarn
+groupadd tomcat
 mkdir -p /var/log/ledp
 mkdir -p /home/yarn/logs
 chmod -R 755 /var/log/ledp

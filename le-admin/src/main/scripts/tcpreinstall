@@ -11,6 +11,7 @@ rm -rf /etc/httpd/conf.d/admin
 rm -rf /home/yarn/admin
 adduser yarn
 groupadd yarn
+groupadd tomcat
 mkdir -p /var/log/ledp
 mkdir -p /home/yarn/logs
 chmod -R 755 /var/log/ledp

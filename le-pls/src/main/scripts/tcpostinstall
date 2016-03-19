@@ -27,4 +27,5 @@ rm -rf /home/yarn/logs/*
 rm -rf /tmp/webapps/pls
 
 echo "finishing"
-ls $CATALINA_HOME/webapp/pls/*.war
+chown -R root:tomcat $CATALINA_HOME/webapps
+ls $CATALINA_HOME/webapps/pls/*.war

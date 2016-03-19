@@ -7,6 +7,7 @@ rm -rf /tmp/webapps/oauth2/ROOT.war
 rm -rf /etc/ledp/oauth2.properties
 adduser yarn
 groupadd yarn
+groupadd tomcat
 mkdir -p /var/log/ledp
 mkdir -p /home/yarn/logs
 chmod -R 755 /var/log/ledp

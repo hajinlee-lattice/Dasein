@@ -26,4 +26,5 @@ rm -rf /home/yarn/logs/*
 rm -rf /tmp/webapps/oauth2
 
 echo "finishing"
+chown -R root:tomcat $CATALINA_HOME/webapps
 ls $CATALINA_HOME/webapps/oauth/*.war

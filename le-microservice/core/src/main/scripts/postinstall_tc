@@ -29,3 +29,4 @@ for f in $(find . -name "*.war"); do
 done
 
 ls $CATALINA_HOME/webapps/ms/*.war
+chown -R root:tomcat $CATALINA_HOME/webapps

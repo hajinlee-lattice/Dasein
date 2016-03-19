@@ -23,4 +23,5 @@ rm -rf /home/yarn/api
 rm -rf /tmp/webapps/api
 
 echo "finishing"
+chown -R root:tomcat $CATALINA_HOME/webapps
 ls $CATALINA_HOME/webapps/api/*.war

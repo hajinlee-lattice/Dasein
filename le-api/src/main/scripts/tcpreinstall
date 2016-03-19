@@ -9,6 +9,7 @@ rm -rf /etc/ledp/db.properties
 rm -rf /home/yarn/api
 adduser yarn
 groupadd yarn
+groupadd tomcat
 groupadd hadoop
 mkdir -p /var/log/ledp
 mkdir -p /home/yarn/logs
