@@ -25,6 +25,8 @@ class Finalize(State):
         self.writeReadoutSample(self.getMediator())
         self.writeEnhancedFiles(self.getMediator())
         self.writeMessages(self.getMediator())
+        self.writeExportData(self.getMediator())
+        
         
     def writeMessages(self, mediator):
         if len(mediator.messages) > 0:
@@ -68,6 +70,11 @@ class Finalize(State):
     def writeReadoutSample(self, mediator):
         csvFilePath = mediator.modelLocalDir + mediator.name + "_readoutsample.csv"
         self.mediator.readoutsample.to_csv(csvFilePath, index = False)
+    
+    def writeExportData(self, mediator):
+        exportFilePath = mediator.modelLocalDir + mediator.name + "_dataexport.csv"
+        if os.path.isfile("./exportdfstep.csv"):
+            os.rename("./exportdfstep.csv", exportFilePath)
 
     def writeEnhancedFiles(self, mediator):
         base = self.mediator.modelEnhancementsLocalDir

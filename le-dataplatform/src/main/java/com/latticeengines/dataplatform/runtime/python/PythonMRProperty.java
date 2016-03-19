@@ -6,4 +6,5 @@ public enum PythonMRProperty {
     SHDP_HD_FSWEB, //
     PYTHONIOENCODING, //
     PYTHONPATH, //
+    DEBUG
 }

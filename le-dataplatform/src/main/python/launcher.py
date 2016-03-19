@@ -26,7 +26,7 @@ class Launcher(object):
         self.test = {}
  
     def stripPath(self, fileName):
-        return fileName[fileName.rfind('/') + 1:len(fileName)]
+        return fileName[fileName.rfind("/") + 1:len(fileName)]
  
     def __validateEnvVariable(self, variable):
         try:
@@ -41,8 +41,9 @@ class Launcher(object):
             raise Exception("%s not set in job metadata." % (param))
  
     def __validateEnv(self):
-        self.__validateEnvVariable('SHDP_HD_FSWEB')
-        self.__validateEnvVariable('CONTAINER_ID')
+        self.__validateEnvVariable("SHDP_HD_FSWEB")
+        self.__validateEnvVariable("CONTAINER_ID")
+        self.__validateEnvVariable("DEBUG")
          
     def __validateParameters(self, schema):
         self.__validateSchemaParam(schema, "training_data")

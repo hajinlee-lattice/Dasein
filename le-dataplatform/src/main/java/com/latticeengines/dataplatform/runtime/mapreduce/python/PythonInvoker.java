@@ -50,5 +50,6 @@ public class PythonInvoker {
         env.put(PythonMRProperty.PYTHONPATH.name(), config.get(PythonMRProperty.PYTHONPATH.name()));
         env.put(PythonMRProperty.SHDP_HD_FSWEB.name(), config.get(PythonMRProperty.SHDP_HD_FSWEB.name()));
         env.put(PythonMRProperty.PYTHONIOENCODING.name(), config.get(PythonMRProperty.PYTHONIOENCODING.name()));
+        env.put(PythonMRProperty.DEBUG.name(), config.get(PythonMRProperty.DEBUG.name()));
     }
 }

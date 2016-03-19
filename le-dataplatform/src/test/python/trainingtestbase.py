@@ -25,6 +25,7 @@ class TrainingTestBase(TestBase):
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "container_1425511391553_3644_01_000001"
         os.environ["SHDP_HD_FSWEB"] = "http://localhost:50070"
+        os.environ["DEBUG"] = "true"
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
         self.fwkdir = "./leframework.tar.gz"

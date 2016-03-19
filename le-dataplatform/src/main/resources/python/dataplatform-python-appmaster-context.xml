@@ -39,6 +39,7 @@
         SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
         PYTHONIOENCODING=UTF-8
         PYTHONPATH=.:leframework.tar.gz:$$PYTHONPIPELINELIB$$
+        DEBUG=${dataplatform.debug:false}
     </yarn:environment>
 
     <yarn:master appmaster-class="com.latticeengines.dataplatform.exposed.runtime.am.CommandLineAppMaster">

@@ -47,6 +47,9 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.fs.web.defaultFS}")
     private String webFS;
 
+    @Value("${dataplatform.debug:false}")
+    private String debug;
+
     @Autowired
     private VersionManager versionManager;
 
@@ -98,8 +101,8 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         for (File avroFile : avroFiles) {
             copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), sampleDir, false));
         }
+        
         return copyEntries;
-
     }
 
     @Test(groups = { "functional" }, enabled = true)
@@ -107,10 +110,10 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         classifier = PythonMRTestUtils.readClassifier(localDir, "metadata-profile.json");
         setVersion(classifier, versionManager.getCurrentVersion());
         int linesPerMap = createProfilingInputConfig(classifier.getFeatures(), profileDir);
-        Properties property = setupProperty(linesPerMap, profileDir, metadataDir,
+        Properties properties = setupProperties(linesPerMap, profileDir, metadataDir,
                 PythonMRJobType.PROFILING_JOB.jobType());
 
-        ApplicationId appId = modelingJobService.submitMRJob(PythonMRJob.PYTHON_MR_JOB, property);
+        ApplicationId appId = modelingJobService.submitMRJob(PythonMRJob.PYTHON_MR_JOB, properties);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         assertTrue(HdfsUtils.fileExists(yarnConfiguration, metadataDir + "/" + FileAggregator.PROFILE_AVRO));
@@ -129,17 +132,16 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         setVersion(classifier, versionManager.getCurrentVersion());
         String modelInputDir = modelDir + "/modelName";
         int linesPerMap = createModelingInputConfig(sampleDir, modelInputDir);
-        Properties property = setupProperty(linesPerMap, modelInputDir, modelDir,
+        Properties property = setupProperties(linesPerMap, modelInputDir, modelDir,
                 PythonMRJobType.MODELING_JOB.jobType());
 
         ApplicationId appId = modelingJobService.submitMRJob(PythonMRJob.PYTHON_MR_JOB, property);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-
     }
 
-    private Properties setupProperty(int linesPerMap, String hdfsInDir, String hdfsOutDir, String jobType) {
-        Properties property = new Properties();
+    private Properties setupProperties(int linesPerMap, String hdfsInDir, String hdfsOutDir, String jobType) {
+        Properties properties = new Properties();
 
         String cacheFilePath = null;
         if (jobType == PythonMRJobType.PROFILING_JOB.jobType()) {
@@ -155,29 +157,31 @@ public class PythonMRJobTestNG extends DataPlatformFunctionalTestNGBase {
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersion());
         String[] tokens = classifier.getPythonPipelineLibHdfsPath().split("/");
 
-        property.put(MapReduceProperty.INPUT.name(), hdfsInDir);
-        property.put(PythonMRProperty.LINES_PER_MAP.name(), String.valueOf(linesPerMap));
+        properties.put(MapReduceProperty.INPUT.name(), hdfsInDir);
+        properties.put(PythonMRProperty.LINES_PER_MAP.name(), String.valueOf(linesPerMap));
 
-        property.put(MapReduceProperty.OUTPUT.name(), hdfsOutDir);
-        property.put(MapReduceProperty.CUSTOMER.name(), customer);
+        properties.put(MapReduceProperty.OUTPUT.name(), hdfsOutDir);
+        properties.put(MapReduceProperty.CUSTOMER.name(), customer);
         String assignedQueue = LedpQueueAssigner.getModelingQueueNameForSubmission();
-        property.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
-        property.put(MapReduceProperty.JOB_TYPE.name(), jobType);
-        property.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
-        property.put(MapReduceProperty.CACHE_ARCHIVE_PATH.name(), cacheArchivePath);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
+        properties.put(MapReduceProperty.JOB_TYPE.name(), jobType);
+        properties.put(MapReduceProperty.CACHE_FILE_PATH.name(), cacheFilePath);
+        properties.put(MapReduceProperty.CACHE_ARCHIVE_PATH.name(), cacheArchivePath);
 
-        property.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + tokens[tokens.length - 1]);
-        property.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
-        property.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
-        property.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
+        properties.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + tokens[tokens.length - 1]);
+        properties.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
+        properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
+        properties.put(PythonMRProperty.DEBUG.name(), debug);
+        properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
 
-        return property;
+        return properties;
     }
 
     private int createProfilingInputConfig(List<String> features, String hdfsDir) {
         int size = features.size();
-        if (size < NUM_MAPPER)
+        if (size < NUM_MAPPER) {
             throw new RuntimeException("Feature size less than the number of mapper");
+        }
 
         int linesPerMap = size / NUM_MAPPER;
         String profileConfig = PythonMRJobType.PROFILING_JOB.configName();

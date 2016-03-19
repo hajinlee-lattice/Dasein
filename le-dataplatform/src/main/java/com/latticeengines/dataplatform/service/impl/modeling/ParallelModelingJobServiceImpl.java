@@ -37,8 +37,12 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
     @Value("${dataplatform.container.parallel.map.memory}")
     private String mapMemorySize;
+    
     @Value("${dataplatform.container.parallel.reduce.memory}")
     private String reduceMemorySize;
+    
+    @Value("${dataplatform.debug:false}")
+    private String debug;
 
     @Autowired
     private VersionManager versionManager;
@@ -82,6 +86,7 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
         properties.put(PythonMRProperty.PYTHONPATH.name(), ".:leframework.tar.gz:" + pipelineLibFile);
         properties.put(PythonMRProperty.PYTHONIOENCODING.name(), "UTF-8");
         properties.put(PythonMRProperty.SHDP_HD_FSWEB.name(), webFS);
+        properties.put(PythonMRProperty.DEBUG.name(), debug);
         properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), classifier.toString());
 
         return super.submitMRJob(PythonMRJob.PYTHON_MR_JOB, properties);
