@@ -40,7 +40,6 @@
                             <sources>
                                 <source>
                                     <location>target/le-oauth2-${le.rpm.version}.war</location>
-                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>

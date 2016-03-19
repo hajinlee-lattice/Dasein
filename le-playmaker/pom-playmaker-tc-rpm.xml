@@ -75,7 +75,6 @@
                             <sources>
                                 <source>
                                     <location>target/le-playmaker-${le.rpm.version}.war</location>
-                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>
