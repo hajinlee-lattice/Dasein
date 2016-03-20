@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.warnings.impl;
+package com.latticeengines.scoringapi.exposed.warnings.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.latticeengines.scoringapi.warnings.Warning;
-import com.latticeengines.scoringapi.warnings.Warnings;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 
 @Component("warnings")
 public class WarningsImpl implements Warnings {

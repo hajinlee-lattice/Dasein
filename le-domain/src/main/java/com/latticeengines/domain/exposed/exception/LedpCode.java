@@ -367,6 +367,13 @@ public enum LedpCode {
     LEDP_31012("PMML model has multiple ({0}) results and no target was specified"), //
     LEDP_31013("PMML model evaluation returned no results"), //
     LEDP_31014("Problem scoring the record {0}"), //
+    LEDP_31015("Failed to get data export csv hdfs path from HDFS {0}"), //
+    LEDP_31016("Data export csv does not exist {0}"), //
+    LEDP_31017("Too many Data export csv files exist at {0}"), //
+    LEDP_31018("Failed to get scored txt hdfs path from HDFS {0}"), //
+    LEDP_31019("Scored txt does not exist {0}"), //
+    LEDP_31020("Too many scored txt files exist at {0}"), //
+    LEDP_31021("Could not find ID field name from datacomposition schema {0}"), //
 
     // le-scoringapi external-facing errors
     LEDP_31101("missing_model_id", "modelId is required"), //

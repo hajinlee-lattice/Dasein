@@ -16,9 +16,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
+import com.latticeengines.scoringapi.exposed.warnings.WarningCode;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
-import com.latticeengines.scoringapi.warnings.Warning;
-import com.latticeengines.scoringapi.warnings.WarningCode;
 
 public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBase {
 

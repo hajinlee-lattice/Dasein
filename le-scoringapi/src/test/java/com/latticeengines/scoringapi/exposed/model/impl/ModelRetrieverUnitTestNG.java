@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.model.impl;
+package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 
 public class ModelRetrieverUnitTestNG {
 

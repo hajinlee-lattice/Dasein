@@ -27,10 +27,10 @@ import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
+import com.latticeengines.scoringapi.exposed.warnings.WarningCode;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 import com.latticeengines.scoringapi.match.Matcher;
-import com.latticeengines.scoringapi.warnings.Warning;
-import com.latticeengines.scoringapi.warnings.WarningCode;
-import com.latticeengines.scoringapi.warnings.Warnings;
 
 @Component("matcher)")
 public class MatcherImpl implements Matcher {

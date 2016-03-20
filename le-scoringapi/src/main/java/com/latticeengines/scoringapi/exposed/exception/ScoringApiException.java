@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exception;
+package com.latticeengines.scoringapi.exposed.exception;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

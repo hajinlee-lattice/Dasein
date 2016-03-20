@@ -30,9 +30,9 @@ import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
-import com.latticeengines.scoringapi.model.ModelRetriever;
+import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
-import com.latticeengines.scoringapi.warnings.Warnings;
 
 @Api(value = "score", description = "REST resource for interacting with score API")
 @RestController

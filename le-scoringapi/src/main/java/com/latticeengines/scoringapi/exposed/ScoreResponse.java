@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.scoringapi.warnings.Warning;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
 
 public class ScoreResponse {
 

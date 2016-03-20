@@ -32,9 +32,9 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.scoringapi.exposed.ScoreType;
+import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 import com.latticeengines.scoringapi.functionalframework.RecordTransformerTestMetadata;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
-import com.latticeengines.scoringapi.model.ModelEvaluator;
 
 /**
  * This test provides the ability to run all the tenants. This entire test is

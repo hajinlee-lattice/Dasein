@@ -4,7 +4,7 @@ import java.io.File;
 
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.scoringapi.model.ModelEvaluator;
+import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 public class ScoringArtifacts {
 

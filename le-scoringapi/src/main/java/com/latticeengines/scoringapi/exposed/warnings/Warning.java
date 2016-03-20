@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.warnings;
+package com.latticeengines.scoringapi.exposed.warnings;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

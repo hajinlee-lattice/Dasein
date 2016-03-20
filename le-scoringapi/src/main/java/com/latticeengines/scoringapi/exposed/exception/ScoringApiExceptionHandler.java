@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exception;
+package com.latticeengines.scoringapi.exposed.exception;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.model.impl;
+package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,20 +36,22 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
-import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
+import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ModelType;
+import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
-import com.latticeengines.scoringapi.model.ModelEvaluator;
-import com.latticeengines.scoringapi.model.ModelRetriever;
-import com.latticeengines.scoringapi.warnings.Warnings;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
+import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
+import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 
 @Component("modelRetriever")
 public class ModelRetrieverImpl implements ModelRetriever {
@@ -63,6 +65,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String SCORE_DERIVATION_FILENAME = "scorederivation.json";
     public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
     public static final String MODEL_JSON = "model.json";
+    public static final String DATA_EXPORT_CSV = "_dataexport.csv";
+    public static final String SCORED_TXT = "_scored.txt";
+
     private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
                                                                                             // modelId
     private static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
@@ -133,8 +138,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
-    @Override
-    public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
+    private AbstractMap.SimpleEntry<String, String> determineScoreArtifactBaseAndEventTableDirs(
+            CustomerSpace customerSpace, String modelId) {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
@@ -151,6 +156,16 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactTableDir = String.format(HDFS_SCORE_ARTIFACT_TABLE_DIR, customerSpace.toString(),
                 modelSummary.getEventTableName());
 
+        return new AbstractMap.SimpleEntry<String, String>(hdfsScoreArtifactBaseDir, hdfsScoreArtifactTableDir);
+    }
+
+    @Override
+    public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
+        AbstractMap.SimpleEntry<String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseAndEventTableDirs(
+                customerSpace, modelId);
+        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getKey();
+        String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getValue();
+
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
         DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
         removeDroppedDataScienceFieldEventTableTransforms(eventTableDataComposition, dataScienceDataComposition);
@@ -158,7 +173,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
 
-        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary.getId(), dataScienceDataComposition,
+        ScoringArtifacts artifacts = new ScoringArtifacts(modelId, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
 
         return artifacts;
@@ -263,6 +278,76 @@ public class ModelRetrieverImpl implements ModelRetriever {
         }
         DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);
         return dataComposition;
+    }
+
+    private String getScoredTxt(String hdfsScoreArtifactBaseDir) {
+        String content = null;
+
+        List<String> scoredTxtHdfsPath = null;
+        try {
+            scoredTxtHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
+                    new HdfsFilenameFilter() {
+                        @Override
+                        public boolean accept(String filename) {
+                            if (filename.endsWith(SCORED_TXT)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_31018, new String[] { hdfsScoreArtifactBaseDir });
+        }
+
+        if (scoredTxtHdfsPath.size() == 1) {
+            try {
+                content = HdfsUtils.getHdfsFileContents(yarnConfiguration, scoredTxtHdfsPath.get(0));
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_31000, new String[] { scoredTxtHdfsPath.get(0) });
+            }
+        } else if (scoredTxtHdfsPath.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_31019, new String[] { hdfsScoreArtifactBaseDir });
+        } else {
+            throw new LedpException(LedpCode.LEDP_31020, new String[] { hdfsScoreArtifactBaseDir });
+        }
+
+        return content;
+    }
+
+    private String getModelRecordExportCsv(String hdfsScoreArtifactBaseDir) {
+        String content = null;
+
+        List<String> dataExportHdfsPath = null;
+        try {
+            dataExportHdfsPath = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsScoreArtifactBaseDir,
+                    new HdfsFilenameFilter() {
+                        @Override
+                        public boolean accept(String filename) {
+                            if (filename.endsWith(DATA_EXPORT_CSV)) {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_31015, new String[] { hdfsScoreArtifactBaseDir });
+        }
+
+        if (dataExportHdfsPath.size() == 1) {
+            try {
+                content = HdfsUtils.getHdfsFileContents(yarnConfiguration, dataExportHdfsPath.get(0));
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_31000, new String[] { dataExportHdfsPath.get(0) });
+            }
+        } else if (dataExportHdfsPath.size() == 0) {
+            throw new LedpException(LedpCode.LEDP_31016, new String[] { hdfsScoreArtifactBaseDir });
+        } else {
+            throw new LedpException(LedpCode.LEDP_31017, new String[] { hdfsScoreArtifactBaseDir });
+        }
+
+        return content;
     }
 
     private ScoreDerivation getScoreDerivation(String hdfsScoreArtifactBaseDir) {
@@ -372,4 +457,40 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public void setLocalPathToPersist(String localPathToPersist) {
         this.localPathToPersist = localPathToPersist;
     }
+
+    private String determineIdFieldName(DataComposition dataScienceDataComposition) {
+        // find ID field
+        String idFieldName = "";
+        for (String fieldName : dataScienceDataComposition.fields.keySet()) {
+            FieldSchema fieldSchema = dataScienceDataComposition.fields.get(fieldName);
+            if (fieldSchema.interpretation == FieldInterpretation.ID) {
+                idFieldName = fieldName;
+                break;
+            }
+        }
+        if (idFieldName == null) {
+            throw new LedpException(LedpCode.LEDP_31021, new String[] { JsonUtils.serialize(dataScienceDataComposition.fields) });
+        }
+        return idFieldName;
+    }
+
+    @Override
+    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(
+            CustomerSpace customerSpace, String modelId) {
+        AbstractMap.SimpleEntry<String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseAndEventTableDirs(
+                customerSpace, modelId);
+        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getKey();
+
+        DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
+        String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);
+        String scoredTxt = getScoredTxt(hdfsScoreArtifactBaseDir);
+
+        ScoreCorrectnessArtifacts artifacts = new ScoreCorrectnessArtifacts();
+        artifacts.setDataScienceDataComposition(dataScienceDataComposition);
+        artifacts.setExpectedRecords(expectedRecords);
+        artifacts.setScoredTxt(scoredTxt);
+        artifacts.setIdField(determineIdFieldName(dataScienceDataComposition));
+        return artifacts;
+    }
+
 }

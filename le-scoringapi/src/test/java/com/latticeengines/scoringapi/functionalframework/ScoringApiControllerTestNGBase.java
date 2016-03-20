@@ -26,9 +26,9 @@ import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
-import com.latticeengines.scoringapi.controller.InternalResourceRestApiProxy;
+import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
-import com.latticeengines.scoringapi.model.impl.ModelRetrieverImpl;
+import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
 public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBase {

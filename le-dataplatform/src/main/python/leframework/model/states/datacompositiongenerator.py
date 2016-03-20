@@ -44,8 +44,10 @@ class DataCompositionGenerator(State):
             # TODO Decide if we need to handle TEMPORAL types or not.
             if dataType == "boolean":
                 details["type"] = "BOOLEAN"
-            elif dataType == "int" or dataType == "long":
+            elif dataType == "int":
                 details["type"] = "INTEGER"
+            elif dataType == "long":
+                details["type"] = "LONG"
             elif dataType == "float" or dataType == "double":
                 details["type"] = "FLOAT"
             else:

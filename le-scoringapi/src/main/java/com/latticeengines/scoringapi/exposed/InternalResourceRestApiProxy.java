@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.controller;
+package com.latticeengines.scoringapi.exposed;
 
 import java.util.List;
 

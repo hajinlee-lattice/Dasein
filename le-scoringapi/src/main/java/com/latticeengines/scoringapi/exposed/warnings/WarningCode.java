@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.warnings;
+package com.latticeengines.scoringapi.exposed.warnings;
 
 public enum WarningCode {
 

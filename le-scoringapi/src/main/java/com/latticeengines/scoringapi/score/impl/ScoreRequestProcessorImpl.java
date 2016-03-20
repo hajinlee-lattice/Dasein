@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.scoringapi.controller.ScoreResource;
-import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
@@ -32,13 +31,14 @@ import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreType;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
+import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
+import com.latticeengines.scoringapi.exposed.warnings.WarningCode;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 import com.latticeengines.scoringapi.match.Matcher;
-import com.latticeengines.scoringapi.model.ModelRetriever;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
-import com.latticeengines.scoringapi.warnings.Warning;
-import com.latticeengines.scoringapi.warnings.WarningCode;
-import com.latticeengines.scoringapi.warnings.Warnings;
 
 @Component("scoreRequestProcessor")
 public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
@@ -222,6 +222,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbability());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
+        debugScoreResponse.setTransformedRecord(transformedRecord);
 
         return debugScoreResponse;
     }

@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.model;
+package com.latticeengines.scoringapi.exposed.model;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -28,8 +28,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.BucketRange;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
-import com.latticeengines.scoringapi.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.ScoreType;
+import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 
 public class ModelEvaluator {
 

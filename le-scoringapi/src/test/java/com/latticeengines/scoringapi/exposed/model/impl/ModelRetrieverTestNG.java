@@ -1,15 +1,16 @@
-package com.latticeengines.scoringapi.model.impl;
+package com.latticeengines.scoringapi.exposed.model.impl;
 
 import java.io.File;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
-import com.latticeengines.scoringapi.model.ModelRetriever;
 
 public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
 
@@ -18,15 +19,18 @@ public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
     @Autowired
     private ModelRetriever modelRetriever;
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     /**
      * Use this as a tool to download a model into test resources for running scoring tests against.
      * @throws Exception
      */
     @Test(groups = "functional", enabled = false)
     public void downloadModelToLocal() throws Exception {
-        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/4MulesoftOneLeadPerDomain_20160316/";
+        String localPathToPersist = "/users/bnguyen/dev/ledp/le-scoringapi/src/test/resources/com/latticeengines/scoringapi/model/5MulesoftOneLeadPerDomain_20160316/";
         File file = new File(localPathToPersist);
-        boolean result = file.mkdirs();
+        file.mkdirs();
         String tenantId = "DevelopTestPLSTenant1.DevelopTestPLSTenant1.Production";
         String modelId = "ms__fb8f3557-5af6-4e7d-ab66-4b24189d0779-4Mulesof";
 
@@ -37,4 +41,5 @@ public class ModelRetrieverTestNG extends ScoringApiFunctionalTestNGBase {
 
         log.info("Done");
     }
+
 }

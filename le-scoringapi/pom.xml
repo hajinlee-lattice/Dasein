@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-scoringapi</artifactId>
     <packaging>war</packaging>
-    <name>${component-name}</name>
+    <name>le-${component-name}</name>
     <description>LE Scoring API</description>
 
     <parent>
@@ -33,13 +33,52 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.1.1</version>
-                <configuration>
-                    <attachClasses>true</attachClasses>
-                    <classesClassifier>classes</classesClassifier>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <packaging>jar</packaging>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <groupId>${project.parent.groupId}</groupId>
+                            <version>${project.parent.version}</version>
+                            <file>
+                                ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
+                            </file>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <packaging>jar</packaging>
+                            <generatePom>true</generatePom>
+                            <url>${project.distributionManagement.repository.url}</url>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <groupId>${project.parent.groupId}</groupId>
+                            <version>${project.parent.version}</version>
+                            <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -262,8 +301,8 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-testframework</artifactId>
             <version>${le.testframework.version}</version>
-            <scope>test</scope>
             <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

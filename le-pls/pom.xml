@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-pls</artifactId>
@@ -18,6 +18,7 @@
         <le.baton.version>2.0.22-SNAPSHOT</le.baton.version>
         <le.monitor.version>2.0.22-SNAPSHOT</le.monitor.version>
         <le.liaison.version>2.0.22-SNAPSHOT</le.liaison.version>
+        <le.scoringapi.version>2.0.22-SNAPSHOT</le.scoringapi.version>
         <le.swlib.version>2.0.22-SNAPSHOT</le.swlib.version>
         <le.testfwk.version>2.0.22-SNAPSHOT</le.testfwk.version>
         <le.workflow.version>2.0.22-SNAPSHOT</le.workflow.version>
@@ -175,13 +176,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>make-a-jar</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -387,7 +381,21 @@
             <version>${le.swlib.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scoringapi</artifactId>
+            <version>${le.scoringapi.version}</version>
+            <classifier>intf</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.joestelmach</groupId>
+            <artifactId>natty</artifactId>
+            <version>0.11</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- use this instead of <artifactId>persistence-api</artifactId>
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>

@@ -1,4 +1,4 @@
-package com.latticeengines.scoringapi.exception;
+package com.latticeengines.scoringapi.exposed.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
