@@ -24,5 +24,6 @@ rm -rf /home/yarn/logs/*
 rm -rf /tmp/webapps/scoringapi
 
 echo "finishing"
-chown -R root:tomcat $CATALINA_HOME/webapps
+chown -R tomcat:tomcat $CATALINA_HOME/webapps/scoringapi
+chmod -R 775 $CATALINA_HOME/webapps/scoringapi
 ls $CATALINA_HOME/webapps/scoringapi/*.war

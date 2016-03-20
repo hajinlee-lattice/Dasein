@@ -28,5 +28,6 @@ rm -rf /home/yarn/admin
 rm -rf /home/yarn/logs/*
 
 echo "finishing"
-chown -R root:tomcat $CATALINA_HOME/webapps
+chown -R tomcat:tomcat $CATALINA_HOME/webapps/admin
+chmod -R 775 $CATALINA_HOME/webapps/admin
 ls $CATALINA_HOME/webapps/admin/*.war

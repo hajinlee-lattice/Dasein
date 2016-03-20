@@ -28,5 +28,7 @@ for f in $(find . -name "*.war"); do
     cp $f $CATALINA_HOME/webapps/ms/$fn.war;
 done
 
+echo "finishing"
+chown -R tomcat:tomcat $CATALINA_HOME/webapps/ms
+chmod -R 775 $CATALINA_HOME/webapps/ms
 ls $CATALINA_HOME/webapps/ms/*.war
-chown -R root:tomcat $CATALINA_HOME/webapps
