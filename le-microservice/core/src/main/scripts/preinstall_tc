@@ -2,5 +2,5 @@
 mkdir -p /tmp/webapps/ms
 rm -rf /tmp/webapps/ms/*
 
-useradd tomcat
-groupadd tomcat
+id -u tomcat &>/dev/null || useradd tomcat
+getent group tomcat || groupadd tomcat

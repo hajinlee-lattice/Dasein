@@ -3,5 +3,5 @@ source /etc/profile
 rm -rf $CATALINA_HOME/webapps/api/*.war
 rm -rf /tmp/webapps/api
 
-useradd tomcat
-groupadd tomcat
+id -u tomcat &>/dev/null || useradd tomcat
+getent group tomcat || groupadd tomcat
