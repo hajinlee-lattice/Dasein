@@ -15,12 +15,10 @@ fi
 
 echo "copying files from temporary folders"
 cp le-scoringapi-*.war $CATALINA_HOME/webapps/scoringapi/ROOT.war
-cp /etc/ledp/scoringapi/$ENV_TYPE/*.properties /etc/ledp/
+cp /tmp/ledp/scoringapi/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
-rm -rf /etc/ledp/scoringapi
-rm -rf /home/yarn/scoringapi
-rm -rf /home/yarn/logs/*
+rm -rf /tmp/ledp/scoringapi
 rm -rf /tmp/webapps/scoringapi
 
 echo "finishing"

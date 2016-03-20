@@ -17,41 +17,6 @@
         <version>2.0.22-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
-    <profiles>
-        <profile>
-            <id>qa</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>qacluster</value>
-                </property>
-            </activation>
-            <properties>
-                <playmaker.properties.path>conf/env/qacluster</playmaker.properties.path>
-                <oauth2.properties.path>
-                    ../le-oauth2db/conf/env/qacluster
-                </oauth2.properties.path>
-                <bin.env.path>bin/env/qacluster</bin.env.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>production</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>prodcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <playmaker.properties.path>conf/env/prodcluster</playmaker.properties.path>
-                <oauth2.properties.path>
-                    ../le-oauth2db/conf/env/prodcluster
-                </oauth2.properties.path>
-                <bin.env.path>bin/env/prodcluster</bin.env.path>
-            </properties>
-        </profile>
-    </profiles>
-
 
     <build>
         <plugins>
@@ -80,7 +45,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/playmaker/qaclusterb</directory>
+                            <directory>/tmp/ledp/playmaker/qaclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -95,7 +60,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/playmaker/prodclustera</directory>
+                            <directory>/tmp/ledp/playmaker/prodclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -110,7 +75,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/playmaker/qaclustera</directory>
+                            <directory>/tmp/ledp/playmaker/qaclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -125,7 +90,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/playmaker/prodclusterb</directory>
+                            <directory>/tmp/ledp/playmaker/prodclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>

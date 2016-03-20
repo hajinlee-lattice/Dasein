@@ -18,71 +18,6 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
-    <profiles>
-        <profile>
-            <id>qaclusterb</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>qaclusterb</value>
-                </property>
-            </activation>
-            <properties>
-                <monitor.properties.path>../le-monitor/conf/env/qaclusterb</monitor.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/qaclusterb</proxy.properties.path>
-                <scoringapi.properties.path>conf/env/qaclusterb</scoringapi.properties.path>
-                <oauth2db.properties.path>../le-oauth2db/conf/env/qaclusterb</oauth2db.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>development</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>environment.type</name>
-                    <value>devcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <monitor.properties.path>../le-monitor/conf/env/development</monitor.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/development</proxy.properties.path>
-                <scoringapi.properties.path>conf/env/development</scoringapi.properties.path>
-                <oauth2db.properties.path>../le-oauth2db/conf/env/development</oauth2db.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>qa</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>qacluster</value>
-                </property>
-            </activation>
-            <properties>
-                <monitor.properties.path>../le-monitor/conf/env/qacluster</monitor.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
-                <scoringapi.properties.path>conf/env/qacluster</scoringapi.properties.path>
-                <oauth2db.properties.path>../le-oauth2db/conf/env/qacluster</oauth2db.properties.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>production</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>prodcluster</value>
-                </property>
-            </activation>
-            <properties>
-                <monitor.properties.path>../le-monitor/conf/env/prodcluster</monitor.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
-                <scoringapi.properties.path>conf/env/prodcluster</scoringapi.properties.path>
-                <oauth2db.properties.path>../le-oauth2db/conf/env/prodcluster</oauth2db.properties.path>
-            </properties>
-        </profile>
-    </profiles>
-
     <build>
         <plugins>
             <plugin>
@@ -107,7 +42,7 @@
                             </sources>
                         </mapping>
                         <mapping>
-                            <directory>/etc/ledp/scoringapi/qaclusterb</directory>
+                            <directory>/tmp/ledp/scoringapi/qaclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -128,7 +63,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/scoringapi/qaclustera</directory>
+                            <directory>/tmp/ledp/scoringapi/qaclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -149,7 +84,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/scoringapi/prodclusterb</directory>
+                            <directory>/tmp/ledp/scoringapi/prodclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -170,7 +105,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/scoringapi/prodclustera</directory>
+                            <directory>/tmp/ledp/scoringapi/prodclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>

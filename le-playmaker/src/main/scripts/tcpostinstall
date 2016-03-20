@@ -16,12 +16,10 @@ echo $VERSION
 
 echo "copying files from temporary folders"
 cp le-playmaker-*.war $CATALINA_HOME/webapps/playmaker/ROOT.war
-cp /etc/ledp/playmaker/$ENV_TYPE/*.properties /etc/ledp/
+cp /tmp/ledp/playmaker/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
-rm -rf /etc/ledp/playmaker
-rm -rf /home/yarn/playmaker
-rm -rf /home/yarn/logs/*
+rm -rf /tmp/ledp/playmaker
 rm -rf /tmp/webapps/playmaker
 
 echo "finishing"

@@ -44,7 +44,7 @@
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/pls/qaclusterb</directory>
+                            <directory>/tmp/ledp/pls/qaclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -65,16 +65,13 @@
                                     <location>../le-workflow/conf/env/qaclusterb/workflow.properties</location>
                                 </source>
                                 <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
-                                </source>
-                                <source>
                                     <location>../le-monitor/conf/env/qaclusterb/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/ledp/pls/prodclusterb</directory>
+                            <directory>/tmp/ledp/pls/prodclusterb</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -95,16 +92,13 @@
                                     <location>../le-workflow/conf/env/prodclusterb/workflow.properties</location>
                                 </source>
                                 <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
-                                </source>
-                                <source>
                                     <location>../le-monitor/conf/env/prodclusterb/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
 
                         <mapping>
-                            <directory>/etc/ledp/pls/qaclustera</directory>
+                            <directory>/tmp/ledp/pls/qaclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -125,16 +119,13 @@
                                     <location>../le-workflow/conf/env/qaclustera/workflow.properties</location>
                                 </source>
                                 <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
-                                </source>
-                                <source>
                                     <location>../le-monitor/conf/env/qaclustera/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
                         
                         <mapping>
-                            <directory>/etc/ledp/pls/prodclustera</directory>
+                            <directory>/tmp/ledp/pls/prodclustera</directory>
                             <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
@@ -153,9 +144,6 @@
                                 </source>
                                 <source>
                                     <location>../le-workflow/conf/env/prodclustera/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>certificates/laca-ldap.dev.lattice.local.jks</location>
                                 </source>
                                 <source>
                                     <location>../le-monitor/conf/env/prodclustera/monitor.properties</location>
