@@ -1,7 +1,6 @@
 # This script is used to update property file in specified environment
 import glob
 import os
-import shutil
 
 PROPERTY_DIR = "/conf/env/"
 PROPERTY_FILE_SUFFIX = "*.properties"
@@ -33,6 +32,7 @@ def printCurrentDir(dir):
 
 def updatePropertyFiles(environment, dir, dictionary):
     qaPropertyFiles = glob.glob(dir + '/' + PROPERTY_FILE_SUFFIX)
+    qaPropertyFiles += glob.glob(dir + '/ENV_VARS')
 
     #open specific property file and compare the contents of them
     for pFile in qaPropertyFiles:
@@ -45,7 +45,7 @@ def updatePropertyFiles(environment, dir, dictionary):
         qaPropertyFile.close()
         qaNewPropertyFile.close()
         os.remove(qaPropertyFileName)
-        shutil.move(qaNewPropertyFileName, qaPropertyFileName)
+        os.rename(qaNewPropertyFileName, qaPropertyFileName)
 
 
 def updateContents(environment, filename, conents, dictionary, file):
@@ -54,13 +54,16 @@ def updateContents(environment, filename, conents, dictionary, file):
         if (not line.startswith( '#' )) and (not line.isspace() ):
             pair = line.split('=', 1)
             if len(pair) < 2: continue
-            if ('${INSIDE_TOMCAT}' in pair[1]):
+            if '${INSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${INSIDE_TOMCAT}', dictionary['%s.inside.tomcat' % environment])
-            if ('${OUTSIDE_TOMCAT}' in pair[1]):
+            if '${OUTSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
+            elif 'export API_URL' in pair[1]:
+                line = 'export API_URL=http://${OUTSIDE_TOMCAT}:8081'\
+                    .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
         file.write(line)
 
 def loadContents(conents):
