@@ -53,6 +53,7 @@ def updateContents(environment, filename, conents, dictionary, file):
         line = conents[i]
         if (not line.startswith( '#' )) and (not line.isspace() ):
             pair = line.split('=', 1)
+            if len(pair) < 2: continue
             if ('${INSIDE_TOMCAT}' in pair[1]):
                 line = pair[0] + '=' + pair[1] \
                     .replace('${INSIDE_TOMCAT}', dictionary['%s.inside.tomcat' % environment])
@@ -73,7 +74,7 @@ def loadContents(conents):
             else:
                 dictionary[pair[0]] = ''
 
-            if '.qacluster' in pair[0] or '.prodcluster' in pair[0]:
+            if 'qacluster' in pair[0] or 'prodcluster' in pair[0]:
                 dictionary[pair[0]] = dictionary[pair[0]].replace('\n', '')
                 print '%s=%s' % (pair[0], dictionary[pair[0]])
     print ''
