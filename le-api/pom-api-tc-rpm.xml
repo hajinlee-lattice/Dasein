@@ -35,100 +35,29 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/webapps/api</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-api-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/api/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclusterb/api.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/qaclusterb/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclusterb/db.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/api/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclusterb/api.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/prodclusterb/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclusterb/db.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/api/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclustera/api.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/prodclustera/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/api/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclustera/api.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/qaclustera/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
                     </mappings>
                     
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/tcpreremove</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpreinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
+                    <requires>
+                        <require>le-config-rpm</require>
+                    </requires>
                 </configuration>
             </plugin>
         </plugins>

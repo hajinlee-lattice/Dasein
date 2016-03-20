@@ -1,23 +1,7 @@
 #!/bin/bash
 source /etc/profile
-rm -rf $CATALINA_HOME/webapps/pls/le-pls-*.war
-rm -rf /tmp/webapps/pls/le-pls-*.war
-rm -rf /etc/ledp/db.properties
-rm -rf /etc/ledp/pls.properties
-rm -rf /etc/ledp/security.properties
-rm -rf /etc/ledp/proxy.properties
-rm -rf /etc/ledp/workflow.properties
-rm -rf /etc/ledp/laca-ldap.dev.lattice.local.jks
-rm -rf /etc/ledp/monitor.properties
-rm -rf /etc/ledp/pls
+rm -rf $CATALINA_HOME/webapps/pls/*.war
+rm -rf /tmp/webapps/pls
 
-rm -rf /home/yarn/pls
-adduser yarn
-groupadd yarn
+useradd tomcat
 groupadd tomcat
-mkdir -p /var/log/ledp
-mkdir -p /home/yarn/logs
-chmod -R 755 /var/log/ledp
-chmod -R 755 /home/yarn/logs
-chown -R yarn:yarn /var/log/ledp
-chown -R yarn:yarn /home/yarn/logs

@@ -17,13 +17,11 @@ echo $VERSION
 
 echo "copying files from temporary folders"
 cp le-oauth2-*.war $CATALINA_HOME/webapps/oauth/ROOT.war
-cp /tmp/ledp/oauth2/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
-rm -rf /tmp/ledp/oauth2
 rm -rf /tmp/webapps/oauth2
 
 echo "finishing"
 chown -R tomcat:tomcat $CATALINA_HOME/webapps/oauth
 chmod -R 775 $CATALINA_HOME/webapps/oauth
-ls $CATALINA_HOME/webapps/oauth/*.war
+ll $CATALINA_HOME/webapps/oauth/*.war

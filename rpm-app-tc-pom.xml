@@ -15,7 +15,7 @@
     </parent>
 
     <modules>
-        <module>le-common</module>
+        <module>le-config/pom-config-rpm.xml</module>
         <module>le-oauth2/pom-oauth2-tc-rpm.xml</module>
         <module>le-scoringapi/pom-scoringapi-tc-rpm.xml</module>
         <module>le-playmaker/pom-playmaker-tc-rpm.xml</module>

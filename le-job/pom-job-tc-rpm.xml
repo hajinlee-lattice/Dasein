@@ -34,204 +34,9 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/webapps/job</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-job-${le.rpm.version}.war</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/job/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclusterb/job.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/qaclusterb/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataflow/conf/env/qaclusterb/dataflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-propdata/conf/env/qaclusterb/propdata.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-scoring/conf/env/qaclusterb/scoring.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dellebi/conf/env/qaclusterb/dellebi.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-pls/conf/env/qaclusterb/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/qaclusterb/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/qaclusterb/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/qaclusterb/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/qaclusterb/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/job/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclusterb/job.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/prodclusterb/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataflow/conf/env/prodclusterb/dataflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-propdata/conf/env/prodclusterb/propdata.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-scoring/conf/env/prodclusterb/scoring.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dellebi/conf/env/prodclusterb/dellebi.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-pls/conf/env/prodclusterb/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/prodclusterb/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/prodclusterb/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/prodclusterb/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/prodclusterb/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/job/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclustera/job.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/qaclustera/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataflow/conf/env/qaclustera/dataflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-propdata/conf/env/qaclustera/propdata.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-scoring/conf/env/qaclustera/scoring.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dellebi/conf/env/qaclustera/dellebi.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-pls/conf/env/qaclustera/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/qaclustera/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/qaclustera/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/qaclustera/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/qaclustera/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/etc/ledp/job/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/deployment/job.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataplatform/conf/env/prodclustera/dataplatform.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dataflow/conf/env/prodclustera/dataflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-propdata/conf/env/prodclustera/propdata.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-scoring/conf/env/prodclustera/scoring.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-dellebi/conf/env/prodclustera/dellebi.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-pls/conf/env/prodclustera/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/prodclustera/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/prodclustera/camille.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/prodclustera/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/prodclustera/monitor.properties</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -239,14 +44,19 @@
                     
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/tcpreremove</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpreinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
+                    <requires>
+                        <require>le-config-rpm</require>
+                    </requires>
                 </configuration>
             </plugin>
         </plugins>

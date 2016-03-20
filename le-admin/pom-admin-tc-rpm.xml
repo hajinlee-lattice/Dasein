@@ -33,100 +33,12 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/webapps/admin</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-admin-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
-                        
-                        <mapping>
-                            <directory>/tmp/ledp/admin/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclustera/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/qaclustera/camille.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/tmp/ledp/admin/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/qaclusterb/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/qaclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/qaclusterb/camille.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/tmp/ledp/admin/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclustera/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/prodclustera/camille.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/tmp/ledp/admin/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>conf/env/prodclusterb/admin.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-db/conf/env/prodclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-camille/conf/env/prodclusterb/camille.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/tcpreremove</scriptFile>
@@ -138,6 +50,9 @@
                         <scriptFile>src/main/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
+                    <requires>
+                        <require>le-config-rpm</require>
+                    </requires>
                 </configuration>
             </plugin>
         </plugins>

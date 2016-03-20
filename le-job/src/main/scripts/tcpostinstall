@@ -1,7 +1,6 @@
 #!/bin/bash -x
 source /etc/profile
 echo "getting environment information"
-echo $ENV_TYPE
 echo $CATALINA_HOME
 
 cd /tmp/webapps/job
@@ -14,12 +13,12 @@ then
 fi
 
 echo "copying files"
-cp le-job-*.war $CATALINA_HOME/webapps/job/job\#\#$VERSION.war
-cp /etc/ledp/job/$ENV_TYPE/*.properties /etc/ledp/
+cp le-job-*.war $CATALINA_HOME/webapps/job/job.war
 
 echo "cleaning up"
-rm -rf /home/yarn/job
-rm -rf /etc/ledp/job
+rm -rf /tmp/webapps/job
 
 echo "finishing"
-service jetty restart > /opt/jetty/logs/start.log 2>&1
+chown -R tomcat:tomcat $CATALINA_HOME/webapps/job
+chmod -R 775 $CATALINA_HOME/webapps/job
+ll $CATALINA_HOME/webapps/job/*.war

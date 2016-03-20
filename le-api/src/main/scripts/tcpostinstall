@@ -14,14 +14,12 @@ then
 fi
 
 echo "copying files"
-cp le-api-*.war $CATALINA_HOME/webapps/api/api\#\#$VERSION.war
-cp /etc/ledp/api/$ENV_TYPE/*.properties /etc/ledp/
+cp le-api-*.war $CATALINA_HOME/webapps/api/ROOT.war
 
 echo "cleaning up"
-rm -rf /etc/ledp/api
-rm -rf /home/yarn/api
 rm -rf /tmp/webapps/api
 
 echo "finishing"
-chown -R root:tomcat $CATALINA_HOME/webapps
-ls $CATALINA_HOME/webapps/api/*.war
+chown -R tomcat:tomcat $CATALINA_HOME/webapps/api
+chmod -R 775 $CATALINA_HOME/webapps/api
+ll $CATALINA_HOME/webapps/api/*.war

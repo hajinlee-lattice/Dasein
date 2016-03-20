@@ -33,135 +33,28 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/webapps/pls</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-pls-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
-                        
-                        <mapping>
-                            <directory>/tmp/ledp/pls/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-db/conf/env/qaclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>conf/env/qaclusterb/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/qaclusterb/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/qaclusterb/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/qaclusterb/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/tmp/ledp/pls/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-db/conf/env/prodclusterb/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>conf/env/prodclusterb/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclusterb/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/prodclusterb/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/prodclusterb/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/prodclusterb/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
-                        <mapping>
-                            <directory>/tmp/ledp/pls/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-db/conf/env/qaclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>conf/env/qaclustera/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/qaclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/qaclustera/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/qaclustera/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/qaclustera/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
-                        <mapping>
-                            <directory>/tmp/ledp/pls/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-db/conf/env/prodclustera/db.properties</location>
-                                </source>
-                                <source>
-                                    <location>conf/env/prodclustera/pls.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-security/conf/env/prodclustera/security.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-proxy/conf/env/prodclustera/proxy.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-workflow/conf/env/prodclustera/workflow.properties</location>
-                                </source>
-                                <source>
-                                    <location>../le-monitor/conf/env/prodclustera/monitor.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/tcpreremove</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpreinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
+                    <requires>
+                        <require>le-config-rpm</require>
+                    </requires>
                 </configuration>
             </plugin>
         </plugins>

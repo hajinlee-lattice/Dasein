@@ -15,13 +15,11 @@ fi
 
 echo "copying files from temporary folders"
 cp le-scoringapi-*.war $CATALINA_HOME/webapps/scoringapi/ROOT.war
-cp /tmp/ledp/scoringapi/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
-rm -rf /tmp/ledp/scoringapi
 rm -rf /tmp/webapps/scoringapi
 
 echo "finishing"
 chown -R tomcat:tomcat $CATALINA_HOME/webapps/scoringapi
 chmod -R 775 $CATALINA_HOME/webapps/scoringapi
-ls $CATALINA_HOME/webapps/scoringapi/*.war
+ll $CATALINA_HOME/webapps/scoringapi/*.war

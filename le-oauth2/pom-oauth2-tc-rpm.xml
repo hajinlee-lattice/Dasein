@@ -34,71 +34,28 @@
                     <mappings>
                         <mapping>
                             <directory>/tmp/webapps/oauth2</directory>
-                            <filemode>755</filemode>
-                            <username>yarn</username>
-                            <groupname>yarn</groupname>
                             <sources>
                                 <source>
                                     <location>target/le-oauth2-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>
-                        <mapping>
-                            <directory>/tmp/ledp/oauth2/qaclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-oauth2db/conf/env/qaclusterb/oauth2.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/tmp/ledp/oauth2/qaclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-oauth2db/conf/env/qaclustera/oauth2.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/tmp/ledp/oauth2/prodclusterb</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-oauth2db/conf/env/prodclusterb/oauth2.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-                        <mapping>
-                            <directory>/tmp/ledp/oauth2/prodclustera</directory>
-                            <filemode>755</filemode>
-                            <username>root</username>
-                            <groupname>root</groupname>
-                            <sources>
-                                <source>
-                                    <location>../le-oauth2db/conf/env/prodclustera/oauth2.properties</location>
-                                </source>
-                            </sources>
-                        </mapping>
-
                     </mappings>
                     <preremoveScriptlet>
                         <scriptFile>src/main/scripts/tcpreremove</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preremoveScriptlet>
                     <preinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpreinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
                         <scriptFile>src/main/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
+                    <requires>
+                        <require>le-config-rpm</require>
+                    </requires>
                 </configuration>
             </plugin>
         </plugins>

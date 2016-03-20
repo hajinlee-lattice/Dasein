@@ -1,6 +1,6 @@
 #!/bin/bash
-mkdir -p /var/log/ledp
-chmod a+w /var/log/ledp
-mkdir -p /tmp/webapps
-rm -rf /tmp/webapps/*
+mkdir -p /tmp/webapps/ms
+rm -rf /tmp/webapps/ms/*
+
+useradd tomcat
 groupadd tomcat

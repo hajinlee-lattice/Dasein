@@ -17,13 +17,11 @@ echo $VERSION
 
 echo "copying files"
 cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps/admin/ROOT.war
-cp /tmp/ledp/admin/$ENV_TYPE/*.properties /etc/ledp/
 
 echo "cleaning up"
-rm -rf /tmp/webapps/admin/le-admin-*.war
-rm -rf /tmp/ledp/admin
+rm -rf /tmp/webapps/admin
 
 echo "finishing"
 chown -R tomcat:tomcat $CATALINA_HOME/webapps/admin
 chmod -R 775 $CATALINA_HOME/webapps/admin
-ls $CATALINA_HOME/webapps/admin/*.war
+ll $CATALINA_HOME/webapps/admin/*.war

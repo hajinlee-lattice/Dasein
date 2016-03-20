@@ -7,7 +7,7 @@ echo CATALINA_HOME=$CATALINA_HOME
 mkdir -p $CATALINA_HOME/webapps
 rm -rf $CATALINA_HOME/webapps/*.war
 
-cd /tmp/webapps
+cd /tmp/webapps/ms
 
 JARFILE=`ls le-microservice-*.war`
 VERSION=`echo $JARFILE | cut -d \- -f 3`
@@ -28,7 +28,10 @@ for f in $(find . -name "*.war"); do
     cp $f $CATALINA_HOME/webapps/ms/$fn.war;
 done
 
+echo "cleanup"
+rm -rf /tmp/webapps/ms
+
 echo "finishing"
 chown -R tomcat:tomcat $CATALINA_HOME/webapps/ms
 chmod -R 775 $CATALINA_HOME/webapps/ms
-ls $CATALINA_HOME/webapps/ms/*.war
+ll $CATALINA_HOME/webapps/ms/*.war
