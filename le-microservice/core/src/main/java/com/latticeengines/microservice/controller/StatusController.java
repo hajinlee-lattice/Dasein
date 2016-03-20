@@ -1,5 +1,9 @@
 package com.latticeengines.microservice.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,11 +29,27 @@ public class StatusController {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "check that all the microservices are up")
-    public void statusCheck() {
+    public Map<String, String> statusCheck() {
         String [] microservices = microservicesStr.split(",");
-
+        Map<String, String> status = new HashMap<>();
+        Boolean overall = true;
         for (String microservice : microservices) {
-            String response = restTemplate.getForObject(String.format("%s/%s/api-docs", microserviceHostPort, microservice), String.class);
+            try {
+                String response = restTemplate.getForObject(String.format("%s/%s/api-docs", microserviceHostPort, microservice), String.class);
+                if (response.contains("\"apiVersion\"")) {
+                    status.put(microservice, "OK");
+                } else {
+                    status.put(microservice, "Unknow api-doc: " + response);
+                    overall = false;
+                }
+            } catch (Exception e) {
+                status.put(microservice, ExceptionUtils.getFullStackTrace(e));
+                overall = false;
+            }
         }
+
+        status.put("Overall", overall ? "OK" : "ERROR");
+
+        return status;
     }
 }
