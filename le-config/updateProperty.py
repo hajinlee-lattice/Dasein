@@ -57,13 +57,15 @@ def updateContents(environment, filename, conents, dictionary, file):
             if '${INSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${INSIDE_TOMCAT}', dictionary['%s.inside.tomcat' % environment])
+                print filename + ' : ' + environment + " : " + line.replace('\n', '')
             if '${OUTSIDE_TOMCAT}' in pair[1]:
                 line = pair[0] + '=' + pair[1] \
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
-            elif 'export API_URL' in pair[1]:
+            elif 'export API_URL' in pair[0]:
                 line = 'export API_URL=http://${OUTSIDE_TOMCAT}:8081'\
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
+                print filename + ' : ' + environment + " : " + line.replace('\n', '')
         file.write(line)
 
 def loadContents(conents):
