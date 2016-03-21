@@ -31,7 +31,7 @@
                     <group>Application/Collectors</group>
                     <mappings>
                         <mapping>
-                            <directory>${env.CATALINA_HOME}/webapps/ms</directory>
+                            <directory>/usr/share/tomcat/webapps/ms</directory>
                             <username>tomcat</username>
                             <groupname>tomcat</groupname>
                             <filemode>775</filemode>

@@ -33,7 +33,7 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>${env.CATALINA_HOME}/webapps/oauth</directory>
+                            <directory>/usr/share/tomcat/webapps/oauth</directory>
                             <username>tomcat</username>
                             <groupname>tomcat</groupname>
                             <filemode>775</filemode>

@@ -4,8 +4,3 @@ rm -rf $CATALINA_HOME/webapps/playmaker/*.war
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat
-
-if [ -z "$CATALINA_HOME" ]; then
-    echo "Need to set CATALINA_HOME"
-    exit 1
-fi

@@ -34,7 +34,7 @@
                     
                     <mappings>
                         <mapping>
-                            <directory>${env.CATALINA_HOME}/webapps/api</directory>
+                            <directory>/usr/share/tomcat/webapps/api</directory>
                             <username>tomcat</username>
                             <groupname>tomcat</groupname>
                             <filemode>775</filemode>
