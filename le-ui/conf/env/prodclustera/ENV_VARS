@@ -1,5 +1,5 @@
 export NODE_ENV=production
-export API_URL=false
+export API_URL=http://${OUTSIDE_TOMCAT}:8081
 export COMPRESSED=true
 export LOGGING=/var/log/ledp
 export WHITELIST=10.0.0.1
