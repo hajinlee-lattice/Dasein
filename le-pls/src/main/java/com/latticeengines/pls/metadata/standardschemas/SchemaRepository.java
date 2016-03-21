@@ -87,7 +87,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Id)
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE).build());
+                .logicalType(LogicalDataType.Id).build());
         table.addAttribute(attr("Email").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Email).build());
         table.addAttribute(attr("Event").type(Schema.Type.BOOLEAN).required().interfaceName(InterfaceName.Event)
                 .logicalType(LogicalDataType.Event).build());

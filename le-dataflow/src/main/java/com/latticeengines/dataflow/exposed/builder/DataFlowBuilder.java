@@ -10,7 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
@@ -24,6 +23,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class DataFlowBuilder {
@@ -74,8 +74,10 @@ public abstract class DataFlowBuilder {
 
             if (dataFlowCtx != null && dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
                 String logicalType = props.get("logicalType");
-                if (logicalType != null && (logicalType.equals(LogicalDataType.Id.toString()) ||
-                        logicalType.equals(LogicalDataType.Reference.toString()))) {
+                if (logicalType != null && //
+                        (logicalType.equals(LogicalDataType.InternalId.toString()) || //
+                        logicalType.equals(LogicalDataType.Reference.toString()) || //
+                        logicalType.equals(LogicalDataType.Id))) {
                     continue;
                 }
             }

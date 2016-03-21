@@ -1,12 +1,12 @@
 package com.latticeengines.leadprioritization.dataflow;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.dataflow.util.DataFlowUtils;
 
@@ -37,7 +37,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         }
 
         last = addSortColumn(last, eventTable, SORT);
-
         Node emptyDomains = last //
                 .filter(String.format("%s == null || %s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN)) //
                 .renamePipe("nullDomains");
@@ -49,7 +48,9 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                         1, //
                         true, //
                         false);
+
         last = last.merge(emptyDomains);
+        last = DataFlowUtils.addInternalId(last);
         return last.discard(new FieldList(SORT, DOMAIN));
     }
 

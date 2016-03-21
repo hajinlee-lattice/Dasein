@@ -2,6 +2,9 @@ package com.latticeengines.serviceflows.dataflow.util;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
     public static CascadingDataFlowBuilder.Node normalizeDomain(CascadingDataFlowBuilder.Node last, String fieldName) {
@@ -32,5 +35,15 @@ public class DataFlowUtils {
                 .addFunction(String.format(extract, emailFieldName, emailFieldName, emailFieldName), //
                         new DataFlowBuilder.FieldList(emailFieldName), //
                         new DataFlowBuilder.FieldMetadata(outputFieldName, String.class));
+    }
+
+    public static CascadingDataFlowBuilder.Node addInternalId(CascadingDataFlowBuilder.Node last) {
+        DataFlowBuilder.FieldMetadata fm = new DataFlowBuilder.FieldMetadata(InterfaceName.InternalId.toString(),
+                Long.class);
+        fm.setPropertyValue("logicalType", LogicalDataType.InternalId.toString());
+        fm.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
+        fm.setPropertyValue("displayName", "Id");
+        last = last.addRowID(fm);
+        return last;
     }
 }

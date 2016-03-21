@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 public enum InterfaceName {
     Id, //
+    InternalId, //
     Event, //
     Domain, //
 

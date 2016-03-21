@@ -286,6 +286,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             return new Node(builder.addRowId(identifier, targetFieldName), builder);
         }
 
+        public Node addRowID(FieldMetadata fm) {
+            return new Node(builder.addRowId(identifier, fm), builder);
+        }
+
         public Node addJythonFunction(String packageName, String moduleName, String functionName,
                 FieldList fieldsToApply, FieldMetadata targetField) {
             return new Node(builder.addJythonFunction(identifier, packageName, moduleName, functionName, fieldsToApply,
@@ -1316,15 +1320,21 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     protected String addRowId(String prior, String targetFieldName) {
+        FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
+        rowIdFm.setPropertyValue("logicalType", LogicalDataType.RowId.toString());
+        rowIdFm.setPropertyValue("displayName", "Row ID");
+
+        return addRowId(prior, rowIdFm);
+    }
+
+    protected String addRowId(String prior, FieldMetadata rowIdFm) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), prior), Fields.ALL);
+        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(rowIdFm.getFieldName()), prior),
+                Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
-        FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
-        rowIdFm.setPropertyValue("logicalType", LogicalDataType.RowId.toString());
-        rowIdFm.setPropertyValue("displayName", "Row ID");
         newFm.add(rowIdFm);
 
         return register(each, newFm);

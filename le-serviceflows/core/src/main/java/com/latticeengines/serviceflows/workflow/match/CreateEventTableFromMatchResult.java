@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
@@ -73,8 +75,10 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
     private Table createEventTableFromMatchResult(Long commandId, //
             Table preMatchEventTable, DbCreds dbCreds) throws Exception {
         Table table = preMatchEventTable;
+
+        Attribute idColumn = getIdColumn(table);
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT Source_Id");
+        sb.append("SELECT Source_" + idColumn.getName());
         for (Attribute attr : table.getAttributes()) {
             sb.append(", Source_" + attr.getName() + " AS " + attr.getName()).append("\n");
         }
@@ -104,7 +108,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         config.setCreds(dbCreds);
         config.setQuery(sb.toString());
         config.setCustomer(configuration.getCustomerSpace().toString());
-        config.setKeyCols(Arrays.<String> asList(new String[] { "Source_Id" }));
+        config.setKeyCols(Arrays.<String> asList(new String[] { "Source_" + idColumn.getName() }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
         AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
@@ -118,6 +122,22 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
                 configuration.getCustomerSpace(), eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
         return eventTable;
+    }
+
+    private Attribute getIdColumn(Table table) {
+        List<Attribute> idColumns = table.getAttributes(LogicalDataType.InternalId);
+        if (idColumns.isEmpty()) {
+            if (table.getAttribute("Id") == null) {
+                throw new RuntimeException("No Id columns found in prematch table");
+            } else {
+                log.warn("No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
+                idColumns.add(table.getAttribute("Id"));
+            }
+        }
+        if (idColumns.size() != 1) {
+            log.warn(String.format("Multiple id columns in prematch table.  Choosing %s", idColumns.get(0).getName()));
+        }
+        return idColumns.get(0);
     }
 
     private String getTargetPath() {
