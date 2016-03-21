@@ -48,34 +48,81 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(attr("Id").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Id)
-                .logicalType(LogicalDataType.Id).build());
-        table.addAttribute(attr("Website").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Website)
+        table.addAttribute(attr("Id") //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.Id) //
+                .logicalType(LogicalDataType.Id) //
                 .build());
-        table.addAttribute(attr("Event").type(Schema.Type.BOOLEAN).required().interfaceName(InterfaceName.Event)
-                .logicalType(LogicalDataType.Event).build());
+        table.addAttribute(attr("Website") //
+                .type(Schema.Type.STRING) //
+                .required().interfaceName(InterfaceName.Website) //
+                .build());
+        table.addAttribute(attr("Event") //
+                .type(Schema.Type.BOOLEAN) //
+                .required() //
+                .interfaceName(InterfaceName.Event) //
+                .logicalType(LogicalDataType.Event) //
+                .build());
 
-        table.addAttribute(attr("CompanyName").type(Schema.Type.STRING).interfaceName(InterfaceName.CompanyName)
-                .withValidator("Website").build());
-        table.addAttribute(attr("City").type(Schema.Type.STRING).interfaceName(InterfaceName.City)
-                .withValidator("Website").build());
-        table.addAttribute(attr("State").type(Schema.Type.STRING).interfaceName(InterfaceName.State)
-                .withValidator("Website").build());
-        table.addAttribute(attr("Country").type(Schema.Type.STRING).interfaceName(InterfaceName.Country)
-                .withValidator("Website").build());
-        table.addAttribute(attr("PostalCode").type(Schema.Type.STRING).interfaceName(InterfaceName.PostalCode).build());
+        table.addAttribute(attr("CompanyName") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .withValidator("Website") //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("City") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.City) //
+                .withValidator("Website") //
+                .build());
+        table.addAttribute(attr("State") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.State) //
+                .withValidator("Website") //
+                .build());
+        table.addAttribute(attr("Country") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Country) //
+                .withValidator("Website") //
+                .build());
+        table.addAttribute(attr("PostalCode") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PostalCode) //
+                .build());
 
-        table.addAttribute(attr("Industry").type(Schema.Type.STRING).interfaceName(InterfaceName.Industry).build());
-        table.addAttribute(attr("AnnualRevenue").type(Schema.Type.DOUBLE).interfaceName(InterfaceName.AnnualRevenue)
+        table.addAttribute(attr("Industry") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Industry) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .build());
-        table.addAttribute(attr("NumberOfEmployees").type(Schema.Type.INT)
-                .interfaceName(InterfaceName.NumberOfEmployees).build());
-        table.addAttribute(attr("CreatedDate").type(Schema.Type.LONG).interfaceName(InterfaceName.CreatedDate).build());
-        table.addAttribute(attr("LastModifiedDate").type(Schema.Type.LONG)
-                .interfaceName(InterfaceName.LastModifiedDate).build());
-        table.addAttribute(attr("YearStarted").type(Schema.Type.STRING).interfaceName(InterfaceName.YearStarted)
+        table.addAttribute(attr("AnnualRevenue") //
+                .type(Schema.Type.DOUBLE) //
+                .interfaceName(InterfaceName.AnnualRevenue) //
                 .build());
-        table.addAttribute(attr("PhoneNumber").type(Schema.Type.STRING).interfaceName(InterfaceName.PhoneNumber)
+        table.addAttribute(attr("NumberOfEmployees") //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.NumberOfEmployees) //
+                .build());
+        table.addAttribute(attr("CreatedDate") //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.CreatedDate) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("LastModifiedDate") //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("YearStarted") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.YearStarted) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("PhoneNumber") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PhoneNumber) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .build());
 
         return table;
@@ -86,38 +133,107 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
         table.setPrimaryKey(createPrimaryKey("Id"));
 
-        table.addAttribute(attr("Id").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Id)
-                .logicalType(LogicalDataType.Id).build());
-        table.addAttribute(attr("Email").type(Schema.Type.STRING).required().interfaceName(InterfaceName.Email).build());
-        table.addAttribute(attr("Event").type(Schema.Type.BOOLEAN).required().interfaceName(InterfaceName.Event)
-                .logicalType(LogicalDataType.Event).build());
-
-        table.addAttribute(attr("CompanyName").type(Schema.Type.STRING).interfaceName(InterfaceName.CompanyName)
-                .withValidator("Email").build());
-        table.addAttribute(attr("City").type(Schema.Type.STRING).interfaceName(InterfaceName.City)
-                .withValidator("Email").build());
-        table.addAttribute(attr("State").type(Schema.Type.STRING).interfaceName(InterfaceName.State)
-                .withValidator("Email").build());
-        table.addAttribute(attr("Country").type(Schema.Type.STRING).interfaceName(InterfaceName.Country)
-                .withValidator("Email").build());
-        table.addAttribute(attr("PostalCode").type(Schema.Type.STRING).interfaceName(InterfaceName.PostalCode).build());
-
-        table.addAttribute(attr("CreatedDate").type(Schema.Type.LONG).interfaceName(InterfaceName.CreatedDate).build());
-        table.addAttribute(attr("LastModifiedDate").type(Schema.Type.LONG)
-                .interfaceName(InterfaceName.LastModifiedDate).build());
-        table.addAttribute(attr("FirstName").type(Schema.Type.STRING).interfaceName(InterfaceName.FirstName).build());
-        table.addAttribute(attr("LastName").type(Schema.Type.STRING).interfaceName(InterfaceName.LastName).build());
-        table.addAttribute(attr("Title").type(Schema.Type.STRING).interfaceName(InterfaceName.Title).build());
-        table.addAttribute(attr("LeadSource").type(Schema.Type.STRING).interfaceName(InterfaceName.LeadSource).build());
-        table.addAttribute(attr("IsClosed").type(Schema.Type.BOOLEAN).interfaceName(InterfaceName.IsClosed).build());
-        table.addAttribute(attr("StageName").type(Schema.Type.STRING).interfaceName(InterfaceName.StageName).build());
-        table.addAttribute(attr("PhoneNumber").type(Schema.Type.STRING).interfaceName(InterfaceName.PhoneNumber)
+        table.addAttribute(attr("Id") //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.Id) //
+                .logicalType(LogicalDataType.Id) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .build());
-        table.addAttribute(attr("AnnualRevenue").type(Schema.Type.DOUBLE).interfaceName(InterfaceName.AnnualRevenue)
+        table.addAttribute(attr("Email") //
+                .type(Schema.Type.STRING) //
+                .required() //
+                .interfaceName(InterfaceName.Email) //
                 .build());
-        table.addAttribute(attr("NumberOfEmployees").type(Schema.Type.INT)
-                .interfaceName(InterfaceName.NumberOfEmployees).build());
-        table.addAttribute(attr("Industry").type(Schema.Type.STRING).interfaceName(InterfaceName.Industry).build());
+        table.addAttribute(attr("Event") //
+                .type(Schema.Type.BOOLEAN) //
+                .required().interfaceName(InterfaceName.Event) //
+                .logicalType(LogicalDataType.Event) //
+                .build());
+
+        table.addAttribute(attr("CompanyName") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CompanyName) //
+                .withValidator("Email") //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("City") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.City) //
+                .withValidator("Email") //
+                .build());
+        table.addAttribute(attr("State") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.State) //
+                .withValidator("Email") //
+                .build());
+        table.addAttribute(attr("Country") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Country) //
+                .withValidator("Email") //
+                .build());
+        table.addAttribute(attr("PostalCode") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PostalCode) //
+                .build());
+
+        table.addAttribute(attr("CreatedDate") //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.CreatedDate) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("LastModifiedDate") //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("FirstName") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.FirstName) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("LastName") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.LastName) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("Title") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Title) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("LeadSource") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.LeadSource) //
+                .build());
+        table.addAttribute(attr("IsClosed") //
+                .type(Schema.Type.BOOLEAN) //
+                .interfaceName(InterfaceName.IsClosed) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("StageName") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.StageName) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("PhoneNumber") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.PhoneNumber) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr("AnnualRevenue") //
+                .type(Schema.Type.DOUBLE) //
+                .interfaceName(InterfaceName.AnnualRevenue) //
+                .build());
+        table.addAttribute(attr("NumberOfEmployees") //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.NumberOfEmployees) //
+                .build());
+        table.addAttribute(attr("Industry") //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Industry) //
+                .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
+                .build());
         return table;
     }
 
