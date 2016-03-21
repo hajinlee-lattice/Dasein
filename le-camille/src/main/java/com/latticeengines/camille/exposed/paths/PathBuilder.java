@@ -104,7 +104,7 @@ public final class PathBuilder {
     }
 
     public static Path buildMessageQueuePath(String podId, String division, String queueName) {
-        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.QUEUES, PathConstants.DIVISION, queueName);
+        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.DIVISION, division, PathConstants.QUEUES, queueName);
     }
 
     public static Path buildMessageQueuePath(String podId, String queueName) {
