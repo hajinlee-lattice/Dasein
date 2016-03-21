@@ -1,27 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-cd /tmp/webapps/pls
-
-JARFILE=`ls le-pls-*.war`
-VERSION=`echo $JARFILE | cut -d \- -f 3`
-SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
-
-if test $SNAPSHOT = "SNAPSHOT"
-    then
-        VERSION=$VERSION-"SNAPSHOT"
-fi
-echo $VERSION
-
-echo "copying files from temporary folders"
-cp le-pls-*.war $CATALINA_HOME/webapps/pls/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/pls
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/pls
-chmod -R 775 $CATALINA_HOME/webapps/pls
 ll $CATALINA_HOME/webapps/pls/*.war
