@@ -14,14 +14,14 @@ module.exports = function (grunt) {
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080/lp2',
-                apiUrl:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                url:            'http://app2.lattice.local/lp2/',
+                apiUrl:         'http://app2.lattice.local/',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
             },
             prod:        {
-                url:            'https://app.lattice-engines.com/lp2',
-                apiUrl:         'https://app.lattice-engines.com',
+                url:            'https://app.lattice-engines.com/lp2/',
+                apiUrl:         'https://app.lattice-engines.com/',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
                 protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
             }
