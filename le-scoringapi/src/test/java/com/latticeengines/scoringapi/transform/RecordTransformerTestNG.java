@@ -158,12 +158,6 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         transformService.execute(new RecordTransformerCallable(schema, inputQueue, outputQueue, errorQueue, //
                     keyColumn, modelExtractionDir.getAbsolutePath(), transforms, derivation, recordTransformer, //
                     pmmlEvaluator, expectedScores));
-        /*
-        for (int j = 0; j < 10; j++) {
-            new RecordTransformerCallable(schema, inputQueue, outputQueue, errorQueue, //
-                    keyColumn, modelExtractionDir.getAbsolutePath(), transforms, derivation, recordTransformer, //
-                    pmmlEvaluator, expectedScores);//.start();
-        }*/
 
         for (GenericRecord record : reader) {
             inputQueue.put(record);
