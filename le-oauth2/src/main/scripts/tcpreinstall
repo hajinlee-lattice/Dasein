@@ -1,7 +1,11 @@
 #!/bin/bash
 source /etc/profile
 rm -rf $CATALINA_HOME/webapps/oauth2/*.war
-rm -rf /tmp/webapps/oauth2
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat
+
+if [ -z "$CATALINA_HOME" ]; then
+    echo "Need to set CATALINA_HOME"
+    exit 1
+fi

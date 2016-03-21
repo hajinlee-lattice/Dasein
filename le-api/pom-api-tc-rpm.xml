@@ -34,10 +34,14 @@
                     
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/api</directory>
+                            <directory>${env.CATALINA_HOME}/webapps/api</directory>
+                            <username>tomcat</username>
+                            <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>target/le-api-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>

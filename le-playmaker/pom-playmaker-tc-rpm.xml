@@ -33,10 +33,14 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/playmaker</directory>
+                            <directory>${env.CATALINA_HOME}/webapps/playmaker</directory>
+                            <username>tomcat</username>
+                            <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>target/le-playmaker-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>

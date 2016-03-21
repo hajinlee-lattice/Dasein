@@ -1,6 +1,12 @@
 #!/bin/bash
-mkdir -p /tmp/webapps/ms
-rm -rf /tmp/webapps/ms/*
+
+source /etc/profile
+rm -rf $CATALINA_HOME/webapps/ms/*.war
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat
+
+if [ -z "$CATALINA_HOME" ]; then
+    echo "Need to set CATALINA_HOME"
+    exit 1
+fi

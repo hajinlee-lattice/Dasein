@@ -1,27 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-cd /tmp/webapps/admin
-
-JARFILE=`ls le-admin-*.war`
-VERSION=`echo $JARFILE | cut -d \- -f 3`
-SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
-
-if test $SNAPSHOT = "SNAPSHOT"
-    then
-        VERSION=$VERSION-"SNAPSHOT"
-fi
-echo $VERSION
-
-echo "copying files"
-cp /tmp/webapps/admin/le-admin-*.war $CATALINA_HOME/webapps/admin/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/admin
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/admin
-chmod -R 775 $CATALINA_HOME/webapps/admin
 ll $CATALINA_HOME/webapps/admin/*.war

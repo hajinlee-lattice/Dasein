@@ -31,10 +31,14 @@
                     <group>Application/Collectors</group>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/scoringapi</directory>
+                            <directory>${env.CATALINA_HOME}/webapps/scoringapi</directory>
+                            <username>tomcat</username>
+                            <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>target/le-scoringapi-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>

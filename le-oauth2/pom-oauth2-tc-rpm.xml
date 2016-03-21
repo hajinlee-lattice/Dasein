@@ -33,10 +33,14 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/oauth2</directory>
+                            <directory>${env.CATALINA_HOME}/webapps/oauth</directory>
+                            <username>tomcat</username>
+                            <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>target/le-oauth2-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                             </sources>
                         </mapping>

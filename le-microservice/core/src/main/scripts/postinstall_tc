@@ -1,37 +1,4 @@
-#!/bin/bash -x
-
-source /etc/profile
-
-echo CATALINA_HOME=$CATALINA_HOME
-
-mkdir -p $CATALINA_HOME/webapps
-rm -rf $CATALINA_HOME/webapps/*.war
-
-cd /tmp/webapps/ms
-
-JARFILE=`ls le-microservice-*.war`
-VERSION=`echo $JARFILE | cut -d \- -f 3`
-SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
-
-if test $SNAPSHOT = "SNAPSHOT"
-    then
-        VERSION=$VERSION-"SNAPSHOT"
-fi
-echo $VERSION
-
-for f in $(find . -name "*.war"); do
-    fn=`echo $f | cut -d - -f 2`
-    if [ $fn = "microservice" ]
-    then
-        fn=ROOT
-    fi
-    cp $f $CATALINA_HOME/webapps/ms/$fn.war;
-done
-
-echo "cleanup"
-rm -rf /tmp/webapps/ms
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/ms
-chmod -R 775 $CATALINA_HOME/webapps/ms
 ll $CATALINA_HOME/webapps/ms/*.war

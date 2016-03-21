@@ -31,34 +31,42 @@
                     <group>Application/Collectors</group>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/ms</directory>
-                            <filemode>755</filemode>
+                            <directory>${env.CATALINA_HOME}/webapps/ms</directory>
                             <username>tomcat</username>
                             <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>core/target/le-microservice-${le.rpm.version}.war</location>
+                                    <destination>ROOT.war</destination>
                                 </source>
                                 <source>
                                     <location>modeling/target/le-modeling-microservice-${le.rpm.version}.war</location>
+                                    <destination>modeling.war</destination>
                                 </source>
                                 <source>
                                     <location>eai/target/le-eai-microservice-${le.rpm.version}.war</location>
+                                    <destination>eai.war</destination>
                                 </source>
                                 <source>
                                     <location>metadata/target/le-metadata-microservice-${le.rpm.version}.war</location>
+                                    <destination>metadata.war</destination>
                                 </source>
                                 <source>
                                     <location>dataflowapi/target/le-dataflowapi-microservice-${le.rpm.version}.war</location>
+                                    <destination>dataflowapi.war</destination>
                                 </source>
                                 <source>
                                     <location>propdata/target/le-propdata-microservice-${le.rpm.version}.war</location>
+                                    <destination>propdata.war</destination>
                                 </source>
                                 <source>
                                     <location>scoring/target/le-scoring-microservice-${le.rpm.version}.war</location>
+                                    <destination>scoring.war</destination>
                                 </source>
                                 <source>
                                     <location>workflowapi/target/le-workflowapi-microservice-${le.rpm.version}.war</location>
+                                    <destination>workflowapi.war</destination>
                                 </source>
                             </sources>
                         </mapping>

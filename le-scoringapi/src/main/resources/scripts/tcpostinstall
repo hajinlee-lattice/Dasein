@@ -1,25 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-cd /tmp/webapps/scoringapi
-
-JAVAFILE=`ls le-scoringapi-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
-fi
-
-echo "copying files from temporary folders"
-cp le-scoringapi-*.war $CATALINA_HOME/webapps/scoringapi/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/scoringapi
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/scoringapi
-chmod -R 775 $CATALINA_HOME/webapps/scoringapi
 ll $CATALINA_HOME/webapps/scoringapi/*.war

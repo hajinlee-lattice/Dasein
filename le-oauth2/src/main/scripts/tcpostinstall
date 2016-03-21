@@ -1,27 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-cd /tmp/webapps/oauth2
-
-JARFILE=`ls le-oauth2-*.war`
-VERSION=`echo $JARFILE | cut -d \- -f 3`
-SNAPSHOT=`echo $JARFILE | cut -d \- -f 4`
-
-if test $SNAPSHOT = "SNAPSHOT"
-    then
-        VERSION=$VERSION-"SNAPSHOT"
-fi
-echo $VERSION
-
-echo "copying files from temporary folders"
-cp le-oauth2-*.war $CATALINA_HOME/webapps/oauth/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/oauth2
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/oauth
-chmod -R 775 $CATALINA_HOME/webapps/oauth
 ll $CATALINA_HOME/webapps/oauth/*.war

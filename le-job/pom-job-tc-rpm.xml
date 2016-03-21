@@ -33,10 +33,14 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/tmp/webapps/job</directory>
+                            <directory>${env.CATALINA_HOME}/webapps/job</directory>
+                            <username>tomcat</username>
+                            <groupname>tomcat</groupname>
+                            <filemode>775</filemode>
                             <sources>
                                 <source>
                                     <location>target/le-job-${le.rpm.version}.war</location>
+                                    <destination>job.war</destination>
                                 </source>
                             </sources>
                         </mapping>

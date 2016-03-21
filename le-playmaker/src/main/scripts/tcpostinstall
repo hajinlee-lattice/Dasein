@@ -1,26 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-cd /tmp/webapps/playmaker
-
-JAVAFILE=`ls le-playmaker-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
-fi
-echo $VERSION
-
-echo "copying files from temporary folders"
-cp le-playmaker-*.war $CATALINA_HOME/webapps/playmaker/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/playmaker
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/playmaker
-chmod -R 775 $CATALINA_HOME/webapps/playmaker
 ll $CATALINA_HOME/webapps/playmaker/*.war

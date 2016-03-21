@@ -1,24 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $CATALINA_HOME
-
-cd /tmp/webapps/job
-JAVAFILE=`ls le-job-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
-fi
-
-echo "copying files"
-cp le-job-*.war $CATALINA_HOME/webapps/job/job.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/job
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/job
-chmod -R 775 $CATALINA_HOME/webapps/job
 ll $CATALINA_HOME/webapps/job/*.war

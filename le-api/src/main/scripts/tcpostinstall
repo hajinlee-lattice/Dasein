@@ -1,25 +1,4 @@
-#!/bin/bash -x
-source /etc/profile
-echo "getting environment information"
-echo $ENV_TYPE
-echo $CATALINA_HOME
-
-cd /tmp/webapps/api
-JAVAFILE=`ls le-api-*.war`
-VERSION=`echo $JAVAFILE | cut -d\- -f3`
-SNAPSHOT=`echo $JAVAFILE | cut -d\- -f4`
-if test $SNAPSHOT='SNAPSHOT'
-then
-    VERSION=$VERSION-$SHAPSHOT
-fi
-
-echo "copying files"
-cp le-api-*.war $CATALINA_HOME/webapps/api/ROOT.war
-
-echo "cleaning up"
-rm -rf /tmp/webapps/api
+#!/bin/bash
 
 echo "finishing"
-chown -R tomcat:tomcat $CATALINA_HOME/webapps/api
-chmod -R 775 $CATALINA_HOME/webapps/api
 ll $CATALINA_HOME/webapps/api/*.war
