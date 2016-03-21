@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -31,7 +33,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
@@ -47,7 +51,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 public class ScoreCorrectnessService {
 
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
-    private static final int NUM_LEADS_TO_SCORE = 50;
+    private static final int NUM_LEADS_TO_SCORE = 300;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
@@ -72,28 +76,22 @@ public class ScoreCorrectnessService {
                 CustomerSpace.parse(tenantId), modelId);
 
         Map<String, Double> expectedScores = getExpectedScoresFromScoredTxt(artifacts);
-        Map<String, Map<String, String>> expectedRecords = getExpectedRecords(artifacts);
+        Map<String, Map<String, Object>> expectedRecords = getExpectedRecords(artifacts);
+        Map<String, Map<String, Object>> matchedRecords = getExpectedMatchedRecords(artifacts);
         Map<String, FieldSchema> schema = artifacts.getDataScienceDataComposition().fields;
         Fields fieldsFromScoreApi = getModelingFields(modelId);
         Map<String, Map<String, Object>> inputRecords = getInputRecordsFromInputCsv(artifacts, pathToModelInputCsv,
                 expectedScores, fieldsFromScoreApi.getFields());
         Map<String, DebugScoreResponse> scoreResponses = scoreRecords(modelId, inputRecords);
         Map<String, ComparedRecord> differentRecords = compareExpectedVsScoredRecords(schema, expectedScores,
-                expectedRecords, scoreResponses);
+                expectedRecords, matchedRecords, scoreResponses);
         outputResults(expectedScores.size(), differentRecords);
 
         Assert.assertTrue(differentRecords.isEmpty());
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {
-        String summaryThreshold = generateSummary(totalCompared, result.size(), THRESHOLD);
-        System.out.println(summaryThreshold);
-        System.out.println("Records with different scores:");
-        for (String id : result.keySet()) {
-            ComparedRecord compared = result.get(id);
-            System.out.println(String.format("ID:%s Expected:%s ScoreApi:%s Delta:%s", id, compared.getExpectedScore(),
-                    compared.getScoreApiScore(), compared.getScoreDifference()));
-        }
+        System.out.println("***** Details of Delta Records *****");
         for (String id : result.keySet()) {
             ComparedRecord compared = result.get(id);
             System.out.println(String.format("ID:%s Expected:%s ScoreApi:%s Delta:%s", id, compared.getExpectedScore(),
@@ -101,10 +99,17 @@ public class ScoreCorrectnessService {
             System.out.println(JsonUtils.serialize(compared));
         }
 
-        System.out.println(summaryThreshold);
-
-        int num5 = 0, num4 = 0, num3 = 0, num2 = 0;
+        int num5 = 0, num4 = 0, num3 = 0, num2 = 0, numRecordsWithMatchConflicts = 0, numRecordsWithTransformConflicts = 0, totalMatchConflicts = 0, totalTransformConflicts = 0;
         for (ComparedRecord compared : result.values()) {
+            totalMatchConflicts += compared.getNumMatchFieldConflicts();
+            totalTransformConflicts += compared.getNumTransformFieldConflicts();
+
+            if (compared.getNumMatchFieldConflicts() > 0) {
+                numRecordsWithMatchConflicts++;
+            }
+            if (compared.getNumTransformFieldConflicts() > 0) {
+                numRecordsWithTransformConflicts++;
+            }
             if (compared.getScoreDifference() > 0.00001) {
                 num5++;
             }
@@ -120,6 +125,19 @@ public class ScoreCorrectnessService {
 
         }
 
+        System.out.println("***** Summary of Delta Records *****");
+        for (String id : result.keySet()) {
+            ComparedRecord compared = result.get(id);
+            System.out.println(String.format(
+                    "ID:%s Expected:%s ScoreApi:%s Delta:%s NumMatchConflicts:%d NumTranformConflicts:%s", id,
+                    compared.getExpectedScore(), compared.getScoreApiScore(), compared.getScoreDifference(),
+                    compared.getNumMatchFieldConflicts(), compared.getNumTransformFieldConflicts()));
+        }
+
+        System.out.println("***** Overall Summary *****");
+        System.out.println(generateThresholdSummary(totalCompared, result.size(), THRESHOLD,
+                numRecordsWithMatchConflicts, numRecordsWithTransformConflicts, totalMatchConflicts,
+                totalTransformConflicts));
         System.out.println(generateSummary(totalCompared, num5, 0.00001));
         System.out.println(generateSummary(totalCompared, num4, 0.0001));
         System.out.println(generateSummary(totalCompared, num3, 0.001));
@@ -127,34 +145,65 @@ public class ScoreCorrectnessService {
 
     }
 
+    private String generateThresholdSummary(int totalRecords, int different, double threshold,
+            int numRecordsWithMatchConflicts, int numRecordsWithTransformConflicts, int totalMatchConflicts,
+            int totalTransformConflicts) {
+        return String
+                .format("threshold:%f recordsCompared:%d different:%d percentDifferent:%3.1f differentRecordsWithMatchConflicts:%d differentRecordsWithTransformConflicts:%d avgMatchConflictsPerMatchConflictedRecord:%d avgTransformConflictsPerTransformConflictedRecord:%d",
+                        threshold, totalRecords, different, (float) different / (float) totalRecords * 100.0,
+                        numRecordsWithMatchConflicts, numRecordsWithTransformConflicts, totalMatchConflicts
+                                / numRecordsWithMatchConflicts, totalTransformConflicts
+                                / numRecordsWithTransformConflicts);
+    }
+
     private String generateSummary(int totalRecords, int different, double threshold) {
-        return String.format(
-                "Number of records compared:%d different:%d percent-different:%3.1f threshold:%f", totalRecords,
-                different, (float) different / (float) totalRecords * 100.0, threshold);
+        return String.format("threshold:%f recordsCompared:%d different:%d percentDifferent:%3.1f", threshold,
+                totalRecords, different, (float) different / (float) totalRecords * 100.0);
     }
 
     private Map<String, ComparedRecord> compareExpectedVsScoredRecords(Map<String, FieldSchema> schema,
-            Map<String, Double> expectedScores, Map<String, Map<String, String>> expectedRecords,
-            Map<String, DebugScoreResponse> scoredResponses) {
+            Map<String, Double> expectedScores, Map<String, Map<String, Object>> expectedRecords,
+            Map<String, Map<String, Object>> matchedRecords, Map<String, DebugScoreResponse> scoredResponses) {
         Map<String, ComparedRecord> deltas = new HashMap<>();
         for (String id : expectedScores.keySet()) {
             DebugScoreResponse response = scoredResponses.get(id);
+            if (response == null) {
+                // Skip analysis of this record since failed scoring it.
+                continue;
+            }
             double difference = Math.abs(expectedScores.get(id) - response.getProbability());
             if (difference > THRESHOLD) {
-                Map<String, String> expectedRecord = expectedRecords.get(id);
+                Map<String, Object> expectedMatchedRecord = matchedRecords.get(id);
+                Map<String, Object> scoreMatchedRecord = response.getMatchedRecord();
+                Triple<List<FieldConflict>, List<String>, List<String>> matchDiffs = diffRecords(expectedMatchedRecord,
+                        scoreMatchedRecord, schema);
+
+                Map<String, Object> expectedRecord = expectedRecords.get(id);
                 Map<String, Object> scoreRecord = response.getTransformedRecord();
-                Triple<List<FieldConflict>, List<String>, List<String>> diffs = diffRecords(expectedRecord,
+                Triple<List<FieldConflict>, List<String>, List<String>> transformDiffs = diffRecords(expectedRecord,
                         scoreRecord, schema);
+
                 ComparedRecord comparedRecord = new ComparedRecord();
-                comparedRecord.setFieldConflicts(diffs.getLeft());
                 comparedRecord.setId(id);
-                comparedRecord.setExpectedTransformedRecord(expectedRecord);
+
                 comparedRecord.setExpectedScore(expectedScores.get(id));
-                comparedRecord.setScoreApiExtraFields(diffs.getMiddle());
-                comparedRecord.setScoreApiMissingFields(diffs.getRight());
-                comparedRecord.setScoreApiTransformedRecord(scoreRecord);
                 comparedRecord.setScoreApiScore(response.getProbability());
                 comparedRecord.setScoreDifference(difference);
+
+                comparedRecord.setExpectedMatchedRecord(matchedRecords.get(id));
+                comparedRecord.setScoreApiMatchedRecord(response.getMatchedRecord());
+                comparedRecord.setMatchedFieldConflicts(matchDiffs.getLeft());
+                comparedRecord.setNumMatchFieldConflicts(matchDiffs.getLeft().size());
+                comparedRecord.setScoreApiMatchExtraFields(matchDiffs.getMiddle());
+                comparedRecord.setScoreApiMatchMissingFields(matchDiffs.getRight());
+
+                comparedRecord.setTransformFieldConflicts(transformDiffs.getLeft());
+                comparedRecord.setExpectedTransformedRecord(expectedRecord);
+                comparedRecord.setScoreApiTransformedRecord(scoreRecord);
+                comparedRecord.setNumTransformFieldConflicts(transformDiffs.getLeft().size());
+                comparedRecord.setScoreApiTransformExtraFields(transformDiffs.getMiddle());
+                comparedRecord.setScoreApiTransformMissingFields(transformDiffs.getRight());
+
                 deltas.put(id, comparedRecord);
             }
         }
@@ -162,7 +211,7 @@ public class ScoreCorrectnessService {
         return deltas;
     }
 
-    private Triple<List<FieldConflict>, List<String>, List<String>> diffRecords(Map<String, String> expectedRecord,
+    private Triple<List<FieldConflict>, List<String>, List<String>> diffRecords(Map<String, Object> expectedRecord,
             Map<String, Object> scoreRecord, Map<String, FieldSchema> schema) {
         List<FieldConflict> conflicts = new ArrayList<>();
         List<String> extraFields = new ArrayList<>();
@@ -187,21 +236,12 @@ public class ScoreCorrectnessService {
         Set<String> intersection = new HashSet<>(expectedRecord.keySet());
         intersection.retainAll(scoreRecord.keySet());
         for (String field : intersection) {
-            // FieldSchema fieldSchema = schema.get(field);
             try {
                 String expectedValueString = String.valueOf(expectedRecord.get(field));
                 String scoreValueString = String.valueOf(scoreRecord.get(field));
                 SimpleEntry<Object, Object> parsed = parseObjects(expectedValueString, scoreValueString);
                 Object expectedValue = parsed.getKey();
                 Object scoreValue = parsed.getValue();
-                // if (fieldSchema.source.equals(FieldSource.REQUEST)) {
-                // expectedValue = FieldType.parse(fieldSchema.type,
-                // expectedRecord.get(field));
-                // scoreValue = FieldType.parse(fieldSchema.type,
-                // scoreRecord.get(field));
-                // } else {
-
-                // }
                 if (!expectedValue.equals(scoreValue)) {
                     FieldConflict conflict = new FieldConflict();
                     conflict.setFieldName(field);
@@ -222,8 +262,15 @@ public class ScoreCorrectnessService {
         Object parsedExpected = expected;
         Object parsedScoreApi = scoreApi;
         try {
-            parsedExpected = Double.parseDouble(expected);
-            parsedScoreApi = Double.parseDouble(scoreApi);
+            double doubleExpected = Double.parseDouble(expected);
+            double doubleScoreApi = Double.parseDouble(scoreApi);
+            parsedExpected = doubleExpected;
+            parsedScoreApi = doubleScoreApi;
+            double difference = Math.abs(doubleExpected - doubleScoreApi);
+            if (difference < THRESHOLD) {
+                // difference is so minor just count these two as the same
+                parsedScoreApi = parsedExpected;
+            }
         } catch (NumberFormatException edouble) {
             try {
                 parsedExpected = Long.parseLong(expected);
@@ -237,10 +284,18 @@ public class ScoreCorrectnessService {
     }
 
     private Map<String, DebugScoreResponse> scoreRecords(String modelId, Map<String, Map<String, Object>> inputRecords) {
+        Set<String> problemScores = new HashSet<>();
         Map<String, DebugScoreResponse> responses = new HashMap<>();
         for (String id : inputRecords.keySet()) {
-            DebugScoreResponse response = score(inputRecords.get(id), modelId);
-            responses.put(id, response);
+            try {
+                DebugScoreResponse response = score(inputRecords.get(id), modelId);
+                responses.put(id, response);
+            } catch (Exception e) {
+                problemScores.add(id);
+            }
+        }
+        if (!problemScores.isEmpty()) {
+            log.error("Problem scoring these record ids: " + JsonUtils.serialize(problemScores));
         }
         return responses;
     }
@@ -288,8 +343,39 @@ public class ScoreCorrectnessService {
         return records;
     }
 
-    private Map<String, Map<String, String>> getExpectedRecords(ScoreCorrectnessArtifacts artifacts) throws IOException {
-        Map<String, Map<String, String>> records = new HashMap<>();
+    private Map<String, Map<String, Object>> getExpectedMatchedRecords(ScoreCorrectnessArtifacts artifacts)
+            throws IOException {
+        Map<String, Map<String, Object>> matchedRecords = new HashMap<>();
+        List<GenericRecord> avroRecords = AvroUtils.getDataFromGlob(yarnConfiguration, artifacts.getPathToSamplesAvro()
+                + "allTest-r-00000.avro");
+        Schema schema = avroRecords.get(0).getSchema();
+        List<Schema.Field> fields = schema.getFields();
+
+        for (GenericRecord avroRecord : avroRecords) {
+            Map<String, Object> record = new HashMap<>();
+            Object idFieldValue = null;
+            for (Schema.Field field : fields) {
+                String fieldName = field.name();
+                Object fieldValue = avroRecord.get(fieldName);
+                record.put(fieldName, fieldValue);
+                if (fieldName.equals(artifacts.getIdField())) {
+                    idFieldValue = fieldValue;
+                }
+            }
+            if (StringUtils.objectIsNullOrEmptyString(idFieldValue)) {
+                log.warn("Skipping this record because missing ID field value " + JsonUtils.serialize(record));
+                continue;
+            } else {
+                matchedRecords.put(String.valueOf(idFieldValue), record);
+            }
+
+        }
+
+        return matchedRecords;
+    }
+
+    private Map<String, Map<String, Object>> getExpectedRecords(ScoreCorrectnessArtifacts artifacts) throws IOException {
+        Map<String, Map<String, Object>> records = new HashMap<>();
         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
         try (CSVParser parser = CSVParser.parse(artifacts.getExpectedRecords(), format)) {
             String idFieldValue = null;
@@ -299,7 +385,8 @@ public class ScoreCorrectnessService {
                         idFieldValue = csvRecord.get(fieldName);
                     }
                 }
-                Map<String, String> record = csvRecord.toMap();
+                Map<String, Object> record = new HashMap<>();
+                record.putAll(csvRecord.toMap());
                 if (Strings.isNullOrEmpty(idFieldValue)) {
                     log.warn("Skipping this record because missing ID field value " + JsonUtils.serialize(record));
                     continue;

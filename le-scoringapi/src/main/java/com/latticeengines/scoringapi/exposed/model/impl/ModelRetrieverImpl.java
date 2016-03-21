@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -57,7 +58,7 @@ import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 public class ModelRetrieverImpl implements ModelRetriever {
 
     private static final Log log = LogFactory.getLog(ModelRetrieverImpl.class);
-    public static final String HDFS_SCORE_ARTIFACT_TABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
+    public static final String HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR = "/user/s-analytics/customers/%s/data/%s-Event-Metadata/";
     public static final String HDFS_SCORE_ARTIFACT_APPID_DIR = "/user/s-analytics/customers/%s/models/%s/%s/";
     public static final String HDFS_SCORE_ARTIFACT_BASE_DIR = HDFS_SCORE_ARTIFACT_APPID_DIR + "%s/";
     public static final String HDFS_ENHANCEMENTS_DIR = "enhancements/";
@@ -66,6 +67,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     public static final String DATA_COMPOSITION_FILENAME = "datacomposition.json";
     public static final String MODEL_JSON = "model.json";
     public static final String DATA_EXPORT_CSV = "_dataexport.csv";
+    public static final String SAMPLES_AVRO_PATH = "/user/s-analytics/customers/%s/data/%s/samples/";
     public static final String SCORED_TXT = "_scored.txt";
 
     private static final String LOCAL_MODELJSON_CACHE_DIR = "/var/cache/scoringapi/%s/%s/"; // space
@@ -138,7 +140,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
-    private AbstractMap.SimpleEntry<String, String> determineScoreArtifactBaseAndEventTableDirs(
+    private Triple<String, String, String> determineScoreArtifactBaseEventTableAndSamplePath(
             CustomerSpace customerSpace, String modelId) {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
@@ -153,18 +155,21 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String hdfsScoreArtifactBaseDir = String.format(HDFS_SCORE_ARTIFACT_BASE_DIR, customerSpace.toString(),
                 modelNameAndVersion.getKey(), modelNameAndVersion.getValue(), appId);
 
-        String hdfsScoreArtifactTableDir = String.format(HDFS_SCORE_ARTIFACT_TABLE_DIR, customerSpace.toString(),
+        String hdfsScoreArtifactTableDir = String.format(HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, customerSpace.toString(),
                 modelSummary.getEventTableName());
 
-        return new AbstractMap.SimpleEntry<String, String>(hdfsScoreArtifactBaseDir, hdfsScoreArtifactTableDir);
+        String hdfsSamplesAvroPath = String.format(SAMPLES_AVRO_PATH, customerSpace.toString(),
+                modelSummary.getEventTableName());
+
+        return Triple.of(hdfsScoreArtifactBaseDir, hdfsScoreArtifactTableDir, hdfsSamplesAvroPath);
     }
 
     @Override
     public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
-        AbstractMap.SimpleEntry<String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseAndEventTableDirs(
+        Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelId);
-        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getKey();
-        String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getValue();
+        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
+        String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
         DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
@@ -477,9 +482,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @Override
     public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(
             CustomerSpace customerSpace, String modelId) {
-        AbstractMap.SimpleEntry<String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseAndEventTableDirs(
+        Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelId);
-        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getKey();
+        String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
         String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);
@@ -490,6 +495,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         artifacts.setExpectedRecords(expectedRecords);
         artifacts.setScoredTxt(scoredTxt);
         artifacts.setIdField(determineIdFieldName(dataScienceDataComposition));
+        artifacts.setPathToSamplesAvro(artifactBaseAndEventTableDirs.getRight());
         return artifacts;
     }
 

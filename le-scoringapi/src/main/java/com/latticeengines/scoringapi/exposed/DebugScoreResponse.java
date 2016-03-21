@@ -16,6 +16,18 @@ public class DebugScoreResponse extends ScoreResponse {
     @ApiModelProperty(required = true)
     private Map<String, Object> transformedRecord;
 
+    @JsonProperty("matchedRecord")
+    @ApiModelProperty(required = true)
+    private Map<String, Object> matchedRecord;
+
+    public Map<String, Object> getMatchedRecord() {
+        return matchedRecord;
+    }
+
+    public void setMatchedRecord(Map<String, Object> matchedRecord) {
+        this.matchedRecord = matchedRecord;
+    }
+
     public Map<String, Object> getTransformedRecord() {
         return transformedRecord;
     }

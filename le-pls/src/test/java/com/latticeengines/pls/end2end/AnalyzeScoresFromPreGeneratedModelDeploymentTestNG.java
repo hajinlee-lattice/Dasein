@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,9 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
 
     @Value("${pls.scoringapi.rest.endpoint.hostport}")
     private String scoringApiHostPort;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Autowired
     private ScoreCorrectnessService scoreCorrectnessService;

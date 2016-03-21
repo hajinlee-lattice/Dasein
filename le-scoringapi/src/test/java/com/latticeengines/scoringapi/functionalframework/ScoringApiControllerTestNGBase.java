@@ -149,7 +149,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
     private void setupHdfsArtifacts(Tenant tenant) throws IOException {
         String tenantId = tenant.getId();
         String artifactTableDir = String
-                .format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_TABLE_DIR, tenantId, EVENT_TABLE);
+                .format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_EVENTTABLE_DIR, tenantId, EVENT_TABLE);
         String artifactBaseDir = String.format(ModelRetrieverImpl.HDFS_SCORE_ARTIFACT_BASE_DIR, tenantId, EVENT_TABLE,
                 MODEL_VERSION, PARSED_APPLICATION_ID);
         String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;

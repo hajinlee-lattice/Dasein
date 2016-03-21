@@ -8,6 +8,15 @@ public class ScoreCorrectnessArtifacts {
     private DataComposition dataScienceDataComposition;
     private String expectedRecords;
     private String scoredTxt;
+    private String pathToSamplesAvro;
+
+    public String getPathToSamplesAvro() {
+        return pathToSamplesAvro;
+    }
+
+    public void setPathToSamplesAvro(String pathToSamplesAvro) {
+        this.pathToSamplesAvro = pathToSamplesAvro;
+    }
 
     public void setIdField(String idFieldName) {
         this.idField = idFieldName;

@@ -16,6 +16,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -86,7 +87,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
         ScoreResponse scoreResponse = null;
         if (isDebug) {
-            scoreResponse = generateDebugScoreResponse(scoringArtifacts, transformedRecord);
+            scoreResponse = generateDebugScoreResponse(scoringArtifacts, transformedRecord, matchedRecord);
         } else {
             scoreResponse = generateScoreResponse(scoringArtifacts, transformedRecord);
         }
@@ -101,7 +102,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             Map<String, Object> record) {
         if (!Strings.isNullOrEmpty(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
-            if (!objectIsNullOrEmptyString(id)) {
+            if (!StringUtils.objectIsNullOrEmptyString(id)) {
                 scoreResponse.setId(String.valueOf(id));
             }
         }
@@ -185,18 +186,18 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
 
             Object fieldValue = record.get(fieldName);
-            if (expectedMatchFields.contains(fieldSchema.interpretation) && objectIsNullOrEmptyString(fieldValue)) {
+            if (expectedMatchFields.contains(fieldSchema.interpretation) && StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 missingMatchFields.add(fieldName);
             }
-            if (expectedDomainFields.contains(fieldSchema.interpretation) && !objectIsNullOrEmptyString(fieldValue)) {
+            if (expectedDomainFields.contains(fieldSchema.interpretation) && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasOneOfDomain = true;
             }
 
             if (fieldSchema.interpretation == FieldInterpretation.COMPANY_NAME
-                    && !objectIsNullOrEmptyString(fieldValue)) {
+                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyName = true;
             } else if (fieldSchema.interpretation == FieldInterpretation.COMPANY_STATE
-                    && !objectIsNullOrEmptyString(fieldValue)) {
+                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyState = true;
             }
         }
@@ -217,12 +218,13 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     }
 
     private DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
-            Map<String, Object> transformedRecord) {
+            Map<String, Object> transformedRecord, Map<String, Object> matchedRecord) {
         DebugScoreResponse debugScoreResponse = new DebugScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         debugScoreResponse.setProbability(scoreEvaluation.getProbability());
         debugScoreResponse.setScore(scoreEvaluation.getPercentile());
         debugScoreResponse.setTransformedRecord(transformedRecord);
+        debugScoreResponse.setMatchedRecord(matchedRecord);
 
         return debugScoreResponse;
     }
@@ -303,15 +305,6 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(),
                         fieldValue));
             }
-        }
-    }
-
-    private boolean objectIsNullOrEmptyString(Object obj) {
-        if (obj == null) {
-            return true;
-        } else {
-            String value = String.valueOf(obj);
-            return Strings.isNullOrEmpty(value);
         }
     }
 
