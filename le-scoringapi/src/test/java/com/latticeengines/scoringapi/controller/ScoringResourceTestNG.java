@@ -10,6 +10,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
+import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
@@ -45,6 +46,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         for (Field field : fields.getFields()) {
             FieldSchema expectedSchema = dataScienceDataComposition.fields.get(field.getFieldName());
             Assert.assertEquals(expectedSchema.type, field.getFieldType());
+            Assert.assertEquals(expectedSchema.source, FieldSource.REQUEST);
         }
     }
 

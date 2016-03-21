@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
-import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
@@ -108,8 +107,7 @@ public class MatcherImpl implements Matcher {
             if (outputRecord.isMatched()) {
                 mergeMatchedOutput(matchFieldNames, outputRecord, fieldSchemas, record);
             } else {
-                handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record,
-                        nameLocationStr);
+                handleUnMatchedOutput(matchFieldNames, matchInput, outputRecord, fieldSchemas, record, nameLocationStr);
             }
         }
         if (log.isDebugEnabled()) {
@@ -118,9 +116,8 @@ public class MatcherImpl implements Matcher {
         return record;
     }
 
-    private void handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput,
-            OutputRecord outputRecord, Map<String, FieldSchema> fieldSchemas, Map<String, Object> record,
-            String nameLocationStr) {
+    private void handleUnMatchedOutput(List<String> matchFieldNames, MatchInput matchInput, OutputRecord outputRecord,
+            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, String nameLocationStr) {
         for (int i = 0; i < matchFieldNames.size(); i++) {
             String fieldName = matchFieldNames.get(i);
             FieldSchema schema = fieldSchemas.get(fieldName);
@@ -145,12 +142,10 @@ public class MatcherImpl implements Matcher {
         for (int i = 0; i < matchFieldNames.size(); i++) {
             String fieldName = matchFieldNames.get(i);
             FieldSchema schema = fieldSchemas.get(fieldName);
-            if (schema != null && schema.source == FieldSource.PROPRIETARY) {
-                Object fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
+            if (schema != null && schema.source != FieldSource.REQUEST) {
+                Object fieldValue = matchFieldValues.get(i);
                 record.put(fieldName, fieldValue);
-                if (fieldValue == null) {
-//                    log.debug(String.format("Received null value for matched field:%s", fieldName));
-                } else if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
+                if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;
                     if (isPublicDomain) {
                         warnings.addWarning(new Warning(WarningCode.PUBLIC_DOMAIN, new String[] { Strings
