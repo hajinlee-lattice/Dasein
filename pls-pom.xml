@@ -33,6 +33,7 @@
         <module>le-serviceflows</module>
         <module>le-network</module>
         <module>le-proxy</module>
+        <module>le-scoringapi</module>
         <module>le-pls</module>
     </modules>
 </project>

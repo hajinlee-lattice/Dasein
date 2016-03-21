@@ -43,6 +43,7 @@
         <module>le-propdata</module>
         <module>le-security</module>
         <module>le-oauth2db</module>
+        <module>le-scoringapi</module>
         <module>le-pls</module>
         <module>le-dellebi</module>
         <module>le-job</module>
@@ -51,6 +52,5 @@
         <module>le-liaison</module>
         <module>le-workflow</module>
         <module>le-workflowapi</module>
-        <module>le-scoringapi</module>
     </modules>
 </project>
