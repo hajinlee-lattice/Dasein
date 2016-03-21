@@ -63,7 +63,7 @@ def updateContents(environment, filename, conents, dictionary, file):
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
             elif 'export API_URL' in pair[0]:
-                line = 'export API_URL=http://${OUTSIDE_TOMCAT}:8081'\
+                line = 'export API_URL=http://${OUTSIDE_TOMCAT}:8081\n'\
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
         file.write(line)
