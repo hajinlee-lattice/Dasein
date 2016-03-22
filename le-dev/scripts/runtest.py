@@ -4,7 +4,7 @@ import subprocess
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROPFILE_SUFFIX = '.properties'
-CONF_EVN = '/conf/env/dev'
+CONF_ENV = '/conf/env/dev'
 
 
 def chdirToProjectDir(project):
@@ -16,11 +16,11 @@ def propDirsOpts():
     projects = []
     for dirName, subdirList, fileList in os.walk(WSHOME):
         for fileName in fileList:
-            if fileName[-len(PROPFILE_SUFFIX):] == PROPFILE_SUFFIX and dirName[-len(CONF_EVN):] == CONF_EVN:
-                project = dirName.replace(CONF_EVN, '').split('/')[-1]
+            if fileName[-len(PROPFILE_SUFFIX):] == PROPFILE_SUFFIX and dirName[-len(CONF_ENV):] == CONF_ENV:
+                project = dirName.replace(CONF_ENV, '').split('/')[-1]
                 if project[:3] == 'le-':
                     projects.append(project[3:])
-    return ['-D%s_PROPDIR=../le-%s' % (p.upper(), p) + CONF_EVN for p in projects]
+    return ['-D%s_PROPDIR=../le-%s' % (p.upper(), p) + CONF_ENV for p in projects]
 
 
 def commonOpts():
