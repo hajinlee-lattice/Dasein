@@ -10,20 +10,20 @@ module.exports = function (grunt) {
             dev:         {
                 url:            'http://localhost:8081/lp2',
                 apiUrl:         'http://localhost:8081',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
+                protractorConf:   'src/main/webapp/test/e2e/conf/protractor.conf.dev.js',
+                protractorCcConf: 'src/main/webapp/test/e2e/conf/protractor.cc.conf.js'
             },
             qa:          {
                 url:            'http://app2.lattice.local/lp2/',
                 apiUrl:         'http://app2.lattice.local/',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.qa.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.qa.js'
+                protractorConf:   'src/main/webapp/test/e2e/conf/protractor.conf.qa.js',
+                protractorCcConf: 'src/main/webapp/test/e2e/conf/protractor.cc.conf.qa.js'
             },
             prod:        {
                 url:            'https://app.lattice-engines.com/lp2/',
                 apiUrl:         'https://app.lattice-engines.com/',
-                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.prod.js',
-                protractorCcConf: sourceDir + '/test/e2e/conf/protractor.cc.conf.js'
+                protractorConf:   'src/main/webapp/test/e2e/conf/protractor.conf.prod.js',
+                protractorCcConf: 'src/main/webapp/test/e2e/conf/protractor.cc.conf.js'
             }
         }
     };
