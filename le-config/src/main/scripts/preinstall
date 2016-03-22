@@ -1,3 +1,4 @@
 #!/bin/bash
 
+mkdir -p /etc/ledp
 rm -rf /etc/ledp/*.properties
