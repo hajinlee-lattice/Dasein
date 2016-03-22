@@ -81,11 +81,11 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/qacluster</api.properties.path>
+                <api.properties.path>conf/env/qaclustera</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qacluster
+                    ../le-dataplatform/conf/env/qaclustera
                 </dataplatform.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclustera</db.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -98,11 +98,11 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/qacluster</api.properties.path>
+                <api.properties.path>conf/env/qaclusterb</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qacluster
+                    ../le-dataplatform/conf/env/qaclusterb
                 </dataplatform.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclusterb</db.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -132,11 +132,11 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/deployment</api.properties.path>
+                <api.properties.path>conf/env/prodclustera</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prodcluster
+                    ../le-dataplatform/conf/env/prodclustera
                 </dataplatform.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclustera</db.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -149,11 +149,11 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/deployment</api.properties.path>
+                <api.properties.path>conf/env/prodclusterb</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prodcluster
+                    ../le-dataplatform/conf/env/prodclusterb
                 </dataplatform.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclusterb</db.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>

@@ -75,38 +75,38 @@
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qacluster
+                    ../le-dataplatform/conf/env/qaclustera
                 </dataplatform.properties.path>
                 <dataflow.properties.path>
-                    ../le-dataflow/conf/env/qacluster
+                    ../le-dataflow/conf/env/qaclustera
                 </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclustera</db.properties.path>
                 <propdata.properties.path>
-                    ../le-propdata/conf/env/qacluster
+                    ../le-propdata/conf/env/qaclustera
                 </propdata.properties.path>
                 <score.properties.path>
-                    ../le-scoring/conf/env/qacluster
+                    ../le-scoring/conf/env/qaclustera
                 </score.properties.path>
                 <dellebi.properties.path>
-                    ../le-dellebi/conf/env/qacluster
+                    ../le-dellebi/conf/env/qaclustera
                 </dellebi.properties.path>
                 <pls.properties.path>
-                    ../le-pls/conf/env/qacluster
+                    ../le-pls/conf/env/qaclustera
                 </pls.properties.path>
                 <security.properties.path>
-                    ../le-security/conf/env/qacluster
+                    ../le-security/conf/env/qaclustera
                 </security.properties.path>
                 <proxy.properties.path>
-                    ../le-proxy/conf/env/qacluster
+                    ../le-proxy/conf/env/qaclustera
                 </proxy.properties.path>
                 <workflow.properties.path>
-                    ../le-workflow/conf/env/qacluster
+                    ../le-workflow/conf/env/qaclustera
                 </workflow.properties.path>
                 <camille.properties.path>
-                    ../le-camille/conf/env/qacluster
+                    ../le-camille/conf/env/qaclustera
                 </camille.properties.path>
                 <monitor.properties.path>
-                    ../le-monitor/conf/env/qacluster
+                    ../le-monitor/conf/env/qaclustera
                 </monitor.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
@@ -121,38 +121,38 @@
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qacluster
+                    ../le-dataplatform/conf/env/qaclusterb
                 </dataplatform.properties.path>
                 <dataflow.properties.path>
-                    ../le-dataflow/conf/env/qacluster
+                    ../le-dataflow/conf/env/qaclusterb
                 </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclusterb</db.properties.path>
                 <propdata.properties.path>
-                    ../le-propdata/conf/env/qacluster
+                    ../le-propdata/conf/env/qaclusterb
                 </propdata.properties.path>
                 <score.properties.path>
-                    ../le-scoring/conf/env/qacluster
+                    ../le-scoring/conf/env/qaclusterb
                 </score.properties.path>
                 <dellebi.properties.path>
-                    ../le-dellebi/conf/env/qacluster
+                    ../le-dellebi/conf/env/qaclusterb
                 </dellebi.properties.path>
                 <pls.properties.path>
-                    ../le-pls/conf/env/qacluster
+                    ../le-pls/conf/env/qaclusterb
                 </pls.properties.path>
                 <security.properties.path>
-                    ../le-security/conf/env/qacluster
+                    ../le-security/conf/env/qaclusterb
                 </security.properties.path>
                 <proxy.properties.path>
-                    ../le-proxy/conf/env/qacluster
+                    ../le-proxy/conf/env/qaclusterb
                 </proxy.properties.path>
                 <workflow.properties.path>
-                    ../le-workflow/conf/env/qacluster
+                    ../le-workflow/conf/env/qaclusterb
                 </workflow.properties.path>
                 <camille.properties.path>
-                    ../le-camille/conf/env/qacluster
+                    ../le-camille/conf/env/qaclusterb
                 </camille.properties.path>
                 <monitor.properties.path>
-                    ../le-monitor/conf/env/qacluster
+                    ../le-monitor/conf/env/qaclusterb
                 </monitor.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
@@ -213,38 +213,38 @@
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prodcluster
+                    ../le-dataplatform/conf/env/prodclustera
                 </dataplatform.properties.path>
                 <dataflow.properties.path>
-                    ../le-dataflow/conf/env/prodcluster
+                    ../le-dataflow/conf/env/prodclustera
                 </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclustera</db.properties.path>
                 <propdata.properties.path>
-                    ../le-propdata/conf/env/prodcluster
+                    ../le-propdata/conf/env/prodclustera
                 </propdata.properties.path>
                 <score.properties.path>
-                    ../le-scoring/conf/env/prodcluster
+                    ../le-scoring/conf/env/prodclustera
                 </score.properties.path>
                 <dellebi.properties.path>
-                    ../le-dellebi/conf/env/prodcluster
+                    ../le-dellebi/conf/env/prodclustera
                 </dellebi.properties.path>
                 <pls.properties.path>
-                    ../le-pls/conf/env/prodcluster
+                    ../le-pls/conf/env/prodclustera
                 </pls.properties.path>
                 <security.properties.path>
-                    ../le-security/conf/env/prodcluster
+                    ../le-security/conf/env/prodclustera
                 </security.properties.path>
                 <proxy.properties.path>
-                    ../le-proxy/conf/env/prodcluster
+                    ../le-proxy/conf/env/prodclustera
                 </proxy.properties.path>
                 <workflow.properties.path>
-                    ../le-workflow/conf/env/prodcluster
+                    ../le-workflow/conf/env/prodclustera
                 </workflow.properties.path>
                 <camille.properties.path>
-                    ../le-camille/conf/env/prodcluster
+                    ../le-camille/conf/env/prodclustera
                 </camille.properties.path>
                 <monitor.properties.path>
-                    ../le-monitor/conf/env/prodcluster
+                    ../le-monitor/conf/env/prodclustera
                 </monitor.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
@@ -259,38 +259,38 @@
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prodcluster
+                    ../le-dataplatform/conf/env/prodclusterb
                 </dataplatform.properties.path>
                 <dataflow.properties.path>
-                    ../le-dataflow/conf/env/prodcluster
+                    ../le-dataflow/conf/env/prodclusterb
                 </dataflow.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclusterb</db.properties.path>
                 <propdata.properties.path>
-                    ../le-propdata/conf/env/prodcluster
+                    ../le-propdata/conf/env/prodclusterb
                 </propdata.properties.path>
                 <score.properties.path>
-                    ../le-scoring/conf/env/prodcluster
+                    ../le-scoring/conf/env/prodclusterb
                 </score.properties.path>
                 <dellebi.properties.path>
-                    ../le-dellebi/conf/env/prodcluster
+                    ../le-dellebi/conf/env/prodclusterb
                 </dellebi.properties.path>
                 <pls.properties.path>
-                    ../le-pls/conf/env/prodcluster
+                    ../le-pls/conf/env/prodclusterb
                 </pls.properties.path>
                 <security.properties.path>
-                    ../le-security/conf/env/prodcluster
+                    ../le-security/conf/env/prodclusterb
                 </security.properties.path>
                 <proxy.properties.path>
-                    ../le-proxy/conf/env/prodcluster
+                    ../le-proxy/conf/env/prodclusterb
                 </proxy.properties.path>
                 <workflow.properties.path>
-                    ../le-workflow/conf/env/prodcluster
+                    ../le-workflow/conf/env/prodclusterb
                 </workflow.properties.path>
                 <camille.properties.path>
-                    ../le-camille/conf/env/prodcluster
+                    ../le-camille/conf/env/prodclusterb
                 </camille.properties.path>
                 <monitor.properties.path>
-                    ../le-monitor/conf/env/prodcluster
+                    ../le-monitor/conf/env/prodclusterb
                 </monitor.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>

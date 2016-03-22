@@ -99,17 +99,17 @@
                 </property>
             </activation>
             <properties>
-                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
-                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
-                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
-                <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
-                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
-                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/qaclustera</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclustera</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qaclustera</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qaclustera</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/qaclustera</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qaclustera</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/qaclustera</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qaclustera</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qaclustera</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qaclustera</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/qaclustera</hadoop-metrics2.properties.path>
             </properties>
         </profile>
         <profile>
@@ -121,17 +121,17 @@
                 </property>
             </activation>
             <properties>
-                <eai.properties.path>../le-eai/conf/env/qacluster</eai.properties.path>
-                <db.properties.path>../le-db/conf/env/qacluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/qacluster</security.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qacluster</dataflowapi.properties.path>
-                <dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
-                <workflow.properties.path>../le-workflow/conf/env/qacluster</workflow.properties.path>
-                <workflowapi.properties.path>../le-workflowapi/conf/env/qacluster</workflowapi.properties.path>
-                <camille.properties.path>../le-camille/conf/env/qacluster</camille.properties.path>
-                <propdata.properties.path>../le-propdata/conf/env/qacluster</propdata.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/qacluster</proxy.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/qaclusterb</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/qaclusterb</db.properties.path>
+                <security.properties.path>../le-security/conf/env/qaclusterb</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/qaclusterb</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/qaclusterb</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/qaclusterb</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/qaclusterb</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/qaclusterb</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/qaclusterb</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/qaclusterb</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/qaclusterb</hadoop-metrics2.properties.path>
             </properties>
         </profile>
         <profile>
@@ -165,17 +165,17 @@
                 </property>
             </activation>
             <properties>
-                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
-                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
-                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
-                <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
-                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
-                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/prodclustera</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclustera</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodclustera</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodclustera</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/prodclustera</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodclustera</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/prodclustera</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodclustera</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodclustera</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodclustera</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/prodclustera</hadoop-metrics2.properties.path>
             </properties>
         </profile>
         <profile>
@@ -187,17 +187,17 @@
                 </property>
             </activation>
             <properties>
-                <eai.properties.path>../le-eai/conf/env/prodcluster</eai.properties.path>
-                <db.properties.path>../le-db/conf/env/prodcluster</db.properties.path>
-                <security.properties.path>../le-security/conf/env/prodcluster</security.properties.path>
-                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodcluster</dataflowapi.properties.path>
-                <dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
-                <workflow.properties.path>../le-workflow/conf/env/prodcluster</workflow.properties.path>
-                <workflowapi.properties.path>../le-workflowapi/conf/env/prodcluster</workflowapi.properties.path>
-                <camille.properties.path>../le-camille/conf/env/prodcluster</camille.properties.path>
-                <propdata.properties.path>../le-propdata/conf/env/prodcluster</propdata.properties.path>
-                <proxy.properties.path>../le-proxy/conf/env/prodcluster</proxy.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/prodclusterb</eai.properties.path>
+                <db.properties.path>../le-db/conf/env/prodclusterb</db.properties.path>
+                <security.properties.path>../le-security/conf/env/prodclusterb</security.properties.path>
+                <dataflowapi.properties.path>../le-dataflowapi/conf/env/prodclusterb</dataflowapi.properties.path>
+                <dataplatform.properties.path>conf/env/prodclusterb</dataplatform.properties.path>
+                <workflow.properties.path>../le-workflow/conf/env/prodclusterb</workflow.properties.path>
+                <workflowapi.properties.path>../le-workflowapi/conf/env/prodclusterb</workflowapi.properties.path>
+                <camille.properties.path>../le-camille/conf/env/prodclusterb</camille.properties.path>
+                <propdata.properties.path>../le-propdata/conf/env/prodclusterb</propdata.properties.path>
+                <proxy.properties.path>../le-proxy/conf/env/prodclusterb</proxy.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/prodclusterb</hadoop-metrics2.properties.path>
             </properties>
         </profile>
     </profiles>
