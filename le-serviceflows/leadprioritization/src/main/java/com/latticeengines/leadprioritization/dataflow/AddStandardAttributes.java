@@ -3,13 +3,13 @@ package com.latticeengines.leadprioritization.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component("addStandardAttributes")
 public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAttributesParameters> {
@@ -54,7 +54,7 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
         last = addFunction(last, "std_visidb_alexa_monthssinceonline", fm, //
                 eventTable.getSourceAttribute("AlexaOnlineSince"));
 
-        fm = new FieldMetadata("ModelAction1", String.class);
+        fm = new FieldMetadata("ModelAction1", Integer.class);
         last = addFunction(last, "std_visidb_ds_pd_modelaction_ordered", fm, //
                 eventTable.getSourceAttribute("ModelAction"));
 
