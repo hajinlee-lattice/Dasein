@@ -38,7 +38,7 @@
                             <sources>
                                 <source>
                                     <location>core/target/le-microservice-${le.rpm.version}.war</location>
-                                    <destination>doc.war</destination>
+                                    <destination>ROOT.war</destination>
                                 </source>
                                 <source>
                                     <location>modeling/target/le-modeling-microservice-${le.rpm.version}.war</location>
