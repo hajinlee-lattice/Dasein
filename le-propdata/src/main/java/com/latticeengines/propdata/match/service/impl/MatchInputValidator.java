@@ -61,9 +61,11 @@ class MatchInputValidator {
             throw new IllegalArgumentException("Must specify predefined or custom column selection.");
         }
 
-        if (!ColumnSelection.Predefined.Model.equals(input.getPredefinedSelection())) {
+        if (!ColumnSelection.Predefined.Model.equals(input.getPredefinedSelection()) &&
+                !ColumnSelection.Predefined.DerivedColumns.equals(input.getPredefinedSelection())) {
             throw new UnsupportedOperationException(
-                    "Only Predefined selection " + ColumnSelection.Predefined.Model + " is supported at this time.");
+                    "Only Predefined selection " + ColumnSelection.Predefined.Model
+                            + " and " + ColumnSelection.Predefined.DerivedColumns + " is supported at this time.");
         }
 
     }

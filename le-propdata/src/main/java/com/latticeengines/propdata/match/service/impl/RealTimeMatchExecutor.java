@@ -62,6 +62,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     private static final String CACHE_TABLE = "DerivedColumnsCache";
     private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     private static final String MODEL = ColumnSelection.Predefined.Model.getName();
+    private static final String DERIVED_COLUMNS = ColumnSelection.Predefined.DerivedColumns.getName();
     private static final Integer MAX_FETCH_THREADS = 4;
 
     private LoadingCache<String, Set<String>> tableColumnsCache;
@@ -325,7 +326,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
                 output.add(value);
 
-                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
+                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection()) ||
+                        ColumnSelection.Predefined.DerivedColumns.equals(
+                                matchContext.getInput().getPredefinedSelection())) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
                     internalRecord.getColumnMatched().add(value != null);
                 } else {
@@ -387,9 +390,11 @@ class RealTimeMatchExecutor implements MatchExecutor {
     }
 
     private MatchContext appendMetadata(MatchContext matchContext) {
-        if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())) {
+        ColumnSelection.Predefined selection = matchContext.getInput().getPredefinedSelection();
+        if (ColumnSelection.Predefined.Model.equals(selection) ||
+                ColumnSelection.Predefined.DerivedColumns.equals(selection)) {
             List<ColumnMetadata> allFields = columnMetadataService
-                    .fromPredefinedSelection(ColumnSelection.Predefined.Model);
+                    .fromPredefinedSelection(selection);
             matchContext.getOutput().setMetadata(allFields);
         }
         return matchContext;
@@ -400,7 +405,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     }
 
     private boolean isCachedSource(String sourceName) {
-        return MODEL.equals(sourceName);
+        return MODEL.equals(sourceName) || DERIVED_COLUMNS.equals(sourceName);
     }
 
     private String getDomainField(String sourceName) {
@@ -417,7 +422,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     private MatchCallable getMatchCallable(String sourceName, List<String> targetColumns, MatchContext matchContext) {
         JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-        if (MODEL.equals(sourceName)) {
+        if (MODEL.equals(sourceName) || DERIVED_COLUMNS.equals(sourceName)) {
             CachedMatchCallable callable =
                     new CachedMatchCallable("Domain", "Name", "Country", "State", "City");
             callable.setSourceName(sourceName);
@@ -429,7 +434,8 @@ class RealTimeMatchExecutor implements MatchExecutor {
             return callable;
         } else {
             throw new UnsupportedOperationException(
-                    "Only support match against predefined selection " + ColumnSelection.Predefined.Model + " now.");
+                    "Only support match against predefined selection " + ColumnSelection.Predefined.Model
+                            + " and " + ColumnSelection.Predefined.DerivedColumns + " now.");
         }
     }
 
@@ -606,7 +612,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
 
         protected String getSourceTableName() {
-            if (MODEL.equals(sourceName)) {
+            if (MODEL.equals(sourceName) || DERIVED_COLUMNS.equals(sourceName)) {
                 return CACHE_TABLE;
             } else {
                 return null;
