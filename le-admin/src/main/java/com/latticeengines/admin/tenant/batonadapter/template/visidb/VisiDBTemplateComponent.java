@@ -85,8 +85,11 @@ public class VisiDBTemplateComponent extends LatticeComponent {
 
     @Override
     public boolean doRegistration() {
-        String defaultJson = "vdb_tpl_default.json";
-        String metadataJson = "vdb_tpl_metadata.json";
-        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        if (uploadSchema) {
+            String defaultJson = "vdb_tpl_default.json";
+            String metadataJson = "vdb_tpl_metadata.json";
+            uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        }
+        return true;
     }
 }

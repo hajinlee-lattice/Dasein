@@ -85,8 +85,11 @@ public class DLTemplateComponent extends LatticeComponent {
 
     @Override
     public boolean doRegistration() {
-        String defaultJson = "dl_tpl_default.json";
-        String metadataJson = "dl_tpl_metadata.json";
-        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        if (uploadSchema) {
+            String defaultJson = "dl_tpl_default.json";
+            String metadataJson = "dl_tpl_metadata.json";
+            uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        }
+        return true;
     }
 }
