@@ -2,9 +2,9 @@
 
 /*
               Lattice Engines Express Server Application
+           See /server/server.js for the actual server code
     See Gruntfile.js to define environment variables for local dev
     See /conf/env/* to define environment variables for QA/PROD/etc
-           See /server/server.js for the actual server code
 */
 
 const Server    = require('./server/server');
@@ -16,8 +16,9 @@ const options   = {
     NODE_ENV:   app.get('env')          || process.env.NODE_ENV || 'production',
     HTTP_PORT:  process.env.HTTP_PORT   || false,
     HTTPS_PORT: process.env.HTTPS_PORT  || 3000,
-    HTTPS_KEY:  process.env.HTTPS_KEY   || '/certs/privatekey.key',
-    HTTPS_CRT:  process.env.HTTPS_CRT   || '/certs/certificate.crt',
+    HTTPS_KEY:  process.env.HTTPS_KEY   || './certs/privatekey.key',
+    HTTPS_CRT:  process.env.HTTPS_CRT   || './certs/certificate.crt',
+    HTTPS_PASS: process.env.HTTPS_PASS  || false,
     API_URL:    process.env.API_URL     || false,
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || true,
@@ -31,8 +32,9 @@ Object.keys(options).forEach(key => {
     options[key] === 'true'  ? options[key] = true  : null;
 });
 
-const server = new Server(express, app, options);
 const routes = require('./server/routes_' + (options.COMPRESSED ? 'dist' : 'dev'));
+
+const server = new Server(express, app, options);
 
 options.LOGGING
     ? server.startLogging(options.LOGGING) : null;

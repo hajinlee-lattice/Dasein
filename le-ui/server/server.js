@@ -28,12 +28,14 @@ class Server {
         if (options.HTTPS_PORT) {
             try {
                 const https = require('https');
-                const httpsKey = fs.readFileSync(__dirname + options.HTTPS_KEY, 'utf8');
-                const httpsCert = fs.readFileSync(__dirname + options.HTTPS_CRT, 'utf8');
+                const httpsKey = fs.readFileSync(options.HTTPS_KEY, 'utf8');
+                const httpsCert = fs.readFileSync(options.HTTPS_CRT, 'utf8');
                 const credentials = {
-                    key: httpsKey, 
                     cert: httpsCert
                 };
+                
+                options.HTTPS_KEY  ? credentials.key = httpsKey : null; 
+                options.HTTPS_PASS ? credentials.passphrase = options.HTTPS_PASS : null; 
 
                 this.httpsServer = https.createServer(credentials, this.app);
             } catch(err) {

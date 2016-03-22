@@ -1,8 +1,8 @@
 export NODE_ENV=qa
 export API_URL=http://${OUTSIDE_TOMCAT}:8081
 export COMPRESSED=true
-export HTTP_PORT=3000
-export HTTPS_PORT=3001
-export HTTPS_KEY=/certs/privatekey.key
-export HTTPS_CRT=/certs/certificate.crt
-export LOGGING=/var/log/ledp
+export HTTP_PORT=false
+export HTTPS_PORT=3000
+export HTTPS_KEY=/etc/pki/tls/private/private.key
+export HTTPS_CRT=/etc/pki/tls/star_lattice-engines_com.crt
+export HTTPS_PASS=Lattice1

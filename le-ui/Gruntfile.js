@@ -17,8 +17,9 @@ module.exports = function (grunt) {
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
                 HTTPS_PORT: 3001,
-                HTTPS_KEY: '/certs/privatekey.key',
-                HTTPS_CRT: '/certs/certificate.crt'
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
             },
             local: {
                 NODE_ENV: 'development',
@@ -27,8 +28,9 @@ module.exports = function (grunt) {
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
                 HTTPS_PORT: 3001,
-                HTTPS_KEY: '/certs/privatekey.key',
-                HTTPS_CRT: '/certs/certificate.crt'
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false
             },
             integration: {
                 NODE_ENV: 'integration',
@@ -37,8 +39,9 @@ module.exports = function (grunt) {
                 LOGGING: '/var/log/ledp',
                 HTTP_PORT: false,
                 HTTPS_PORT: 3000,
-                HTTPS_KEY: '/certs/privatekey.key',
-                HTTPS_CRT: '/certs/certificate.crt'
+                HTTPS_KEY: '/etc/pki/tls/private/private.key',
+                HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
+                HTTPS_PASS: 'Lattice1'
             },
             qa: {
                 NODE_ENV: 'qa',
@@ -47,8 +50,9 @@ module.exports = function (grunt) {
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
                 HTTPS_PORT: 3001,
-                HTTPS_KEY: '/certs/privatekey.key',
-                HTTPS_CRT: '/certs/certificate.crt'
+                HTTPS_KEY: '/etc/pki/tls/private/private.key',
+                HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
+                HTTPS_PASS: 'Lattice1'
             },
             production: {
                 NODE_ENV: 'production',
@@ -57,8 +61,9 @@ module.exports = function (grunt) {
                 LOGGING: '/var/log/ledp',
                 HTTP_PORT: false,
                 HTTPS_PORT: 3000,
-                HTTPS_KEY: '/certs/privatekey.key',
-                HTTPS_CRT: '/certs/certificate.crt',
+                HTTPS_KEY: '/etc/pki/tls/private/private.key',
+                HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
+                HTTPS_PASS: 'Lattice1',
                 WHITELIST: [
                     '10.0.0.1',
                     '10.0.10.1'
