@@ -60,7 +60,7 @@ public class ScoreResource {
 
     @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get active models (only contact type is supported in M1)")
+    @ApiOperation(value = "Get active models")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
