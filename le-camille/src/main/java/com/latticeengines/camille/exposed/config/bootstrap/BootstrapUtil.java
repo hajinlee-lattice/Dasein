@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
