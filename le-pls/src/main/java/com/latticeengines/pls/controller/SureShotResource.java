@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,7 +21,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "sureshot", description = "REST resource for providing SureShot links")
 @RestController
 @RequestMapping(value = "/sureshot")
-@PreAuthorize("hasRole('View_PLS_Configurations')")
 public class SureShotResource {
 
     private static final Logger log = Logger.getLogger(SureShotResource.class);
@@ -39,7 +37,6 @@ public class SureShotResource {
     @RequestMapping(value = "/credentials", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
-    @PreAuthorize("hasRole('Edit_PLS_Configurations')")
     public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType) {
         Tenant tenant = SecurityContextUtils.getTenant();
         if (tenant == null) {
@@ -54,7 +51,6 @@ public class SureShotResource {
     @RequestMapping(value = "/urls", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
-    @PreAuthorize("hasRole('Edit_PLS_Configurations')")
     public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType) {
         Tenant tenant = SecurityContextUtils.getTenant();
         if (tenant == null) {

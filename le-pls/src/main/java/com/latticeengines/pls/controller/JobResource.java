@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -40,7 +39,7 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a job by id")
-    @PreAuthorize("hasRole('View_PLS_Jobs')")
+    //@PreAuthorize("hasRole('View_PLS_Jobs')")
     public Job find(@PathVariable String jobId) {
         return workflowProxy.getWorkflowExecution(jobId);
     }
@@ -90,7 +89,7 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}/cancel", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Cancel a running job")
-    @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    //@PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public void cancel(@PathVariable String jobId) {
         workflowProxy.stopWorkflow(jobId);
     }
@@ -98,7 +97,7 @@ public class JobResource {
     @RequestMapping(value = "/{jobId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous job")
-    @PreAuthorize("hasRole('Edit_PLS_Jobs')")
+    //@PreAuthorize("hasRole('Edit_PLS_Jobs')")
     public AppSubmission restart(@PathVariable String jobId) {
         return workflowProxy.restartWorkflowExecution(jobId);
     }
