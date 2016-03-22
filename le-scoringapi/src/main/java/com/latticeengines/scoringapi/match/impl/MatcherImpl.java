@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
@@ -54,7 +55,7 @@ public class MatcherImpl implements Matcher {
         addToKeyMapIfValueExists(keyMap, MatchKey.State, interpreted.getCompanyState(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Country, interpreted.getCompanyCountry(), record);
         matchInput.setKeyMap(keyMap);
-        matchInput.setPredefinedSelection(ColumnSelection.Predefined.Model);
+        matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         matchInput.setTenant(new Tenant(space.toString()));
         List<String> fields = new ArrayList<>();
         List<List<Object>> data = new ArrayList<>();
@@ -142,8 +143,13 @@ public class MatcherImpl implements Matcher {
         for (int i = 0; i < matchFieldNames.size(); i++) {
             String fieldName = matchFieldNames.get(i);
             FieldSchema schema = fieldSchemas.get(fieldName);
-            if (schema != null && schema.source != FieldSource.REQUEST) {
-                Object fieldValue = matchFieldValues.get(i);
+            if (schema == null || (schema != null && schema.source != FieldSource.REQUEST)) {
+                Object fieldValue = null;
+                if (schema != null) {
+                    fieldValue = FieldType.parse(schema.type, matchFieldValues.get(i));
+                } else {
+                    fieldValue = matchFieldValues.get(i);
+                }
                 record.put(fieldName, fieldValue);
                 if (fieldName.equals(IS_PUBLIC_DOMAIN)) {
                     Boolean isPublicDomain = (Boolean) fieldValue;

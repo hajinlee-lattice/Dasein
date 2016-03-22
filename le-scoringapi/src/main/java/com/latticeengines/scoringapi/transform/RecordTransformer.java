@@ -34,7 +34,7 @@ public class RecordTransformer {
             Exception failedInvocationException = null;
             for (int numTries = 1; numTries < 3; numTries++) {
                 try {
-                    value = engine.invoke(entry.name, entry.arguments, record, entry.type.type());
+                    value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                     successfulInvocation = true;
                     if (numTries > 1) {
                         log.warn(String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
@@ -45,7 +45,6 @@ public class RecordTransformer {
                 }
             }
             if (successfulInvocation) {
-                record.put(entry.output, value);
                 result.put(entry.output, value);
             } else {
                 if (log.isWarnEnabled()) {

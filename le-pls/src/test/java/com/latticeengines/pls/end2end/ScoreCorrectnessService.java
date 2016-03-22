@@ -151,8 +151,9 @@ public class ScoreCorrectnessService {
         return String
                 .format("threshold:%f recordsCompared:%d different:%d percentDifferent:%3.1f differentRecordsWithMatchConflicts:%d differentRecordsWithTransformConflicts:%d avgMatchConflictsPerMatchConflictedRecord:%d avgTransformConflictsPerTransformConflictedRecord:%d",
                         threshold, totalRecords, different, (float) different / (float) totalRecords * 100.0,
-                        numRecordsWithMatchConflicts, numRecordsWithTransformConflicts, totalMatchConflicts
-                                / numRecordsWithMatchConflicts, totalTransformConflicts
+                        numRecordsWithMatchConflicts, numRecordsWithTransformConflicts,
+                        numRecordsWithMatchConflicts == 0 ? 0 : totalMatchConflicts / numRecordsWithMatchConflicts,
+                        numRecordsWithTransformConflicts == 0 ? 0 : totalTransformConflicts
                                 / numRecordsWithTransformConflicts);
     }
 
