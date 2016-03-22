@@ -152,16 +152,4 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(found);
     }
 
-    @Test(groups = "functional")
-    public void uploadFileWithNoAccess() throws Exception {
-        switchToExternalUser();
-        boolean exception = false;
-        try {
-            submitFile(false, PATH, false).isSuccess();
-        } catch (Exception e) {
-            exception = true;
-            assertEquals(e.getMessage(), "403");
-        }
-        assertTrue(exception, "Exception should have been thrown.");
-    }
 }
