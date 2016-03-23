@@ -48,11 +48,7 @@ module.exports = function (grunt) {
                 API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
                 COMPRESSED: true,
                 LOGGING: './server/log',
-                HTTP_PORT: 3000,
-                HTTPS_PORT: 3001,
-                HTTPS_KEY: '/etc/pki/tls/private/private.key',
-                HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
-                HTTPS_PASS: 'Lattice1'
+                HTTP_PORT: 3000
             },
             production: {
                 NODE_ENV: 'production',
