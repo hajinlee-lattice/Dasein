@@ -19,6 +19,8 @@ class LoadGroupMgr(object):
     def createLoadGroup(self, groupName, groupPath, groupAlias, autoClear, isNestedGroup):
         raise NotImplementedError( 'LoadGroupMgr.createLoadGroup()' )
 
+    def createSchemas(self, config):
+        raise NotImplementedError( 'LoadGroupMgr.createSchemas()' )
 
     def deleteLoadGroup(self, groupName):
         raise NotImplementedError( 'LoadGroupMgr.deleteLoadGroup()' )

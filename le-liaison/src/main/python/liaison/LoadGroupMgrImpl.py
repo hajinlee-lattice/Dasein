@@ -34,6 +34,15 @@ class LoadGroupMgrImpl( LoadGroupMgr ):
         dataProviders = self._config.find(".//dataProviders")
         dataProviders.append( d_new )
 
+    def createSchemas( self, config ):
+
+        s_new = etree.fromstring( config.encode('ascii', 'xmlcharrefreplace') )
+        if s_new.tag != 'schema':
+            raise UnknownDataLoaderObject( 'Unknown Functionality \'{0}\''.format(s_new.tag) )
+
+        schemas = self._config.find(".//schemas")
+        schemas.append( s_new )
+
 
     def createLoadGroup( self, groupName, groupPath, groupAlias, autoClear, isNestedGroup ):
         
@@ -169,7 +178,7 @@ class LoadGroupMgrImpl( LoadGroupMgr ):
 
     def initFromConfig( self, configstr ):
 
-        self._functionalities = set(['schemas','ngs','visiDBConfigurationWithMacros','targetQueries',
+        self._functionalities = set(['schema','schemas','ngs','visiDBConfigurationWithMacros','targetQueries',
                                                                  'targetQuerySequences','rdss','validationExtracts','ces','extractQueries',
                                                                  'extractQuerySequences','leafExtracts','launchExtracts','jobs', 'pdmatches','leadscroings',
                                                                  'lssbardins','lssbardouts','lds','ecs','gCs'])
@@ -179,6 +188,8 @@ class LoadGroupMgrImpl( LoadGroupMgr ):
         self._config.remove( dataProviders )
         self._config.insert( 0, etree.Element( 'dataProviders' ) )
 
+        schemas = self._config.find(".//schemas")
+        self._config.insert( 0, etree.Element( 'schemas' ) )
         self._groups = {}
 
         groupdefns = self._config.find(".//groups")

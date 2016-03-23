@@ -817,6 +817,53 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             print 'Success'
 
 
+#Add a New Feature to get the DL Tenant Setting
+    def getDLTenantSettings(self):
+
+        url = self._url + '/DLRestService/GetDLTenantSettings'
+
+        payload = {}
+        payload['tenantName'] = self._tenant_name
+
+        if self.isVerbose():
+            print self.getType() +': Get DataLoader Tenant Settings...',
+
+        try:
+            response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
+        except requests.exceptions.ConnectionError as e:
+            raise EndpointError( e )
+
+        if response.status_code != 200:
+            if self.isVerbose():
+                print 'HTTP POST request failed'
+            raise HTTPError( 'ConnectionMgrVDBImpl.getDLTenantSettings(): POST request returned code {0}'.format(response.status_code) )
+
+        status = None
+        errmsg = ''
+        try:
+            status = response.json()['Status']
+            errmsg = response.json()['ErrorMessage']
+
+        except ValueError as e:
+            if self.isVerbose():
+                print 'HTTP Endpoint did not return the expected response'
+            raise EndpointError( e )
+
+        if status == 5:
+            raise XMLStringError( errmsg )
+
+        if status != 3:
+            if self.isVerbose():
+                print 'Failed to get DL Tenant Settings'
+                print errmsg
+            raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.getDLTenantSettings(): {0}'.format(payload['tenantName']) )
+
+        if self.isVerbose():
+            print 'Success'
+
+        return( response.json()["Value"])
+
+
     @classmethod
     def __getURLForTenant(cls, tenant):
 
