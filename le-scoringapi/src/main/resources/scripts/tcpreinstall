@@ -4,3 +4,6 @@ rm -rf $CATALINA_HOME/webapps/scoringapi/*.war
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat
+mkdir -p /var/cache/scoringapi
+chown -R tomcat:tomcat /var/cache/scoringapi
+chmod 755 /var/cache/scoringapi
