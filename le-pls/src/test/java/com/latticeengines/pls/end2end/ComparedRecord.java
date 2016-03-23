@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.latticeengines.scoringapi.exposed.warnings.Warning;
 
 public class ComparedRecord {
 
@@ -23,6 +24,8 @@ public class ComparedRecord {
 
     private int numTransformFieldConflicts;
 
+    private List<Warning> warnings;
+
     @JsonIgnore
     private Map<String, Object> expectedTransformedRecord;
 
@@ -35,10 +38,8 @@ public class ComparedRecord {
     @JsonIgnore
     private Map<String, Object> scoreApiMatchedRecord;
 
-    @JsonIgnore
     private List<String> scoreApiMatchExtraFields;
 
-    @JsonIgnore
     private List<String> scoreApiMatchMissingFields;
 
     @JsonIgnore
@@ -173,6 +174,14 @@ public class ComparedRecord {
 
     public void setScoreApiMatchMissingFields(List<String> scoreApiMatchMissingFields) {
         this.scoreApiMatchMissingFields = scoreApiMatchMissingFields;
+    }
+
+    public List<Warning> getWarnings() {
+        return warnings;
+    }
+
+    public void setWarnings(List<Warning> warnings) {
+        this.warnings = warnings;
     }
 
 }
