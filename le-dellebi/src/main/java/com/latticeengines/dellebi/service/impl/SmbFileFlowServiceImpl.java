@@ -4,17 +4,18 @@ import jcifs.smb.NtStatus;
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-
 import java.net.MalformedURLException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dellebi.mbean.SmbFilesMBean;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -38,38 +39,42 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     @Value("${dellebi.datatarget.stagefinal.dbname}")
     private String stageFinalTargetDB;
 
+    @Autowired
+    private SmbFilesMBean smbFilesMBean;
+
     public SmbFile getScanedFile(DataFlowContext context) {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
         jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
+        List<SmbFile> smbFilesList = new ArrayList<SmbFile>();
 
-        initEntries(context);
-
-        for (DellEbiConfig config : getEntries(context)) {
+        for (DellEbiConfig config : getConfigListFromContext(context)) {
             try {
-
                 String smbInboxPath = config.getInboxPath();
                 SmbFile smbDir = new SmbFile(smbInboxPath + "/", auth);
 
                 SmbFile[] files = smbDir.listFiles(config.getFilePattern());
-
-                for (SmbFile zipFile : files) {
-
-                    if (isValidFile(zipFile, context)) {
-                        String zipFileName = zipFile.getName();
-                        log.info("Found one new file, name=" + zipFileName);
-                        return zipFile;
-                    }
+                for (int i = 0; i < files.length; i++) {
+                    smbFilesList.add(files[i]);
                 }
-
             } catch (SmbException ex) {
-                if (ex.getNtStatus() != NtStatus.NT_STATUS_NO_SUCH_FILE)
+                if (ex.getNtStatus() != NtStatus.NT_STATUS_NO_SUCH_FILE) {
                     log.warn("Failed to get Smb file! error=" + ex.getMessage());
+                }
             } catch (MalformedURLException ex) {
                 log.warn("The SMB url and auth is not correct! error=" + ex.getMessage());
             }
         }
+        SmbFile[] files = smbFilesList.toArray(new SmbFile[smbFilesList.size()]);
+        smbFilesMBean.sortSmbFiles(files);
 
+        for (SmbFile zipFile : files) {
+            if (isValidFile(zipFile)) {
+                String zipFileName = zipFile.getName();
+                log.info("Found one new file, name=" + zipFileName);
+                return zipFile;
+            }
+        }
         return null;
     }
 
@@ -128,7 +133,6 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             log.error("Can not move smbFile, name=" + fileName, ex);
             return false;
         }
-
     }
 
     @Override
@@ -139,12 +143,11 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             return stageFinalTargetDB;
     }
 
-    protected boolean isValidFile(SmbFile file, DataFlowContext context) {
+    protected boolean isValidFile(SmbFile file) {
 
         String fileName = file.getName();
 
         try {
-            Long lastModifiedTime = file.lastModified();
             if (file.isDirectory()) {
                 return false;
             }
@@ -156,7 +159,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             if (isFailedFile(fileName)) {
                 return false;
             }
-
+            Long lastModifiedTime = file.lastModified();
             if (!isValidForDate(fileName, lastModifiedTime)) {
                 return false;
             }
@@ -169,17 +172,11 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             log.error("Can not validate smbFile, name=" + fileName, e);
             return false;
         }
+
         return true;
     }
 
-    private void initEntries(DataFlowContext context) {
-        List<?> objs = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
-        List<DellEbiConfig> cfgList = DellEbiFlowServiceImpl.asList(objs, DellEbiConfig.class);
-        Collections.sort(cfgList);
-        context.setProperty(DellEbiFlowService.CFG_LIST, cfgList);
-    }
-
-    private List<DellEbiConfig> getEntries(DataFlowContext context) {
+    private List<DellEbiConfig> getConfigListFromContext(DataFlowContext context) {
         List<?> objs = context.getProperty(DellEbiFlowService.CFG_LIST, List.class);
         List<DellEbiConfig> cfgList = DellEbiFlowServiceImpl.asList(objs, DellEbiConfig.class);
         return cfgList;
@@ -187,12 +184,12 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
     protected String getSmbInboxPathByFileName(String fileName) {
         FileType type = getFileType(fileName);
-        if (type == null)
+        if (type == null) {
             return null;
+        }
         String typeName = type.getType();
 
         return dellEbiConfigEntityMgr.getInboxPath(typeName);
 
     }
-
 }

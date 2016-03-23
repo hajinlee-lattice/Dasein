@@ -59,19 +59,19 @@
     <bean id="dellebiManagerCronTrigger1"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="dellebiManagerJob1" />
-        <property name="cronExpression" value="0 0/5 * * * ?" />
+        <property name="cronExpression" value="${dellebi.dellebiManagerJob.schedule}" />
     </bean>
 
     <bean id="dellebiManagerCronTrigger2"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="dellebiManagerJob2" />
-        <property name="cronExpression" value="0 0/5 * * * ?" />
+        <property name="cronExpression" value="${dellebi.dellebiManagerJob.schedule}" />
     </bean>
 
     <bean id="dellebiManagerCronTrigger3"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="dellebiManagerJob3" />
-        <property name="cronExpression" value="0 0/5 * * * ?" />
+        <property name="cronExpression" value="${dellebi.dellebiManagerJob.schedule}" />
     </bean>
 
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

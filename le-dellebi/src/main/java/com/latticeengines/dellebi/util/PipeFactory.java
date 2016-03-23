@@ -53,8 +53,7 @@ public class PipeFactory {
             scrubArguments = scrubArguments.append(scrubArgument);
         }
 
-        List<String> exportedItems = new ArrayList<String>(
-                Arrays.asList(exportedFields.split(",")));
+        List<String> exportedItems = new ArrayList<String>(Arrays.asList(exportedFields.split(",")));
 
         Fields outputScrubArguments = new Fields(exportedItems.get(0));
         exportedItems.remove(0);
@@ -67,8 +66,7 @@ public class PipeFactory {
         docPipe = new Pipe("copy");
         AssertSizeEquals equals = new AssertSizeEquals(sizeOfFields);
         docPipe = new Each(docPipe, AssertionLevel.VALID, equals);
-        docPipe = new Each(docPipe, scrubArguments, new ScrubGeneralFunction(outputScrubArguments),
-                Fields.RESULTS);
+        docPipe = new Each(docPipe, scrubArguments, new ScrubGeneralFunction(outputScrubArguments), Fields.RESULTS);
         return docPipe;
     }
 }

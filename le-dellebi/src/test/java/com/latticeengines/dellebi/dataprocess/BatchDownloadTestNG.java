@@ -75,8 +75,8 @@ public class BatchDownloadTestNG extends AbstractTestNGSpringContextTests {
             unzip(fs, batchInputDir, batchOutputDir, file.getName());
 
             endTime = System.currentTimeMillis();
-            System.out.println("Unzip Time elapsed="
-                    + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
+            System.out.println(
+                    "Unzip Time elapsed=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
 
         }
 

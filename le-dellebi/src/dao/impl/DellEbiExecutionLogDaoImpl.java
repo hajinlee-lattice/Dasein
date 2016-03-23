@@ -9,7 +9,8 @@ import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.dellebi.dao.DellEbiExecutionLogDao;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 
-public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>implements DellEbiExecutionLogDao {
+public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
+        implements DellEbiExecutionLogDao {
 
     @Override
     protected Class<DellEbiExecutionLog> getEntityClass() {
@@ -22,7 +23,8 @@ public class DellEbiExecutionLogDaoImpl extends BaseDaoImpl<DellEbiExecutionLog>
         Session session = getSessionFactory().getCurrentSession();
 
         Class<DellEbiExecutionLog> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where FileName = :file order by id desc", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where FileName = :file order by id desc",
+                entityClz.getSimpleName());
 
         Query query = session.createQuery(queryStr);
         query.setString("file", file);

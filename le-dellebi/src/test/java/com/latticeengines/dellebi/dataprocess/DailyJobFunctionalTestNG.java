@@ -1,12 +1,6 @@
 package com.latticeengines.dellebi.dataprocess;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,18 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
-import jcifs.smb.SmbFileOutputStream;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.FileCopyUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -34,27 +22,20 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
-import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
+import com.latticeengines.dellebi.functionalframework.DellEbiTestNGBase;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.util.ExportAndReportService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
-import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
-@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml", "classpath:dellebi-context.xml" })
-public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
+public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
     static final Log log = LogFactory.getLog(DailyJobFunctionalTestNG.class);
 
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
-
-    @Value("${dellebi.smbaccount}")
-    private String smbAccount;
-    @Value("${dellebi.smbps}")
-    private String smbPS;
 
     @Value("${dellebi.local.inboxpath}")
     private String localInboxPath;
@@ -69,9 +50,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     private DellEbiFlowService dellEbiFlowService;
 
     @Autowired
-    private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
-
-    @Autowired
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
     private DellEbiExecutionLog dellEbiExecutionLog;
@@ -79,7 +57,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         dellEbiConfigEntityMgr.initialService();
-        smbClean();
+        smbClean(getValidateNameData());
+        smbClean(getStartDateNameData());
     }
 
     @BeforeMethod(groups = "functional")
@@ -234,63 +213,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
         return new Object[][] { { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true }, };
     }
 
-    private void smbPut(String remoteUrl, String localFile) throws Exception {
-        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
-
-        InputStream in = null;
-        OutputStream out = null;
-        String fileName = getFileNameFromPath(localFile);
-        SmbFile remoteFile = new SmbFile(remoteUrl + "/" + fileName, auth);
-        in = new BufferedInputStream(new FileInputStream(localFile));
-        out = new BufferedOutputStream(new SmbFileOutputStream(remoteFile));
-
-        FileCopyUtils.copy(in, out);
-
-    }
-
-    private void smbClean() throws Exception {
-        NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
-        jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
-        List<DellEbiConfig> configs = dellEbiConfigEntityMgr.getConfigs();
-        List<String> cleanPaths = new ArrayList<String>();
-        for (DellEbiConfig config : configs) {
-            if (!cleanPaths.contains(config.getInboxPath())) {
-                cleanPaths.add(config.getInboxPath());
-            }
-        }
-        for (String cleanPath : cleanPaths) {
-            try {
-                SmbFile remoteFile = new SmbFile(cleanPath + '/', auth);
-                SmbFile[] smbFiles = remoteFile.listFiles();
-                for (SmbFile smbFile : smbFiles) {
-                    String fileName = smbFile.getName();
-
-                    for (Object[] obj : getValidateNameData()) {
-                        String objFileName = getFileNameFromPath((String) obj[0]);
-                        if (fileName.equals(objFileName)) {
-                            smbFile.delete();
-                            log.info("Deleting smbFile, name=" + cleanPath + "/" + fileName);
-                            break;
-                        }
-                    }
-
-                    for (Object[] obj : getStartDateNameData()) {
-                        String objFileName = getFileNameFromPath((String) obj[0]);
-                        if (fileName.equals(objFileName)) {
-                            smbFile.delete();
-                            log.info("Deleting smbFile, name=" + cleanPath + "/" + fileName);
-                            break;
-                        }
-                    }
-
-                }
-
-            } catch (SmbException ex) {
-                log.error(ex);
-            }
-        }
-    }
-
     private void processLogEntryStatus(String fileName, Boolean isProcessed) {
         if (isProcessed == false) {
             dellEbiExecutionLog = dellEbiExecutionLogEntityMgr.getEntryByFile(fileName);
@@ -323,15 +245,6 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
         return dellEbiConfigEntityMgr.getIsDeleted(type);
 
-    }
-
-    private String getFileNameFromPath(String filePath) {
-        if (filePath == null)
-            return null;
-
-        File localFile = new File(filePath);
-        String fileName = localFile.getName();
-        return fileName;
     }
 
     private void processSmbFileModifiedDate(String fileName, Boolean isSetStartDate) throws Exception {
