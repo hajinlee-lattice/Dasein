@@ -144,7 +144,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @JsonIgnore
-    public void setLogicalDataTypeString(String logicalDataTypeString) {
+    public void setLogicalDataType(String logicalDataTypeString) {
         LogicalDataType logicalDataType = null;
         try {
             logicalDataType = LogicalDataType.valueOf(logicalDataTypeString);
@@ -196,7 +196,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setInterfaceNameString(String interfaceNameString) {
+    public void setInterfaceName(String interfaceNameString) {
         InterfaceName interfaceName = null;
         try {
             interfaceName = InterfaceName.valueOf(interfaceNameString);
@@ -604,6 +604,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonIgnore
     public void setRTS(Boolean rts) {
         properties.put("RTSAttribute", rts);
+    }
+
+    @Transient
+    @JsonIgnore
+    public void setRTS(String rts) {
+        properties.put("RTSAttribute", Boolean.valueOf(rts));
     }
 
     @Override

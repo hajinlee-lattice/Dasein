@@ -32,10 +32,12 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
                 eventTable.getSourceAttribute(InterfaceName.CompanyName));
 
         fm = new FieldMetadata("Title_Length", Integer.class);
+        fm.setPropertyValue("DisplayName", "Length of Title");
         last = addFunction(last, "std_length", fm, //
                 eventTable.getSourceAttribute(InterfaceName.Title));
 
         fm = new FieldMetadata("CompanyName_Length", Integer.class);
+        fm.setPropertyValue("DisplayName", "Length of Company Name");
         last = addFunction(last, "std_length", fm, //
                 eventTable.getSourceAttribute(InterfaceName.CompanyName));
 
@@ -44,9 +46,11 @@ public class AddStandardAttributes extends TypesafeDataFlowBuilder<AddStandardAt
                 eventTable.getSourceAttribute("AlexaRelatedLinks"));
 
         fm = new FieldMetadata("Domain_Length", Integer.class);
+        fm.setPropertyValue("DisplayName", "Length of Domain Name");
         last = addFunction(last, "std_length", fm, emailOrWebsite);
 
         fm = new FieldMetadata("Phone_Entropy", Double.class);
+        fm.setPropertyValue("DisplayName", "Entropy of Phone Number");
         last = addFunction(last, "std_entropy", fm, //
                 eventTable.getSourceAttribute(InterfaceName.PhoneNumber));
 

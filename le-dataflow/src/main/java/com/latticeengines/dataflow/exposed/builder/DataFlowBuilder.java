@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 public abstract class DataFlowBuilder {
 
@@ -76,7 +77,7 @@ public abstract class DataFlowBuilder {
                 String logicalType = props.get("logicalType");
                 if (logicalType != null && //
                         (logicalType.equals(LogicalDataType.InternalId.toString()) || //
-                        logicalType.equals(LogicalDataType.Reference.toString()) || //
+                                logicalType.equals(LogicalDataType.Reference.toString()) || //
                         logicalType.equals(LogicalDataType.Id))) {
                     continue;
                 }
@@ -170,7 +171,7 @@ public abstract class DataFlowBuilder {
                 }
 
                 attribute.setSourceLogicalDataType(fm.getPropertyValue("sourceLogicalType"));
-                attribute.setLogicalDataTypeString(fm.getPropertyValue("logicalType"));
+                attribute.setLogicalDataType(fm.getPropertyValue("logicalType"));
                 attribute.setNullable(true);
                 attribute.setPhysicalDataType(fm.getAvroType().toString().toLowerCase());
 
@@ -182,35 +183,7 @@ public abstract class DataFlowBuilder {
                 }
                 attribute.setCleanedUpEnumValuesAsString(fm.getPropertyValue("enumValues"));
 
-                for (Map.Entry<String, String> entry : fm.getProperties().entrySet()) {
-                    String key = entry.getKey();
-                    String value = entry.getValue();
-                    if (key.equals("ApprovedUsage")) {
-                        attribute.setApprovedUsage(value);
-                    } else if (key.equals("StatisticalType")) {
-                        attribute.setStatisticalType(value);
-                    } else if (key.equals("DisplayDiscretizationStrategy")) {
-                        attribute.setDisplayDiscretizationStrategy(value);
-                    } else if (key.equals("Category")) {
-                        attribute.setCategory(value);
-                    } else if (key.equals("Tags")) {
-                        attribute.setTags(value);
-                    } else if (key.equals("FundamentalType")) {
-                        attribute.setFundamentalType(value);
-                    } else if (key.equals("RTSModuleName")) {
-                        attribute.setRTSModuleName(value);
-                    } else if (key.equals("RTSArguments")) {
-                        attribute.setRTSArguments(value);
-                    } else if (key.equals("RTSAttribute")) {
-                        attribute.setRTS(Boolean.valueOf(value));
-                    } else if (key.equals("InterfaceName")) {
-                        attribute.setInterfaceNameString(value);
-                    } else if (key.equals("Category")) {
-                        attribute.setCategory(value);
-                    } else if (key.equals("DataType")) {
-                        attribute.setDataType(value);
-                    }
-                }
+                AttributeUtils.setPropertiesFromStrings(attribute, fm.getProperties());
 
                 table.addAttribute(attribute);
             } catch (Exception e) {

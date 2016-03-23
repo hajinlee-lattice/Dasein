@@ -153,7 +153,7 @@ public class MetadataConverter {
             String type = getType(field.schema());
             attribute.setPhysicalDataType(type);
             attribute.setSourceLogicalDataType(field.getProp("sourceLogicalType"));
-            attribute.setLogicalDataTypeString(field.getProp("logicalType"));
+            attribute.setLogicalDataType(field.getProp("logicalType"));
             if (field.getProp("scale") != null) {
                 attribute.setScale(Integer.parseInt(field.getProp("scale")));
             }
@@ -176,7 +176,7 @@ public class MetadataConverter {
                 attribute.setCleanedUpEnumValues(enumValues);
                 attribute.setEnumValues(enumValues);
             }
-            attribute.setInterfaceNameString(field.getProp("InterfaceName"));
+            attribute.setInterfaceName(field.getProp("InterfaceName"));
 
             return attribute;
         } catch (Exception e) {

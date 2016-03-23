@@ -1,12 +1,10 @@
 package com.latticeengines.serviceflows.workflow.match;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -150,8 +148,6 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
             String query = "SELECT InternalColumnName, MetaDataName, MetaDataValue FROM " + table.getName()
                     + "_MetaData ORDER BY InternalColumnName";
             Map<String, Attribute> map = table.getNameAttributeMap();
-            Class<?> attrClass = Class.forName(Attribute.class.getName());
-            Map<String, Method> methodMap = new HashMap<>();
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
                 ResultSet rset = pstmt.executeQuery();
 
@@ -169,22 +165,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
                     if (attr == null) {
                         continue;
                     }
-                    String methodName = "set" + metadataName;
-                    Method m = methodMap.get(methodName);
-
-                    if (m == null) {
-                        try {
-                            m = attrClass.getMethod(methodName, String.class);
-                        } catch (Exception e) {
-                            // no method, skip
-                            continue;
-                        }
-                        methodMap.put(methodName, m);
-                    }
-
-                    if (m != null) {
-                        m.invoke(attr, metadataValue);
-                    }
+                    AttributeUtils.setPropertyFromString(attr, metadataName, metadataValue);
                 }
             }
         }
