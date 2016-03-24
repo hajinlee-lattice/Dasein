@@ -18,13 +18,13 @@ import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.warnings.Warning;
 import com.latticeengines.scoringapi.exposed.warnings.WarningCode;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
-public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBase {
+public class ScoringResourceWarningsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ScoringResourceWarningsTestNG.class);
+    private static final Log log = LogFactory.getLog(ScoringResourceWarningsDeploymentTestNG.class);
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void missingColumn() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -40,7 +40,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void noMatch() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -55,7 +55,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void publicDomain() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -69,7 +69,7 @@ public class ScoringResourceWarningsTestNG extends ScoringApiControllerTestNGBas
         postAndAssert(url, scoreRequest, expectedWarningCodeAndMessageValues);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void extraFields() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();

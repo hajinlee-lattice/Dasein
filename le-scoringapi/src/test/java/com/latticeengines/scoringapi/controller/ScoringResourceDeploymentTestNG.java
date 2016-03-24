@@ -17,11 +17,11 @@ import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 
-public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
+public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void getModels() {
         String url = apiHostPort + "/score/models/CONTACT";
         ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
@@ -32,7 +32,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         Assert.assertEquals(models.get(0).getModelId(), MODEL_ID);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void getFields() {
         String modelId = MODEL_ID;
         String url = apiHostPort + "/score/models/" + modelId + "/fields";
@@ -50,7 +50,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void scoreRecord() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -62,7 +62,7 @@ public class ScoringResourceTestNG extends ScoringApiControllerTestNGBase {
         Assert.assertEquals(scoreResponse.getScore(), 99.0d);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void scoreDebugRecord() throws IOException {
         String url = apiHostPort + "/score/record/debug";
         ScoreRequest scoreRequest = getScoreRequest();

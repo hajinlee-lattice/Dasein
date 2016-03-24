@@ -12,12 +12,12 @@ import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
-import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerTestNGBase;
+import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 
-public class ScoringResourceErrorsTestNG extends ScoringApiControllerTestNGBase {
+public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void missingModelId() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -30,7 +30,7 @@ public class ScoringResourceErrorsTestNG extends ScoringApiControllerTestNGBase 
         Assert.assertEquals(handlerAndErrors.getValue().getDescription(), LedpCode.LEDP_31101.getMessage());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void invalidModelId() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -42,7 +42,7 @@ public class ScoringResourceErrorsTestNG extends ScoringApiControllerTestNGBase 
         Assert.assertEquals(handlerAndErrors.getValue().getError(), LedpCode.LEDP_31102.getExternalCode());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void missingDomain() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -55,7 +55,7 @@ public class ScoringResourceErrorsTestNG extends ScoringApiControllerTestNGBase 
         Assert.assertEquals(handlerAndErrors.getValue().getError(), LedpCode.LEDP_31199.getExternalCode());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "deployment", enabled = true)
     public void mismatchedDatatype() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();

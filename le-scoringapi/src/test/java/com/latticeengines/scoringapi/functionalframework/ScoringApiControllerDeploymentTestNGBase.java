@@ -31,7 +31,7 @@ import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.domain.pls.ModelSummaryUtils;
 
-public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBase {
+public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 
     protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
 
@@ -45,7 +45,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     protected static final CustomerSpace customerSpace = CustomerSpace.parse(TENANT_ID);
     private static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
-    private static final Log log = LogFactory.getLog(ScoringApiControllerTestNGBase.class);
+    private static final Log log = LogFactory.getLog(ScoringApiControllerDeploymentTestNGBase.class);
 
     private static final String CLIENT_ID_LP = "lp";
 
@@ -77,7 +77,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
 
     protected OAuth2RestTemplate oAuth2RestTemplate = null;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void beforeClass() throws IOException {
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         oAuthUser = getOAuthUser(TENANT_ID);
@@ -89,7 +89,7 @@ public class ScoringApiControllerTestNGBase extends ScoringApiFunctionalTestNGBa
         setupHdfsArtifacts(tenant);
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void afterClass() {
         userEntityMgr.delete(oAuthUser.getUserId());
     }
