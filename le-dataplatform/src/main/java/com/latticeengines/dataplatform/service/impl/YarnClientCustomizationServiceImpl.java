@@ -194,9 +194,10 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);
         try {
+            log.warn("Turning off ssl.");
             turnOffSslChecking();
         } catch (Exception e) {
-            log.warn("Could not turn off ssl check.", e);
+            log.warn("Failed to turn off ssl.");
         }
     }
 
