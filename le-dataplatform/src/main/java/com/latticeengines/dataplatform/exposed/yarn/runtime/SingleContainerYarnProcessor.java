@@ -1,7 +1,17 @@
 package com.latticeengines.dataplatform.exposed.yarn.runtime;
 
 import java.lang.reflect.ParameterizedType;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -61,6 +71,12 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     @SuppressWarnings("unchecked")
     public SingleContainerYarnProcessor() {
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        try {
+            log.warn("Turning off ssl.");
+            turnOffSslChecking();
+        } catch (Exception e) {
+            log.warn("Failed to turn off ssl.");
+        }
     }
 
     public ApplicationContext loadSoftwarePackages(String module, SoftwareLibraryService softwareLibraryService,
@@ -163,5 +179,28 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
         ((MindAppmasterServiceClient) appmasterServiceClient).setResponseChannel(replyChannel);
         ((MindAppmasterServiceClient) appmasterServiceClient).setBeanFactory(applicationContext);
 
+    }
+
+    //TODO: remove this when enabling https on production cluster
+    private void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
+        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        } };
+        final SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
     }
 }
