@@ -592,7 +592,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public Boolean getRTS() {
+    public Boolean getRTSAttribute() {
         Boolean rts = (Boolean) properties.get("RTSAttribute");
         if (rts == null) {
             return false;
@@ -602,13 +602,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     @Transient
     @JsonIgnore
-    public void setRTS(Boolean rts) {
+    public void setRTSAttribute(Boolean rts) {
         properties.put("RTSAttribute", rts);
     }
 
     @Transient
     @JsonIgnore
-    public void setRTS(String rts) {
+    public void setRTSAttribute(String rts) {
         properties.put("RTSAttribute", Boolean.valueOf(rts));
     }
 

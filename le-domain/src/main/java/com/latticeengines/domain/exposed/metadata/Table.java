@@ -393,7 +393,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         Map<String, FieldSchema> fields = new HashMap<>();
         ObjectMapper mapper = new ObjectMapper();
         for (Attribute attr : getAttributes()) {
-            if (!attr.getRTS()) {
+            if (!attr.getRTSAttribute()) {
                 continue;
             }
             Map<String, Object> args;
