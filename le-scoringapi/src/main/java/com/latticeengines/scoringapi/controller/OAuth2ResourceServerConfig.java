@@ -48,7 +48,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         http.requestMatchers().
                 antMatchers("/score/**", "/api-docs/**", "/swagger/**").and().
                 authorizeRequests().
-                    antMatchers("/score/configuration/**", "/score/webjars/**", "/score/v2/**", "/score/api-docs", "/score/api-docs/**", "/score/swagger/**", "/score/swagger**").permitAll().
+                    antMatchers("/score/configuration/**", "/score/webjars/**", "/score/v2/**", "/score/api-docs", "/score/api-docs/**", "/score/swagger/**", "/score/swagger**", "/score/health/**").permitAll().
                     antMatchers("/score/**").access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))");
         // @formatter:on
     }
