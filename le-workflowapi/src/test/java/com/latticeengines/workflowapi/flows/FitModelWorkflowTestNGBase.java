@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -31,6 +32,9 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
 
+    @Value("${workflowapi.test.accountmaster.path}")
+    private String accountMasterPath;
+    
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -74,7 +78,7 @@ public class FitModelWorkflowTestNGBase extends WorkflowApiFunctionalTestNGBase 
                 .targetMarket(defaultTargetMarket) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .uniqueKeyColumn("LatticeAccountID") //
-                .directoryToScore("/tmp/AccountMaster") //
+                .directoryToScore(accountMasterPath) //
                 .registerScoredTable(true) //
                 .attributes(
                         Arrays.asList(new String[] { "BusinessIndustry", "BusinessRevenueRange",
