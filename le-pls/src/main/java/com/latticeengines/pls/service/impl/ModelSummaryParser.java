@@ -103,7 +103,8 @@ public class ModelSummaryParser {
             constructionTime = System.currentTimeMillis();
         }
         String lookupId = JsonUtils.getOrDefault(details.get("LookupID"), String.class, "");
-        summary.setName(name);
+        summary.setName(String.format("%s-%s", name.replace(' ', '_'),
+                getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
         summary.setLookupId(lookupId);
         summary.setRocScore(JsonUtils.getOrDefault(details.get("RocScore"), Double.class, 0.0));
         summary.setTrainingRowCount(JsonUtils.getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
