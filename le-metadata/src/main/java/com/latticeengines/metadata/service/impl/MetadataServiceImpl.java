@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.Closure;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImpl;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -65,13 +67,23 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void createTable(CustomerSpace customerSpace, Table table) {
-        tableEntityMgr.create(table);
+    public void createTable(CustomerSpace customerSpace, final Table table) {
+        DatabaseUtils.retry("createTable", new Closure() {
+            @Override
+            public void execute(Object input) {
+                tableEntityMgr.create(table);
+            }
+        });
     }
 
     @Override
-    public void deleteTable(CustomerSpace customerSpace, String tableName) {
-        tableEntityMgr.deleteByName(tableName);
+    public void deleteTable(CustomerSpace customerSpace, final String tableName) {
+        DatabaseUtils.retry("deleteTable", new Closure() {
+            @Override
+            public void execute(Object input) {
+                tableEntityMgr.deleteByName(tableName);
+            }
+        });
     }
 
     @Override
@@ -85,16 +97,21 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void updateTable(CustomerSpace customerSpace, Table table) {
+    public void updateTable(CustomerSpace customerSpace, final Table table) {
         tableTypeHolder.setTableType(table.getTableType());
         try {
-            Table found = tableEntityMgr.findByName(table.getName());
-            if (found != null) {
-                log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
-                tableEntityMgr.deleteByName(found.getName());
-            }
+            DatabaseUtils.retry("updateTable", new Closure() {
+                @Override
+                public void execute(Object input) {
+                    Table found = tableEntityMgr.findByName(table.getName());
+                    if (found != null) {
+                        log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
+                        tableEntityMgr.deleteByName(found.getName());
+                    }
 
-            tableEntityMgr.create(table);
+                    tableEntityMgr.create(table);
+                }
+            });
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
         }
