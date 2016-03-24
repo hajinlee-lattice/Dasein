@@ -68,8 +68,8 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
     @Autowired
     private EmailService emailService;
 
-    @Value("${security.pls.app.hostport:http://localhost:8080}")
-    private String hostPort;
+    @Value("${security.app.public.url:http://localhost:8081}")
+    private String appPublicUrl;
 
     @Override
     public void importSfdcData(String tenantId, TenantDeployment deployment) {
@@ -375,23 +375,23 @@ public class TenantDeploymentManagerImpl implements TenantDeploymentManager {
                         User user = userService.findByEmail(email);
                         if (step == TenantDeploymentStep.IMPORT_SFDC_DATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsImportDataSuccessEmail(user, hostPort);
+                                emailService.sendPlsImportDataSuccessEmail(user, appPublicUrl);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsImportDataErrorEmail(user, hostPort);
+                                emailService.sendPlsImportDataErrorEmail(user, appPublicUrl);
                             }
                         } else if (step == TenantDeploymentStep.ENRICH_DATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsEnrichDataSuccessEmail(user, hostPort);
+                                emailService.sendPlsEnrichDataSuccessEmail(user, appPublicUrl);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsEnrichDataErrorEmail(user, hostPort);
+                                emailService.sendPlsEnrichDataErrorEmail(user, appPublicUrl);
                             }
                         } else if (step == TenantDeploymentStep.VALIDATE_METADATA) {
                             if (status == TenantDeploymentStatus.SUCCESS) {
-                                emailService.sendPlsValidateMetadataSuccessEmail(user, hostPort);
+                                emailService.sendPlsValidateMetadataSuccessEmail(user, appPublicUrl);
                             } else if (status == TenantDeploymentStatus.WARNING) {
-                                emailService.sendPlsMetadataMissingEmail(user, hostPort);
+                                emailService.sendPlsMetadataMissingEmail(user, appPublicUrl);
                             } else if (status == TenantDeploymentStatus.FAIL) {
-                                emailService.sendPlsValidateMetadataErrorEmail(user, hostPort);
+                                emailService.sendPlsValidateMetadataErrorEmail(user, appPublicUrl);
                             }
                         }
                     } catch (Exception e) { }

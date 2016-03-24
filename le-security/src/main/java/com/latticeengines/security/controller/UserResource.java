@@ -55,8 +55,8 @@ public class UserResource {
     @Autowired
     private EmailService emailService;
 
-    @Value("${security.pls.app.hostport:http://localhost:8080}")
-    private String apiHostPort;
+    @Value("${security.app.public.url:http://localhost:8081}")
+    private String apiPublicUrl;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -127,9 +127,9 @@ public class UserResource {
 
         String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiHostPort);
+            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiPublicUrl);
         } else {
-            emailService.sendPlsNewInternalUserEmail(tenant, user, tempPass, apiHostPort);
+            emailService.sendPlsNewInternalUserEmail(tenant, user, tempPass, apiPublicUrl);
         }
 
         response.setSuccess(true);
@@ -203,9 +203,9 @@ public class UserResource {
             if (newUser && user != null) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) ||
                         targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
+                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiPublicUrl);
                 } else {
-                    emailService.sendPlsExistingInternalUserEmail(tenant, user, apiHostPort);
+                    emailService.sendPlsExistingInternalUserEmail(tenant, user, apiPublicUrl);
                 }
             }
         }

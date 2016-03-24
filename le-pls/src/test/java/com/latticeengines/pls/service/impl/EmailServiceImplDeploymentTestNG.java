@@ -46,7 +46,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private String testUsername;
 
-    @Value("${security.pls.app.hostport}")
+    @Value("${security.app.public.url}")
     private String appUrl;
 
     @BeforeClass(groups = "deployment")

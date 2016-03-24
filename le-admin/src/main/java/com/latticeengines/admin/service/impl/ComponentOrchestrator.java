@@ -51,8 +51,8 @@ public class ComponentOrchestrator {
     @Autowired
     private UserService userService;
 
-    @Value("${security.pd.app.hostport}")
-    private String apiHostPort;
+    @Value("${security.app.public.url:http://localhost:8081}")
+    private String appPublicUrl;
 
     @Value("${pls.api.hostport}")
     private String plsEndHost;
@@ -189,9 +189,9 @@ public class ComponentOrchestrator {
                     HttpMethod.PUT, requestEntity, String.class);
 
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
+                emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), apiHostPort);
+                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
             } else {
                 log.info("The user clicked both PD and LPA3");
             }
@@ -209,9 +209,9 @@ public class ComponentOrchestrator {
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendPdExistingExternalUserEmail(tenant, user, apiHostPort);
+                emailService.sendPdExistingExternalUserEmail(tenant, user, appPublicUrl);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsExistingExternalUserEmail(tenant, user, apiHostPort);
+                emailService.sendPlsExistingExternalUserEmail(tenant, user, appPublicUrl);
             } else {
                 log.info("The user clicked both PD and LPA3");
             }
