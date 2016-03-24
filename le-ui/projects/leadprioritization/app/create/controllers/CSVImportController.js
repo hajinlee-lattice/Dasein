@@ -193,7 +193,7 @@ angular.module('mainApp.create.csvImport', [
             data: {
                 'description': 'Self-service Model',
                 'filename': csvMetaData.name,
-                'name': csvMetaData.modelName + "-" + new Date().getTime()
+                'name': csvMetaData.modelName
             },
             headers: { 'Content-Type': 'application/json' }
         })
