@@ -37,10 +37,12 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     data.TopSample = ModelService.FormatLeadSampleData(data.TopSample);
     $scope.externalAttributes = data.ExternalAttributes.total;
     $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
+    $scope.totalExternalPredictors = data.ExternalAttributes.totalAttributeValues;
     
     $scope.internalAttributes = data.InternalAttributes.total;
     $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
-    
+    $scope.totalInternalPredictors = data.InternalAttributes.totalAttributeValues;
+
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];
     $scope.createdDate = $scope.createdDate * 1000;
     $scope.createdDate = DateTimeFormatUtility.FormatShortDate($scope.createdDate);

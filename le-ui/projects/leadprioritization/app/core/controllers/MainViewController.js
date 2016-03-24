@@ -3,6 +3,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
+    'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.config.controllers.ManageCredentialsController',
@@ -19,7 +20,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.setup.controllers.LeadEnrichmentController'
 ])
 
-.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $state, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, LoginService, NavUtility, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     // Handle Initial View
@@ -41,10 +42,9 @@ angular.module('mainApp.core.controllers.MainViewController', [
     });
 
     function createUpdatePasswordSuccessView() {
-        $http.get('app/login/views/UpdatePasswordSuccessView.html', { cache: $templateCache }).success(function (html) {
-            var scope = $rootScope.$new();
-            $compile($("#mainContentView").html(html))(scope);
-        });
+        $('#mainHeaderView').hide();
+        LoginService.Logout();
+        $state.go('passwordsuccess');
     }
 
     // Handle when the User Management link is clicked
@@ -57,10 +57,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         //window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
 
         // Fetch the view and make it Angular aware
-        $http.get('app/userManagement/views/UserManagementView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            $compile($("#mainContentView").html(html))(scope);
-        });
+        $state.go('users', {}, { reload: true } );
     }
     /*
     function createMainContentViewAndRefreshFeatures() {

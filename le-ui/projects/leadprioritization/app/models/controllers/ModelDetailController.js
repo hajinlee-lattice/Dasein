@@ -43,7 +43,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
     var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
     model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
-    model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
+    model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
 
     thresholdData = ThresholdExplorerService.PrepareData(model);
     model.ThresholdChartData = thresholdData.ChartData;

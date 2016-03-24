@@ -420,6 +420,14 @@ angular
                 }
             }
         })
+        .state('passwordsuccess', {
+            url: '/passwordsuccess',
+            views: {
+                "main@": {
+                    templateUrl: 'app/login/views/UpdatePasswordSuccessView.html'
+                }
+            }
+        })
         .state('deploymentwizard', {
             url: '/deploymentwizard',
             views: {

@@ -47,8 +47,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.showExternalCategories = externalCategoryObj.total > 0;
     
     // Calculate total
-    var totalAttributes = data.TotalAttributeValues;
-    $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
+    var totalPredictors = data.TotalPredictors;
+    $scope.topPredictorTitle = totalPredictors + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
     
     $scope.generateCategoryLabel = function(category) {
     	return $sce.trustAsHtml(category.name + '<span style="background-color:' + category.color + '">' + category.count + '</span>');
