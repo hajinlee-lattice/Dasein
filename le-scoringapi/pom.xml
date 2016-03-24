@@ -132,7 +132,7 @@
                         <version>${jetty.version}</version>
                         <configuration>
                             <httpConnector>
-                                <port>8071</port>
+                                <port>8073</port>
                             </httpConnector>
                             <webAppConfig>
                                 <extraClasspath>
