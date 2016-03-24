@@ -36,7 +36,7 @@ var Login = function() {
         var width = 1100;
         var height = 768;
         browser.driver.manage().window().setSize(width, height);
-        browser.get('/', 30000);
+        browser.get('/lp2/', 30000);
     }
 
     function isLoginPage() {
