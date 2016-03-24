@@ -30,8 +30,8 @@ public class SmbFilesMBeanTestNG extends DellEbiTestNGBase {
     private final static String[] sortedFileNames = { "tgt_quote_trans_global_1_2015.zip",
             "tgt_quote_trans_global_5_2015.zip", "tgt_quote_trans_global_1_20150107_053143.zip",
             "tgt_quote_trans_global_2_20151007_035025.zip", "tgt_quote_trans_global_11_20151007_035025.zip",
-            "tgt_order_detail_global_1_20151127_235435.zip", "tgt_order_detail_global_5_20151127_235435.zip",
             "tgt_quote_trans_global_1_2016.zip", "tgt_quote_trans_global_1_20161007_035025.zip",
+            "tgt_order_detail_global_1_20151127_235435.zip", "tgt_order_detail_global_5_20151127_235435.zip",
             "tgt_all_chnl_hier_1_20151125_201055.zip", "tgt_order_detail_global_5_20151127_235435_1.zip" };
 
     @BeforeClass(groups = "functional")
