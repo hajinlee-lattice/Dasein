@@ -1,4 +1,3 @@
-alias zzztest='ls'
 alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -T8 -Pgenerate -DskipTests clean install'
 alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
