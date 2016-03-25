@@ -15,6 +15,9 @@ import org.apache.commons.logging.LogFactory;
 public class SSLUtils {
     private static Log log = LogFactory.getLog(SSLUtils.class);
 
+    /**
+     * turn off ssl checking for all https request from now on in current thread
+     */
     public static void turnOffSslChecking() {
         try {
             final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
