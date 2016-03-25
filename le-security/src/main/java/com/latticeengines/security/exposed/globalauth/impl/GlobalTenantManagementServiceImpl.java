@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
@@ -21,6 +22,8 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
 
     @RestApiCall
     private ITenantManagementService getService() {
+        SSLUtils.turnOffSslChecking();
+
         TenantManagementService service;
         try {
             service = new TenantManagementService(new URL(globalAuthUrl + "/GlobalAuthTenantManager?wsdl"));

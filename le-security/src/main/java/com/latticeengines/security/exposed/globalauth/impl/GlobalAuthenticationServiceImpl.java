@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.monitor.annotation.RestApiCall;
@@ -28,6 +29,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     @Override
     @RestApiCall
     public synchronized Ticket authenticateUser(String user, String password) {
+        SSLUtils.turnOffSslChecking();
+
         AuthenticationService service;
         try {
             service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));
@@ -49,6 +52,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     @Override
     @RestApiCall
     public synchronized boolean discard(Ticket ticket) {
+        SSLUtils.turnOffSslChecking();
+
         AuthenticationService service;
         try {
             service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));

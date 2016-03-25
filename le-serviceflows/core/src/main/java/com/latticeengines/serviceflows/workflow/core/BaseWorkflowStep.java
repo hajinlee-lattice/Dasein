@@ -1,21 +1,11 @@
 package com.latticeengines.serviceflows.workflow.core;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -27,6 +17,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -76,12 +67,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Override
     public boolean setup() {
         boolean result = super.setup();
-        try {
-            log.warn("Turning off ssl.");
-            turnOffSslChecking();
-        } catch (Exception e) {
-            log.warn("Failed to turn off ssl.");
-        }
+        SSLUtils.turnOffSslChecking();
         restTemplate.setInterceptors(addMagicAuthHeaders);
         return result;
     }
@@ -231,31 +217,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             return null;
         }
 
-    }
-
-
-
-    //TODO: remove this when enabling https on production cluster
-    private void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        } };
-        final SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        });
     }
 
 }

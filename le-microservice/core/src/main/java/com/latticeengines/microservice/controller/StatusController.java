@@ -1,17 +1,7 @@
 package com.latticeengines.microservice.controller;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -42,7 +33,7 @@ public class StatusController {
     @ApiOperation(value = "check that all the microservices are up")
     public Map<String, String> statusCheck() {
         try {
-            turnOffSslChecking();
+            SSLUtils.turnOffSslChecking();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -68,27 +59,5 @@ public class StatusController {
         status.put("Overall", overall ? "OK" : "ERROR");
 
         return status;
-    }
-
-    private void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
-        } };
-        final SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        });
     }
 }
