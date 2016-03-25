@@ -8,18 +8,18 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
-        <le.dataflow.version>2.0.22-SNAPSHOT</le.dataflow.version>
-        <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
-        <le.serviceflows.core.version>2.0.22-SNAPSHOT</le.serviceflows.core.version>
-        <le.workflow.version>2.0.22-SNAPSHOT</le.workflow.version>
-        <le.proxy.version>2.0.22-SNAPSHOT</le.proxy.version>
+        <le.dataflow.version>2.0.23-SNAPSHOT</le.dataflow.version>
+        <le.domain.version>2.0.23-SNAPSHOT</le.domain.version>
+        <le.serviceflows.core.version>2.0.23-SNAPSHOT</le.serviceflows.core.version>
+        <le.workflow.version>2.0.23-SNAPSHOT</le.workflow.version>
+        <le.proxy.version>2.0.23-SNAPSHOT</le.proxy.version>
         <component-name>leadprioritization</component-name>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-serviceflows</artifactId>
-        <version>2.0.22-SNAPSHOT</version>
+        <version>2.0.23-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 

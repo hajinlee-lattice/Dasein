@@ -9,14 +9,14 @@
 
     <properties>
         <component-name>workflowapi-microservice</component-name>
-        <le.workflowapi.version>2.0.22-SNAPSHOT</le.workflowapi.version>
-        <le.microservice.version>2.0.22-SNAPSHOT</le.microservice.version>
+        <le.workflowapi.version>2.0.23-SNAPSHOT</le.workflowapi.version>
+        <le.microservice.version>2.0.23-SNAPSHOT</le.microservice.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-microservice-parent</artifactId>
-        <version>2.0.22-SNAPSHOT</version>
+        <version>2.0.23-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 

@@ -9,15 +9,15 @@
 
     <properties>
         <component-name>network</component-name>
-        <le.common.version>2.0.22-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.22-SNAPSHOT</le.domain.version>
-        <le.oauth2.db.version>2.0.22-SNAPSHOT</le.oauth2.db.version>
+        <le.common.version>2.0.23-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.23-SNAPSHOT</le.domain.version>
+        <le.oauth2.db.version>2.0.23-SNAPSHOT</le.oauth2.db.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.22-SNAPSHOT</version>
+        <version>2.0.23-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
