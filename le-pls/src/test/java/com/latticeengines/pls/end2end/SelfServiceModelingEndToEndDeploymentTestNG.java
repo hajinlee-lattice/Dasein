@@ -282,7 +282,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                     String.format("%s/pls/modelsummaries", getPLSRestAPIHostPort()), List.class);
             for (Object rawSummary : summaries) {
                 ModelSummary summary = new ObjectMapper().convertValue(rawSummary, ModelSummary.class);
-                if (summary.getName().equals(modelName)) {
+                if (summary.getName().contains(modelName)) {
                     found = summary;
                 }
             }
