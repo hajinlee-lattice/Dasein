@@ -19,7 +19,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
@@ -234,10 +233,6 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
                 scoringArtifacts.getScoreDerivation());
         double probability = (double) evaluation.get(ScoreType.PROBABILITY);
         Object percentileObject = evaluation.get(ScoreType.PERCENTILE);
-        if (percentileObject == null) {
-            throw new LedpException(LedpCode.LEDP_31011, new String[] {
-                    String.valueOf(evaluation.get(ScoreType.PROBABILITY)), scoringArtifacts.getModelId() });
-        }
 
         int percentile = (int) percentileObject;
         if (percentile > 99 || percentile < 5) {

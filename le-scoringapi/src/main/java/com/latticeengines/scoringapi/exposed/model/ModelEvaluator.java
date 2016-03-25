@@ -127,12 +127,26 @@ public class ModelEvaluator {
         }
 
         if (derivation.percentiles != null) {
+            double lowest = 1.0;
+            double highest = 0.0;
             for (int index = 0; index < derivation.percentiles.size(); index++) {
                 BucketRange percentileRange = derivation.percentiles.get(index);
+                if (percentileRange.lower < lowest) {
+                    lowest = percentileRange.lower;
+                } else if (percentileRange.upper > highest) {
+                    highest = percentileRange.upper;
+                }
                 if (withinRange(percentileRange, predicted)) {
                     // Name of the percentile bucket is the percentile value.
                     result.put(ScoreType.PERCENTILE, Integer.valueOf(percentileRange.name));
                     break;
+                }
+            }
+            if (!result.containsKey(ScoreType.PERCENTILE)) {
+                if (predicted < lowest) {
+                    result.put(ScoreType.PERCENTILE, 1);
+                } else if (predicted > highest) {
+                    result.put(ScoreType.PERCENTILE, 100);
                 }
             }
         }

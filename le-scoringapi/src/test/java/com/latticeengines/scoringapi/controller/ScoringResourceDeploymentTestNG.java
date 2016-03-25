@@ -1,6 +1,9 @@
 package com.latticeengines.scoringapi.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -9,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.io.Files;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
@@ -75,5 +80,21 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         double difference = Math.abs(scoreResponse.getProbability() - 0.5411256857185404d);
         Assert.assertTrue(difference < 0.1);
     }
+
+    @Test(groups = "deployment", enabled = true)
+    public void scoreOutOfRangeRecord() throws IOException {
+        String url = apiHostPort + "/score/record/debug";
+        URL scoreRequestUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + "outofrange_score_request.json");
+        String scoreRecordContents = Files.toString(new File(scoreRequestUrl.getFile()), Charset.defaultCharset());
+        ScoreRequest scoreRequest = JsonUtils.deserialize(scoreRecordContents, ScoreRequest.class);
+
+        scoreRequest.setModelId(MODEL_ID);
+        ResponseEntity<DebugScoreResponse> response = oAuth2RestTemplate.postForEntity(url, scoreRequest,
+                DebugScoreResponse.class);
+
+        DebugScoreResponse scoreResponse = response.getBody();
+        Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+    }
+
 
 }
