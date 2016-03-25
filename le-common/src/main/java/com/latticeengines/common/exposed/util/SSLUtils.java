@@ -39,9 +39,9 @@ public class SSLUtils {
                     return true;
                 }
             });
-            log.info("Turned off ssl.");
+            log.info("Turned off ssl for current thread: " + Thread.currentThread().getName());
         } catch (Exception e) {
-            log.warn("Failed to turn off ssl.", e);
+            log.warn("Failed to turn off ssl for thread" + Thread.currentThread().getName(), e);
         }
     }
 
