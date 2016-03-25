@@ -139,6 +139,9 @@ public class InternalResource extends InternalResourceBase {
     @Value("${pls.test.deployment.reset.by.admin:true}")
     private boolean resetByAdminApi;
 
+    @Value("${security.app.public.url:http://localhost:8081}")
+    private String appPublicUrl;
+
     @RequestMapping(value = "/targetmarkets/default/" + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create default target market")
@@ -356,9 +359,9 @@ public class InternalResource extends InternalResourceBase {
         for (User user : users) {
             if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
                 if (result.equals("COMPLETED")) {
-                    emailService.sendPlsCreateModelCompletionEmail(user, hostPort);
+                    emailService.sendPlsCreateModelCompletionEmail(user, appPublicUrl);
                 } else {
-                    emailService.sendPlsCreateModelErrorEmail(user, hostPort);
+                    emailService.sendPlsCreateModelErrorEmail(user, appPublicUrl);
                 }
             }
         }
