@@ -53,7 +53,7 @@ public class ScoreCorrectnessService {
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
 //    private static final int NUM_LEADS_TO_SCORE = 4000;
     private static final int NUM_LEADS_TO_SCORE = 300;
-    private static final double ACCEPTABLE_NUM_DIFFERENCES = 1;
+    private static final double ACCEPTABLE_NUM_DIFFERENCES = 5;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
@@ -293,10 +293,13 @@ public class ScoreCorrectnessService {
     private Map<String, DebugScoreResponse> scoreRecords(String modelId, Map<String, Map<String, Object>> inputRecords) {
         Set<String> problemScores = new HashSet<>();
         Map<String, DebugScoreResponse> responses = new HashMap<>();
+        int counter = 1;
+        int recordSize = inputRecords.keySet().size();
         for (String id : inputRecords.keySet()) {
             try {
                 DebugScoreResponse response = score(inputRecords.get(id), modelId);
                 responses.put(id, response);
+                log.info(String.format("Scored record %d out of %d", counter++, recordSize));
             } catch (Exception e) {
                 problemScores.add(id);
             }
