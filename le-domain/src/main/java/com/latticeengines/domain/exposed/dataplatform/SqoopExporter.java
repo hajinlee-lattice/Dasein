@@ -3,10 +3,10 @@ package com.latticeengines.domain.exposed.dataplatform;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopExporter {
@@ -23,7 +23,6 @@ public class SqoopExporter {
     private boolean sync;
     private List<String> hadoopArgs;
     private List<String> otherOptions;
-    private Properties properties;
 
     public String getTable() {
         return table;
@@ -121,14 +120,6 @@ public class SqoopExporter {
         this.otherOptions = otherOptions;
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Properties properties) {
-        this.properties = properties;
-    }
-
     public static class Builder {
 
         private String table;
@@ -143,10 +134,9 @@ public class SqoopExporter {
         private boolean sync = true;
         private List<String> hadoopArgs = new ArrayList<>();
         private List<String> otherOptions = new ArrayList<>();
-        private Properties properties;
 
         public SqoopExporter build() {
-            SqoopExporter exporter = new SqoopExporter();
+            SqoopExporter exporter =  new SqoopExporter();
             exporter.setTable(this.table);
             exporter.setSourceDir(this.sourceDir);
             exporter.setDbCreds(this.dbCreds);
@@ -157,10 +147,9 @@ public class SqoopExporter {
             exporter.setExportColumns(new ArrayList<String>(this.exportColumns));
             exporter.setYarnConfiguration(this.yarnConfiguration);
             exporter.setSync(this.sync);
-            exporter.setProperties(properties);
 
             Set<String> hadoopArgKeys = new HashSet<>();
-            for (String arg : this.hadoopArgs) {
+            for (String arg: this.hadoopArgs) {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
                 }
@@ -237,11 +226,6 @@ public class SqoopExporter {
 
         public Builder addExtraOption(String option) {
             this.otherOptions.add(option);
-            return this;
-        }
-
-        public Builder setProperties(Properties properties) {
-            this.properties = properties;
             return this;
         }
     }
