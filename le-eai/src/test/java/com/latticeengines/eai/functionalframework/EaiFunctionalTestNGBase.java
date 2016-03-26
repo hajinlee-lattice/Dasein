@@ -163,23 +163,23 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             attr.setName(field.getName());
             attr.setDisplayName(field.getName());
             attr.setNullable(true);
-            if (attr.getName().equals("Id")) {
+            if (attr.getName().equals(InterfaceName.Id.name())) {
                 attr.setInterfaceName(InterfaceName.Id);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
-            if (attr.getName().equals("Country")) {
+            if (attr.getName().equals(InterfaceName.Country.name())) {
                 attr.setInterfaceName(InterfaceName.Country);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
-            if (attr.getName().equals("Company")) {
+            if (attr.getName().equals(InterfaceName.CompanyName.name())) {
                 attr.setInterfaceName(InterfaceName.CompanyName);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
-            if (attr.getName().equals("Email")) {
+            if (attr.getName().equals(InterfaceName.Email.name())) {
                 attr.setInterfaceName(InterfaceName.Email);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
-            if (attr.getName().equals("City")) {
+            if (attr.getName().equals(InterfaceName.City.name())) {
                 attr.setInterfaceName(InterfaceName.City);
                 attr.setPhysicalDataType(String.class.getSimpleName());
             }
@@ -189,7 +189,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             if (attr.getName().equals("DS_CompanyName_Entropy")) {
                 attr.setPhysicalDataType(Float.class.getSimpleName());
             }
-            if (attr.getName().equals("LastModifiedDate")) {
+            if (attr.getName().equals(InterfaceName.LastModifiedDate.name())) {
                 attr.setInterfaceName(InterfaceName.LastModifiedDate);
                 attr.setPhysicalDataType(Long.class.getSimpleName());
             }

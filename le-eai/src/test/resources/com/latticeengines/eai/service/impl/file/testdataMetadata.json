@@ -78,7 +78,7 @@
       "ApprovedUsage": [
         "None"
       ],
-      "ColumnName": "Company",
+      "ColumnName": "CompanyName",
       "DataQuality": null,
       "DataSource": [
         "File"
