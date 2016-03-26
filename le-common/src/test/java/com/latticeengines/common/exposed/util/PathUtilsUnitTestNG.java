@@ -3,7 +3,7 @@ package com.latticeengines.common.exposed.util;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-public class PathUtilsTestNG {
+public class PathUtilsUnitTestNG {
 
     @Test(groups = { "unit", "functional" })
     public void testStripoutProtocal() throws Exception {

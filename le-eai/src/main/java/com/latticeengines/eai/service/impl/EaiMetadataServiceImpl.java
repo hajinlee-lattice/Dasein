@@ -1,27 +1,15 @@
 package com.latticeengines.eai.service.impl;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.PathUtils;
@@ -36,7 +24,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.service.EaiMetadataService;
-import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("eaiMetadataService")
@@ -48,16 +36,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     private TenantService tenantService;
 
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Value("${eai.metadata.url}")
-    private String metadataUrl;
-
-    @PostConstruct
-    public void init() {
-        restTemplate.setInterceptors(Arrays.<ClientHttpRequestInterceptor> asList( //
-                new ClientHttpRequestInterceptor[] { new AuthorizationHeaderHttpRequestInterceptor() }));
-    }
+    private MetadataProxy metadataProxy;
 
     @Override
     public void registerTables(List<Table> tablesMetadataFromImport, ImportContext importContext) {
@@ -68,72 +47,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
 
     @Override
     public List<Table> getImportTables(String customerSpace) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        String[] tableNames = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/importtables",
-                String[].class, uriVariables);
-        List<Table> tables = new ArrayList<>();
-        for (String tableName : tableNames) {
-            uriVariables.put("tableName", tableName);
-            Table table = getImportTable(customerSpace, tableName);
-            if (table != null) {
-                tables.add(table);
-            }
-        }
-        return tables;
-    }
-
-    @Override
-    public Table getImportTable(String customerSpace, String tableName) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        uriVariables.put("tableName", tableName);
-        Table newTable = restTemplate.getForObject(metadataUrl
-                + "/customerspaces/{customerSpace}/importtables/{tableName}", Table.class, uriVariables);
-        return newTable;
-    }
-
-    @Override
-    public List<Table> getTables(String customerSpace) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        String[] tableNames = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/tables",
-                String[].class, uriVariables);
-        List<Table> tables = new ArrayList<>();
-        for (String tableName : tableNames) {
-            uriVariables.put("tableName", tableName);
-            Table table = getTable(customerSpace, tableName);
-            if (table != null) {
-                tables.add(table);
-            }
-        }
-        return tables;
-    }
-
-    @Override
-    public Table getTable(String customerSpace, String tableName) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        uriVariables.put("tableName", tableName);
-        Table newTable = restTemplate.getForObject(metadataUrl + "/customerspaces/{customerSpace}/tables/{tableName}",
-                Table.class, uriVariables);
-        return newTable;
-    }
-
-    @Override
-    public void createImportTables(String customerSpace, List<Table> tables) {
-        for (Table table : tables) {
-            createImportTable(customerSpace, table);
-        }
-    }
-
-    @Override
-    public void createImportTable(String customerSpace, Table table) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("customerSpace", customerSpace);
-        uriVariables.put("tableName", table.getName());
-        restTemplate.postForObject(metadataUrl + "/customerspaces/{customerSpace}/importtables/{tableName}", table,
-                String.class, uriVariables);
+        return metadataProxy.getImportTables(customerSpace);
     }
 
     @Override
@@ -142,20 +56,18 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         uriVariables.put("customerSpace", customerSpace);
 
         for (Table table : tables) {
-            uriVariables.put("tableName", table.getName());
-            restTemplate.put(
-                    String.format("%s/customerspaces/%s/tables/%s", metadataUrl, customerSpace, table.getName()), //
-                    table);
+            metadataProxy.updateTable(customerSpace, table.getName(), table);
         }
+
     }
 
     @Override
     public LastModifiedKey getLastModifiedKey(String customerSpace, Table table) {
-        Table newTable = getTable(customerSpace, table.getName());
+        Table newTable = metadataProxy.getTable(customerSpace, table.getName());
         if (newTable != null) {
             return newTable.getLastModifiedKey();
         }
-        newTable = getImportTable(customerSpace, table.getName());
+        newTable = metadataProxy.getImportTable(customerSpace, table.getName());
         if (newTable != null) {
             return newTable.getLastModifiedKey();
         }
@@ -193,18 +105,6 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         return tenantService.findByTenantId(customerSpace);
     }
 
-    public class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME,
-                    Constants.INTERNAL_SERVICE_HEADERVALUE);
-            return execution.execute(requestWrapper, body);
-        }
-    }
-
     @Override
     public void updateTableSchema(List<Table> tablesMetadataFromImport, ImportContext importContext) {
         String customer = importContext.getProperty(ImportProperty.CUSTOMER, String.class);
@@ -234,14 +134,13 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
         }
     }
 
-    @Override
-    public void setMetadataUrl(String metadataUrl) {
-        this.metadataUrl = metadataUrl;
+    @VisibleForTesting
+    void setMetadatProxy(MetadataProxy metadataProxy) {
+        this.metadataProxy = metadataProxy;
     }
 
     @VisibleForTesting
     void setTenantService(TenantService tenantService) {
         this.tenantService = tenantService;
     }
-
 }

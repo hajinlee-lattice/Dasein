@@ -11,7 +11,9 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -91,6 +93,8 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
                 throw new RuntimeException("Found empty column name in headers.");
+            } else if (!NameValidationUtils.validateColumnName(field)) {
+                throw new LedpException(LedpCode.LEDP_18095, new String[] { field, csvPath });
             }
             if (!Iterables.any(attributes, new Predicate<Attribute>() {
 
@@ -160,7 +164,6 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     }
 
     private Set<String> getHeaderFields() {
-        Set<String> fields = new HashSet<>();
         try {
             try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
                 try (InputStream is = fs.open(new Path(csvPath))) {

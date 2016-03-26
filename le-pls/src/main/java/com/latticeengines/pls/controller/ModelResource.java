@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.util.ModelNameUtils;
+import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
@@ -49,7 +49,7 @@ public class ModelResource {
     @ResponseBody
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, @RequestBody ModelingParameters parameters) {
-        if (!ModelNameUtils.validateModelName(modelName)) {
+        if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
             return ResponseDocument.failedResponse(new RuntimeException(message));

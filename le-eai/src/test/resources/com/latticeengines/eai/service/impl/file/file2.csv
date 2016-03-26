@@ -1,4 +1,4 @@
-Id,Country,Company,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy,LastModifiedDate
+Id,Country,CompanyName,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy,LastModifiedDate
 9821131,China,China Uniform 中国联通,Yun,Luo,18,0.2131439816,10/10/04,3
 12609604,Singapore,,,,1,,10/10/04
 10996868,China,Husor,sun,ze,5,0.464385619,10/23/04
@@ -15,6 +15,6 @@ Id,Country,Company,Email,City,DS_CompanyName_Length,DS_CompanyName_Entropy,LastM
 12882862,India,Sony India Software Center,,,26,0.141933092,10/10/04
 11239854,China,HUST ITEC,龚,逸凌,9,0.327522531,10/10/04
 10364388,Australia,n/a,Johan,Swanepoel,3,0.5283208336,2014-03-06
-11330434,New Zealand,Orion Health,Geethika,Guruge,12,0.2709690973,2004-01-03
-11625974,Vietnam,TMA Solutions,Dat,Nguyen,13,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00
+11330434,New Zealand,Orion Health,Geethika,,12,0.2709690973,2004-01-03
+11625974,Vietnam,,Dat,Nguyen,13,0.2491462505,Wed Mar 04 2009 05:09:06 GMT-06:00
 6200258,China,n/a,Guo,Peihui 郭培辉,3,0.5283208336,03/14/14 07:20 PM

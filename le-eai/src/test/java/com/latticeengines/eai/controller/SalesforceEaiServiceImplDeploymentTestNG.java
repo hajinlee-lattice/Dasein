@@ -1,4 +1,4 @@
-package com.latticeengines.eai.service.impl;
+package com.latticeengines.eai.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -10,7 +10,6 @@ import java.util.List;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -30,16 +30,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.source.SourceCredentialType;
-import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.DataExtractionService;
-import com.latticeengines.eai.service.EaiMetadataService;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
-
-    @Autowired
-    private EaiService eaiService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -51,7 +48,10 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     private DataExtractionService dataExtractionService;
 
     @Autowired
-    private EaiMetadataService eaiMetadataService;
+    private EaiProxy eaiProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Value("${eai.test.salesforce.username}")
     private String salesforceUserName;
@@ -104,7 +104,10 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
 
         tables = getSalesforceTables(tableNameList);
         System.out.println(tables);
-        eaiMetadataService.createImportTables(customerSpace, tables);
+
+        for (Table table : tables) {
+            metadataProxy.createImportTable(customerSpace, table.getName(), table);
+        }
     }
 
     @AfterClass(groups = "deployment")
@@ -120,27 +123,29 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
     public void extractAndImport() throws Exception {
         ImportConfiguration importConfig = createSalesforceImportConfig(customer);
         targetPath += "/" + importConfig.getSourceConfigurations().get(0).getSourceType().getName();
-        ApplicationId appId = eaiService.extractAndImport(importConfig);
-        assertNotNull(appId);
-        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+
+        AppSubmission appIds = eaiProxy.createImportDataJob(importConfig);
+        assertNotNull(appIds);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appIds.getApplicationIds().get(0),
+                FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         checkDataExists(targetPath, tableNameList, 1);
         List<Table> tablesBeforeExtract = tables;
-        List<Table> tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
+        List<Table> tablesAfterExtract = metadataProxy.getTables(customerSpace);
         checkLastModifiedTimestampChanged(true, tablesBeforeExtract, tablesAfterExtract);
         checkExtract(tablesAfterExtract);
 
         HdfsUtils.rmdir(yarnConfiguration, targetPath);
         importConfig.getSourceConfigurations().get(0).setSourceCredentialType(SourceCredentialType.SANDBOX);
-        appId = eaiService.extractAndImport(importConfig);
-        assertNotNull(appId);
-        status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        appIds = eaiProxy.createImportDataJob(importConfig);
+        assertNotNull(appIds);
+        status = platformTestBase.waitForStatus(appIds.getApplicationIds().get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         checkDataExists(targetPath, tableNameList, 1);
         tablesBeforeExtract = tablesAfterExtract;
-        tablesAfterExtract = eaiMetadataService.getTables(customerSpace);
+        tablesAfterExtract = metadataProxy.getTables(customerSpace);
         checkLastModifiedTimestampChanged(false, tablesBeforeExtract, tablesAfterExtract);
         checkLastModifiedTimestampInRecords(tablesBeforeExtract);
         checkExtract(tablesAfterExtract);
@@ -180,7 +185,8 @@ public class SalesforceEaiServiceImplDeploymentTestNG extends EaiFunctionalTestN
             List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, new Path(filesForTable.get(0)));
             log.info("Table: " + table.getName());
             for (GenericRecord record : records) {
-                Long lastModifiedDateValueFromRecord = (Long) record.get(table.getLastModifiedKey().getAttributeNames()[0]);
+                Long lastModifiedDateValueFromRecord = (Long) record
+                        .get(table.getLastModifiedKey().getAttributeNames()[0]);
                 log.info("value from record: " + lastModifiedDateValueFromRecord);
                 Long lastModifiedDateValueFromTable = table.getLastModifiedKey().getLastModifiedTimestamp();
                 log.info("value from metadata: " + lastModifiedDateValueFromTable);

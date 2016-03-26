@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.util.ModelNameUtils;
+import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -139,7 +139,7 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
-        if (!ModelNameUtils.validateModelName(modelId)) {
+        if (!NameValidationUtils.validateModelName(modelId)) {
             log.error(String.format("Not qualified modelId %s contains unsupported characters.", modelId));
             return false;
         }

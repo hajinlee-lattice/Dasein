@@ -6,4 +6,5 @@ public class BaseProperty {
     public static final String TARGETPATH = "targetPath";
     public static final String CUSTOMER = "customer";
     public static final String APPID = "appId";
+    public static final String HDFSFILE = "hdfsFile";
 }

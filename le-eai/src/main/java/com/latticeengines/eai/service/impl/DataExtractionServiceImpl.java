@@ -61,11 +61,11 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public List<Table> extractAndImport(ImportConfiguration importConfig, ImportContext context) {
-        String metadataUrl = context.getProperty(ImportProperty.METADATAURL, String.class);
+//        String metadataUrl = context.getProperty(ImportProperty.METADATAURL, String.class);
 
-        if (metadataUrl != null) {
-            eaiMetadataService.setMetadataUrl(metadataUrl);
-        }
+//        if (metadataUrl != null) {
+//            eaiMetadataService.setMetadataUrl(metadataUrl);
+//        }
 
         List<SourceImportConfiguration> sourceImportConfigs = importConfig.getSourceConfigurations();
         String customerSpace = importConfig.getCustomerSpace().toString();

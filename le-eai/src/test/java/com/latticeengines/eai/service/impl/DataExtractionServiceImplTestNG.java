@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.metadata.util.EaiMetadataUtil;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {

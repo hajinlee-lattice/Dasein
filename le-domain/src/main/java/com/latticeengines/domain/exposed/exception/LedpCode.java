@@ -188,6 +188,7 @@ public enum LedpCode {
     LEDP_18092("File exceeds maximum allowed limit of {0}."), //
     LEDP_18093("Failed to download errors file."), //
     LEDP_18094("Failed to read from CSV file."), //
+    LEDP_18095("Detected unexpected character in header name {0}, in csv file {1}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

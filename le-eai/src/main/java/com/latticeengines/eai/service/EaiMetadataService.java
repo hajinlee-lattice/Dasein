@@ -12,22 +12,10 @@ public interface EaiMetadataService {
 
     LastModifiedKey getLastModifiedKey(String customerSpace, Table table);
 
-    List<Table> getTables(String customerSpace);
-
     void updateTables(String customerSpace, List<Table> tables);
-
-    Table getTable(String customerSpace, String tableName);
-
-    void createImportTable(String customerSpace, Table table);
-
-    void createImportTables(String customerSpace, List<Table> tables);
 
     List<Table> getImportTables(String customerSpace);
 
-    Table getImportTable(String customerSpace, String tableName);
-
     void updateTableSchema(List<Table> tableMetadata, ImportContext importContext);
-
-    void setMetadataUrl(String metadataUrl);
 
 }
