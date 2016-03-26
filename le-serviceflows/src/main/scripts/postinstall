@@ -15,6 +15,14 @@ fi
 
 echo $VERSION
 
+hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION
+hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION
+hdfs dfs -mkdir -p /app/swlib/propdata/com/latticeengines/le-serviceflows-propdata/$VERSION
+
+hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION/*
+hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION/*
+hdfs dfs -rm -r -f /app/swlib/propdata/com/latticeengines/le-serviceflows-propdata/$VERSION/*
+
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
     -m dataflowapi \
