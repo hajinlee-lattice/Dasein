@@ -34,7 +34,7 @@ public class MatchKeyUtils {
         for (String domainField: domainFields) {
             for (String field : fields) {
                 String lowerField = field.toLowerCase();
-                if (domainField.equals(lowerField) || lowerField.contains(domainField)) {
+                if (domainField.equals(lowerField)) {
                     keyMap.get(MatchKey.Domain).add(field);
                 }
             }
