@@ -96,3 +96,6 @@ alias pmdpltc='pushd $WSHOME/le-playmaker; rm $CATALINA_HOME/webapps/playmaker/*
 alias sapidpltc='pushd $WSHOME/le-scoringapi; rm $CATALINA_HOME/webapp/scoringapi/*.war; cp target/le-scoringapi*.war $CATALINA_HOME/webapps/scoringapi/ROOT\#\#`leversion`.war; popd'
 alias msdpltc='pushd $WSHOME/le-microservice; bash ../le-dev/scripts/deployms.sh; popd'
 alias dpltc='$CATALINA_HOME/bin/shutdown.sh; plsdpltc; admindpltc; oauthdpltc; pmdpltc; sapidpltc; msdpltc; pushd $CATALINA_HOME; bin/startup.sh; popd'
+
+alias runoauth='mvn spring-boot:run -DOAUTH2_PROPDIR=conf/env/dev -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/ -Dserver.port=8072'
+alias runplay='mvn spring-boot:run -DOAUTH2_PROPDIR=../le-oauth2/conf/env/dev -DPLAYMAKER_PROPDIR=conf/env/dev -Dserver.port=8071 -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/'
