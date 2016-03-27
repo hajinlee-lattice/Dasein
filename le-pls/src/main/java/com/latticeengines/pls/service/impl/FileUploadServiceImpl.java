@@ -83,7 +83,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             if (!inputStream.markSupported()) {
                 inputStream = new BufferedInputStream(inputStream);
             }
-            inputStream.mark(1024);
+            inputStream.mark(1024 * 500);
             Set<String> headerFields = null;
             reader = new InputStreamReader(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
                     ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
@@ -107,6 +107,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         } finally {
             try {
+                inputStream.close();
                 reader.close();
                 parser.close();
             } catch (IOException e) {
