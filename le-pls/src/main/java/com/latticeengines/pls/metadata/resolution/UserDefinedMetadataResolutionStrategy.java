@@ -4,20 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-
-import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -67,35 +62,10 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
         // Get header
         Set<String> headerFields = getHeaderFields();
-
-        // Remove unrequired columns from metadata that are not in header,
-        // asserting that no required columns have been removed
-        Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = result.metadata.getAttributes();
-        Iterator<Attribute> iterator = attributes.iterator();
-        while (iterator.hasNext()) {
-            Attribute attribute = iterator.next();
-            boolean missing = !headerFields.contains(attribute.getName());
-            if (missing && !attribute.isNullable()) {
-                missingRequiredFields.add(attribute.getName());
-            }
-            if (missing) {
-                iterator.remove();
-            }
-        }
-
-        if (!missingRequiredFields.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[] { StringUtils.join(missingRequiredFields, ","), csvPath });
-        }
 
         // Add columns that are not in metadata to unknown columns
         for (final String field : headerFields) {
-            if (StringUtils.isEmpty(field)) {
-                throw new RuntimeException("Found empty column name in headers.");
-            } else if (!NameValidationUtils.validateColumnName(field)) {
-                throw new LedpException(LedpCode.LEDP_18095, new String[] { field, csvPath });
-            }
             if (!Iterables.any(attributes, new Predicate<Attribute>() {
 
                 @Override
