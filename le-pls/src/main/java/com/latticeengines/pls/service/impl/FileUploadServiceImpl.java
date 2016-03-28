@@ -89,6 +89,8 @@ public class FileUploadServiceImpl implements FileUploadService {
                 headerFields = parser.getHeaderMap().keySet();
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_18094, e);
+            } finally{
+                parser.close();
             }
 
             MetadataResolutionStrategy strategy = getResolutionStrategy(file, null);
@@ -106,7 +108,6 @@ public class FileUploadServiceImpl implements FileUploadService {
                 parser.close();
             } catch (IOException e) {
                 log.error(e);
-                e.printStackTrace();
                 throw new LedpException(LedpCode.LEDP_00002);
             }
         }
