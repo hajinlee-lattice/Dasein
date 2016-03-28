@@ -83,7 +83,6 @@ public class FileUploadServiceImpl implements FileUploadService {
                     ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
                     ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8);
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-
             parser = new CSVParser(reader, format);
             headerFields = parser.getHeaderMap().keySet();
 
