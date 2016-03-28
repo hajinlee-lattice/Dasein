@@ -73,7 +73,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/test/testData/**/*.js',
                     '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
                     '<%= pls.app %>/app/**/*.js',
-                    '<%= pls.app %>/test/unit/**/*.js',
+                    'src/main/webapp/test/unit/**/*.js',
                     '<%= pls.app %>/lib/js/kendo.all.min.js'
                 ],
                 frameworks: ['jasmine']

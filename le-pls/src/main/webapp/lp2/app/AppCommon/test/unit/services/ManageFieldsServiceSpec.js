@@ -70,6 +70,13 @@ describe('ManageFieldsServiceSpec Tests', function () {
             var dataItem = { Tags: "External" };
             expect(manageFieldsService.CategoryEditable(dataItem)).toBe(false);
         });
+
+        it('should return true means category editable', function () {
+            var dataItem = { Tags: null };
+            expect(manageFieldsService.CategoryEditable(dataItem)).toBe(true);
+            dataItem = { Tags: '' };
+            expect(manageFieldsService.CategoryEditable(dataItem)).toBe(true);
+        });
     });
 
 });

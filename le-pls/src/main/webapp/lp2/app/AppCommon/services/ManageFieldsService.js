@@ -37,7 +37,15 @@ angular.module('mainApp.appCommon.services.ManageFieldsService', [
     };
 
     this.CategoryEditable = function (dataItem) {
-        return (dataItem != null && dataItem.Tags != null && dataItem.Tags.toLowerCase() === "internal");
+        if (dataItem != null) {
+            if (dataItem.Tags == null || dataItem.Tags === '') {
+                return true;
+            } else {
+                return dataItem.Tags.toLowerCase() === 'internal';
+            }
+        } else {
+            return false;
+        }
     };
 
 });
