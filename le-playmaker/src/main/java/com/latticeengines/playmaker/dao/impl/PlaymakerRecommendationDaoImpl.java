@@ -35,7 +35,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1  ISNULL(T.[Display_Name], '') + '|' + ISNULL(T.[Phone_Number], '') + '|' + ISNULL(T.[Email_Address], '') "
                 + " + '|' +  ISNULL(T.[Address_Street_1], '') + '|' + ISNULL(T.[City], '') + '|' + ISNULL(T.[State_Province], '') "
-                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') "
+                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') + '|' + ISNULL(T.[External_id], '') "
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date], L.[PreLead_ID]) RowNum "
@@ -71,7 +71,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 String contacts = (String) record.get("Contacts");
                 if (contacts != null) {
                     String[] contactArray = contacts.split("[|]", -1);
-                    if (contactArray.length >= 8) {
+                    if (contactArray.length >= 9) {
                         List<Map<String, Object>> contactList = new ArrayList<>(1);
                         Map<String, Object> contactMap = new HashMap<>();
                         contactMap.put("Name", contactArray[0]);
@@ -82,6 +82,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         contactMap.put("State", contactArray[5]);
                         contactMap.put("Country", contactArray[6]);
                         contactMap.put("ZipCode", contactArray[7]);
+                        contactMap.put("SfdcContactID", contactArray[8]);
                         contactList.add(contactMap);
                         record.put("Contacts", contactList);
                     }

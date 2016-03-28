@@ -36,7 +36,7 @@ public class TenantResource {
         playmakerEntityMgr.updateByTenantName(tenant);
     }
 
-    @RequestMapping(value = "/{tenantName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get a playmaker tenant")
     public PlaymakerTenant getTenant(@PathVariable String tenantName) {
@@ -47,7 +47,7 @@ public class TenantResource {
         return new PlaymakerTenant();
     }
 
-    @RequestMapping(value = "/{tenantName}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete playmaker tenant")
     public void deleteTenant(@PathVariable String tenantName) {

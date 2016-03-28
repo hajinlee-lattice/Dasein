@@ -34,7 +34,7 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         }
 
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
-                newTenant.getTenantPassword(), newTenant.getTenantName());
+                newTenant.getTenantPassword(), "playmaker");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -46,7 +46,7 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
 
         adminRestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, newTenant.getTenantName(),
-                newTenant.getTenantPassword(), newTenant.getTenantName());
+                newTenant.getTenantPassword(), "playmaker");
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
@@ -54,6 +54,7 @@ public class TenantResourceTestNG extends BasePlaymakerFunctionalTestNG {
         String url = apiHostPort + "/tenants/" + tenant.getTenantName();
         tenant.setExternalId("externalId2");
         adminRestTemplate.put(url, tenant);
+
         PlaymakerTenant newTenant = adminRestTemplate.getForObject(url, PlaymakerTenant.class);
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getExternalId(), "externalId2");

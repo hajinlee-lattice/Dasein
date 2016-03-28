@@ -1,5 +1,7 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
+import java.net.InetAddress;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,11 +46,11 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
 
         tenant.setExternalId("externalId2");
         playMakerEntityMgr.executeUpdate(tenant);
-        result = playMakerEntityMgr.findByTenantName("playmaker");
+        result = playMakerEntityMgr.findByTenantName(getTenantName());
         Assert.assertNotNull(result);
 
         playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
-        result = playMakerEntityMgr.findByTenantName("playmaker");
+        result = playMakerEntityMgr.findByTenantName(getTenantName());
         Assert.assertNull(result);
 
         user = users.get(user.getUserId());
@@ -89,12 +91,20 @@ public class PlaymakerTenantEntityMgrImplTestNG extends AbstractTestNGSpringCont
 
     public static PlaymakerTenant getTenant() {
         PlaymakerTenant tenant = new PlaymakerTenant();
-        tenant.setExternalId("externalId");
+        tenant.setExternalId("");
         tenant.setJdbcDriver("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        tenant.setJdbcPassword("playmaker");
         tenant.setJdbcUrl("jdbc:sqlserver://10.41.1.118;instanceName=SQL2012STD;databaseName=PlayMakerDB");
-        tenant.setJdbcUserName("playmaker");
-        tenant.setTenantName("playmaker");
+        tenant.setTenantName(getTenantName());
         return tenant;
+    }
+
+    public static String getTenantName() {
+        String hostName;
+        try {
+            hostName = InetAddress.getLocalHost().getHostName();
+        } catch (Exception ex) {
+            hostName = "localhost";
+        }
+        return "test." + System.getProperty("user.name") + "." + hostName;
     }
 }
