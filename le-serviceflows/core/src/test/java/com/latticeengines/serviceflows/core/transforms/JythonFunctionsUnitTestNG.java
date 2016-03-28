@@ -83,7 +83,6 @@ public class JythonFunctionsUnitTestNG {
                 i++;
 
                 String leadID = record.get("LeadID");
-                @SuppressWarnings("unused")
                 String email = record.get("Email");
                 String emailDomain = record.get("EmailDomain");
                 String firstName = record.get("FirstName");
@@ -254,7 +253,6 @@ public class JythonFunctionsUnitTestNG {
                         "std_visidb_alexa_monthssinceonline", "std_visidb_alexa_monthssinceonline",
                         new String[] { alexaOnlineSince }, Integer.class);
 
-                @SuppressWarnings("unused")
                 Boolean passesMonthsSinceOnline = passesIntegerValues(resultMonthsSinceOnline, alexaMonthsSinceOnline);
                 //
                 // This function can only be properly tested when the dataset is
