@@ -5,12 +5,15 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.ImportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
@@ -154,7 +157,13 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             importRequest.setAvroDir(targetDir);
             importRequest.setSplitColumn(splitColumn);
             importRequest.setWhereClause(whereClause);
-            sqlService.importTable(importRequest, true);
+            ApplicationId appId = sqlService.importTable(importRequest);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                throw new IllegalStateException("The final state of " + appId + " is not "
+                        + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+            }
+
         } catch (Exception e) {
             LoggingUtils.logError(getLogger(), progress, "Failed to import data from source DB.", e);
             return false;

@@ -65,28 +65,26 @@ public class SqlServiceImpl implements SqlService {
     private int numMappers;
 
     @Override
-    public ApplicationId importTable(ImportRequest importRequest, Boolean sync) {
+    public ApplicationId importTable(ImportRequest importRequest) {
         SqoopImporter importer = getCollectionDbImporter(
                 importRequest.getSqlTable(),
                 importRequest.getAvroDir(),
                 "PropData",
                 importRequest.getSplitColumn(),
-                importRequest.getWhereClause(),
-                sync);
+                importRequest.getWhereClause());
         return sqoopService.importData(importer);
     }
 
     @Override
-    public ApplicationId exportTable(ExportRequest exportRequest, Boolean sync) {
+    public ApplicationId exportTable(ExportRequest exportRequest) {
         SqoopExporter exporter = getCollectionDbExporter(
                 exportRequest.getSqlTable(),
                 exportRequest.getAvroDir(),
-                "PropData",
-                sync);
+                "PropData");
         return sqoopService.exportData(exporter);
     }
 
-    private SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer, Boolean sync) {
+    private SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
 
@@ -100,12 +98,12 @@ public class SqlServiceImpl implements SqlService {
                 .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
                 .addHadoopArg("-Dexport.statements.per.transaction=1")
                 .addExtraOption("--batch")
-                .setSync(sync)
+                .setSync(false)
                 .build();
     }
 
     private SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String customer,
-                                                    String splitColumn, String whereClause, Boolean sync) {
+                                                    String splitColumn, String whereClause) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
 
@@ -117,7 +115,7 @@ public class SqlServiceImpl implements SqlService {
                 .setTable(sqlTable)
                 .setTargetDir(avroDir)
                 .setDbCreds(new DbCreds(credsBuilder))
-                .setSync(sync);
+                .setSync(false);
 
         if (StringUtils.isNotEmpty(whereClause)) {
             builder = builder.addExtraOption("--where").addExtraOption(whereClause);

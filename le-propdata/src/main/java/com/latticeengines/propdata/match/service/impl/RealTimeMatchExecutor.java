@@ -339,8 +339,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
                 matchedAnyColumn = matchedAnyColumn || matched;
             }
 
-
-            // make IsMatched are not null
+            // make *_IsMatched columns not null
             if (matchedAnyColumn) {
                 for (int i = 0; i < outputFields.size(); i++) {
                     String field = outputFields.get(i);

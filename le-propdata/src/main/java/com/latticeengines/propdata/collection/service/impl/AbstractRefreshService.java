@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.ExportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
@@ -202,7 +205,12 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             ExportRequest request = new ExportRequest();
             request.setSqlTable(stageTableName);
             request.setAvroDir(avroDir);
-            sqlService.exportTable(request, true);
+            ApplicationId appId = sqlService.exportTable(request);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                throw new IllegalStateException("The final state of " + appId + " is not "
+                        + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
+            }
 
             LoggingUtils.logInfo(getLogger(), progress, "Creating indices on the stage table " + stageTableName);
             createIndicesOnStageTable();

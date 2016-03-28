@@ -30,7 +30,7 @@ public class SqlResource {
     @ResponseBody
     @ApiOperation(value = "Import data from SQL to HDFS")
     public AppSubmission importTable(@RequestBody ImportRequest importRequest) {
-        ApplicationId applicationId = sqlService.importTable(importRequest, false);
+        ApplicationId applicationId = sqlService.importTable(importRequest);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
@@ -39,7 +39,7 @@ public class SqlResource {
     @ResponseBody
     @ApiOperation(value = "Export data from HDFS to SQL")
     public AppSubmission importTable(@RequestBody ExportRequest exportRequest) {
-        ApplicationId applicationId = sqlService.exportTable(exportRequest, false);
+        ApplicationId applicationId = sqlService.exportTable(exportRequest);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 

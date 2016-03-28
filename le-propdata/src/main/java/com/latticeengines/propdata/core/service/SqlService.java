@@ -6,6 +6,6 @@ import com.latticeengines.domain.exposed.propdata.ExportRequest;
 import com.latticeengines.domain.exposed.propdata.ImportRequest;
 
 public interface SqlService {
-    ApplicationId importTable(ImportRequest importRequest, Boolean Sync);
-    ApplicationId exportTable(ExportRequest exportRequest, Boolean sync);
+    ApplicationId importTable(ImportRequest importRequest);
+    ApplicationId exportTable(ExportRequest exportRequest);
 }
