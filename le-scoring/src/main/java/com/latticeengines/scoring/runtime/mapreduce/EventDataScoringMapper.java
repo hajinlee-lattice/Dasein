@@ -2,8 +2,8 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -46,7 +46,7 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
 
         try {
             // Store localized files
-            HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(paths);
+            Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(paths);
             long transformStartTime = System.currentTimeMillis();
             JsonNode dataType = ScoringJobUtil.generateDataTypeSchema(schema);
             log.info("DataType :" + dataType.asText());

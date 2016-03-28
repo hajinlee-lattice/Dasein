@@ -66,7 +66,7 @@ public class ScoringMapperValidateUtilUnitTestNG {
 
     @Test(groups = "unit")
     public void testValidateDatatype() throws IOException {
-        HashMap<String, JsonNode> models = new HashMap<>();
+        Map<String, JsonNode> models = new HashMap<>();
         URL modelUrl = ClassLoader
                 .getSystemResource("com/latticeengines/scoring/models/60fd2fa4-9868-464e-a534-3205f52c41f0");
         String modelFileName = modelUrl.getFile();

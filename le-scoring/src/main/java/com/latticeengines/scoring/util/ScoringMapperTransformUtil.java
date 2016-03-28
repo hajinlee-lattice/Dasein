@@ -43,10 +43,10 @@ public class ScoringMapperTransformUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    public static HashMap<String, JsonNode> processLocalizedFiles(Path[] paths) throws IOException {
+    public static Map<String, JsonNode> processLocalizedFiles(Path[] paths) throws IOException {
         // key: uuid, value: model contents
         // Note that not every model in the map might be used.
-        HashMap<String, JsonNode> models = new HashMap<String, JsonNode>();
+        Map<String, JsonNode> models = new HashMap<String, JsonNode>();
         boolean scoringScriptProvided = false;
 
         for (Path p : paths) {
@@ -114,7 +114,7 @@ public class ScoringMapperTransformUtil {
 
     public static ModelAndRecordInfo prepareRecordsForScoring(
             Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, JsonNode dataType,
-            HashMap<String, JsonNode> models, long leadFileThreshold) throws IOException, InterruptedException {
+            Map<String, JsonNode> models, long leadFileThreshold) throws IOException, InterruptedException {
 
         Configuration config = context.getConfiguration();
         ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
@@ -134,8 +134,8 @@ public class ScoringMapperTransformUtil {
             JsonNode jsonNode = mapper.readTree(record);
             if (CollectionUtils.isEmpty(modelGuids)) {
                 String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models, leadFileThreshold,
-                        modelGuid, uniqueKeyColumn);
+                transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
+                        leadFileThreshold, modelGuid, uniqueKeyColumn);
                 recordNumber++;
             } else {
                 for (String modelGuid : modelGuids) {
@@ -159,9 +159,10 @@ public class ScoringMapperTransformUtil {
     }
 
     @VisibleForTesting
-    static void transformAndWriteRecord(JsonNode jsonNode, JsonNode dataType, Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap,
-            Map<String, BufferedWriter> recordFilebufferMap, HashMap<String, JsonNode> models, long recordFileThreshold,
-            String modelGuid, String uniqueKeyColumn) throws IOException {
+    static void transformAndWriteRecord(JsonNode jsonNode, JsonNode dataType,
+            Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap, Map<String, BufferedWriter> recordFilebufferMap,
+            Map<String, JsonNode> models, long recordFileThreshold, String modelGuid, String uniqueKeyColumn)
+            throws IOException {
         // first step validation, to see whether the leadId is provided.
         if (!jsonNode.has(uniqueKeyColumn) || jsonNode.get(uniqueKeyColumn).isNull()) {
             throw new LedpException(LedpCode.LEDP_20003, new String[] { uniqueKeyColumn });
@@ -277,7 +278,7 @@ public class ScoringMapperTransformUtil {
         JsonNode modelObject = new ObjectMapper().readTree(modelStr);
         decodeSupportedFilesToFile("e2e", modelObject.get(ScoringDaemonService.MODEL));
         writeScoringScript("e2e", modelObject.get(ScoringDaemonService.MODEL));
-        
+
     }
 
 }

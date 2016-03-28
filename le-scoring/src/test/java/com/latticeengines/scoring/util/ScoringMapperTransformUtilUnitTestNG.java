@@ -65,7 +65,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
     @Test(groups = "unit")
     public void testProcessLocalizedFiles() throws IOException {
 
-        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
         Assert.assertNotNull(models);
         Assert.assertEquals(models.size(), 1);
@@ -151,7 +151,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
         JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
         ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
@@ -239,7 +239,7 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        Map<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
 
         try {
