@@ -3,16 +3,20 @@ package com.latticeengines.pls.metadata.resolution;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -137,8 +141,9 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         try {
             try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
                 try (InputStream is = fs.open(new Path(csvPath))) {
-
-                    try (InputStreamReader reader = new InputStreamReader(is)) {
+                    try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(is, false, ByteOrderMark.UTF_8,
+                            ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                            StandardCharsets.UTF_8)) {
                         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
                         try (CSVParser parser = new CSVParser(reader, format)) {
                             return parser.getHeaderMap().keySet();

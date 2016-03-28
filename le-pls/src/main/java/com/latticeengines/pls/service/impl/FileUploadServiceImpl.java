@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +12,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -26,11 +23,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -39,7 +34,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
 import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
-import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -67,7 +61,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     public SourceFile uploadFile(String outputFileName, SchemaInterpretation schemaInterpretation,
             InputStream inputStream) {
         CSVParser parser = null;
-        InputStreamReader reader = null;
         try {
             Tenant tenant = SecurityContextUtils.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
@@ -84,10 +77,11 @@ public class FileUploadServiceImpl implements FileUploadService {
                 inputStream = new BufferedInputStream(inputStream);
             }
             inputStream.mark(1024 * 500);
+
             Set<String> headerFields = null;
-            reader = new InputStreamReader(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8,
-                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                    StandardCharsets.UTF_8);
+            InputStreamReader reader = new InputStreamReader(new BOMInputStream(inputStream, false,
+                    ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
+                    ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8);
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
 
             try {
@@ -96,7 +90,9 @@ public class FileUploadServiceImpl implements FileUploadService {
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_18094, e);
             }
-            validateHeaderFields(headerFields, schemaInterpretation, file.getPath());
+
+            MetadataResolutionStrategy strategy = getResolutionStrategy(file, null);
+            strategy.validateHeaderFields(headerFields, schemaInterpretation, file.getPath());
 
             inputStream.reset();
             HdfsUtils
@@ -107,45 +103,11 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         } finally {
             try {
-                inputStream.close();
-                reader.close();
                 parser.close();
             } catch (IOException e) {
                 log.error(e);
+                e.printStackTrace();
                 throw new LedpException(LedpCode.LEDP_00002);
-            }
-        }
-    }
-
-    private void validateHeaderFields(Set<String> headerFields, SchemaInterpretation schema, String csvPath) {
-
-        SchemaRepository repository = SchemaRepository.instance();
-        Table metadata = repository.getSchema(schema);
-
-        Set<String> missingRequiredFields = new HashSet<>();
-        List<Attribute> attributes = metadata.getAttributes();
-        Iterator<Attribute> iterator = attributes.iterator();
-        while (iterator.hasNext()) {
-            Attribute attribute = iterator.next();
-            boolean missing = !headerFields.contains(attribute.getName());
-            if (missing && !attribute.isNullable()) {
-                missingRequiredFields.add(attribute.getName());
-            }
-            if (missing) {
-                iterator.remove();
-            }
-        }
-
-        if (!missingRequiredFields.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_18087, //
-                    new String[] { StringUtils.join(missingRequiredFields, ","), csvPath });
-        }
-
-        for (final String field : headerFields) {
-            if (StringUtils.isEmpty(field)) {
-                throw new LedpException(LedpCode.LEDP_18096, new String[] { csvPath });
-            } else if (!NameValidationUtils.validateColumnName(field)) {
-                throw new LedpException(LedpCode.LEDP_18095, new String[] { field });
             }
         }
     }

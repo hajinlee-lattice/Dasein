@@ -50,7 +50,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant2", contractId));
+        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", "TENANT1"));
         Tenant tenant1 = tenantService.findByTenantId("TENANT1");
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
@@ -64,7 +64,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
         dataFile = new File(ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv").getPath());
-        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        fileInputStream = new FileInputStream(dataFile);
     }
 
     @AfterClass(groups = "functional")
