@@ -84,14 +84,8 @@ public class FileUploadServiceImpl implements FileUploadService {
                     ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8);
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
 
-            try {
-                parser = new CSVParser(reader, format);
-                headerFields = parser.getHeaderMap().keySet();
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_18094, e);
-            } finally{
-                parser.close();
-            }
+            parser = new CSVParser(reader, format);
+            headerFields = parser.getHeaderMap().keySet();
 
             MetadataResolutionStrategy strategy = getResolutionStrategy(file, null);
             strategy.validateHeaderFields(headerFields, schemaInterpretation, file.getPath());
@@ -105,7 +99,9 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
         } finally {
             try {
-                parser.close();
+                if (parser != null) {
+                    parser.close();
+                }
             } catch (IOException e) {
                 log.error(e);
                 throw new LedpException(LedpCode.LEDP_00002);
