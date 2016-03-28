@@ -162,12 +162,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
-            <scope>intf</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-security</artifactId>
-            <version>${le.security.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

@@ -143,6 +143,7 @@ public class WorkflowExecutionCache {
         return steps;
     }
 
+    @SuppressWarnings("rawtypes")
     private List<Report> getReports(JobExecution jobExecution) {
         ExecutionContext context = jobExecution.getExecutionContext();
         Object contextObj = context.get(WorkflowContextConstants.REPORTS);

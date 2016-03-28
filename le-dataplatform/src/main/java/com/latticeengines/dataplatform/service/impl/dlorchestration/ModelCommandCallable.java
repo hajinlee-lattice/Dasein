@@ -89,6 +89,7 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private int positiveEventWarnThreshold = -1;
 
+    @SuppressWarnings("unused")
     private int featuresThreshold = -1;
 
     private MetadataService metadataService;

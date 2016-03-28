@@ -531,6 +531,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         }
     }
 
+    @SuppressWarnings("unused")
     private class DomainBasedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
 
         private Log log = LogFactory.getLog(DomainBasedMatchCallable.class);

@@ -22,6 +22,7 @@ public class FlowUtils {
     private static Log log = LogFactory.getLog(FlowUtils.class);
     private static Pattern varcharPattern = Pattern.compile("(?<=VARCHAR\\().*?(?=\\))");
 
+    @SuppressWarnings("rawtypes")
     public static CascadingDataFlowBuilder.Node truncateStringFields(CascadingDataFlowBuilder.Node node, List<SourceColumn> columns) {
         Set<String> fieldsInMetadata = new HashSet<>(node.getFieldNames());
         for (SourceColumn column : columns) {

@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -31,7 +30,6 @@ public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {
     private static final String SAMPLE_BASE_DIR = "/user/s-analytics/customers/%s/data/%s/samples";
     private static final Long MATCH_COMMAND_ID_NUMBER = 123L;
 
-    private JdbcTemplate jdbcTemplate;
 
     @Override
     public void execute() {

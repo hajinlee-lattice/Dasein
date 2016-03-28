@@ -164,7 +164,6 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>${jetty.version}</version>
                 <configuration>
                     <webApp>
                         <contextPath>/</contextPath>
@@ -173,8 +172,6 @@
                         <port>8899</port>
                     </httpConnector>
                 </configuration>
-                <!-- <executions> <execution> <id>jetty-stop</id> <phase>test</phase> 
-                    <goals> <goal>stop</goal> </goals> </execution> </executions> -->
             </plugin>
         </plugins>
     </build>

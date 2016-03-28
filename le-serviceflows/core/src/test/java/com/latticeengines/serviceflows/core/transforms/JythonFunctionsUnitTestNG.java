@@ -45,6 +45,7 @@ public class JythonFunctionsUnitTestNG {
         assertEquals(result, expectedResult);
     }
 
+    @SuppressWarnings("unused")
     @Test(groups = "unit")
     public void testLegacyFunctionsWithDatasets() throws Exception {
         String testDataDSAPACMKTO = "src/test/resources/testdata_legacy_DS_APAC_MKTO.csv";
