@@ -1,0 +1,66 @@
+<section class="container setup-import">
+  
+	<div class="row">
+    	<div class="six columns offset-three">
+    		<div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
+				<label for="loadfile">Upload CSV File</label>
+		        <input id="uploadFileInput" class="form-control" disabled="disabled" placeholder="Choose File" />
+		        <div class="fileUpload button blue-button">
+		          <span>Browse...</span>
+		          <input id="uploadBtn" name="csvFileName" ng-model="csvFileName" required type="file" class="upload" csv-uploader="csvFile" />
+		        </div>
+		        <p class="help-block">* Please choose a file to upload.</p>
+		    </div>
+		    <!-- Script needed to get filepath and place it into the input field and remove additional garbage -->
+	        <script>
+	          document.getElementById("uploadBtn").onchange = function () {
+	              document.getElementById("uploadFileInput").value = this.value.substring(12);
+	          };
+	        </script>
+        </div>
+    </div>
+
+    <div class="row">
+    	<div class="six columns offset-three">
+    		<table class="no-stripes">
+    			<thead>
+    				<tr>
+    					<th>Required fields</th>
+    				</tr>
+    			</thead>
+    			<tbody>
+    				<tr><td>Lead ID</td></tr>
+    				<tr><td>Email</td></tr>
+    				<tr><td>Won</td></tr>
+    				<tr><td>Company/Account</td></tr>
+    				<tr><td>City</td></tr>
+    				<tr><td>State</td></tr>
+    				<tr><td>Country</td></tr>
+    				<tr><td>Created Date</td></tr>
+    				<tr><td>Last Modified Date</td></tr>
+    				<tr><td>Zip/Postal Code</td></tr>
+    				<tr><td>First Name</td></tr>
+    				<tr><td>Last Name</td></tr>
+    				<tr><td>Title</td></tr>
+    				<tr><td>Lead Source</td></tr>
+    				<tr><td>Closed</td></tr>
+    				<tr><td>Stage</td></tr>
+    				<tr><td>Phone</td></tr>
+    				<tr><td>Annual Revenue</td></tr>
+    				<tr><td>No. of Employees</td></tr>
+    				<tr><td>Industry</td></tr>
+    			</tbody>
+    		</table>
+    	</div>
+    </div>
+
+    <div class="row">
+    	<div class="three columns offset-three">
+    		<button type="button" class="button gray-button block-button">Cancel</button>
+    	</div>
+    	<div class="three columns">
+    		<button type="button" class="button orange-button block-button">Import Data</button>
+    	</div>
+    </div>
+
+</section>

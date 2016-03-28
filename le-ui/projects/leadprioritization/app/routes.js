@@ -266,24 +266,25 @@ angular
                     templateUrl: 'app/AppCommon/widgets/adminInfoAlertsWidget/AdminInfoAlertsWidgetTemplate.html'
                 }   
             }
-        })/*
+        })
         .state('model.scoring', {
             url: '/scoring',
+            redirectto: 'model.scoring.import',
             views: {
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'UNDER CONSTRUCTION';
+                            return 'Import testing set';
                         }
                     },
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: UnderConstruction
+                    templateUrl: 'app/models/views/BulkScoringImportData.html'
                 }   
             }
-        })*/
+        })
         .state('model.refine', {
             url: '/refine',
             views: {

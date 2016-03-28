@@ -52,6 +52,11 @@ table {
         margin-right: 5px;
         font-size: 16px;
     }
+    &.no-stripes {
+        tbody tr:nth-child(odd) {
+            background: #fff;
+        }
+    }
     &.unstyled {
         tbody tr {
         border-bottom: none;
