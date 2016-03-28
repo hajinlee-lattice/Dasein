@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.propdata.ImportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
@@ -28,6 +29,7 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
+import com.latticeengines.proxy.exposed.propdata.SqlProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -39,6 +41,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     @Autowired
     protected SqlService sqlService;
+
+    @Autowired
+    protected SqlProxy sqlProxy;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
@@ -157,8 +162,10 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             importRequest.setAvroDir(targetDir);
             importRequest.setSplitColumn(splitColumn);
             importRequest.setWhereClause(whereClause);
-            ApplicationId appId = sqlService.importTable(importRequest);
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            AppSubmission submission = sqlProxy.importTable(importRequest);
+            ApplicationId appId = YarnUtils.getAppIdFromString(submission.getApplicationIds().get(0));
+            FinalApplicationStatus status =
+                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600 * 1000L);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

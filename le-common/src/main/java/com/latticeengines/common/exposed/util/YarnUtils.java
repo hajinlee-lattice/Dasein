@@ -49,8 +49,10 @@ public class YarnUtils {
         return report;
     }
 
-    public static FinalApplicationStatus waitFinalStatusForAppId(Configuration yarnConfiguration, ApplicationId applicationId) {
+    public static FinalApplicationStatus waitFinalStatusForAppId(
+            Configuration yarnConfiguration, ApplicationId applicationId, Long timeoutInMills) {
         FinalApplicationStatus finalStatus = null;
+        Long startTime = System.currentTimeMillis();
         int maxTries = 10000;
         int i = 0;
         do {
@@ -72,13 +74,25 @@ public class YarnUtils {
             }
             i++;
 
-            if (i == maxTries) {
+            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInMills) {
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(finalStatus));
 
         return finalStatus;
 
+    }
+
+    public static ApplicationId getAppIdFromString(String str) {
+        String[] tokens = str.split("_");
+        if (tokens.length != 3 || !"application".equals(tokens[0])) {
+            throw new IllegalArgumentException("Input string " + str + " is not in the format of an application id");
+        }
+        try {
+            return ApplicationId.newInstance(Long.valueOf(tokens[1]), Integer.valueOf(tokens[2]));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse string " + str + " into an application id.", e);
+        }
     }
 
 }

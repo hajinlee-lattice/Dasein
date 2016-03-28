@@ -11,6 +11,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.propdata.ExportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
@@ -205,8 +206,10 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             ExportRequest request = new ExportRequest();
             request.setSqlTable(stageTableName);
             request.setAvroDir(avroDir);
-            ApplicationId appId = sqlService.exportTable(request);
-            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+            AppSubmission submission = sqlProxy.exportTable(request);
+            ApplicationId appId = YarnUtils.getAppIdFromString(submission.getApplicationIds().get(0));
+            FinalApplicationStatus status =
+                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600 * 1000L);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

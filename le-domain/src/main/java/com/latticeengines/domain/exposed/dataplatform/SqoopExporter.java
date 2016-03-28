@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,11 @@ import org.apache.hadoop.conf.Configuration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopExporter {
+
+    private static List<String> defaultHadoopArgs = Arrays.asList(
+            "-Dmapreduce.task.timeout=600000",
+            "-Dmapreduce.job.running.map.limit=32"
+    );
 
     private String table;
     private String sourceDir;
@@ -159,8 +165,11 @@ public class SqoopExporter {
                 this.addHadoopArg("-Dmapreduce.job.queuename=" + this.queue);
             }
 
-            if (!hadoopArgKeys.contains("-Dmapreduce.task.timeout")) {
-                this.addHadoopArg("-Dmapreduce.task.timeout=600000");
+            for (String arg: defaultHadoopArgs) {
+                String defaultKey = arg.substring(0, arg.indexOf("="));
+                if (!hadoopArgKeys.contains(defaultKey)) {
+                    this.addHadoopArg(arg);
+                }
             }
 
             exporter.setHadoopArgs(new ArrayList<>(this.hadoopArgs));

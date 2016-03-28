@@ -1,13 +1,9 @@
 package com.latticeengines.propdata.core.service.impl;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
@@ -16,35 +12,14 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.ExportRequest;
 import com.latticeengines.domain.exposed.propdata.ImportRequest;
-import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
-import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.core.service.SqlService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("sqlService")
 public class SqlServiceImpl implements SqlService {
 
-    private static Log log = LogFactory.getLog(SqlServiceImpl.class);
-
     @Autowired
     private SqoopSyncJobService sqoopService;
-
-    @Autowired
-    private ArchiveProgressEntityMgr archiveProgressEntityMgr;
-
-    @Autowired
-    private RefreshProgressEntityMgr refreshProgressEntityMgr;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
-    @Autowired
-    @Qualifier(value = "propDataBulkJdbcTemplate")
-    private JdbcTemplate jdbcTemplateBulkDB;
-
-    @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplate")
-    private JdbcTemplate jdbcTemplateCollectionDB;
 
     @Value("${propdata.collection.host}")
     private String dbHost;
