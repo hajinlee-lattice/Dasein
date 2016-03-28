@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.core.source.BulkSource;
-import com.latticeengines.propdata.core.source.StageServer;
+import com.latticeengines.domain.exposed.propdata.StageServer;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 
 public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBase<ArchiveProgress>

@@ -34,7 +34,7 @@ public class MatchKeyUtilsUnitTestNG {
                 { new String[] { "Domain", "Website", "Email" }, new String[] { "Domain", "Website", "Email" } },
                 { new String[] { "Website", "Domain", "Email" }, new String[] { "Domain", "Website", "Email" } },
                 { new String[] { "DomainName", "Website", "EmailAddress" },
-                        new String[] { "DomainName", "Website", "EmailAddress" } },
+                        new String[] { "Website" } },
         };
     }
 

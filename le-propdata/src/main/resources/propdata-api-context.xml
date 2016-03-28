@@ -11,6 +11,7 @@
     </context:component-scan>
 
     <import resource="classpath:propdata-match-context.xml" />
+    <import resource="classpath:propdata-collection-context.xml" />
     <import resource="classpath:propdata-persistence-entitlements-context.xml" />
 
 </beans>

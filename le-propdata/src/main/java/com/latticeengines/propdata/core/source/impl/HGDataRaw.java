@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.BulkSource;
-import com.latticeengines.propdata.core.source.StageServer;
+import com.latticeengines.domain.exposed.propdata.StageServer;
 
 @Component
 public class HGDataRaw implements BulkSource {

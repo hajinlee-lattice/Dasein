@@ -3,19 +3,15 @@ package com.latticeengines.propdata.collection.service.impl;
 import java.util.List;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.propdata.ImportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.Progress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
@@ -24,11 +20,11 @@ import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMg
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.SqlService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -39,7 +35,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     abstract Source getSource();
 
     @Autowired
-    protected SqoopSyncJobService sqoopService;
+    protected SqlService sqlService;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;
@@ -66,24 +62,6 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     @Autowired
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
-
-    @Value("${propdata.collection.host}")
-    protected String dbHost;
-
-    @Value("${propdata.collection.port}")
-    protected int dbPort;
-
-    @Value("${propdata.collection.db}")
-    protected String db;
-
-    @Value("${propdata.user}")
-    protected String dbUser;
-
-    @Value("${propdata.password.encrypted}")
-    protected String dbPassword;
-
-    @Value("${propdata.collection.sqoop.mapper.number:8}")
-    protected int numMappers;
 
     public P findRunningJob() {
         return getProgressEntityMgr().findRunningProgress(getSource());
@@ -171,18 +149,17 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     protected boolean importFromCollectionDB(String table, String targetDir, String splitColumn, String whereClause,
             P progress) {
         try {
-            String customer = getSqoopCustomerName(progress);
-            SqoopImporter importer = getCollectionDbImporter(table, targetDir, customer, splitColumn, whereClause);
-            sqoopService.importData(importer);
+            ImportRequest importRequest = new ImportRequest();
+            importRequest.setSqlTable(table);
+            importRequest.setAvroDir(targetDir);
+            importRequest.setSplitColumn(splitColumn);
+            importRequest.setWhereClause(whereClause);
+            sqlService.importTable(importRequest, true);
         } catch (Exception e) {
             LoggingUtils.logError(getLogger(), progress, "Failed to import data from source DB.", e);
             return false;
         }
         return true;
-    }
-
-    protected String getSqoopCustomerName(P progress) {
-        return getSource().getSourceName() + "[" + progress.getRootOperationUID() + "]";
     }
 
     protected void updateStatusToFailed(P progress, String errorMsg, Exception e) {
@@ -196,23 +173,6 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         progress.setNumRetries(0);
         LoggingUtils.logInfo(getLogger(), progress, "Finished.");
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
-    }
-
-    protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String customer,
-            String splitColumn, String whereClause) {
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-
-        SqoopImporter.Builder builder = new SqoopImporter.Builder()
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission()).setCustomer(customer + "-" + sqlTable)
-                .setNumMappers(numMappers).setSplitColumn(splitColumn).setTable(sqlTable).setTargetDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder)).setSync(true);
-
-        if (StringUtils.isNotEmpty(whereClause)) {
-            builder = builder.addExtraOption("--where").addExtraOption(whereClause);
-        }
-
-        return builder.build();
     }
 
     protected Long countSourceTable(P progress) {

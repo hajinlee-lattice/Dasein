@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.core.source;
+package com.latticeengines.domain.exposed.propdata;
 
 public enum StageServer {
 

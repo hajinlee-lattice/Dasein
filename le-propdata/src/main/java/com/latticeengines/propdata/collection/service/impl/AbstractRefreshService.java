@@ -8,8 +8,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.propdata.ExportRequest;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
@@ -20,7 +19,6 @@ import com.latticeengines.propdata.core.source.DomainBased;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.util.LoggingUtils;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractRefreshService extends SourceRefreshServiceBase<RefreshProgress>
         implements RefreshService {
@@ -195,15 +193,16 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
     protected boolean uploadAvroToCollectionDB(RefreshProgress progress, String avroDir, String destTable) {
         String stageTableName = getStageTableName();
         String bakTableName = destTable + "_bak";
-        String customer = getSqoopCustomerName(progress);
 
         try {
             LoggingUtils.logInfo(getLogger(), progress, "Create a clean stage table " + stageTableName);
             dropJdbcTableIfExists(stageTableName);
             createStageTable();
 
-            SqoopExporter exporter = getCollectionDbExporter(stageTableName, avroDir, customer);
-            sqoopService.exportData(exporter);
+            ExportRequest request = new ExportRequest();
+            request.setSqlTable(stageTableName);
+            request.setAvroDir(avroDir);
+            sqlService.exportTable(request, true);
 
             LoggingUtils.logInfo(getLogger(), progress, "Creating indices on the stage table " + stageTableName);
             createIndicesOnStageTable();
@@ -260,17 +259,6 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
                     + domainBased.getDomainField() + "])");
         }
 
-    }
-
-    protected SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer) {
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-
-        return new SqoopExporter.Builder().setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
-                .setCustomer(customer + "-" + sqlTable).setNumMappers(numMappers).setTable(sqlTable)
-                .setSourceDir(avroDir).setDbCreds(new DbCreds(credsBuilder))
-                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").setSync(true).build();
     }
 
 }
