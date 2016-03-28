@@ -43,22 +43,17 @@ public class ScoringMapperTransformUtil {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    public static LocalizedFiles processLocalizedFiles(Path[] paths) throws IOException {
+    public static HashMap<String, JsonNode> processLocalizedFiles(Path[] paths) throws IOException {
         // key: uuid, value: model contents
         // Note that not every model in the map might be used.
         HashMap<String, JsonNode> models = new HashMap<String, JsonNode>();
-        LocalizedFiles localizedFiles = new LocalizedFiles();
         boolean scoringScriptProvided = false;
-        boolean datatypeFileProvided = false;
 
         for (Path p : paths) {
             log.info("files" + p);
             log.info(p.getName());
-            if (p.getName().equals("datatype.avsc")) {
-                datatypeFileProvided = true;
-                JsonNode datatype = parseFileContentToJsonNode(p);
-                localizedFiles.setDatatype(datatype);
-            } else if (p.getName().equals("scoring.py")) {
+
+            if (p.getName().equals("scoring.py")) {
                 scoringScriptProvided = true;
             } else if (!p.getName().endsWith(".jar")) {
                 String uuid = p.getName();
@@ -74,10 +69,9 @@ public class ScoringMapperTransformUtil {
         }
 
         log.info("Has localized in total " + models.size() + " models.");
-        ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, datatypeFileProvided, models);
+        ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, models);
 
-        localizedFiles.setModels(models);
-        return localizedFiles;
+        return models;
     }
 
     @VisibleForTesting
@@ -119,8 +113,8 @@ public class ScoringMapperTransformUtil {
     }
 
     public static ModelAndRecordInfo prepareRecordsForScoring(
-            Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context,
-            LocalizedFiles localizedFiles, long leadFileThreshold) throws IOException, InterruptedException {
+            Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, JsonNode dataType,
+            HashMap<String, JsonNode> models, long leadFileThreshold) throws IOException, InterruptedException {
 
         Configuration config = context.getConfiguration();
         ModelAndRecordInfo modelAndLeadInfo = new ModelAndRecordInfo();
@@ -140,12 +134,12 @@ public class ScoringMapperTransformUtil {
             JsonNode jsonNode = mapper.readTree(record);
             if (CollectionUtils.isEmpty(modelGuids)) {
                 String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
-                transformAndWriteRecord(jsonNode, modelInfoMap, recordFileBufferMap, localizedFiles, leadFileThreshold,
+                transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models, leadFileThreshold,
                         modelGuid, uniqueKeyColumn);
                 recordNumber++;
             } else {
                 for (String modelGuid : modelGuids) {
-                    transformAndWriteRecord(jsonNode, modelInfoMap, recordFileBufferMap, localizedFiles,
+                    transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                             leadFileThreshold, modelGuid, uniqueKeyColumn);
                     recordNumber++;
                 }
@@ -165,8 +159,8 @@ public class ScoringMapperTransformUtil {
     }
 
     @VisibleForTesting
-    static void transformAndWriteRecord(JsonNode jsonNode, Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap,
-            Map<String, BufferedWriter> recordFilebufferMap, LocalizedFiles localizedFiles, long recordFileThreshold,
+    static void transformAndWriteRecord(JsonNode jsonNode, JsonNode dataType, Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap,
+            Map<String, BufferedWriter> recordFilebufferMap, HashMap<String, JsonNode> models, long recordFileThreshold,
             String modelGuid, String uniqueKeyColumn) throws IOException {
         // first step validation, to see whether the leadId is provided.
         if (!jsonNode.has(uniqueKeyColumn) || jsonNode.get(uniqueKeyColumn).isNull()) {
@@ -174,14 +168,14 @@ public class ScoringMapperTransformUtil {
         }
 
         String uuid = UuidUtils.extractUuid(modelGuid);
-        JsonNode modelContents = localizedFiles.getModels().get(uuid);
+        JsonNode modelContents = models.get(uuid);
         String recordFileName = "";
         BufferedWriter bw = null;
 
         // second step validation, to see if the metadata is valid
         if (!modelInfoMap.containsKey(uuid)) { // this model is new, and
                                                // needs to be validated
-            ScoringMapperValidateUtil.validateDatatype(localizedFiles.getDatatype(), modelContents, modelGuid);
+            ScoringMapperValidateUtil.validateDatatype(dataType, modelContents, modelGuid);
             // if the validation passes, update the modelIdMap
             ModelAndRecordInfo.ModelInfo modelInfo = new ModelAndRecordInfo.ModelInfo(modelGuid, 1L);
             modelInfoMap.put(uuid, modelInfo);

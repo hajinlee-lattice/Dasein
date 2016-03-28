@@ -46,31 +46,30 @@ public class ScoringMapperTransformUtilUnitTestNG {
             + "\"FundingFiscalYear\": 123456789, \"BusinessFirmographicsParentEmployees\": 24, \"C_Job_Role1\": \"\", "
             + "\"BusinessSocialPresence\": \"True\", \"Model_GUID\": \"FAKE_PREFIX_2Checkout_relaunch_PLSModel_2015-03-19_15-37_model.json\"}";
 
-    private Path datatypePath;
     private Path modelPath;
     private Path pythonPath;
     private List<Path> localFilePaths;
+    private JsonNode dataType;
 
     @BeforeClass(groups = "unit")
-    public void setup() {
-        datatypePath = new Path(ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc").getFile());
+    public void setup() throws IOException {
         modelPath = new Path(ClassLoader.getSystemResource(MODEL_PATH + UUID).getFile());
         pythonPath = new Path(ClassLoader.getSystemResource(PYTHON_PATH).getFile());
         localFilePaths = new ArrayList<Path>();
-        localFilePaths.add(datatypePath);
         localFilePaths.add(modelPath);
         localFilePaths.add(pythonPath);
+        Path datatypePath = new Path(ClassLoader.getSystemResource(DATA_PATH + "datatype.avsc").getFile());
+        dataType = ScoringMapperTransformUtil.parseFileContentToJsonNode(datatypePath);
     }
 
     @Test(groups = "unit")
     public void testProcessLocalizedFiles() throws IOException {
 
-        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
-        Assert.assertNotNull(localizedFiles);
-        Assert.assertNotNull(localizedFiles.getDatatype());
-        Assert.assertEquals(localizedFiles.getModels().size(), 1);
-        Assert.assertNotNull(localizedFiles.getModels().get(UUID));
+        Assert.assertNotNull(models);
+        Assert.assertEquals(models.size(), 1);
+        Assert.assertNotNull(models.get(UUID));
     }
 
     @Test(groups = "unit")
@@ -152,10 +151,10 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
         JsonNode jsonNode = new ObjectMapper().readTree(PROPER_TEST_RECORD);
-        ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+        ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
                 10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
 
         Assert.assertNotNull(modelInfoMap);
@@ -240,12 +239,12 @@ public class ScoringMapperTransformUtilUnitTestNG {
         Map<String, ModelAndRecordInfo.ModelInfo> modelInfoMap = new HashMap<String, ModelAndRecordInfo.ModelInfo>();
         Map<String, BufferedWriter> leadFileBufferMap = new HashMap<String, BufferedWriter>();
 
-        LocalizedFiles localizedFiles = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
+        HashMap<String, JsonNode> models = ScoringMapperTransformUtil.processLocalizedFiles(localFilePaths
                 .toArray(new Path[localFilePaths.size()]));
 
         try {
             JsonNode jsonNode = new ObjectMapper().readTree(IMPROPER_TEST_RECORD_WITH_NO_LEAD_ID);
-            ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, modelInfoMap, leadFileBufferMap, localizedFiles,
+            ScoringMapperTransformUtil.transformAndWriteRecord(jsonNode, dataType, modelInfoMap, leadFileBufferMap, models,
                     10000, "ms__60fd2fa4-9868-464e-a534-3205f52c41f0-Model_UI", ScoringDaemonService.UNIQUE_KEY_COLUMN);
             Assert.fail("Should have thrown expcetion.");
         } catch (LedpException e) {

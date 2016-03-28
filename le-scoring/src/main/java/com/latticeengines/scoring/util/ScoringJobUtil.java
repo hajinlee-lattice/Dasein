@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
@@ -79,7 +80,7 @@ public class ScoringJobUtil {
         return modelUrlsToLocalize;
     }
 
-    public static void generateDataTypeSchema(Schema schema, String dataTypeFilePath, Configuration config) {
+    public static JsonNode generateDataTypeSchema(Schema schema) {
         List<Field> fields = schema.getFields();
         ObjectNode jsonObj = new ObjectMapper().createObjectNode();
         for (Field field : fields) {
@@ -89,11 +90,7 @@ public class ScoringJobUtil {
             else
                 jsonObj.put(field.name(), 0);
         }
-        try {
-            HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return jsonObj;
     }
 
 }

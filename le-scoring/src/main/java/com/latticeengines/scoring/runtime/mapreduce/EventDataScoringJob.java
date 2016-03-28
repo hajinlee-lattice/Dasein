@@ -30,11 +30,8 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-import com.latticeengines.scoring.util.ScoringJobUtil;
 
 public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization {
-
-    private static final String dataTypeFile = "datatype.avsc";
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
@@ -97,9 +94,6 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Schema schema = AvroUtils.getSchema(config, path);
             AvroJob.setInputKeySchema(mrJob, schema);
 
-            String dataTypeFilePath = inputDir + "/" + dataTypeFile;
-            ScoringJobUtil.generateDataTypeSchema(schema, dataTypeFilePath, config);
-
             String leadInputFileThreshold = properties.getProperty(ScoringProperty.RECORD_FILE_THRESHOLD.name());
             config.setLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(), Long.parseLong(leadInputFileThreshold));
             config.set(MapReduceProperty.OUTPUT.name(), properties.getProperty(MapReduceProperty.OUTPUT.name()));
@@ -110,7 +104,6 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
             mrJob.addCacheFile(new URI(dependencyPath + versionManager.getCurrentVersion() + scoringPythonPath));
-            mrJob.addCacheFile(new URI(dataTypeFilePath));
             List<String> jarFilePaths = HdfsUtils
                     .getFilesForDir(mrJob.getConfiguration(), dependencyPath + versionManager.getCurrentVersion() + jarDependencyPath, ".*.jar$");
             for (String jarFilePath : jarFilePaths) {

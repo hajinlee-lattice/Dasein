@@ -49,15 +49,11 @@ public class ScoringMapperValidateUtil {
         }
     }
 
-    public static void validateLocalizedFiles(boolean scoringScriptProvided, boolean datatypeFileProvided,
+    public static void validateLocalizedFiles(boolean scoringScriptProvided,
             Map<String, JsonNode> models) {
 
         if (!scoringScriptProvided) {
             throw new LedpException(LedpCode.LEDP_20002);
-        }
-
-        if (!datatypeFileProvided) {
-            throw new LedpException(LedpCode.LEDP_20006);
         }
 
         // check whether if model(s) is(are) localized

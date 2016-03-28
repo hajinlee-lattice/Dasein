@@ -47,7 +47,7 @@ public class ScoringMapperValidateUtilUnitTestNG {
         Map<String, JsonNode> mockModels = new HashMap<>();
 
         try {
-            ScoringMapperValidateUtil.validateLocalizedFiles(true, true, mockModels);
+            ScoringMapperValidateUtil.validateLocalizedFiles(true, mockModels);
             Assert.fail("should have thrown exception.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20020);
@@ -57,25 +57,11 @@ public class ScoringMapperValidateUtilUnitTestNG {
         mockModels.put(MODEL_ID, obj);
 
         try {
-            ScoringMapperValidateUtil.validateLocalizedFiles(false, true, mockModels);
+            ScoringMapperValidateUtil.validateLocalizedFiles(false, mockModels);
             Assert.fail("should have thrown exception.");
         } catch (LedpException e) {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_20002);
         }
-
-        try {
-            ScoringMapperValidateUtil.validateLocalizedFiles(true, false, mockModels);
-            Assert.fail("should have thrown exception.");
-        } catch (LedpException e) {
-            Assert.assertEquals(e.getCode(), LedpCode.LEDP_20006);
-        }
-
-        try {
-            ScoringMapperValidateUtil.validateLocalizedFiles(true, true, mockModels);
-        } catch (LedpException e) {
-            Assert.fail("should NOT have thrown exception.");
-        }
-
     }
 
     @Test(groups = "unit")
