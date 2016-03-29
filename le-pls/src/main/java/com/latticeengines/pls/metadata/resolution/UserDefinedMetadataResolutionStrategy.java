@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 import org.apache.avro.Schema;
 import org.apache.commons.csv.CSVFormat;
@@ -26,6 +26,7 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -66,7 +67,22 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
 
         // Get header
         Set<String> headerFields = getHeaderFields();
+
+        // Remove unrequired columns from metadata that are not in header,
+        // asserting that no required columns have been removed
+        Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = result.metadata.getAttributes();
+        Iterator<Attribute> iterator = attributes.iterator();
+        while (iterator.hasNext()) {
+            Attribute attribute = iterator.next();
+            boolean missing = !headerFields.contains(attribute.getName());
+            if (missing && !attribute.isNullable()) {
+                missingRequiredFields.add(attribute.getName());
+            }
+            if (missing) {
+                iterator.remove();
+            }
+        }
 
         // Add columns that are not in metadata to unknown columns
         for (final String field : headerFields) {
@@ -141,9 +157,9 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         try {
             try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
                 try (InputStream is = fs.open(new Path(csvPath))) {
-                    try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(is, false, ByteOrderMark.UTF_8,
-                            ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                            StandardCharsets.UTF_8)) {
+                    try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(is, false,
+                            ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
+                            ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
                         CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
                         try (CSVParser parser = new CSVParser(reader, format)) {
                             return parser.getHeaderMap().keySet();

@@ -2,13 +2,14 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.rmi.server.UID;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,27 +31,27 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "fileuploads", description = "REST resource for uploading data files")
+@Api(value = "models/fileuploads", description = "REST resource for uploading csv files for modeling")
 @RestController
-@RequestMapping("/fileuploads")
-public class FileUploadResource {
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(FileUploadResource.class);
+@RequestMapping("/models/fileuploads")
+public class ModelingFileUploadResource {
+    // TODO rights
 
-    @Autowired
-    private SourceFileService sourceFileService;
+    @SuppressWarnings("unused")
+    private static final Logger log = Logger.getLogger(ModelingFileUploadResource.class);
 
     @Autowired
     private FileUploadService fileUploadService;
 
     @Autowired
-    private MetadataProxy metadataProxy;
+    private ModelingFileMetadataService modelingFileMetadataService;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Value("${pls.fileupload.maxUpload.bytes}")
     private long maxUploadSize;
@@ -67,13 +68,15 @@ public class FileUploadResource {
             if (file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
             }
+
+            InputStream stream = file.getInputStream();
             if (compressed) {
-                return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
-                        ZipUtils.decompressStream(file.getInputStream())));
-            } else {
-                return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema,
-                        file.getInputStream()));
+                stream = ZipUtils.decompressStream(stream);
             }
+
+            stream = modelingFileMetadataService.validateHeaderFields(stream, schema, fileName);
+
+            return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema, stream));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
         }
@@ -86,32 +89,21 @@ public class FileUploadResource {
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam("file") MultipartFile file) {
-        String filename = new UID().toString().replace("-", "").replace(":", "") + ".csv";
-        return uploadFile(filename, schema, compressed, file);
+        return uploadFile("file_" + DateTime.now().getMillis() + ".csv", schema, compressed, file);
     }
 
     @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Retrieve the metadata of the specified source file")
     public ResponseDocument<Table> getMetadata(@PathVariable String fileName) {
-
-        SourceFile sourceFile = sourceFileService.findByName(fileName);
-        if (sourceFile == null) {
-            return null;
-        }
-        if (sourceFile.getTableName() == null) {
-            return null;
-        }
-        Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
-                sourceFile.getTableName());
-        return ResponseDocument.successResponse(table);
+        return ResponseDocument.successResponse(fileUploadService.getMetadata(fileName));
     }
 
     @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Retrieve the list of unknown metadata columns")
     public ResponseDocument<List<ColumnTypeMapping>> getUnknownColumns(@PathVariable String fileName) {
-        return ResponseDocument.successResponse(fileUploadService.getUnknownColumns(fileName));
+        return ResponseDocument.successResponse(modelingFileMetadataService.getUnknownColumns(fileName));
     }
 
     @RequestMapping(value = "{fileName}/metadata/unknown", method = RequestMethod.POST)
@@ -119,7 +111,7 @@ public class FileUploadResource {
     @ApiOperation(value = "Resolve the metadata given the list of specified columns")
     public SimpleBooleanResponse resolveMetadata(@PathVariable String fileName,
             @RequestBody List<ColumnTypeMapping> unknownColumns) {
-        fileUploadService.resolveMetadata(fileName, unknownColumns);
+        modelingFileMetadataService.resolveMetadata(fileName, unknownColumns);
         return SimpleBooleanResponse.successResponse();
     }
 

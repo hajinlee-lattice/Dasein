@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
+public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
     private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.zip";
@@ -64,7 +64,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String uri = String.format("/pls/fileuploads/unnamed?schema=%s&compressed=%s",
+            String uri = String.format("/pls/models/fileuploads/unnamed?schema=%s&compressed=%s",
                     SchemaInterpretation.SalesforceAccount, compressed);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
@@ -72,7 +72,7 @@ public class FileUploadResourceTestNG extends PlsFunctionalTestNGBase {
             });
         } else {
             String filename = DateTime.now().getMillis() + ".csv";
-            String uri = String.format("/pls/fileuploads?fileName=%s&schema=%s&compressed=%s", filename,
+            String uri = String.format("/pls/models/fileuploads?fileName=%s&schema=%s&compressed=%s", filename,
                     SchemaInterpretation.SalesforceAccount, compressed);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);

@@ -79,14 +79,14 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     private void resolveMetadata() {
         RestTemplate restTemplate = selfServiceModeling.getRestTemplate();
         ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
-                ResponseDocument.class);
+                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
+                        sourceFile.getName()), ResponseDocument.class);
         @SuppressWarnings("unchecked")
         List<LinkedHashMap> unknownColumns = new ObjectMapper().convertValue(response.getResult(), List.class);
         setUnknowColumnType(unknownColumns);
         response = restTemplate.postForObject(
-                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
-                unknownColumns, ResponseDocument.class);
+                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
+                        sourceFile.getName()), unknownColumns, ResponseDocument.class);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

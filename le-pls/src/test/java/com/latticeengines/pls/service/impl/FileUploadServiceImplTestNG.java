@@ -90,49 +90,4 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(contents, expectedContents);
     }
 
-    @Test(groups = "functional")
-    public void uploadFileWithMissingRequiredFields() throws Exception {
-        dataFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_missing_required_fields.csv").getPath());
-        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-        try {
-            fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount,
-                    fileInputStream);
-        } catch (Exception e) {
-            assertTrue(e instanceof LedpException);
-            assertTrue(e.getMessage().contains(InterfaceName.Id.name()));
-            assertTrue(e.getMessage().contains(InterfaceName.Website.name()));
-            assertTrue(e.getMessage().contains(InterfaceName.Event.name()));
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18087);
-        }
-    }
-
-    @Test(groups = "functional")
-    public void uploadFileWithEmptyHeaderName() throws Exception {
-        dataFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_empty_header.csv").getPath());
-        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-        try {
-            fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount,
-                    fileInputStream);
-        } catch (Exception e) {
-            assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18096);
-        }
-    }
-
-    @Test(groups = "functional")
-    public void uploadFileWithUnexpectedCharacterInHeaderName() throws Exception {
-        dataFile = new File(ClassLoader.getSystemResource(
-                "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_unexpected_character_in_header.csv")
-                .getPath());
-        fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
-        try {
-            fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount,
-                    fileInputStream);
-        } catch (Exception e) {
-            assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18095);
-        }
-    }
 }

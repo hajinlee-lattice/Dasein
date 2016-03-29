@@ -190,6 +190,8 @@ public enum LedpCode {
     LEDP_18094("Failed to read from CSV file."), //
     LEDP_18095("Detected unexpected character in header name {0}, in csv file {1}."), //
     LEDP_18096("Found empty column name in csv headers in csv file {0}."), //
+    LEDP_18097("Problems uploading file."), //
+
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
 

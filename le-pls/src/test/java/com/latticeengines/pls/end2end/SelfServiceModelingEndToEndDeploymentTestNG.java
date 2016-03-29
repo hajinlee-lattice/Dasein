@@ -119,7 +119,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/fileuploads/unnamed?schema=%s", getPLSRestAPIHostPort(),
+                String.format("%s/pls/models/fileuploads/unnamed?schema=%s", getPLSRestAPIHostPort(),
                         SchemaInterpretation.SalesforceLead), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -130,13 +130,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "uploadFile")
     public void resolveMetadata() {
         ResponseDocument response = restTemplate.getForObject(
-                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
-                ResponseDocument.class);
+                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
+                        sourceFile.getName()), ResponseDocument.class);
         @SuppressWarnings("unchecked")
         List<Object> unknownColumns = new ObjectMapper().convertValue(response.getResult(), List.class);
         response = restTemplate.postForObject(
-                String.format("%s/pls/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(), sourceFile.getName()),
-                unknownColumns, ResponseDocument.class);
+                String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
+                        sourceFile.getName()), unknownColumns, ResponseDocument.class);
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
@@ -210,8 +210,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = restTemplate.exchange(
-                String.format("%s/pls/fileuploads/%s/import/errors", getPLSRestAPIHostPort(), sourceFile.getName()),
-                HttpMethod.GET, entity, byte[].class);
+                String.format("%s/pls/models/fileuploads/%s/import/errors", getPLSRestAPIHostPort(),
+                        sourceFile.getName()), HttpMethod.GET, entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());
         assertTrue(errors.length() > 0);
