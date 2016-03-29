@@ -18,14 +18,14 @@ public class SqlProxy extends BaseRestApiProxy implements SqlInterface {
     @Override
     public AppSubmission importTable(ImportRequest importRequest) {
         String url = constructUrl("/imports");
-        return post("match", url, importRequest, AppSubmission.class);
+        return post("import", url, importRequest, AppSubmission.class);
     }
 
 
     @Override
     public AppSubmission exportTable(ExportRequest exportRequest) {
         String url = constructUrl("/exports");
-        return post("match", url, exportRequest, AppSubmission.class);
+        return post("export", url, exportRequest, AppSubmission.class);
     }
 
 }
