@@ -29,12 +29,16 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 
     private static final int sftpPort = 22;
-    private static final String sftpUserName = "sftpdev";
-    private static final String sftpPassword = "welcome";
     private static final String fileName = "madison.csv.gz";
 
     @Value("${eai.test.sftp.host}")
     private String sftpHost;
+
+    @Value("${eai.test.sftp.user}")
+    private String sftpUserName;
+
+    @Value("${eai.test.sftp.password.encrypted}")
+    private String sftpPasswordEncrypted;
 
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
@@ -68,7 +72,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
             JSch jsch = new JSch();
             Session session = jsch.getSession(sftpUserName, sftpHost, sftpPort);
             session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword(sftpPassword);
+            session.setPassword(CipherUtils.decrypt(sftpPasswordEncrypted));
             session.connect();
             Channel channel = session.openChannel("sftp");
             channel.connect();
@@ -117,7 +121,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         configuration.setSftpPort(sftpPort);
         configuration.setHdfsDir(hdfsDir);
         configuration.setSftpUserName(sftpUserName);
-        configuration.setSftpPasswordEncrypted(CipherUtils.encrypt(sftpPassword).replace("\r","").replace("\n",""));
+        configuration.setSftpPasswordEncrypted(sftpPasswordEncrypted);
         return configuration;
     }
 
