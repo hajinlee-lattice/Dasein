@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -163,7 +164,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             importRequest.setSplitColumn(splitColumn);
             importRequest.setWhereClause(whereClause);
             AppSubmission submission = sqlProxy.importTable(importRequest);
-            ApplicationId appId = YarnUtils.getAppIdFromString(submission.getApplicationIds().get(0));
+            ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
             FinalApplicationStatus status =
                     YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600 * 1000L);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {

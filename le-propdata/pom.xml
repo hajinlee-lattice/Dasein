@@ -99,7 +99,7 @@
                                 <port>8080</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                <extraClasspath>${evn.HADOOP_CONF_DIR};${evn.TEZ_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar;
                                 </extraClasspath>
                             </webAppConfig>
                             <useTestClasspath>true</useTestClasspath>

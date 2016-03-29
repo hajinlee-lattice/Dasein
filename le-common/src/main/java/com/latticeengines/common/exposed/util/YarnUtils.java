@@ -83,16 +83,4 @@ public class YarnUtils {
 
     }
 
-    public static ApplicationId getAppIdFromString(String str) {
-        String[] tokens = str.split("_");
-        if (tokens.length != 3 || !"application".equals(tokens[0])) {
-            throw new IllegalArgumentException("Input string " + str + " is not in the format of an application id");
-        }
-        try {
-            return ApplicationId.newInstance(Long.valueOf(tokens[1]), Integer.valueOf(tokens[2]));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse string " + str + " into an application id.", e);
-        }
-    }
-
 }
