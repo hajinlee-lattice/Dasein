@@ -38,7 +38,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     private String sftpUserName;
 
     @Value("${eai.test.sftp.password.encrypted}")
-    private String sftpPasswordEncrypted;
+    private String sftpPassword;
 
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;
@@ -72,7 +72,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
             JSch jsch = new JSch();
             Session session = jsch.getSession(sftpUserName, sftpHost, sftpPort);
             session.setConfig("StrictHostKeyChecking", "no");
-            session.setPassword(CipherUtils.decrypt(sftpPasswordEncrypted));
+            session.setPassword(sftpPassword);
             session.connect();
             Channel channel = session.openChannel("sftp");
             channel.connect();
@@ -121,7 +121,8 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         configuration.setSftpPort(sftpPort);
         configuration.setHdfsDir(hdfsDir);
         configuration.setSftpUserName(sftpUserName);
-        configuration.setSftpPasswordEncrypted(sftpPasswordEncrypted);
+        System.out.println("password in getRouteConfiguration: " + sftpPassword);
+        configuration.setSftpPasswordEncrypted(CipherUtils.encrypt(sftpPassword).replace("\r", "").replace("\n", ""));
         return configuration;
     }
 

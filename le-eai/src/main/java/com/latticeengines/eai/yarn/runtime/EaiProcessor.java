@@ -43,6 +43,5 @@ public class EaiProcessor extends SingleContainerYarnProcessor<ImportConfigurati
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         importTableProcessor.setApplicationContext(applicationContext);
-        camelRouteProcessor.setApplicationContext(applicationContext);
     }
 }

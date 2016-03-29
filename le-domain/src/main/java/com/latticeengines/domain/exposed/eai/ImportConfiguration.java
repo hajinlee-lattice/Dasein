@@ -18,7 +18,7 @@ public class ImportConfiguration extends BasePayloadConfiguration {
     private List<SourceImportConfiguration> sourceConfigurations = new ArrayList<>();
     private Map<String, String> properties = new HashMap<>();
     private ImportType importType = ImportType.ImportTable;
-    private List<CamelRouteConfiguration> camelRouteConfigurations;
+    private CamelRouteConfiguration camelRouteConfiguration;
 
     @JsonProperty("sources")
     public List<SourceImportConfiguration> getSourceConfigurations() {
@@ -65,14 +65,14 @@ public class ImportConfiguration extends BasePayloadConfiguration {
         this.importType = importType;
     }
 
-    @JsonProperty("camel_route_configurations")
-    public List<CamelRouteConfiguration> getCamelRouteConfigurations() {
-        return camelRouteConfigurations;
+    @JsonProperty("camel_route_configuration")
+    public CamelRouteConfiguration getCamelRouteConfiguration() {
+        return camelRouteConfiguration;
     }
 
-    @JsonProperty("camel_route_configurations")
-    public void setCamelRouteConfigurations(List<CamelRouteConfiguration> camelRouteConfigurations) {
-        this.camelRouteConfigurations = camelRouteConfigurations;
+    @JsonProperty("camel_route_configuration")
+    public void setCamelRouteConfiguration(CamelRouteConfiguration camelRouteConfiguration) {
+        this.camelRouteConfiguration = camelRouteConfiguration;
     }
 
     @Override
@@ -80,11 +80,11 @@ public class ImportConfiguration extends BasePayloadConfiguration {
         return JsonUtils.serialize(this);
     }
 
-    public static ImportConfiguration createForCamelRouteConfigurations(
-            List<CamelRouteConfiguration> camelRouteConfigurations) {
+    public static ImportConfiguration createForCamelRouteConfiguration(
+            CamelRouteConfiguration camelRouteConfiguration) {
         ImportConfiguration importConfiguration = new ImportConfiguration();
         importConfiguration.setImportType(ImportType.CamelRoute);
-        importConfiguration.setCamelRouteConfigurations(camelRouteConfigurations);
+        importConfiguration.setCamelRouteConfiguration(camelRouteConfiguration);
         return importConfiguration;
     }
 

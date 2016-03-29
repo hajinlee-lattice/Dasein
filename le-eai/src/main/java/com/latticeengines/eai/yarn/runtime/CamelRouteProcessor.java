@@ -1,7 +1,5 @@
 package com.latticeengines.eai.yarn.runtime;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.camel.CamelContext;
@@ -10,9 +8,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -25,14 +21,13 @@ import com.latticeengines.eai.service.impl.camel.SftpToHdfsRouteService;
 
 @Component("camelRouteProcessor")
 public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConfiguration> implements
-        ItemProcessor<ImportConfiguration, String>, ApplicationContextAware {
+        ItemProcessor<ImportConfiguration, String> {
 
     private static final Long timeout = TimeUnit.HOURS.toMillis(48);
     private static final Log log = LogFactory.getLog(CamelRouteProcessor.class);
 
-    private ApplicationContext applicationContext;
-    private List<CamelRouteService<?>> camelRouteServices = new ArrayList<>();
-    private List<CamelRouteConfiguration> camelRouteConfigurations;
+    @Autowired
+    private SftpToHdfsRouteService sftpToHdfsRouteService;
 
     @Override
     public String process(ImportConfiguration importConfig) throws Exception {
@@ -41,54 +36,40 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
                     + " was directed to " + this.getClass().getSimpleName());
         }
 
-        camelRouteConfigurations = importConfig.getCamelRouteConfigurations();
-        System.out.println(JsonUtils.serialize(camelRouteConfigurations));
+        System.out.println(JsonUtils.serialize(importConfig.getCamelRouteConfiguration()));
+
+        CamelRouteConfiguration camelRouteConfiguration = importConfig.getCamelRouteConfiguration();
         CamelContext camelContext = new DefaultCamelContext();
+        CamelRouteService<?> camelRouteService;
 
-        for (CamelRouteConfiguration camelRouteConfiguration: camelRouteConfigurations) {
-            CamelRouteService<?> camelRouteService;
-            if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
-                camelRouteService = (SftpToHdfsRouteService) applicationContext.getBean("sftpToHdfsRoutService");
-            } else {
-                throw new UnsupportedOperationException(camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
-            }
-
-            RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
-            camelContext.addRoutes(route);
-            camelRouteServices.add(camelRouteService);
+        if (camelRouteConfiguration instanceof SftpToHdfsRouteConfiguration) {
+            camelRouteService = sftpToHdfsRouteService;
+        } else {
+            throw new UnsupportedOperationException(camelRouteConfiguration.getClass().getSimpleName() + " has not been implemented yet.");
         }
 
+        RouteBuilder route = camelRouteService.generateRoute(camelRouteConfiguration);
+        camelContext.addRoutes(route);
         camelContext.start();
-        waitForRouteToFinish();
+        waitForRouteToFinish(camelRouteService, camelRouteConfiguration);
         camelContext.stop();
 
         return null;
      }
 
-    private void waitForRouteToFinish() {
+    private void waitForRouteToFinish(CamelRouteService<?> camelRouteService,
+                                      CamelRouteConfiguration camelRouteConfiguration) {
         Long startTime = System.currentTimeMillis();
         Integer errorTimes = 0;
-        int currentStep = 0;
-        CamelRouteService<?> currentService;
-        CamelRouteConfiguration currentConfiguration;
         while (System.currentTimeMillis() - startTime < timeout) {
-            if (currentStep >= camelRouteConfigurations.size()) {
-                break;
-            }
-            currentService = camelRouteServices.get(currentStep);
-            currentConfiguration = camelRouteConfigurations.get(currentStep);
             try {
-                if (currentService.routeIsFinished(currentConfiguration)) {
-                    setProgress(convertToGlobalProgress(currentStep, 1.0f));
-                    log.info("Step " + (currentStep + 1) + "/" + camelRouteConfigurations.size() + " finished.");
-                    // reset for next step
-                    errorTimes = 0;
-                    currentStep++;
+                if (camelRouteService.routeIsFinished(camelRouteConfiguration)) {
+                    setProgress(0.95f);
+                    return;
                 } else {
-                    Double progress = currentService.getProgress(currentConfiguration);
-                    setProgress(convertToGlobalProgress(currentStep, progress.floatValue()));
-                    log.info("Waiting for the camel route to finish: " + progress * 100 + " % of step "
-                            + (currentStep + 1) + "/" + camelRouteConfigurations.size());
+                    Double progress = camelRouteService.getProgress(camelRouteConfiguration);
+                    setProgress(progress.floatValue());
+                    log.info("Waiting for the camel route to finish: " + progress * 100 + " %");
                 }
             } catch (Exception e) {
                 log.error(e);
@@ -104,21 +85,6 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
                 }
             }
         }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
-
-    private float convertToGlobalProgress(int step, float stepProgress) {
-        int totalSteps = camelRouteConfigurations.size();
-        if (totalSteps <= 0) {
-            throw new IllegalStateException("Total number of steps is " + totalSteps);
-        }
-
-        float stepPortion = (float) step / totalSteps;
-        return stepPortion * (step + 0.9f * stepProgress + 0.05f);
     }
 
 }

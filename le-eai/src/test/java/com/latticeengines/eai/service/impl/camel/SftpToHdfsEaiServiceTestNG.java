@@ -16,8 +16,6 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @Component("sftpToHdfsEaiServiceTestNG")
 public class SftpToHdfsEaiServiceTestNG extends EaiFunctionalTestNGBase {
 
@@ -36,8 +34,8 @@ public class SftpToHdfsEaiServiceTestNG extends EaiFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testDownloadSftp() throws Exception {
         SftpToHdfsRouteConfiguration camelRouteConfiguration =  routeServiceTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig = ImportConfiguration
-                .createForCamelRouteConfigurations(Collections.singletonList(camelRouteConfiguration));
+        ImportConfiguration importConfig =
+                ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfiguration);
         ApplicationId appId = eaiService.extractAndImport(importConfig);
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
