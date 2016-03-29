@@ -3,4 +3,4 @@ export API_URL=http://${OUTSIDE_TOMCAT}:8081
 export COMPRESSED=true
 export HTTP_PORT=3000
 export HTTPS_PORT=false
-export WHITELIST=10.41.0.14,10.41.0.16
+export WHITELIST=${OUTSIDE_TOMCAT}
