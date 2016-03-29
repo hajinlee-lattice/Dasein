@@ -37,7 +37,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         if (data != null && data.Success) {
             createUpdatePasswordSuccessView(); console.log('buh',data);
         } else {
-            $state.go('updatepassword');
+            $state.go('home.updatepassword');
         }
     });
 

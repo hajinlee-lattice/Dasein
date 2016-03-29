@@ -334,8 +334,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     '<%= pls.dist %>/app.js': [
-                        '<%= pls.dist %>/app.js',
-                        '<%= pls.dist %>/templates.js'
+                        '<%= pls.dist %>/app.js'//,'<%= pls.dist %>/templates.js'
                     ]
                 }
             }

@@ -2,7 +2,7 @@ angular
     .module('pd.jobs')
     .config(['$stateProvider', function($stateProvider) {
         $stateProvider
-            .state('jobs', {
+            .state('home.jobs', {
                 url: '/jobs',
                 views: {
                     "navigation@": {
@@ -12,13 +12,13 @@ angular
                 },
                 redirectTo: 'jobs.status'
             })
-            .state('jobs.status', {
+            .state('home.jobs.status', {
                 url: '/status',
                 views: {
                     "summary@": {
                         resolve: { 
                             ResourceString: function() {
-                                return 'Jobs Page';
+                                return 'SUMMARY_JOBS_STATUS';
                             }
                         },
                         controller: 'OneLineController',
@@ -29,7 +29,7 @@ angular
                     }
                 }
             })
-            .state('jobs.status.ready', {
+            .state('home.jobs.status.ready', {
                 url: '/ready/:jobId',
                 views: {
                     "summary@": {
@@ -40,7 +40,7 @@ angular
                     }
                 }
             })
-            .state('jobs.status.csv', {
+            .state('home.jobs.status.csv', {
                 url: '/csv/:jobId',
                 resolve: {
                     JobReport: function($q, $stateParams, JobsService) {
@@ -67,45 +67,22 @@ angular
                     "summary@": {
                         resolve: { 
                             ResourceString: function() {
-                                return 'Summary of Imported Data';
+                                return 'SUMMARY_JOBS_IMPORT_CSV';
                             }
                         },
                         controller: 'OneLineController',
                         templateUrl: 'app/navigation/summary/OneLineView.html'
                     },
                     "main@": {
-                        controller: function($scope, JobsService, JobReport) {
-                            if (!JobReport) {
-                                return;
-                            }
-                            
-                            $scope.report = JobReport;
-                            $scope.data = data = JSON.parse(JobReport.json.Payload);
-                            $scope.data.total_records = data.imported_records + data.ignored_records;
-                            $scope.errorlog = '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors';
-
-                            $scope.clickGetErrorLog = function($event) {
-                                console.log('click', JobReport);
-
-                                JobsService.getErrorLog(JobReport).then(function(result) {
-                                    console.log('success',result);
-
-                                    var blob = new Blob([ JSON.stringify(result) ], {
-                                        type: "text/plain;charset=utf-8"
-                                    });
-                                    
-                                    saveAs(blob, "errorlog.json");
-                                });
-                            }
-                        },
+                        controller: 'CSVReportController',
                         templateUrl: 'app/create/views/ValidateImportView.html'
                     }   
                 }
             })
-            .state('jobs.import', {
+            .state('home.jobs.import', {
                 url: '/import'
             })
-            .state('jobs.import.credentials', {
+            .state('home.jobs.import.credentials', {
                 url: '/credentials',
                 views: {
                     "summary@": {
@@ -116,7 +93,7 @@ angular
                     }
                 }
             })
-            .state('jobs.import.file', {
+            .state('home.jobs.import.file', {
                 url: '/file',
                 views: {
                     "summary@": {
@@ -127,7 +104,7 @@ angular
                     }
                 }
             })
-            .state('jobs.import.processing', {
+            .state('home.jobs.import.processing', {
                 url: '/processing',
                 views: {
                     "summary@": {

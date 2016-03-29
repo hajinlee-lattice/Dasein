@@ -15,7 +15,6 @@ angular.module('mainApp.appCommon.modals.SimpleModal', [
         };
         
         angular.extend(options, overrides);
-        
         var modalClass = "no-close-button";
         var modalElement = $('<div></div>');
         modalElement.html(options.message);

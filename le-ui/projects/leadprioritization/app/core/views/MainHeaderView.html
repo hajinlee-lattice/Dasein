@@ -13,7 +13,7 @@
                 <span class="pd-header-downarrow fa fa-angle-down"></span>
             </a>
             <ul ng-show="showProfileNav" ng-click="showProfileNav = !showProfileNav">
-                <li><a ui-sref="updatepassword" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
+                <li><a ui-sref="home.updatepassword" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
 
 
                 <!--
@@ -31,7 +31,7 @@
                 <li data-ng-if="showDeploymentWizard" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="deploymentWizardClicked($event)">{{ResourceUtility.getString('HEADER_DEPLOYMENT_WIZARD')}}</a></li>
                 <li data-ng-if="showLeadEnrichment" data-ng-hide="mandatePasswordChange"><a href="javascript:void(0)" data-ng-click="leadEnrichmentClicked($event)">{{ResourceUtility.getString('HEADER_LEAD_ENRICHMENT')}}</a></li>
                 -->
-                <li><a ui-sref="signout">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
+                <li><a ui-sref="home.signout">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
             </ul>
         </div>
 

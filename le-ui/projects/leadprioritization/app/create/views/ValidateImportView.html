@@ -4,19 +4,19 @@
 	<div class="row text-center">
 
 		<div class="two columns offset-two uploaded-leads">
-			<h2>All records that <br/>were Uploaded</h2>
+			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_UPLOADED')}}</h2>
 			<h3 class="blue-text">{{data.total_records || 0}}</h3>
 		</div>
 		<div class="four columns excluded-leads">
-			<h2>All records that <br/>were Excluded</h2>
+			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_EXCLUDED')}}</h2>
 			<h3 class="error-text">{{data.ignored_records || 0}}</h3>
 
 			<dl class="summary-list">
-				<dt>Required Field Missing</dt>
+				<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MISSING')}}</dt>
 				<dd class="error-text">{{data.required_field_missing || 0}}</dd>
-				<dt>Field Malformed</dt>
+				<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_MALFORMED')}}</dt>
 				<dd class="error-text">{{data.field_malformed || 0}}</dd>
-				<dt>Row Error</dt>
+				<dt>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_ROWERROR')}}</dt>
 				<dd class="error-text">{{data.row_error || 0}}</dd>
 			</dl>
 
@@ -25,12 +25,12 @@
 				class="button white-button block-button download-button"
 				ng-show="data.ignored_records > 0"
 				ng-click="clickGetErrorLog($event)">
-				Download Error Log
+				{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_BUTTON_DOWNLOAD')}}
 			</button>
 
 		</div>
 		<div class="two columns used-leads">
-			<h2>Records used to <br/>Create the Model</h2>
+			<h2>{{ResourceUtility.getString('MODEL_JOBREPORT_CSV_LABEL_USED')}}</h2>
 			<h3 class="success-text">{{data.imported_records || 0}}</h3>
 		</div>
 

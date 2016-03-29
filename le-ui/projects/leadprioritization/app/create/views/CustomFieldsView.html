@@ -23,13 +23,13 @@
 
 	<div class="six columns offset-three">
 
-		<p ng-hide="vm.errors">Displaying {{ vm.data.length }}.</p>
+		<p ng-hide="vm.errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING')}}&nbsp;{{ vm.data.length }}.</p>
 
 		<table ng-hide="vm.errors" class="unstyled">
 			<thead>
 				<tr>
-					<th>Custom Field Name</th>
-					<th>Type</th>
+					<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_FIELDNAME')}}</th>
+					<th>{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_TYPE')}}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -50,13 +50,19 @@
 
 		<div class="row">
 			<div class="six columns offset-two" ng-if="vm.errors">
-				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
+				<button ui-sref="home.models.import" class="button gray-button block-button" type="button">
+					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
+				</button>
 			</div>
 			<div class="six columns" ng-hide="vm.errors">
-				<button ui-sref="models.import" class="button gray-button block-button" type="button">Go Back</button>
+				<button ui-sref="home.models.import" class="button gray-button block-button" type="button">
+					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_BACK')}}
+				</button>
 			</div>
 			<div class="six columns" ng-hide="vm.errors">
-				<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">Looks Fine, Next</button>
+				<button ng-click="vm.csvSubmitColumns($event)" class="button orange-button block-button" type="button">
+					{{ResourceUtility.getString('MODEL_COLUMNS_CSV_BUTTON_NEXT')}}
+				</button>
 			</div>
 		</div>
 

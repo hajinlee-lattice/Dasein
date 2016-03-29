@@ -1,33 +1,33 @@
-<div>
+<div ng-controller="SidebarRootController">
     <div class="menu-header">
-        <a ui-sref="models" class="button button-blue icon-button">
+        <a ui-sref="home.models" class="button button-blue icon-button">
             <span class="fa fa-angle-left"></span>
         </a>
         <h3>{{ name }}</h3>
     </div>
     <ul class="menu">
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.attributes"><span class="ico ico-attributes ico-light-gray"></span>Attributes</a>
+            <a ui-sref="home.model.attributes"><span class="ico ico-attributes ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}</a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.performance"><span class="ico ico-performance ico-light-gray"></span>Performance</a>
+            <a ui-sref="home.model.performance"><span class="ico ico-performance ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PERFORMANCE')}}</a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.leads"><span class="ico ico-leads ico-light-gray"></span>Sample Leads</a>
+            <a ui-sref="home.model.leads"><span class="ico ico-leads ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}</a>
         </li>
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.summary"><span class="ico ico-datatable ico-light-gray"></span>Model Summary</a>
+            <a ui-sref="home.model.summary"><span class="ico ico-datatable ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</a>
         </li>
         <li data-ng-if="showAlerts" role="presentation" ui-sref-active="active">
-            <a ui-sref="model.alerts"><span class="ico ico-alerts ico-light-gray"></span>Alerts</a>
+            <a ui-sref="home.model.alerts"><span class="ico ico-alerts ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ALERTS')}}</a>
         </li>
         
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.scoring"><span class="ico ico-scoring ico-light-gray"></span>Scoring</a>
+            <a ui-sref="home.model.scoring"><span class="ico ico-scoring ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SCORING')}}</a>
         </li>
         
         <li role="presentation" ui-sref-active="active">
-            <a ui-sref="model.refine"><span class="ico ico-refine ico-light-gray"></span>Refine &amp; Clone</a>
+            <a ui-sref="home.model.refine"><span class="ico ico-refine ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_REFINE')}}</a>
         </li>
     </ul>
 </div>

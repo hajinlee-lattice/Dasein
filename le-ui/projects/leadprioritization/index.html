@@ -40,9 +40,13 @@
             </div>
         </div>
         <!--[if IE]> <div id="isIE"></div> <![endif]-->
-        <!-- combined common and vendor js -->
-        <script src="/assets/lattice.js"></script>
+        
+        <script src="/assets/vendor.min.js"></script>
+        <script src="/assets/lattice.min.js"></script>
         <script src="lib/js/kendo.all.min.js"></script>
+        <!-- build:template:dist
+        <script src="templates.js"></script>
+        /build -->
         <!-- build:js app.js -->
         <script src="../demo/js/bootstrap-select.min.js"></script>
         <script src="app/app.js"></script>
@@ -95,6 +99,7 @@
         <script src="app/core/controllers/SalesforceCredentialController.js"></script>
 
         <script src="app/create/controllers/CSVImportController.js"></script>
+        <script src="app/create/controllers/CSVReportController.js"></script>
 
         <script src="app/navigation/NavigationController.js"></script>
         <script src="app/navigation/summary/OneLineController.js"></script>
@@ -151,6 +156,7 @@
         <script src="app/setup/services/LeadEnrichmentService.js"></script>
         <script src="app/setup/services/MetadataService.js"></script>
         <!-- endbuild -->
+
         <!-- build:remove:dist -->
         <script type="text/javascript">
             angular.module('templates-main', []);

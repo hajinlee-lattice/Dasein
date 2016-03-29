@@ -11,7 +11,7 @@
         </div>
         -->
         <div class="form-group" ng-class="{ 'has-error' : uploadForm.modelName.$invalid && !uploadForm.modelName.$pristine }">
-          <label>Model Name <span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+          <label>{{ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_MODELNAME')}}&nbsp;<span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
           <input 
             type="text" 
             class="form-control" 
@@ -22,19 +22,19 @@
             placeholder="Example: US_Enterprise_model"
             ng-pattern="/^[a-zA-Z0-9\-_]*$/"
             required />
-          <p class="help-block">* Model Name must be present, less than 35 characters and contain no special characters.</p>
+          <p class="help-block">{{ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_MODELNAME')}}</p>
         </div>
 
         <div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
 
-     <label for="loadfile">Upload CSV File <span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+     <label for="loadfile">{{ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}&nbsp;<span class="more-info" tooltips tooltip-template="<h4>CSV File</h4><p>Creating a CSV file with one row per lead with the fields which you want to train the prediction model with. For best results, there should be at least 50,000 leads, 500 of which should indicate success, and the conversion rate should be between 1% and 10%.</p><h4 class='divider'>Fields For Account Model</h4><p>Required fields are: Id, Website and Event.</p><p>Additional fields are: CompanyName, City, State, Country, PostalCode, Industry, AnnualRevenue, NumberOfEmployees, CreatedDate, LastModifiedDate, YearStarted, PhoneNumber</p><h4 class='divider'>Fields For Lead Model</h4><p>Required fields are: Id, Email, Event.</p><p>Addtional fields are: CompanyName, City, State, Country, PostalCode, CreatedDate, LastModifiedDate, FirstName, LastName, Title, LeadSource, IsClosed, StageName, PhoneNumber, AnnualRevenue, NumberOfEmployees, Industry</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
           <input 
             id="uploadFileInput" 
             class="form-control" 
             disabled="disabled"
             placeholder="Choose File" />
           <div class="fileUpload button blue-button">
-              <span>Browse...</span>
+              <span>{{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_BROWSE')}}</span>
               <input 
                 id="uploadBtn"
                 name="csvFileName"
@@ -44,7 +44,7 @@
                 class="upload"
                 csv-uploader="csvFile" />
           </div>
-          <p class="help-block">* Please choose a file to upload.</p>
+          <p class="help-block">{{ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
         </div>
 
         <!-- Script needed to get filepath and place it into the input field -->
@@ -56,9 +56,9 @@
 
         <div class="form-group">
           <div class="toggle-check">
-            <label for="account-lead-check">Account Based</label>
+            <label for="account-lead-check">{{ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_ACCOUNT')}}</label>
             <input type="checkbox" name="account-lead-check" ng-model="accountLeadCheck" id="account-lead-check" class="toggle-switch" />
-            <label for="account-lead-check">Lead Based</label>
+            <label for="account-lead-check">{{ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_LEAD')}}</label>
           </div>          
         </div>
 
@@ -69,9 +69,9 @@
     <div class="three columns offset-three">
         <button 
             type="button" 
-            ui-sref="models"
+            ui-sref="home.models"
             class="button gray-button block-button">
-          Cancel</button>
+          {{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
     </div>
     <div class="three columns">
         <button 
@@ -79,7 +79,7 @@
             class="button orange-button block-button"
             ng-disabled="uploadForm.$invalid"
             ng-click="uploadFile()">
-          Start the Data Import
+          {{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_UPLOAD_FILE')}}
         </button>
     </div>
   </div>

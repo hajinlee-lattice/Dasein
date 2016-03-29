@@ -12,7 +12,7 @@ module.exports = function (grunt) {
         env: {
             dev: {
                 NODE_ENV: 'development',
-                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                API_URL: 'http://app.lattice.local',
                 COMPRESSED: false,
                 LOGGING: './server/log',
                 HTTP_PORT: 3000,
@@ -41,14 +41,20 @@ module.exports = function (grunt) {
                 HTTPS_PORT: 3000,
                 HTTPS_KEY: '/etc/pki/tls/private/private.key',
                 HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
-                HTTPS_PASS: 'Lattice1'
+                HTTPS_PASS: 'Lattice1',
+                WHITELIST: '10.41.0.14,10.41.0.16,10.51.12.109,10.51.51.109'
             },
             qa: {
                 NODE_ENV: 'qa',
-                API_URL: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                API_URL: 'http://app.lattice.local',
                 COMPRESSED: true,
                 LOGGING: './server/log',
-                HTTP_PORT: 3000
+                HTTP_PORT: 3000,
+                HTTPS_PORT: 3001,
+                HTTPS_KEY: './server/certs/privatekey.key',
+                HTTPS_CRT: './server/certs/certificate.crt',
+                HTTPS_PASS: false,
+                WHITELIST: '10.41.0.14,10.41.0.16'
             },
             production: {
                 NODE_ENV: 'production',
@@ -60,13 +66,9 @@ module.exports = function (grunt) {
                 HTTPS_KEY: '/etc/pki/tls/private/private.key',
                 HTTPS_CRT: '/etc/pki/tls/star_lattice-engines_com.crt',
                 HTTPS_PASS: 'Lattice1',
-                WHITELIST: [
-                    '10.0.0.1',
-                    '10.0.10.1'
-                ]
+                WHITELIST: '10.51.12.109,10.51.51.109'
             }
         },
-
         run: {
             node: {
                 args: [ './app.js' ]

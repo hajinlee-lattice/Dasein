@@ -16,6 +16,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.services.LoginService',
     'mainApp.config.services.ConfigService',
     'mainApp.create.csvImport',
+    'mainApp.create.csvReport',
     'pd.navigation',
     'pd.jobs'
 ])
@@ -51,28 +52,18 @@ var mainApp = angular.module('mainApp', [
     var inactivityCheckingId = null;
     var warningModalInstance = null;
 
-    ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
-        var previousSession = BrowserStorageUtility.getClientSession();
-        var loginDocument = BrowserStorageUtility.getLoginDocument();
+    var previousSession = BrowserStorageUtility.getClientSession();
+    var loginDocument = BrowserStorageUtility.getLoginDocument();
+
+    setTimeout(function() {
         if (loginDocument && mustUserChangePassword(loginDocument)) {
             window.open("/login", "_self");
-            return;
-            $scope.isLoggedInWithTempPassword = loginDocument.MustChangePassword;
-            $scope.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(loginDocument.PasswordLastModified);
-            createMandatoryChangePasswordViewForLocale(previousSession.Locale);
-        } else if (previousSession != null && ! hasSessionTimedOut()) {
+        } else if (previousSession != null && !hasSessionTimedOut()) {
             $scope.refreshPreviousSession(previousSession.Tenant);
         } else {
             window.open("/login", "_self");
-            return;
-            $scope.showFooter = false;
-            // Create the Login View
-            $http.get('app/login/views/LoginView.html', { cache: $templateCache }).success(function (html) {
-                var scope = $rootScope.$new();
-                $compile($("#mainView").html(html))(scope);
-            });
         }
-    });
+    },0)
 
     $scope.$on("LoggedIn", function() {
         startObservingUserActivtyThroughMouseAndKeyboard();
@@ -117,11 +108,13 @@ var mainApp = angular.module('mainApp', [
     });
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
+        /*
         ResourceStringsService.GetInternalResourceStringsForLocale(locale).then(function(result) {
             $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
-            $scope.getWidgetConfigDoc();
         });
+        */
+        $scope.getWidgetConfigDoc();
     };
     
     $scope.privacyPolicyClick = function ($event) {

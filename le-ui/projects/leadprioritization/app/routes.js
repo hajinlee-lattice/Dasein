@@ -37,39 +37,51 @@ angular
             }
         };
 
-    $urlRouterProvider.otherwise('/');
+    $urlRouterProvider.otherwise('/tenant/');
 
     $stateProvider
         .state('home', {
-            url: '/', // '/:tenantId',
-            /* eventually... detect tenantId/choose tenantId
+            url: '/tenant/:tenantId',
             resolve: {
-                Tenant: function($q, $stateParams, $scope, $controller) {
-                    var deferred = $q.defer(),
-                        tenantId = $stateParams.tenantId,
-                        LoginCtrl = $controller('LoginController', {});
-
-                    if (tenantId)
-                        deferred.resolve(true);
+                FeatureFlags: function($q, FeatureFlagService) {
+                    var deferred = $q.defer();
                     
-                    console.log('hi',deferred,tenantId,LoginCtrl);
+                    FeatureFlagService.GetAllFlags().then(function() {
+                        deferred.resolve();
+                    });
+                    
+                    return deferred.promise;
+                },
+                ResourceStrings: function($q, BrowserStorageUtility, ResourceStringsService) {
+                    var deferred = $q.defer(),
+                        session = BrowserStorageUtility.getClientSession();
+
+                    ResourceStringsService.GetInternalResourceStringsForLocale(session.Locale).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
                     return deferred.promise;
                 }
             },
-            */
             views: {
                 "navigation": {
-                    controller: 'SidebarRootController',
+                    controller: function($stateParams, $state, BrowserStorageUtility) {
+                        var tenantId = $stateParams.tenantId,
+                            ClientSession = BrowserStorageUtility.getClientSession(),
+                            Tenant = ClientSession ? ClientSession.Tenant : null;
+
+                        if (tenantId != Tenant.DisplayName) {
+                            $state.go('home.models', { tenantId: window.escape(Tenant.DisplayName) });
+                        }
+                    },
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 }
-            },
-            redirectTo: 'models'
+            }
         })
-        .state('models', {
+        .state('home.models', {
             url: '/models',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -80,13 +92,13 @@ angular
                 }   
             }
         })
-        .state('models.import', {
+        .state('home.models.import', {
             url: '/import',
             views: {
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'First, setup the model.';
+                            return 'SUMMARY_IMPORT_MODEL_CSV_UPLOAD';
                         }
                     },
                     controller: 'OneLineController',
@@ -97,7 +109,7 @@ angular
                 }   
             }
         })
-        .state('models.import.columns', {
+        .state('home.models.import.columns', {
             url: '/:csvFileName/columns',
             resolve: {
                 csvMetaData: function($stateParams, csvImportStore) {
@@ -118,7 +130,7 @@ angular
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Specify Unknown Column Types';
+                            return 'SUMMARY_IMPORT_MODEL_CSV_COLUMNS';
                         }
                     },
                     controller: 'OneLineController',
@@ -135,7 +147,7 @@ angular
 
                             csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
                                 csvImportService.StartModeling(csvMetaData).then(function(result) {
-                                    $state.go('jobs.status');
+                                    $state.go('home.jobs.status');
                                 });
                             });
                         }
@@ -145,13 +157,13 @@ angular
                 }   
             }
         })
-        .state('models.create', {
+        .state('home.models.create', {
             url: '/create',
             views: {
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'The model is ready to be created.';
+                            return 'SUMMARY_IMPORT_MODEL_CSV_READY';
                         }
                     },
                     controller: 'OneLineController',
@@ -162,7 +174,7 @@ angular
                 }   
             }
         })
-        .state('model', {
+        .state('home.model', {
             url: '/model/:modelId',
             resolve: ModelDependencies,
             views: {
@@ -185,7 +197,7 @@ angular
                 }
             }
         })
-        .state('model.attributes', {
+        .state('home.model.attributes', {
             url: '/attributes',
             views: {
                 "main@": {
@@ -197,7 +209,7 @@ angular
                 }
             }
         })
-        .state('model.performance', {
+        .state('home.model.performance', {
             url: '/performance',
             views: {
                 "main@": {
@@ -209,7 +221,7 @@ angular
                 }
             }
         })
-        .state('model.leads', {
+        .state('home.model.leads', {
             url: '/leads',
             views: {
                 "main@": {
@@ -221,7 +233,7 @@ angular
                 }
             }
         })
-        .state('model.summary', {
+        .state('home.model.summary', {
             url: '/summary',
             views: {
                 "main@": {
@@ -232,7 +244,7 @@ angular
                 }   
             }
         })
-        .state('model.alerts', {
+        .state('home.model.alerts', {
             url: '/alerts',
             views: {
                 "main@": {
@@ -267,7 +279,7 @@ angular
                 }   
             }
         })
-        .state('model.scoring', {
+        .state('home.model.scoring', {
             url: '/scoring',
             redirectto: 'model.scoring.import',
             views: {
@@ -285,7 +297,7 @@ angular
                 }   
             }
         })
-        .state('model.refine', {
+        .state('home.model.refine', {
             url: '/refine',
             views: {
                 "main@": {
@@ -297,7 +309,7 @@ angular
                 }   
             }
         })
-        .state('marketosettings', {
+        .state('home.marketosettings', {
             url: '/marketosettings',
             redirectto: 'marketosettings.apikey',
             resolve: { 
@@ -338,13 +350,13 @@ angular
                 }   
             }
         })
-        .state('marketosettings.apikey', {
+        .state('home.marketosettings.apikey', {
             url: '/apikey',
             views: {
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Marketo API Key';
+                            return 'SUMMARY_MARKETO_APIKEY';
                         }
                     },
                     controller: 'OneLineController',
@@ -359,13 +371,13 @@ angular
                 }   
             }
         })
-        .state('marketosettings.models', {
+        .state('home.marketosettings.models', {
             url: '/models',
             views: { 
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Enable Lattice Models in Marketo';
+                            return 'SUMMARY_MARKETO_MODELS';
                         }
                     },
                     controller: 'OneLineController',
@@ -380,13 +392,13 @@ angular
                 }   
             }
         }) 
-        .state('signout', {
+        .state('home.signout', {
             url: '/signout', 
             views: {
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Shutting Down';
+                            return 'SUMMARY_SIGNOUT';
                         }
                     },
                     controller: 'OneLineController',
@@ -400,17 +412,16 @@ angular
                 }
             }
         })
-        .state('updatepassword', {
+        .state('home.updatepassword', {
             url: '/updatepassword',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'Update Your Password';
+                            return 'SUMMARY_PASSWORD_UPDATE';
                         }
                     },
                     controller: 'OneLineController',
@@ -429,17 +440,16 @@ angular
                 }
             }
         })
-        .state('deploymentwizard', {
+        .state('home.deploymentwizard', {
             url: '/deploymentwizard',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
                     resolve: { 
                         ResourceString: function() {
-                            return 'hi';
+                            return '';
                         }
                     },
                     controller: 'OneLineController',
@@ -451,11 +461,10 @@ angular
                 }
             }
         })
-        .state('activate', {
+        .state('home.activate', {
             url: '/activate',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -472,11 +481,10 @@ angular
                 }
             }
         })
-        .state('users', {
+        .state('home.users', {
             url: '/users',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -493,11 +501,10 @@ angular
                 }   
             }
         })
-        .state('setup', {
+        .state('home.setup', {
             url: '/setup',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -514,11 +521,10 @@ angular
                 }   
             }
         })
-        .state('history', {
+        .state('home.history', {
             url: '/history',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -535,11 +541,10 @@ angular
                 }   
             }
         })
-        .state('fields', {
+        .state('home.fields', {
             url: '/fields',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -557,11 +562,10 @@ angular
                 }   
             }
         })
-        .state('dashboard', {
+        .state('home.dashboard', {
             url: '/dashboard',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {
@@ -578,11 +582,10 @@ angular
                 }   
             }
         })
-        .state('enrichment', {
+        .state('home.enrichment', {
             url: '/enrichment',
             views: {
                 "navigation@": {
-                    controller: 'SidebarRootController',
                     templateUrl: 'app/navigation/sidebar/RootView.html'
                 },
                 "summary@": {

@@ -31,14 +31,33 @@ module.exports = function(grunt) {
 				tasks: ['sass:dist']
 			}
 		},
+        ngAnnotate: {
+            production: {
+                files: {
+                    '<%= dir.assets %>/lattice.min.js': [
+                    	'<%= dir.assets %>/lattice.min.js'
+                    ]
+                }
+            }
+        },
         uglify: {
+            vendor: {
+                options: {
+                    mangle: false
+                },
+                files: {
+                    '<%= dir.assets %>/vendor.min.js': [
+                        '<%= dir.assets %>/vendor.min.js'
+                    ]
+                }
+            },
             production: {
                 options: {
                     mangle: false
                 },
                 files: {
-                    '<%= dir.assets %>/js/min/production.min.js': [
-                        '<%= dir.assets %>/js/min/production.min.js'
+                    '<%= dir.assets %>/lattice.min.js': [
+                        '<%= dir.assets %>/lattice.min.js'
                     ]
                 }
             }
@@ -52,20 +71,13 @@ module.exports = function(grunt) {
 					'<%= dir.bower %>/min/*.js',
 					'<%= dir.bower %>/*.js'
 				],
-				dest: '<%= dir.assets %>/js/min/vendor.min.js'
+				dest: '<%= dir.assets %>/vendor.min.js'
 			},
 			production: {
 				src: [
 					'<%= dir.app %>/**/*.js'
 				],
-				dest: '<%= dir.assets %>/js/min/production.min.js'
-			},
-			dist: {
-				src: [
-					'<%= dir.assets %>/js/min/vendor.min.js',
-					'<%= dir.assets %>/js/min/production.min.js'
-				],
-				dest: '<%= dir.dist %>/lattice.js'
+				dest: '<%= dir.assets %>/lattice.min.js'
 			}
 		},
         concurrent: {
@@ -78,12 +90,14 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-ng-annotate');
 
 	grunt.registerTask('build',[
 		'concat:vendor',
+		//'uglify:vendor',
 		'concat:production',
+        'ngAnnotate:production',
 		'uglify:production',
-		'concat:dist',
 		'sass:dist'
 	]);
 

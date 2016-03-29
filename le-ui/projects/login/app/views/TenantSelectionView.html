@@ -2,11 +2,11 @@
     button.button.icon-button, 
     a.button.icon-button, 
     .button.icon-button {
-        padding: 0.4em 0.8em 0.4em .7em;
-        font-size: 16px;
+        padding: 0.6em 0.8em 0.5em .7em;
+        font-size: 15px;
         line-height: 1em;
         color: #555555;
-        margin-bottom: 0.25em;
+        margin-bottom: 0.2em;
     }
     div.pd-pagination {
         text-align: center;
@@ -18,8 +18,11 @@
         margin-top: .5em;
     }
     select#tenantSelectionInput option {
-        padding: 0.2em 0.3em;
+        padding: 0.4em;
         cursor: pointer;
+    }
+    select#tenantSelectionInput option:nth-child(odd) {
+        background-color: #f5f5f5;
     }
     select#tenantSelectionInput option:hover {
         background: #26639b;
@@ -29,9 +32,18 @@
         width: 27em;
     }
     input.tenant-selection-search {
-        width: 10em;
+        width: 8em;
         display: inline;
         line-height: 1em;
+    }
+    input.tenant-selection-search:focus {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        border-color: #ccc;
+    }
+    div.modal-tenant-select-controls-right {
+        float: right;
+        margin-top: -0.2em;
     }
 </style>
 <div id="tenantSelectionFormContainer" class="modal-dialog modal-sm" data-ng-controller="TenantSelectionController">
@@ -41,39 +53,42 @@
         </div>
         <div class="modal-body" ng-init="SortDirection = ''">
             <div class="modal-tenant-select-controls">
-                <span>LP Version:&nbsp;</span>
+                <span>LP Version:</span>&nbsp;
                 <label for="tenantSelection2">
                 <input id="tenantSelection2" type="radio" ng-model="version" value="2.0">
-                2</label>&nbsp;
+                2.0</label>&nbsp;
                 <label for="tenantSelection3">
                 <input id="tenantSelection3" type="radio" ng-model="version" value="3.0">
-                3</label>&nbsp;
-                <input 
-                        type="text" 
-                        class="form-control tenant-selection-search" 
-                        ng-model="SearchValue"
-                        placeholder="Quick Search" 
-                    />
-                <button 
-                        type="button" 
-                        class="button white-button icon-button" 
-                        ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
-                    >
-                    <span class="fa 
-                            fa-sort-alpha-{{ 
-                                SortDirection == '' 
-                                    ? 'asc' 
-                                    : 'desc' 
-                            }}"
+                3.0</label>
+
+                <div class="modal-tenant-select-controls-right">
+                    <input 
+                            type="text" 
+                            class="form-control tenant-selection-search" 
+                            ng-model="SearchValue"
+                            placeholder="Contains:" 
+                        />
+                    <button 
+                            type="button" 
+                            class="button white-button icon-button" 
+                            ng-click="SortDirection = (SortDirection == '' ? '-' : '')" 
                         >
-                    </span>
-                </button>
+                        <span class="fa 
+                                fa-sort-alpha-{{ 
+                                    SortDirection == '' 
+                                        ? 'asc' 
+                                        : 'desc' 
+                                }}"
+                            >
+                        </span>
+                    </button>
+                </div>
             </div>
             <select 
                     id="tenantSelectionInput" 
-                    data-ng-model="select_value" 
-                    data-ng-change="handleTenantSelected()" 
-                    size="15"
+                    ng-model="select_value" 
+                    ng-change="handleTenantSelected()" 
+                    size="15" 
                 >
                 <option 
                         data-ng-repeat="tenant in tenantList | 
@@ -81,7 +96,7 @@
                             orderBy: SortDirection + 'DisplayName'"
                         value="{{tenant.Identifier}}"
                     >
-                    {{tenant.UIVersion}} - {{tenant.DisplayName}}
+                    {{tenant.UIVersion}}: {{tenant.DisplayName}}
                 </option>
             </select>
         </div>

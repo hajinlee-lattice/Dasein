@@ -9,9 +9,7 @@ const path      = require('path');
 const exphbs    = require('express-handlebars');
 const request   = require('request');
 const morgan    = require('morgan');
-const rotator   = require('file-stream-rotator');
 const fs        = require('fs');
-
 
 class Server {
     constructor(express, app, options) {
@@ -58,6 +56,9 @@ class Server {
         try {
             var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
             this.app.use(morgan('combined', { stream: accessLogStream }));
+            this.app.use(morgan('dev', { 
+                skip: function (req, res) { return res.statusCode < 400 } 
+            }));
         } catch(err) {
             console.log(err);
         }
@@ -81,10 +82,9 @@ class Server {
     // forward API requests for dev
     useApiProxy(API_URL, API_PATH) {
         if (API_URL) {
-            API_PATH = API_PATH || '/pls';
+            this.API_PATH = API_PATH = API_PATH || '/pls';
 
             try {
-                console.log('> REDIRECT:',API_PATH,' -> ',API_URL);
                 this.app.use(API_PATH, (req, res) => {
                     const url = API_URL + API_PATH + req.url;
                     let r = null;
@@ -97,7 +97,7 @@ class Server {
                             });
 
                             // prevent large-ish files from timing out on upload
-                            res.setTimeout(900000);
+                            res.setTimeout(1800000);
                         } else {
                             r = request(url);
                         }
@@ -154,10 +154,13 @@ class Server {
         });
 
         // print stack trace for dev environment
-        if (NODE_ENV === 'development') {
+        if (NODE_ENV != 'production') {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('./server/error', {
+                    options: this.options,
+                    url: req.originalUrl,
+                    status: err.status,
                     message: err.message,
                     error: err,
                     env: NODE_ENV
@@ -169,9 +172,12 @@ class Server {
         this.app.use((err, req, res, next) => {
             res.status(err.status || 500);
             res.render('./server/error', {
+                options: this.options,
+                url: req.originalUrl,
+                status: err.status,
                 message: err.message,
-                error: 'hidden',
-                env: NODE_ENV
+                error: 'Please contact the administrator if the problem persists.',
+                env: 'Lattice Engines'
             });
         });
     }
@@ -180,11 +186,14 @@ class Server {
         const options = this.options;
 
         console.log('> SERVER OPTIONS:');
+
         Object.keys(options).forEach(key => {
             var value = options[key];
 
             console.log('\t' + key + ':\t' + value + ' (' + typeof value + ')');
         });
+
+        console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
 
         if (this.httpServer) {
             this.httpServer.listen(options.HTTP_PORT, () => { console.log('> LISTENING: http://localhost:' + options.HTTP_PORT); });

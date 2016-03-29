@@ -16,19 +16,19 @@
     "tests"
   ],
   "dependencies": {
-    "angular-ui-router": "^0.2.17",
     "angular": "^1.4.9",
-    "angular-animate": "^1.4.9",
-    "underscore": "^1.8.3",
     "jquery": "^2.2.0",
     "jStorage": "jstorage#^0.4.12",
+    "qtip2": "^2.2.1",
     "d3": "^3.5.14",
     "crypto": "^3.46.1",
+    "underscore": "^1.8.3",
     "bootstrap": "^3.3.6",
-    "angular-sanitize": "^1.4.9",
-    "angular-resource": "^1.4.9",
     "ui-bootstrap": "^1.1.1",
-    "qtip2": "^2.2.1",
+    "angular-sanitize": "^1.4.9",
+    "angular-animate": "^1.4.9",
+    "angular-ui-router": "^0.2.17",
+    "angular-resource": "^1.4.9",
     "angular-route": "^1.4.9"
   }
 }

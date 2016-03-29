@@ -1,9 +1,9 @@
 <html>
     <head>
-        <title>Error Page</title>
+        <title>{{status}} {{message}}</title>
     </head>
     <body>
-        <h1>{{message}}</h1>
-        <p>{{error}}</p><p>{{env}}</p>
+        <h1>{{status}} {{message}}</h1>
+        <p>{{url}} - {{error}}</p><hr><span>env:{{env}}, min:{{options.COMPRESSED}}</span>
     </body>
 </html>

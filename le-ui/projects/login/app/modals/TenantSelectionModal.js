@@ -40,7 +40,8 @@ angular.module('mainApp.login.modals.TenantSelectionModal', [
             $("#modalContainer").modal('hide');
         }
     };
-    $scope.handleTenantScroll = function($event, $delta, $deltaX, $deltaY) {
-        console.log($event, $delta, $deltaX, $deltaY);
+    $scope.startsWith = function (actual, expected) {
+        var lowerStr = (actual + "").toLowerCase();
+        return lowerStr.indexOf(expected.toLowerCase()) === 0;
     };
 });

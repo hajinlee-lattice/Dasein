@@ -21,7 +21,7 @@ angular.module('mainApp.create.csvImport', [
         }
     }
 })
-.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore) {
+.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
     this.Upload = function(file, fileType, cancelDeferred) {
         var deferred = $q.defer(),
             formData = new FormData(),
@@ -77,7 +77,7 @@ angular.module('mainApp.create.csvImport', [
             console.log('# xhr upload error', e, this.responseText);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('MODEL_IMPORT_GENERAL_ERROR'),
+                ResultErrors: ResourceUtility.getString('MODEL_IMPORT_CONNECTION_ERROR'),
                 Result: null
             };
 
@@ -247,50 +247,56 @@ angular.module('mainApp.create.csvImport', [
     };
 }])
 .controller('csvImportController', [
-        '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
-        function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state, $q) {
-    $scope.showImportError = false;
-    $scope.importErrorMsg = "";
-    $scope.importing = false;
-    $scope.showImportSuccess = false;
-    $scope.ResourceUtility = ResourceUtility;
-    $scope.accountLeadCheck = false;
-
-    $scope.uploadFile = function() {
+    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
+    function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state, $q) {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
-        $scope.importing = true;
+        $scope.importing = false;
+        $scope.showImportSuccess = false;
+        $scope.ResourceUtility = ResourceUtility;
+        $scope.accountLeadCheck = false;
 
-        var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
-        this.cancelDeferred = cancelDeferred = $q.defer();
+        $scope.uploadFile = function() {
+            $scope.showImportError = false;
+            $scope.importErrorMsg = "";
+            $scope.importing = true;
 
-        csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
-            console.log('# Upload Successful:' + result.Success, result);
-            if (result.Success && result.Result) {
-                var fileName = result.Result.name,
-                    metaData = result.Result,
-                    modelName = $scope.modelName;
+            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
+            this.cancelDeferred = cancelDeferred = $q.defer();
 
-                console.log('# CSV Upload Complete', fileName, modelName, metaData);
-                metaData.modelName = modelName;
+            csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
+                console.log('# Upload Successful:' + result.Success, result);
+                if (result.Success && result.Result) {
+                    var fileName = result.Result.name,
+                        metaData = result.Result,
+                        modelName = $scope.modelName;
 
-                csvImportStore.Set(fileName, metaData);
+                    console.log('# CSV Upload Complete', fileName, modelName, metaData);
+                    metaData.modelName = modelName;
 
-                $state.go('models.import.columns', { csvFileName: fileName })
-            }
-        });
+                    csvImportStore.Set(fileName, metaData);
 
-        $('#mainSummaryView .summary>h1').html('Uploading File');
-        $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
+                    $state.go('home.models.import.columns', { csvFileName: fileName })
+                } else {
+                    $('div.loader').css({'display':'none'});
 
-        ShowSpinner('<div><h6 id="file_progress"></h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
+                    html = 'ERROR: ' + (result.ResultErrors ? result.ResultErrors : 'Unknown error while uploading file.');
+                    $('#file_progress').html(html);
+                }
+            });
 
-        $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
-    };
+            $('#mainSummaryView .summary>h1').html('Uploading File');
+            $('#mainSummaryView .summary').append('<p>Please wait while the CSV file is being uploaded.</p>');
 
-    $scope.cancelClicked = function() {
-        console.log('# Upload Cancelled');
-        csvImportStore.Get('cancelXHR', true).abort();
-        $state.go('models');
-    };
-}]);
+            ShowSpinner('<div><h6 id="file_progress"></h6></div><br><button type="button" id="fileUploadCancelBtn" class="button default-button"><span style="color:black">Cancel Upload</span></button>');
+
+            $('#fileUploadCancelBtn').on('click', $scope.cancelClicked.bind(this));
+        };
+
+        $scope.cancelClicked = function() {
+            console.log('# Upload Cancelled');
+            csvImportStore.Get('cancelXHR', true).abort();
+            $state.go('home.models');
+        };
+    }
+]);
