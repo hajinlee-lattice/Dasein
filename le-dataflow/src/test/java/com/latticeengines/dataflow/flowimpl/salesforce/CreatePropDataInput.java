@@ -6,7 +6,11 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
@@ -19,7 +23,7 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
         addSource("EventTable", sources.get("EventTable"));
 
         List<Aggregation> aggregation = new ArrayList<>();
-        aggregation.add(new Aggregation(Aggregation.AggregationType.FIRST, FieldList.GROUP));
+        aggregation.add(new Aggregation(AggregationType.FIRST, FieldList.GROUP));
 
         String groupby = addGroupBy("EventTable", //
                 new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), aggregation);

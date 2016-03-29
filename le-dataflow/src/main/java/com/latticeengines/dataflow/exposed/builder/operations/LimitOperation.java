@@ -2,8 +2,6 @@ package com.latticeengines.dataflow.exposed.builder.operations;
 
 import java.beans.ConstructorProperties;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-
 import cascading.flow.FlowProcess;
 import cascading.management.annotation.Property;
 import cascading.management.annotation.PropertyDescription;
@@ -16,17 +14,10 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 
 public class LimitOperation extends Operation {
-    public LimitOperation(String prior, int count, CascadingDataFlowBuilder builder) {
-        super(builder);
-
-        if (!builder.enforceGlobalOrdering()) {
-            throw new RuntimeException(
-                    "Builder must enforce global ordering in order to perform a deterministic limit operation");
-        }
-
-        Pipe priorPipe = getPipe(prior);
+    public LimitOperation(Input prior, int count) {
+        Pipe priorPipe = prior.pipe;
         this.pipe = new Each(priorPipe, new Limit(count));
-        this.metadata = getMetadata(prior);
+        this.metadata = prior.metadata;
     }
 
     /**

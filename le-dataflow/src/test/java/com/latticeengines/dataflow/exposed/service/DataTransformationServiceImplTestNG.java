@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestNGBase {
@@ -104,12 +105,12 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
 
     @Test(groups = "functional", dataProvider = "engineProvider", enabled = true)
     public void executeNamedTransformation(String engine) throws Exception {
-        Map<String, String> sources = new HashMap<>();
-        sources.put("Lead", lead);
-        sources.put("Opportunity", opportunity);
+        Map<String, Table> sources = new HashMap<>();
+        sources.put("Lead", MetadataConverter.getTable(config, lead));
+        sources.put("Opportunity", MetadataConverter.getTable(config, opportunity));
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("SOURCETABLES", sources);
         ctx.setProperty("CUSTOMER", "customer1");
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
         ctx.setProperty("TARGETTABLENAME", "EventTable");
@@ -119,11 +120,11 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         ctx.setProperty("HADOOPCONF", config);
         ctx.setProperty("ENGINE", engine);
         Table table = dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
-        
+
         verifyMetadata(table, "/tmp/EventTable");
         verifyNumRows(config, "/tmp/EventTable", 308);
     }
-    
+
     @SuppressWarnings("deprecation")
     private void verifyMetadata(Table table, String targetDir) throws Exception {
         List<String> avroFiles = HdfsUtils.getFilesByGlob(config, String.format("%s/*.avro", targetDir));
@@ -132,15 +133,16 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         Map<String, String> props = field.getProps();
         assertEquals(props.get("StatisticalType"), "ratio");
         assertEquals(props.get("ApprovedUsage"), "Model");
-        
+
         for (Attribute attr : table.getAttributes()) {
             if (attr.getName().equals("DomainHashCode")) {
                 assertEquals(attr.getApprovedUsage().get(0), "Model");
                 assertEquals(attr.getStatisticalType(), "ratio");
             }
         }
-        
-        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transformDefinitions = table.getRealTimeTransformationMetadata();
+
+        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transformDefinitions = table
+                .getRealTimeTransformationMetadata();
         assertEquals(transformDefinitions.getValue().size(), 1);
         TransformDefinition transform = transformDefinitions.getValue().get(0);
         assertEquals(transform.name, "encoder");

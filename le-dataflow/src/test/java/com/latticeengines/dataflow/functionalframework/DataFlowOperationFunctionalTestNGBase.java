@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -81,6 +82,10 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         return sources;
     }
 
+    protected Schema getOutputSchema() {
+        return AvroUtils.getSchemaFromGlob(configuration, TARGET_PATH + "/*.avro");
+    }
+
     protected List<GenericRecord> readOutput() {
         return AvroUtils.getDataFromGlob(configuration, TARGET_PATH + "/*.avro");
     }
@@ -110,4 +115,20 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
         ctx.setProperty("ENGINE", "TEZ");
         dataTransformationService.executeNamedTransformation(ctx, builder);
     }
+
+    protected Map<Object, Integer> histogram(List<GenericRecord> records, String column) {
+        Map<Object, Integer> results = new HashMap<>();
+        for (GenericRecord record : records) {
+            Object value = record.get(column);
+            Integer count = results.get(value);
+            if (count == null) {
+                results.put(value, 1);
+            } else {
+                results.put(value, count + 1);
+            }
+        }
+
+        return results;
+    }
+
 }

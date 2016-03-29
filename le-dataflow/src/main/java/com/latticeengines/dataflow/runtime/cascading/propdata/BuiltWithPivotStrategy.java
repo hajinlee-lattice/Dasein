@@ -10,22 +10,19 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import cascading.tuple.TupleEntry;
+
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
-
-import cascading.tuple.TupleEntry;
 
 public class BuiltWithPivotStrategy implements PivotStrategy {
 
     private static final long serialVersionUID = 6019495135106360664L;
 
-    public static String[] typeFlags = {
-            "BusinessTechnologiesMarketingAutomation",
-            "BusinessTechnologiesSocialMediaPresence",
-            "BusinessTechnologiesOpenSourceAdoption"
-    };
+    public static String[] typeFlags = { "BusinessTechnologiesMarketingAutomation",
+            "BusinessTechnologiesSocialMediaPresence", "BusinessTechnologiesOpenSourceAdoption" };
 
     @Override
     public List<PivotResult> pivot(TupleEntry arguments) {
@@ -57,17 +54,17 @@ public class BuiltWithPivotStrategy implements PivotStrategy {
     @Override
     public Map<String, Object> getDefaultValues() {
         Map<String, Object> toReturn = new HashMap<>();
-        for (String flag: typeFlags) {
+        for (String flag : typeFlags) {
             toReturn.put(flag, false);
         }
         return toReturn;
     }
 
     @Override
-    public List<DataFlowBuilder.FieldMetadata> getFieldMetadataList() {
-        List<DataFlowBuilder.FieldMetadata> fms = new ArrayList<>();
-        for (String flag: typeFlags) {
-            fms.add(new DataFlowBuilder.FieldMetadata(flag, Boolean.class));
+    public List<FieldMetadata> getFieldMetadataList() {
+        List<FieldMetadata> fms = new ArrayList<>();
+        for (String flag : typeFlags) {
+            fms.add(new FieldMetadata(flag, Boolean.class));
         }
         return fms;
     }
@@ -78,20 +75,20 @@ public class BuiltWithPivotStrategy implements PivotStrategy {
     }
 
     private boolean hasMarketingAutomation(String tech) {
-        return Arrays.asList("eloqua","marketo","act-on","pardot","hubspot","vtrenz (silverpop)")
-                .contains(tech.toLowerCase());
+        return Arrays.asList("eloqua", "marketo", "act-on", "pardot", "hubspot", "vtrenz (silverpop)").contains(
+                tech.toLowerCase());
     }
 
     private boolean hasSocialMediaPresence(String tech) {
-        if (StringUtils.isEmpty(tech)) return false;
+        if (StringUtils.isEmpty(tech))
+            return false;
         String lowerTech = tech.toLowerCase();
         return lowerTech.contains("facebook") || lowerTech.contains("twitter") || lowerTech.contains("linkedin");
     }
 
     private boolean hasOpenSource(String tech, String tag) {
-        return "framework".equalsIgnoreCase(tag) || (
-                "web server".equalsIgnoreCase(tag) && (
-                        tech.toLowerCase().contains("apache") || tech.toLowerCase().contains("nginx")
-                ));
+        return "framework".equalsIgnoreCase(tag)
+                || ("web server".equalsIgnoreCase(tag) && (tech.toLowerCase().contains("apache") || tech.toLowerCase()
+                        .contains("nginx")));
     }
 }

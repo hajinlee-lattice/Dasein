@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -15,12 +18,16 @@ import org.apache.commons.io.FileUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotType;
 import com.latticeengines.dataflow.functionalframework.DataFlowOperationFunctionalTestNGBase;
@@ -97,6 +104,44 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         List<GenericRecord> input = readInput("Lead");
         List<GenericRecord> output = readOutput();
         Assert.assertEquals(output.size(), input.size());
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testGroupByAndLimit() {
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node lead = addSource("Lead");
+                return lead.groupByAndLimit(new FieldList("Email"), 1);
+            }
+        });
+
+        List<GenericRecord> input = readInput("Lead");
+        List<GenericRecord> output = readOutput();
+        Assert.assertNotEquals(input.size(), output.size());
+        final Map<Object, Integer> histogram = histogram(output, "Email");
+        Assert.assertTrue(Iterables.all(histogram.keySet(), new Predicate<Object>() {
+
+            @Override
+            public boolean apply(@Nullable Object input) {
+                return histogram.get(input) == 1;
+            }
+        }));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testRename() {
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node lead = addSource("Lead");
+                return lead.rename(new FieldList("Email"), new FieldList("Foo"));
+            }
+        });
+
+        Schema schema = getOutputSchema();
+        Assert.assertNotNull(schema.getField("Foo"));
+        Assert.assertNull(schema.getField("Email"));
     }
 
     @Test(groups = "functional", enabled = true)
@@ -256,8 +301,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             public Node construct(DataFlowParameters parameters) {
                 Node feature = addSource("Feature");
                 Set<String> features = new HashSet<>(Arrays.asList("f1", "f2", "f3", "f4"));
-                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features, columnMappings,
-                        Integer.class, PivotType.SUM, 0);
+                PivotStrategyImpl mapper = PivotStrategyImpl.withColumnMap("Feature", "Value", features,
+                        columnMappings, Integer.class, PivotType.SUM, 0);
                 return feature.pivot(new String[] { "Domain" }, mapper);
             }
         });
@@ -356,8 +401,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 4, 124L }, { "dom1.com", "f1", 2, 129L }, { "dom1.com", "f3", 1, 122L },
                 { "dom1.com", "f2", 3, 121L }, { "dom1.com", "f2", 2, 122L }, { "dom2.com", "f1", 1, 123L },
-                { "dom2.com", "f2", 2, 125L }, { "dom2.com", "f3", 4, 124L },
-                { "dom2.com", "f3", 1, 122L }, { "dom2.com", "f2", 3, 121L }, { "dom2.com", "f2", 2, 122L } };
+                { "dom2.com", "f2", 2, 125L }, { "dom2.com", "f3", 4, 124L }, { "dom2.com", "f3", 1, 122L },
+                { "dom2.com", "f2", 3, 121L }, { "dom2.com", "f2", 2, 122L } };
 
         uploadAvro(data, avroDir, fileName);
     }
@@ -365,8 +410,8 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\"," + "\"fields\":["
-                + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
+                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Feature\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"Value\",\"type\":[\"int\",\"null\"]},"
                 + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");

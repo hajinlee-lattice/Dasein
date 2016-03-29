@@ -1,25 +1,28 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
 
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
-public abstract class Operation {
-    protected CascadingDataFlowBuilder builder;
-    protected List<DataFlowBuilder.FieldMetadata> metadata;
-    protected Pipe pipe;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 
-    public Operation(CascadingDataFlowBuilder builder) {
-        this.builder = builder;
+public abstract class Operation {
+    public static class Input {
+        public Input(Pipe pipe, List<FieldMetadata> metadata) {
+            this.pipe = pipe;
+            this.metadata = metadata;
+        }
+
+        public Pipe pipe;
+        public List<FieldMetadata> metadata;
     }
 
-    public List<DataFlowBuilder.FieldMetadata> getOutputMetadata() {
+    protected List<FieldMetadata> metadata;
+    protected Pipe pipe;
+
+    public List<FieldMetadata> getOutputMetadata() {
         return metadata;
     }
 
@@ -27,21 +30,9 @@ public abstract class Operation {
         return pipe;
     }
 
-    protected Pipe getPipe(String identifier) {
-        return getPipeAndMetadata(identifier).getKey();
-    }
-
-    protected List<DataFlowBuilder.FieldMetadata> getMetadata(String identifier) {
-        return getPipeAndMetadata(identifier).getValue();
-    }
-
-    private AbstractMap.SimpleEntry<Pipe, List<DataFlowBuilder.FieldMetadata>> getPipeAndMetadata(String identifier) {
-        return builder.getPipeAndMetadata(identifier);
-    }
-
-    protected Fields getFiels(String identfier) {
+    protected Fields getFields(Input input) {
         List<String> fieldNames = new ArrayList<>();
-        for (DataFlowBuilder.FieldMetadata metadata: getMetadata(identfier)) {
+        for (FieldMetadata metadata : input.metadata) {
             fieldNames.add(metadata.getFieldName());
         }
         return new Fields(fieldNames.toArray(new String[fieldNames.size()]));

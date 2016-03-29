@@ -1,26 +1,23 @@
 package com.latticeengines.dataflow.exposed.builder.operations;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
-import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
-
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
+import com.latticeengines.dataflow.runtime.cascading.AddFieldFunction;
+
 public class AddFieldOperation extends Operation {
 
-
-    public AddFieldOperation(String prior, AddFieldStrategy strategy, CascadingDataFlowBuilder builder) {
+    public AddFieldOperation(Input prior, AddFieldStrategy strategy) {
         // use all fields as arguments
-        super(builder);
-        Pipe p = getPipe(prior);
-        this.metadata = getMetadata(prior);
+        Pipe p = prior.pipe;
+        this.metadata = prior.metadata;
 
-        Fields priorFields = getFiels(prior);
+        Fields priorFields = getFields(prior);
 
-        DataFlowBuilder.FieldMetadata newFieldMetadata = strategy.newField();
+        FieldMetadata newFieldMetadata = strategy.newField();
         Fields newField = new Fields(newFieldMetadata.getFieldName());
 
         Fields fieldsToApply;
@@ -35,7 +32,8 @@ public class AddFieldOperation extends Operation {
         }
 
         this.pipe = new Each(p, fieldsToApply, new AddFieldFunction(strategy, newField), outputSelector);
-        if (outputSelector == Fields.ALL) { this.metadata.add(newFieldMetadata); }
+        if (outputSelector == Fields.ALL) {
+            this.metadata.add(newFieldMetadata);
+        }
     }
-
 }

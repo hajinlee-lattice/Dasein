@@ -1,11 +1,10 @@
 package com.latticeengines.dataflow.exposed.builder.strategy.impl;
 
-
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
-
 import cascading.tuple.Fields;
 import cascading.tuple.TupleEntry;
+
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.strategy.AddFieldStrategy;
 
 public abstract class AddFieldStrategyBase implements AddFieldStrategy {
 
@@ -20,10 +19,12 @@ public abstract class AddFieldStrategyBase implements AddFieldStrategy {
 
     public abstract Object compute(TupleEntry arguments);
 
-    public DataFlowBuilder.FieldMetadata newField() {
-        return new DataFlowBuilder.FieldMetadata(fieldName, fieldClass);
+    public FieldMetadata newField() {
+        return new FieldMetadata(fieldName, fieldClass);
     }
 
-    public Fields argumentSelector() { return Fields.ALL; } // by default choose the who tuple as argument
+    public Fields argumentSelector() {
+        return Fields.ALL;
+    } // by default choose the who tuple as argument
 
 }

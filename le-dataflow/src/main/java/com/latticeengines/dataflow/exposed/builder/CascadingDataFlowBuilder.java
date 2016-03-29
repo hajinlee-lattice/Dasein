@@ -2,7 +2,6 @@ package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -19,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.tez.dag.api.TezConfiguration;
 import org.joda.time.DateTime;
@@ -28,33 +25,18 @@ import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
-import cascading.operation.Aggregator;
-import cascading.operation.Buffer;
-import cascading.operation.Function;
 import cascading.operation.NoOp;
-import cascading.operation.aggregator.Average;
-import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
-import cascading.operation.aggregator.Last;
-import cascading.operation.aggregator.MaxValue;
-import cascading.operation.aggregator.MinValue;
-import cascading.operation.aggregator.Sum;
-import cascading.operation.buffer.FirstNBuffer;
 import cascading.operation.expression.ExpressionFilter;
-import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.Not;
 import cascading.pipe.Checkpoint;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
-import cascading.pipe.HashJoin;
 import cascading.pipe.Merge;
 import cascading.pipe.Pipe;
-import cascading.pipe.assembly.AverageBy;
-import cascading.pipe.assembly.CountBy;
 import cascading.pipe.assembly.Discard;
-import cascading.pipe.assembly.Rename;
 import cascading.pipe.assembly.Retain;
 import cascading.pipe.joiner.BaseJoiner;
 import cascading.pipe.joiner.InnerJoin;
@@ -69,37 +51,27 @@ import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tuple.Fields;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
-import com.latticeengines.common.exposed.jython.JythonEngine;
-import com.latticeengines.common.exposed.query.Sort;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
-import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.LimitOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.MergeOperation;
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.Operation;
-import com.latticeengines.dataflow.exposed.builder.operations.PivotOperation;
-import com.latticeengines.dataflow.exposed.builder.operations.SortOperation;
-import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.AddTimestampStrategy;
+import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddNullColumns;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
-import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowListener;
 import com.latticeengines.dataflow.service.impl.listener.DataFlowStepListener;
-import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -107,282 +79,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private static final Log log = LogFactory.getLog(CascadingDataFlowBuilder.class);
-    private static JythonEngine engine = new JythonEngine(null);
-
-    public static class Node {
-        private String identifier;
-        private CascadingDataFlowBuilder builder;
-
-        private Node(String identifier, CascadingDataFlowBuilder builder) {
-            this.identifier = identifier;
-            this.builder = builder;
-        }
-
-        public Node join(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields, JoinType joinType) {
-            return new Node(builder.addJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields, joinType),
-                    builder);
-        }
-
-        public Node innerJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-            Node join = new Node(builder.addInnerJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields),
-                    builder);
-
-            List<String> fieldList = new ArrayList<>();
-            for (FieldMetadata fm : this.getSchema()) {
-                if (!fieldList.contains(fm.getFieldName())) {
-                    fieldList.add(fm.getFieldName());
-                }
-            }
-            for (FieldMetadata fm : rhs.getSchema()) {
-                if (!fieldList.contains(fm.getFieldName())) {
-                    fieldList.add(fm.getFieldName());
-                }
-            }
-
-            join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
-            return join;
-        }
-
-        public Node innerJoin(String lhsField, Node rhs, String rhsField) {
-            return innerJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
-        }
-
-        public Node leftOuterJoin(FieldList lhsJoinFields, Node rhs, FieldList rhsJoinFields) {
-            Node join = new Node(builder.addLeftOuterJoin(identifier, lhsJoinFields, rhs.identifier, rhsJoinFields),
-                    builder);
-
-            List<String> fieldList = new ArrayList<>();
-            for (FieldMetadata fm : this.getSchema()) {
-                if (!fieldList.contains(fm.getFieldName())) {
-                    fieldList.add(fm.getFieldName());
-                }
-            }
-            for (FieldMetadata fm : rhs.getSchema()) {
-                if (!fieldList.contains(fm.getFieldName())) {
-                    fieldList.add(fm.getFieldName());
-                }
-            }
-
-            join = join.retain(new FieldList(fieldList.toArray(new String[fieldList.size()])));
-            return join;
-        }
-
-        public Node leftOuterJoin(String lhsField, Node rhs, String rhsField) {
-            return leftOuterJoin(new FieldList(lhsField), rhs, new FieldList(rhsField));
-        }
-
-        public Node groupBy(FieldList groupByFieldList, List<Aggregation> aggregations) {
-            return new Node(builder.addGroupBy(identifier, groupByFieldList, aggregations), builder);
-        }
-
-        public Node groupBy(FieldList groupByFieldList, FieldList sortFieldList, List<Aggregation> aggregations) {
-            return new Node(builder.addGroupBy(identifier, groupByFieldList, sortFieldList, aggregations), builder);
-        }
-
-        public Node groupByAndLimit(FieldList groupByFieldList, int count) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, new FirstNBuffer(count)), builder);
-        }
-
-        public Node groupByAndLimit(FieldList groupByFieldList, FieldList sortFieldList, int count, boolean descending,
-                boolean caseInsensitive) {
-            return groupByAndBuffer(groupByFieldList, sortFieldList, new FirstNBuffer(count), descending,
-                    caseInsensitive);
-        }
-
-        public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
-                boolean descending) {
-            return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
-        }
-
-        public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
-                boolean descending, boolean caseInsensitive) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, sortFieldList, buffer,
-                    descending, caseInsensitive), builder);
-        }
-
-        public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, buffer), builder);
-        }
-
-        public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas) {
-            return new Node(builder.addGroupByAndBuffer(identifier, groupByFieldList, buffer, fieldMetadatas), builder);
-        }
-
-        public Node groupByAndExpand(FieldList groupByFieldList, String expandField, List<String> expandFormats, //
-                FieldList argumentsFieldList, FieldList declaredFieldList) {
-            return new Node(builder.addGroupByAndExpand(identifier, groupByFieldList, expandField, //
-                    expandFormats, argumentsFieldList, declaredFieldList), builder);
-        }
-
-        public Node sort(String field) {
-            return new Node(builder.register(new SortOperation(identifier, field, builder)), builder);
-        }
-
-        public Node sort(String field, boolean descending) {
-            return new Node(builder.register(new SortOperation(identifier, field, descending, builder)), builder);
-        }
-
-        public Node sort(Sort sort) {
-            return new Node(builder.register(new SortOperation(identifier, sort, builder)), builder);
-        }
-
-        public Node filter(String expression, FieldList filterFieldList) {
-            return new Node(builder.addFilter(identifier, expression, filterFieldList), builder);
-        }
-
-        public Node pivot(String[] groupyByFields, PivotStrategy pivotStrategy) {
-            return new Node(builder.register(new PivotOperation(identifier, groupyByFields, pivotStrategy, builder)),
-                    builder);
-        }
-
-        public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-            return new Node(builder.addFunction(identifier, expression, fieldsToApply, targetField), builder);
-        }
-
-        public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField,
-                FieldList outputFields) {
-            return new Node(builder.addFunction(identifier, expression, fieldsToApply, targetField, outputFields),
-                    builder);
-        }
-
-        public Node renameBooleanField(String booleanField, BooleanType type) {
-            String expression;
-            FieldMetadata fm;
-            switch (type) {
-            case TRUE_FALSE:
-                expression = String.format("%s ? \"True\" : \"False\"", booleanField);
-                fm = new FieldMetadata(booleanField, String.class);
-                break;
-            case YES_NO:
-                expression = String.format("%s ? \"Yes\" : \"No\"", booleanField);
-                fm = new FieldMetadata(booleanField, String.class);
-                break;
-            case Y_N:
-                expression = String.format("%s ? \"Y\" : \"N\"", booleanField);
-                fm = new FieldMetadata(booleanField, String.class);
-                break;
-            default:
-                return this;
-            }
-
-            return new Node(builder.addFunction(identifier, expression, new FieldList(booleanField), fm), builder);
-        }
-
-        public Node apply(Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-            return new Node(builder.addFunction(identifier, function, fieldsToApply, targetField), builder);
-        }
-
-        public Node apply(Function<?> function, FieldList fieldsToApply, List<FieldMetadata> targetFields,
-                FieldList outputFields) {
-            return new Node(builder.addFunction(identifier, function, fieldsToApply, targetFields, outputFields),
-                    builder);
-        }
-
-        public Node addMD5(FieldList fieldsToApply, String targetFieldName) {
-            return new Node(builder.addMD5(identifier, fieldsToApply, targetFieldName), builder);
-        }
-
-        public Node addRowID(String targetFieldName) {
-            return new Node(builder.addRowId(identifier, targetFieldName), builder);
-        }
-
-        public Node addRowID(FieldMetadata fm) {
-            return new Node(builder.addRowId(identifier, fm), builder);
-        }
-
-        public Node addJythonFunction(String packageName, String moduleName, String functionName,
-                FieldList fieldsToApply, FieldMetadata targetField) {
-            return new Node(builder.addJythonFunction(identifier, packageName, moduleName, functionName, fieldsToApply,
-                    targetField), builder);
-        }
-
-        public Node renamePipe(String newname) {
-            return new Node(builder.addRenamePipe(identifier, newname), builder);
-        }
-
-        public Node retain(FieldList outputFields) {
-            return new Node(builder.addRetain(identifier, outputFields), builder);
-        }
-
-        public Node discard(FieldList toDiscard) {
-            return new Node(builder.addDiscard(identifier, toDiscard), builder);
-        }
-
-        public Node checkpoint(String name) {
-            return new Node(builder.addCheckpoint(identifier, name), builder);
-        }
-
-        public Node rename(FieldList previousNames, FieldList newNames) {
-            return new Node(builder.addRename(identifier, previousNames, newNames), builder);
-        }
-
-        public Node stopList(Node rhs, String lhsFieldName, String rhsFieldName) {
-            return new Node(builder.addStopListFilter(identifier, rhs.identifier, lhsFieldName, rhsFieldName), builder);
-        }
-
-        public Node aggregate(Aggregation aggregation) {
-            return new Node(builder.addAggregation(identifier, aggregation), builder);
-        }
-
-        public Node combine(Node rhs) {
-            return new Node(builder.addCombine(identifier, rhs.identifier), builder);
-        }
-
-        public Node merge(Node rhs) {
-            return new Node(builder.register(new MergeOperation(identifier, rhs.identifier, builder)), builder);
-        }
-
-        public Node limit(int count) {
-            return new Node(builder.register(new LimitOperation(identifier, count, builder)), builder);
-        }
-
-        public Node addTimestamp(String timestampField, int mode) {
-            return new Node(builder.register(new AddFieldOperation(identifier, new AddTimestampStrategy(timestampField,
-                    mode), builder)), builder);
-        }
-
-        public Node addTimestamp(String timestampField) {
-            return new Node(builder.register(new AddFieldOperation(identifier,
-                    new AddTimestampStrategy(timestampField), builder)), builder);
-        }
-
-        public Table getSourceSchema() {
-            return builder.getSourceMetadata(identifier);
-        }
-
-        public Attribute getSourceAttribute(final InterfaceName interfaceName) {
-            return getSourceSchema().getAttribute(interfaceName);
-        }
-
-        public Attribute getSourceAttribute(String attributeName) {
-            return getSourceSchema().getAttribute(attributeName);
-        }
-
-        public List<FieldMetadata> getSchema() {
-            return builder.getMetadata(identifier);
-        }
-
-        public void setSchema(List<FieldMetadata> fms) {
-            builder.setMetadata(identifier, fms);
-        }
-
-        public String getPipeName() {
-            return builder.getPipeByIdentifier(identifier).getName();
-        }
-
-        public List<String> getFieldNames() {
-            List<String> names = new ArrayList<>();
-            List<FieldMetadata> fields = getSchema();
-            for (FieldMetadata field : fields) {
-                names.add(field.getFieldName());
-            }
-            return names;
-        }
-
-        private String getIdentifier() {
-            return identifier;
-        }
-    }
 
     private Integer counter = 1;
 
@@ -415,69 +111,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     public String register(Operation operation) {
         return register(operation.getOutputPipe(), operation.getOutputMetadata());
-    }
-
-    private List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap, Table table) {
-        List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
-
-        for (Field field : fieldMap.values()) {
-            Type avroType = Type.NULL;
-            for (Schema schema : field.schema().getTypes()) {
-                avroType = schema.getType();
-                if (!Type.NULL.equals(avroType)) {
-                    break;
-                }
-            }
-            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
-
-            // Merge in properties from Attribute on the Table
-            Attribute attribute = table.getAttribute(field.name());
-            if (attribute != null) {
-                if (fm.getPropertyValue("displayName") == null) {
-                    fm.setPropertyValue("displayName", attribute.getDisplayName());
-                }
-                if (fm.getPropertyValue("length") == null) {
-                    fm.setPropertyValue("length", attribute.getLength() != null ? attribute.getLength().toString()
-                            : null);
-                }
-                if (fm.getPropertyValue("sourceLogicalType") == null) {
-                    fm.setPropertyValue("sourceLogicalType", attribute.getSourceLogicalDataType());
-                }
-                if (fm.getPropertyValue("logicalType") == null) {
-                    fm.setPropertyValue("logicalType", attribute.getLogicalDataType() != null ? attribute
-                            .getLogicalDataType().toString() : null);
-                }
-                if (fm.getPropertyValue("precision") != null) {
-                    fm.setPropertyValue("precision", attribute.getPrecision() != null ? attribute.getPrecision()
-                            .toString() : null);
-                }
-                if (fm.getPropertyValue("scale") != null) {
-                    fm.setPropertyValue("scale", attribute.getScale() != null ? attribute.getScale().toString() : null);
-                }
-                if (fm.getPropertyValue("enumValues") != null) {
-                    fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
-                }
-
-                Map<String, Object> properties = attribute.getProperties();
-                for (String key : properties.keySet()) {
-                    Object metadataValue = properties.get(key);
-                    String avroValue = fm.getPropertyValue(key);
-                    if (avroValue != null && !avroValue.equals(metadataValue)) {
-                        log.warn(String
-                                .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
-                                        field.name(), table.getName(), avroValue, metadataValue));
-                    }
-                    fm.setPropertyValue(key, metadataValue != null ? metadataValue.toString() : null);
-                }
-            } else {
-                log.warn(String.format(
-                        "Could not find field %s in table %s.  Attribute is in avro but not in metadata", field.name(),
-                        table.getName()));
-            }
-
-            fields.add(fm);
-        }
-        return fields;
     }
 
     private String register(Pipe pipe, List<FieldMetadata> fields) {
@@ -694,15 +327,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return lookup.getKey().getName().replaceAll("\\*|-", "__") + "__" + fieldName;
     }
 
-    protected String addRenamePipe(String prior, String newname) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> priorLookup = pipesAndOutputSchemas.get(prior);
-        if (priorLookup == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Pipe pipe = new Pipe(newname, priorLookup.getKey());
-        return register(pipe, priorLookup.getValue());
-    }
-
     private Configuration getConfig() {
         DataFlowContext ctx = getDataFlowCtx();
         Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
@@ -723,36 +347,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_18023);
         }
         return sourcePath;
-    }
-
-    protected String addAggregation(String lhs, Aggregation aggregation) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
-        Pipe lhsPipe = lhsPipesAndFields.getKey();
-        Pipe aggregationPipe = new Pipe(aggregation.getAggregationType() + "-" + lhsPipe.getName(), lhsPipe);
-        Class<?> targetFieldClass = Double.class;
-        switch (aggregation.getAggregationType()) {
-        case AVG:
-            aggregationPipe = new AverageBy(aggregationPipe, //
-                    Fields.NONE, //
-                    new Fields(aggregation.getAggregatedFieldName()), //
-                    new Fields(aggregation.getTargetFieldName()));
-            targetFieldClass = Double.class;
-            break;
-        case COUNT:
-            aggregationPipe = new CountBy(aggregationPipe, //
-                    Fields.NONE, //
-                    new Fields(aggregation.getAggregatedFieldName()), //
-                    new Fields(aggregation.getTargetFieldName()));
-            targetFieldClass = Long.class;
-        default:
-            break;
-        }
-        List<FieldMetadata> mergedFields = new ArrayList<>();
-        mergedFields.addAll(lhsPipesAndFields.getValue());
-        mergedFields.add(new FieldMetadata(aggregation.getTargetFieldName(), targetFieldClass));
-        Pipe merged = new HashJoin(lhs + "-merged", lhsPipe, Fields.NONE, //
-                aggregationPipe, Fields.NONE);
-        return register(merged, mergedFields);
     }
 
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
@@ -793,10 +387,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Pipe join = new CoGroup(lhsPipesAndFields.getKey(), //
-                convertToFields(lhsJoinFields.getFields()), //
+                DataFlowUtils.convertToFields(lhsJoinFields.getFields()), //
                 rhsPipesAndFields.getKey(), //
-                convertToFields(rhsJoinFields.getFields()), //
-                convertToFields(getFieldNames(declaredFields)), //
+                DataFlowUtils.convertToFields(rhsJoinFields.getFields()), //
+                DataFlowUtils.convertToFields(DataFlowUtils.getFieldNames(declaredFields)), //
                 joiner);
         return register(join, declaredFields);
     }
@@ -806,16 +400,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Set<String> seenFields = new HashSet<>();
 
         List<String> outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(lhsFields));
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsFields);
+        outputFields.addAll(DataFlowUtils.getFieldNames(lhsFields));
+        Map<String, FieldMetadata> nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(lhsFields);
         for (String fieldName : outputFields) {
             seenFields.add(fieldName);
             declaredFields.add(nameToFieldMetadataMap.get(fieldName));
         }
 
         outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(rhsFields));
-        nameToFieldMetadataMap = getFieldMetadataMap(rhsFields);
+        outputFields.addAll(DataFlowUtils.getFieldNames(rhsFields));
+        nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(rhsFields);
         for (String fieldName : outputFields) {
             String originalFieldName = fieldName;
 
@@ -835,84 +429,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             declaredFields.add(fm);
         }
         return declaredFields;
-    }
-
-    private static Class<?>[] getTypes(List<String> fieldNames, List<FieldMetadata> full) {
-        List<FieldMetadata> fmList = getIntersection(fieldNames, full);
-
-        Class<?>[] types = new Class[fmList.size()];
-
-        int i = 0;
-        for (FieldMetadata fm : fmList) {
-            types[i++] = fm.getJavaType();
-        }
-        return types;
-    }
-
-    private static List<FieldMetadata> getIntersection(List<String> partial, List<FieldMetadata> full) {
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(full);
-        List<FieldMetadata> partialFieldMetadata = new ArrayList<>();
-
-        for (String fieldName : partial) {
-            FieldMetadata fm = nameToFieldMetadataMap.get(fieldName);
-
-            if (fm == null) {
-                throw new LedpException(LedpCode.LEDP_26002, new String[] { fieldName });
-            }
-            partialFieldMetadata.add(fm);
-        }
-        return partialFieldMetadata;
-    }
-
-    private static Map<String, FieldMetadata> getFieldMetadataMap(List<FieldMetadata> fieldMetadata) {
-        Map<String, FieldMetadata> nameToFieldMetadataMap = new HashMap<>();
-
-        for (FieldMetadata fieldMetadatum : fieldMetadata) {
-            nameToFieldMetadataMap.put(fieldMetadatum.getFieldName(), fieldMetadatum);
-        }
-        return nameToFieldMetadataMap;
-    }
-
-    private static List<String> getFieldNames(List<FieldMetadata> fieldMetadata) {
-        List<String> fieldNames = new ArrayList<>();
-        for (FieldMetadata fieldMetadatum : fieldMetadata) {
-            fieldNames.add(fieldMetadatum.getFieldName());
-        }
-        return fieldNames;
-    }
-
-    private static Fields convertToFields(List<String> fields) {
-        String[] fieldsArray = new String[fields.size()];
-        fields.toArray(fieldsArray);
-        return new Fields(fieldsArray);
-    }
-
-    private static Fields convertToFields(String[] fields) {
-        return new Fields(fields);
-    }
-
-    private static Fields convertToFields(String field) {
-        return new Fields(field);
-    }
-
-    private static Aggregator<?> getAggregator(String aggregatedFieldName, AggregationType aggregationType) {
-        switch (aggregationType) {
-        case MAX:
-            return new MaxValue(convertToFields(aggregatedFieldName));
-        case MIN:
-            return new MinValue(convertToFields(aggregatedFieldName));
-        case COUNT:
-            return new Count(convertToFields(aggregatedFieldName));
-        case SUM:
-            return new Sum(convertToFields(aggregatedFieldName));
-        case AVG:
-            return new Average(convertToFields(aggregatedFieldName));
-        case FIRST:
-            return new First();
-        case LAST:
-            return new Last();
-        }
-        return null;
     }
 
     public Pipe getPipeByIdentifier(String identifier) {
@@ -941,7 +457,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return super.createSchema(flowName, pipeAndMetadata.getValue(), dataFlowCtx);
     }
 
-    protected Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
+    public Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
         String taregetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
         if (taregetSchemaPath != null) {
             Configuration config = getConfig();
@@ -954,29 +470,30 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return null;
     }
 
-    protected String addGroupBy(String prior, FieldList groupByFieldList, List<Aggregation> aggregation) {
+    public String addGroupBy(String prior, FieldList groupByFieldList, List<Aggregation> aggregation) {
         return addGroupBy(prior, groupByFieldList, null, aggregation);
     }
 
-    protected String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
+    public String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
             List<Aggregation> aggregations) {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(pm.getValue());
+        Map<String, FieldMetadata> nameToFieldMetadataMap = DataFlowUtils.getFieldMetadataMap(pm.getValue());
 
         Pipe groupby = null;
 
         if (sortFieldList != null) {
-            groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields),
-                    convertToFields(sortFieldList.getFieldsAsList()));
+            groupby = new GroupBy(pm.getKey(), DataFlowUtils.convertToFields(groupByFields),
+                    DataFlowUtils.convertToFields(sortFieldList.getFieldsAsList()));
         } else {
-            groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
+            groupby = new GroupBy(pm.getKey(), DataFlowUtils.convertToFields(groupByFields));
         }
 
-        List<FieldMetadata> declaredFields = getIntersection(groupByFields, pipesAndOutputSchemas.get(prior).getValue());
+        List<FieldMetadata> declaredFields = DataFlowUtils.getIntersection(groupByFields,
+                pipesAndOutputSchemas.get(prior).getValue());
 
         for (Aggregation aggregation : aggregations) {
             String aggFieldName = aggregation.getAggregatedFieldName();
@@ -996,8 +513,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     break;
                 }
             }
-            groupby = new Every(groupby, aggFieldName == null ? Fields.ALL : convertToFields(aggFieldName), //
-                    getAggregator(aggregation.getTargetFieldName(), aggregation.getAggregationType()), //
+            groupby = new Every(groupby, aggFieldName == null ? Fields.ALL
+                    : DataFlowUtils.convertToFields(aggFieldName), //
+                    DataFlowUtils.getAggregator(aggregation.getTargetFieldName(), aggregation.getAggregationType()), //
                     outputStrategy);
             FieldMetadata fm = aggregation.getAggregationType().getFieldMetadata();
 
@@ -1018,7 +536,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     /* This method will use .avro file as schema for the sink */
-    protected String addGroupByAndExpand(String prior, FieldList groupByFieldList, String expandField,
+    public String addGroupByAndExpand(String prior, FieldList groupByFieldList, String expandField,
             List<String> expandFormats, FieldList argumentsFieldList, FieldList declaredFieldList) {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
@@ -1026,217 +544,60 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
         Pipe groupby = null;
-        groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
+        groupby = new GroupBy(pm.getKey(), DataFlowUtils.convertToFields(groupByFields));
         groupby = new Every(groupby, argumentsFieldList == null ? Fields.ALL
-                : convertToFields(argumentsFieldList.getFieldsAsList()), //
+                : DataFlowUtils.convertToFields(argumentsFieldList.getFieldsAsList()), //
                 new GroupAndExpandFieldsBuffer(argumentsFieldList.getFieldsAsList().size(), expandField, expandFormats,
-                        convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
+                        DataFlowUtils.convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
 
         List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
 
         return register(groupby, fieldMetadata);
     }
 
-    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Pipe groupby = null;
-        groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
-        groupby = new Every(groupby, buffer, Fields.RESULTS);
-
-        return register(groupby, pm.getValue());
-    }
-
-    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, Buffer buffer, List<FieldMetadata> fms) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Pipe groupby = new GroupBy(pm.getKey(), new Fields(groupByFields.getFields()));
-        groupby = new Every(groupby, buffer, Fields.RESULTS);
-
-        return register(groupby, fms);
-    }
-
-    protected String addGroupByAndBuffer(String prior, FieldList groupByFields, FieldList sortFields, Buffer buffer,
-            boolean descending, boolean caseInsensitive) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-
-        Fields fields = new Fields(groupByFields.getFields());
-        if (caseInsensitive) {
-            List<String> groupByKeys = Arrays.asList(groupByFields.getFields());
-            for (FieldMetadata metadata : pm.getValue()) {
-                if (groupByKeys.contains(metadata.getFieldName()) && String.class.equals(metadata.getJavaType())) {
-                    fields.setComparator(metadata.getFieldName(), String.CASE_INSENSITIVE_ORDER);
-                }
-            }
-        }
-
-        Pipe groupby = new GroupBy(pm.getKey(), fields, new Fields(sortFields.getFields()), descending);
-        groupby = new Every(groupby, buffer, Fields.REPLACE);
-
-        return register(groupby, pm.getValue());
-    }
-
-    protected String addGroupByAndBuffer(String[] priors, FieldList groupByFields, Buffer buffer,
-            List<FieldMetadata> fieldMetadatas, boolean stringCaseInsensitve) {
-        Pipe[] pipes = new Pipe[priors.length];
-        for (int i = 0; i < priors.length; i++) {
-            String prior = priors[i];
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-            if (pm == null) {
-                throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-            }
-            pipes[i] = pm.getKey();
-        }
-
-        Fields fields = new Fields(groupByFields.getFields());
-        if (stringCaseInsensitve) {
-            List<String> groupByKeys = Arrays.asList(groupByFields.getFields());
-            for (FieldMetadata metadata : fieldMetadatas) {
-                if (groupByKeys.contains(metadata.getFieldName()) && String.class.equals(metadata.getJavaType())) {
-                    fields.setComparator(metadata.getFieldName(), String.CASE_INSENSITIVE_ORDER);
-                }
-            }
-        }
-
-        Pipe groupby = new GroupBy(pipes, fields);
-        groupby = new Every(groupby, buffer, Fields.RESULTS);
-
-        return register(groupby, fieldMetadatas);
-    }
-
-    protected String addFilter(String prior, String expression, FieldList filterFieldList) {
+    public String addFilter(String prior, String expression, FieldList filterFieldList) {
         List<String> filterFields = filterFieldList.getFieldsAsList();
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         String[] filterFieldsArray = new String[filterFields.size()];
         filterFields.toArray(filterFieldsArray);
-        Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getValue())));
-        Pipe each = new Each(pm.getKey(), convertToFields(filterFields), filter);
+        Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, DataFlowUtils.getTypes(filterFields,
+                pm.getValue())));
+        Pipe each = new Each(pm.getKey(), DataFlowUtils.convertToFields(filterFields), filter);
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
         return register(each, fm);
     }
 
-    protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-        return addFunctionWithExpression(prior, expression, fieldsToApply, targetField, null);
+    @Deprecated
+    public String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
+        return register(new FunctionOperation(opInput(prior), expression, fieldsToApply, targetField));
     }
 
-    protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField,
+    @Deprecated
+    public String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField,
             FieldList outputFields) {
-        return addFunctionWithExpression(prior, expression, fieldsToApply, targetField, outputFields);
+        return register(new FunctionOperation(opInput(prior), expression, fieldsToApply, targetField, outputFields));
     }
 
-    private String addFunctionWithExpression(String prior, String expression, FieldList fieldsToApply,
-            FieldMetadata targetField, FieldList outputFields) {
+    public String addRetain(String prior, FieldList outputFields) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-        ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
-                expression, //
-                fieldsToApply.getFields(), //
-                getTypes(fieldsToApply.getFieldsAsList(), pm.getValue()));
 
-        return addFunction(prior, function, fieldsToApply, targetField, outputFields);
-    }
-
-    protected String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        return addFunction(prior, function, fieldsToApply, targetField, null);
-    }
-
-    private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField,
-            FieldList outputFields) {
-        return addFunction(prior, function, fieldsToApply, Collections.singletonList(targetField), outputFields);
-    }
-
-    private String addFunction(String prior, Function<?> function, FieldList fieldsToApply,
-            List<FieldMetadata> targetFields, FieldList outputFields) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Fields fieldStrategy = Fields.ALL;
+        Pipe retain = new Retain(pm.getKey(), DataFlowUtils.convertToFields(outputFields.getFields()));
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-
-        if (fieldsToApply.getFields().length == 1 && targetFields.size() == 1
-                && fieldsToApply.getFields()[0].equals(targetFields.get(0).getFieldName())) {
-            fieldStrategy = Fields.REPLACE;
-        }
-
-        if (outputFields != null) {
-            fieldStrategy = convertToFields(outputFields.getFields());
-        }
-        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
-
-        if (fieldStrategy != Fields.REPLACE) {
-            for (FieldMetadata targetField : targetFields) {
-                fm.add(targetField);
-            }
-            fm = retainFields(outputFields, fm);
-        } else {
-            Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
-            for (FieldMetadata targetField : targetFields) {
-                FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
-                if (targetFm.getJavaType() != targetField.getJavaType()) {
-                    FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
-                            targetField.getFieldName(), null);
-                    nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
-                    for (int i = 0; i < fm.size(); i++) {
-                        if (fm.get(i).getFieldName().equals(replaceFm.getFieldName())) {
-                            fm.set(i, replaceFm);
-                        }
-                    }
-                }
-            }
-        }
-
-        return register(each, fm);
-    }
-
-    protected String addRetain(String prior, FieldList outputFields) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-
-        Pipe retain = new Retain(pm.getKey(), convertToFields(outputFields.getFields()));
-
-        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        fm = retainFields(outputFields, fm);
+        fm = DataFlowUtils.retainFields(outputFields, fm);
         return register(retain, fm);
     }
 
-    private List<FieldMetadata> retainFields(FieldList outputFields, List<FieldMetadata> fm) {
-        if (outputFields != null) {
-            List<FieldMetadata> newFieldMetadata = new ArrayList<>();
-            Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
-            Set<String> metadataKeySet = nameToFieldMetadataMap.keySet();
-            List<String> outputFieldList = outputFields.getFieldsAsList();
-            for (String outputField : outputFieldList) {
-                if (metadataKeySet.contains(outputField)) {
-                    newFieldMetadata.add(nameToFieldMetadataMap.get(outputField));
-                }
-            }
-            return newFieldMetadata;
-        }
-        return fm;
-    }
-
-    protected String addDiscard(String prior, FieldList toDiscard) {
+    public String addDiscard(String prior, FieldList toDiscard) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
 
-        Pipe discard = new Discard(pm.getKey(), convertToFields(toDiscard.getFields()));
+        Pipe discard = new Discard(pm.getKey(), DataFlowUtils.convertToFields(toDiscard.getFields()));
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
         discardFields(toDiscard, fm);
         return register(discard, fm);
@@ -1256,53 +617,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
     }
 
-    protected String addRename(String prior, FieldList previousNames, FieldList newNames) {
+    public String addMD5(String prior, FieldList fieldsToApply, String targetFieldName) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
         }
-
-        Pipe rename = new Rename(pm.getKey(), convertToFields(previousNames.getFields()),
-                convertToFields(newNames.getFields()));
-        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        renameFields(previousNames, newNames, fm);
-        return register(rename, fm);
-    }
-
-    private void renameFields(FieldList previousNames, FieldList newNames, List<FieldMetadata> metadata) {
-        if (previousNames.getFields().length != newNames.getFields().length) {
-            throw new RuntimeException("Previous and new name array lengths must be the same");
-        }
-
-        String[] previousNameStrings = previousNames.getFields();
-        String[] newNameStrings = newNames.getFields();
-        for (int i = 0; i < previousNameStrings.length; ++i) {
-            String previousName = previousNameStrings[i];
-            String newName = newNameStrings[i];
-
-            boolean found = false;
-            for (FieldMetadata field : metadata) {
-                if (field.getFieldName().equals(previousName)) {
-                    field.setFieldName(newName);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                throw new RuntimeException(String.format("Could not locate field with name %s in metadata",
-                        previousName));
-            }
-        }
-    }
-
-    protected String addMD5(String prior, FieldList fieldsToApply, String targetFieldName) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(
-                targetFieldName)), Fields.ALL);
+        Pipe each = new Each(pm.getKey(), DataFlowUtils.convertToFields(fieldsToApply.getFields()), new AddMD5Hash(
+                new Fields(targetFieldName)), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
@@ -1312,14 +633,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(each, newFm);
     }
 
-    protected String addCombine(String lhs, String rhs) {
+    public String addCombine(String lhs, String rhs) {
         lhs = addRowId(lhs, "__rowid__");
         rhs = addRowId(rhs, "__rowid__");
         String last = addJoin(lhs, new FieldList("__rowid__"), rhs, new FieldList("__rowid__"), JoinType.OUTER);
         return addDiscard(last, new FieldList("__rowid__", joinFieldName(rhs, "__rowid__")));
     }
 
-    protected String addRowId(String prior, String targetFieldName) {
+    public String addRowId(String prior, String targetFieldName) {
         FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
         rowIdFm.setPropertyValue("logicalType", LogicalDataType.RowId.toString());
         rowIdFm.setPropertyValue("displayName", "Row ID");
@@ -1327,7 +648,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return addRowId(prior, rowIdFm);
     }
 
-    protected String addRowId(String prior, FieldMetadata rowIdFm) {
+    public String addRowId(String prior, FieldMetadata rowIdFm) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
@@ -1340,58 +661,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return register(each, newFm);
     }
 
-    @SuppressWarnings("unchecked")
-    protected String addJythonFunction(String prior, String packageName, String moduleName, String functionName,
-            FieldList fieldsToApply, FieldMetadata targetField) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
-        if (pm == null) {
-            throw new LedpException(LedpCode.LEDP_26004, new String[] { prior });
-        }
-        Map<String, String> properties = (Map<String, String>) engine.invoke(packageName, moduleName, "metadata",
-                new Object[] {}, Map.class);
-        for (Map.Entry<String, String> entry : properties.entrySet()) {
-            if (entry.getKey().equals("type")) {
-                continue;
-            }
-            targetField.setPropertyValue(entry.getKey(), entry.getValue());
-        }
-        // For now, assume that all Jython functions are to be used within RTS
-        setRTSProperties(targetField, moduleName, fieldsToApply);
-
-        return addFunction(prior, //
-                new JythonFunction(packageName, //
-                        moduleName, //
-                        functionName, //
-                        convertToFields(fieldsToApply.getFields()), //
-                        convertToFields(targetField.getFieldName()), //
-                        targetField.getJavaType()), //
-                fieldsToApply, //
-                targetField, null);
-    }
-
-    private void setRTSProperties(FieldMetadata targetField, String moduleName, FieldList fieldsToApply) {
-        // Add as an RTS function
-        targetField.setPropertyValue("RTSAttribute", "true");
-        targetField.setPropertyValue("RTSModuleName", moduleName);
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> args = new HashMap<>();
-        String[] fields = fieldsToApply.getFields();
-        if (fields.length == 1) {
-            args.put("column", fieldsToApply.getFields()[0]);
-        } else {
-            int i = 1;
-            for (String field : fields) {
-                args.put("column" + i++, field);
-            }
-        }
-        try {
-            targetField.setPropertyValue("RTSArguments", mapper.writeValueAsString(args));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected String addStopListFilter(String lhs, String rhs, String lhsJoinField, String rhsJoinField) {
+    public String addStopListFilter(String lhs, String rhs, String lhsJoinField, String rhsJoinField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pmLhs = pipesAndOutputSchemas.get(lhs);
         if (pmLhs == null) {
             throw new LedpException(LedpCode.LEDP_26004, new String[] { lhs });
@@ -1403,7 +673,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         String joined = addJoin(lhs, new FieldList(lhsJoinField), rhs, new FieldList(rhsJoinField), JoinType.OUTER);
-        if (getFieldNames(pmLhs.getValue()).contains(rhsJoinField)) {
+        if (DataFlowUtils.getFieldNames(pmLhs.getValue()).contains(rhsJoinField)) {
             rhsJoinField = joinFieldName(rhs, rhsJoinField);
         }
         String expression = String.format("%s == null", rhsJoinField);
@@ -1411,11 +681,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return filtered;
     }
 
-    protected List<FieldMetadata> getMetadata(String identifier) {
+    public List<FieldMetadata> getMetadata(String identifier) {
         return pipesAndOutputSchemas.get(identifier).getValue();
     }
 
-    protected void setMetadata(String identifier, List<FieldMetadata> fms) {
+    public void setMetadata(String identifier, List<FieldMetadata> fms) {
         pipesAndOutputSchemas.get(identifier).setValue(fms);
     }
 
@@ -1503,12 +773,12 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 ctx.getProperty("CUSTOMER", String.class), //
                 ctx.getProperty("FLOWNAME", String.class), //
                 name);
-        targetPath = getLocationPrefixedPath(targetPath);
+        targetPath = DataFlowUtils.getLocationPrefixedPath(this, targetPath);
         return new Hfs(new SequenceFile(Fields.UNKNOWN), targetPath, SinkMode.REPLACE);
     }
 
     private Tap<?, ?, ?> createTap(String sourcePath) {
-        sourcePath = getLocationPrefixedPath(sourcePath);
+        sourcePath = DataFlowUtils.getLocationPrefixedPath(this, sourcePath);
         return new GlobHfs(new AvroScheme(), sourcePath);
     }
 
@@ -1521,70 +791,18 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             scheme.setNumSinkParts(1);
         }
 
-        targetPath = getLocationPrefixedPath(targetPath);
+        targetPath = DataFlowUtils.getLocationPrefixedPath(this, targetPath);
 
         Tap<?, ?, ?> sink = new Hfs(scheme, targetPath, SinkMode.REPLACE);
         return sink;
     }
 
-    private String getLocationPrefixedPath(String path) {
-        DataFlowContext context = getDataFlowCtx();
-        Configuration configuration = context.getRequiredProperty("HADOOPCONF", Configuration.class);
-
-        if (path.startsWith("file://")) {
-            path = path.substring(7);
-        } else if (path.startsWith("hdfs://")) {
-            String[] parts = path.split("/");
-            // skip over hdfs://hostname:port/
-            List<String> partsSkipped = new ArrayList<>();
-            for (int i = 3; i < parts.length; ++i) {
-                partsSkipped.add(parts[i]);
-            }
-            path = Joiner.on("/").join(partsSkipped);
+    private Operation.Input opInput(String identifier) {
+        Map.Entry<Pipe, List<FieldMetadata>> pipeAndMetadata = getPipeAndMetadata(identifier);
+        if (pipeAndMetadata == null) {
+            throw new LedpException(LedpCode.LEDP_26004, new String[] { identifier });
         }
-
-        return configuration.get("fs.defaultFS") + path;
-    }
-
-    public static class RegexFilter implements HdfsUtils.HdfsFileFilter {
-
-        private Pattern pattern;
-
-        public RegexFilter(String glob) {
-            String regex = createRegexFromGlob(glob);
-            pattern = Pattern.compile(regex);
-        }
-
-        @Override
-        public boolean accept(FileStatus file) {
-            String filePath = Path.getPathWithoutSchemeAndAuthority(file.getPath()).toString();
-            return pattern.matcher(filePath).matches();
-        }
-    }
-
-    private static String createRegexFromGlob(String glob) {
-        String out = "^";
-        for (int i = 0; i < glob.length(); ++i) {
-            final char c = glob.charAt(i);
-            switch (c) {
-            case '*':
-                out += ".*";
-                break;
-            case '?':
-                out += '.';
-                break;
-            case '.':
-                out += "\\.";
-                break;
-            case '\\':
-                out += "\\\\";
-                break;
-            default:
-                out += c;
-            }
-        }
-        out += '$';
-        return out;
+        return new Operation.Input(pipeAndMetadata.getKey(), Lists.newArrayList(pipeAndMetadata.getValue()));
     }
 
 }

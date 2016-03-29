@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
-
 import cascading.tuple.TupleEntry;
+
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotResult;
 
 public interface PivotStrategy extends Serializable {
 
@@ -16,7 +16,7 @@ public interface PivotStrategy extends Serializable {
 
     Map<String, Object> getDefaultValues();
 
-    List<DataFlowBuilder.FieldMetadata> getFieldMetadataList();
+    List<FieldMetadata> getFieldMetadataList();
 
     Set<String> getResultColumns();
 

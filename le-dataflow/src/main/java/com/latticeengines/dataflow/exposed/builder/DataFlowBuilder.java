@@ -2,12 +2,8 @@ package com.latticeengines.dataflow.exposed.builder;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.avro.Schema;
@@ -17,9 +13,12 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -28,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 public abstract class DataFlowBuilder {
+    private static final Log log = LogFactory.getLog(DataFlowBuilder.class);
 
     private boolean local;
     private boolean checkpoint;
@@ -55,6 +55,30 @@ public abstract class DataFlowBuilder {
             map = fm.getProperties();
         }
         return new AbstractMap.SimpleEntry<>(fm.getAvroType(), map);
+    }
+
+    public boolean isCheckpoint() {
+        return checkpoint;
+    }
+
+    public void setCheckpoint(boolean checkpoint) {
+        this.checkpoint = checkpoint;
+    }
+
+    public boolean enforceGlobalOrdering() {
+        return enforceGlobalOrdering;
+    }
+
+    public void setEnforceGlobalOrdering(boolean enforceGlobalOrdering) {
+        this.enforceGlobalOrdering = enforceGlobalOrdering;
+    }
+
+    public DataFlowContext getDataFlowCtx() {
+        return dataFlowCtx;
+    }
+
+    public void setDataFlowCtx(DataFlowContext dataFlowCtx) {
+        this.dataFlowCtx = dataFlowCtx;
     }
 
     protected Schema createSchema(String flowName, List<FieldMetadata> fieldMetadata, DataFlowContext dataFlowCtx) {
@@ -123,37 +147,71 @@ public abstract class DataFlowBuilder {
 
     }
 
-    public boolean isCheckpoint() {
-        return checkpoint;
+    // Conversion to FieldMetadata
+    protected List<FieldMetadata> getFieldMetadata(Map<String, Field> fieldMap, Table table) {
+        List<FieldMetadata> fields = new ArrayList<>(fieldMap.size());
+
+        for (Field field : fieldMap.values()) {
+            Type avroType = Type.NULL;
+            for (Schema schema : field.schema().getTypes()) {
+                avroType = schema.getType();
+                if (!Type.NULL.equals(avroType)) {
+                    break;
+                }
+            }
+            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
+
+            // Merge in properties from Attribute on the Table
+            Attribute attribute = table.getAttribute(field.name());
+            if (attribute != null) {
+                if (fm.getPropertyValue("displayName") == null) {
+                    fm.setPropertyValue("displayName", attribute.getDisplayName());
+                }
+                if (fm.getPropertyValue("length") == null) {
+                    fm.setPropertyValue("length", attribute.getLength() != null ? attribute.getLength().toString()
+                            : null);
+                }
+                if (fm.getPropertyValue("sourceLogicalType") == null) {
+                    fm.setPropertyValue("sourceLogicalType", attribute.getSourceLogicalDataType());
+                }
+                if (fm.getPropertyValue("logicalType") == null) {
+                    fm.setPropertyValue("logicalType", attribute.getLogicalDataType() != null ? attribute
+                            .getLogicalDataType().toString() : null);
+                }
+                if (fm.getPropertyValue("precision") != null) {
+                    fm.setPropertyValue("precision", attribute.getPrecision() != null ? attribute.getPrecision()
+                            .toString() : null);
+                }
+                if (fm.getPropertyValue("scale") != null) {
+                    fm.setPropertyValue("scale", attribute.getScale() != null ? attribute.getScale().toString() : null);
+                }
+                if (fm.getPropertyValue("enumValues") != null) {
+                    fm.setPropertyValue("enumValues", attribute.getCleanedUpEnumValuesAsString());
+                }
+
+                Map<String, Object> properties = attribute.getProperties();
+                for (String key : properties.keySet()) {
+                    Object metadataValue = properties.get(key);
+                    String avroValue = fm.getPropertyValue(key);
+                    if (avroValue != null && !avroValue.equals(metadataValue)) {
+                        log.warn(String
+                                .format("Property collision for field %s in table %s.  Value is %s in avro but %s in metadata table.  Using metadataValue from metadata table",
+                                        field.name(), table.getName(), avroValue, metadataValue));
+                    }
+                    fm.setPropertyValue(key, metadataValue != null ? metadataValue.toString() : null);
+                }
+            } else {
+                log.warn(String.format(
+                        "Could not find field %s in table %s.  Attribute is in avro but not in metadata", field.name(),
+                        table.getName()));
+            }
+
+            fields.add(fm);
+        }
+        return fields;
     }
 
-    public void setCheckpoint(boolean checkpoint) {
-        this.checkpoint = checkpoint;
-    }
-
-    public boolean enforceGlobalOrdering() {
-        return enforceGlobalOrdering;
-    }
-
-    public void setEnforceGlobalOrdering(boolean enforceGlobalOrdering) {
-        this.enforceGlobalOrdering = enforceGlobalOrdering;
-    }
-
-    public DataFlowContext getDataFlowCtx() {
-        return dataFlowCtx;
-    }
-
-    public void setDataFlowCtx(DataFlowContext dataFlowCtx) {
-        this.dataFlowCtx = dataFlowCtx;
-    }
-
-    public static enum JoinType {
-        INNER, //
-        LEFT, //
-        RIGHT, //
-        OUTER
-    }
-
+    // Conversion to Table
     protected Table getTableMetadata(String tableName, String targetPath, List<FieldMetadata> metadata) {
         Table table = new Table();
         table.setName(tableName);
@@ -199,207 +257,6 @@ public abstract class DataFlowBuilder {
         table.addExtract(extract);
 
         return table;
-    }
-
-    public static class Aggregation {
-        public static enum AggregationType {
-            MAX, //
-            MIN, //
-            SUM(new FieldMetadata(Type.DOUBLE, Double.class, null, null)), //
-            COUNT(new FieldMetadata(Type.LONG, Long.class, null, null)), //
-            AVG(new FieldMetadata(Type.DOUBLE, Double.class, null, null)), //
-            FIRST, //
-            LAST;
-
-            private FieldMetadata fieldMetadata;
-
-            AggregationType() {
-                this(null);
-            }
-
-            AggregationType(FieldMetadata fieldMetadata) {
-                this.fieldMetadata = fieldMetadata;
-            }
-
-            public FieldMetadata getFieldMetadata() {
-                return fieldMetadata;
-            }
-
-        }
-
-        private final String aggregatedFieldName;
-        private final String targetFieldName;
-        private final AggregationType aggregationType;
-        private final FieldList outputFieldStrategy;
-
-        public Aggregation(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType) {
-            this(aggregatedFieldName, targetFieldName, aggregationType, null);
-        }
-
-        public Aggregation(AggregationType aggregationType, FieldList outputFieldStrategy) {
-            this(null, null, aggregationType, outputFieldStrategy);
-        }
-
-        public Aggregation(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType,
-                FieldList outputFieldStrategy) {
-            this.aggregatedFieldName = aggregatedFieldName;
-            this.targetFieldName = targetFieldName;
-            this.aggregationType = aggregationType;
-            this.outputFieldStrategy = outputFieldStrategy;
-        }
-
-        public String getAggregatedFieldName() {
-            return aggregatedFieldName;
-        }
-
-        public String getTargetFieldName() {
-            return targetFieldName;
-        }
-
-        public AggregationType getAggregationType() {
-            return aggregationType;
-        }
-
-        public FieldList getOutputFieldStrategy() {
-            return outputFieldStrategy;
-        }
-    }
-
-    public static class FieldMetadata {
-        private Schema.Type avroType;
-        private Class<?> javaType;
-        private String fieldName;
-        private Field avroField;
-        private Map<String, String> properties = new HashMap<>();
-
-        public FieldMetadata(FieldMetadata fm) {
-            this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties());
-        }
-
-        public FieldMetadata(String fieldName, Class<?> javaType) {
-            this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
-        }
-
-        public FieldMetadata(String fieldName, Class<?> javaType, Map<String, String> properties) {
-            this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
-            properties.putAll(properties);
-        }
-
-        @SuppressWarnings("deprecation")
-        public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Field avroField) {
-            this.avroType = avroType;
-            this.javaType = javaType;
-            this.fieldName = fieldName;
-            this.avroField = avroField;
-
-            if (avroField != null) {
-                properties.putAll(avroField.props());
-            }
-        }
-
-        public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Field avroField,
-                Map<String, String> properties) {
-            this(avroType, javaType, fieldName, avroField);
-            if (avroField == null && properties != null) {
-                this.properties.putAll(properties);
-            }
-        }
-
-        public Schema.Type getAvroType() {
-            return avroType;
-        }
-
-        public Class<?> getJavaType() {
-            return javaType;
-        }
-
-        public String getFieldName() {
-            return fieldName;
-        }
-
-        public void setFieldName(String fieldName) {
-            this.fieldName = fieldName;
-        }
-
-        public Field getField() {
-            return avroField;
-        }
-
-        public String getPropertyValue(String key) {
-            return properties.get(key);
-        }
-
-        public void setPropertyValue(String key, String value) {
-            properties.put(key, value);
-        }
-
-        public Set<Entry<String, String>> getEntries() {
-            return properties.entrySet();
-        }
-
-        public Map<String, String> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public String toString() {
-            return fieldName;
-        }
-    }
-
-    public static class FieldList {
-        public static FieldList ALL = new FieldList(KindOfFields.ALL);
-        public static FieldList RESULTS = new FieldList(KindOfFields.RESULTS);
-        public static FieldList GROUP = new FieldList(KindOfFields.GROUP);
-        public static FieldList NONE = new FieldList(KindOfFields.NONE);
-
-        public enum KindOfFields {
-            ALL, //
-            RESULTS, //
-            GROUP, //
-            NONE
-        }
-
-        private List<String> fields;
-        private KindOfFields kind;
-
-        public FieldList(KindOfFields kind) {
-            this.kind = kind;
-        }
-
-        public FieldList(String... fields) {
-            this.fields = Arrays.asList(fields);
-        }
-
-        public FieldList(List<String> fields) {
-            this.fields = new ArrayList<>(fields);
-        }
-
-        public String[] getFields() {
-            if (fields == null) {
-                return null;
-            }
-            return fields.toArray(new String[fields.size()]);
-        }
-
-        public List<String> getFieldsAsList() {
-            if (fields == null) {
-                return null;
-            }
-            return new ArrayList<>(fields);
-        }
-
-        public FieldList addAll(List<String> fields) {
-            FieldList toReturn = new FieldList(this.fields);
-            toReturn.kind = this.kind;
-            toReturn.fields.addAll(fields);
-            return toReturn;
-        }
-
-        public KindOfFields getKind() {
-            return kind;
-        }
-
     }
 
 }
