@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.jcraft.jsch.Channel;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.service.CamelRouteService;
 
 @Component("sftpToHdfsRoutService")
+@Scope("prototype")
 public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRouteConfiguration> {
 
     private static final String OPEN_SUFFIX = SftpToHdfsRouteConfiguration.OPEN_SUFFIX;
@@ -132,8 +134,8 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
     public Double getProgress(CamelRouteConfiguration camelRouteConfiguration) {
         SftpToHdfsRouteConfiguration config = (SftpToHdfsRouteConfiguration) camelRouteConfiguration;
 
-        if (progress.get() == null || progress.get() < 0.05) {
-            progress.set(0.05);
+        if (progress.get() == null) {
+            progress.set(0.0);
         }
 
         try {
@@ -155,7 +157,7 @@ public class SftpToHdfsRouteService implements CamelRouteService<SftpToHdfsRoute
         }
 
         if (destFileSize.get() != null && sourceFileSize.get() != null) {
-            progress.set(0.9 * destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue());
+            progress.set(destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue());
         }
 
         return progress.get();

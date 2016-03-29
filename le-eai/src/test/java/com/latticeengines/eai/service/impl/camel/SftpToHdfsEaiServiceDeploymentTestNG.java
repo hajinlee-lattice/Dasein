@@ -13,9 +13,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
+import com.latticeengines.domain.exposed.eai.route.CamelRouteConfiguration;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component("sftpToHdfsEaiServiceDeploymentTestNG")
 public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBase {
@@ -31,11 +34,12 @@ public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBas
         routeServiceTestNG.cleanup();
     }
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testDownloadSftpByRestCall() throws Exception {
         SftpToHdfsRouteConfiguration camelRouteConfiguration =  routeServiceTestNG.getRouteConfiguration();
-        ImportConfiguration importConfig =
-                ImportConfiguration.createForCamelRouteConfiguration(camelRouteConfiguration);
+        ImportConfiguration importConfig = ImportConfiguration
+                .createForCamelRouteConfigurations(Collections.singletonList(camelRouteConfiguration));
         AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
         assertNotEquals(submission.getApplicationIds().size(), 0);
         String appId = submission.getApplicationIds().get(0);
