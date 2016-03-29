@@ -20,6 +20,7 @@ class Server {
         if (options.HTTP_PORT) {
             const http = require('http');
 
+            http.globalAgent.maxSockets = Infinity;
             this.httpServer = http.createServer(this.app);
         }
 
@@ -35,6 +36,7 @@ class Server {
                 options.HTTPS_KEY  ? credentials.key = httpsKey : null; 
                 options.HTTPS_PASS ? credentials.passphrase = options.HTTPS_PASS : null; 
 
+                https.globalAgent.maxSockets = Infinity;
                 this.httpsServer = https.createServer(credentials, this.app);
             } catch(err) {
                 console.log(err);
