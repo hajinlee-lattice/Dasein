@@ -6,6 +6,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -27,11 +28,13 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
 
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 
-    private static final String sftpHost = "10.41.1.31";
     private static final int sftpPort = 22;
     private static final String sftpUserName = "sftpdev";
     private static final String sftpPassword = "welcome";
-    private static final String fileName = "alexa.csv.gz";
+    private static final String fileName = "madison.csv.gz";
+
+    @Value("${eai.test.sftp.host}")
+    private String sftpHost;
 
     @Autowired
     private SftpToHdfsRouteService sftpToHdfsRouteService;

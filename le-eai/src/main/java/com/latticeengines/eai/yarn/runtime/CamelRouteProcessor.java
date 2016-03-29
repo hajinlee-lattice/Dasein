@@ -80,7 +80,7 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
             try {
                 if (currentService.routeIsFinished(currentConfiguration)) {
                     setProgress(convertToGlobalProgress(currentStep, 1.0f));
-                    log.info("Step " + currentStep + "/" + camelRouteConfigurations.size() + " finished.");
+                    log.info("Step " + (currentStep + 1) + "/" + camelRouteConfigurations.size() + " finished.");
                     // reset for next step
                     errorTimes = 0;
                     currentStep++;
@@ -88,7 +88,7 @@ public class CamelRouteProcessor extends SingleContainerYarnProcessor<ImportConf
                     Double progress = currentService.getProgress(currentConfiguration);
                     setProgress(convertToGlobalProgress(currentStep, progress.floatValue()));
                     log.info("Waiting for the camel route to finish: " + progress * 100 + " % of step "
-                            + currentStep + "/" + camelRouteConfigurations.size());
+                            + (currentStep + 1) + "/" + camelRouteConfigurations.size());
                 }
             } catch (Exception e) {
                 log.error(e);
