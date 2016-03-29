@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
@@ -37,8 +42,8 @@ public class HGDataRefreshFlow extends TypesafeDataFlowBuilder<DataFlowParameter
         source = source.innerJoin(contentsWithDate, latest, contentsWithDate);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("Intensity", "MaxIntensity", Aggregation.AggregationType.MAX));
-        aggregations.add(new Aggregation("URL", "LocationCount", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("Intensity", "MaxIntensity", AggregationType.MAX));
+        aggregations.add(new Aggregation("URL", "LocationCount", AggregationType.COUNT));
         Node aggregated = source.groupBy(contentsWithDate, aggregations);
         aggregated = aggregated.retain(new FieldList("URL", "SupplierName", "ProductName", "HGCategory1", "HGCategory2",
                 "HGCategory1Parent", "HGCategory2Parent", "DateLastVerified", "MaxIntensity", "LocationCount"));

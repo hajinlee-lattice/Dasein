@@ -5,6 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
 
@@ -18,19 +23,17 @@ public class CreateAttributeLevelSummary extends TypesafeDataFlowBuilder<CreateA
         List<Aggregation> aggregation = new ArrayList<>();
         switch (parameters.aggregationType) {
         case "COUNT":
-            aggregation.add(new Aggregation(parameters.aggregateColumn, "Count",
-                    Aggregation.AggregationType.COUNT));
+            aggregation.add(new Aggregation(parameters.aggregateColumn, "Count", AggregationType.COUNT));
             return eventTable.groupBy(new FieldList(parameters.groupByColumns), aggregation);
 
         default:
-            aggregation.add(new Aggregation(parameters.aggregateColumn, "Average",
-                    Aggregation.AggregationType.AVG));
+            aggregation.add(new Aggregation(parameters.aggregateColumn, "Average", AggregationType.AVG));
             Node aggregated = eventTable.groupBy(new FieldList(parameters.groupByColumns), aggregation);
             return aggregated.addFunction("Average/AverageProbability", new FieldList("Average", "AverageProbability"), //
                     new FieldMetadata("Lift", Double.class));
-         
+
         }
-        
+
     }
 
 }

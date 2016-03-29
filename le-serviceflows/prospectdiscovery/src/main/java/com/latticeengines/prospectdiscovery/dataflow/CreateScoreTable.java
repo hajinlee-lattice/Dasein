@@ -2,7 +2,11 @@ package com.latticeengines.prospectdiscovery.dataflow;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.Aggregation.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateScoreTableParameters;
 
@@ -13,7 +17,7 @@ public class CreateScoreTable extends TypesafeDataFlowBuilder<CreateScoreTablePa
     public Node construct(CreateScoreTableParameters parameters) {
         Node eventTable = addSource(parameters.getEventTable());
         Node scoreTable = addSource(parameters.getScoreResultsTable());
-        
+
         Node castedScoreTable = scoreTable.addFunction("Long.parseLong(LeadID)", //
                 new FieldList("LeadID"), //
                 new FieldMetadata("LeadID_Numeric", Long.class));

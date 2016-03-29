@@ -5,6 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -88,7 +93,7 @@ public class CreateImportSummary extends TypesafeDataFlowBuilder<DataFlowParamet
         String temporaryFieldName = String.format("__%s__", fieldName);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("Id", temporaryFieldName, Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("Id", temporaryFieldName, AggregationType.COUNT));
         Node aggregated = source.groupBy(new FieldList(), aggregations);
         if (previous != null) {
             output = previous.combine(aggregated);
@@ -107,11 +112,11 @@ public class CreateImportSummary extends TypesafeDataFlowBuilder<DataFlowParamet
             Node previous) {
         String timestampField = sourceMetadata.getLastModifiedKey().getAttributes().get(0);
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation(timestampField, minDateColumn, Aggregation.AggregationType.MIN));
+        aggregations.add(new Aggregation(timestampField, minDateColumn, AggregationType.MIN));
         previous = addAggregation(aggregations, source, previous);
 
         aggregations.clear();
-        aggregations.add(new Aggregation(timestampField, maxDateColumn, Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(timestampField, maxDateColumn, AggregationType.MAX));
         previous = addAggregation(aggregations, source, previous);
         return previous;
     }

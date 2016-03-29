@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.PivotStrategyImpl;
@@ -49,8 +55,6 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
         }
         return join;
     }
-
-
 
     protected Node finalRetain(Node node, List<SourceColumn> columns) {
         List<String> fields = new ArrayList<>();
@@ -142,8 +146,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                 } else {
                     newValue = String.format("new %s(%s)", fieldMetadata.getJavaType().getSimpleName(), nullValue);
                 }
-                join = join.addFunction(String.format("%s == null ? %s : %s", field, newValue, field),
-                        new FieldList(field), fieldMetadata);
+                join = join.addFunction(String.format("%s == null ? %s : %s", field, newValue, field), new FieldList(
+                        field), fieldMetadata);
             }
         }
         return join;
@@ -258,8 +262,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
             if (StringUtils.isEmpty(column.getPreparation())) {
                 identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource(), column.getGroupBy()));
             } else {
-                identifier = ImmutableList.copyOf(
-                        Arrays.asList(column.getBaseSource() + "_" + column.getPreparation(), column.getGroupBy()));
+                identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource() + "_" + column.getPreparation(),
+                        column.getGroupBy()));
             }
             if (!aggregationMap.containsKey(identifier)) {
                 aggregationMap.put(identifier, new ArrayList<Aggregation>());
@@ -270,19 +274,19 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
     }
 
     private static Aggregation constructAggregation(SourceColumn column) {
-        Aggregation.AggregationType aggType;
+        AggregationType aggType;
         switch (column.getCalculation()) {
         case AGG_MIN:
-            aggType = Aggregation.AggregationType.MIN;
+            aggType = AggregationType.MIN;
             break;
         case AGG_MAX:
-            aggType = Aggregation.AggregationType.MAX;
+            aggType = AggregationType.MAX;
             break;
         case AGG_SUM:
-            aggType = Aggregation.AggregationType.SUM;
+            aggType = AggregationType.SUM;
             break;
         case AGG_COUNT:
-            aggType = Aggregation.AggregationType.COUNT;
+            aggType = AggregationType.COUNT;
             break;
         default:
             return null;
@@ -314,8 +318,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
 
             ImmutableList<String> identifier;
             if (StringUtils.isEmpty(column.getPreparation())) {
-                identifier = ImmutableList.copyOf(
-                        Arrays.asList(column.getBaseSource(), column.getGroupBy(), impl.keyColumn, impl.valueColumn));
+                identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource(), column.getGroupBy(),
+                        impl.keyColumn, impl.valueColumn));
             } else {
                 identifier = ImmutableList.copyOf(Arrays.asList(column.getBaseSource() + "_" + column.getPreparation(),
                         column.getGroupBy(), impl.keyColumn, impl.valueColumn));
@@ -403,8 +407,8 @@ public class PivotFlow extends TypesafeDataFlowBuilder<PivotDataFlowParameters> 
                 }
             } else if (columnType.contains("BIT")) {
                 if (json.has("DefaultValue")) {
-                    Boolean defaultValue = Arrays.asList("1", "true", "yes", "t")
-                            .contains(json.get("DefaultValue").asText().toLowerCase());
+                    Boolean defaultValue = Arrays.asList("1", "true", "yes", "t").contains(
+                            json.get("DefaultValue").asText().toLowerCase());
                     return PivotStrategyImpl.withColumnMap(keyColumn, valueColumn, keySet, columnMappingList,
                             Boolean.class, pivotType, defaultValue);
                 } else {

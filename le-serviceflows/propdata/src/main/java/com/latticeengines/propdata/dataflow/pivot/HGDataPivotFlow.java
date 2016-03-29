@@ -6,10 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import org.springframework.stereotype.Component;
 
 import cascading.operation.Buffer;
 
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataBothBuffer;
 import com.latticeengines.dataflow.runtime.cascading.propdata.HGDataNewTechBuffer;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
@@ -64,7 +68,7 @@ public class HGDataPivotFlow extends PivotFlow {
     }
 
     private FieldMetadata newTechFieldMetadata(List<SourceColumn> columns) {
-        for (SourceColumn column: columns) {
+        for (SourceColumn column : columns) {
             if (column.getCalculation().equals(SourceColumn.Calculation.HGDATA_NEWTECH)) {
                 return new FieldMetadata(column.getColumnName(), String.class);
             }

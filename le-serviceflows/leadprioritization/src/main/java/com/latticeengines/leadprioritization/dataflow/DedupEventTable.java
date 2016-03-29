@@ -3,6 +3,9 @@ package com.latticeengines.leadprioritization.dataflow;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;

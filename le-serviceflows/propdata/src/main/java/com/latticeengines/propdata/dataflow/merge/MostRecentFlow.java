@@ -3,6 +3,9 @@ package com.latticeengines.propdata.dataflow.merge;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DomainCleanupFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.OldDataCleanupFunction;
@@ -25,8 +28,8 @@ public class MostRecentFlow extends TypesafeDataFlowBuilder<MostRecentDataFlowPa
             source = source.apply(new DomainCleanupFunction(domainField), new FieldList(domainField),
                     new FieldMetadata(domainField, String.class));
         }
-        source = source.apply(new OldDataCleanupFunction(timestampField, parameters.getEarliest()),
-                new FieldList(timestampField), new FieldMetadata(timestampField, Long.class));
+        source = source.apply(new OldDataCleanupFunction(timestampField, parameters.getEarliest()), new FieldList(
+                timestampField), new FieldMetadata(timestampField, Long.class));
         return source.groupByAndLimit(new FieldList(groupbyFields), new FieldList(timestampField), 1, true, true);
     }
 

@@ -3,12 +3,18 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.query.ReferenceInterpretation;
 import com.latticeengines.common.exposed.query.SingleReferenceLookup;
 import com.latticeengines.common.exposed.query.Sort;
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.flows.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.pls.IntentScore;
@@ -72,8 +78,8 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         Node merged = intent.merge(fit);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("IsIntent", "IsIntent", Aggregation.AggregationType.MAX));
-        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("IsIntent", "IsIntent", AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, AggregationType.MAX));
         Node deduped = merged //
                 .groupBy(new FieldList("Email"), aggregations) //
                 .filter("Email != null", new FieldList("Email"));
@@ -151,13 +157,13 @@ public class QuotaFlow extends TypesafeDataFlowBuilder<QuotaFlowParameters> {
         }
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, AggregationType.MAX));
         return intent.groupBy(new FieldList("Email"), aggregations);
     }
 
     private Node removePreviouslyGeneratedFit(Node fit, Node existingProspect) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation(LatticeAccountID, LatticeAccountID, AggregationType.MAX));
         return fit.stopList(existingProspect, "Email", "Email") //
                 .groupBy(new FieldList("Email"), aggregations);
     }

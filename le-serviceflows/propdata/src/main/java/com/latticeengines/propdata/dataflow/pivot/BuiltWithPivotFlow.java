@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import org.springframework.stereotype.Component;
 
 import cascading.operation.Buffer;
@@ -14,6 +15,9 @@ import cascading.tuple.Fields;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.strategy.PivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithPivotStrategy;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BuiltWithRecentTechBuffer;
@@ -71,8 +75,8 @@ public class BuiltWithPivotFlow extends PivotFlow {
         Node threeMonth = source.filter("Technology_First_Detected + " + ONE_MONTH * 3 + "L >= LE_Last_Upload_Date",
                 new FieldList("Technology_First_Detected", "LE_Last_Upload_Date"));
         threeMonth = threeMonth.renamePipe("recent-tech");
-        Buffer<?> buffer = new BuiltWithRecentTechBuffer(
-                new Fields("Domain", "BusinessTechnologiesRecentTechnologies", "BusinessTechnologiesRecentTags"));
+        Buffer<?> buffer = new BuiltWithRecentTechBuffer(new Fields("Domain", "BusinessTechnologiesRecentTechnologies",
+                "BusinessTechnologiesRecentTags"));
         List<FieldMetadata> fms = new ArrayList<>();
         fms.add(new FieldMetadata(domainField, String.class));
         fms.add(new FieldMetadata("BusinessTechnologiesRecentTechnologies", String.class));
@@ -91,8 +95,8 @@ public class BuiltWithPivotFlow extends PivotFlow {
             fieldNames.add(fm.getFieldName());
         }
 
-        Buffer<?> buffer = new BuiltWithTopAttrBuffer(attrMap,
-                new Fields(fieldNames.toArray(new String[fieldNames.size()])));
+        Buffer<?> buffer = new BuiltWithTopAttrBuffer(attrMap, new Fields(fieldNames.toArray(new String[fieldNames
+                .size()])));
         Node topAttrs = source.groupByAndBuffer(new FieldList(domainField), buffer, fms);
         topAttrs = topAttrs.renamePipe("top-attr");
         return topAttrs;

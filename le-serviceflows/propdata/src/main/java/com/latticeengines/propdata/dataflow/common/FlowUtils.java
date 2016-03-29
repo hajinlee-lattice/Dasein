@@ -11,8 +11,9 @@ import org.apache.commons.logging.LogFactory;
 
 import cascading.operation.Function;
 
-import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.runtime.cascading.StringTruncateFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.DateTimeCleanupFunction;
 import com.latticeengines.domain.exposed.propdata.manage.SourceColumn;
@@ -23,11 +24,11 @@ public class FlowUtils {
     private static Pattern varcharPattern = Pattern.compile("(?<=VARCHAR\\().*?(?=\\))");
 
     @SuppressWarnings("rawtypes")
-    public static CascadingDataFlowBuilder.Node truncateStringFields(CascadingDataFlowBuilder.Node node, List<SourceColumn> columns) {
+    public static Node truncateStringFields(Node node, List<SourceColumn> columns) {
         Set<String> fieldsInMetadata = new HashSet<>(node.getFieldNames());
         for (SourceColumn column : columns) {
-            if (fieldsInMetadata.contains(column.getColumnName()) &&
-                    column.getColumnType().toUpperCase().contains("VARCHAR")) {
+            if (fieldsInMetadata.contains(column.getColumnName())
+                    && column.getColumnType().toUpperCase().contains("VARCHAR")) {
                 try {
                     String str = column.getColumnType().toUpperCase();
                     Matcher matcher = varcharPattern.matcher(str);
@@ -38,8 +39,8 @@ public class FlowUtils {
                             if (length > 10) {
                                 log.info("Truncating field " + column.getColumnName() + " to length " + length);
                                 Function function = new StringTruncateFunction(column.getColumnName(), length);
-                                node = node.apply(function, new DataFlowBuilder.FieldList(column.getColumnName()),
-                                        new DataFlowBuilder.FieldMetadata(column.getColumnName(), String.class));
+                                node = node.apply(function, new FieldList(column.getColumnName()), new FieldMetadata(
+                                        column.getColumnName(), String.class));
                             }
                         }
                     } else {
@@ -54,15 +55,15 @@ public class FlowUtils {
         return node;
     }
 
-    public static CascadingDataFlowBuilder.Node removeInvalidDatetime(CascadingDataFlowBuilder.Node node, List<SourceColumn> columns) {
+    public static Node removeInvalidDatetime(Node node, List<SourceColumn> columns) {
         Set<String> fieldsInMetadata = new HashSet<>(node.getFieldNames());
         for (SourceColumn column : columns) {
-            if (fieldsInMetadata.contains(column.getColumnName()) &&
-                    column.getColumnType().toUpperCase().contains("DATETIME")) {
+            if (fieldsInMetadata.contains(column.getColumnName())
+                    && column.getColumnType().toUpperCase().contains("DATETIME")) {
                 log.info("Cleaning up datetime field " + column.getColumnName());
                 DateTimeCleanupFunction function = new DateTimeCleanupFunction(column.getColumnName());
-                node = node.apply(function, new DataFlowBuilder.FieldList(column.getColumnName()),
-                        new DataFlowBuilder.FieldMetadata(column.getColumnName(), Long.class));
+                node = node.apply(function, new FieldList(column.getColumnName()),
+                        new FieldMetadata(column.getColumnName(), Long.class));
             }
         }
         return node;

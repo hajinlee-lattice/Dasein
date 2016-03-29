@@ -8,7 +8,12 @@ import org.apache.avro.Schema.Type;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 
@@ -38,14 +43,13 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         String lastAggregatedOperatorName;
         List<Aggregation> aggregation = new ArrayList<>();
 
-        aggregation.add(new Aggregation("Topic", "Topic_Total", Aggregation.AggregationType.COUNT));
+        aggregation.add(new Aggregation("Topic", "Topic_Total", AggregationType.COUNT));
         lastAggregatedOperatorName = addGroupBy("MadisonLogicForToday", new FieldList("DomainID", "Category",
                 "HashedEmailID"), aggregation);
 
         aggregation = new ArrayList<>();
-        aggregation.add(new Aggregation("Topic_Total", "ML_30Day_Category_Total", Aggregation.AggregationType.SUM));
-        aggregation.add(new Aggregation("HashedEmailID", "ML_30Day_Category_UniqueUsers",
-                Aggregation.AggregationType.COUNT));
+        aggregation.add(new Aggregation("Topic_Total", "ML_30Day_Category_Total", AggregationType.SUM));
+        aggregation.add(new Aggregation("HashedEmailID", "ML_30Day_Category_UniqueUsers", AggregationType.COUNT));
         lastAggregatedOperatorName = addGroupBy(lastAggregatedOperatorName, new FieldList("DomainID", "Category"),
                 aggregation);
 

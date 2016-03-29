@@ -3,8 +3,13 @@ package com.latticeengines.prospectdiscovery.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
@@ -38,12 +43,12 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
         // Bucket into domains for each account
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("AccountId", "BucketSize", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("AccountId", "BucketSize", AggregationType.COUNT));
         Node retrieveDomainBucketsForEachAccount = stopped.groupBy(new FieldList("ContactDomain", "AccountId"), //
                 aggregations);
 
         aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("BucketSize", "MaxBucketSize", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("BucketSize", "MaxBucketSize", AggregationType.MAX));
 
         Node retrieveMaxDomainBucketSize = retrieveDomainBucketsForEachAccount.groupBy( //
                 new FieldList("AccountId"), aggregations);
@@ -56,7 +61,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("AccountId", "MaxBucketSize"));
 
         aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("ContactDomain", "ContactDomain", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("ContactDomain", "ContactDomain", AggregationType.MAX));
         Node resolveTies = retrieveBestDomain.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joinedWithAccounts = account.leftOuterJoin(new FieldList("Id"), //
@@ -107,8 +112,8 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
         // Aggregate
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("IsWonInteger", "Count", Aggregation.AggregationType.SUM));
-        aggregations.add(new Aggregation("Revenue_IsWon", "Revenue_IsWon", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("IsWonInteger", "Count", AggregationType.SUM));
+        aggregations.add(new Aggregation("Revenue_IsWon", "Revenue_IsWon", AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         // Left outer join with that
@@ -138,9 +143,9 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("StageName", "Amount"), revenue);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("StageIsClosedWon", "Count", Aggregation.AggregationType.SUM));
+        aggregations.add(new Aggregation("StageIsClosedWon", "Count", AggregationType.SUM));
         aggregations.add(new Aggregation("Revenue_StageIsClosedWon", "Revenue_StageIsClosedWon",
-                Aggregation.AggregationType.MAX));
+                AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
@@ -167,8 +172,8 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
                 new FieldList("IsClosed", "Amount"), revenue);
 
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("IsClosedInteger", "Count", Aggregation.AggregationType.SUM));
-        aggregations.add(new Aggregation("Revenue_IsClosed", "Revenue_IsClosed", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("IsClosedInteger", "Count", AggregationType.SUM));
+        aggregations.add(new Aggregation("Revenue_IsClosed", "Revenue_IsClosed", AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
@@ -186,8 +191,8 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
     private Node addOpportunityCreatedEvent(Node account, Node opportunity) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("AccountId", "Count", Aggregation.AggregationType.COUNT));
-        aggregations.add(new Aggregation("Amount", "Revenue_OpportunityCreated", Aggregation.AggregationType.MAX));
+        aggregations.add(new Aggregation("AccountId", "Count", AggregationType.COUNT));
+        aggregations.add(new Aggregation("Amount", "Revenue_OpportunityCreated", AggregationType.MAX));
         Node grouped = opportunity.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");
@@ -205,7 +210,7 @@ public class PreMatchEventTableFlow extends TypesafeDataFlowBuilder<DataFlowPara
 
     private Node addHasContacts(Node account, Node contact) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation("AccountId", "Count", Aggregation.AggregationType.COUNT));
+        aggregations.add(new Aggregation("AccountId", "Count", AggregationType.COUNT));
         Node grouped = contact.groupBy(new FieldList("AccountId"), aggregations);
 
         Node joined = account.leftOuterJoin("Id", grouped, "AccountId");

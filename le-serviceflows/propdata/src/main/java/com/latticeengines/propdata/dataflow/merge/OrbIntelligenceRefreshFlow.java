@@ -11,12 +11,15 @@ import java.util.Scanner;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.runtime.cascading.MappingFunction;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 
 @Component("orbIntelligenceRefreshFlow")
-public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {
+public class OrbIntelligenceRefreshFlow extends MostRecentFlow {
 
     private static final String YEAR_FOUNDED = "Year_Founded";
     private static final String REVENUE_RANGE = "BusinessRevenueRange";
@@ -32,13 +35,12 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {
         source = findMostRecent(source, parameters);
 
         source = source.addFunction(
-                String.format("%s == null ? null : String.valueOf(%s)", YEAR_FOUNDED, YEAR_FOUNDED),
-                new FieldList(YEAR_FOUNDED), new FieldMetadata(YEAR_FOUNDED, String.class));
+                String.format("%s == null ? null : String.valueOf(%s)", YEAR_FOUNDED, YEAR_FOUNDED), new FieldList(
+                        YEAR_FOUNDED), new FieldMetadata(YEAR_FOUNDED, String.class));
 
-        source = source.addFunction(
-                String.format("(\"0 - 1M\".equals(%s) || \"1M - 10M\".equals(%s)) ? \"0 - 10M\" : %s",
-                        REVENUE_RANGE, REVENUE_RANGE, REVENUE_RANGE),
-                new FieldList(REVENUE_RANGE), new FieldMetadata(REVENUE_RANGE, String.class));
+        source = source.addFunction(String.format(
+                "(\"0 - 1M\".equals(%s) || \"1M - 10M\".equals(%s)) ? \"0 - 10M\" : %s", REVENUE_RANGE, REVENUE_RANGE,
+                REVENUE_RANGE), new FieldList(REVENUE_RANGE), new FieldMetadata(REVENUE_RANGE, String.class));
 
         source = consolidateIndustry(source);
         source = standardIndustry(source);
@@ -53,8 +55,8 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {
 
     private Node addUrlExistsField(Node node, String urlField) {
         String booleanField = urlField + "_Exists";
-        node = node.addFunction(urlField + " != null ? true : false", new FieldList(urlField),
-                new FieldMetadata(booleanField, Boolean.class));
+        node = node.addFunction(urlField + " != null ? true : false", new FieldList(urlField), new FieldMetadata(
+                booleanField, Boolean.class));
         return node.renameBooleanField(booleanField, BooleanType.Y_N);
     }
 
@@ -97,8 +99,8 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {
         }
         scanner.close();
 
-        return node.apply(new MappingFunction(INDUSTRY, CONSOLIDATED_INDUSTRY, industryMap),
-                new FieldList(INDUSTRY), new FieldMetadata(CONSOLIDATED_INDUSTRY, String.class));
+        return node.apply(new MappingFunction(INDUSTRY, CONSOLIDATED_INDUSTRY, industryMap), new FieldList(INDUSTRY),
+                new FieldMetadata(CONSOLIDATED_INDUSTRY, String.class));
     }
 
     private Node standardIndustry(Node node) {
@@ -127,11 +129,11 @@ public class OrbIntelligenceRefreshFlow extends MostRecentFlow  {
         }
         scanner.close();
 
-        node = node.apply(new MappingFunction(INDUSTRY, BUSINESS_INDUSTRY, industryMap),
-                new FieldList(INDUSTRY), new FieldMetadata(BUSINESS_INDUSTRY, String.class));
+        node = node.apply(new MappingFunction(INDUSTRY, BUSINESS_INDUSTRY, industryMap), new FieldList(INDUSTRY),
+                new FieldMetadata(BUSINESS_INDUSTRY, String.class));
 
-        node = node.apply(new MappingFunction(INDUSTRY, BUSINESS_INDUSTRY2, subIndustryMap),
-                new FieldList(INDUSTRY), new FieldMetadata(BUSINESS_INDUSTRY2, String.class));
+        node = node.apply(new MappingFunction(INDUSTRY, BUSINESS_INDUSTRY2, subIndustryMap), new FieldList(INDUSTRY),
+                new FieldMetadata(BUSINESS_INDUSTRY2, String.class));
 
         return node;
     }
