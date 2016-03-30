@@ -123,7 +123,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 if (StringUtils.isEmpty(field)) {
                     throw new LedpException(LedpCode.LEDP_18096, new String[] { fileName });
                 } else if (!NameValidationUtils.validateColumnName(field)) {
-                    throw new LedpException(LedpCode.LEDP_18097, new String[] { field });
+                    throw new LedpException(LedpCode.LEDP_18095, new String[] { field, fileName });
                 }
             }
 
