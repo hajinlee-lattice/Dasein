@@ -85,7 +85,7 @@ var UserManagement = function() {
 
     this.waitAndSleep = function() {
         browser.waitForAngular();
-        browser.driver.sleep(5000);
+        browser.driver.sleep(12000);
     };
 };
 

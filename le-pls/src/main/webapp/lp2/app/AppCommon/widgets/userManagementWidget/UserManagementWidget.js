@@ -20,7 +20,8 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
         $scope.data = [$scope.data];
     }
     $scope.users = _.sortBy(_.sortBy($scope.data, 'Email'), function(u){
-        return RightsUtility.getAccessLevel(u.AccessLevel).ordinal;
+        var accessLevel = RightsUtility.getAccessLevel(u.AccessLevel);
+        return accessLevel != null ? accessLevel.ordinal : 0;
     });
 
     var flags = FeatureFlagService.Flags();
