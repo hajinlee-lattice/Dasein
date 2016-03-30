@@ -2,10 +2,10 @@ package com.latticeengines.propdata.core.service;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.domain.exposed.propdata.ExportRequest;
-import com.latticeengines.domain.exposed.propdata.ImportRequest;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 
 public interface SqlService {
-    ApplicationId importTable(ImportRequest importRequest);
-    ApplicationId exportTable(ExportRequest exportRequest);
+    ApplicationId importTable(SqoopImporter importer);
+    ApplicationId exportTable(SqoopExporter exporter);
 }

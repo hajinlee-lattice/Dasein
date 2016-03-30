@@ -1,17 +1,14 @@
 package com.latticeengines.propdata.core.service.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.propdata.ExportRequest;
-import com.latticeengines.domain.exposed.propdata.ImportRequest;
 import com.latticeengines.propdata.core.service.SqlService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -21,82 +18,22 @@ public class SqlServiceImpl implements SqlService {
     @Autowired
     private SqoopSyncJobService sqoopService;
 
-    @Value("${propdata.collection.host}")
-    private String dbHost;
-
-    @Value("${propdata.collection.port}")
-    private int dbPort;
-
-    @Value("${propdata.collection.db}")
-    private String db;
-
-    @Value("${propdata.user}")
-    private String dbUser;
-
-    @Value("${propdata.password.encrypted}")
-    private String dbPassword;
-
-    @Value("${propdata.collection.sqoop.mapper.number:8}")
-    private int numMappers;
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Override
-    public ApplicationId importTable(ImportRequest importRequest) {
-        SqoopImporter importer = getCollectionDbImporter(
-                importRequest.getSqlTable(),
-                importRequest.getAvroDir(),
-                "PropData",
-                importRequest.getSplitColumn(),
-                importRequest.getWhereClause());
+    public ApplicationId importTable(SqoopImporter importer) {
+        importer.setYarnConfiguration(yarnConfiguration);
+        importer.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        System.out.println(JsonUtils.serialize(importer));
         return sqoopService.importData(importer);
     }
 
     @Override
-    public ApplicationId exportTable(ExportRequest exportRequest) {
-        SqoopExporter exporter = getCollectionDbExporter(
-                exportRequest.getSqlTable(),
-                exportRequest.getAvroDir(),
-                "PropData");
+    public ApplicationId exportTable(SqoopExporter exporter) {
+        exporter.setYarnConfiguration(yarnConfiguration);
+        exporter.setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission());
         return sqoopService.exportData(exporter);
-    }
-
-    private SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir, String customer) {
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-
-        return new SqoopExporter.Builder()
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
-                .setCustomer(customer + "-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setTable(sqlTable)
-                .setSourceDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1")
-                .addExtraOption("--batch")
-                .setSync(false)
-                .build();
-    }
-
-    private SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String customer,
-                                                    String splitColumn, String whereClause) {
-        DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
-
-        SqoopImporter.Builder builder = new SqoopImporter.Builder()
-                .setQueue(LedpQueueAssigner.getPropDataQueueNameForSubmission())
-                .setCustomer(customer + "-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setSplitColumn(splitColumn)
-                .setTable(sqlTable)
-                .setTargetDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .setSync(false);
-
-        if (StringUtils.isNotEmpty(whereClause)) {
-            builder = builder.addExtraOption("--where").addExtraOption(whereClause);
-        }
-
-        return builder.build();
     }
 
 }

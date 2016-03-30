@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.propdata.ExportRequest;
-import com.latticeengines.domain.exposed.propdata.ImportRequest;
-import com.latticeengines.network.exposed.propdata.SqlInterface;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
+import com.latticeengines.network.exposed.propdata.SqoopInterface;
 import com.latticeengines.propdata.core.service.SqlService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
@@ -24,18 +24,18 @@ import edu.emory.mathcs.backport.java.util.Collections;
 @Api(value = "sql jobs", description = "REST resource for propdata sql import and export jobs.")
 @RestController
 @RequestMapping("/sql")
-public class SqlResource extends InternalResourceBase implements SqlInterface {
+public class SqoopResource extends InternalResourceBase implements SqoopInterface {
 
     @Autowired
     private SqlService sqlService;
 
     @Override
-    public AppSubmission importTable(ImportRequest importRequest) {
+    public AppSubmission importTable(SqoopImporter importer) {
         throw new RuntimeException("This is a place holder of a proxy method.");
     }
 
     @Override
-    public AppSubmission exportTable(ExportRequest exportRequest) {
+    public AppSubmission exportTable(SqoopExporter exporter) {
         throw new RuntimeException("This is a place holder of a proxy method.");
     }
 
@@ -43,9 +43,9 @@ public class SqlResource extends InternalResourceBase implements SqlInterface {
     @RequestMapping(value = "/imports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Import data from SQL to HDFS")
-    public AppSubmission importTable(@RequestBody ImportRequest importRequest, HttpServletRequest request) {
+    public AppSubmission importTable(@RequestBody SqoopImporter importer, HttpServletRequest request) {
         checkHeader(request);
-        ApplicationId applicationId = sqlService.importTable(importRequest);
+        ApplicationId applicationId = sqlService.importTable(importer);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
@@ -53,9 +53,9 @@ public class SqlResource extends InternalResourceBase implements SqlInterface {
     @RequestMapping(value = "/exports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Export data from HDFS to SQL")
-    public AppSubmission exportTable(@RequestBody ExportRequest exportRequest, HttpServletRequest request) {
+    public AppSubmission exportTable(@RequestBody SqoopExporter exporter, HttpServletRequest request) {
         checkHeader(request);
-        ApplicationId applicationId = sqlService.exportTable(exportRequest);
+        ApplicationId applicationId = sqlService.exportTable(exporter);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 

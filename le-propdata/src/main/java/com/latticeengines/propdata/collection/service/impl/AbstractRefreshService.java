@@ -11,7 +11,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.propdata.ExportRequest;
+import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
@@ -202,10 +202,8 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
             dropJdbcTableIfExists(stageTableName);
             createStageTable();
 
-            ExportRequest request = new ExportRequest();
-            request.setSqlTable(stageTableName);
-            request.setAvroDir(avroDir);
-            ApplicationId appId = sqlService.exportTable(request);
+            SqoopExporter exporter = getCollectionDbExporter(stageTableName, avroDir);
+            ApplicationId appId = sqlService.exportTable(exporter);
             FinalApplicationStatus status =
                     YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600 * 1000L);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
