@@ -214,7 +214,7 @@ public enum LedpCode {
     LEDP_20003("User error: Lead does not have Unique Key Column {0}."), //
     LEDP_20004("User error: Lead does not have 'Model_GUID' column."), //
     LEDP_20005("There are duplicate leads for 'LeadID': {0} and 'Model_GUID': {1} in one request."), //
-    LEDP_20006("Datatype file for scoring is not provided."), //
+
     LEDP_20007("User error: The following model is not provided: {0}"), //
     LEDP_20008("User error: Cannot find any model for tenant: {0}"), //
     LEDP_20009("Not all the leads are not scored. {0} leads are transformed, but only {1} got scored."), //
