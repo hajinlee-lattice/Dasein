@@ -61,7 +61,7 @@ public class SureShotResource {
         Oauth2AccessToken token = oauth2AccessTokenEntityMgr.get(tenantId);
         String credsUrl = String.format(mapCredsAuthUrl + crmType + "?tenantId=%s&token=%s", tenantId,
                 token.getAccessToken()).toString();
-        String settingsUrl = String.format(scoringSettingsUrl + crmType + "?tenantId=%s&token=%s", tenantId,
+        String settingsUrl = String.format(scoringSettingsUrl + "?tenantId=%s&token=%s", tenantId,
                 token.getAccessToken()).toString();
         SureShotUrls urls = new SureShotUrls(credsUrl, settingsUrl);
         return ResponseDocument.successResponse(urls);
