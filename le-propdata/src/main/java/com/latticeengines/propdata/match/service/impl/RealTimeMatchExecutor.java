@@ -61,6 +61,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
     private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
     private static final String CACHE_TABLE = "DerivedColumnsCache";
     private static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
+    private static final String DISPOSABLE_EMAIL = "DisposableEmail";
     private static final String MODEL = ColumnSelection.Predefined.Model.getName();
     private static final String DERIVED_COLUMNS = ColumnSelection.Predefined.DerivedColumns.getName();
     private static final Integer MAX_FETCH_THREADS = 4;
@@ -78,6 +79,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
 
     @Autowired
     private PublicDomainService publicDomainService;
+
+    @Autowired
+    private DisposableEmailServiceImpl disposableEmailService;
 
     @PostConstruct
     private void postConstruct() {
@@ -185,20 +189,6 @@ class RealTimeMatchExecutor implements MatchExecutor {
             String sourceName = result.getKey();
             if (isCachedSource(sourceName)) {
                 distributeCachedSourceResults(records, sourceName, result.getValue());
-            } else if (isDomainSource(sourceName)) {
-                String domainField = getDomainField(sourceName);
-                for (InternalOutputRecord record : records) {
-                    String parsedDomain = record.getParsedDomain();
-                    if (StringUtils.isEmpty(parsedDomain) || publicDomainService.isPublicDomain(parsedDomain)) {
-                        continue;
-                    }
-
-                    for (Map<String, Object> row : result.getValue()) {
-                        if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
-                            record.getResultsInSource().put(sourceName, row);
-                        }
-                    }
-                }
             }
         }
         return records;
@@ -314,6 +304,11 @@ class RealTimeMatchExecutor implements MatchExecutor {
                         && publicDomainService.isPublicDomain(internalRecord.getParsedDomain())) {
                     matched = true;
                     value = true;
+                } else if (DISPOSABLE_EMAIL.equalsIgnoreCase(field)
+                        && StringUtils.isNotEmpty(internalRecord.getParsedDomain())
+                        && disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain())) {
+                    matched = true;
+                    value = true;
                 } else if (columnPriorityMap.containsKey(field)) {
                     for (String targetSource : columnPriorityMap.get(field)) {
                         if (results.containsKey(targetSource)) {
@@ -349,6 +344,9 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     }
                     if (IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
                         output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
+                    }
+                    if (DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
+                        output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
                     }
                 }
             }
