@@ -88,7 +88,7 @@
                                     <groups>${functional.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
-                                        <additionalClasspathElement>${evn.HADOOP_CONF_DIR}</additionalClasspathElement>
+                                        <additionalClasspathElement>${env.HADOOP_CONF_DIR}</additionalClasspathElement>
                                         <additionalClasspathElement>${env.TEZ_CONF_DIR}</additionalClasspathElement>
                                         <additionalClasspathElement>${env.JAVA_HOME}/lib/tools.jar</additionalClasspathElement>
                                     </additionalClasspathElements>
@@ -105,7 +105,7 @@
                                 <port>8080</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${evn.HADOOP_CONF_DIR};${evn.TEZ_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar;</extraClasspath>
+                                <extraClasspath>${env.HADOOP_CONF_DIR};${env.TEZ_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar;</extraClasspath>
                             </webAppConfig>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>

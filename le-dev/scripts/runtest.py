@@ -38,9 +38,9 @@ def commonOpts():
 
 def testOpts(args):
     if args.groups is None:
-        return ['-P%s' % args.profile, '-Dtest=*%s*' % args.test, args.command]
+        return ['-P%s' % args.profile, '-Dtest=*%s*' % args.test, 'clean', args.command]
     else:
-        return ['-P%s' % args.profile, '-D%s.groups=%s' % (args.profile, args.groups), '-Dtest=*%s*' % args.test, args.command]
+        return ['-P%s' % args.profile, '-D%s.groups=%s' % (args.profile, args.groups), '-Dtest=*%s*' % args.test, 'clean', args.command]
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
