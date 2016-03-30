@@ -74,6 +74,7 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
         FeatureFlagValueMap flags = tenantConfigService.getFeatureFlags(tenantId);
         if (!useEaiToValidate(flags) && products.contains(LatticeProduct.LPA)) {
+            log.info("Using data loader Service to validate sfdc credentials");
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, isProduction, dlUrl);
         } else if (products.contains(LatticeProduct.PD)) {
@@ -121,8 +122,12 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
         if (products.contains(LatticeProduct.LPA)) {
+            log.info("Using data loader Service to validate marketo credentials");
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        } else {
+            throw new UnsupportedOperationException("Does not support Marketo credential validation for products "
+                    + products);
         }
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 
@@ -134,8 +139,12 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         List<LatticeProduct> products = tenantConfigService.getProducts(tenantId);
         if (products.contains(LatticeProduct.LPA)) {
+            log.info("Using data loader Service to validate eloqua credentials");
             String dlUrl = tenantConfigService.getDLRestServiceAddress(tenantId);
             dataLoaderService.verifyCredentials(crmType, crmCredential, true, dlUrl);
+        } else {
+            throw new UnsupportedOperationException("Does not support Eloqua credential validation for products "
+                    + products);
         }
         writeToZooKeeper(crmType, tenantId, true, crmCredential, false);
 

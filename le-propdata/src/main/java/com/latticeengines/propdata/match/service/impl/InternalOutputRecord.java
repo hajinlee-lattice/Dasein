@@ -47,7 +47,7 @@ class InternalOutputRecord extends OutputRecord {
         this.columnMatched = columnMatched;
     }
 
-    public Boolean getFailed() {
+    public Boolean isFailed() {
         return failed;
     }
 

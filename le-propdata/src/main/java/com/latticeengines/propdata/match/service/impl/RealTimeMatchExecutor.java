@@ -161,7 +161,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         List<InternalOutputRecord> recordList = matchContext.getInternalResults();
         List<String> outputFields = matchContext.getOutput().getOutputFields();
         for (InternalOutputRecord record : recordList) {
-            if (record.getFailed()) { continue; }
+            if (record.isFailed()) { continue; }
             MatchKeyDimension keyDimension =
                     new MatchKeyDimension(record.getParsedDomain(), record.getParsedNameLocation());
             MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
@@ -202,7 +202,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         String stateField = getStateField(sourceName);
         String countryField = getCountryField(sourceName);
         for (InternalOutputRecord record : records) {
-            if (record.getFailed()) { continue; }
+            if (record.isFailed()) { continue; }
             // try using domain first
             boolean matched = false;
             String parsedDomain = record.getParsedDomain();
@@ -280,7 +280,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
         int totalMatched = 0;
 
         for (InternalOutputRecord internalRecord : records) {
-            if (internalRecord.getFailed()) {
+            if (internalRecord.isFailed()) {
                 OutputRecord outputRecord = new OutputRecord();
                 outputRecord.setInput(internalRecord.getInput());
                 outputRecord.setMatched(false);

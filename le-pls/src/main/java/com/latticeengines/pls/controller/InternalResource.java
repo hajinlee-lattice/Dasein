@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,9 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,12 +30,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -398,6 +407,28 @@ public class InternalResource extends InternalResourceBase {
             waitForTenantConsoleInstallation(CustomerSpace.parse(tenant2Id));
 
         } else {
+            if (StringUtils.isEmpty(productPrefix)) {
+                Camille camille = CamilleEnvironment.getCamille();
+                Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                        CustomerSpace.parse(tenant1Id)).append("SpaceConfiguration").append("Products");
+                try {
+                    camille.upsert(productsPath,
+                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
+                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
+                        CustomerSpace.parse(tenant2Id)).append("SpaceConfiguration").append("Products");
+                try {
+                    camille.upsert(productsPath,
+                            new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
+                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             try {
                 tenantConfigService.getTopology(tenant1Id);
             } catch (LedpException e) {

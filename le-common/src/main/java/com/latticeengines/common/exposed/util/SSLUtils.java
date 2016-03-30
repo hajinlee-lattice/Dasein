@@ -15,33 +15,38 @@ import org.apache.commons.logging.LogFactory;
 public class SSLUtils {
     private static Log log = LogFactory.getLog(SSLUtils.class);
 
+    private static ThreadLocal<Boolean> sslOff = new ThreadLocal<>();
+
     /**
      * turn off ssl checking for all https request from now on in current thread
      */
     public static void turnOffSslChecking() {
-        try {
-            final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
+        if (sslOff.get() == null || !sslOff.get()) {
+            try {
+                final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[]{new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
 
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                }
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
 
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                }
-            }};
-            final SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-            log.info("Turned off ssl for current thread: " + Thread.currentThread().getName());
-        } catch (Exception e) {
-            log.warn("Failed to turn off ssl for thread" + Thread.currentThread().getName(), e);
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+                }};
+                final SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+                HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+                sslOff.set(true);
+                log.info("Turned off ssl for current thread: " + Thread.currentThread().getName());
+            } catch (Exception e) {
+                log.warn("Failed to turn off ssl for thread" + Thread.currentThread().getName(), e);
+            }
         }
     }
 
