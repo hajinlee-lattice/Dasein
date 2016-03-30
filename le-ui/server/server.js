@@ -174,7 +174,6 @@ class Server {
         this.app.use((err, req, res, next) => {
             res.status(err.status || 500);
             res.render('./server/error', {
-                options: this.options,
                 url: req.originalUrl,
                 status: err.status,
                 message: err.message,

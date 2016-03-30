@@ -23,6 +23,7 @@ const options   = {
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || true,
     LOGGING:    process.env.LOGGING     || '/var/log/ledp',
+    TIMESTAMP:  new Date().getTime(),
     APP_ROOT:   __dirname 
 };
 
@@ -47,7 +48,6 @@ options.API_URL
 options.WHITELIST
     ? server.trustProxy(options.WHITELIST) : null;
 
-// when files are compressed, keep routing to essential areas only
 server.setAppRoutes(routes);
 
 // for 404/other
