@@ -50,7 +50,7 @@ public class Score extends BaseWorkflowStep<ScoreStepConfiguration> {
                 configuration.getMicroServiceHostPort(), configuration.getCustomerSpace(),
                 tableName);
         restTemplate.postForLocation(url, eventTable);
-        executionContext.putString(SCORING_RESULT_TABLE, tableName);
+        executionContext.putString(SCORING_RESULT_TABLE_NAME, tableName);
     }
 
     private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {

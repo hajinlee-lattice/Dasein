@@ -31,7 +31,7 @@ public class RunScoreTableDataFlow extends RunDataFlow<RunScoreTableDataFlowConf
     }
     
     private String getScoreResultTable() {
-        String scoreResultTable = getStringValueFromContext(SCORING_RESULT_TABLE);
+        String scoreResultTable = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         if (scoreResultTable == null) {
             scoreResultTable = configuration.getScoreResult();
         }
