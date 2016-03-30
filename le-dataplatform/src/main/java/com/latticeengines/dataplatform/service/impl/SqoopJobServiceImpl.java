@@ -59,7 +59,7 @@ public class SqoopJobServiceImpl {
         cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(sourceDir);
-        cmds.add("-m");
+        cmds.add("--num-mappers");
         cmds.add(Integer.toString(numMappers));
         String uuid = UUID.randomUUID().toString();
         cmds.add("--bindir");
@@ -113,7 +113,7 @@ public class SqoopJobServiceImpl {
         cmds.add(jobName);
         cmds.add("--export-dir");
         cmds.add(exporter.getSourceDir());
-        cmds.add("-m");
+        cmds.add("--num-mappers");
         cmds.add(Integer.toString(numMappers));
         String uuid = UUID.randomUUID().toString();
         cmds.add("--bindir");
@@ -215,7 +215,7 @@ public class SqoopJobServiceImpl {
             cmds.add("--split-by");
             cmds.add(importer.getSplitColumn());
         }
-        cmds.add("-m");
+        cmds.add("--num-mappers");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--target-dir");
         cmds.add(importer.getTargetDir());
@@ -340,7 +340,7 @@ public class SqoopJobServiceImpl {
         }
         cmds.add("--split-by");
         cmds.add(StringUtils.join(splitCols, ","));
-        cmds.add("-m");
+        cmds.add("--num-mappers");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--target-dir");
         cmds.add(targetDir);

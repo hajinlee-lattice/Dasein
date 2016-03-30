@@ -1,11 +1,17 @@
 package com.latticeengines.propdata.collection.testframework;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.proxy.exposed.propdata.SqlProxy;
 
 public abstract class PropDataCollectionFunctionalTestNGBase extends PropDataCollectionAbstractTestNGBase {
 
     protected static final String progressCreator = "FunctionalTest";
+
+    @Autowired
+    protected SqlProxy sqlProxy;
 
     protected void prepareCleanPod(Source source) {
         String podId = "Functional" + source.getSourceName();
@@ -15,7 +21,6 @@ public abstract class PropDataCollectionFunctionalTestNGBase extends PropDataCol
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
     }
 
 }
