@@ -189,6 +189,20 @@ class RealTimeMatchExecutor implements MatchExecutor {
             String sourceName = result.getKey();
             if (isCachedSource(sourceName)) {
                 distributeCachedSourceResults(records, sourceName, result.getValue());
+            } else if (isDomainSource(sourceName)) {
+                String domainField = getDomainField(sourceName);
+                for (InternalOutputRecord record : records) {
+                    String parsedDomain = record.getParsedDomain();
+                    if (StringUtils.isEmpty(parsedDomain) || publicDomainService.isPublicDomain(parsedDomain)) {
+                        continue;
+                    }
+
+                    for (Map<String, Object> row : result.getValue()) {
+                        if (row.containsKey(domainField) && row.get(domainField).equals(parsedDomain)) {
+                            record.getResultsInSource().put(sourceName, row);
+                        }
+                    }
+                }
             }
         }
         return records;
