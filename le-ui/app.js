@@ -33,6 +33,7 @@ Object.keys(options).forEach(key => {
     options[key] === 'true'  ? options[key] = true  : null;
 });
 
+options.COMPRESSED = false;  // hardcoding this for debug purposes
 const routes = require('./server/routes_' + (options.COMPRESSED ? 'dist' : 'dev'));
 
 const server = new Server(express, app, options);

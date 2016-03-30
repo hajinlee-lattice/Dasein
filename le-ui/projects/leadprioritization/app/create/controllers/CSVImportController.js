@@ -89,7 +89,7 @@ angular.module('mainApp.create.csvImport', [
             deferred.resolve(this.responseText);
         });
 
-        xhr.open('POST', '/pls/fileuploads/unnamed?schema=' + fileType);
+        xhr.open('POST', '/pls/models/fileuploads/unnamed?schema=' + fileType);
         
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
@@ -107,7 +107,7 @@ angular.module('mainApp.create.csvImport', [
 
         $http({
             method: 'GET',
-            url: '/pls/fileuploads/' + csvFile.name + '/metadata/unknown',
+            url: '/pls/models/fileuploads/' + csvFile.name + '/metadata/unknown',
             headers: { 'Content-Type': 'application/json' }
         })
         .success(function(data, status, headers, config) {
@@ -149,7 +149,7 @@ angular.module('mainApp.create.csvImport', [
 
         $http({
             method: 'POST',
-            url: '/pls/fileuploads/' + csvMetaData.name + '/metadata/unknown',
+            url: '/pls/models/fileuploads/' + csvMetaData.name + '/metadata/unknown',
             data: csvUnknownColumns,
             headers: { 'Content-Type': 'application/json' }
         })
@@ -280,7 +280,10 @@ angular.module('mainApp.create.csvImport', [
                 } else {
                     $('div.loader').css({'display':'none'});
 
-                    html = 'ERROR: ' + (result.ResultErrors ? result.ResultErrors : 'Unknown error while uploading file.');
+                    var errorCode = result.errorCode || 'LEDP_ERR';
+                    var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
+
+                    html = '<span style="display:block;margin:4em auto 0.5em;max-width:27em;">' + errorMsg + '</span><span style="margin-bottom:3em;display:block;font-size:8pt;color:#666;">' + errorCode + '</span>';
                     $('#file_progress').html(html);
                 }
             });

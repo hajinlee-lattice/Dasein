@@ -264,16 +264,13 @@ Primary Sidebar Nav Menu Styling
     }
   }
   .ico {
-    width: 22px;
     height: 22px;
+    width: 25px;
+    background-color: #b3b5b8;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: 50%;
     &.ico-fingerprint {
       width: 16px;
-    }
-    &.ico-history {
-      width: 24px;
-    }
-    &.ico-user {
-      width: 21px;
     }
     &.ico-marketo {
       height: 14px;
