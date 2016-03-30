@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopImporter {
@@ -30,82 +31,119 @@ public class SqoopImporter {
     private List<String> otherOptions;
     private Mode mode;
 
+    @JsonProperty("table")
     public String getTable() {
         return table;
     }
 
+    @JsonProperty("table")
     public void setTable(String table) {
         this.table = table;
     }
 
+    @JsonProperty("query")
     public String getQuery() {
         return query;
     }
 
+    @JsonProperty("query")
     public void setQuery(String query) {
         this.query = query;
     }
 
+    @JsonProperty("target_dir")
     public String getTargetDir() {
         return targetDir;
     }
 
+    @JsonProperty("target_dir")
     public void setTargetDir(String targetDir) {
         this.targetDir = targetDir;
     }
 
+    @JsonProperty("db_creds")
     public DbCreds getDbCreds() {
         return dbCreds;
     }
 
+    @JsonProperty("db_creds")
     public void setDbCreds(DbCreds dbCreds) {
         this.dbCreds = dbCreds;
     }
 
+    @JsonProperty("queue")
     public String getQueue() {
         return queue;
     }
 
+    @JsonProperty("queue")
     public void setQueue(String queue) {
         this.queue = queue;
+        boolean queueInArgs = false;
+        String queueArg = "-Dmapreduce.job.queuename=" + this.queue;
+        List<String> args = new ArrayList<>();
+        if (this.hadoopArgs != null) {
+            for (String arg : this.hadoopArgs) {
+                if (arg.contains("-Dmapreduce.job.queuename")) {
+                    queueInArgs = true;
+                    args.add(queueArg);
+                } else {
+                    args.add(arg);
+                }
+            }
+        }
+        if (!queueInArgs) {
+            args.add(queueArg);
+        }
+        setHadoopArgs(args);
     }
 
+    @JsonProperty("customer")
     public String getCustomer() {
         return customer;
     }
 
+    @JsonProperty("customer")
     public void setCustomer(String customer) {
         this.customer = customer;
     }
 
+    @JsonProperty("num_mappers")
     public int getNumMappers() {
         return numMappers;
     }
 
+    @JsonProperty("num_mappers")
     public void setNumMappers(int numMappers) {
         this.numMappers = numMappers;
     }
 
+    @JsonProperty("columns")
     public List<String> getColumnsToInclude() {
         return columnsToInclude;
     }
 
+    @JsonProperty("columns")
     public void setColumnsToInclude(List<String> columnsToInclude) {
         this.columnsToInclude = columnsToInclude;
     }
 
+    @JsonProperty("split_column")
     public String getSplitColumn() {
         return splitColumn;
     }
 
+    @JsonProperty("split_column")
     public void setSplitColumn(String splitColumn) {
         this.splitColumn = splitColumn;
     }
 
+    @JsonProperty("properties")
     public Properties getProperties() {
         return properties;
     }
 
+    @JsonProperty("properties")
     public void setProperties(Properties properties) {
         this.properties = properties;
     }
@@ -118,34 +156,42 @@ public class SqoopImporter {
         this.yarnConfiguration = yarnConfiguration;
     }
 
+    @JsonProperty("sync")
     public boolean isSync() {
         return sync;
     }
 
+    @JsonProperty("sync")
     public void setSync(boolean sync) {
         this.sync = sync;
     }
 
+    @JsonProperty("hadoop_args")
     public List<String> getHadoopArgs() {
         return hadoopArgs;
     }
 
+    @JsonProperty("hadoop_args")
     public void setHadoopArgs(List<String> hadoopArgs) {
         this.hadoopArgs = hadoopArgs;
     }
 
+    @JsonProperty("other_opts")
     public List<String> getOtherOptions() {
         return otherOptions;
     }
 
+    @JsonProperty("other_opts")
     public void setOtherOptions(List<String> otherOptions) {
         this.otherOptions = otherOptions;
     }
 
+    @JsonProperty("mode")
     public Mode getMode() {
         return mode;
     }
 
+    @JsonProperty("mode")
     public void setMode(Mode mode) {
         this.mode = mode;
     }
@@ -191,10 +237,6 @@ public class SqoopImporter {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
                 }
-            }
-
-            if (!hadoopArgKeys.contains("-Dmapreduce.job.queuename")) {
-                this.addHadoopArg("-Dmapreduce.job.queuename=" + this.queue);
             }
 
             if (!hadoopArgKeys.contains("-Dmapreduce.task.timeout")) {

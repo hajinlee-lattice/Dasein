@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.modeling;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class DbCreds {
 
@@ -29,42 +31,62 @@ public class DbCreds {
         this.driverClass = builder.driverClass;
     }
 
+    @JsonProperty("user")
     public String getUser() {
         return user;
     }
 
+    @JsonProperty("user")
     public void setUser(String user) {
         this.user = user;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonIgnore
     public void setPassword(String password) {
         this.password = password;
     }
 
+    @JsonProperty("password")
+    private String getEncryptedPassword() {
+        return CipherUtils.encrypt(password);
+    }
+
+    @JsonProperty("password")
+    private void setEncryptedPassword(String encryptedPassword) {
+        this.password = CipherUtils.decrypt(encryptedPassword);
+    }
+
+    @JsonProperty("host")
     public String getHost() {
         return host;
     }
 
+    @JsonProperty("host")
     public void setHost(String host) {
         this.host = host;
     }
 
+    @JsonProperty("port")
     public int getPort() {
         return port;
     }
 
+    @JsonProperty("port")
     public void setPort(int port) {
         this.port = port;
     }
 
+    @JsonProperty("db")
     public String getDb() {
         return db;
     }
 
+    @JsonProperty("db")
     public void setDb(String db) {
         this.db = db;
     }
@@ -74,6 +96,7 @@ public class DbCreds {
         return dbType;
     }
 
+    @JsonProperty("db_type")
     public void setDbType(String dbType) {
         this.dbType = dbType;
     }
@@ -83,6 +106,7 @@ public class DbCreds {
         return instance;
     }
 
+    @JsonProperty("instance")
     public void setInstance(String instance) {
         this.instance = instance;
     }
@@ -92,15 +116,17 @@ public class DbCreds {
         return jdbcUrl;
     }
 
+    @JsonProperty("jdbc_url")
     public void setJdbcUrl(String jdbcUrl) {
         this.jdbcUrl = jdbcUrl;
     }
-    
+
     @JsonProperty(value = "driver_class", required = false)
     public String getDriverClass() {
         return driverClass;
     }
-    
+
+    @JsonProperty("driver_class")
     public void setDriverClass(String driverClass) {
         this.driverClass = driverClass;
     }
