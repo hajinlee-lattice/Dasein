@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +36,8 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -186,7 +189,18 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
         }
+        addInternalId(table);
         return table;
+    }
+
+    private void addInternalId(Table table){
+        Attribute internalId = new Attribute();
+        internalId.setName(InterfaceName.InternalId.name());
+        internalId.setDisplayName(internalId.getName());
+        internalId.setPhysicalDataType(Type.LONG.name());
+        internalId.setSourceLogicalDataType("");
+        internalId.setLogicalDataType(LogicalDataType.InternalId.name());
+        table.addAttribute(internalId);
     }
 
     @Override

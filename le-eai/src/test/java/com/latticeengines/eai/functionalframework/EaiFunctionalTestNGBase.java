@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.avro.Schema.Type;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
@@ -165,33 +166,33 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             attr.setNullable(true);
             if (attr.getName().equals(InterfaceName.Id.name())) {
                 attr.setInterfaceName(InterfaceName.Id);
-                attr.setPhysicalDataType(String.class.getSimpleName());
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             if (attr.getName().equals(InterfaceName.Country.name())) {
                 attr.setInterfaceName(InterfaceName.Country);
-                attr.setPhysicalDataType(String.class.getSimpleName());
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             if (attr.getName().equals(InterfaceName.CompanyName.name())) {
                 attr.setInterfaceName(InterfaceName.CompanyName);
-                attr.setPhysicalDataType(String.class.getSimpleName());
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             if (attr.getName().equals(InterfaceName.Email.name())) {
                 attr.setInterfaceName(InterfaceName.Email);
-                attr.setPhysicalDataType(String.class.getSimpleName());
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             if (attr.getName().equals(InterfaceName.City.name())) {
                 attr.setInterfaceName(InterfaceName.City);
-                attr.setPhysicalDataType(String.class.getSimpleName());
+                attr.setPhysicalDataType(Type.STRING.name());
             }
             if (attr.getName().equals("DS_CompanyName_Length")) {
-                attr.setPhysicalDataType("int");
+                attr.setPhysicalDataType(Type.INT.name());
             }
             if (attr.getName().equals("DS_CompanyName_Entropy")) {
-                attr.setPhysicalDataType(Float.class.getSimpleName());
+                attr.setPhysicalDataType(Type.FLOAT.name());
             }
             if (attr.getName().equals(InterfaceName.LastModifiedDate.name())) {
                 attr.setInterfaceName(InterfaceName.LastModifiedDate);
-                attr.setPhysicalDataType(Long.class.getSimpleName());
+                attr.setPhysicalDataType(Type.LONG.name());
             }
             file.addAttribute(attr);
         }
@@ -202,21 +203,18 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
     protected void verifyAllDataNotNullWithNumRows(Configuration config, Table table, int expectedNumRows)
             throws Exception {
         List<Extract> extracts = table.getExtracts();
-        int numRows = 0;
+        long numRows = 0;
         for (Extract extract : extracts) {
             List<String> avroFiles = HdfsUtils.getFilesByGlob(config, extract.getPath());
 
             for (String avroFile : avroFiles) {
                 try (FileReader<GenericRecord> reader = AvroUtils.getAvroFileReader(config,
                         new org.apache.hadoop.fs.Path(avroFile))) {
-                    while (reader.hasNext()) {
-                        reader.next();
-                        // Schema schema = record.getSchema();
-                        // for (org.apache.avro.Schema.Field field :
-                        // schema.getFields()) {
-                        // assertNotNull(record.get(field.name()));
-                        // }
-                        numRows++;
+                    for (; reader.hasNext(); numRows++) {
+                        GenericRecord record = reader.next();
+                        assertEquals(
+                                Long.valueOf(record.get(InterfaceName.InternalId.name()).toString()).compareTo(numRows + 1),
+                                0);
                     }
                 }
             }

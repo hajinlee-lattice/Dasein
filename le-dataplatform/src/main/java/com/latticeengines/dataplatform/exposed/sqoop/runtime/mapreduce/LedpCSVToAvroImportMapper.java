@@ -66,8 +66,9 @@ public class LedpCSVToAvroImportMapper extends
     private boolean emailOrWebsiteIsEmpty;
     private boolean missingRequiredColValue;
     private boolean fieldMalFormed;
-    private long lineNum = 2;
+    private long lineNum;
     private int errorLineNumber;
+    private long importedLineNum;
     private Parser parser = new Parser();
 
     @Override
@@ -109,13 +110,13 @@ public class LedpCSVToAvroImportMapper extends
         emailOrWebsiteIsEmpty = false;
         missingRequiredColValue = false;
         fieldMalFormed = false;
+        importedLineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue();
+        lineNum = importedLineNum + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() + 2;
         GenericRecord record = toGenericRecord(val);
         if (errorMap.size() == 0) {
             wrapper.datum(record);
             context.write(wrapper, NullWritable.get());
             context.getCounter(RecordImportCounter.IMPORTED_RECORDS).increment(1);
-            lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
-                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
         } else {
             if (missingRequiredColValue) {
                 context.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).increment(1);
@@ -123,10 +124,8 @@ public class LedpCSVToAvroImportMapper extends
                 context.getCounter(RecordImportCounter.FIELD_MALFORMED).increment(1);
             }
             context.getCounter(RecordImportCounter.IGNORED_RECORDS).increment(1);
-            lineNum = context.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue()
-                    + context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
             if (context.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue() <= errorLineNumber) {
-                csvFilePrinter.printRecord(lineNum + 1, errorMap.values().toString());
+                csvFilePrinter.printRecord(lineNum, errorMap.values().toString());
                 csvFilePrinter.flush();
             }
             errorMap.clear();
@@ -134,6 +133,7 @@ public class LedpCSVToAvroImportMapper extends
     }
 
     private GenericRecord toGenericRecord(SqoopRecord val) {
+
         GenericRecord record = new GenericData.Record(schema);
         Map<String, Object> fieldMap = val.getFieldMap();
 
@@ -158,7 +158,7 @@ public class LedpCSVToAvroImportMapper extends
 
         });
         sortedFieldMap.putAll(fieldMap);
-        LOG.info("Start to processing line: " + (lineNum + 1));
+        LOG.info("Start to processing line: " + lineNum);
         for (Map.Entry<String, Object> entry : sortedFieldMap.entrySet()) {
             final String fieldKey = entry.getKey();
             Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
@@ -187,6 +187,7 @@ public class LedpCSVToAvroImportMapper extends
             }
             record.put(attrKey, fieldAvroValue);
         }
+        record.put(InterfaceName.InternalId.name(), importedLineNum + 1);
         return record;
     }
 
