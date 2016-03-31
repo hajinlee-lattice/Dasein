@@ -24,6 +24,7 @@ import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -106,6 +107,17 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         return true;
     }
 
+    @Test(groups = "functional", dataProvider = "tenants", enabled = true)
+    public void transformTenant10(String tenantPath, String keyColumn) throws Exception {
+        System.setProperty("TENANT", "tenant10");
+        String tenantName = new File(tenantPath).getName();
+        if (skip(tenantName)) {
+            return;
+        } else {
+            transform(tenantPath, keyColumn);
+        }
+    }
+
     @Test(groups = "functional", dataProvider = "tenants", enabled = false)
     public void transform(String tenantPath, String keyColumn) throws Exception {
         String modelFilePath = tenantPath + "/model.json";
@@ -174,6 +186,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
         for (QueueEntry<Double, Double> entry : errorQueue) {
             System.out.println("Record id = " + entry.getKey() + " value = " + entry.getValue());
         }
+        Assert.assertTrue(errorQueue.size() < 7);
     }
 
     private Map<Double, Double> getExpectedScores(String expectedScoresPath) throws Exception {
