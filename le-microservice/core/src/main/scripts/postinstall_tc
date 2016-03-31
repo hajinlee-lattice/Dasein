@@ -1,4 +1,37 @@
 #!/bin/bash
 
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+
+echo "repackaging wars"
+cd /tmp/le-microservice-tc-rpm/ms
+
+for f in $(find . -name "*.war");
+do
+    fn=`echo $f | cut -d / -f 2 | cut -d . -f 1`
+    echo "repackaging ${fn}.war"
+    mkdir $fn
+
+    pushd $fn
+    jar xvf ../$fn.war
+    popd
+    rm -rf $fn.war
+
+    if [ -f "/tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/${fn}_log4j.properties" ]
+    then
+        echo "replacing log4j.properties for ${fn}.war"
+        cp -f /tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/$fn_log4j.properties $fn/WEB-INF/classes/log4j.properties
+    fi
+
+    jar cvf $fn.war -C $fn/ .
+    cp -f $fn.war /usr/share/tomcat/webapps/ms
+done
+
+chown -R tomcat:tomcat /usr/share/tomcat/webapps/ms
+chmod -R 775 /usr/share/tomcat/webapps/ms
+
+rm -rf /tmp/le-microservice-tc-rpm
+
 echo "finishing"
-ll $CATALINA_HOME/webapps/ms/*.war
+ll /usr/share/tomcat/webapps/ms/*.war

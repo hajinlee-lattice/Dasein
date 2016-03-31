@@ -1,7 +1,8 @@
 #!/bin/bash
 
 source /etc/profile
-rm -rf $CATALINA_HOME/webapps/ms/*.war
+rm -rf /usr/share/tomcat/webapps/ms/*.war
+rm -rf /tmp/le-microservice-tc-rpm
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat

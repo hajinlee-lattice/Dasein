@@ -31,10 +31,7 @@
                     <group>Application/Collectors</group>
                     <mappings>
                         <mapping>
-                            <directory>/usr/share/tomcat/webapps/ms</directory>
-                            <username>tomcat</username>
-                            <groupname>tomcat</groupname>
-                            <filemode>775</filemode>
+                            <directory>/tmp/le-microservice-tc-rpm/ms</directory>
                             <sources>
                                 <source>
                                     <location>core/target/le-microservice-${le.rpm.version}.war</location>
@@ -67,6 +64,14 @@
                                 <source>
                                     <location>workflowapi/target/le-workflowapi-microservice-${le.rpm.version}.war</location>
                                     <destination>workflowapi.war</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/le-microservice-tc-rpm/env</directory>
+                            <sources>
+                                <source>
+                                    <location>core/conf/env</location>
                                 </source>
                             </sources>
                         </mapping>
