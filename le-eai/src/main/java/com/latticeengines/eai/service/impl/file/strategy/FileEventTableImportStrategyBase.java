@@ -199,7 +199,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         internalId.setDisplayName(internalId.getName());
         internalId.setPhysicalDataType(Type.LONG.name());
         internalId.setSourceLogicalDataType("");
-        internalId.setLogicalDataType(LogicalDataType.InternalId.name());
+        internalId.setLogicalDataType(LogicalDataType.InternalId);
         table.addAttribute(internalId);
     }
 
