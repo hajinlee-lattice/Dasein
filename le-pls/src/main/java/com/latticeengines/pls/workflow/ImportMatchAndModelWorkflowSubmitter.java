@@ -30,7 +30,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Autowired
     private MatchCommandProxy matchCommandProxy;
 
-    public ApplicationId submit(ModelingParameters parameters) {
+    public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
 
         if (sourceFile == null) {
@@ -60,6 +60,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .modelName(parameters.getName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .build();
+        return configuration;
+    }
+
+    public ApplicationId submit(ModelingParameters parameters) {
+        SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
+        ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
         AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
         String applicationId = submission.getApplicationIds().get(0);
         sourceFile.setApplicationId(applicationId);

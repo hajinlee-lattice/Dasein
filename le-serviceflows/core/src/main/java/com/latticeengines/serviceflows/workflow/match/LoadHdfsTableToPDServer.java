@@ -47,8 +47,9 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         jdbcUrl = jdbcUrl.replaceAll("\\$\\$USER\\$\\$", configuration.getDbUser());
         jdbcUrl = jdbcUrl.replaceAll("\\$\\$PASSWD\\$\\$", password);
 
-        DbCreds.Builder credsBuilder = new DbCreds.Builder()
-                .dbType("SQLServer") // SQLServer is the only supported match dbtype
+        // SQLServer is the only supported match dbtype
+        DbCreds.Builder credsBuilder = new DbCreds.Builder() //
+                .dbType("SQLServer") //
                 .jdbcUrl(jdbcUrl) //
                 .user(configuration.getDbUser()) //
                 .password(password);
@@ -100,21 +101,22 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
     }
 
     private String getSQLServerType(String type) {
-        switch (type) {
-            case "double":
-                return "FLOAT";
-            case "float":
-                return "FLOAT";
-            case "string":
-                return "VARCHAR(MAX)";
-            case "long":
-                return "BIGINT";
-            case "boolean":
-                return "BIT";
-            case "int":
-                return "INT";
-            default:
-                throw new RuntimeException("Unknown SQL Server type for avro type " + type);
+        String lower = type.toLowerCase();
+        switch (lower) {
+        case "double":
+            return "FLOAT";
+        case "float":
+            return "FLOAT";
+        case "string":
+            return "VARCHAR(MAX)";
+        case "long":
+            return "BIGINT";
+        case "boolean":
+            return "BIT";
+        case "int":
+            return "INT";
+        default:
+            throw new RuntimeException("Unknown SQL Server type for avro type " + type);
         }
     }
 
