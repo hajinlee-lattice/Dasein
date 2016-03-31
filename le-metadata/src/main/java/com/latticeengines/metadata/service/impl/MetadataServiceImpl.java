@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.service.MetadataService;
@@ -71,7 +72,7 @@ public class MetadataServiceImpl implements MetadataService {
         DatabaseUtils.retry("createTable", new Closure() {
             @Override
             public void execute(Object input) {
-                tableEntityMgr.create(table);
+                tableEntityMgr.create(TableUtils.clone(table));
             }
         });
     }
@@ -109,7 +110,7 @@ public class MetadataServiceImpl implements MetadataService {
                         tableEntityMgr.deleteByName(found.getName());
                     }
 
-                    tableEntityMgr.create(table);
+                    tableEntityMgr.create(TableUtils.clone(table));
                 }
             });
         } finally {
@@ -140,5 +141,4 @@ public class MetadataServiceImpl implements MetadataService {
     public Table cloneTable(CustomerSpace customerSpace, String tableName) {
         return tableEntityMgr.clone(tableName);
     }
-
 }

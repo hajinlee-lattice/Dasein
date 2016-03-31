@@ -3,6 +3,7 @@ package com.latticeengines.metadata.entitymgr.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.collections.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
@@ -14,14 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
@@ -62,7 +64,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void create(final Table entity) {
+    public void create(Table entity) {
         setTenantId(entity);
         tableDao.create(entity);
         updateReferences(entity);
@@ -126,10 +128,15 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             throw new RuntimeException(String.format("No such table with name %s", name));
         }
 
-        Table clone = JsonUtils.clone(existing);
+        final Table clone = TableUtils.clone(existing);
         clone.setName(UUID.randomUUID().toString());
 
-        create(clone);
+        DatabaseUtils.retry("createTable", new Closure() {
+            @Override
+            public void execute(Object input) {
+                create(TableUtils.clone(clone));
+            }
+        });
 
         if (clone.getExtracts().size() > 0) {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
