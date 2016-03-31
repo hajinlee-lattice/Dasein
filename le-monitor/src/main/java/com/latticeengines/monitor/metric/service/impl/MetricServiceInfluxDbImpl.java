@@ -118,7 +118,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
     public <F extends Fact, D extends Dimension> void write(MetricDB db,
             Collection<? extends Measurement<F, D>> measurements) {
         if (enabled) {
-            log.info("Received " + measurements.size() + " points to write.");
+            log.debug("Received " + measurements.size() + " points to write.");
             executor.submit(new MetricRunnable<>(db, measurements));
         } else if (!forceDisabled && StringUtils.isNotEmpty(url)) {
             postConstruct();

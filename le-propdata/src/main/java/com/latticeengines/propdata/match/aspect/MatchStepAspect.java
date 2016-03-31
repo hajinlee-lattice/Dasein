@@ -65,7 +65,7 @@ public class MatchStepAspect {
             tracker.set(trackId);
         }
 
-        log.info(logMsg);
+        log.debug(logMsg);
 
         return retVal;
     }
