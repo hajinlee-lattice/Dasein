@@ -11,6 +11,7 @@ import java.io.InputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.csv.parser.LECSVParser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -32,15 +33,19 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         dataFile = new File(ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_missing_required_fields.csv").getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        LECSVParser parser = new LECSVParser();
         try {
             modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    dataFile.getName());
+                    parser, dataFile.getName());
+            parser.close();
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
             assertTrue(e.getMessage().contains(InterfaceName.Id.name()));
             assertTrue(e.getMessage().contains(InterfaceName.Website.name()));
             assertTrue(e.getMessage().contains(InterfaceName.Event.name()));
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18087);
+        } finally {
+            parser.close();
         }
     }
 
@@ -49,12 +54,15 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         dataFile = new File(ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_empty_header.csv").getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        LECSVParser parser = new LECSVParser();
         try {
             modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    dataFile.getName());
+                    parser, dataFile.getName());
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18096);
+        } finally {
+            parser.close();
         }
     }
 
@@ -64,12 +72,15 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
                 "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file_unexpected_character_in_header.csv")
                 .getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
+        LECSVParser parser = new LECSVParser();
         try {
             modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    dataFile.getName());
+                    parser, dataFile.getName());
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18097);
+            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18095);
+        } finally {
+            parser.close();
         }
     }
 }

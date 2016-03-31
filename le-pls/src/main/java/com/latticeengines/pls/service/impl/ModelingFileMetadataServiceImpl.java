@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.csv.parser.LECSVParser;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -80,8 +81,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema, String fileName) {
-        CSVParser parser = null;
+    public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema, LECSVParser leCsvParser, String fileName) {
         try {
             if (!stream.markSupported()) {
                 stream = new BufferedInputStream(stream);
@@ -94,7 +94,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
                     StandardCharsets.UTF_8);
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-            parser = new CSVParser(reader, format);
+            CSVParser parser = new CSVParser(reader, format);
+            leCsvParser.setCSVParser(parser);
             headerFields = parser.getHeaderMap().keySet();
 
             SchemaRepository repository = SchemaRepository.instance();
