@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.latticeengines.common.exposed.csv.parser.LECSVParser;
+import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.ZipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
@@ -65,7 +65,7 @@ public class ModelingFileUploadResource {
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam("file") MultipartFile file) {
-        LECSVParser leCsvParser = new LECSVParser();
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             if (file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
@@ -76,14 +76,14 @@ public class ModelingFileUploadResource {
                 stream = ZipUtils.decompressStream(stream);
             }
 
-            stream = modelingFileMetadataService.validateHeaderFields(stream, schema, leCsvParser, fileName);
+            stream = modelingFileMetadataService.validateHeaderFields(stream, schema, closeableResourcePool, fileName);
 
             return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema, stream));
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
         } finally {
             try {
-                leCsvParser.close();
+                closeableResourcePool.close();
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
             }
