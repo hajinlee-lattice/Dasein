@@ -321,7 +321,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     private String getModelRecordExportCsv(String hdfsScoreArtifactBaseDir) {
-        String content = null;
+        String content = "";
 
         List<String> dataExportHdfsPath = null;
         try {
@@ -337,7 +337,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
                         }
                     });
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_31015, new String[] { hdfsScoreArtifactBaseDir });
         }
 
         if (dataExportHdfsPath.size() == 1) {
@@ -346,10 +345,6 @@ public class ModelRetrieverImpl implements ModelRetriever {
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_31000, new String[] { dataExportHdfsPath.get(0) });
             }
-        } else if (dataExportHdfsPath.size() == 0) {
-            throw new LedpException(LedpCode.LEDP_31016, new String[] { hdfsScoreArtifactBaseDir });
-        } else {
-            throw new LedpException(LedpCode.LEDP_31017, new String[] { hdfsScoreArtifactBaseDir });
         }
 
         return content;

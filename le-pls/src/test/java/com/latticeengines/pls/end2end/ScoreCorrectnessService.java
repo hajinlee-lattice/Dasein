@@ -10,7 +10,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -51,9 +60,10 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 public class ScoreCorrectnessService {
 
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
-//    private static final int NUM_LEADS_TO_SCORE = 4000;
-    private static final int NUM_LEADS_TO_SCORE = 300;
-    private static final double ACCEPTABLE_NUM_DIFFERENCES = 5;
+    private static final int NUM_LEADS_TO_SCORE = 500;
+    private static final int TIMEOUT_IN_MIN = 60;
+    private static final int THREADPOOL_SIZE = 10;
+    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 2.0;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
@@ -87,9 +97,11 @@ public class ScoreCorrectnessService {
         Map<String, DebugScoreResponse> scoreResponses = scoreRecords(modelId, inputRecords);
         Map<String, ComparedRecord> differentRecords = compareExpectedVsScoredRecords(schema, expectedScores,
                 expectedRecords, matchedRecords, scoreResponses);
-        outputResults(expectedScores.size(), differentRecords);
+        outputResults(scoreResponses.size(), differentRecords);
 
-        Assert.assertTrue(differentRecords.size() <= ACCEPTABLE_NUM_DIFFERENCES);
+        double percentDifference = (double) differentRecords.size() / (double) scoreResponses.size() * 100.0;
+        System.out.println("PercentDifference:" + percentDifference);
+        Assert.assertTrue(percentDifference <= ACCEPTABLE_PERCENT_DIFFERENCE);
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {
@@ -224,6 +236,9 @@ public class ScoreCorrectnessService {
         List<String> extraFields = new ArrayList<>();
         List<String> missingFields = new ArrayList<>();
 
+        if (expectedRecord == null || expectedRecord.keySet().isEmpty()) {
+            return Triple.of(conflicts, extraFields, missingFields);
+        }
         Set<String> expectedKeys = new HashSet<>(expectedRecord.keySet());
         Set<String> scoredKeys = new HashSet<>(scoreRecord.keySet());
 
@@ -291,32 +306,89 @@ public class ScoreCorrectnessService {
     }
 
     private Map<String, DebugScoreResponse> scoreRecords(String modelId, Map<String, Map<String, Object>> inputRecords) {
-        Set<String> problemScores = new HashSet<>();
-        Map<String, DebugScoreResponse> responses = new HashMap<>();
-        int counter = 1;
-        int recordSize = inputRecords.keySet().size();
-        for (String id : inputRecords.keySet()) {
-            try {
-                DebugScoreResponse response = score(inputRecords.get(id), modelId);
-                responses.put(id, response);
-                log.info(String.format("Scored record %d out of %d", counter++, recordSize));
-            } catch (Exception e) {
-                problemScores.add(id);
-            }
+        Queue<String> inputQueue = new ConcurrentLinkedQueue<>();
+        Set<String> problemScores = new ConcurrentSkipListSet<>();
+        Map<String, DebugScoreResponse> responses = new ConcurrentHashMap<>();
+        ExecutorService scoreExecutorService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+
+        inputQueue.addAll(inputRecords.keySet());
+        scoreExecutorService.execute(new ScoreApiCallable(scoreApiHostPort, scoringRestTemplate, modelId, inputRecords,
+                inputQueue, problemScores, responses));
+
+        scoreExecutorService.shutdown();
+        try {
+            scoreExecutorService.awaitTermination(TIMEOUT_IN_MIN, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
         }
+
         if (!problemScores.isEmpty()) {
             log.error("Problem scoring these record ids: " + JsonUtils.serialize(problemScores));
         }
         return responses;
     }
 
-    private DebugScoreResponse score(Map<String, Object> record, String modelId) {
-        ScoreRequest request = new ScoreRequest();
-        request.setModelId(modelId);
-        request.setRecord(record);
-        DebugScoreResponse response = scoringRestTemplate.postForObject(scoreApiHostPort + "/score/record/debug",
-                request, DebugScoreResponse.class);
-        return response;
+    private static class ScoreApiCallable implements Callable<Void>, Runnable {
+
+        private String scoreApiHostPort;
+        private RestTemplate scoringRestTemplate;
+        private String modelId;
+        private Map<String, Map<String, Object>> inputRecords;
+        private Queue<String> inputQueue;
+        private Set<String> problemScores;
+        private Map<String, DebugScoreResponse> responses;
+        private AtomicInteger counter = new AtomicInteger(0);
+        private int initialInputQueueSize;
+
+        public ScoreApiCallable(String scoreApiHostPort, RestTemplate scoringRestTemplate, String modelId,
+                Map<String, Map<String, Object>> inputRecords, Queue<String> inputQueue, Set<String> problemScores,
+                Map<String, DebugScoreResponse> responses) {
+            super();
+            this.scoreApiHostPort = scoreApiHostPort;
+            this.scoringRestTemplate = scoringRestTemplate;
+            this.modelId = modelId;
+            this.inputRecords = inputRecords;
+            this.problemScores = problemScores;
+            this.responses = responses;
+            this.inputQueue = inputQueue;
+            this.initialInputQueueSize = inputQueue.size();
+        }
+
+        @Override
+        public Void call() throws Exception {
+            while (true) {
+                String id = inputQueue.poll();
+                if (id == null) {
+                    break;
+                }
+                try {
+                    DebugScoreResponse response = score(inputRecords.get(id), modelId);
+                    System.out.println((String.format("Scored record id %s #%d out of %d", id,
+                            counter.incrementAndGet(), initialInputQueueSize)));
+                    responses.put(id, response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    problemScores.add(id);
+                }
+            }
+            return null;
+        }
+
+        private DebugScoreResponse score(Map<String, Object> record, String modelId) {
+            ScoreRequest request = new ScoreRequest();
+            request.setModelId(modelId);
+            request.setRecord(record);
+            DebugScoreResponse response = scoringRestTemplate.postForObject(scoreApiHostPort + "/score/record/debug",
+                    request, DebugScoreResponse.class);
+            return response;
+        }
+
+        @Override
+        public void run() {
+            try {
+                call();
+            } catch (Exception e) {
+            }
+        }
     }
 
     private Map<String, Map<String, Object>> getInputRecordsFromInputCsv(ScoreCorrectnessArtifacts artifacts,
