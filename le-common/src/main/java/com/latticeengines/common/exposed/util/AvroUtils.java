@@ -227,7 +227,7 @@ public class AvroUtils {
         }
     }
 
-    private static Type getType(Field field) {
+    public static Type getType(Field field) {
         return field.schema().getTypes().get(0).getType();
     }
 

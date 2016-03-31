@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData.Record;
+import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.mapred.AvroKey;
@@ -36,9 +36,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
+import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtil {
 
@@ -87,24 +89,30 @@ public class ScoringMapperPredictUtil {
 
     }
 
-    public static void writeToOutputFile(List<ScoreOutput> resultList, Configuration yarnConfiguration,
-            String outputPath) throws Exception {
-
+    public static void writeToOutputFile(List<ScoreOutput> resultList, Configuration configuration, String outputPath)
+            throws IOException {
         String fileName = UUID.randomUUID() + ScoringDaemonService.AVRO_FILE_SUFFIX;
         File outputFile = new File(fileName);
-        DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
-        DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<ScoreOutput>(userDatumWriter);
 
-        for (int i = 0; i < resultList.size(); i++) {
-            ScoreOutput result = resultList.get(i);
-            if (i == 0) {
-                dataFileWriter.create(result.getSchema(), outputFile);
+        String uniqueKeyColumn = configuration.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
+        if (!uniqueKeyColumn.equals(InterfaceName.Id.name())) {
+            DatumWriter<ScoreOutput> userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
+            DataFileWriter<ScoreOutput> dataFileWriter = new DataFileWriter<ScoreOutput>(userDatumWriter);
+            for (int i = 0; i < resultList.size(); i++) {
+                ScoreOutput result = resultList.get(i);
+                if (i == 0) {
+                    dataFileWriter.create(result.getSchema(), outputFile);
+                }
+                dataFileWriter.append(result);
             }
-            dataFileWriter.append(result);
+            dataFileWriter.close();
+        } else {
+            DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+            DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter);
+            ScoringJobUtil.writeScoreResultToAvroRecord(dataFileWriter, resultList, outputFile);
+            dataFileWriter.close();
         }
-
-        dataFileWriter.close();
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, outputPath + "/" + fileName);
+        HdfsUtils.copyLocalToHdfs(configuration, fileName, outputPath + "/" + fileName);
     }
 
     public static List<ScoreOutput> processScoreFiles(ModelAndRecordInfo modelAndRecordInfo,
@@ -161,7 +169,8 @@ public class ScoringMapperPredictUtil {
         return duplicateLeadsList;
     }
 
-    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException, DecoderException {
+    private static int readScoreFile(String uuid, int index, Map<String, List<Double>> scores) throws IOException,
+            DecoderException {
 
         int rawScoreNum = 0;
         String fileName = uuid + ScoringDaemonService.SCORING_OUTPUT_PREFIX + index + ".txt";

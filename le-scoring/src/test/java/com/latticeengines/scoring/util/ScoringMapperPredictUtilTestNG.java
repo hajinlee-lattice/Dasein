@@ -23,6 +23,8 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.scoring.ScoreOutput;
+import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
+import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtilTestNG {
 
@@ -150,7 +152,9 @@ public class ScoringMapperPredictUtilTestNG {
             e1.printStackTrace();
         }
 
-        ScoringMapperPredictUtil.writeToOutputFile(expectedResultList, new Configuration(), tempOutputPath);
+        Configuration config = new Configuration();
+        config.set(ScoringProperty.UNIQUE_KEY_COLUMN.name(), ScoringDaemonService.UNIQUE_KEY_COLUMN);
+        ScoringMapperPredictUtil.writeToOutputFile(expectedResultList, config, tempOutputPath);
 
         // Deserialize
         FileSystem fs = FileSystem.get(new Configuration());
