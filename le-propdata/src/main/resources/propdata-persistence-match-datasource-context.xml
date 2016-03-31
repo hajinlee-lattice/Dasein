@@ -7,11 +7,10 @@
         <property name="targetDataSources">
             <map key-type="com.latticeengines.domain.exposed.propdata.MatchClient">
                 <entry key="PD126" value-ref="pd126ClientDataSource" />
-                <entry key="PD127" value-ref="pd127ClientDataSource" />
                 <entry key="PD128" value-ref="pd128ClientDataSource" />
+                <entry key="PD131" value-ref="pd131ClientDataSource" />
                 <entry key="PD144" value-ref="pd144ClientDataSource" />
                 <entry key="PD130" value-ref="pd130ClientDataSource" />
-                <entry key="PD238" value-ref="pd238ClientDataSource" />
             </map>
         </property>
         <property name="defaultTargetDataSource" ref="pd130ClientDataSource" />
@@ -24,16 +23,16 @@
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
-    <bean id="pd127ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="pd128ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://10.51.15.127:1433;databaseName=PropDataMatchDB;" />
+        <property name="url" value="jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;" />
         <property name="username" value="${propdata.user}" />
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
 
-    <bean id="pd128ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <bean id="pd131ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url" value="jdbc:sqlserver://10.51.15.128:1433;databaseName=PropDataMatchDB;" />
+        <property name="url" value="jdbc:sqlserver://10.51.15.131:1433;databaseName=PropDataMatchDB;" />
         <property name="username" value="${propdata.user}" />
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
@@ -48,14 +47,6 @@
     <bean id="pd130ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
         <property name="url" value="jdbc:sqlserver://10.51.15.130:1433;databaseName=PropDataMatchDB;" />
-        <property name="username" value="${propdata.user}" />
-        <property name="password" value="${propdata.password.encrypted}" />
-    </bean>
-
-    <bean id="pd238ClientDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-        <property name="url"
-            value="jdbc:sqlserver://10.41.1.238\\SQL2012:1437;databaseName=PropDataMatchDB;" />
         <property name="username" value="${propdata.user}" />
         <property name="password" value="${propdata.password.encrypted}" />
     </bean>
