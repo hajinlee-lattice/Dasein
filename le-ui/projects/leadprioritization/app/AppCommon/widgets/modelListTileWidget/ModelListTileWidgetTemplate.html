@@ -1,39 +1,37 @@
-<div class="four columns">
 
-    <div class="model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
 
-        <div class="model-title" data-ng-hide="nameStatus.editing">
-            <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
-            <h2 class="edit" data-ng-if="mayChangeModelNames">
-                <button type="button" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button>
-            </h2>
-        </div>        
-        <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
-            <div novalidate class="form-inline editable-container editableform" name="form">
-                <div class="control-group">
-                    <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
-                    <div class="editable-buttons">
-                        <button class="button blue-button editable-cancel" data-ng-click="cancel($event)">Cancel</button>
-                        <button class="button orange-button editable-submit" data-ng-click="submit($event)">Save</button>
-                    </div>
-                    <label class="global-error model-error" data-ng-show="showNameEditError">
-                        <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{nameEditErrorMessage}}</span>
-                    </label>
+<div class="model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
+
+    <div class="model-title" data-ng-hide="nameStatus.editing">
+        <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
+        <h2 class="edit" data-ng-if="mayChangeModelNames">
+            <button type="button" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button>
+        </h2>
+    </div>        
+    <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
+        <div novalidate class="form-inline editable-container editableform" name="form">
+            <div class="control-group">
+                <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
+                <div class="editable-buttons">
+                    <button class="button blue-button editable-cancel" data-ng-click="cancel($event)">Cancel</button>
+                    <button class="button orange-button editable-submit" data-ng-click="submit($event)">Save</button>
                 </div>
+                <label class="global-error model-error" data-ng-show="showNameEditError">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{nameEditErrorMessage}}</span>
+                </label>
             </div>
         </div>
-        <div class="meta-data">
-            <dl class="stats">
-                <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
-                <dd class="small">{{createdDate}}</dd>
-            </dl>
-            <div class="status">
-                <span data-ng-show="!isActive" class="error-text">{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
-                <span data-ng-show="isActive" class="success-text">{{ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
-            </div>
-            <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
+    </div>
+    <div class="meta-data">
+        <dl class="stats">
+            <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
+            <dd class="small">{{createdDate}}</dd>
+        </dl>
+        <div class="status">
+            <span data-ng-show="!isActive" class="error-text">{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</span>
+            <span data-ng-show="isActive" class="success-text">{{ResourceUtility.getString('MODEL_DETAILS_ACTIVE_LABEL')}}</span>
         </div>
-
+        <button type="button" data-ng-if="mayDeleteModels && !isActive" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
     </div>
 
-</div><!-- End .list-item.model -->
+</div><!-- End .model -->

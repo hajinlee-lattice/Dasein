@@ -14,18 +14,14 @@
         </div>
 
         <div class="row" data-ng-hide="showNoModels || loading">
-            <div class="col-md-12">
-                <div class="pull-left" style="margin-top:0.65em;font-size:1.2em;">
-                    Displaying {{ length }} models
-                </div>
-                <div class="pull-right">
-                    <button ui-sref="home.models.import" type="button" class="button orange-button">Create Model</button>
-                </div>
+            <div class="twelve columns">
+                Displaying {{ length }} models
+                <button ui-sref="home.models.import" type="button" class="button orange-button pull-right create-model">Create Model</button>
             </div>
         </div>
 
         <div class="row" data-ng-hide="showNoModels || loading" style="margin-top:1em;">        
-            <div class="twelve columns tile-list" id="modelListContainer"></div>
+            <div id="modelListContainer" class="twelve columns model-list"></div>
         </div>
 
     </section>
