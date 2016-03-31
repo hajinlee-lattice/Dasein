@@ -23,7 +23,7 @@ const options   = {
     WHITELIST:  process.env.WHITELIST   || false,
     COMPRESSED: process.env.COMPRESSED  || true,
     LOGGING:    process.env.LOGGING     || '/var/log/ledp',
-    TIMESTAMP:  new Date().getTime(),
+    UPTIME:     process.uptime(),
     APP_ROOT:   __dirname 
 };
 
