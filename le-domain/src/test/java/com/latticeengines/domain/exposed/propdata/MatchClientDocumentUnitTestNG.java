@@ -11,7 +11,7 @@ public class MatchClientDocumentUnitTestNG {
 
     @Test(groups = "unit")
     public void testSerDe() throws IOException {
-        MatchClient client = MatchClient.PD127;
+        MatchClient client = MatchClient.PD128;
 
         MatchClientDocument doc = new MatchClientDocument(client);
         Assert.assertTrue(doc.getUrl().contains(client.host));
@@ -26,7 +26,7 @@ public class MatchClientDocumentUnitTestNG {
 
     @Test(groups = "unit")
     public void testDefaultValues() throws IOException {
-        MatchClient client = MatchClient.PD127;
+        MatchClient client = MatchClient.PD128;
 
         MatchClientDocument doc = new MatchClientDocument(client);
         ObjectMapper mapper = new ObjectMapper();

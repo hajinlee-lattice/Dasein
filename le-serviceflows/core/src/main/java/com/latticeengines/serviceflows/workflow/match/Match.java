@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -16,6 +17,8 @@ import com.latticeengines.domain.exposed.propdata.CommandParameter;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.domain.exposed.propdata.CreateCommandRequest;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
+import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
+import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("match")
@@ -25,6 +28,9 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final EnumSet<MatchCommandStatus> TERMINAL_MATCH_STATUS = EnumSet.of(MatchCommandStatus.COMPLETE,
             MatchCommandStatus.ABORTED, MatchCommandStatus.FAILED);
+
+    @Autowired
+    private MatchCommandProxy matchCommandProxy;
 
     @Override
     public void execute() {
@@ -47,8 +53,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         commandParameters.put(CommandParameter.KEY_INTERPRETED_DOMAIN, CommandParameter.VALUE_YES);
         matchCommand.setParameters(commandParameters);
 
-        String url = String.format("%s/propdata/matchcommands", configuration.getMicroServiceHostPort());
-        Commands response = restTemplate.postForObject(url, matchCommand, Commands.class);
+        Commands response = matchCommandProxy.createMatchCommand(matchCommand, configuration.getMatchClient());
 
         waitForMatchCommand(response);
 
@@ -59,19 +64,17 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
     private void waitForMatchCommand(Commands commands) {
         log.info(String.format("Waiting for match command %d to complete", commands.getPid()));
 
-        Map<String, String> status = new HashMap<>();
         int maxTries = 1000;
         int i = 0;
         MatchCommandStatus matchCommandStatus = null;
         do {
-            String url = String.format(configuration.getMicroServiceHostPort()
-                    + "/propdata/matchcommands/%s?matchClient=%s", commands.getPid(), configuration.getMatchClient());
-            status = restTemplate.getForObject(url, Map.class);
+            MatchStatusResponse status =
+                    matchCommandProxy.getMatchStatus(commands.getPid(), configuration.getMatchClient());
             if (status == null) {
-                throw new LedpException(LedpCode.LEDP_28009, new String[] { url });
+                throw new LedpException(LedpCode.LEDP_28009, new String[] { configuration.getMatchClient() });
             }
 
-            matchCommandStatus = MatchCommandStatus.fromStatus(status.get("Status"));
+            matchCommandStatus = MatchCommandStatus.fromStatus(status.getStatus());
             log.info("Match Status = " + matchCommandStatus);
 
             try {
