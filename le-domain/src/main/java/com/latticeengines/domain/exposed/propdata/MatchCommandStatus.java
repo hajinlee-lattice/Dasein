@@ -16,6 +16,7 @@ public enum MatchCommandStatus {
     PROCESSED("PROCESSED"),
     COMPLETING("COMPLETING"),
     COMPLETE("COMPLETE"),
+    ABORTED("ABORTED"),
     FAILED("FAILED");
 
     private static final Log log = LogFactory.getLog(MatchCommandStatus.class);

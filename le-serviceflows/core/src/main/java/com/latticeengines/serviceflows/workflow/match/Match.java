@@ -24,7 +24,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
     private static final Log log = LogFactory.getLog(Match.class);
 
     private static final EnumSet<MatchCommandStatus> TERMINAL_MATCH_STATUS = EnumSet.of(MatchCommandStatus.COMPLETE,
-            MatchCommandStatus.FAILED);
+            MatchCommandStatus.ABORTED, MatchCommandStatus.FAILED);
 
     @Override
     public void execute() {
