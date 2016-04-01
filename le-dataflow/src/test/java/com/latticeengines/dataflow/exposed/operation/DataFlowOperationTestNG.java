@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -381,6 +382,51 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
     }
 
+    @Test(groups = "functional")
+    public void testDepivot() throws Exception {
+        String avroDir = "/tmp/avro/";
+        String fileName = "Feature.avro";
+        prepareDepivotData(avroDir, fileName);
+
+        execute(new TypesafeDataFlowBuilder<DataFlowParameters>() {
+            @Override
+            public Node construct(DataFlowParameters parameters) {
+                Node node = addSource("Feature");
+                String[] targetFields = new String[]{ "Topic", "Score" };
+                String[][] sourceFieldTuples = new String[][]{
+                        { "Topic1", "Score1" },
+                        { "Topic2", "Score2" },
+                        { "Topic3", "Score3" },
+                        { "Topic4", "Score4" }
+                };
+                return node.depivot(targetFields, sourceFieldTuples);
+            }
+        });
+
+        Map<String, Double> expectedMap = new HashMap<>();
+        expectedMap.put("topic1", 1.0);
+        expectedMap.put("topic2", 2.0);
+        expectedMap.put("topic3", 3.0);
+        expectedMap.put("topic4", 4.0);
+        expectedMap.put("topic5", 1.1);
+        expectedMap.put("topic6", 2.1);
+        expectedMap.put("topic7", null);
+
+        List<GenericRecord> output = readOutput();
+        Assert.assertEquals(output.size(), 8);
+        for (GenericRecord record : output) {
+            System.out.println(record);
+            Assert.assertEquals(record.get("Domain").toString(), "dom1.com");
+            if (record.get("Topic") == null) {
+                Assert.assertEquals(record.get("Score"), 4.1);
+            } else {
+                Assert.assertEquals(record.get("Score"), expectedMap.get(record.get("Topic").toString()));
+            }
+        }
+
+        HdfsUtils.rmdir(configuration, avroDir + "." + fileName);
+    }
+
     private void prepareSimplePivotData(String avroDir, String fileName) {
         Object[][] data = new Object[][] { { "dom1.com", "f1", 1, 123L }, { "dom1.com", "f2", 2, 125L },
                 { "dom1.com", "f3", 3, 124L }, { "dom1.com", "k1_low", 3, 124L }, { "dom1.com", "k1_high", 5, 124L },
@@ -407,6 +453,15 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
         uploadAvro(data, avroDir, fileName);
     }
 
+    private void prepareDepivotData(String avroDir, String fileName) {
+        Object[][] data = new Object[][] {
+                { "dom1.com", "topic1", 1.0, "topic2", 2.0, "topic3", 3.0, "topic4", 4.0, 123L },
+                { "dom1.com", "topic5", 1.1, "topic6", 2.1, "topic7", null, null, 4.1, 123L }
+        };
+
+        uploadDepivotAvro(data, avroDir, fileName);
+    }
+
     private void uploadAvro(Object[][] data, String avroDir, String fileName) {
         List<GenericRecord> records = new ArrayList<>();
         Schema.Parser parser = new Schema.Parser();
@@ -421,6 +476,48 @@ public class DataFlowOperationTestNG extends DataFlowOperationFunctionalTestNGBa
             builder.set("Feature", tuple[1]);
             builder.set("Value", tuple[2]);
             builder.set("Timestamp", tuple[3]);
+            records.add(builder.build());
+        }
+
+        try {
+            AvroUtils.writeToLocalFile(schema, records, fileName);
+            if (HdfsUtils.fileExists(configuration, avroDir + "/" + fileName)) {
+                HdfsUtils.rmdir(configuration, avroDir + "/" + fileName);
+            }
+            HdfsUtils.copyLocalToHdfs(configuration, fileName, avroDir + "/" + fileName);
+        } catch (Exception e) {
+            Assert.fail("Failed to upload " + fileName, e);
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
+    }
+
+    private void uploadDepivotAvro(Object[][] data, String avroDir, String fileName) {
+        List<GenericRecord> records = new ArrayList<>();
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\","
+                + "\"fields\":[" + "{\"name\":\"Domain\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Topic1\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Score1\",\"type\":[\"double\",\"null\"]},"
+                + "{\"name\":\"Topic2\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Score2\",\"type\":[\"double\",\"null\"]},"
+                + "{\"name\":\"Topic3\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Score3\",\"type\":[\"double\",\"null\"]},"
+                + "{\"name\":\"Topic4\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"Score4\",\"type\":[\"double\",\"null\"]},"
+                + "{\"name\":\"Timestamp\",\"type\":[\"long\",\"null\"]}" + "]}");
+        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+        for (Object[] tuple : data) {
+            builder.set("Domain", tuple[0]);
+            builder.set("Topic1", tuple[1]);
+            builder.set("Score1", tuple[2]);
+            builder.set("Topic2", tuple[3]);
+            builder.set("Score2", tuple[4]);
+            builder.set("Topic3", tuple[5]);
+            builder.set("Score3", tuple[6]);
+            builder.set("Topic4", tuple[7]);
+            builder.set("Score4", tuple[8]);
+            builder.set("Timestamp", tuple[9]);
             records.add(builder.build());
         }
 

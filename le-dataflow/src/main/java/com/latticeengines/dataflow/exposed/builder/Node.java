@@ -17,6 +17,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.exposed.builder.operations.AddFieldOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.AggregationOperation;
+import com.latticeengines.dataflow.exposed.builder.operations.DepivotOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.FunctionOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.GroupByAndBufferOperation;
 import com.latticeengines.dataflow.exposed.builder.operations.JythonFunctionOperation;
@@ -113,21 +114,25 @@ public class Node {
         return groupByAndBuffer(groupByFieldList, sortFieldList, new FirstNBuffer(count), descending, caseInsensitive);
     }
 
+    @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer, boolean descending) {
         return groupByAndBuffer(groupByFieldList, sortFieldList, buffer, descending, false);
     }
 
+    @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, FieldList sortFieldList, Buffer buffer,
             boolean descending, boolean caseInsensitive) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList,
                 sortFieldList, buffer, descending, caseInsensitive)), builder);
     }
 
+    @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer)),
                 builder);
     }
 
+    @SuppressWarnings("rawtypes")
     public Node groupByAndBuffer(FieldList groupByFieldList, Buffer buffer, List<FieldMetadata> fieldMetadatas) {
         return new Node(builder.register(new GroupByAndBufferOperation(opInput(identifier), groupByFieldList, buffer,
                 fieldMetadatas)), builder);
@@ -158,6 +163,11 @@ public class Node {
     public Node pivot(String[] groupyByFields, PivotStrategy pivotStrategy) {
         return new Node(builder.register(new PivotOperation(opInput(identifier), groupyByFields, pivotStrategy)),
                 builder);
+    }
+
+    public Node depivot(String[] targetFields, String[][] sourceFieldTuples) {
+        DepivotOperation operation = new DepivotOperation(opInput(identifier), targetFields, sourceFieldTuples);
+        return new Node(builder.register(operation), builder);
     }
 
     public Node addFunction(String expression, FieldList fieldsToApply, FieldMetadata targetField) {
