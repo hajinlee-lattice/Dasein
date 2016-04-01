@@ -31,7 +31,6 @@ public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBas
         routeServiceTestNG.cleanup();
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "deployment")
     public void testDownloadSftpByRestCall() throws Exception {
         SftpToHdfsRouteConfiguration camelRouteConfiguration =  routeServiceTestNG.getRouteConfiguration();

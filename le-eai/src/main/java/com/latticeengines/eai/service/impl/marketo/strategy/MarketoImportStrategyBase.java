@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
