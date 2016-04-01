@@ -85,6 +85,7 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
                     .keyColumn("Id").modelName(configuration.getModelName()) //
                     .eventTableName(getEventTable().getName()) //
                     .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
+                    .sourceFileTableName(getConfiguration().getSourceFileTableName()) //
                     .productType(configuration.getProductType());
             if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");

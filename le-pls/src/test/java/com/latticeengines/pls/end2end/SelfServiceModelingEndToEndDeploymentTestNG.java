@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
@@ -56,6 +57,9 @@ import com.latticeengines.security.exposed.AccessLevel;
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private WorkflowProxy workflowProxy;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
@@ -155,7 +159,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/%s", getPLSRestAPIHostPort(), parameters.getName()), parameters,
                 ResponseDocument.class);
-
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
         System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
@@ -200,6 +203,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
+        System.out.println("originalModelSummary.getSourceFileTableName() is "
+                + originalModelSummary.getSourceFileTableName());
+        System.out.println("sourceFile.getTableName() is " + sourceFile.getTableName());
+        assertNotNull(originalModelSummary.getSourceFileTableName());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -271,6 +278,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         }));
         assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
+        String foundFileTableName = found.getSourceFileTableName();
+        System.out.println("found.getSourceFileTableName() is " + foundFileTableName);
+        assertNotNull(foundFileTableName);
     }
 
     private ModelSummary getModelSummary(String modelName) throws InterruptedException {

@@ -37,6 +37,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
             throw new LedpException(LedpCode.LEDP_18084, new String[] { parameters.getFilename() });
         }
 
+        String sourceFileTableName = sourceFile.getTableName();
+
+        if (sourceFileTableName == null) {
+            throw new LedpException(LedpCode.LEDP_18099, new String[] { parameters.getFilename() });
+        }
+
         if (hasRunningWorkflow(sourceFile)) {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
         }
@@ -59,6 +65,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .matchDestTables("DerivedColumnsCache") //
                 .modelName(parameters.getName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
+                .sourceFileTableName(sourceFileTableName) //
                 .build();
         return configuration;
     }

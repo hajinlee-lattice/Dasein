@@ -133,6 +133,8 @@ public class ModelSummaryParser {
                     ""));
             summary.setSourceSchemaInterpretation(JsonUtils.getOrDefault(
                     eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
+            summary.setSourceFileTableName(JsonUtils.getOrDefault(eventTableProvenance.get("SourceFileTableName"),
+                    String.class, ""));
         }
 
         // the Id will be used to find hdfs path, make sure they are in sync.

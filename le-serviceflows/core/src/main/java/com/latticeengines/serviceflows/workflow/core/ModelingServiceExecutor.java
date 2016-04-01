@@ -165,6 +165,9 @@ public class ModelingServiceExecutor {
         if (builder.getSourceSchemaInterpretation() != null) {
             props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
         }
+        if (builder.getSourceFileTableName() != null) {
+            props.add("Source_File_Table_Name=" + builder.getSourceFileTableName());
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
 
@@ -191,7 +194,7 @@ public class ModelingServiceExecutor {
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
-    
+
     public String modelForPMML() throws Exception {
         PMMLAlgorithm pmmlAlgorithm = new PMMLAlgorithm();
         pmmlAlgorithm.setPriority(0);
@@ -212,7 +215,7 @@ public class ModelingServiceExecutor {
         model.setDataFormat("avro");
         String provenanceProperties = "Event_Table_Name=" + builder.getEventTableTable();
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
-        
+
         model.setProvenanceProperties(provenanceProperties);
 
         AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
@@ -236,7 +239,6 @@ public class ModelingServiceExecutor {
             throw new LedpException(LedpCode.LEDP_28014, new String[] { appId });
         }
     }
-
 
     private JobStatus waitForAppId(String appId) throws Exception {
         return waitForAppId(appId, builder.getRetrieveJobStatusUrl());
@@ -301,6 +303,7 @@ public class ModelingServiceExecutor {
         private String modelName;
         private String eventTableName;
         private String sourceSchemaInterpretation;
+        private String sourceFileTableName;
         private String productType;
 
         private String loadSubmissionUrl = "/rest/load";
@@ -452,6 +455,11 @@ public class ModelingServiceExecutor {
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             this.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder sourceFileTableName(String sourceFileTableName) {
+            this.setSourceFileTableName(sourceFileTableName);
             return this;
         }
 
@@ -674,6 +682,14 @@ public class ModelingServiceExecutor {
 
         public String getEventTableTable() {
             return eventTableName;
+        }
+
+        public void setSourceFileTableName(String sourceFileTableName) {
+            this.sourceFileTableName = sourceFileTableName;
+        }
+
+        public String getSourceFileTableName() {
+            return sourceFileTableName;
         }
 
         public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {

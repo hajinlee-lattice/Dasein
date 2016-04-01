@@ -51,6 +51,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder sourceFileTableName(String sourceFileTableName) {
+            model.setSourceFileTableName(sourceFileTableName);
+            return this;
+        }
+
         public ModelWorkflowConfiguration build() {
             configuration.add(model);
 

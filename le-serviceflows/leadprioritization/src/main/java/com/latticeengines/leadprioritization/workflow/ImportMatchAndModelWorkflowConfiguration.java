@@ -115,6 +115,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder sourceFileTableName(String sourceFileTableName) {
+            model.setSourceFileTableName(sourceFileTableName);
+            return this;
+        }
+
         public Builder modelName(String modelName) {
             model.setModelName(modelName);
             return this;
