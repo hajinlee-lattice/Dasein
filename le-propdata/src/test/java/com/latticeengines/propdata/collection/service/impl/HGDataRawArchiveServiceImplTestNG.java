@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.core.source.BulkSource;
 import com.latticeengines.propdata.core.source.impl.HGDataRaw;

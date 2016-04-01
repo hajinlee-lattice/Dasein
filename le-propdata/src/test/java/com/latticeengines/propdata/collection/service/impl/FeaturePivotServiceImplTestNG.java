@@ -3,7 +3,7 @@ package com.latticeengines.propdata.collection.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.impl.FeaturePivoted;

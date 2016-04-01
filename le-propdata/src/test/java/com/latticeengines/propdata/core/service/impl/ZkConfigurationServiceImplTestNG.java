@@ -9,7 +9,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testng.annotations.Test;
 
 import com.latticeengines.propdata.core.datasource.DataSourceConnection;
-import com.latticeengines.propdata.core.datasource.DataSourcePool;
+import com.latticeengines.domain.exposed.propdata.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceUtils;
 import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;

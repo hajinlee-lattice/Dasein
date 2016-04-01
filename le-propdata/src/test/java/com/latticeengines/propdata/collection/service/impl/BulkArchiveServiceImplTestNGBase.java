@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
-import com.latticeengines.propdata.collection.entitymanager.ArchiveProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.BulkArchiveService;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.BulkSource;

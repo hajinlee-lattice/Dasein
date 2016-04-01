@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
-import com.latticeengines.propdata.core.service.ZkConfigurationService;
+import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
@@ -40,7 +40,7 @@ public class PropDataScheduler {
     List<Source> sourceList;
 
     @Autowired
-    ZkConfigurationService zkConfigurationService;
+    ServiceFlowsZkConfigService serviceFlowsZkConfigService;
 
     @Autowired
     ProgressOrchestrator progressOrchestrator;
@@ -50,7 +50,7 @@ public class PropDataScheduler {
         scheduler = new StdSchedulerFactory().getScheduler();
 
         for (Source source : sourceList) {
-            if (zkConfigurationService.refreshJobEnabled(source)) {
+            if (serviceFlowsZkConfigService.refreshJobEnabled(source)) {
                 try {
                     registerJob(source);
                 } catch (Exception e) {
@@ -64,7 +64,7 @@ public class PropDataScheduler {
 
     public void reschedule() {
         for (Source source : sourceList) {
-            if (zkConfigurationService.refreshJobEnabled(source)) {
+            if (serviceFlowsZkConfigService.refreshJobEnabled(source)) {
                 try {
                     rescheduleSource(source);
                 } catch (Exception e) {
@@ -87,7 +87,7 @@ public class PropDataScheduler {
         if (service != null) {
             JobDetail job = JobBuilder.newJob(ArchiveScheduler.class).usingJobData("dryrun", dryrun).build();
             job.getJobDataMap().put("archiveService", service);
-            job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
+            job.getJobDataMap().put("zkConfigurationService", serviceFlowsZkConfigService);
 
             scheduler.scheduleJob(job, cronTriggerForSource(source));
         }
@@ -98,14 +98,14 @@ public class PropDataScheduler {
         if (service != null) {
             JobDetail job = JobBuilder.newJob(RefreshScheduler.class).usingJobData("dryrun", dryrun).build();
             job.getJobDataMap().put("refreshService", service);
-            job.getJobDataMap().put("zkConfigurationService", zkConfigurationService);
+            job.getJobDataMap().put("zkConfigurationService", serviceFlowsZkConfigService);
 
             scheduler.scheduleJob(job, cronTriggerForSource(source));
         }
     }
 
     private CronTrigger cronTriggerForSource(Source source) {
-        String cron = zkConfigurationService.refreshCronSchedule(source);
+        String cron = serviceFlowsZkConfigService.refreshCronSchedule(source);
         return TriggerBuilder.newTrigger().withIdentity(new TriggerKey(source.getSourceName()))
                 .withSchedule(CronScheduleBuilder.cronSchedule(cron)).build();
     }
@@ -115,7 +115,7 @@ public class PropDataScheduler {
         CronTrigger oldTrigger = (CronTrigger) scheduler.getTrigger(key);
         if (oldTrigger == null) {
             registerJob(source);
-        } else if (!zkConfigurationService.refreshCronSchedule(source).equals(oldTrigger.getCronExpression())) {
+        } else if (!serviceFlowsZkConfigService.refreshCronSchedule(source).equals(oldTrigger.getCronExpression())) {
             CronTrigger newTrigger = cronTriggerForSource(source);
             log.info("Reschedule " + source.getSourceName() + " from " + oldTrigger.getCronExpression() + " to "
                     + newTrigger.getCronExpression());

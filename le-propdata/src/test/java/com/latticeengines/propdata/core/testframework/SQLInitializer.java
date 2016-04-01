@@ -11,13 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
-
-import com.latticeengines.propdata.core.datasource.DataSourceService;
-import com.latticeengines.propdata.core.datasource.Database;
-import com.latticeengines.propdata.core.datasource.SQLDialect;
 
 @Component
 public class SQLInitializer {
@@ -26,15 +23,15 @@ public class SQLInitializer {
     @Qualifier(value = "propDataManageJdbcTemplate")
     private JdbcTemplate jdbcTemplateManageDB;
 
-    @Autowired
-    private DataSourceService dataSourceService;
+    @Value("${propdata.manage.dialect}")
+    private String manageDbDialect;
 
     private Log log = LogFactory.getLog(SQLInitializer.class);
 
     private static boolean initialized = false;
 
     public void initialize() {
-        if (SQLDialect.MYSQL.equals(dataSourceService.getSqlDialect(Database.ManageDB))) {
+        if (manageDbDialect.toLowerCase().contains("mysql")) {
             initializeMySqlDB();
         }
     }

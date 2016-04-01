@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.manage.ArchiveProgress;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
-import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.BulkSource;

@@ -46,15 +46,6 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Value("${propdata.manage.url}")
     private String dbUrl;
 
-    @Value("${propdata.test.manage.host}")
-    private String dbHost;
-
-    @Value("${propdata.test.manage.port}")
-    private int dbPort;
-
-    @Value("${propdata.test.manage.db}")
-    private String db;
-
     @Value("${propdata.manage.user}")
     private String dbUser;
 

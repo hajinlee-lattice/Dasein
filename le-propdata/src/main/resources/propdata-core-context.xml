@@ -6,9 +6,6 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.core"/>
 
-    <import resource="classpath:propdata-persistence-context.xml"/>
-    <import resource="classpath:dataplatform-context.xml"/>
-    <import resource="classpath:camille-runtime-context.xml"/>
-    <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-context.xml"/>
 
 </beans>

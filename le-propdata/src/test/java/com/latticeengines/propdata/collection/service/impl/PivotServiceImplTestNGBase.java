@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
-import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.source.HasSqlPresence;

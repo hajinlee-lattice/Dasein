@@ -43,9 +43,8 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.latticeengines.propdata.core.datasource.DataSourcePool;
+import com.latticeengines.domain.exposed.propdata.DataSourcePool;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
-import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.metric.FetchDataFromSql;
 import com.latticeengines.propdata.match.metric.MatchedAccount;
@@ -120,7 +119,7 @@ class RealTimeMatchExecutor implements MatchExecutor {
             try {
                 resultMap.put(sourceColumns.getKey(), future.get());
             } catch (InterruptedException | ExecutionException e) {
-                LoggingUtils.logError(log, "Failed to fetch data from " + sourceColumns.getKey(), context, e);
+                logError(log, "Failed to fetch data from " + sourceColumns.getKey(), context, e);
                 throw new RuntimeException("Failed to fetch data from " + sourceColumns.getKey(), e);
             }
         }
@@ -651,5 +650,14 @@ class RealTimeMatchExecutor implements MatchExecutor {
                     }
                 });
     }
+
+    private static void logError(Log log, String message, MatchContext matchContext, Exception e) {
+        if (e == null) {
+            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID());
+        } else {
+            log.error(message + " RootOperationUID=" + matchContext.getOutput().getRootOperationUID(), e);
+        }
+    }
+
 
 }

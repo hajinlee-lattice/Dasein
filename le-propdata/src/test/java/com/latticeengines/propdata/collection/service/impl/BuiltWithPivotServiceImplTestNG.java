@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
-import com.latticeengines.propdata.collection.entitymanager.RefreshProgressEntityMgr;
+import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
 import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
