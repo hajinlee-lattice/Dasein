@@ -27,13 +27,12 @@ import com.latticeengines.propdata.collection.entitymanager.SourceColumnEntityMg
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.service.SqlService;
+import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
 import com.latticeengines.proxy.exposed.propdata.SqoopProxy;
-import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -44,7 +43,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     abstract Source getSource();
 
     @Autowired
-    protected SqlService sqlService;
+    protected SqoopService sqoopService;
 
     @Autowired
     protected SqoopProxy sqoopProxy;
@@ -180,9 +179,9 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             P progress) {
         try {
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, splitColumn, whereClause);
-            ApplicationId appId = sqlService.importTable(importer);
+            ApplicationId appId = sqoopService.importTable(importer);
             FinalApplicationStatus status =
-                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600 * 1000L);
+                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);

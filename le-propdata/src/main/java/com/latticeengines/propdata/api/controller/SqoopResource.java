@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.network.exposed.propdata.SqoopInterface;
-import com.latticeengines.propdata.core.service.SqlService;
+import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -23,11 +23,11 @@ import edu.emory.mathcs.backport.java.util.Collections;
 
 @Api(value = "sql jobs", description = "REST resource for propdata sql import and export jobs.")
 @RestController
-@RequestMapping("/sql")
+@RequestMapping("/sqoop")
 public class SqoopResource extends InternalResourceBase implements SqoopInterface {
 
     @Autowired
-    private SqlService sqlService;
+    private SqoopService sqoopService;
 
     @Override
     public AppSubmission importTable(SqoopImporter importer) {
@@ -45,7 +45,8 @@ public class SqoopResource extends InternalResourceBase implements SqoopInterfac
     @ApiOperation(value = "Import data from SQL to HDFS")
     public AppSubmission importTable(@RequestBody SqoopImporter importer, HttpServletRequest request) {
         checkHeader(request);
-        ApplicationId applicationId = sqlService.importTable(importer);
+        importer.setSync(false);
+        ApplicationId applicationId = sqoopService.importTable(importer);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
@@ -55,7 +56,8 @@ public class SqoopResource extends InternalResourceBase implements SqoopInterfac
     @ApiOperation(value = "Export data from HDFS to SQL")
     public AppSubmission exportTable(@RequestBody SqoopExporter exporter, HttpServletRequest request) {
         checkHeader(request);
-        ApplicationId applicationId = sqlService.exportTable(exporter);
+        exporter.setSync(false);
+        ApplicationId applicationId = sqoopService.exportTable(exporter);
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 

@@ -50,7 +50,8 @@ public class YarnUtils {
     }
 
     public static FinalApplicationStatus waitFinalStatusForAppId(
-            Configuration yarnConfiguration, ApplicationId applicationId, Long timeoutInMills) {
+            Configuration yarnConfiguration, ApplicationId applicationId, Integer timeoutInSec) {
+        log.info("Wait " + applicationId + " for " + timeoutInSec + " seconds.");
         FinalApplicationStatus finalStatus = null;
         Long startTime = System.currentTimeMillis();
         int maxTries = 10000;
@@ -74,7 +75,7 @@ public class YarnUtils {
             }
             i++;
 
-            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInMills) {
+            if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(finalStatus));
