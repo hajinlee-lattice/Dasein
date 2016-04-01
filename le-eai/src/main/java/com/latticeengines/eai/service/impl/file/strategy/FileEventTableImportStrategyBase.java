@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
@@ -128,8 +129,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("importMapperClass", LedpCSVToAvroImportMapper.class.toString());
         props.put("columnTypes", StringUtils.join(types, ","));
         props.put("yarn.mr.hdfs.class.path", String.format("/app/%s/eai/lib", versionManager.getCurrentVersion()));
-        System.out.println(AvroSchemaBuilder.createSchema(table.getName(), table).toString());
-        props.put("avro.schema", AvroSchemaBuilder.createSchema(table.getName(), table).toString());
+        System.out.println(TableUtils.createSchema(table.getName(), table).toString());
+        props.put("avro.schema", TableUtils.createSchema(table.getName(), table).toString());
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, localFileName));

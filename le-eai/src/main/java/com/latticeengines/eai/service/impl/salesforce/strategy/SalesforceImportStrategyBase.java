@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
@@ -208,7 +209,7 @@ public class SalesforceImportStrategyBase extends ImportStrategy {
             newTable.setPrimaryKey(pk);
             newTable.setLastModifiedKey(lmk);
 
-            Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
+            Schema schema = TableUtils.createSchema(newTable.getName(), newTable);
             newTable.setSchema(schema);
             return newTable;
         } finally {

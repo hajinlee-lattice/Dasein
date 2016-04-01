@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
@@ -78,7 +79,7 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
                 }
             }
         }
-        Schema schema = AvroSchemaBuilder.createSchema(table.getName(), table);
+        Schema schema = TableUtils.createSchema(table.getName(), table);
         table.setSchema(schema);
 
         return table;
