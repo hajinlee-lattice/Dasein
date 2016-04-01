@@ -6,6 +6,7 @@ public enum RetentionPolicyImpl implements RetentionPolicy {
     DEFAULT("default", "INF", 1), //
     ONE_MONTH("OneMonth", "4w", 1), //
     ONE_WEEK("OneWeek", "1w", 1), //
+    ONE_DAY("OneDay", "24h", 1), //
     ONE_HOUR("OneHour", "1h", 1);
 
     private String name;

@@ -3,5 +3,5 @@ package com.latticeengines.domain.exposed.monitor.metric;
 import com.latticeengines.common.exposed.metric.MetricStore;
 
 public enum MetricStoreImpl implements MetricStore {
-    INFLUX_DB
+    INFLUX_DB, SPLUNK_LOG
 }

@@ -1,17 +1,21 @@
 package com.latticeengines.propdata.match.metric;
 
+import java.util.Collection;
+
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Measurement;
-import com.latticeengines.common.exposed.metric.RetentionPolicy;
+import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
-import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
+import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.Matched;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
+
+import edu.emory.mathcs.backport.java.util.Collections;
 
 public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.MatchedColumnDimension>
         implements Measurement<Matched, MatchedColumn.MatchedColumnDimension> {
@@ -25,9 +29,10 @@ public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.Matche
         this.dimension = new MatchedColumnDimension(input, keyDimension, matchEngine, targetColumn);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public RetentionPolicy getRetentionPolicy() {
-        return RetentionPolicyImpl.ONE_WEEK;
+    public Collection<MetricStore> getMetricStores() {
+        return Collections.singletonList(MetricStoreImpl.SPLUNK_LOG);
     }
 
     @Override

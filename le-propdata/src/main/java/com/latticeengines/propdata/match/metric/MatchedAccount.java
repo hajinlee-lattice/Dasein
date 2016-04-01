@@ -1,7 +1,12 @@
 package com.latticeengines.propdata.match.metric;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.latticeengines.common.exposed.metric.Measurement;
+import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
+import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
@@ -21,6 +26,11 @@ public class MatchedAccount extends BaseMeasurement<Matched, InputAccount>
             this.dimension.setMatchEngine(matchEngine.getName());
         }
         this.fact = new Matched(matched);
+    }
+
+    @Override
+    public Collection<MetricStore> getMetricStores() {
+        return Arrays.asList((MetricStore) MetricStoreImpl.INFLUX_DB, MetricStoreImpl.SPLUNK_LOG);
     }
 
     @Override

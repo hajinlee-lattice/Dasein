@@ -27,24 +27,24 @@ import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-monitor-metric-context.xml" })
-public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContextTests {
+public class InfluxDbMetricWriterTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    private MetricServiceInfluxDbImpl metricService;
+    private InfluxDbMetricWriter influxDbMetricWriter;
 
     @Test(groups = "functional")
     public void testMetricServiceInitialization() throws Exception {
-        if (!metricService.isEnabled()) {
+        if (!influxDbMetricWriter.isEnabled()) {
             return;
         }
 
-        InfluxDB influxDB = metricService.getInfluxDB();
+        InfluxDB influxDB = influxDbMetricWriter.getInfluxDB();
         Assert.assertNotNull(influxDB);
 
-        List<String> dbNames = metricService.listDatabases();
+        List<String> dbNames = influxDbMetricWriter.listDatabases();
         for (MetricDB db : MetricDB.values()) {
             Assert.assertTrue(dbNames.contains(db.getDbName()), "MetricDB [" + db.getDbName() + "] does not exists.");
-            List<String> policies = metricService.listRetentionPolicies(db.getDbName());
+            List<String> policies = influxDbMetricWriter.listRetentionPolicies(db.getDbName());
             for (RetentionPolicyImpl policy : RetentionPolicyImpl.values()) {
                 Assert.assertTrue(policies.contains(policy.getName()), "MetricDB [" + db.getDbName()
                         + "] does not have registered retention policy [" + policy.getName() + "]");
@@ -54,11 +54,11 @@ public class MetricServiceInfluxDbImplTestNG extends AbstractTestNGSpringContext
 
     @Test(groups = "functional")
     public void testWriteMetrics() throws Exception {
-        if (!metricService.isEnabled()) {
+        if (!influxDbMetricWriter.isEnabled()) {
             return;
         }
         TestMeasurement measurement = new TestMeasurement();
-        metricService.write(MetricDB.TEST_DB, Collections.singletonList(measurement));
+        influxDbMetricWriter.write(MetricDB.TEST_DB, Collections.singletonList(measurement));
 
         Thread.sleep(3000L);
     }

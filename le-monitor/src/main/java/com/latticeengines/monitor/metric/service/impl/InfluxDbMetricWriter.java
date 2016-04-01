@@ -41,16 +41,17 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.monitor.metric.service.MetricWriter;
 
-@Component("metricService")
-public class MetricServiceInfluxDbImpl implements MetricService {
+@Component("influxDbMetricWriter")
+public class InfluxDbMetricWriter implements MetricWriter {
 
-    private static final Log log = LogFactory.getLog(MetricServiceInfluxDbImpl.class);
+    private static final Log log = LogFactory.getLog(MetricServiceImpl.class);
     private static final String DB_CACHE_KEY = "InfluxDB";
     private LoadingCache<String, InfluxDB> dbConnectionCache;
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private static ExecutorService executor = Executors.newCachedThreadPool();
 
     @Autowired
     private VersionManager versionManager;
@@ -108,9 +109,7 @@ public class MetricServiceInfluxDbImpl implements MetricService {
         }
     }
 
-    @Override
-    public <F extends Fact, D extends Dimension> void
-    write(MetricDB db, Measurement<F, D> measurement) {
+    public <F extends Fact, D extends Dimension> void write(MetricDB db, Measurement<F, D> measurement) {
         write(db, Collections.singleton(measurement));
     }
 
@@ -207,11 +206,20 @@ public class MetricServiceInfluxDbImpl implements MetricService {
 
         @Override
         public void run() {
-            try {
-                BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
-                getInfluxDB().write(batchPoints);
-            } catch (Exception e) {
-                log.error(e);
+            boolean needToWrite = false;
+            for (Measurement<F, D> measurement: measurements) {
+                if (measurement.getMetricStores().contains(MetricStoreImpl.INFLUX_DB)) {
+                    needToWrite = true;
+                    break;
+                }
+            }
+            if (needToWrite) {
+                try {
+                    BatchPoints batchPoints = generateBatchPoints(metricDb, measurements);
+                    getInfluxDB().write(batchPoints);
+                } catch (Exception e) {
+                    log.error(e);
+                }
             }
         }
     }
