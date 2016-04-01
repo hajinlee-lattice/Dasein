@@ -1,15 +1,27 @@
 <section class="container setup-import">
+<form name="uploadForm" ng-controller="csvImportController" novalidate>
   
 	<div class="row">
     	<div class="six columns offset-three">
     		<div class="form-group file-upload" ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.csvFileName.$pristine }">
-				<label for="loadfile">Upload CSV File</label>
-		        <input id="uploadFileInput" class="form-control" disabled="disabled" placeholder="Choose File" />
+				<label for="loadfile">{{ResourceUtility.getString('MODEL_IMPORT_CSV_LABEL_FILE')}}</label>
+		        <input 
+                    id="uploadFileInput" 
+                    class="form-control" 
+                    disabled="disabled"
+                    placeholder="Choose File" />
 		        <div class="fileUpload button blue-button">
-		          <span>Browse...</span>
-		          <input id="uploadBtn" name="csvFileName" ng-model="csvFileName" required type="file" class="upload" csv-uploader="csvFile" />
+                    <span>{{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_BROWSE')}}</span>
+                    <input 
+                        id="uploadBtn"
+                        name="csvFileName"
+                        ng-model="csvFileName"
+                        required
+                        type="file" 
+                        class="upload"
+                        csv-uploader="csvFile" />
 		        </div>
-		        <p class="help-block">* Please choose a file to upload.</p>
+		        <p class="help-block">{{ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_FILE')}}</p>
 		    </div>
 		    <!-- Script needed to get filepath and place it into the input field and remove additional garbage -->
 	        <script>
@@ -56,11 +68,12 @@
 
     <div class="row">
     	<div class="three columns offset-three">
-    		<button type="button" class="button gray-button block-button">Cancel</button>
+    		<button type="button" class="button gray-button block-button">{{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_CANCEL')}}</button>
     	</div>
     	<div class="three columns">
-    		<button type="button" class="button orange-button block-button">Import Data</button>
+    		<button type="button" class="button orange-button block-button" ng-click="uploadFile()">{{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_UPLOAD_FILE')}}</button>
     	</div>
     </div>
 
+</form>
 </section>

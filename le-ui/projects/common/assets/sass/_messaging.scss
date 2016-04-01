@@ -15,3 +15,19 @@
 	    border-color: #d6e9c6;
 	}
 }
+
+.page-error {
+	text-align: center;
+	background: url(/assets/images/ico-error.png) center top no-repeat;
+	background-size: 60px;
+    padding-top: 6em;
+    margin-top: 2.5em;
+    h2 {
+    	margin-bottom: 10px;
+    }
+	h3 {
+		color: #ddd;
+		font-size: 1em;
+		margin-bottom: 40px;
+	}
+}
