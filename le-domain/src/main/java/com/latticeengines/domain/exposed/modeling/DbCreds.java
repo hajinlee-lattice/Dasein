@@ -1,13 +1,21 @@
 package com.latticeengines.domain.exposed.modeling;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class DbCreds {
 
+    private static Log log = LogFactory.getLog(DbCreds.class);
+
     private String user;
     private String password;
+    private String encryptedPassword;
     private String host;
     private int port;
     private String db;
@@ -22,6 +30,7 @@ public class DbCreds {
     public DbCreds(Builder builder) {
         this.user = builder.user;
         this.password = builder.password;
+        this.encryptedPassword = builder.encryptedPassword;
         this.host = builder.host;
         this.port = builder.port;
         this.db = builder.db;
@@ -29,6 +38,14 @@ public class DbCreds {
         this.instance = builder.instance;
         this.jdbcUrl = builder.jdbcUrl;
         this.driverClass = builder.driverClass;
+    }
+
+    @PostConstruct
+    private void postConstruct() {
+        if (StringUtils.isNotEmpty(this.encryptedPassword)) {
+            log.info("Overwrite clear text password by the encrypted one.");
+            this.password = CipherUtils.decrypt(encryptedPassword);
+        }
     }
 
     @JsonProperty("user")
@@ -41,24 +58,24 @@ public class DbCreds {
         this.user = user;
     }
 
-    @JsonIgnore
+    @JsonProperty("password")
     public String getPassword() {
         return password;
     }
 
-    @JsonIgnore
+    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }
 
-    @JsonProperty("password")
+    @JsonProperty("encrypted_password")
     private String getEncryptedPassword() {
-        return CipherUtils.encrypt(password);
+        return encryptedPassword;
     }
 
-    @JsonProperty("password")
+    @JsonProperty("encrypted_password")
     private void setEncryptedPassword(String encryptedPassword) {
-        this.password = CipherUtils.decrypt(encryptedPassword);
+        this.encryptedPassword = encryptedPassword;
     }
 
     @JsonProperty("host")
@@ -135,6 +152,7 @@ public class DbCreds {
 
         private String user;
         private String password;
+        private String encryptedPassword;
         private String host;
         private int port;
         private String db;
@@ -153,6 +171,7 @@ public class DbCreds {
 
         public Builder password(String password) {
             this.password = password;
+            this.encryptedPassword = CipherUtils.encrypt(password);
             return this;
         }
 
