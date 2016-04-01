@@ -7,11 +7,40 @@ module.exports = function (grunt) {
     var appConfig = {
         app:  sourceDir,
         dist: 'assets',
+        env:  {
+            dev:         {
+                url:            'http://localhost:3000',
+                apiUrl:         'http://localhost:8081',
+                protractorConf:   sourceDir + 'test/e2e/conf/protractor.conf.dev.js',
+                protractorCcConf: sourceDir + 'test/e2e/conf/protractor.cc.conf.js'
+            },
+            qa:          {
+                url:            'http://app2.lattice.local',
+                apiUrl:         'http://app2.lattice.local',
+                protractorConf:   sourceDir + 'test/e2e/conf/protractor.conf.qa.js',
+                protractorCcConf: sourceDir + 'test/e2e/conf/protractor.cc.conf.qa.js'
+            },
+            prod:        {
+                url:            'https://app.lattice-engines.com',
+                apiUrl:         'https://app.lattice-engines.com',
+                protractorConf:   sourceDir + 'test/e2e/conf/protractor.conf.prod.js',
+                protractorCcConf: sourceDir + 'test/e2e/conf/protractor.cc.conf.js'
+            }
+        }
     };
 
     // version of our software. This should really be in the package.json
     // but it gets passed in through 
     var versionStringConfig = grunt.option('versionString') || new Date().getTime();
+    var env = grunt.option('env') || 'dev';
+    var chosenEnv;
+    if (env === 'dev') {
+        chosenEnv = appConfig.env.dev;
+    } else if (env === 'qa') {
+        chosenEnv = appConfig.env.qa;
+    } else if (env === 'prod') {
+        chosenEnv = appConfig.env.prod;
+    }
 
     // Define the configuration for all the tasks
     grunt.initConfig({
@@ -19,6 +48,7 @@ module.exports = function (grunt) {
         // Project settings
         pls:           appConfig,
         versionString: versionStringConfig,
+        testenv:       chosenEnv,
 
         // Removes unessasary folders and files that are created during the build process
         // Force = true to allow for deleting contents outside of the grunt directory structure
@@ -111,9 +141,9 @@ module.exports = function (grunt) {
             dist: {
                 src:     [
                     '<%= pls.app %>/app/**/*.js',
-                    '!<%= pls.app %>/../common/app/widgets/talkingPointWidget/TalkingPointParser.js',
-                    '!<%= pls.app %>/../common/app/vendor/**/*.js',
-                    '!<%= pls.app %>/../common/app/test/**/*.js'
+                    '!<%= pls.app %>/../common/lib/js/**/*.js',
+                    '!<%= pls.app %>/app/AppCommon/widgets/talkingPointWidget/TalkingPointParser.js',
+                    '!<%= pls.app %>/app/AppCommon/test/**/*.js'
                 ],
                 options: {
                     eqnull: true,
@@ -126,15 +156,20 @@ module.exports = function (grunt) {
         karma: {
             options: {
                 files:      [
-                    '<%= pls.app %>/../common/app/vendor/*jquery-2.1.1.js',
-                    '<%= pls.app %>/../common/app/vendor/angular/*angular.js',
-                    '<%= pls.app %>/../common/app/vendor/angular/*angular-mocks.js',
-                    '<%= pls.app %>/../common/app/vendor/*underscore.js',
-                    '<%= pls.app %>/../common/app/test/testData/**/*.js',
-                    '<%= pls.app %>/../common/app/test/unit/**/*.js',
+                    '<%= pls.app %>/../common/lib/js/*jquery.js',
+                    '<%= pls.app %>/../common/lib/js/*jstorage.js',
+                    '<%= pls.app %>/../common/lib/js/angular/*angular.js',
+                    '<%= pls.app %>/../common/lib/js/angular/*angular-mocks.js',
+                    '<%= pls.app %>/../common/lib/js/*underscore.js',
                     '<%= pls.app %>/../common/app/**/*.js',
-                    '<%= pls.app %>/test/unit/**/*.js',
-                    '<%= pls.app %>/../common/lib/js/kendo.all.min.js'
+                    '<%= pls.app %>/app/*loadjs.js',
+                    '<%= pls.app %>/app/AppCommon/utilities/*.js',
+                    '<%= pls.app %>/app/AppCommon/widgets/**/*.js',
+                    '<%= pls.app %>/app/AppCommon/services/*.js',
+                    '<%= pls.app %>/app/AppCommon/test/testData/*.js',
+                    '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
+                    '<%= pls.app %>/app/models/**/*.js',
+                    '<%= pls.app %>/test/unit/**/*.js'
                 ],
                 frameworks: ['jasmine']
 
@@ -188,6 +223,60 @@ module.exports = function (grunt) {
             }
         },
 
+        // End to End (e2e) tests (aka UI automation)
+        protractor: {
+            options:          {
+                configFile: '<%= testenv.protractorConf %>',
+                noColor:    false,
+                keepAlive:  false // don't keep browser process alive after failures
+            },
+            chrome:           {
+                options: {
+                    args: {
+                        browser: 'chrome',
+                        baseUrl: '<%= testenv.url %>',
+                        directConnect: true
+                    }
+                }
+            },
+            firefox:          {
+                options: {
+                    args: {
+                        browser: 'firefox',
+                        baseUrl: '<%= testenv.url %>',
+                        directConnect: true
+                    }
+                }
+            },
+            internetexplorer: {
+                options: {
+                    args: {
+                        browser: 'internet explorer',
+                        baseUrl: '<%= testenv.url %>'
+                    }
+                }
+            },
+            safari:           {
+                options: {
+                    args: {
+                        browser: 'safari',
+                        baseUrl: '<%= testenv.url %>'
+                    }
+                }
+            }
+        },
+
+        http: {
+            resetTenants: {
+                options: {
+                    url:     '<%= testenv.apiUrl %>/pls/internal/testtenants',
+                    method:  'PUT',
+                    headers: { MagicAuthentication: "Security through obscurity!" },
+                    strictSSL: false
+                }
+            }
+        },
+
         rename: {
             moveAppToBak: {
                 src:  '<%= pls.app %>',
@@ -210,7 +299,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/**/*.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/test/**/*.js',
-                    '!<%= pls.app %>/../common/app/vendor/**/*.js'],
+                    '!<%= pls.app %>/../common/lib/js/**/*.js'],
                 tasks: ['jshint:dist', 'karma:watch:run']
             },
             css:     {
@@ -380,12 +469,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-rename');
     grunt.loadNpmTasks('grunt-replace');
-    /*
+    grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-http');
+    grunt.loadNpmTasks('grunt-protractor-runner');
     grunt.loadNpmTasks('grunt-protractor-coverage');
     grunt.loadNpmTasks('grunt-istanbul');
-    grunt.loadNpmTasks('grunt-karma');
-    grunt.loadNpmTasks('grunt-protractor-runner');
-    */
 
     grunt.registerTask('build', [
         'clean:build',

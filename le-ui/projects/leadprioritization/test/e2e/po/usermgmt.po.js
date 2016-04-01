@@ -2,8 +2,9 @@
 
 var UserManagement = function() {
     var userDropdown = require('./userdropdown.po');
+    var siderbar = require('./siderbar.po');
     var helper = require('./helper.po');
-    
+
     this.AddNewUserLink = element(by.css('#usermgmt-btn-add-user'));
     this.tempUserFirstName = 'Temp';
     this.tempUserLastName = 'User';
@@ -21,39 +22,84 @@ var UserManagement = function() {
         return text;
     };
 
+    this.canSeePredictionModelsLink = function (expected) {
+        helper.elementExists(siderbar.PredictionModelsLink, expected,
+            expected ? "should see Prediction Models" : "should not see Prediction Models");
+    };
+
+    this.canSeeCreateModelLink = function (expected) {
+        helper.elementExists(siderbar.CreateModelLink, expected,
+            expected ? "should see Create a Model" : "should not see Create a Model");
+    };
+
     this.canSeeManageUsersLink = function (expected) {
-        helper.elementExists(userDropdown.ManageUsersLink, expected,
+        helper.elementExists(siderbar.ManageUsersLink, expected,
             expected ? "should see Manage Users" : "should not see Manage Users");
     };
 
-    this.canSeeSystemSetupLink = function (expected) {
-        helper.elementExists(userDropdown.SystemSetupLink, expected,
-            expected ? "should see System Setup" : "should not see System Setup");
-    };
-
-    this.canSeeActivateModelLink = function (expected) {
-        helper.elementExists(userDropdown.ActivateModelLink, expected,
-            expected ? "should see Activate Model" : "should not see Activate Model");
-    };
-
     this.canSeeModelCreationHistoryLink = function (expected) {
-        helper.elementExists(userDropdown.ModelCreationHistoryLink, expected,
+        helper.elementExists(siderbar.ModelCreationHistoryLink, expected,
             expected ? "should see Model Creation History" : "should not see Model Creation History");
     };
 
-    this.canSeeSetupLink = function (expected) {
-        helper.elementExists(userDropdown.SetupLink, expected,
-            expected ? "should see Manage Fields" : "should not see Manage Fields");
+    this.canSeeJobsLink = function (expected) {
+        helper.elementExists(siderbar.JobsLink, expected,
+            expected ? "should see Jobs" : "should not see Jobs");
     };
 
+    this.canSeeMarketoSettingsLink = function (expected) {
+        helper.elementExists(siderbar.MarketoSettingsLink, expected,
+            expected ? "should see Marketo Settings" : "should not see Marketo Settings");
+    };
+
+    this.canSeeAttributesLink = function (expected) {
+        helper.elementExists(siderbar.AttributesLink, expected,
+            expected ? "should see Attributes" : "should not see Attributes");
+    };
+
+    this.canSeePerformanceLink = function (expected) {
+        helper.elementExists(siderbar.PerformanceLink, expected,
+            expected ? "should see Performance" : "should not see Performance");
+    };
+
+    this.canSeeSampleLeadsLink = function (expected) {
+        helper.elementExists(siderbar.SampleLeadsLink, expected,
+            expected ? "should see Sample Leads" : "should not see Sample Leads");
+    };
+
+    this.canSeeModelSummaryLink = function (expected) {
+        helper.elementExists(siderbar.ModelSummaryLink, expected,
+            expected ? "should see Model Summary" : "should not see Model Summary");
+    }
+
+    this.canSeeScoringLink = function (expected) {
+        helper.elementExists(siderbar.ScoringLink, expected,
+            expected ? "should see Scoring" : "should not see Scoring");
+    }
+
+    this.canSeeRefineAndCloneLink = function (expected) {
+        helper.elementExists(siderbar.RefineAndCloneLink, expected,
+            expected ? "should see Refine And Clone" : "should not see Refine And Clone");
+    }
+
     this.canSeeHiddenAdminLink = function(expected) {
-        element.all(by.css('a.model')).first().click();
-        browser.driver.wait(element(by.css('a.back-button')).isPresent(),
-            10000, 'tabs list should appear with in 10 sec.');
-        element(by.linkText('SAMPLE LEADS')).click();
+        element(by.linkText('Sample Leads')).click();
         helper.elementExists(element(by.linkText('Admin')), expected,
             expected ? "should see Admin link" : "should not see Admin link");
     };
+
+    this.clickFirstModel = function() {
+        element.all(by.css('div.model')).first().click();
+        browser.waitForAngular();
+        browser.driver.wait(element(by.css('div.menu-header')).isPresent(),
+            10000, 'model page should appear with in 10 sec.');
+    }
+
+    this.backToAllModelsPage = function() {
+        element(by.css('#nav .menu-header > a')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(2000);
+    }
 
     this.enterUserInfoAndClickOkay = function(firstName, lastName, email) {
         expect(element(by.css('#add-user-modal')).isPresent()).toBe(true);
@@ -78,7 +124,7 @@ var UserManagement = function() {
 
     this.canSeeUser = function(username, expected) {
         var message = "be able to see user " + username;
-        element(by.css('.user-list')).element(by.css('table')).getInnerHtml().then(function(html){
+        element(by.css('.user-management-list')).element(by.css('table')).getInnerHtml().then(function(html){
             expect(html.indexOf(username) > -1).toBe(expected, expected ? "should " + message : "should not " + message)
         });
     };

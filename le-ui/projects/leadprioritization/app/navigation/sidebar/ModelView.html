@@ -15,7 +15,7 @@
         <li role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.leads"><span class="ico ico-leads ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_LEADS')}}</a>
         </li>
-        <li role="presentation" ui-sref-active="active">
+        <li data-ng-if="showModelSummary" role="presentation" ui-sref-active="active">
             <a ui-sref="home.model.summary"><span class="ico ico-datatable ico-light-gray"></span>{{ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_SUMMARY')}}</a>
         </li>
         <li data-ng-if="showAlerts" role="presentation" ui-sref-active="active">

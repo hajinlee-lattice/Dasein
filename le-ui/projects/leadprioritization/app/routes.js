@@ -183,6 +183,7 @@ angular
                         $scope.name = Model.ModelDetails.Name;
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
+                            $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);
                             $scope.showAlerts = FeatureFlagService.FlagIsEnabled(flags.ADMIN_ALERTS_TAB);
                         });
                     },

@@ -29,7 +29,8 @@ var Config = function() {
                 //specBasePath + '/managefields_spec.js',
                 //specBasePath + '/tenantdeployment_spec.js',
 
-                specBasePath + '/systemsetup_spec.js'
+                specBasePath + '/usermgmt_spec.js',
+                specBasePath + '/predictors_spec.js'
             ],
 
             params: {

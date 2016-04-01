@@ -2,31 +2,35 @@
 
 var SuperAdmin = function() {
     var loginPage = require('./login.po');
+    var siderbar = require('./siderbar.po');
     var userManagement = require('./usermgmt.po');
-    var userDropdown = require('./userdropdown.po');
 
     this.testUserManagement = function() {
         describe('A super admin', function(){
             it('should see links accordingly', function () {
                 loginPage.loginAsSuperAdmin();
 
-                userDropdown.toggleDropdown();
+                userManagement.canSeePredictionModelsLink(true);
+                userManagement.canSeeCreateModelLink(true);
                 userManagement.canSeeManageUsersLink(true);
-                userManagement.canSeeSystemSetupLink(true);
-                userManagement.canSeeActivateModelLink(true);
                 userManagement.canSeeModelCreationHistoryLink(true);
-                //userManagement.canSeeSetupLink(true); //TODO: this is feature flag related
-                userDropdown.toggleDropdown();
-
-                userManagement.canSeeHiddenAdminLink(true);
+                userManagement.canSeeJobsLink(true);
+                userManagement.canSeeMarketoSettingsLink(true);
+                userManagement.clickFirstModel();
+                userManagement.canSeeAttributesLink(true);
+                userManagement.canSeePerformanceLink(true);
+                userManagement.canSeeSampleLeadsLink(true);
+                userManagement.canSeeModelSummaryLink(true);
+                userManagement.canSeeScoringLink(true);
+                userManagement.canSeeRefineAndCloneLink(true);
 
                 loginPage.logout();
             });
 
             it('should see edit/delete links for all users', function () {
                 loginPage.loginAsSuperAdmin();
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
+                browser.driver.sleep(500);
 
                 userManagement.canSeeUser("pls-super-admin-tester", true);
                 userManagement.canSeeUser("pls-internal-admin-tester", true);
@@ -51,10 +55,10 @@ var SuperAdmin = function() {
                 loginPage.loginAsSuperAdmin();
 
                 //==================================================
-                // Select manage users tab
+                // Select manage users
                 //==================================================
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
+                browser.driver.sleep(500);
                 element.all(by.repeater('user in users')).count().then(function(userCount){
                     browser.driver.sleep(500);
                     originalNumUsers = userCount;
@@ -69,7 +73,7 @@ var SuperAdmin = function() {
                     expect(element.all(by.css('option')).count()).toBe(3);
                     userManagement.enterUserInfoAndClickOkay(userManagement.tempUserFirstName, userManagement.tempUserLastName,
                             userManagement.tempUserEmail);
-                    expect(element(by.css(".alert-success")).isPresent()).toBe(true);
+                    expect(element(by.css("#add-user-btn-ok")).isPresent()).toBe(true);
                     element(by.css('#add-user-btn-ok')).click();
                     userManagement.waitAndSleep();
 
@@ -79,7 +83,7 @@ var SuperAdmin = function() {
                 })
             });
 
-            it("should be able to modify the new user and then delete it", function () {
+            it("should be able to modify the new user and then delete the user", function () {
                 //==================================================
                 // Open edit user modal and edit the user
                 //==================================================
@@ -119,10 +123,9 @@ var SuperAdmin = function() {
                 loginPage.loginAsSuperAdmin();
 
                 //==================================================
-                // Select manage users tab
+                // Select manage users
                 //==================================================
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
                 browser.driver.sleep(500);
 
                 //==================================================
@@ -135,7 +138,6 @@ var SuperAdmin = function() {
                 userManagement.waitAndSleep();
                 var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
                 expect(originalNumUsers).toEqual(actualNumOfCurrentUsers);
-
 
                 //==================================================
                 // Logout
@@ -150,10 +152,9 @@ var SuperAdmin = function() {
                 loginPage.loginAsSuperAdmin();
 
                 //==================================================
-                // Select manage users tab
+                // Select manage users
                 //==================================================
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
                 browser.driver.sleep(500);
 
                 //==================================================
@@ -165,7 +166,6 @@ var SuperAdmin = function() {
                 element(by.css('#edit-user-btn-cancel')).click();
                 userManagement.waitAndSleep();
                 expect(element(by.css('#edit-user-modal')).isPresent()).toBe(false);
-
 
                 //==================================================
                 // Logout
@@ -180,10 +180,9 @@ var SuperAdmin = function() {
                 loginPage.loginAsSuperAdmin();
 
                 //==================================================
-                // Select manage users tab
+                // Select manage users
                 //==================================================
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
                 browser.driver.sleep(500);
 
                 //==================================================
@@ -196,7 +195,6 @@ var SuperAdmin = function() {
                 var actualNumOfCurrentUsers = element.all(by.repeater('user in users')).count();
                 expect(originalNumUsers).toEqual(actualNumOfCurrentUsers);
                 expect(element(by.css('#delete-user-modal')).isPresent()).toBe(false);
-
 
                 //==================================================
                 // Logout

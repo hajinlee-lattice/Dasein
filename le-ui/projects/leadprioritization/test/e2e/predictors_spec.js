@@ -5,7 +5,6 @@ describe('top predictors', function () {
     var helper = require('./po/helper.po');
     var loginPage = require('./po/login.po');
     var modelList = require('./po/modellist.po');
-    var modelTabs = require('./po/modeltabs.po');
 
     it('should validate top predictors donut', function () {
         //==================================================
@@ -17,12 +16,6 @@ describe('top predictors', function () {
         // Select Model
         //==================================================
         modelList.getAnyModel().click();
-        browser.waitForAngular();
-
-        //==================================================
-        // Select Attributes Tab
-        //==================================================
-        modelTabs.getTabByIndex(0).click();
         browser.waitForAngular();
 
         expect(element(by.id('chart')).isDisplayed()).toBe(true);

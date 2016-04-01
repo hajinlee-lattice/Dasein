@@ -10,15 +10,19 @@ var ExternalUser = function() {
             it('should see links accordingly', function () {
                 loginPage.loginAsExternalUser();
 
-                userDropdown.toggleDropdown();
+                userManagement.canSeePredictionModelsLink(true);
+                userManagement.canSeeCreateModelLink(true);
                 userManagement.canSeeManageUsersLink(false);
-                userManagement.canSeeSystemSetupLink(false);
-                userManagement.canSeeActivateModelLink(false);
                 userManagement.canSeeModelCreationHistoryLink(false);
-                userManagement.canSeeSetupLink(false);
-                userDropdown.toggleDropdown();
-
-                userManagement.canSeeHiddenAdminLink(false);
+                userManagement.canSeeJobsLink(true);
+                userManagement.canSeeMarketoSettingsLink(true);
+                userManagement.clickFirstModel();
+                userManagement.canSeeAttributesLink(true);
+                userManagement.canSeePerformanceLink(true);
+                userManagement.canSeeSampleLeadsLink(true);
+                userManagement.canSeeModelSummaryLink(false);
+                userManagement.canSeeScoringLink(true);
+                userManagement.canSeeRefineAndCloneLink(true);
 
                 loginPage.logout();
             });

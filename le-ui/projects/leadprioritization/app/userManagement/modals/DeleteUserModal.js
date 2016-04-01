@@ -54,11 +54,15 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
                 $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
                 $("#modalContainer").modal('hide');
             } else {
-                //TODO:song handle error
-                alert(result.Errors[0]);
+                if (result.ResultErrors === ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')) {
+                    $scope.deleteUserErrorMessage = ResourceUtility.getString("DELETE_USER_GENERAL_ERROR");
+                } else {
+                    $scope.deleteUserErrorMessage = result.ResultErrors;
+                }
+                $scope.showDeleteUserError = true;
             }
+            $scope.deleteInProgress = false;
         });
-        $scope.deleteInProgress = false;
     };
     
     $scope.cancelClick = function () {

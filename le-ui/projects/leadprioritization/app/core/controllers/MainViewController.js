@@ -57,7 +57,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         //window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
 
         // Fetch the view and make it Angular aware
-        $state.go('users', {}, { reload: true } );
+        $state.go('home.users', {}, { reload: true } );
     }
     /*
     function createMainContentViewAndRefreshFeatures() {

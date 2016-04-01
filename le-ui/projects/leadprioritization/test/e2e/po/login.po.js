@@ -10,8 +10,9 @@ var Login = function() {
 
     this.loginUser = function(name, password, tenantId) {
         this.login(name, password, tenantId);
+        browser.driver.sleep(20000);
         browser.wait(function(){
-            return element(by.css('div.page-title')).isPresent();
+            return element(by.id('mainSummaryView')).isPresent();
         }, 100000, 'page title should appear with in 100 sec.');
     };
 
@@ -33,14 +34,14 @@ var Login = function() {
     };
 
     function getWebApp() {
-        var width = 1100;
+        var width = 1250;
         var height = 768;
         browser.driver.manage().window().setSize(width, height);
         browser.get('/', 30000);
     }
 
     function isLoginPage() {
-        return element(by.css('div.login-wrap')).isPresent();
+        return element(by.id('loginMainView')).isPresent();
     }
 
     function submitLoginCredentials(name, password) {
@@ -52,9 +53,12 @@ var Login = function() {
     }
 
     function logout() {
-        getWebApp();
+        //getWebApp();
+        browser.driver.manage().window().setSize(1250, 768);
+        browser.get('/lp/', 30000);
         isLoginPage().then(function(ispresent){
             if (!ispresent) {
+                browser.driver.sleep(10000);
                 userDropdown.toggleDropdown();
                 browser.driver.wait(function(){
                     return userDropdown.signout.isPresent();
@@ -70,7 +74,7 @@ var Login = function() {
 
     this.assertLoggedIn = function(expected) {
         if (expected) {
-            expect(element(by.css('div.page-title')).isPresent()).toBe(true);
+            expect(element(by.id('mainSummaryView')).isPresent()).toBe(true);
         } else {
             expect(element(by.id('loginMainView')).isPresent()).toBe(true);
         }

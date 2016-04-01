@@ -2,31 +2,35 @@
 
 var InternalAdmin = function() {
     var loginPage = require('./login.po');
+    var siderbar = require('./siderbar.po');
     var userManagement = require('./usermgmt.po');
-    var userDropdown = require('./userdropdown.po');
 
     this.testUserManagement = function() {
         describe('An internal admin', function(){
             it('should see links accordingly', function () {
                 loginPage.loginAsInternalAdmin();
 
-                userDropdown.toggleDropdown();
+                userManagement.canSeePredictionModelsLink(true);
+                userManagement.canSeeCreateModelLink(true);
                 userManagement.canSeeManageUsersLink(true);
-                userManagement.canSeeSystemSetupLink(true);
-                userManagement.canSeeActivateModelLink(true);
                 userManagement.canSeeModelCreationHistoryLink(true);
-                //userManagement.canSeeSetupLink(true); //TODO: this is feature flag related
-                userDropdown.toggleDropdown();
-
-                userManagement.canSeeHiddenAdminLink(true);
+                userManagement.canSeeJobsLink(true);
+                userManagement.canSeeMarketoSettingsLink(true);
+                userManagement.clickFirstModel();
+                userManagement.canSeeAttributesLink(true);
+                userManagement.canSeePerformanceLink(true);
+                userManagement.canSeeSampleLeadsLink(true);
+                userManagement.canSeeModelSummaryLink(true);
+                userManagement.canSeeScoringLink(true);
+                userManagement.canSeeRefineAndCloneLink(true);
 
                 loginPage.logout();
             });
 
             it('should see edit/delete links for all users', function () {
                 loginPage.loginAsInternalAdmin();
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
+                browser.driver.sleep(500);
 
                 userManagement.canSeeUser("pls-super-admin-tester", true);
                 userManagement.canSeeUser("pls-internal-admin-tester", true);
@@ -53,8 +57,8 @@ var InternalAdmin = function() {
                 //==================================================
                 // Select manage users tab
                 //==================================================
-                userDropdown.toggleDropdown();
-                userDropdown.ManageUsersLink.click();
+                siderbar.ManageUsersLink.click();
+                browser.driver.sleep(500);
                 element.all(by.repeater('user in users')).count().then(function(numUsers) {
                     originalNumUsers = numUsers;
                     browser.driver.sleep(500);
@@ -70,7 +74,7 @@ var InternalAdmin = function() {
                     expect(element.all(by.css('option')).count()).toBe(2);
                     userManagement.enterUserInfoAndClickOkay(userManagement.tempUserFirstName, userManagement.tempUserLastName,
                             userManagement.tempUserEmail);
-                    expect(element(by.css(".alert-success")).isPresent()).toBe(true);
+                    expect(element(by.css('#add-user-btn-ok')).isPresent()).toBe(true);
                     element(by.css('#add-user-btn-ok')).click();
                     userManagement.waitAndSleep();
 

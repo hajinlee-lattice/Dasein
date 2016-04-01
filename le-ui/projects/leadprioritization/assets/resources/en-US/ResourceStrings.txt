@@ -121,6 +121,7 @@ DELETE_USERS_WAIT=Deleting users...
 DELETE_USERS_PARA1=The following users have been successfully deleted:
 DELETE_USERS_PARA2=We were unable to delete the following users:
 DELETE_USERS_PARA3=Please contact your system administrator for assistance.
+DELETE_USER_GENERAL_ERROR=Unable to delete the selected user at this time.
 EDIT_USER_TITLE=Edit User
 EDIT_USERS_WAIT=Editing user ...
 EDIT_USER_ACCESS_LEVEL_LABEL=Access Level
