@@ -9,7 +9,7 @@ def metadata():
     return {  'ApprovedUsage'   : 'Model'
             , 'DisplayDiscretizationStrategy' : '{"linear": { "minValue":0,"stepSize":1,"minSamples":100,"minFreq":0.01,"maxBuckets":5,"maxPercentile":1}}'
             , 'DisplayName'     : 'Credit Risk Level'
-            , 'Category'        : 'Firmagraphics'
+            , 'Category'        : 'Firmographics'
             , 'StatisticalType' : 'ordinal'
             , 'Tags'            : 'External' }
 
