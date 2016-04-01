@@ -1,6 +1,6 @@
-0-mail.com
 0815.ru
 0clickemail.com
+0-mail.com
 0wnd.net
 0wnd.org
 10minutemail.com
@@ -29,6 +29,7 @@ amiri.net
 amiriindustries.com
 anonbox.net
 anonymbox.com
+anonymousspeech.com
 antichef.com
 antichef.net
 antispam.de
@@ -44,6 +45,7 @@ broadbandninja.com
 bsnow.net
 bugmenot.com
 bumpymail.com
+byom.de
 casualdx.com
 centermail.com
 centermail.net
@@ -69,7 +71,6 @@ dfgh.net
 digitalsanctuary.com
 discardmail.com
 discardmail.de
-Disposableemailaddresses:emailmiser.com
 disposableaddress.com
 disposeamail.com
 disposemail.com
@@ -81,8 +82,8 @@ dodgit.org
 donemail.ru
 dontreg.com
 dontsendmespam.de
-dump-email.info
 dumpandjunk.com
+dump-email.info
 dumpmail.de
 dumpyemail.com
 e4ward.com
@@ -104,7 +105,9 @@ ephemail.net
 etranquil.com
 etranquil.net
 etranquil.org
+euaqa.com
 explodemail.com
+fake.email.com
 fakeinbox.com
 fakeinformation.com
 fastacura.com
@@ -205,7 +208,6 @@ lortemail.dk
 lr78.com
 m4ilweb.info
 maboard.com
-mail-temporaire.fr
 mail.by
 mail.mezimages.net
 mail2rss.org
@@ -233,6 +235,7 @@ mailnull.com
 mailshell.com
 mailsiphon.com
 mailslite.com
+mail-temporaire.fr
 mailzilla.com
 mailzilla.org
 mbx.cc
@@ -266,13 +269,13 @@ netmails.com
 netmails.net
 netzidiot.de
 neverbox.com
-no-spam.ws
 nobulk.com
 noclickemail.com
 nogmailspam.info
 nomail.xl.cx
 nomail2me.com
 nomorespamemails.com
+no-spam.ws
 nospam.ze.tc
 nospam4.us
 nospamfor.us
@@ -304,7 +307,7 @@ privacy.net
 proxymail.eu
 prtnx.com
 punkass.com
-PutThisInYourSpamDatabase.com
+putthisinyourspamdatabase.com
 qq.com
 quickinbox.com
 rcpt.at
@@ -325,7 +328,7 @@ safetypost.de
 sandelf.de
 saynotospams.com
 selfdestructingmail.com
-SendSpamHere.com
+sendspamhere.com
 sharklasers.com
 shiftmail.com
 shitmail.me
@@ -372,8 +375,8 @@ spamfree24.org
 spamgourmet.com
 spamgourmet.net
 spamgourmet.org
-SpamHereLots.com
-SpamHerePlease.com
+spamherelots.com
+spamhereplease.com
 spamhole.com
 spamify.com
 spaminator.de
@@ -395,10 +398,10 @@ suremail.info
 teewars.org
 teleworm.com
 tempalias.com
-tempe-mail.com
 tempemail.biz
 tempemail.com
-TempEMail.net
+tempe-mail.com
+tempemail.net
 tempinbox.co.uk
 tempinbox.com
 tempmail.it
@@ -416,15 +419,15 @@ throwawayemailaddress.com
 tilien.com
 tmailinator.com
 tradermail.info
-trash-amil.com
-trash-mail.at
-trash-mail.com
-trash-mail.de
 trash2009.com
+trash-amil.com
 trashemail.de
 trashmail.at
+trash-mail.at
 trashmail.com
+trash-mail.com
 trashmail.de
+trash-mail.de
 trashmail.me
 trashmail.net
 trashmail.org
@@ -460,9 +463,6 @@ winemaven.info
 wronghead.com
 wuzup.net
 wuzupmail.net
-www.e4ward.com
-www.gishpuppy.com
-www.mailinator.com
 wwwnew.eu
 xagloo.com
 xemaps.com
@@ -480,4 +480,3 @@ zehnminutenmail.de
 zippymail.info
 zoaxe.com
 zoemail.org
-anonymousspeech.com
