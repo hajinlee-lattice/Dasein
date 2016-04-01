@@ -53,7 +53,6 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
                         false);
 
         last = last.merge(emptyDomains);
-        last = DataFlowUtils.addInternalId(last);
         return last.discard(new FieldList(SORT, DOMAIN));
     }
 

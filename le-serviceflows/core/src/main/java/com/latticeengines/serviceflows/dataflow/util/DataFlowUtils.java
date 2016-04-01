@@ -3,9 +3,6 @@ package com.latticeengines.serviceflows.dataflow.util;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
 import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
     public static Node normalizeDomain(Node last, String fieldName) {
@@ -31,14 +28,5 @@ public class DataFlowUtils {
                 .addFunction(String.format(extract, emailFieldName, emailFieldName, emailFieldName), //
                         new FieldList(emailFieldName), //
                         new FieldMetadata(outputFieldName, String.class));
-    }
-
-    public static Node addInternalId(Node last) {
-        FieldMetadata fm = new FieldMetadata(InterfaceName.InternalId.toString(), Long.class);
-        fm.setPropertyValue("logicalType", LogicalDataType.InternalId.toString());
-        fm.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
-        fm.setPropertyValue("displayName", "Id");
-        last = last.addRowID(fm);
-        return last;
     }
 }
