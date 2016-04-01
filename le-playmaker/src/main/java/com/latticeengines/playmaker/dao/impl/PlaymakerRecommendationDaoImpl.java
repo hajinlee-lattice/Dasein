@@ -35,7 +35,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1  ISNULL(T.[Display_Name], '') + '|' + ISNULL(T.[Phone_Number], '') + '|' + ISNULL(T.[Email_Address], '') "
                 + " + '|' +  ISNULL(T.[Address_Street_1], '') + '|' + ISNULL(T.[City], '') + '|' + ISNULL(T.[State_Province], '') "
-                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') + '|' + ISNULL(T.[External_id], '') "
+                + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') "
+                + getSfdcContactID()
                 + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
                 + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date], L.[PreLead_ID]) RowNum "
@@ -55,6 +56,10 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         convertContacts(results);
 
         return results;
+    }
+
+    protected String getSfdcContactID() {
+        return " + '|' + ISNULL(T.[External_id], '') ";
     }
 
     protected String getMonetaryValue() {
@@ -108,7 +113,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     protected String getRecommendationFromWhereClause(int syncDestination, List<Integer> playIds) {
         String whereClause = "FROM [PreLead] L WITH (NOLOCK) LEFT OUTER JOIN LaunchRun R WITH (NOLOCK) "
                 + "ON L.[LaunchRun_ID] = R.[LaunchRun_ID]  AND R.Launch_Stage = 0 JOIN LEAccount A WITH (NOLOCK) "
-                + "ON L.Account_ID = A.LEAccount_ID JOIN Play PL "
+                + "ON L.Account_ID = A.LEAccount_ID AND A.IsActive = 1 JOIN Play PL "
                 + "ON L.Play_ID = PL.Play_ID AND PL.IsActive = 1 AND PL.IsVisible = 1 JOIN Priority P WITH (NOLOCK) "
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
