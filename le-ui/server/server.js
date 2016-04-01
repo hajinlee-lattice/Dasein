@@ -48,8 +48,12 @@ class Server {
         this.app.set('view engine', '.html');
         this.app.set('views', options.APP_ROOT);
 
-        //process.on('uncaughtException', err => this.app.close());
-        //process.on('SIGTERM', err => this.app.close());
+        process.on('uncaughtException', err => this.app.close());
+        process.on('SIGTERM', err => this.app.close());
+        process.on('ECONNRESET', err => { 
+            //this.app.close()
+
+        });
     }
 
     startLogging(log_path) {
@@ -119,7 +123,7 @@ class Server {
         routes.forEach(route => {
             const dir = this.options.APP_ROOT + route.path;
             var displayString = '';
-            console.log('> PATH:\t'+route.path);
+            //console.log('> PATH:\t'+route.path);
             // set up the static routes for app files
             if (route.folders) {
                 Object.keys(route.folders).forEach(folder => {
@@ -131,13 +135,13 @@ class Server {
                 });
             }
 
-            console.log('\t[ '+displayString+' ]');
+            //console.log('\t[ '+displayString+' ]');
 
             displayString = '';
             // users will see the desired render page when entering these routes
             if (route.pages) {
                 Object.keys(route.pages).forEach(page => {
-                    console.log('\t'+route.pages[page]+'\t->',page);
+                    //console.log('\t'+route.pages[page]+'\t->',page);
                     this.app.get(
                         page, 
                         (req, res) => res.render(dir + '/' + route.pages[page])
@@ -194,7 +198,7 @@ class Server {
             console.log('\t' + key + ':\t' + value + ' (' + typeof value + ')');
         });
 
-        console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
+        //console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
 
         if (this.httpServer) {
             this.httpServer.listen(options.HTTP_PORT, () => { console.log('> LISTENING: http://localhost:' + options.HTTP_PORT); });

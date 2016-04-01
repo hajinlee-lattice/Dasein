@@ -58,14 +58,14 @@ module.exports = function (grunt) {
             },
             production: {
                 NODE_ENV: 'production',
-                API_URL: false,
+                API_URL: 'http://app.lattice.local',
                 COMPRESSED: true,
                 LOGGING: './server/log',
                 HTTP_PORT: false,
                 HTTPS_PORT: 3000,
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
-                HTTPS_PASS: 'Lattice1',
+                HTTPS_PASS: false,
                 WHITELIST: '10.51.12.109,10.51.51.109'
             }
         },
@@ -76,6 +76,10 @@ module.exports = function (grunt) {
             nodemon: {
                 cmd: 'nodemon.cmd',
                 args: [ './app.js' ]
+            },
+            pm2: {
+                cmd: 'pm2.cmd',
+                args: [ 'start', './app.js' ]
             },
             killnode: {
                 cmd: 'taskkill.exe',
@@ -112,6 +116,17 @@ module.exports = function (grunt) {
     grunt.registerTask('dev', devText, [
         'env:dev',
         'run:node'
+    ]);
+
+    grunt.registerTask('pm2dev', devText, [
+        'env:dev',
+        'run:pm2'
+    ]);
+
+
+    grunt.registerTask('pm2', devText, [
+        'env:qa',
+        'run:pm2'
     ]);
 
     var devText = 'Run Express Server, using Local API Endpoints';
