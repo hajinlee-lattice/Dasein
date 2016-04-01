@@ -39,7 +39,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
 echo "install le-serviceflows-propdata for dataflowapi"
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
-    -m dataflowapi \
+    -m propdata \
     -g com.latticeengines \
     -a le-serviceflows-propdata \
     -v $VERSION \
@@ -49,7 +49,7 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
 echo "install le-serviceflows-propdata for workflowapi"
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -o install \
-    -m workflowapi \
+    -m propdata \
     -g com.latticeengines \
     -a le-serviceflows-propdata \
     -v $VERSION \
