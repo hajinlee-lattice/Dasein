@@ -13,25 +13,25 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.workflow.FitWorkflowSubmitter;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class WorkflowSubmitterUnitTestNG {
-    
+
     private FitWorkflowSubmitter fitWorkflowSubmitter = new FitWorkflowSubmitter();
 
     @Test(groups = "unit")
     public void submitFitWorkflow() {
         TargetMarket targetMarket = mock(TargetMarket.class);
-        WorkflowProxy workflowProxy = mock(WorkflowProxy.class);
+        WorkflowJobService workflowJobService = mock(WorkflowJobService.class);
         WorkflowStatus workflowStatus = mock(WorkflowStatus.class);
         when(targetMarket.getApplicationId()).thenReturn("application_xyz_123");
-        
-        when(workflowProxy.getWorkflowStatusFromApplicationId("application_xyz_123")).thenReturn(workflowStatus);
+
+        when(workflowJobService.getWorkflowStatusFromApplicationId("application_xyz_123")).thenReturn(workflowStatus);
         when(workflowStatus.getStatus()).thenReturn(BatchStatus.STARTED);
-        
-        ReflectionTestUtils.setField(fitWorkflowSubmitter, "workflowProxy", workflowProxy);
-        
+
+        ReflectionTestUtils.setField(fitWorkflowSubmitter, "workflowJobService", workflowJobService);
+
         boolean exception = false;
         try {
             fitWorkflowSubmitter.submitWorkflowForTargetMarketAndWorkflowName(targetMarket, "fitModelWorkflow");
