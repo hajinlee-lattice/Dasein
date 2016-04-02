@@ -1,6 +1,6 @@
 #!/bin/sh
 echo "examine environment vars"
-# HADOOP_CONF_DIR=/usr/hdp/current/hadoop-client/conf
+HADOOP_CONF_DIR=/usr/hdp/current/hadoop-client/conf
 
 echo $HADOOP_CONF_DIR
 
@@ -18,13 +18,9 @@ echo $VERSION
 echo "clean up hdfs"
 hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION
 hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION
-hdfs dfs -mkdir -p /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-propdata/$VERSION
-hdfs dfs -mkdir -p /app/swlib/workflowapi/com/latticeengines/le-serviceflows-propdata/$VERSION
 
 hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-prospectdiscovery/$VERSION/*
 hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-leadprioritization/$VERSION/*
-hdfs dfs -rm -r -f /app/swlib/dataflowapi/com/latticeengines/le-serviceflows-propdata/$VERSION/*
-hdfs dfs -rm -r -f /app/swlib/workflowapi/com/latticeengines/le-serviceflows-propdata/$VERSION/*
 
 echo "install le-serviceflows-prospectdiscovery for dataflowapi"
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
@@ -35,26 +31,6 @@ java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
     -v $VERSION \
     -i com.latticeengines.prospectdiscovery.Initializer \
     -f /tmp/le-serviceflows-prospectdiscovery-*-shaded.jar
-
-echo "install le-serviceflows-propdata for dataflowapi"
-java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
-    -o install \
-    -m propdata \
-    -g com.latticeengines \
-    -a le-serviceflows-propdata \
-    -v $VERSION \
-    -i com.latticeengines.propdata.Initializer \
-    -f /tmp/le-serviceflows-propdata-*-shaded.jar
-
-echo "install le-serviceflows-propdata for workflowapi"
-java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
-    -o install \
-    -m propdata \
-    -g com.latticeengines \
-    -a le-serviceflows-propdata \
-    -v $VERSION \
-    -i com.latticeengines.propdata.Initializer \
-    -f /tmp/le-serviceflows-propdata-*-shaded.jar
 
 echo "install le-serviceflows-leadprioritization for dataflowapi"
 java -cp $JARFILE:$HADOOP_CONF_DIR com.latticeengines.swlib.SwlibTool \
