@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.batch.core.ExitStatus;
@@ -33,7 +34,6 @@ import org.springframework.yarn.integration.ip.mind.MindRpcSerializer;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.progress.LedpProgressReporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -125,7 +125,7 @@ public abstract class SingleContainerYarnProcessor<T> implements ItemProcessor<T
     public void beforeStep(StepExecution stepExecution) {
         String strAppId = stepExecution.getJobParameters().getString(ContainerRuntimeProperty.APPLICATION_ID.name());
         if (strAppId != null) {
-            appId = YarnUtils.appIdFromString(strAppId);
+            appId = ConverterUtils.toApplicationId(strAppId);
         }
     }
 

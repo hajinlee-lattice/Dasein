@@ -102,7 +102,7 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void allSourceFileMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
-    
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.Oauth2AccessTokenEntityMgrImpl.find*(..))")
     public void findAllAccessToken(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -115,6 +115,16 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.Oauth2AccessTokenEntityMgrImpl.createOrUpdate*(..))")
     public void createOrUpdateAccessToken(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.WorkflowJobEntityMgrImpl.findAll*(..))")
+    public void getWorkflowJobs(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.WorkflowJobEntityMgrImpl.create*(..))")
+    public void createWorkflowJob(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 }

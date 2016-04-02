@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
-    
+
     private String podId;
 
     @NotNull

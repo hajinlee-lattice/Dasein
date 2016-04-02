@@ -8,13 +8,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public abstract class WorkflowSubmitter {
+
     @Autowired
-    protected WorkflowProxy workflowProxy;
+    protected WorkflowJobService workflowJobService;
 
     @Value("${pls.api.hostport}")
     protected String internalResourceHostPort;
@@ -37,7 +38,7 @@ public abstract class WorkflowSubmitter {
         }
         WorkflowStatus status = null;
         try {
-            status = workflowProxy.getWorkflowStatusFromApplicationId(appId);
+            status = workflowJobService.getWorkflowStatusFromApplicationId(appId);
         } catch (Exception e) {
             // Ignore any errors since this means that any associated workflow
             // must be problematic so let it continue

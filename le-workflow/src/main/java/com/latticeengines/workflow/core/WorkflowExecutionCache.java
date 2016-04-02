@@ -36,13 +36,12 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.service.impl.WorkflowServiceImpl;
 
 @Component("workflowExecutionCache")
 public class WorkflowExecutionCache {
 
     private static final int MAX_CACHE_SIZE = 1000;
-    private static final Log log = LogFactory.getLog(WorkflowServiceImpl.class);
+    private static final Log log = LogFactory.getLog(WorkflowExecutionCache.class);
 
     @Value("${workflow.jobs.numthreads}")
     private String numJobThreads;
@@ -103,7 +102,6 @@ public class WorkflowExecutionCache {
             job.setEndTimestamp(workflowStatus.getEndTime());
             cache.put(job.getId(), job);
         }
-
         return job;
     }
 

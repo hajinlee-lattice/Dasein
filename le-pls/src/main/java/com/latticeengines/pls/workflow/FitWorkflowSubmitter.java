@@ -12,9 +12,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -96,9 +93,7 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             String payloadName = workflowName + "-" + customer + "-" + targetMarket.getName();
             configuration.setContainerConfiguration(workflowName, CustomerSpace.parse(customer), payloadName);
 
-            AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-            ApplicationId applicationId = YarnUtils.appIdFromString(submission.getApplicationIds().get(0));
-            log.info(String.format("Submitted %s with application id %s", workflowName, applicationId));
+            ApplicationId applicationId = workflowJobService.submit(configuration);
             targetMarket.setApplicationId(applicationId.toString());
             targetMarketService.updateTargetMarketByName(targetMarket, targetMarket.getName());
         } catch (Exception e) {

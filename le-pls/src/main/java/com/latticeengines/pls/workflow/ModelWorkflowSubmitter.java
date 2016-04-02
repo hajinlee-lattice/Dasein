@@ -3,9 +3,6 @@ package com.latticeengines.pls.workflow;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -34,9 +31,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .build();
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-        String applicationId = submission.getApplicationIds().get(0);
-        return YarnUtils.appIdFromString(applicationId);
+        return workflowJobService.submit(configuration);
     }
 
 }

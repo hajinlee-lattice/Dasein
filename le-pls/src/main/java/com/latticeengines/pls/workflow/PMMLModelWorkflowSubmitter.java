@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
@@ -23,27 +21,27 @@ import com.latticeengines.pls.service.MetadataFileUploadService;
 public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(PMMLModelWorkflowSubmitter.class);
-    
+
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
     public ApplicationId submit(String modelName, String moduleName, String pmmlArtifactName, String pivotArtifactName) {
-        Map<String, Artifact> pmmlArtifacts = getArtifactMap(
-                metadataFileUploadService.getArtifacts(moduleName, ArtifactType.PMML));
-        Map<String, Artifact> pivotArtifacts = getArtifactMap(
-                metadataFileUploadService.getArtifacts(moduleName, ArtifactType.PivotMapping));
-        
+        Map<String, Artifact> pmmlArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
+                ArtifactType.PMML));
+        Map<String, Artifact> pivotArtifacts = getArtifactMap(metadataFileUploadService.getArtifacts(moduleName,
+                ArtifactType.PivotMapping));
+
         Artifact pmmlArtifact = pmmlArtifacts.get(pmmlArtifactName);
         Artifact pivotArtifact = pivotArtifacts.get(pivotArtifactName);
-        
+
         if (pmmlArtifact == null) {
             throw new LedpException(LedpCode.LEDP_28020, new String[] { pmmlArtifactName });
         }
-        
+
         if (pivotArtifact == null) {
             throw new LedpException(LedpCode.LEDP_28020, new String[] { pivotArtifactName });
         }
-        
+
         PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration.Builder()
                 .podId(CamilleEnvironment.getPodId()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -54,11 +52,9 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .pmmlArtifactPath(pmmlArtifact.getPath()) //
                 .pivotArtifactPath(pivotArtifact.getPath()) //
                 .build();
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-        String applicationId = submission.getApplicationIds().get(0);
-        return YarnUtils.appIdFromString(applicationId);
+        return workflowJobService.submit(configuration);
     }
-    
+
     private Map<String, Artifact> getArtifactMap(List<Artifact> artifacts) {
         Map<String, Artifact> map = new HashMap<>();
         for (Artifact artifact : artifacts) {

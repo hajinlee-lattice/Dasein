@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -129,7 +128,7 @@ public class WorkflowResource implements WorkflowInterface {
 
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
         log.info("getWorkflowId for applicationId:" + applicationId);
-        return workflowContainerService.getWorkflowId(YarnUtils.appIdFromString(applicationId));
+        return workflowContainerService.getWorkflowId(ConverterUtils.toApplicationId(applicationId));
     }
 
     @RequestMapping(value = "/job/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")

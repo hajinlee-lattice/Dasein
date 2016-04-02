@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -21,7 +22,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.pls.FilePayload;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -44,7 +44,7 @@ public class ProcessingStateProcessorUnitTestNG {
         }
         WorkflowProxy apiProxy = mock(WorkflowProxy.class);
         when(apiProxy.submitWorkflowExecution(any(WorkflowConfiguration.class))).thenReturn( //
-                new AppSubmission(Arrays.asList(YarnUtils.appIdFromString("application_1448430180764_0001"))));
+                new AppSubmission(Arrays.asList(ConverterUtils.toApplicationId("application_1448430180764_0001"))));
         props.put("restApiProxy", apiProxy);
     }
 

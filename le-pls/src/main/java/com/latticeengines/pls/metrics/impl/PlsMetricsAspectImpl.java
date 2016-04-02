@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 import com.latticeengines.monitor.exposed.metrics.impl.BaseMetricsAspectImpl;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements MetricsAspect {
 
@@ -21,14 +22,8 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
         }
         String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof TicketAuthenticationToken) {
-            TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
-            if (token.getSession() != null && token.getSession().getEmailAddress() != null) {
-                return metrics + String.format(" User=%s", token.getSession().getEmailAddress());
-            }
-        }
-        return metrics;
+        String user = SecurityContextUtils.getUser();
+        return metrics + String.format(" User=%s", user);
     }
 
     @Override

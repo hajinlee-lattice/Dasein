@@ -33,4 +33,15 @@ public class SecurityContextUtils {
         Authentication auth = new TenantToken(tenant);
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+
+    public static String getUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof TicketAuthenticationToken) {
+            TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
+            if (token.getSession() != null && token.getSession().getEmailAddress() != null) {
+                return token.getSession().getEmailAddress();
+            }
+        }
+        return "";
+    }
 }

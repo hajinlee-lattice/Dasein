@@ -4,9 +4,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -19,8 +16,8 @@ import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
-    @SuppressWarnings("unused")
-    private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
+
+    private static final Logger log = Logger.getLogger(ScoreWorkflowSubmitter.class);
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
@@ -32,8 +29,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     private ModelSummaryService modelSummaryService;
 
     public ApplicationId submit(String modelId, String tableToScore) {
-        log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s", modelId,
-                tableToScore, SecurityContextUtils.getCustomerSpace()));
+        log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s",
+                modelId, tableToScore, SecurityContextUtils.getCustomerSpace()));
         ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore);
 
         if (metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), tableToScore) == null) {
@@ -44,9 +41,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-        String applicationId = submission.getApplicationIds().get(0);
-        return YarnUtils.appIdFromString(applicationId);
+        return workflowJobService.submit(configuration);
     }
 
     public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore) {

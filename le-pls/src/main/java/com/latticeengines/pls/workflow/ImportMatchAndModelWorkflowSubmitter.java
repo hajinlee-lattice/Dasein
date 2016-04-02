@@ -4,9 +4,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -73,11 +70,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     public ApplicationId submit(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
         ImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-        String applicationId = submission.getApplicationIds().get(0);
-        sourceFile.setApplicationId(applicationId);
+
+        ApplicationId applicationId = workflowJobService.submit(configuration);
+        sourceFile.setApplicationId(applicationId.toString());
         sourceFileService.update(sourceFile);
-        return YarnUtils.appIdFromString(applicationId);
+        return applicationId;
     }
 
 }

@@ -10,7 +10,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 
@@ -28,11 +27,6 @@ public class YarnUtils {
             return false;
 
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
-    }
-
-    public static ApplicationId appIdFromString(String appId) {
-        String[] tokens = appId.split("_");
-        return ApplicationIdPBImpl.newInstance(Long.parseLong(tokens[1]), Integer.parseInt(tokens[2]));
     }
 
     public static ApplicationReport getApplicationReport (
