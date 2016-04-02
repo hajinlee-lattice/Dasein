@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
@@ -124,6 +125,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
         t.setId(WFAPITEST_CUSTOMERSPACE.toString());
         t.setName(WFAPITEST_CUSTOMERSPACE.toString());
         tenantEntityMgr.create(t);
+        SecurityContextUtils.setTenant(t);
 
         com.latticeengines.domain.exposed.camille.Path path = //
         PathBuilder.buildCustomerSpacePath("Production", WFAPITEST_CUSTOMERSPACE);
