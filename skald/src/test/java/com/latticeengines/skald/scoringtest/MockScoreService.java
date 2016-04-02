@@ -15,7 +15,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.scoringapi.unused.ModelIdentifier;
 import com.latticeengines.skald.CombinationElement;
 import com.latticeengines.skald.CombinationRetriever;
 import com.latticeengines.skald.ProprietaryDataMatcher;
@@ -25,6 +24,7 @@ import com.latticeengines.skald.RecordTransformer;
 import com.latticeengines.skald.ScoreService;
 import com.latticeengines.skald.exposed.ScoreRequest;
 import com.latticeengines.skald.exposed.ScoreType;
+import com.latticeengines.skald.exposed.domain.ModelIdentifier;
 
 public class MockScoreService {
     @InjectMocks
