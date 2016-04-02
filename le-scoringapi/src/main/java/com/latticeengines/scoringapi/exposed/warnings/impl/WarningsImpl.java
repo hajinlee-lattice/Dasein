@@ -13,7 +13,7 @@ import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 @Component("warnings")
 public class WarningsImpl implements Warnings {
 
-    private static final String WARNINGS_KEY = "com.latticeengines.warnings";
+    private static final String WARNINGS_KEY = "com.latticeengines.scoringapi.warnings";
 
     @Override
     public void addWarning(Warning codeMessage) {

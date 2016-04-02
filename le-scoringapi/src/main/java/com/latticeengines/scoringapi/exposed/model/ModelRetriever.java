@@ -3,9 +3,9 @@ package com.latticeengines.scoringapi.exposed.model;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
-import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 

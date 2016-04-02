@@ -23,11 +23,12 @@ import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.scoringapi.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.Model;
-import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreRequest;
 import com.latticeengines.scoringapi.exposed.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
@@ -54,6 +55,9 @@ public class ScoreResource {
 
     @Autowired
     private ScoreRequestProcessor scoreRequestProcessor;
+
+    @Autowired
+    private RequestInfo requestInfo;
 
     @Autowired
     private Warnings warnings;
@@ -99,9 +103,10 @@ public class ScoreResource {
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
+        requestInfo.put("Tenant", customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             if (log.isInfoEnabled()) {
-                log.info(httpStopWatch.getLogStatement("getTenantFromOAuth"));
+                log.info(httpStopWatch.split("getTenantFromOAuth"));
                 log.info(JsonUtils.serialize(scoreRequest));
             }
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
@@ -111,6 +116,12 @@ public class ScoreResource {
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
             }
+
+            requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
+            requestInfo.put("HasError", Boolean.toString(false));
+            requestInfo.putAll(httpStopWatch.getSplits());
+            requestInfo.logSummary();
+
             return response;
         }
     }

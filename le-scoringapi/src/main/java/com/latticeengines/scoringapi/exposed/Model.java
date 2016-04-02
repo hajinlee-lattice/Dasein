@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.exposed;
 import io.swagger.annotations.ApiModelProperty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 
 public class Model {
 

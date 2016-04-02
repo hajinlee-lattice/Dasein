@@ -2,23 +2,27 @@ package com.latticeengines.scoringapi.exposed;
 
 import java.io.File;
 
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 public class ScoringArtifacts {
 
-    private final String modelId;
+    private final ModelSummary modelSummary;
+    private final ModelType modelType;
     private final DataComposition dataScienceDataComposition;
     private final DataComposition eventTableDataComposition;
     private final ScoreDerivation scoreDerivation;
     private final ModelEvaluator pmmlEvaluator;
     private final File modelArtifactsDir;
 
-    public ScoringArtifacts(String modelId, DataComposition dataScienceDataComposition, DataComposition eventTableDataComposition,
+    public ScoringArtifacts(ModelSummary modelSummary, ModelType modelType, DataComposition dataScienceDataComposition, DataComposition eventTableDataComposition,
             ScoreDerivation scoreDerivation, ModelEvaluator pmmlEvaluator, File modelArtifactsDir) {
         super();
-        this.modelId = modelId;
+        this.modelSummary = modelSummary;
+        this.modelType = modelType;
         this.dataScienceDataComposition = dataScienceDataComposition;
         this.eventTableDataComposition = eventTableDataComposition;
         this.scoreDerivation = scoreDerivation;
@@ -26,8 +30,12 @@ public class ScoringArtifacts {
         this.modelArtifactsDir = modelArtifactsDir;
     }
 
-    public String getModelId() {
-        return modelId;
+    public ModelSummary getModelSummary() {
+        return modelSummary;
+    }
+
+    public ModelType getModelType() {
+        return modelType;
     }
 
     public DataComposition getDataScienceDataComposition() {

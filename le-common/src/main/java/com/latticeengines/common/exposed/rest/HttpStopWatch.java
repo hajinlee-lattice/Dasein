@@ -1,16 +1,18 @@
 package com.latticeengines.common.exposed.rest;
 
+import java.util.Map;
+
 
 public interface HttpStopWatch {
 
     void start();
 
-    long splitAndGetTimeSinceLastSplit();
-
     void stop();
 
-    long getTime();
+    long split(String key);
 
-    String getLogStatement(String key);
+    Map<String, String> getSplits();
+
+    long getTime();
 
 }

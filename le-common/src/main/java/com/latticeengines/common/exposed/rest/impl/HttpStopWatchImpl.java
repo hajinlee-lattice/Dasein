@@ -1,5 +1,8 @@
 package com.latticeengines.common.exposed.rest.impl;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -11,21 +14,38 @@ import com.latticeengines.common.exposed.rest.HttpStopWatch;
 public class HttpStopWatchImpl implements HttpStopWatch {
 
     private static final String STOPWATCH_KEY = "com.latticeengines.stopwatch";
+    private static final String SPLITMAP_KEY = "com.latticeengines.stopwatch.splitmap";
     private static final String STOPWATCH_LASTSPLITTIME_KEY = "com.latticeengines.stopwatch.lastsplittime";
 
-    @Override
     public String getLogStatement(String key) {
         return String.format("{\"%sDurationMS\":\"%d\"}", key, splitAndGetTimeSinceLastSplit());
     }
 
     @Override
-    public void start() {
-        getOrCreate().start();
+    public long split(String key) {
+        long split = splitAndGetTimeSinceLastSplit();
+        getOrCreateSplitMap().put(key, split);
+        return split;
     }
 
     @Override
+    public Map<String, String> getSplits() {
+        Map<String, String> splitsAsStrings = new LinkedHashMap<>();
+        for (String key : getOrCreateSplitMap().keySet()) {
+            splitsAsStrings.put(key + "DurationMS", String.valueOf(getOrCreateSplitMap().get(key)));
+        }
+        splitsAsStrings.put("requestDurationMS", String.valueOf(getTime()));
+
+        return splitsAsStrings;
+    }
+
+    @Override
+    public void start() {
+        getOrCreateStopWatch().start();
+    }
+
     public long splitAndGetTimeSinceLastSplit() {
-        StopWatch stopWatch = getOrCreate();
+        StopWatch stopWatch = getOrCreateStopWatch();
         long lastSplitTime = getLastSplitTime();
         stopWatch.split();
         long splitTime = stopWatch.getSplitTime();
@@ -50,15 +70,15 @@ public class HttpStopWatchImpl implements HttpStopWatch {
 
     @Override
     public void stop() {
-        getOrCreate().stop();
+        getOrCreateStopWatch().stop();
     }
 
     @Override
     public long getTime() {
-        return getOrCreate().getTime();
+        return getOrCreateStopWatch().getTime();
     }
 
-    private StopWatch getOrCreate() {
+    private StopWatch getOrCreateStopWatch() {
         StopWatch stopWatch = null;
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         Object attribute = attributes.getRequest().getAttribute(STOPWATCH_KEY);
@@ -70,6 +90,21 @@ public class HttpStopWatchImpl implements HttpStopWatch {
         }
 
         return stopWatch;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Long> getOrCreateSplitMap() {
+        Map<String, Long> splitMap = null;
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        Object attribute = attributes.getRequest().getAttribute(SPLITMAP_KEY);
+        if (attribute == null) {
+            splitMap = new LinkedHashMap<String, Long>();   // order the keys
+            attributes.getRequest().setAttribute(SPLITMAP_KEY, splitMap);
+        } else {
+            splitMap = (Map<String, Long>) attribute;
+        }
+
+        return splitMap;
     }
 
 }

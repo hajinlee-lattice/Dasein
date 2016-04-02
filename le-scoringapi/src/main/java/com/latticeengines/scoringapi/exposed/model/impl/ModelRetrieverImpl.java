@@ -36,17 +36,18 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
+import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.scoringapi.exposed.Field;
 import com.latticeengines.scoringapi.exposed.Fields;
 import com.latticeengines.scoringapi.exposed.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.Model;
-import com.latticeengines.scoringapi.exposed.ModelType;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
@@ -107,10 +108,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
             for (Object modelSummary : modelSummaries) {
                 @SuppressWarnings("unchecked")
                 Map<String, String> map = (Map<String, String>) modelSummary;
-                if ((type == ModelType.ACCOUNT && map.get("SourceSchemaInterpretation").toLowerCase()
-                        .contains("account"))
-                        || (type == ModelType.CONTACT && map.get("SourceSchemaInterpretation").toLowerCase()
-                                .contains("lead"))) {
+                ModelType modelType = getModelType(map.get("SourceSchemaInterpretation"));
+                if ((type == ModelType.ACCOUNT && modelType == ModelType.ACCOUNT)
+                        || (type == ModelType.CONTACT && modelType == ModelType.CONTACT)) {
                     Model model = new Model(map.get("Id"), map.get("Name"), type);
                     models.add(model);
                 }
@@ -118,6 +118,17 @@ public class ModelRetrieverImpl implements ModelRetriever {
         }
 
         return models;
+    }
+
+    private ModelType getModelType(String sourceSchemaInterpretation) {
+        if (sourceSchemaInterpretation == null) {
+            return null;
+        } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
+            return ModelType.CONTACT;
+        } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceAccount.name())) {
+            return ModelType.ACCOUNT;
+        }
+        return null;
     }
 
     @Override
@@ -140,15 +151,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
         return fields;
     }
 
-    private Triple<String, String, String> determineScoreArtifactBaseEventTableAndSamplePath(
-            CustomerSpace customerSpace, String modelId) {
+    private ModelSummary getModelSummary(CustomerSpace customerSpace, String modelId) {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
         } else if (Strings.isNullOrEmpty(modelSummary.getEventTableName())) {
             throw new LedpException(LedpCode.LEDP_31008, new String[] { modelId });
         }
+        return modelSummary;
+    }
 
+    private Triple<String, String, String> determineScoreArtifactBaseEventTableAndSamplePath(
+            CustomerSpace customerSpace, ModelSummary modelSummary) {
         AbstractMap.SimpleEntry<String, String> modelNameAndVersion = parseModelNameAndVersion(modelSummary);
         String appId = getModelAppIdSubfolder(customerSpace, modelSummary);
 
@@ -166,8 +180,10 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Override
     public ScoringArtifacts retrieveModelArtifactsFromHdfs(CustomerSpace customerSpace, String modelId) {
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
+        ModelType modelType = getModelType(modelSummary.getSourceSchemaInterpretation());
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
-                customerSpace, modelId);
+                customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
         String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
 
@@ -178,7 +194,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
 
-        ScoringArtifacts artifacts = new ScoringArtifacts(modelId, dataScienceDataComposition,
+        ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
                 eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
 
         return artifacts;
@@ -469,16 +485,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
             }
         }
         if (idFieldName == null) {
-            throw new LedpException(LedpCode.LEDP_31021, new String[] { JsonUtils.serialize(dataScienceDataComposition.fields) });
+            throw new LedpException(LedpCode.LEDP_31021,
+                    new String[] { JsonUtils.serialize(dataScienceDataComposition.fields) });
         }
         return idFieldName;
     }
 
     @Override
-    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(
-            CustomerSpace customerSpace, String modelId) {
+    public ScoreCorrectnessArtifacts retrieveScoreCorrectnessArtifactsFromHdfs(CustomerSpace customerSpace,
+            String modelId) {
+        ModelSummary modelSummary = getModelSummary(customerSpace, modelId);
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
-                customerSpace, modelId);
+                customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);

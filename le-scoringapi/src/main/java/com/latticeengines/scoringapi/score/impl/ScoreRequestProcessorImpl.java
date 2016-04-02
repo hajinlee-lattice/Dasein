@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.scoringapi.context.RequestInfo;
 import com.latticeengines.scoringapi.controller.ScoreResource;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
@@ -60,29 +61,41 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     @Autowired
     private Warnings warnings;
 
+    @Autowired
+    private RequestInfo requestInfo;
+
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
-        logSplitTime("requestPreparation");
+        split("requestPreparation");
         if (Strings.isNullOrEmpty(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
         }
 
+        requestInfo.put("Rule", "NotAvailable");
+        requestInfo.put("Source", "NotAvailable");
+
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
+        requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
+        requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getName());
+        requestInfo.put("ModelType", scoringArtifacts.getModelType().name());
+
         Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getDataScienceDataComposition().fields;
-        logSplitTime("retrieveModelArtifacts");
+        split("retrieveModelArtifacts");
 
         checkForMissingFields(fieldSchemas, request.getRecord());
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
                 fieldSchemas, request.getRecord());
-        logSplitTime("parseRecord");
+        String recordId = getIdIfAvailable(parsedRecordAndInterpretedFields.getValue(), request.getRecord());
+        requestInfo.put("RecordId", recordId);
+        split("parseRecord");
 
         Map<String, Object> matchedRecord = matcher.matchAndJoin(space, parsedRecordAndInterpretedFields.getValue(),
                 fieldSchemas, parsedRecordAndInterpretedFields.getKey());
         addMissingFields(fieldSchemas, matchedRecord);
-        logSplitTime("matchRecord");
+        split("matchRecord");
 
         Map<String, Object> transformedRecord = transform(scoringArtifacts, matchedRecord);
-        logSplitTime("transformRecord");
+        split("transformRecord");
 
         ScoreResponse scoreResponse = null;
         if (isDebug) {
@@ -90,27 +103,27 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         } else {
             scoreResponse = generateScoreResponse(scoringArtifacts, transformedRecord);
         }
-        logSplitTime("scoreRecord");
-
-        setIdIfAvailable(scoreResponse, parsedRecordAndInterpretedFields.getValue(), transformedRecord);
+        scoreResponse.setId(recordId);
+        split("scoreRecord");
 
         return scoreResponse;
     }
 
-    private void setIdIfAvailable(ScoreResponse scoreResponse, InterpretedFields interpretedFields,
+
+    private String getIdIfAvailable(InterpretedFields interpretedFields,
             Map<String, Object> record) {
+        String value = "";
         if (!Strings.isNullOrEmpty(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
             if (!StringUtils.objectIsNullOrEmptyString(id)) {
-                scoreResponse.setId(String.valueOf(id));
+                value = String.valueOf(id);
             }
         }
+        return value;
     }
 
-    private void logSplitTime(String key) {
-        if (log.isInfoEnabled()) {
-            log.info(httpStopWatch.getLogStatement(key));
-        }
+    private void split(String key) {
+        httpStopWatch.split(key);
     }
 
     private AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parseRecord(

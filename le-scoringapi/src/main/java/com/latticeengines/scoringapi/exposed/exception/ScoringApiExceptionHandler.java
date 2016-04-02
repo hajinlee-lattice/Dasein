@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -17,13 +16,18 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
+import com.latticeengines.scoringapi.context.RequestInfo;
+import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 
 @ControllerAdvice
 public class ScoringApiExceptionHandler {
@@ -33,6 +37,15 @@ public class ScoringApiExceptionHandler {
 
     @Autowired
     private AlertService alertService;
+
+    @Autowired
+    private HttpStopWatch httpStopWatch;
+
+    @Autowired
+    private RequestInfo requestInfo;
+
+    @Autowired
+    private Warnings warnings;
 
     @ExceptionHandler
     @ResponseBody
@@ -126,16 +139,22 @@ public class ScoringApiExceptionHandler {
         log.error(errorMsg);
 
         if (fireAlert) {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            String identifier = String.valueOf(attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
+
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
-            alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, MDC
-                    .get(RequestLogInterceptor.IDENTIFIER_KEY)));
+            alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
             alertDetails.add(new BasicNameValuePair("Error Message:", errorMsg));
 
-            String logUrl = SPLUNK_URL + MDC.get(RequestLogInterceptor.IDENTIFIER_KEY) + "%22";
+            String logUrl = SPLUNK_URL + identifier + "%22";
             alertService.triggerCriticalEvent(errorMessage, logUrl, alertDetails);
         }
 
+        requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
+        requestInfo.put("HasError", Boolean.toString(true));
+        requestInfo.putAll(httpStopWatch.getSplits());
+        requestInfo.logSummary();
+
         return exceptionHandlerErrors;
     }
-
 }
