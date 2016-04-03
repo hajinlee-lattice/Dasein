@@ -89,7 +89,7 @@ public class EaiMetadataServiceImpl implements EaiMetadataService {
     void addExtractToTable(Table table, String path, long processedRecords) {
         Extract e = new Extract();
         e.setName(StringUtils.substringAfterLast(path, "/"));
-        e.setPath(PathUtils.stripoutProtocal(path));
+        e.setPath(PathUtils.stripoutProtocol(path));
         e.setProcessedRecords(processedRecords);
         String dateTime = StringUtils.substringBetween(path, "/Extracts/", "/");
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
