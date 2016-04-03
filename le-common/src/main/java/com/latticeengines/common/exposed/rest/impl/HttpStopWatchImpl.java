@@ -10,7 +10,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 
-@Component("httStopWatch")
+@Component("httpStopWatch")
 public class HttpStopWatchImpl implements HttpStopWatch {
 
     private static final String STOPWATCH_KEY = "com.latticeengines.stopwatch";
