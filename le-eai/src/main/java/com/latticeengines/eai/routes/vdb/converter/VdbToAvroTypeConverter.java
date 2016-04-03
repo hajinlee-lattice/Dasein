@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 
-@Component("vdbToAvroTypeConverter")
+//@Component("vdbToAvroTypeConverter")
 public class VdbToAvroTypeConverter extends AvroTypeConverter {
 
 }

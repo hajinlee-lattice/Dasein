@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 
-@Component("vdbTableImportStrategyBase")
+//@Component("vdbTableImportStrategyBase")
 public class VdbTableImportStrategyBase extends ImportStrategy {
 
 	private static final Log log = LogFactory.getLog(VdbTableImportStrategyBase.class);
