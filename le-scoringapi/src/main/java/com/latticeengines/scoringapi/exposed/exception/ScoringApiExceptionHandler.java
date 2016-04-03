@@ -26,7 +26,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-import com.latticeengines.scoringapi.context.RequestInfo;
+import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.warnings.Warnings;
 
 @ControllerAdvice
