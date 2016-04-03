@@ -10,37 +10,32 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.service.impl.AvroTypeConverter;
 import com.latticeengines.eai.service.impl.ImportStrategy;
 
-//@Component("vdbTableImportStrategyBase")
+@Component("vdbTableImportStrategyBase")
 public class VdbTableImportStrategyBase extends ImportStrategy {
 
-	private static final Log log = LogFactory.getLog(VdbTableImportStrategyBase.class);
-
-    protected VdbTableImportStrategyBase(String key) {
-		super(key);
-		// TODO Auto-generated constructor stub
+	@SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(VdbTableImportStrategyBase.class);
+	
+	public VdbTableImportStrategyBase() {
+	    super("Vdb.Table");
 	}
 
 	@Override
 	public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public Table importMetadata(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public ImportContext resolveFilterExpression(String expression, ImportContext ctx) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	protected AvroTypeConverter getAvroTypeConverter() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
