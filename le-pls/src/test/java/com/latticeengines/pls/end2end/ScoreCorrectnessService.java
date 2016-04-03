@@ -63,7 +63,7 @@ public class ScoreCorrectnessService {
     private static final int NUM_LEADS_TO_SCORE = 500;
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 10;
-    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 2.0;
+    private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 3.0;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
 
