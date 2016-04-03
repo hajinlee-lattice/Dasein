@@ -20,7 +20,7 @@ public class UuidUtils {
     }
 
     public static String parseUuid(String hdfsPath) {
-        hdfsPath = PathUtils.stripoutProtocal(hdfsPath);
+        hdfsPath = PathUtils.stripoutProtocol(hdfsPath);
         String[] tokens = hdfsPath.split("/");
         return tokens[7];
     }
