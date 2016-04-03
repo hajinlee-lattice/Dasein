@@ -20,7 +20,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
@@ -37,9 +36,6 @@ public class ScoringApiExceptionHandler {
 
     @Autowired
     private AlertService alertService;
-
-    @Autowired
-    private HttpStopWatch httpStopWatch;
 
     @Autowired
     private RequestInfo requestInfo;
@@ -152,7 +148,6 @@ public class ScoringApiExceptionHandler {
 
         requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
         requestInfo.put("HasError", Boolean.toString(true));
-        requestInfo.putAll(httpStopWatch.getSplits());
         requestInfo.logSummary();
 
         return exceptionHandlerErrors;

@@ -5,10 +5,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 
@@ -17,6 +19,9 @@ public class RequestInfoImpl implements RequestInfo {
 
     private static final Log log = LogFactory.getLog(RequestInfoImpl.class);
     private static final String CONTEXT_KEY = "com.latticeengines.scoringapi.requestinfo";
+
+    @Autowired
+    private HttpStopWatch httpStopWatch;
 
     @Override
     public void put(String key, String value) {
@@ -33,6 +38,7 @@ public class RequestInfoImpl implements RequestInfo {
     @Override
     public void logSummary() {
         Map<String, String> context = getOrCreate();
+        putAll(httpStopWatch.getSplits());
         log.info(JsonUtils.serialize(context));
     }
 
