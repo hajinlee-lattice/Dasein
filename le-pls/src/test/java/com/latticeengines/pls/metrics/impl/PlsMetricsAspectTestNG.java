@@ -42,19 +42,19 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
     private Log origLog;
     private ModelSummaryEntityMgr origSummaryEntityMgr;
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void beforeClass() {
         origLog = PlsMetricsAspectImpl.log;
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
     }
 
-    @AfterClass
+    @AfterClass(groups = "functional")
     public void afterClass() {
         PlsMetricsAspectImpl.log = origLog;
         modelSummaryResource.setModelSummaryEntityMgr(origSummaryEntityMgr);
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = "functional")
     public void logMetrics() throws Exception {
         Log newLog = mock(Log.class);
         PlsMetricsAspectImpl.log = newLog;
@@ -68,7 +68,7 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
                 logs.add((String) params[0]);
                 return logs;
             }
-        }).when(newLog).info(any());
+        }).when(newLog).debug(any());
 
         TicketAuthenticationToken auth = new TicketAuthenticationToken("", "Uniqueness.Randomness");
         Session session = new Session();
@@ -79,16 +79,16 @@ public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         modelSummaryResource.setModelSummaryEntityMgr(summaryEntityMgr);
 
         modelSummaryResource.delete("1");
-        verify(newLog, times(1)).info(anyString());
+        verify(newLog, times(1)).debug(anyString());
         Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
         Assert.assertTrue(logs.get(0).contains("Track Id="));
         Assert.assertTrue(logs.get(0).contains("User=bnguyen@lattice-engines.com"));
 
         modelSummaryResource.getModelSummaries(null);
-        verify(newLog, times(2)).info(anyString());
+        verify(newLog, times(2)).debug(anyString());
 
         modelSummaryResource.getModelSummaryEntityMgr();
-        verify(newLog, times(2)).info(anyString());
+        verify(newLog, times(2)).debug(anyString());
 
         String passwd = DigestUtils.sha256Hex(adminPassword);
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
