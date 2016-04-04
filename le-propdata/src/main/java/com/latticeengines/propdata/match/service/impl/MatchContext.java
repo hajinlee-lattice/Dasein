@@ -11,12 +11,10 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 
 public class MatchContext implements Fact, Dimension {
 
-    private MatchStatus status;
     private Set<String> domains;
     private Set<NameLocation> nameLocations;
     private MatchInput input;
@@ -26,6 +24,7 @@ public class MatchContext implements Fact, Dimension {
     private Map<String, List<Map<String, Object>>> resultsBySource;
     private List<InternalOutputRecord> internalResults;
     private boolean returnUnmatched;
+    private Long numRows;
     private MatchEngine matchEngine;
 
     @MetricFieldGroup(excludes = { "InputRows" })
@@ -36,14 +35,6 @@ public class MatchContext implements Fact, Dimension {
 
     public void setInput(MatchInput input) {
         this.input = input;
-    }
-
-    public MatchStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(MatchStatus status) {
-        this.status = status;
     }
 
     public Set<String> getDomains() {
@@ -110,6 +101,14 @@ public class MatchContext implements Fact, Dimension {
 
     public void setReturnUnmatched(boolean returnUnmatched) {
         this.returnUnmatched = returnUnmatched;
+    }
+
+    public Long getNumRows() {
+        return numRows;
+    }
+
+    public void setNumRows(Long numRows) {
+        this.numRows = numRows;
     }
 
     public MatchEngine getMatchEngine() {

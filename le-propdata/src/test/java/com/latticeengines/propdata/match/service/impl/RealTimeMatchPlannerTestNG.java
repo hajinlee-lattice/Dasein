@@ -16,15 +16,14 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
 @Component
-public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
+public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
 
     @Autowired
-    MatchPlanner matchPlanner;
+    RealTimeMatchPlanner matchPlanner;
 
     @Test(groups = "functional")
     public void testPrepareOutput() {
@@ -50,8 +49,7 @@ public class MatchPlannerTestNG extends PropDataMatchFunctionalTestNGBase {
             uniqueDomains.add(domain);
         }
 
-        MatchContext context = matchPlanner.planForRealTime(input);
-        Assert.assertEquals(context.getStatus(), MatchStatus.NEW);
+        MatchContext context = matchPlanner.plan(input);
         Assert.assertEquals(context.getDomains().size(), uniqueDomains.size());
 
         for (InternalOutputRecord record : context.getInternalResults()) {

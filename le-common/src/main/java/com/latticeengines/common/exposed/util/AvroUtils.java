@@ -2,9 +2,11 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +28,15 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 public class AvroUtils {
+
+    private static Log log = LogFactory.getLog(AvroUtils.class);
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
         SeekableInput input;
@@ -122,7 +129,7 @@ public class AvroUtils {
         }
     }
 
-    public static Long count(Configuration configuration, String path) throws Exception {
+    public static Long count(Configuration configuration, String path) {
         Long count = 0L;
         try {
             List<String> matches = HdfsUtils.getFilesByGlob(configuration, path);
@@ -134,7 +141,7 @@ public class AvroUtils {
                 }
             }
             return count;
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -207,7 +214,7 @@ public class AvroUtils {
         return new Object[] { schema, map };
     }
 
-    private static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,
+    public static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,
             FieldBuilder<Schema> fieldBuilder, Type type) {
         switch (type) {
         case DOUBLE:
@@ -228,7 +235,15 @@ public class AvroUtils {
     }
 
     public static Type getType(Field field) {
-        return field.schema().getTypes().get(0).getType();
+        Type bestType = Type.NULL;
+        for (Schema schema: field.schema().getTypes()) {
+            Type type = schema.getType();
+            if (!Type.NULL.equals(type)) {
+                bestType = type;
+                break;
+            }
+        }
+        return bestType;
     }
 
     private static void setValues(GenericRecord r, Schema s, Schema combined, ModifiableRecordBuilder recordBldr,
@@ -363,6 +378,54 @@ public class AvroUtils {
         return assembler.endRecord();
     }
 
+
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data) throws IOException {
+        FileSystem fs = FileSystem.get(configuration);
+        Path path = new Path(filePath);
+
+        if (!HdfsUtils.fileExists(configuration, filePath)) {
+            throw new IOException("File " + filePath + " does not exists, so cannot append.");
+        }
+
+        OutputStream out = fs.append(path);
+        DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+        writer = writer.appendTo(new FsInput(path, configuration), out);
+
+        for (GenericRecord datum : data) {
+            writer.append(datum);
+        }
+
+        writer.close();
+        out.close();
+    }
+
+    public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
+            List<GenericRecord> data) throws IOException {
+        FileSystem fs = FileSystem.get(configuration);
+        Path path = new Path(filePath);
+
+        if (HdfsUtils.fileExists(configuration, filePath)) {
+            throw new IOException("File " + filePath + " already exists. Please consider using append.");
+        }
+
+        OutputStream out = fs.create(path);
+        DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
+        writer = writer.create(schema, out);
+
+        for (GenericRecord datum : data) {
+            try {
+                writer.append(datum);
+            } catch (Exception e) {
+                log.warn("Data for the error row: " + datum.toString());
+                throw new IOException(e);
+            }
+
+        }
+
+        writer.close();
+        out.close();
+    }
+
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
         File avroFile = new File(path);
         try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());) {
@@ -393,4 +456,51 @@ public class AvroUtils {
         }
         return schema;
     }
+
+    public static Iterator<GenericRecord> iterator(Configuration configuration, String path) {
+        try {
+            return new AvroFilesIterator(configuration, path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static class AvroFilesIterator implements Iterator<GenericRecord> {
+
+        private List<String> matchedFiles;
+        private Integer fileIdx = 0;
+        private FileReader<GenericRecord> reader;
+        private Configuration configuration;
+
+        AvroFilesIterator(Configuration configuration, String path) throws IOException {
+            matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
+            if (matchedFiles == null || matchedFiles.isEmpty()) {
+                throw new IOException("Cannot find file match " + path);
+            }
+            this.configuration = configuration;
+            reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
+        }
+
+        @Override
+        public boolean hasNext() {
+            while (!reader.hasNext() && fileIdx < matchedFiles.size() - 1) {
+                fileIdx++;
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    log.error("Failed to close avro file reader.");
+                }
+                reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
+            }
+            return reader.hasNext();
+        }
+
+        @Override
+        public GenericRecord next() {
+            return reader.next();
+        }
+
+    }
+
+
 }

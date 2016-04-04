@@ -4,20 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -99,8 +89,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         String queue = customization.getQueue(appMasterProperties);
         List<String> commands = customization.getCommands(containerProperties);
         Map<String, String> environment = customization.setEnvironment(client.getEnvironment(), containerProperties);
-        client.setAppName(jobNameService.createJobName(
-                appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
+        client.setAppName(appName(appMasterProperties, clientName));
         if (resourceLocalizer != null) {
             client.setResourceLocalizer(resourceLocalizer);
         }
@@ -144,6 +133,15 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_00000, e, new String[] { hdfsDir });
             }
+        }
+    }
+    
+    protected String appName(Properties appMasterProperties, String clientName) {
+        if (appMasterProperties.contains(AppMasterProperty.APP_NAME.name())) {
+            return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
+        } else {
+            return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
+                    clientName);
         }
     }
 

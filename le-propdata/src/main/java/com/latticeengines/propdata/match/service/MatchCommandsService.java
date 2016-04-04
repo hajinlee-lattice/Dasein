@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 
-public interface MatchCommandService {
+public interface MatchCommandsService {
 
     Commands createMatchCommand(CreateCommandRequest request);
 

@@ -10,12 +10,10 @@ public class RealTimeRequest extends BaseMeasurement<MatchInput, MatchInput>
 
     private MatchInput matchInput;
 
-    public RealTimeRequest(MatchInput matchInput, MatchContext.MatchEngine matchEngine, Integer numSelectedColumns) {
-        this.matchInput = matchInput;
-        if (matchEngine != null) {
-            this.matchInput.setMatchEngine(matchEngine.getName());
-        }
-        this.matchInput.setNumSelectedColumns(numSelectedColumns);
+    public RealTimeRequest(MatchInput matchInput, Integer numSelectedColumns) {
+        matchInput.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());
+        matchInput.setNumSelectedColumns(numSelectedColumns);
+        setMatchInput(matchInput);
     }
 
     public MatchInput getMatchInput() {

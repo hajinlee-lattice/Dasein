@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopImporter {
@@ -194,6 +195,11 @@ public class SqoopImporter {
     @JsonProperty("mode")
     public void setMode(Mode mode) {
         this.mode = mode;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
     public static class Builder {

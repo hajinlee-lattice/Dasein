@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.hadoop.conf.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopExporter {
@@ -164,6 +165,11 @@ public class SqoopExporter {
     @JsonProperty("other_opts")
     public void setOtherOptions(List<String> otherOptions) {
         this.otherOptions = otherOptions;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
     public static class Builder {

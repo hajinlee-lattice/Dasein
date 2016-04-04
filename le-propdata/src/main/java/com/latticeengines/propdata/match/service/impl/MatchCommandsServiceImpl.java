@@ -18,10 +18,10 @@ import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.propdata.match.entitymanager.CommandEntityMgr;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.service.MatchCommandsService;
 
-@Component("matchCommandService")
-public class MatchCommandServiceImpl implements MatchCommandService {
+@Component("matchCommandsService")
+public class MatchCommandsServiceImpl implements MatchCommandsService {
 
     @Value("${propdata.matcher.available.clients}")
     private String availableClientsNames;

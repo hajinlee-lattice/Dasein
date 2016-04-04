@@ -2,105 +2,143 @@ CREATE SCHEMA IF NOT EXISTS `LDC_ManageDB`;
 
 USE `LDC_ManageDB`;
 
-DROP TABLE IF EXISTS `ArchiveProgress`;
+drop table if exists `ArchiveProgress`;
 
-DROP TABLE IF EXISTS `ColumnMapping`;
+drop table if exists `ColumnMapping`;
 
-DROP TABLE IF EXISTS `ExternalColumn`;
+drop table if exists `ExternalColumn`;
 
-DROP TABLE IF EXISTS `RefreshProgress`;
+drop table if exists `MatchCommand`;
 
-DROP TABLE IF EXISTS `SourceColumn`;
+drop table if exists `MatchOperation`;
 
-CREATE TABLE `ArchiveProgress` (
-  `ProgressID`           BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
-  `CreateTime`           DATETIME,
-  `CreatedBy`            VARCHAR(255),
-  `EndDate`              DATETIME,
-  `ErrorMessage`         VARCHAR(255),
-  `LatestStatusUpdate`   DATETIME,
-  `NumRetries`           INTEGER,
-  `RootOperationUID`     VARCHAR(255) NOT NULL UNIQUE,
-  `RowsDownloadedToHDFS` BIGINT,
-  `RowsUploadedToSQL`    BIGINT,
-  `SourceName`           VARCHAR(255) NOT NULL,
-  `StartDate`            DATETIME,
-  `Status`               VARCHAR(255),
-  `StatusBeforeFailed`   VARCHAR(255),
-  PRIMARY KEY (`ProgressID`),
-  UNIQUE (`RootOperationUID`)
-)
-  ENGINE = InnoDB;
+drop table if exists `RefreshProgress`;
 
-CREATE TABLE `ColumnMapping` (
-  `PID`            BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
-  `Priority`       INTEGER,
-  `SourceColumn`   VARCHAR(100),
-  `SourceName`     VARCHAR(100) NOT NULL,
-  ExternalColumnID VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`PID`)
-)
-  ENGINE = InnoDB;
+drop table if exists `SourceColumn`;
 
-CREATE TABLE `ExternalColumn` (
-  `ExternalColumnID`              VARCHAR(100)  NOT NULL,
-  `ApprovedUsage`                 VARCHAR(255),
-  `Category`                      VARCHAR(50),
-  `DataType`                      VARCHAR(50)   NOT NULL,
-  `DefaultColumnName`             VARCHAR(100)  NOT NULL,
-  `Description`                   VARCHAR(1000) NOT NULL,
-  `DisplayDiscretizationStrategy` VARCHAR(1000),
-  `DisplayName`                   VARCHAR(255),
-  `FundamentalType`               VARCHAR(50),
-  `PID`                           BIGINT        NOT NULL UNIQUE,
-  `StatisticalType`               VARCHAR(50),
-  `Tags`                          VARCHAR(500),
-  PRIMARY KEY (`ExternalColumnID`)
-)
-  ENGINE = InnoDB;
+create table `ArchiveProgress` (
+    `ProgressID` bigint not null auto_increment unique,
+    `CreateTime` datetime,
+    `CreatedBy` varchar(255),
+    `EndDate` datetime,
+    `ErrorMessage` varchar(255),
+    `LatestStatusUpdate` datetime,
+    `NumRetries` integer,
+    `RootOperationUID` varchar(255) not null unique,
+    `RowsDownloadedToHDFS` bigint,
+    `RowsUploadedToSQL` bigint,
+    `SourceName` varchar(255) not null,
+    `StartDate` datetime,
+    `Status` varchar(255),
+    `StatusBeforeFailed` varchar(255),
+    primary key (`ProgressID`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `RefreshProgress` (
-  `ProgressID`          BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
-  `BaseSourceVersion`   VARCHAR(255),
-  `CreateTime`          DATETIME,
-  `CreatedBy`           VARCHAR(255),
-  `ErrorMessage`        VARCHAR(255),
-  `LatestStatusUpdate`  DATETIME,
-  `NumRetries`          INTEGER,
-  `PivotDate`           DATETIME,
-  `RootOperationUID`    VARCHAR(255) NOT NULL UNIQUE,
-  `RowsGeneratedInHDFS` BIGINT,
-  `RowsUploadedToSQL`   BIGINT,
-  `SourceName`          VARCHAR(255) NOT NULL,
-  `Status`              VARCHAR(255),
-  `StatusBeforeFailed`  VARCHAR(255),
-  PRIMARY KEY (`ProgressID`),
-  UNIQUE (`RootOperationUID`)
-)
-  ENGINE = InnoDB;
+create table `ColumnMapping` (
+    `PID` bigint not null auto_increment unique,
+    `Priority` integer,
+    `SourceColumn` varchar(100),
+    `SourceName` varchar(100) not null,
+    ExternalColumnID varchar(100) not null,
+    primary key (`PID`)
+) ENGINE=InnoDB;
 
-CREATE TABLE `SourceColumn` (
-  `SourceColumnID` BIGINT       NOT NULL AUTO_INCREMENT UNIQUE,
-  `Arguments`      VARCHAR(1000),
-  `BaseSource`     VARCHAR(100),
-  `Calculation`    VARCHAR(50)  NOT NULL,
-  `ColumnName`     VARCHAR(100) NOT NULL,
-  `ColumnType`     VARCHAR(50)  NOT NULL,
-  `GroupBy`        VARCHAR(100),
-  `Groups`         VARCHAR(255) NOT NULL,
-  `Preparation`    VARCHAR(1000),
-  `Priority`       INTEGER      NOT NULL,
-  `SourceName`     VARCHAR(100) NOT NULL,
-  PRIMARY KEY (`SourceColumnID`)
-)
-  ENGINE = InnoDB;
+create table `ExternalColumn` (
+    `ExternalColumnID` varchar(100) not null,
+    `ApprovedUsage` varchar(255),
+    `Category` varchar(50),
+    `DataType` varchar(50) not null,
+    `DefaultColumnName` varchar(100) not null,
+    `Description` varchar(1000) not null,
+    `DisplayDiscretizationStrategy` varchar(1000),
+    `DisplayName` varchar(255),
+    `FundamentalType` varchar(50),
+    `PID` bigint not null unique,
+    `StatisticalType` varchar(50),
+    `Tags` varchar(500),
+    primary key (`ExternalColumnID`)
+) ENGINE=InnoDB;
 
-ALTER TABLE `ColumnMapping`
-ADD INDEX FK9166C0784570DE77 (ExternalColumnID),
-ADD CONSTRAINT FK9166C0784570DE77
-FOREIGN KEY (ExternalColumnID)
-REFERENCES `ExternalColumn` (`ExternalColumnID`)
-  ON DELETE CASCADE;
+create table `MatchCommand` (
+    `PID` bigint not null auto_increment,
+    `ApplicationId` varchar(255),
+    `ColumnSelection` varchar(255),
+    `CreateTime` datetime,
+    `Customer` varchar(255),
+    `ErrorMessage` varchar(255),
+    `LatestStatusUpdate` datetime,
+    `MatchStatus` varchar(20) not null,
+    `NumRetries` integer,
+    `NumRows` integer not null,
+    `Progress` float,
+    `RootOperationUID` varchar(100) not null unique,
+    `StatusBeforeFailed` varchar(20),
+    primary key (`PID`)
+) ENGINE=InnoDB;
+
+create table `MatchOperation` (
+    `PID` bigint not null auto_increment,
+    `ApplicationId` varchar(255),
+    `ApplicationState` varchar(20) not null,
+    `BlockOperationUID` varchar(100) not null,
+    `CreateTime` datetime,
+    `ErrorMessage` varchar(255),
+    `LatestStatusUpdate` datetime,
+    `NumRetries` integer,
+    `NumRows` integer not null,
+    `Progress` float,
+    `StateBeforeFailed` varchar(20),
+    RootOperationUID bigint not null,
+    primary key (`PID`)
+) ENGINE=InnoDB;
+
+create table `RefreshProgress` (
+    `ProgressID` bigint not null auto_increment unique,
+    `BaseSourceVersion` varchar(255),
+    `CreateTime` datetime,
+    `CreatedBy` varchar(255),
+    `ErrorMessage` varchar(255),
+    `LatestStatusUpdate` datetime,
+    `NumRetries` integer,
+    `PivotDate` datetime,
+    `RootOperationUID` varchar(255) not null unique,
+    `RowsGeneratedInHDFS` bigint,
+    `RowsUploadedToSQL` bigint,
+    `SourceName` varchar(255) not null,
+    `Status` varchar(255),
+    `StatusBeforeFailed` varchar(255),
+    primary key (`ProgressID`)
+) ENGINE=InnoDB;
+
+create table `SourceColumn` (
+    `SourceColumnID` bigint not null auto_increment unique,
+    `Arguments` varchar(1000),
+    `BaseSource` varchar(100),
+    `Calculation` varchar(50) not null,
+    `ColumnName` varchar(100) not null,
+    `ColumnType` varchar(50) not null,
+    `GroupBy` varchar(100),
+    `Groups` varchar(255) not null,
+    `Preparation` varchar(1000),
+    `Priority` integer not null,
+    `SourceName` varchar(100) not null,
+    primary key (`SourceColumnID`)
+) ENGINE=InnoDB;
+
+alter table `ColumnMapping`
+    add index FK9166C0784570DE77 (ExternalColumnID),
+    add constraint FK9166C0784570DE77
+    foreign key (ExternalColumnID)
+    references `ExternalColumn` (`ExternalColumnID`)
+    on delete cascade;
+
+alter table `MatchOperation`
+    add index FK78AE1542D791BF6B (RootOperationUID),
+    add constraint FK78AE1542D791BF6B
+    foreign key (RootOperationUID)
+    references `MatchCommand` (`PID`)
+    on delete cascade;
+
 
 LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/SourceColumn.txt' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY '\t'

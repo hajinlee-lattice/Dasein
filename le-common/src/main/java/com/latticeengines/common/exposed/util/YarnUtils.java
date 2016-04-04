@@ -31,6 +31,7 @@ public class YarnUtils {
 
     public static ApplicationReport getApplicationReport (
             Configuration yarnConfiguration, ApplicationId applicationId) throws YarnException, IOException {
+        String rmAddr = yarnConfiguration.get("dataplatform.yarn.resourcemanager.address");
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
@@ -41,6 +42,11 @@ public class YarnUtils {
             yarnClient.stop();
         }
         return report;
+    }
+
+    public static FinalApplicationStatus waitFinalStatusForAppId(
+            Configuration yarnConfiguration, ApplicationId applicationId) {
+        return waitFinalStatusForAppId(yarnConfiguration, applicationId, 3600);
     }
 
     public static FinalApplicationStatus waitFinalStatusForAppId(
@@ -63,7 +69,7 @@ public class YarnUtils {
                 log.warn("Failed to get application status of application id " + applicationId);
             }
             try {
-                Thread.sleep(1000L);
+                Thread.sleep(5000L);
             } catch (InterruptedException e) {
                 // Do nothing for InterruptedException
             }
@@ -73,6 +79,8 @@ public class YarnUtils {
                 break;
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(finalStatus));
+
+        log.info("The terminal status of application [" + applicationId + "] is " + finalStatus);
 
         return finalStatus;
 

@@ -23,13 +23,13 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.propdata.SqoopProxy;
+import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 
 @Component
 public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
     @Autowired
-    private SqoopProxy sqoopProxy;
+    private InternalProxy sqoopProxy;
 
     @Autowired
     private Configuration yarnConfiguration;

@@ -13,65 +13,32 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
-import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.latticeengines.propdata.core.service.ZkConfigurationService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
-import com.latticeengines.propdata.match.metric.RealTimeRequest;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
+import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
-@Component("matchPlanner")
-class MatchPlanner {
+public abstract class MatchPlannerBase implements MatchPlanner {
 
-    private static Log log = LogFactory.getLog(MatchPlanner.class);
-
-    @Autowired
-    private ColumnSelectionService columnSelectionService;
+    private static Log log = LogFactory.getLog(MatchPlannerBase.class);
 
     @Autowired
-    private ZkConfigurationService zkConfigurationService;
+    protected ColumnSelectionService columnSelectionService;
 
     @Autowired
     private PublicDomainService publicDomainService;
 
-    @Autowired
-    private MetricService metricService;
-
     @MatchStep
-    MatchContext planForRealTime(MatchInput input) {
-        MatchContext context = validateMatchInput(input);
-        context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
-        context = generateInputMetric(context);
-        context = scanInputData(input, context);
-        context = sketchExecutionPlan(context);
-        return context;
-    }
-
-    @MatchStep
-    private MatchContext validateMatchInput(MatchInput input) {
-        MatchInputValidator.validateRealTimeInput(input, zkConfigurationService.maxRealTimeInput());
-        MatchContext context = new MatchContext();
-        context.setStatus(MatchStatus.NEW);
-        context.setInput(input);
-        MatchOutput output = initializeMatchOutput(input);
-        context.setOutput(output);
-        return context;
-    }
-
-    @MatchStep
-    private MatchContext scanInputData(MatchInput input, MatchContext context) {
+    protected MatchContext scanInputData(MatchInput input, MatchContext context) {
         Map<MatchKey, List<Integer>> keyPositionMap = getKeyPositionMap(input);
 
         List<InternalOutputRecord> records = new ArrayList<>();
@@ -92,36 +59,22 @@ class MatchPlanner {
     }
 
     @MatchStep
-    private MatchContext generateInputMetric(MatchContext context) {
-        MatchInput input = context.getInput();
-        Integer selectedCols = null;
-        if (input.getPredefinedSelection() != null) {
-            selectedCols = columnSelectionService.getTargetColumns(input.getPredefinedSelection()).size();
-        }
-
-        RealTimeRequest request = new RealTimeRequest(input, context.getMatchEngine(), selectedCols);
-        metricService.write(MetricDB.LDC_Match, request);
-
-        return context;
-    }
-
-    @MatchStep
-    private MatchContext sketchExecutionPlan(MatchContext matchContext) {
+    protected MatchContext sketchExecutionPlan(MatchContext matchContext) {
         ColumnSelection.Predefined predefined = matchContext.getInput().getPredefinedSelection();
         if (predefined != null) {
             matchContext.setSourceColumnsMap(columnSelectionService.getSourceColumnMap(predefined));
             matchContext.setColumnPriorityMap(columnSelectionService.getColumnPriorityMap(predefined));
-            matchContext.getOutput().setOutputFields(columnSelectionService.getTargetColumns(predefined));
         }
         return matchContext;
     }
 
-    private static MatchOutput initializeMatchOutput(MatchInput input) {
-        MatchOutput output = new MatchOutput();
+    protected MatchOutput initializeMatchOutput(MatchInput input) {
+        MatchOutput output = new MatchOutput(input.getUuid());
         output.setReceivedAt(new Date());
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
+        output.setOutputFields(columnSelectionService.getTargetColumns(input.getPredefinedSelection()));
         MatchStatistics statistics = initializeStatistics(input);
         output.setStatistics(statistics);
         return output;
@@ -129,7 +82,7 @@ class MatchPlanner {
 
     private static MatchStatistics initializeStatistics(MatchInput input) {
         MatchStatistics statistics = new MatchStatistics();
-        statistics.setRowsRequested(input.getData().size());
+        statistics.setRowsRequested(input.getNumRows());
         return statistics;
     }
 

@@ -16,6 +16,9 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("hdfsPathBuilder")
 public class HdfsPathBuilder {
 
+    private static final String MATCHES_SEGMENT = "Matches";
+    private static final String BLOCKS_SEGMENT = "Blocks";
+
     private static final String rawDataFlowType = "Raw";
     private static final String versionFile = "_CURRENT_VERSION";
     private static final String latestFile = "_LATEST_TIMESTAMP";
@@ -87,9 +90,45 @@ public class HdfsPathBuilder {
         return baseDir.append(dateFormat.format(archiveDate));
     }
 
-    public Path constructCountFlowDir() {
-        Path baseDir = propDataDir();
-        return baseDir.append("CountFlows");
+    public Path constructMatchDir(String rootOperationUid) {
+        return propDataDir().append(MATCHES_SEGMENT).append(rootOperationUid);
+    }
+
+    public Path constructMatchInputDir(String rootOperationUid) {
+        return constructMatchDir(rootOperationUid).append("Input");
+    }
+
+    public Path constructMatchOutputDir(String rootOperationUid) {
+        return constructMatchDir(rootOperationUid).append("Output");
+    }
+
+    public Path constructMatchErrorFile(String rootOperationUid) {
+        String fileName = "match_" + rootOperationUid.replace("-", "_").toLowerCase() + ".err";
+        return constructMatchOutputDir(rootOperationUid).append(fileName);
+    }
+
+    public Path constructMatchSchemaFile(String rootOperationUid) {
+        String fileName = "match_" + rootOperationUid.replace("-", "_").toLowerCase() + ".avsc";
+        return constructMatchOutputDir(rootOperationUid).append(fileName);
+    }
+
+    public Path constructMatchOutputFile(String rootOperationUid) {
+        String fileName = "match_" + rootOperationUid.replace("-", "_").toLowerCase() + "_output.json";
+        return constructMatchOutputDir(rootOperationUid).append(fileName);
+    }
+
+    public Path constructMatchBlockDir(String rootOperationUid, String blockOperationUid) {
+        return constructMatchDir(rootOperationUid).append(BLOCKS_SEGMENT).append(blockOperationUid);
+    }
+
+    public Path constructMatchBlockErrorFile(String rootOperationUid, String blockOperationUid) {
+        String fileName = "block_" + blockOperationUid.replace("-", "_").toLowerCase() + ".err";
+        return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
+    }
+
+    public Path constructMatchBlockOutputFile(String rootOperationUid, String blockOperationUid) {
+        String fileName = "block_" + blockOperationUid.replace("-", "_").toLowerCase() + "_output.json";
+        return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 
     public Path predefinedColumnSelectionDir(ColumnSelection.Predefined predefined) {

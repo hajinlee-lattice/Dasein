@@ -32,5 +32,4 @@
     <bean id="propDataManageJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
           p:dataSource-ref="propDataManage"/>
 
-
 </beans>

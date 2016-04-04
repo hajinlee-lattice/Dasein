@@ -101,6 +101,14 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/camille/camille.properties", versionManager.getCurrentVersion()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/monitor/monitor.properties", versionManager.getCurrentVersion()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/%s/lib/*", versionManager.getCurrentVersion(), module), //
                 false));
         if (softwareLibraryService != null) {

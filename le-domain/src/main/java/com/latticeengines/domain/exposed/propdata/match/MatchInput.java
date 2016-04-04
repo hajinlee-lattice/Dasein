@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.propdata.match;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,6 +13,7 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -23,6 +25,9 @@ public class MatchInput implements Fact, Dimension {
 
     private List<String> fields;
     private List<List<Object>> data;
+    private int numRows;
+
+    private InputBuffer inputBuffer;
 
     // optional, but better to provide. if not, will be resolved from the fields
     private Map<MatchKey, List<String>> keyMap;
@@ -36,6 +41,8 @@ public class MatchInput implements Fact, Dimension {
 
     private String matchEngine;
     private Integer numSelectedColumns;
+
+    private UUID uuid;
 
     @JsonProperty("KeyMap")
     public Map<MatchKey, List<String>> getKeyMap() {
@@ -71,12 +78,28 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("Data")
     public void setData(List<List<Object>> data) {
         this.data = data;
+        setNumRows(data.size());
+    }
+
+    @JsonProperty("InputBuffer")
+    public InputBuffer getInputBuffer() {
+        return inputBuffer;
+    }
+
+    @JsonProperty("InputBuffer")
+    public void setInputBuffer(InputBuffer buffer) {
+        this.inputBuffer = buffer;
     }
 
     @JsonIgnore
     @MetricField(name = "InputRows", fieldType = MetricField.FieldType.INTEGER)
     public Integer getNumRows() {
-        return getData().size();
+        return numRows;
+    }
+
+    @JsonIgnore
+    public void setNumRows(int numRows) {
+        this.numRows = numRows;
     }
 
     @MetricTagGroup
@@ -141,5 +164,20 @@ public class MatchInput implements Fact, Dimension {
     @JsonIgnore
     public void setNumSelectedColumns(Integer numSelectedColumns) {
         this.numSelectedColumns = numSelectedColumns;
+    }
+
+    @JsonIgnore
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    @JsonIgnore
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 }

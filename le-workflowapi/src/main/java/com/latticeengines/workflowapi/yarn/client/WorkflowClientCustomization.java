@@ -48,6 +48,11 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
                 LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/workflow/workflow.properties", versionManager.getCurrentVersion()),//
                 false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                String.format("/app/%s/propdata/propdata.properties", versionManager.getCurrentVersion()),//
+                false));
+
         return hdfsEntries;
     }
 

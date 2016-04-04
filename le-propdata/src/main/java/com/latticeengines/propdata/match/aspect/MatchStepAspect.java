@@ -127,7 +127,9 @@ public class MatchStepAspect {
                     return matchInput.getTenant().getId();
                 } else if (arg instanceof MatchContext) {
                     MatchContext matchContext = (MatchContext) arg;
-                    return matchContext.getOutput().getSubmittedBy().getId();
+                    if (matchContext.getOutput() != null ) {
+                        return matchContext.getOutput().getSubmittedBy().getId();
+                    }
                 }
             }
         } catch (Exception e) {

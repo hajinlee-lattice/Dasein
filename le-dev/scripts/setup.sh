@@ -30,45 +30,33 @@ echo "Deploying framework properties to local Hadoop"
 fwkdpl 2> /tmp/errors.txt
 processErrors
 
-echo "Deploying dataplatform to local Hadoop"
-cd $WSHOME/le-dataplatform && dpdpl 2> /tmp/errors.txt
+echo "Top-level shaded yarn compile"
+mvn -T8 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
 processErrors
 
-echo "Deploying eai to local Hadoop"
-cd $WSHOME/le-eai && eaidpl 2> /tmp/errors.txt
-processErrors
+for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'propdata|pddplnobld' 'dellebi|dedplnobld'
+do
+    service=`echo $servicecmd | cut -d \| -f 1` &&
+    cmd=`echo $servicecmd | cut -d \| -f 2` &&
+    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
+    pushd $WSHOME/le-$service &&
+    eval $cmd 2> /tmp/errors.txt &&
+    popd &&
+    processErrors &
+done
+wait
 
-echo "Deploying dataflow to local Hadoop"
-cd $WSHOME/le-dataflow && dfdpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying dataflowapi to local Hadoop"
-cd $WSHOME/le-dataflowapi && dfapidpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying workflow to local Hadoop"
-cd $WSHOME/le-workflow && wfdpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying workflowapi to local Hadoop"
-cd $WSHOME/le-workflowapi && wfapidpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying scoring to local Hadoop"
-cd $WSHOME/le-scoring && scoringdpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying swlib to local Hadoop"
-cd $WSHOME/le-swlib && swlibdpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying dellebi to local Hadoop"
-cd $WSHOME/le-dellebi && dedpl 2> /tmp/errors.txt
-processErrors
-
-echo "Deploying microservices to local jetty"
-cd $WSHOME/le-microservice && microservicedplnobld 2> /tmp/errors.txt
-processErrors
+for servicecmd in 'workflow|wfdblnobld' 'workflowapi|wfapidplnobld' 'scoring|scoringdplnobld' 'swlib|swlibdpl' 'microservice|microservicedplnobld'
+do
+    service=`echo $servicecmd | cut -d \| -f 1` &&
+    cmd=`echo $servicecmd | cut -d \| -f 2` &&
+    echo "Deploying ${service} to local Hadoop using ${cmd}" &&
+    pushd $WSHOME/le-$service &&
+    eval $cmd 2> /tmp/errors.txt &&
+    popd &&
+    processErrors &
+done
+wait
 
 echo "Success!!!"
 

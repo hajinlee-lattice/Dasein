@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -37,11 +38,18 @@ public class MatchOutput {
     private Tenant submittedBy;
     private Date receivedAt;
     private Date finishedAt;
-    private String rootOperationUID = UUID.randomUUID().toString().toUpperCase();
+    private String rootOperationUID;
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
+
+    // for json constructor
+    private MatchOutput() {}
+
+    public MatchOutput(UUID uuid) {
+        this.rootOperationUID = uuid.toString().toUpperCase();
+    }
 
     static {
         formatter.setCalendar(calendar);
@@ -187,5 +195,4 @@ public class MatchOutput {
     public Integer numOutputFields() {
         return getOutputFields().size();
     }
-
 }

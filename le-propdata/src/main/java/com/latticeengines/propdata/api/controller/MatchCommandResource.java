@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.domain.exposed.propdata.MatchStatusResponse;
 import com.latticeengines.network.exposed.propdata.MatchCommandInterface;
 import com.latticeengines.propdata.match.datasource.MatchClientContextHolder;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.service.MatchCommandsService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -26,7 +26,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class MatchCommandResource implements MatchCommandInterface {
 
     @Autowired
-    private MatchCommandService matchCommandService;
+    private MatchCommandsService matchCommandsService;
 
     @RequestMapping(value = "/{commandID}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -36,8 +36,8 @@ public class MatchCommandResource implements MatchCommandInterface {
     @Override
     public MatchStatusResponse getMatchStatus(@PathVariable Long commandID,
             @RequestParam(value = "matchClient", required = false, defaultValue = "Default") String clientName) {
-        MatchClientContextHolder.setMatchClient(matchCommandService.getMatchClientByName(clientName));
-        MatchCommandStatus status = matchCommandService.getMatchCommandStatus(commandID);
+        MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
+        MatchCommandStatus status = matchCommandsService.getMatchCommandStatus(commandID);
         return new MatchStatusResponse(status);
     }
 
@@ -49,8 +49,8 @@ public class MatchCommandResource implements MatchCommandInterface {
     @Override
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
             @RequestParam(value = "matchClient", required = false, defaultValue = "Default") String clientName) {
-        MatchClientContextHolder.setMatchClient(matchCommandService.getMatchClientByName(clientName));
-        return matchCommandService.createMatchCommand(request);
+        MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
+        return matchCommandsService.createMatchCommand(request);
     }
 
     @RequestMapping(value = "/bestclient", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -59,7 +59,7 @@ public class MatchCommandResource implements MatchCommandInterface {
             "Requires a query parameter \"rows\", which is the number of records to be matched.")
     @Override
     public MatchClientDocument getBestMatchClient(@RequestParam(value = "rows", required = true) int numRows) {
-        return matchCommandService.getBestMatchClient(numRows);
+        return matchCommandsService.getBestMatchClient(numRows);
     }
 
 }

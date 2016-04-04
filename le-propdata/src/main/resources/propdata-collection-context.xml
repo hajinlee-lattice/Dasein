@@ -7,7 +7,7 @@
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
 
     <import resource="classpath:propdata-core-context.xml"/>
-    <import resource="classpath:serviceflows-propdata-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-collection-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
 
     <bean id="sourceColumnDao" class="com.latticeengines.propdata.collection.dao.impl.SourceColumnDaoImpl">

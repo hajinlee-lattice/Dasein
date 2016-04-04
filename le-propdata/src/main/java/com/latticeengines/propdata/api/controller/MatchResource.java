@@ -1,6 +1,8 @@
 package com.latticeengines.propdata.api.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -8,12 +10,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.network.exposed.propdata.MatchInterface;
+import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.RealTimeMatchService;
+import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -24,6 +30,12 @@ public class MatchResource implements MatchInterface {
 
     @Autowired
     private RealTimeMatchService realTimeMatchService;
+
+    @Autowired
+    private BulkMatchService bulkMatchService;
+
+    @Value("${camille.zk.pod.id:Default}")
+    private String podId;
 
     @RequestMapping(value = "/realtime", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -38,6 +50,27 @@ public class MatchResource implements MatchInterface {
             @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
         try {
             return realTimeMatchService.match(input, returnUnmatched);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25007, e);
+        }
+    }
+
+    @RequestMapping(value = "/bulk", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
+            + "except using InputBuffer instead of embedding Data in json body directly. "
+            + "The request parameter podid is used to change the hdfs pod id. "
+            + "This parameter is mainly for testing purpose, and only the PDTest tenant can use this parameter. "
+            + "Leavt it empty will result in using the pod id defined in camille environment.")
+    public MatchCommand matchBulk(@RequestBody MatchInput input,
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
+        try {
+            if (StringUtils.isNotEmpty(hdfsPod) && !(MatchConstants.PDTEST_USER.equals(input.getTenant().getId())
+                    || CustomerSpace.parse(MatchConstants.PDTEST_USER).toString().endsWith(input.getTenant().getId()))) {
+                throw new IllegalArgumentException("Only the user " + MatchConstants.PDTEST_USER
+                        + " can use the podid parameter. Current customer is " + input.getTenant().getId());
+            }
+            return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);
         }

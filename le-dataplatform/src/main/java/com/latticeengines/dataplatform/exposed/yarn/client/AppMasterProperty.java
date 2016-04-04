@@ -7,6 +7,7 @@ public enum AppMasterProperty {
     QUEUE, //
     PRIORITY, //
     CUSTOMER, //
-    CONTAINER_COUNT;
+    CONTAINER_COUNT,
+    APP_NAME;
 
 }

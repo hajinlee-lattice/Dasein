@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,6 +19,14 @@ public class MatchKeyUtils {
 
     private static final List<String> domainFields = new ArrayList<>(Arrays.asList("domain", "website", "email", "url"));
     private static final String latticeAccountId = "latticeaccountid";
+
+    public static Map<MatchKey, List<String>> resolveKeyMap(Schema schema) {
+        List<String> fieldNames = new ArrayList<>();
+        for (Schema.Field field: schema.getFields()) {
+            fieldNames.add(field.name());
+        }
+        return resolveKeyMap(fieldNames);
+    }
 
     /**
      * This method tries to automatically resolve match keys from a list of
@@ -45,6 +54,8 @@ public class MatchKeyUtils {
             switch (lowerField) {
                 case "name":
                 case "company":
+                case "companyname":
+                case "company_name":
                     keyMap.put(MatchKey.Name, Collections.singletonList(field));
                     break;
                 case "city":
@@ -52,6 +63,7 @@ public class MatchKeyUtils {
                     break;
                 case "state":
                 case "province":
+                case "state_province":
                     keyMap.put(MatchKey.State, Collections.singletonList(field));
                     break;
                 case "country":
@@ -63,30 +75,6 @@ public class MatchKeyUtils {
                 case latticeAccountId:
                     keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(field));
                     break;
-            }
-        }
-
-        for (String field : fields) {
-            String lowerField = field.toLowerCase();
-            if (!keyMap.containsKey(MatchKey.Name) && lowerField.contains("name")) {
-                keyMap.put(MatchKey.Name, Collections.singletonList(field));
-            }
-
-            if (!keyMap.containsKey(MatchKey.City) && lowerField.contains("city")) {
-                keyMap.put(MatchKey.City, Collections.singletonList(field));
-            }
-
-            if (!keyMap.containsKey(MatchKey.State) &&
-                    (lowerField.contains("state") || lowerField.contains("province"))) {
-                keyMap.put(MatchKey.State, Collections.singletonList(field));
-            }
-
-            if (!keyMap.containsKey(MatchKey.Country) && lowerField.contains("country")) {
-                keyMap.put(MatchKey.Country, Collections.singletonList(field));
-            }
-
-            if (!keyMap.containsKey(MatchKey.DUNS) && lowerField.contains("duns")) {
-                keyMap.put(MatchKey.DUNS, Collections.singletonList(field));
             }
         }
 

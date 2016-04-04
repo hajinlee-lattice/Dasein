@@ -31,7 +31,7 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.LoggingUtils;
-import com.latticeengines.proxy.exposed.propdata.SqoopProxy;
+import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
@@ -45,7 +45,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
     protected SqoopService sqoopService;
 
     @Autowired
-    protected SqoopProxy sqoopProxy;
+    protected InternalProxy sqoopProxy;
 
     @Autowired
     protected HdfsPathBuilder hdfsPathBuilder;

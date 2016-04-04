@@ -7,8 +7,6 @@ import com.latticeengines.propdata.core.datasource.DataSourceConnection;
 
 public interface ZkConfigurationService {
 
-    Integer maxRealTimeInput();
-
     List<DataSourceConnection> getConnectionsInPool(DataSourcePool pool);
 
 }

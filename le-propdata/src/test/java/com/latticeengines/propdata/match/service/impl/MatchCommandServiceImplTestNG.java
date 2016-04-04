@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandStatus;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.propdata.match.datasource.MatchClientContextHolder;
 import com.latticeengines.propdata.match.datasource.MatchClientRoutingDataSource;
-import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.service.MatchCommandsService;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
 public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNGBase {
@@ -29,7 +29,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
     private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImplTestNG.class);
 
     @Autowired
-    private MatchCommandService matchCommandService;
+    private MatchCommandsService matchCommandsService;
 
     @Autowired
     private MatchClientRoutingDataSource dataSource;
@@ -52,7 +52,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
         request.setContractExternalID(contractId);
         request.setDestTables(destTables);
         request.setSourceTable(sourceTable);
-        Commands command = matchCommandService.createMatchCommand(request);
+        Commands command = matchCommandsService.createMatchCommand(request);
 
         try {
             verifier.verify(command.getPid(), request);
@@ -114,7 +114,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
         public void verifyResults(Long commandId, CreateCommandRequest request) {
             verifyResultTablesAreGenerated(commandId, 5);
 
-            Collection<String> resultTables = matchCommandService.generatedResultTables(commandId);
+            Collection<String> resultTables = matchCommandsService.generatedResultTables(commandId);
             for (String restultTable: resultTables) {
                 verifyEmptyResultTable(restultTable);
             }
@@ -150,7 +150,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
     // verify methods
     // ==================================================
     private void verifyCreateCommandRequest(Long commandId, CreateCommandRequest request) {
-        Commands command = matchCommandService.findMatchCommandById(commandId);
+        Commands command = matchCommandsService.findMatchCommandById(commandId);
         Assert.assertEquals(command.getContractExternalID(), request.getContractExternalID());
         Assert.assertEquals(command.getDeploymentExternalID(), request.getContractExternalID());
         Assert.assertEquals(command.getCommandName(), MatchCommandType.MATCH_WITH_UNIVERSE.getCommandName());
@@ -162,7 +162,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
         MatchCommandStatus status;
         try {
             do {
-                status = matchCommandService.getMatchCommandStatus(commandId);
+                status = matchCommandsService.getMatchCommandStatus(commandId);
                 Thread.sleep(5000L);
             } while (!status.equals(MatchCommandStatus.COMPLETE) &&
                     !status.equals(MatchCommandStatus.FAILED) && numRetries-- > 0);
@@ -177,7 +177,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
         MatchCommandStatus status = waitCommandComplete(timoutInMin, commandId);
         Assert.assertEquals(status, MatchCommandStatus.COMPLETE);
 
-        Commands commands = matchCommandService.findMatchCommandById(commandId);
+        Commands commands = matchCommandsService.findMatchCommandById(commandId);
         Assert.assertTrue(waitResultTablesGenerated(commandId),
                 "Matching against " + commands.getDestTables() + " failed to generate all the result tables. "
                         + " CommandId=" + commandId );
@@ -188,7 +188,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
         boolean ready;
         try {
             do {
-                ready = matchCommandService.resultTablesAreReady(commandId);
+                ready = matchCommandsService.resultTablesAreReady(commandId);
                 Thread.sleep(3000L);
             } while (!ready && numRetries-- > 0);
             return ready;
@@ -218,7 +218,7 @@ public class MatchCommandServiceImplTestNG extends PropDataMatchFunctionalTestNG
     }
 
     private String getDerivedColumnsResultTableName(Long commandId) {
-        Collection<String> resultTables = matchCommandService.generatedResultTables(commandId);
+        Collection<String> resultTables = matchCommandsService.generatedResultTables(commandId);
         for (String restultTable: resultTables) {
             if (restultTable.contains("DerivedColumns")) {
                 return restultTable;

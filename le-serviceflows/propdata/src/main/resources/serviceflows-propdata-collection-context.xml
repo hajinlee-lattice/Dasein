@@ -5,10 +5,8 @@
           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
-    <context:component-scan base-package="com.latticeengines.propdata.dataflow" />
 
     <import resource="classpath:serviceflows-propdata-core-context.xml"/>
-    <import resource="classpath:dataflow-context.xml"/>
 
     <bean id="sourceColumnDao" class="com.latticeengines.propdata.collection.dao.impl.SourceColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>

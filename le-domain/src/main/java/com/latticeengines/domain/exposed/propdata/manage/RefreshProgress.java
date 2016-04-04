@@ -13,11 +13,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "RefreshProgress", uniqueConstraints = { @UniqueConstraint(columnNames = { "RootOperationUID" }) })
+@Table(name = "RefreshProgress")
 public class RefreshProgress implements Progress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,7 +47,7 @@ public class RealTimeMatchExecutorTestNG extends PropDataMatchFunctionalTestNGBa
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         matchContext.setInput(input);
 
-        MatchOutput output = new MatchOutput();
+        MatchOutput output = new MatchOutput(UUID.randomUUID());
         output.setOutputFields(Arrays.asList("Col1", "Col2", "Col3", "Col4"));
         MatchStatistics statistics = new MatchStatistics();
         output.setStatistics(statistics);

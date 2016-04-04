@@ -19,6 +19,7 @@
         <le.serviceflows.core.version>2.0.24-SNAPSHOT</le.serviceflows.core.version>
         <le.serviceflows.prospectdiscovery.version>2.0.24-SNAPSHOT</le.serviceflows.prospectdiscovery.version>
         <le.serviceflows.leadprioritization.version>2.0.24-SNAPSHOT</le.serviceflows.leadprioritization.version>
+        <le.serviceflows.propdata.version>2.0.24-SNAPSHOT</le.serviceflows.propdata.version>
         <le.workflow.version>2.0.24-SNAPSHOT</le.workflow.version>
         <le.network.version>2.0.24-SNAPSHOT</le.network.version>
         <le.metadata.version>2.0.24-SNAPSHOT</le.metadata.version>
@@ -48,6 +49,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-leadprioritization</artifactId>
             <version>${le.serviceflows.leadprioritization.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceflows-propdata</artifactId>
+            <version>${le.serviceflows.propdata.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
