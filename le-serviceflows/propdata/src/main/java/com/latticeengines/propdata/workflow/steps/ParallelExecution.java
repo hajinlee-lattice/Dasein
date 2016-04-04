@@ -30,17 +30,26 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
     @Autowired
     private InternalProxy internalProxy;
 
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         log.info("Inside ParallelExecution execute()");
-        List<PropDataJobConfiguration> jobConfigurations = (List<PropDataJobConfiguration>) executionContext
-                .get(BulkMatchContextKey.YARN_JOB_CONFIGS);
+        List<PropDataJobConfiguration> jobConfigurations = new ArrayList<>();
+
+        Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
+        if(listObj instanceof List){
+            @SuppressWarnings("rawtypes")
+            List list = (List) executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
+            for(Object configObj : list){
+                if(configObj instanceof PropDataJobConfiguration){
+                    jobConfigurations.add((PropDataJobConfiguration)configObj);
+                }
+            }
+        }
 
         List<ApplicationId> applicationIds = new ArrayList<>();
         for (PropDataJobConfiguration jobConfiguration : jobConfigurations) {
-            ApplicationId appId = ConverterUtils
-                    .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
+            ApplicationId appId = ConverterUtils.toApplicationId(internalProxy.submitYarnJob(jobConfiguration)
+                    .getApplicationIds().get(0));
             log.info("Submit a match block to application id " + appId);
             applicationIds.add(appId);
         }
@@ -49,7 +58,7 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
         LogManager.getLogger(RMProxy.class).setLevel(Level.WARN);
         LogManager.getLogger(AHSProxy.class).setLevel(Level.WARN);
 
-        for (ApplicationId appId: applicationIds) {
+        for (ApplicationId appId : applicationIds) {
             YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600 * 24);
         }
 
