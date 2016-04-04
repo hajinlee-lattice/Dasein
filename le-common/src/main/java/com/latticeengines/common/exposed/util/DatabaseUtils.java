@@ -26,13 +26,6 @@ public class DatabaseUtils {
                     log.warn(String.format("Sleeping for %d milliseconds and retrying", sleep));
                     sleep(sleep);
                 }
-            } catch (Exception exception) {
-                log.warn(String.format("Unknown failure detected performing %s", operationName), exception);
-                thrown = exception;
-                if (i != retries - 1) {
-                    log.warn(String.format("Sleeping for %d milliseconds and retrying", sleep));
-                    sleep(sleep);
-                }
             }
         }
         throw new RuntimeException(String.format("Could not perform operation %s after %d retries", operationName,
