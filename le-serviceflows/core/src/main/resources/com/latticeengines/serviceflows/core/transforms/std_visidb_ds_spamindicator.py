@@ -9,6 +9,7 @@ import re
 from std_visidb_ds_firstname_sameas_lastname import std_visidb_ds_firstname_sameas_lastname
 from std_visidb_ds_companyname_entropy import std_visidb_ds_companyname_entropy
 from std_entropy import std_entropy
+from std_length import std_length
 
 def metadata():
     return {  'ApprovedUsage'   : 'ModelAndModelInsights'
@@ -20,6 +21,9 @@ def metadata():
 
 
 def ds_company_isunusual(n):
+    if n is None:
+        return 0
+
     n = n.lower()
 
     if re.search('["#$%+:<=>?@\^_`{}~]', n):
@@ -38,8 +42,6 @@ def ds_company_isunusual(n):
 
 
 def std_visidb_ds_spamindicator(firstName, lastName, title, phone, company):
-    if firstName is None or lastName is None or title is None or phone is None or company is None:
-        return None
 
     if std_visidb_ds_firstname_sameas_lastname(firstName, lastName) == 1:
         return 1
@@ -47,7 +49,7 @@ def std_visidb_ds_spamindicator(firstName, lastName, title, phone, company):
     score = 0
     score += ds_company_isunusual(company)
 
-    if len(company) < 5:
+    if std_length(company) < 5:
         score += 1
 
     companyNameEntropy = std_visidb_ds_companyname_entropy(company)
@@ -55,7 +57,7 @@ def std_visidb_ds_spamindicator(firstName, lastName, title, phone, company):
     if companyNameEntropy is not None and companyNameEntropy <= 0.03:
         score += 1
 
-    if len(title) <= 2:
+    if std_length(title) <= 2:
         score += 1
 
     phoneEntropy = std_entropy(phone)

@@ -18,7 +18,7 @@ def metadata():
 
 def std_visidb_ds_title_istechrelated(n):
     if n is None:
-        return None
+        return False
 
     if re.search('(?<!\w)eng|tech|info|dev', n.lower()):
         return True

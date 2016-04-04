@@ -41,7 +41,7 @@ def ds_title_isvpabove(n):
 
 def std_visidb_ds_title_level(n):
     if n is None:
-        return None
+        return 0
 
     n = n.lower()
 

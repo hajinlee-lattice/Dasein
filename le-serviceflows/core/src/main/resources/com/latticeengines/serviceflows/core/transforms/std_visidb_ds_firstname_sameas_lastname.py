@@ -16,7 +16,7 @@ def metadata():
 
 def std_visidb_ds_firstname_sameas_lastname(firstname, lastname):
     if firstname is None or lastname is None:
-        return None
+        return False
 
     if firstname == '' and lastname == '':
         return False

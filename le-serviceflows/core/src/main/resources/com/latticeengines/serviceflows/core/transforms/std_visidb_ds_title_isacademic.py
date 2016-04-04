@@ -20,7 +20,7 @@ def metadata():
 
 def std_visidb_ds_title_isacademic(n):
     if n is None:
-        return None
+        return False
 
     if re.search('student|researcher|professor|dev|programmer', n.lower()) and std_visidb_ds_title_level(n) == 0:
         return True
