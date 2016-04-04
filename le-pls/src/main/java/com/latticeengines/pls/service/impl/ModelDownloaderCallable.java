@@ -7,8 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,7 +88,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         for (String file : files) {
             try {
-                String modelSummaryId = UuidUtils.extractUuid(file);
+                String modelSummaryId = UuidUtils.parseUuid(file);
                 if (!set.contains(modelSummaryId)) {
                     String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                     ModelSummary summary = parser.parse(file, contents);
