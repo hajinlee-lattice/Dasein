@@ -12,6 +12,27 @@ angular
                 },
                 redirectTo: 'jobs.status'
             })
+            .state('home.model.jobs', {
+                url: '/jobs',
+                views: {
+                },
+                redirectTo: 'home.model.jobs.status'
+            })
+            .state('home.model.jobs.status', {
+                url: '/status',
+                views: {
+                    "main@": {
+                        /*
+                        resolve: {
+                            Model: function(ModelStore) {
+                                return ModelStore.data;
+                            }
+                        }
+                        */
+                        templateUrl: 'app/jobs/status/StatusView.html'
+                    }
+                }
+            })
             .state('home.jobs.status', {
                 url: '/status',
                 views: {

@@ -22,74 +22,36 @@ angular.module('mainApp.create.csvImport', [
     }
 })
 .service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
-    this.Upload = function(file, fileType, cancelDeferred) {
+    this.Upload = function(options) {
         var deferred = $q.defer(),
-            formData = new FormData(),
-            startTime = new Date();
+            formData = new FormData();
         
-        formData.append('file', file);
+        formData.append('file', options.file);
 
-        var xhr = new XMLHttpRequest(),
-            html = '';
+        var xhr = new XMLHttpRequest();
         
-        (xhr.upload || xhr).addEventListener('progress', function(e) {
-            if (e.total / 1024 > 486000) {
-                xhr.abort();
-                $('div.loader').css({'display':'none'});
+        if (options.progress) {
+            (xhr.upload || xhr).addEventListener('progress', options.progress);
+        }
 
-                html = 'ERROR: Over file size limit.  File must be below 486MB';
-            } else {
-                var done = e.loaded / 1024,
-                    total = e.total / 1024,
-                    percent = Math.round(done / total * 100),
-                    currentTime = new Date(),
-                    seconds = Math.floor((currentTime - startTime) / 1000),
-                    minutes = Math.floor(seconds / 60),
-                    hours = Math.floor(minutes / 60),
-                    speed = done / seconds,
-                    seconds = seconds % 60,
-                    minutes = minutes % 60,
-                    hours = hours % 24,
-                    seconds = (seconds < 10 ? '0' + seconds : seconds),
-                    minutes = (minutes < 10 ? '0' + minutes : minutes),
-                    r = Math.round;
-
-                if (percent < 100) {
-                    var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
-                                '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>';
-                } else {
-                    var html =  'Processing...';
-                }
-            }
-
-            $('#file_progress').html(html);
+        xhr.addEventListener('load', function(event) {
+            deferred.resolve(JSON.parse(this.responseText));
         });
 
-        xhr.addEventListener('load', function(e) {
-            var result = JSON.parse(this.responseText);
-
-            console.log('# xhr upload load', e, result);
-
-            deferred.resolve(result);
-        });
-
-        xhr.addEventListener('error', function(e) {
-            console.log('# xhr upload error', e, this.responseText);
+        xhr.addEventListener('error', function(event) {
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('MODEL_IMPORT_CONNECTION_ERROR'),
                 Result: null
             };
-
             deferred.resolve(result);
         });
 
-        xhr.addEventListener('abort', function(e) {
-            console.log('# xhr upload cancel', e, this.responseText);
+        xhr.addEventListener('abort', function(event) {
             deferred.resolve(this.responseText);
         });
 
-        xhr.open('POST', '/pls/models/fileuploads/unnamed?schema=' + fileType);
+        xhr.open('POST', options.url);
         
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
@@ -261,23 +223,60 @@ angular.module('mainApp.create.csvImport', [
             $scope.importErrorMsg = "";
             $scope.importing = true;
 
-            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
+            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+                startTime = new Date();
+            
             this.cancelDeferred = cancelDeferred = $q.defer();
 
-            csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
-                console.log('# Upload Successful:' + result.Success, result);
+            csvImportService.Upload({
+                file: $scope.csvFile, 
+                url: '/pls/models/fileuploads/unnamed?schema=' + fileType,
+                progress: function(e) {
+                    if (e.total / 1024 > 486000) {
+                        xhr.abort();
+                        $('div.loader').css({'display':'none'});
+
+                        html = 'ERROR: Over file size limit.  File must be below 486MB';
+                    } else {
+                        var done = e.loaded / 1024,
+                            total = e.total / 1024,
+                            percent = Math.round(done / total * 100),
+                            currentTime = new Date(),
+                            seconds = Math.floor((currentTime - startTime) / 1000),
+                            minutes = Math.floor(seconds / 60),
+                            hours = Math.floor(minutes / 60),
+                            speed = done / seconds,
+                            seconds = seconds % 60,
+                            minutes = minutes % 60,
+                            hours = hours % 24,
+                            seconds = (seconds < 10 ? '0' + seconds : seconds),
+                            minutes = (minutes < 10 ? '0' + minutes : minutes),
+                            r = Math.round;
+
+                        if (percent < 100) {
+                            var html =  '<div style="display:inline-block;position:relative;width:164px;height:.9em;border:1px solid #aaa;padding:2px;vertical-align:top;">'+
+                                        '<div style="width:'+percent+'%;height:100%;background:lightgreen;"></div></div>';
+                        } else {
+                            var html =  'Processing...';
+                        }
+                    }
+
+                    $('#file_progress').html(html);
+                }
+            }).then(function(result) {
                 if (result.Success && result.Result) {
                     var fileName = result.Result.name,
                         metaData = result.Result,
                         modelName = $scope.modelName;
 
-                    console.log('# CSV Upload Complete', fileName, modelName, metaData);
+                    console.log('# Upload Complete', fileName, modelName, metaData);
                     metaData.modelName = modelName;
 
                     csvImportStore.Set(fileName, metaData);
 
                     $state.go('home.models.import.columns', { csvFileName: fileName })
                 } else {
+                    console.log('# Upload Error', result);
                     $('div.loader').css({'display':'none'});
 
                     var errorCode = result.errorCode || 'LEDP_ERR';

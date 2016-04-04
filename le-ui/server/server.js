@@ -10,6 +10,9 @@ const exphbs    = require('express-handlebars');
 const request   = require('request');
 const morgan    = require('morgan');
 const fs        = require('fs');
+const helmet    = require('helmet');
+const session   = require('express-session');
+const compress  = require('compression');
 
 class Server {
     constructor(express, app, options) {
@@ -48,12 +51,31 @@ class Server {
         this.app.set('view engine', '.html');
         this.app.set('views', options.APP_ROOT);
 
-        process.on('uncaughtException', err => this.app.close());
-        process.on('SIGTERM', err => this.app.close());
+        //process.on('uncaughtException', err => app.close());
+        //process.on('SIGTERM', err => app.close());
         process.on('ECONNRESET', err => { 
-            //this.app.close()
-
+            console.log('ECONNRESET', err);
         });
+
+        this.setMiddleware();
+    }
+
+    setMiddleware() {
+        // enable gzip compression
+        this.app.use(compress());
+
+        // helmet enables/modifies/removes http headers for security concerns
+        this.app.use(helmet());
+        
+        // default cookie behavior - favors security
+        this.app.use(session({
+            name: 'sessionId',
+            secret: 'LEs3Cur1ty',
+            cookie: { 
+                secure: true,
+                expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+            }
+        }));
     }
 
     startLogging(log_path) {
@@ -72,17 +94,7 @@ class Server {
 
     // trust the load balancer/proxy in production
     trustProxy(WHITELIST) {
-        this.app.set('trust proxy', ip => {
-            const ips = WHITELIST.split(',');
-            
-            ips.forEach(current_ip => {
-                if (current_ip === ip) {
-                    return true;
-                }
-            });
-
-            return false;
-        });
+        this.app.set('trust proxy', WHITELIST);
     }
 
     // forward API requests for dev
@@ -123,19 +135,21 @@ class Server {
         routes.forEach(route => {
             const dir = this.options.APP_ROOT + route.path;
             var displayString = '';
-            //console.log('> PATH:\t'+route.path);
             // set up the static routes for app files
             if (route.folders) {
                 Object.keys(route.folders).forEach(folder => {
                     displayString += (displayString ? ', ' : '') + route.folders[folder];
                     this.app.use(
                         folder, 
-                        this.express.static(dir + route.folders[folder])
+                        this.express.static(dir + route.folders[folder], { maxAge: 31557600 })
                     );
                 });
             }
 
-            //console.log('\t[ '+displayString+' ]');
+            console.log(
+                '> PATH:\t'+route.path.replace(this.options.SRC_PATH,""),
+                '[ '+displayString+' ]'
+            );
 
             displayString = '';
             // users will see the desired render page when entering these routes
@@ -163,7 +177,7 @@ class Server {
         if (NODE_ENV != 'production') {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
-                res.render('./server/error', {
+                res.render('server/error', {
                     options: this.options,
                     url: req.originalUrl,
                     status: err.status,
@@ -177,7 +191,7 @@ class Server {
         // no stacktraces leaked to user for production
         this.app.use((err, req, res, next) => {
             res.status(err.status || 500);
-            res.render('./server/error', {
+            res.render('server/error', {
                 url: req.originalUrl,
                 status: err.status,
                 message: err.message,
@@ -198,7 +212,7 @@ class Server {
             console.log('\t' + key + ':\t' + value + ' (' + typeof value + ')');
         });
 
-        //console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
+        console.log('> REDIRECT:', this.API_PATH, ' -> ', options.API_URL);
 
         if (this.httpServer) {
             this.httpServer.listen(options.HTTP_PORT, () => { console.log('> LISTENING: http://localhost:' + options.HTTP_PORT); });

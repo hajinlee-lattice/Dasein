@@ -6,8 +6,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
     'mainApp.appCommon.services.ManageFieldsService',
     'mainApp.setup.modals.EditFieldModel',
     'mainApp.setup.controllers.DiscardEditFieldsModel',
-    'mainApp.setup.modals.UpdateFieldsModal',
-    'kendo.directives'
+    'mainApp.setup.modals.UpdateFieldsModal'
 ])
 
 .controller('ManageFieldsWidgetController', function (

@@ -42,7 +42,7 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: 'Lattice1',
-                WHITELIST: '10.41.0.14,10.41.0.16,10.51.12.109,10.51.51.109'
+                WHITELIST: '10.41.0.14, 10.41.0.16, 10.51.12.109, 10.51.51.109'
             },
             qa: {
                 NODE_ENV: 'qa',
@@ -54,7 +54,7 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: '10.41.0.14,10.41.0.16'
+                WHITELIST: '10.41.0.14, 10.41.0.16'
             },
             production: {
                 NODE_ENV: 'production',
@@ -66,7 +66,7 @@ module.exports = function (grunt) {
                 HTTPS_KEY: './server/certs/privatekey.key',
                 HTTPS_CRT: './server/certs/certificate.crt',
                 HTTPS_PASS: false,
-                WHITELIST: '10.51.12.109,10.51.51.109'
+                WHITELIST: '10.51.12.109, 10.51.51.109'
             }
         },
         run: {

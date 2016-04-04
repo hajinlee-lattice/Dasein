@@ -204,6 +204,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.exportClicked = function () {
         var fileName = "attributes.csv";
     	var csvRows = TopPredictorService.GetTopPredictorExport(data);
+        console.log(fileName, csvRows, data);
         alasql("SELECT * INTO CSV('" + fileName + "') FROM ?", [csvRows]);
     };
 

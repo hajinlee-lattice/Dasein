@@ -1,10 +1,10 @@
-angular.module('mainApp.create.csvImport', [
+angular.module('mainApp.create.csvBulkUpload', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
     'mainApp.core.utilities.NavUtility'
 ])
-.service('csvImportStore', function() {
+.service('csvBulkUploadStore', function() {
     this.files = {};
     this.cancelXHR = null;
 
@@ -20,7 +20,7 @@ angular.module('mainApp.create.csvImport', [
         }
     }
 })
-.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
+.service('csvBulkUploadService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvBulkUploadStore, ServiceErrorUtility) {
     this.Upload = function(file, fileType, cancelDeferred) {
         var deferred = $q.defer(),
             formData = new FormData(),
@@ -96,7 +96,7 @@ angular.module('mainApp.create.csvImport', [
 
         xhr.send(formData);
 
-        csvImportStore.Set('cancelXHR', xhr, true);
+        csvBulkUploadStore.Set('cancelXHR', xhr, true);
 
         return deferred.promise;
     };
@@ -245,9 +245,9 @@ angular.module('mainApp.create.csvImport', [
         }
     };
 }])
-.controller('csvImportController', [
-    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
-    function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state, $q) {
+.controller('csvBulkUploadController', [
+    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvBulkUploadService', 'csvBulkUploadStore', '$state', '$q',
+    function($scope, $rootScope, ModelService, ResourceUtility, csvBulkUploadService, csvBulkUploadStore, $state, $q) {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
         $scope.importing = false;
@@ -263,7 +263,7 @@ angular.module('mainApp.create.csvImport', [
             var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount';
             this.cancelDeferred = cancelDeferred = $q.defer();
 
-            csvImportService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
+            csvBulkUploadService.Upload($scope.csvFile, fileType, cancelDeferred).then(function(result) {
                 console.log('# Upload Successful:' + result.Success, result);
                 if (result.Success && result.Result) {
                     var fileName = result.Result.name,
@@ -273,9 +273,9 @@ angular.module('mainApp.create.csvImport', [
                     console.log('# CSV Upload Complete', fileName, modelName, metaData);
                     metaData.modelName = modelName;
 
-                    csvImportStore.Set(fileName, metaData);
+                    csvBulkUploadStore.Set(fileName, metaData);
 
-                    $state.go('home.models.import.columns', { csvFileName: fileName })
+                    $state.go('home.model.jobs');
                 } else {
                     $('div.loader').css({'display':'none'});
 
@@ -297,7 +297,7 @@ angular.module('mainApp.create.csvImport', [
 
         $scope.cancelClicked = function() {
             console.log('# Upload Cancelled');
-            csvImportStore.Get('cancelXHR', true).abort();
+            csvBulkUploadStore.Get('cancelXHR', true).abort();
             $state.go('home.models');
         };
     }

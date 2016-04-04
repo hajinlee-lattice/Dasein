@@ -6,7 +6,7 @@ angular
     ])
     .controller('SidebarRootController', function($scope, FeatureFlagService, ResourceUtility) {
         $scope.ResourceUtility = ResourceUtility;
-        console.log(ResourceUtility);
+        
         FeatureFlagService.GetAllFlags().then(function() {
             var flags = FeatureFlagService.Flags();
             $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);

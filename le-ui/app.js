@@ -10,21 +10,23 @@
 const Server    = require('./server/server');
 const express   = require('express');
 const app       = express(); 
+const ts        = new Date();
 
 // node doesn't support destructuring yet, which would have been nice here.
 const options   = {
-    NODE_ENV:   app.get('env')          || process.env.NODE_ENV || 'production',
-    HTTP_PORT:  process.env.HTTP_PORT   || false,
-    HTTPS_PORT: process.env.HTTPS_PORT  || 3000,
+    NODE_ENV:   app.get('env')          || process.env.NODE_ENV || 'development',
+    HTTP_PORT:  process.env.HTTP_PORT   || 3000,
+    HTTPS_PORT: process.env.HTTPS_PORT  || false,
     HTTPS_KEY:  process.env.HTTPS_KEY   || './server/certs/privatekey.key',
     HTTPS_CRT:  process.env.HTTPS_CRT   || './server/certs/certificate.crt',
     HTTPS_PASS: process.env.HTTPS_PASS  || false,
-    API_URL:    process.env.API_URL     || false,
+    API_URL:    process.env.API_URL     || 'http://app.lattice.local',
     WHITELIST:  process.env.WHITELIST   || false,
-    COMPRESSED: process.env.COMPRESSED  || true,
-    LOGGING:    process.env.LOGGING     || '/var/log/ledp',
-    UPTIME:     process.uptime(),
-    APP_ROOT:   __dirname 
+    COMPRESSED: process.env.COMPRESSED  || false,
+    LOGGING:    process.env.LOGGING     || './server/log',
+    TIMESTAMP:  (ts.getMonth()+1)+'/'+ts.getDate()+'/'+ts.getFullYear()+' '+ts.getHours()+':'+ts.getMinutes()+':'+ts.getSeconds(),
+    APP_ROOT:   __dirname,
+    SRC_PATH:   '/projects'
 };
 
 // force boolean true/false for options

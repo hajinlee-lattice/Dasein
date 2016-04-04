@@ -3,6 +3,7 @@ var mainApp = angular.module('mainApp', [
     'templates-main',
     'ui.router',
     'ui.bootstrap',
+    'oc.lazyLoad',
     'mainApp.appCommon.modals.SimpleModal',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
@@ -17,6 +18,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.config.services.ConfigService',
     'mainApp.create.csvImport',
     'mainApp.create.csvReport',
+    'mainApp.create.csvBulkUpload',
     'pd.navigation',
     'pd.jobs'
 ])

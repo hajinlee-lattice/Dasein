@@ -23,8 +23,7 @@ angular
 
 // define routes for PD application.
 .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
-    var UnderConstruction = '<div style="text-align:center;margin-top:5em;"><img src="/assets/images/headbang.gif" /></div>',
-        ModelDependencies = {
+    var ModelDependencies = {
             Model: function($q, $stateParams, ModelStore) {
                 var deferred = $q.defer(),
                     id = $stateParams.modelId;
@@ -34,7 +33,10 @@ angular
                 });
 
                 return deferred.promise;
-            }
+            },
+            loadAlaSQL: ['$ocLazyLoad', function($ocLazyLoad) {
+                return $ocLazyLoad.load('lib/js/alasql.min.js');
+            }]
         };
 
     $urlRouterProvider.otherwise('/tenant/');
@@ -119,7 +121,6 @@ angular
                     var deferred = $q.defer();
 
                     csvImportService.GetUnknownColumns(csvMetaData).then(function(result) {
-                        console.log(result);
                         deferred.resolve(result);
                     });
 
@@ -138,7 +139,6 @@ angular
                 },
                 "main@": {
                     controller: function($state, $stateParams, csvMetaData, csvUnknownColumns, csvImportService) {
-                        console.log(csvUnknownColumns);
                         this.errors = csvUnknownColumns.ResultErrors;
                         this.data = csvUnknownColumns.Result;
 
@@ -300,6 +300,11 @@ angular
         })
         .state('home.model.refine', {
             url: '/refine',
+            resolve: {
+                loadKendo: ['$ocLazyLoad', function($ocLazyLoad) {
+                    return $ocLazyLoad.load('lib/js/kendo.all.min.js');
+                }]
+            },
             views: {
                 "main@": {
                     controller: function($scope, $compile, ModelStore) {
@@ -325,7 +330,6 @@ angular
                         }
                     }).then(
                         function onSuccess(response) {
-                            console.log(response);
                             if (response.data.Success) {
                                 deferred.resolve(response.data.Result);
                             } else {
@@ -579,8 +583,8 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    template: UnderConstruction
-                }   
+                    template: 'dashboard'
+                }
             }
         })
         .state('home.enrichment', {
