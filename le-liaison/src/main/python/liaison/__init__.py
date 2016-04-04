@@ -18,7 +18,7 @@ __author__ = 'Michael Wilson'
 
 from .exceptions import (
     HTTPError, EndpointError, ExpressionSyntaxError, ExpressionNotImplemented,
-    TenantNotMappedToURL, TenantNotFoundAtURL, DataLoaderError,
+    TenantNotMappedToURL, TenantNotFoundAtURL, VisiDBNotFoundOnServer, DataLoaderError,
     UnknownMetadataValue, UnknownVisiDBSpec, UnknownDataLoaderObject,
     UnknownDatabaseType, MaudeStringError, XMLStringError, UnknownVisiDBType,
     VisiDBQueryResultsNotReady

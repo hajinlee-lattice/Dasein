@@ -24,7 +24,7 @@ except ImportError as ie:
     raise ie
 
 import os, datetime, re, htmlentitydefs
-from .exceptions import HTTPError, EndpointError, TenantNotMappedToURL, TenantNotFoundAtURL, DataLoaderError
+from .exceptions import HTTPError, EndpointError, TenantNotMappedToURL, TenantNotFoundAtURL, VisiDBNotFoundOnServer, DataLoaderError
 from .exceptions import UnknownVisiDBSpec, UnknownDataLoaderObject, MaudeStringError, XMLStringError
 from .ConnectionMgr import ConnectionMgr
 from .TableVDBImpl import TableVDBImpl
@@ -817,7 +817,6 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             print 'Success'
 
 
-#Add a New Feature to get the DL Tenant Setting
     def getDLTenantSettings(self):
 
         url = self._url + '/DLRestService/GetDLTenantSettings'
@@ -829,14 +828,14 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
             print self.getType() +': Get DataLoader Tenant Settings...',
 
         try:
-            response = requests.post( url, json=payload, headers=self._headers, verify=self._verify )
+            response = requests.post(url, json=payload, headers=self._headers, verify=self._verify)
         except requests.exceptions.ConnectionError as e:
-            raise EndpointError( e )
+            raise EndpointError(e)
 
         if response.status_code != 200:
             if self.isVerbose():
                 print 'HTTP POST request failed'
-            raise HTTPError( 'ConnectionMgrVDBImpl.getDLTenantSettings(): POST request returned code {0}'.format(response.status_code) )
+            raise HTTPError('ConnectionMgrVDBImpl.getDLTenantSettings(): POST request returned code {0}'.format(response.status_code))
 
         status = None
         errmsg = ''
@@ -847,21 +846,21 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         except ValueError as e:
             if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
-            raise EndpointError( e )
+            raise EndpointError(e)
 
         if status == 5:
-            raise XMLStringError( errmsg )
+            raise VisiDBNotFoundOnServer(errmsg)
 
         if status != 3:
             if self.isVerbose():
                 print 'Failed to get DL Tenant Settings'
                 print errmsg
-            raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.getDLTenantSettings(): {0}'.format(payload['tenantName']) )
+            raise TenantNotFoundAtURL('ConnectionMgrVDBImpl.getDLTenantSettings(): {0}'.format(payload['tenantName']))
 
         if self.isVerbose():
             print 'Success'
 
-        return( response.json()["Value"])
+        return(response.json()["Value"])
 
 
     @classmethod

@@ -14,7 +14,7 @@ def getVersionForTenants(tenantFileName, versionFileName):
 
     with open(versionFileName, mode = 'w') as versionFile:
 
-        versionFile.write('TenantName,Type,Version,CallTime\n')
+        versionFile.write('TenantName,Type,Version,visiDB,CallTime\n')
 
         for t in tenants:
 
@@ -22,16 +22,24 @@ def getVersionForTenants(tenantFileName, versionFileName):
 
             type = 'Unknown'
             version = 'Unknown'
+            visidb = 'Not Found'
             calltime = 0.0
             isLP = False
 
             try:
-                conn_mgr = ConnectionMgrFactory.Create('visiDB', tenant_name=t, verify=False, verbose=True)
+                conn_mgr = ConnectionMgrFactory.Create('visiDB', tenant_name=t, verify=False, verbose=False)
+                settings = conn_mgr.getDLTenantSettings()
                 isLP = True
             except TenantNotMappedToURL:
                 version = 'Not on LP DataLoader'
+            except VisiDBNotFoundOnServer as e:
+                print '  !! visiDB Not Found on Server: {0}'.format(str(e))
 
             t0 = time.time()
+
+            for s in settings:
+                if s['Key'] == 'VisiDBName':
+                    visidb = s['Value']
 
             if isLP:
                 try:
@@ -58,7 +66,7 @@ def getVersionForTenants(tenantFileName, versionFileName):
 
             calltime = t1-t0
 
-            versionFile.write('{0},{1},{2},{3}\n'.format(t,type,version,calltime))
+            versionFile.write('{0},{1},{2},{3},{4}\n'.format(t,type,version,visidb,calltime))
 
 
 def usage(cmd, exit_code):

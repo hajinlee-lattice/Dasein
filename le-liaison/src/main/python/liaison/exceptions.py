@@ -23,6 +23,9 @@ class TenantNotMappedToURL( ValueError ):
 class TenantNotFoundAtURL( ValueError ):
     """The tenant was not found at the specified URL"""
 
+class VisiDBNotFoundOnServer( ValueError ):
+    """The tenant was not found at the specified URL"""
+
 class DataLoaderError( ValueError ):
     """The tenant was not found at the specified URL"""
 
