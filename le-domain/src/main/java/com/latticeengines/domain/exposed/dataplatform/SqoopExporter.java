@@ -77,15 +77,12 @@ public class SqoopExporter {
             for (String arg : this.hadoopArgs) {
                 if (arg.contains("-Dmapreduce.job.queuename")) {
                     queueInArgs = true;
-                    args.add(queueArg);
                 } else {
                     args.add(arg);
                 }
             }
         }
-        if (!queueInArgs) {
-            args.add(queueArg);
-        }
+        args.add(queueArg);
         setHadoopArgs(args);
     }
 
@@ -201,20 +198,30 @@ public class SqoopExporter {
             exporter.setSync(this.sync);
 
             Set<String> hadoopArgKeys = new HashSet<>();
-            for (String arg: this.hadoopArgs) {
+            List<String> hadoopArgs = new ArrayList<>(exporter.getHadoopArgs());
+            for (String arg: hadoopArgs) {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
+                }
+            }
+
+            for (String arg: this.hadoopArgs) {
+                String key = arg.substring(0, arg.indexOf("="));
+                if (!hadoopArgKeys.contains(key)) {
+                    hadoopArgKeys.add(key);
+                    hadoopArgs.add(arg);
                 }
             }
 
             for (String arg: defaultHadoopArgs) {
                 String defaultKey = arg.substring(0, arg.indexOf("="));
                 if (!hadoopArgKeys.contains(defaultKey)) {
-                    this.addHadoopArg(arg);
+                    hadoopArgKeys.add(defaultKey);
+                    hadoopArgs.add(arg);
                 }
             }
 
-            exporter.setHadoopArgs(new ArrayList<>(this.hadoopArgs));
+            exporter.setHadoopArgs(new ArrayList<>(hadoopArgs));
             exporter.setOtherOptions(new ArrayList<>(this.otherOptions));
 
             return exporter;

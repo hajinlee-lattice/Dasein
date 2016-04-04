@@ -16,6 +16,11 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class SqoopImporter {
 
+    private static List<String> defaultHadoopArgs = Arrays.asList(
+            "-Dmapreduce.task.timeout=600000",
+            "-Dmapreduce.job.running.map.limit=32"
+    );
+
     private String table;
     private String query;
     private String targetDir;
@@ -87,15 +92,12 @@ public class SqoopImporter {
             for (String arg : this.hadoopArgs) {
                 if (arg.contains("-Dmapreduce.job.queuename")) {
                     queueInArgs = true;
-                    args.add(queueArg);
                 } else {
                     args.add(arg);
                 }
             }
         }
-        if (!queueInArgs) {
-            args.add(queueArg);
-        }
+        args.add(queueArg);
         setHadoopArgs(args);
     }
 
@@ -239,17 +241,30 @@ public class SqoopImporter {
             importer.setProperties(this.properties);
 
             Set<String> hadoopArgKeys = new HashSet<>();
-            for (String arg: this.hadoopArgs) {
+            List<String> hadoopArgs = new ArrayList<>(importer.getHadoopArgs());
+            for (String arg: hadoopArgs) {
                 if (arg.contains("=")) {
                     hadoopArgKeys.add(arg.substring(0, arg.indexOf("=")));
                 }
             }
 
-            if (!hadoopArgKeys.contains("-Dmapreduce.task.timeout")) {
-                this.addHadoopArg("-Dmapreduce.task.timeout=600000");
+            for (String arg: this.hadoopArgs) {
+                String key = arg.substring(0, arg.indexOf("="));
+                if (!hadoopArgKeys.contains(key)) {
+                    hadoopArgKeys.add(key);
+                    hadoopArgs.add(arg);
+                }
             }
 
-            importer.setHadoopArgs(new ArrayList<>(this.hadoopArgs));
+            for (String arg: defaultHadoopArgs) {
+                String defaultKey = arg.substring(0, arg.indexOf("="));
+                if (!hadoopArgKeys.contains(defaultKey)) {
+                    hadoopArgKeys.add(defaultKey);
+                    hadoopArgs.add(arg);
+                }
+            }
+
+            importer.setHadoopArgs(new ArrayList<>(hadoopArgs));
             importer.setOtherOptions(new ArrayList<>(this.otherOptions));
 
             return importer;
