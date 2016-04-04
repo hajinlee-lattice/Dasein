@@ -500,7 +500,6 @@ public class AvroUtils {
             return reader.next();
         }
 
-
         @Override
         public void remove() {
             throw new UnsupportedOperationException("remove is not applicable to this iterator.");
