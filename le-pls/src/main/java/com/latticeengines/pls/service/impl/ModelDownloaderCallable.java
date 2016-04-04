@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,14 +17,19 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.hdfs.BlockMissingException;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.security.exposed.util.SecurityContextUtils;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
     private static final Log log = LogFactory.getLog(ModelDownloaderCallable.class);
+    
+    private static final int MS__IDX = 4;
+    private static final int GUID_TOKENS_CNT = 5;
 
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
@@ -73,29 +79,36 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
 
         Set<String> set = new HashSet<>();
-        List<ModelSummary> summaries = modelSummaryEntityMgr.getAll();
+        SecurityContextUtils.setTenant(tenant);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         for (ModelSummary summary : summaries) {
-            set.add(summary.getId());
+            try {
+                set.add(getIdFromModelSummary(summary));
+            } catch (Exception e) {
+                // Skip any model summaries that have unexpected ID syntax
+                log.warn(e);
+            }
         }
         boolean foundFilesToDownload = false;
 
         for (String file : files) {
             try {
-                String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
-                ModelSummary summary = parser.parse(file, contents);
-                String[] tokens = file.split("/");
-                summary.setTenant(tenant);
-
-                if (!set.contains(summary.getId())) {
+                String modelSummaryId = UuidUtils.parseUuid(file);
+                if (!set.contains(modelSummaryId)) {
+                    String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
+                    ModelSummary summary = parser.parse(file, contents);
+                    String[] tokens = file.split("/");
+                    summary.setTenant(tenant);
                     try {
-                        summary.setApplicationId("application_" + tokens[tokens.length-3]);
+                        summary.setApplicationId("application_" + tokens[tokens.length - 3]);
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        log.error(String.format("Cannot set application id of model summary with id %s.", summary.getId()));
+                        log.error(String.format("Cannot set application id of model summary with id %s.",
+                                modelSummaryId));
                     }
-                    
                     log.info(String.format("Creating model summary with id %s appId %s from file %s.", //
                             summary.getId(), summary.getApplicationId(), file));
                     modelSummaryEntityMgr.create(summary);
+
                     foundFilesToDownload = true;
                 }
             } catch (BlockMissingException e) {
@@ -103,13 +116,23 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 // delete the bad model summary file
                 HdfsUtils.rmdir(yarnConfiguration, file);
             } catch (IOException e) {
-                log.fatal(ExceptionUtils.getFullStackTrace(e)); // will trigger PagerDuty
+                // Will trigger PagerDuty alert
+                log.fatal(ExceptionUtils.getFullStackTrace(e));
             } catch (Exception e) {
                 log.error(e);
             }
         }
 
         return foundFilesToDownload;
+    }
+    
+    private static String getIdFromModelSummary(ModelSummary summary) {
+        String id = summary.getId();
+        id = id.substring(MS__IDX);
+        String[] tokens = id.split("\\-");
+        String[] finalTokens = new String[GUID_TOKENS_CNT];
+        System.arraycopy(tokens, 0, finalTokens, 0, GUID_TOKENS_CNT);
+        return StringUtils.join(finalTokens, "-");
     }
 
     public static class Builder {

@@ -35,15 +35,13 @@ public class DlGroupRunnable implements Runnable {
 
     @Override
     public void run() {
-        try
-        {
+        try {
             log.info(String.format("Start to listen the status. DL url: %s, launch id: %d.", dlUrl, launchId));
 
             LaunchJobsResult result;
             while (true) {
                 result = dataLoaderService.getLaunchJobs(launchId, dlUrl, true);
-                if (result.getLaunchStatus() == JobStatus.SUCCESS || 
-                        result.getLaunchStatus() == JobStatus.FAIL) {
+                if (result.getLaunchStatus() == JobStatus.SUCCESS || result.getLaunchStatus() == JobStatus.FAIL) {
                     break;
                 } else {
                     if (onProgress != null) {
@@ -68,7 +66,8 @@ public class DlGroupRunnable implements Runnable {
                 onCompleted.callback(ex);
             }
 
-            log.error(String.format("Get launch status encountered an exception. DL url: %s, launch id: %d.", dlUrl, launchId), ex);
+            log.error(String.format("Get launch status encountered an exception. DL url: %s, launch id: %d.", dlUrl,
+                    launchId), ex);
         }
     }
 
