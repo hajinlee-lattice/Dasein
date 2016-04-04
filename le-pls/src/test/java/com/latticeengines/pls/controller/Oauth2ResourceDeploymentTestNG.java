@@ -3,19 +3,18 @@ package com.latticeengines.pls.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import static org.testng.Assert.assertTrue;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
+public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupTestEnvironment();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "deployment" })
     public void createApiToken() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/apitoken?tenantId="
@@ -23,9 +22,9 @@ public class Oauth2ResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(StringUtils.isNotEmpty(token));
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "deployment" })
     public void createOAuth2AccessToken() {
-        switchToThirdPartyUser();
+        switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/oauth2/accesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));

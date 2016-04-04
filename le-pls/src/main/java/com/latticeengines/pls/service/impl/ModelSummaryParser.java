@@ -22,13 +22,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-import com.latticeengines.pls.util.ModelIdUtils;
 
 @Component("modelSummaryParser")
 public class ModelSummaryParser {
@@ -139,8 +139,8 @@ public class ModelSummaryParser {
 
         // the Id will be used to find hdfs path, make sure they are in sync.
         try {
-            String uuidInPath = ModelIdUtils.extractUuid(hdfsPath);
-            String uuidInId = ModelIdUtils.extractUuid(summary.getId());
+            String uuidInPath = UuidUtils.parseUuid(hdfsPath);
+            String uuidInId = UuidUtils.extractUuid(summary.getId());
             if (!uuidInPath.equals(uuidInId)) {
                 summary.setId("ms__" + uuidInPath + "-PLSModel");
             }

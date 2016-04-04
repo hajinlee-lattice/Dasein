@@ -13,12 +13,12 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.util.ModelIdUtils;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
@@ -60,7 +60,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String getFilePath() throws Exception {
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         String customer = summary.getTenant().getId();
-        final String uuid = ModelIdUtils.extractUuid(modelId);
+        final String uuid = UuidUtils.extractUuid(modelId);
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {

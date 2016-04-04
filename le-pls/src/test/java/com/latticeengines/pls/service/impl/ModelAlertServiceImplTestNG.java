@@ -17,12 +17,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelAlertService;
-import com.latticeengines.pls.util.ModelIdUtils;
 
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -56,7 +56,7 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         tenantId = testingTenants.get(0).getId();
-        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + ModelIdUtils.extractUuid(MODEL_ID)
+        dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(MODEL_ID)
                 + "/container_01/";
         modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");

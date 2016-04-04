@@ -14,11 +14,11 @@ import static org.testng.Assert.assertNotEquals;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class Oauth2ServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private Oauth2Interface oauth2Service;
@@ -34,7 +34,7 @@ public class Oauth2ServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private String tenantId = "Oauth2Tenant";
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         Tenant t = tenantService.findByTenantId(tenantId);
         if (t != null) {
@@ -42,7 +42,7 @@ public class Oauth2ServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = "deployment")
     public void teardown() throws Exception {
         Tenant t = tenantService.findByTenantId(tenantId);
         if (t != null) {
@@ -50,13 +50,13 @@ public class Oauth2ServiceImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createAPIToken() {
         String apiToken = oauth2Service.createAPIToken("MyTestingTenant");
         assertTrue(StringUtils.isNotEmpty(apiToken));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void createAccessAndRefreshToken() {
         Tenant t = new Tenant();
         t.setId(tenantId);

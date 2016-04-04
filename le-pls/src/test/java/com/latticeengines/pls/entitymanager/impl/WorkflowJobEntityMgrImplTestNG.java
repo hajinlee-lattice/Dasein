@@ -64,32 +64,32 @@ public class WorkflowJobEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
         setupSecurityContext(tenant1, "user1_1");
         WorkflowJob workflowJob1 = new WorkflowJob();
-        workflowJob1.setYarnAppId("application_00001");
+        workflowJob1.setApplicationId("application_00001");
         workflowJobEntityMgr.create(workflowJob1);
 
         setupSecurityContext(tenant2, "user2_1");
         WorkflowJob workflowJob2 = new WorkflowJob();
-        workflowJob2.setYarnAppId("application_00002");
+        workflowJob2.setApplicationId("application_00002");
         workflowJobEntityMgr.create(workflowJob2);
 
         setupSecurityContext(tenant1, "user1_2");
         WorkflowJob workflowJob3 = new WorkflowJob();
-        workflowJob3.setYarnAppId("application_00003");
+        workflowJob3.setApplicationId("application_00003");
         workflowJobEntityMgr.create(workflowJob3);
 
         setupSecurityContext(tenant1);
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 2);
 
-        assertEquals(workflowJobs.get(0).getYarnAppId(), "application_00001");
+        assertEquals(workflowJobs.get(0).getApplicationId(), "application_00001");
         assertEquals(workflowJobs.get(0).getUser(), "user1_1");
-        assertEquals(workflowJobs.get(1).getYarnAppId(), "application_00003");
+        assertEquals(workflowJobs.get(1).getApplicationId(), "application_00003");
         assertEquals(workflowJobs.get(1).getUser(), "user1_2");
 
         setupSecurityContext(tenant2);
         workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 1);
-        assertEquals(workflowJobs.get(0).getYarnAppId(), "application_00002");
+        assertEquals(workflowJobs.get(0).getApplicationId(), "application_00002");
         assertEquals(workflowJobs.get(0).getUser(), "user2_1");
 
     }

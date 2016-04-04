@@ -8,11 +8,11 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.HdfsFileDownloader;
-import com.latticeengines.pls.util.ModelIdUtils;
 
 public class HdfsFileDownloaderImpl implements HdfsFileDownloader {
 
@@ -35,7 +35,7 @@ public class HdfsFileDownloaderImpl implements HdfsFileDownloader {
 
     private String getFilePath(String tenantId, String modelId, final String filter) throws Exception {
         String customer = tenantId;
-        final String uuid = ModelIdUtils.extractUuid(modelId);
+        final String uuid = UuidUtils.extractUuid(modelId);
 
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {

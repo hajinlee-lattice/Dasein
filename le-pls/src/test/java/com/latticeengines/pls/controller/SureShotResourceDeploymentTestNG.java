@@ -8,16 +8,16 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-public class SureShotResourceTestNG extends PlsFunctionalTestNGBase {
+public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupTestEnvironment();
     }
 
-    @Test(groups = { "functional" })
+    @Test(groups = { "deployment" })
     public void getCredentialAuthenticationLink() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
@@ -31,7 +31,7 @@ public class SureShotResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = { "functional" })
+    @Test(groups = { "deployment" })
     public void getSureShotUrls() {
         switchToSuperAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="

@@ -46,7 +46,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
 
         WorkflowJob workflowJob = new WorkflowJob();
-        workflowJob.setYarnAppId(applicationId);
+        workflowJob.setApplicationId(applicationId);
         workflowJobEntityMgr.create(workflowJob);
 
         return ConverterUtils.toApplicationId(applicationId);

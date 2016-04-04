@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
@@ -17,16 +18,17 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "WORKFLOW_JOB", //
+@Table(name = "WORKFLOW_JOB", //
 uniqueConstraints = { @UniqueConstraint(columnNames = { "YARN_APP_ID" }) })
 @Filters({ //
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId") })
-public class WorkflowJob implements HasPid, HasTenantId {
+public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +45,7 @@ public class WorkflowJob implements HasPid, HasTenantId {
     private Tenant tenant;
 
     @Column(name = "YARN_APP_ID", nullable = false)
-    private String yarnAppId;
+    private String applicationId;
 
     @Column(name = "USER", nullable = false)
     private String user;
@@ -81,12 +83,12 @@ public class WorkflowJob implements HasPid, HasTenantId {
         return tenant;
     }
 
-    public String getYarnAppId() {
-        return yarnAppId;
+    public String getApplicationId() {
+        return applicationId;
     }
 
-    public void setYarnAppId(String yarnAppId) {
-        this.yarnAppId = yarnAppId;
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     public String getUser() {
