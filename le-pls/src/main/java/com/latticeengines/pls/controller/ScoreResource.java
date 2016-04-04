@@ -47,6 +47,6 @@ public class ScoreResource {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getSourceFileTableName()).toString();
+        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName()).toString();
     }
 }

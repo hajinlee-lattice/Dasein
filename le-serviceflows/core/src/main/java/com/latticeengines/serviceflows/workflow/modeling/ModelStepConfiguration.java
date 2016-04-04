@@ -21,7 +21,7 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String sourceSchemaInterpretation;
 
-    private String sourceFileTableName;
+    private String trainingTableName;
 
     @JsonProperty("modelingServiceHdfsBaseDir")
     public String getModelingServiceHdfsBaseDir() {
@@ -67,11 +67,11 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;
     }
 
-    public String getSourceFileTableName() {
-        return sourceFileTableName;
+    public String getTrainingTableName() {
+        return trainingTableName;
     }
 
-    public void setSourceFileTableName(String sourceFileTableName) {
-        this.sourceFileTableName = sourceFileTableName;
+    public void setTrainingTableName(String trainingTableName) {
+        this.trainingTableName = trainingTableName;
     }
 }

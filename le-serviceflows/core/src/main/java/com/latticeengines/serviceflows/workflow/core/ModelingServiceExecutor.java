@@ -165,8 +165,8 @@ public class ModelingServiceExecutor {
         if (builder.getSourceSchemaInterpretation() != null) {
             props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
         }
-        if (builder.getSourceFileTableName() != null) {
-            props.add("Source_File_Table_Name=" + builder.getSourceFileTableName());
+        if (builder.getTrainingTableName() != null) {
+            props.add("Source_File_Table_Name=" + builder.getTrainingTableName());
         }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
@@ -303,7 +303,7 @@ public class ModelingServiceExecutor {
         private String modelName;
         private String eventTableName;
         private String sourceSchemaInterpretation;
-        private String sourceFileTableName;
+        private String trainingTableName;
         private String productType;
 
         private String loadSubmissionUrl = "/rest/load";
@@ -458,8 +458,8 @@ public class ModelingServiceExecutor {
             return this;
         }
 
-        public Builder sourceFileTableName(String sourceFileTableName) {
-            this.setSourceFileTableName(sourceFileTableName);
+        public Builder trainingTableName(String trainingTableName) {
+            this.setTrainingTableName(trainingTableName);
             return this;
         }
 
@@ -684,12 +684,12 @@ public class ModelingServiceExecutor {
             return eventTableName;
         }
 
-        public void setSourceFileTableName(String sourceFileTableName) {
-            this.sourceFileTableName = sourceFileTableName;
+        public void setTrainingTableName(String trainingTableName) {
+            this.trainingTableName = trainingTableName;
         }
 
-        public String getSourceFileTableName() {
-            return sourceFileTableName;
+        public String getTrainingTableName() {
+            return trainingTableName;
         }
 
         public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {

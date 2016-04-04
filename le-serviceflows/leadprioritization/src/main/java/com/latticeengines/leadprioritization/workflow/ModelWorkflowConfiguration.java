@@ -51,8 +51,8 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder sourceFileTableName(String sourceFileTableName) {
-            model.setSourceFileTableName(sourceFileTableName);
+        public Builder trainingTableName(String trainingTableName) {
+            model.setTrainingTableName(trainingTableName);
             return this;
         }
 

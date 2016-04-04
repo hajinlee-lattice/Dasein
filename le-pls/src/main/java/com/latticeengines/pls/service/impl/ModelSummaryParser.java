@@ -133,7 +133,7 @@ public class ModelSummaryParser {
                     ""));
             summary.setSourceSchemaInterpretation(JsonUtils.getOrDefault(
                     eventTableProvenance.get("SourceSchemaInterpretation"), String.class, ""));
-            summary.setSourceFileTableName(JsonUtils.getOrDefault(eventTableProvenance.get("SourceFileTableName"),
+            summary.setTrainingTableName(JsonUtils.getOrDefault(eventTableProvenance.get("TrainingTableName"),
                     String.class, ""));
         }
 

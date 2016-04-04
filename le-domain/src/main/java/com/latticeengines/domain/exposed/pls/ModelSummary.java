@@ -74,7 +74,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private String applicationId;
     private String eventTableName;
     private String sourceSchemaInterpretation;
-    private String sourceFileTableName;
+    private String trainingTableName;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -411,13 +411,13 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.sourceSchemaInterpretation = sourceSchemaInterpretation;
     }
 
-    @JsonProperty("SourceFileTableName")
-    @Column(name = "SOURCE_FILE_TABLE_NAME", nullable = true)
-    public String getSourceFileTableName() {
-        return sourceFileTableName;
+    @JsonProperty("TrainingTableName")
+    @Column(name = "TRAINING_TABLE_NAME", nullable = true)
+    public String getTrainingTableName() {
+        return trainingTableName;
     }
 
-    public void setSourceFileTableName(String sourceFileTableName) {
-        this.sourceFileTableName = sourceFileTableName;
+    public void setTrainingTableName(String trainingTableName) {
+        this.trainingTableName = trainingTableName;
     }
 }

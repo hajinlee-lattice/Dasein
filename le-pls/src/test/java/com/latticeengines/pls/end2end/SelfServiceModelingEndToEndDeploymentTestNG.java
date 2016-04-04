@@ -203,10 +203,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
-        System.out.println("originalModelSummary.getSourceFileTableName() is "
-                + originalModelSummary.getSourceFileTableName());
+        System.out.println("originalModelSummary.getTrainingTableName() is "
+                + originalModelSummary.getTrainingTableName());
         System.out.println("sourceFile.getTableName() is " + sourceFile.getTableName());
-        assertNotNull(originalModelSummary.getSourceFileTableName());
+        assertNotNull(originalModelSummary.getTrainingTableName());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
@@ -278,8 +278,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         }));
         assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
-        String foundFileTableName = found.getSourceFileTableName();
-        System.out.println("found.getSourceFileTableName() is " + foundFileTableName);
+        String foundFileTableName = found.getTrainingTableName();
+        System.out.println("found.getTrainingTableName() is " + foundFileTableName);
         assertNotNull(foundFileTableName);
     }
 
