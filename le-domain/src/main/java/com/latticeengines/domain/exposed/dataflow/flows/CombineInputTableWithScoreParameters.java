@@ -10,7 +10,8 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("input_table_name")
     private String inputTableName;
 
-    private boolean debug = false;
+    @JsonProperty("debug_enabled")
+    private boolean debuggingEnabled = false;
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         setScoreResultsTableName(scoreResultsTable);
@@ -40,12 +41,16 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
         this.inputTableName = inputTableName;
     }
 
+    public void setDebuggingEnabled(boolean debuggingEnabled) {
+        this.debuggingEnabled = debuggingEnabled;
+    }
+
     public boolean isDebuggingEnabled() {
-        return debug;
+        return debuggingEnabled;
     }
 
     public void enableDebugging() {
-        this.debug = true;
+        this.debuggingEnabled = true;
     }
 
 }

@@ -59,7 +59,11 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
         exportConfig.setTable(prematchFlowTable.getName());
         exportConfig.setCustomer(configuration.getCustomerSpace().toString());
-        exportConfig.setHdfsDirPath(prematchFlowTable.getExtracts().get(0).getPath());
+        String path = prematchFlowTable.getExtracts().get(0).getPath();
+        if (path.endsWith("*.avro")) {
+            path = path.replace("*.avro", "");
+        }
+        exportConfig.setHdfsDirPath(path);
         exportConfig.setCreds(creds);
 
         url = String.format("%s/modeling/dataexports", configuration.getMicroServiceHostPort());

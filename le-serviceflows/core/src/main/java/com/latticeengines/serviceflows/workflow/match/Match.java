@@ -68,8 +68,8 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         int i = 0;
         MatchCommandStatus matchCommandStatus = null;
         do {
-            MatchStatusResponse status =
-                    matchCommandProxy.getMatchStatus(commands.getPid(), configuration.getMatchClient());
+            MatchStatusResponse status = matchCommandProxy.getMatchStatus(commands.getPid(),
+                    configuration.getMatchClient());
             if (status == null) {
                 throw new LedpException(LedpCode.LEDP_28009, new String[] { configuration.getMatchClient() });
             }

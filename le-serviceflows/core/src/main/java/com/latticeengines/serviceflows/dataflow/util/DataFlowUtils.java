@@ -1,8 +1,17 @@
 package com.latticeengines.serviceflows.dataflow.util;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.FieldMetadata;
-import com.latticeengines.dataflow.exposed.builder.Node;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
     public static Node normalizeDomain(Node last, String fieldName) {
@@ -28,5 +37,27 @@ public class DataFlowUtils {
                 .addFunction(String.format(extract, emailFieldName, emailFieldName, emailFieldName), //
                         new FieldList(emailFieldName), //
                         new FieldMetadata(outputFieldName, String.class));
+    }
+
+    public static Node addInternalId(Node last) {
+        if (!hasInternalId(last)) {
+            FieldMetadata fm = new FieldMetadata(InterfaceName.InternalId.toString(), Long.class);
+            fm.setPropertyValue("logicalType", LogicalDataType.InternalId.toString());
+            fm.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
+            fm.setPropertyValue("displayName", "Id");
+            last = last.addRowID(fm);
+        }
+        return last;
+    }
+
+    public static boolean hasInternalId(Node last) {
+        List<FieldMetadata> fields = last.getSchema();
+        return Iterables.any(fields, new Predicate<FieldMetadata>() {
+            @Override
+            public boolean apply(@Nullable FieldMetadata input) {
+                String value = input.getPropertyValue("LogicalDataType");
+                return value != null && value.equals(LogicalDataType.InternalId.toString());
+            }
+        });
     }
 }

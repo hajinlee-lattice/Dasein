@@ -1,10 +1,10 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
@@ -23,18 +23,18 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private String getInputTableName() {
-        Table eventTable = JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
-        if (eventTable == null) {
-            return configuration.getInputTableName();
-        }
-        return eventTable.getName();
+        return getDataFlowParams().getInputTableName();
     }
 
     private String getScoreResultTableName() {
         String scoreResultTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
         if (scoreResultTableName == null) {
-            scoreResultTableName = configuration.getScoreResultTableName();
+            scoreResultTableName = getDataFlowParams().getScoreResultsTableName();
         }
         return scoreResultTableName;
+    }
+
+    private CombineInputTableWithScoreParameters getDataFlowParams() {
+        return (CombineInputTableWithScoreParameters) configuration.getDataFlowParams();
     }
 }

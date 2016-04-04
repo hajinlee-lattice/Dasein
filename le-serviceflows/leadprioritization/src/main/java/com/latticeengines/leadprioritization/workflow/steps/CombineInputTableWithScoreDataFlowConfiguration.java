@@ -1,32 +1,13 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
+import java.util.UUID;
+
 import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
 
 public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
-
-    private String scoreResultTableName;
-
-    private String inputTableName;
-
     public CombineInputTableWithScoreDataFlowConfiguration() {
         setBeanName("combineInputTableWithScore");
         setName("CombineInputTableWithScore");
-        setTargetPath("/CombineInputTableWithScore");
-    }
-
-    public String getScoreResultTableName() {
-        return scoreResultTableName;
-    }
-
-    public void setScoreResultTableName(String scoreResultTableName) {
-        this.scoreResultTableName = scoreResultTableName;
-    }
-
-    public String getInputTableName() {
-        return inputTableName;
-    }
-
-    public void setInputTableName(String inputTableName) {
-        this.inputTableName = inputTableName;
+        setTargetPath("/CombineInputTableWithScore_" + UUID.randomUUID().toString());
     }
 }

@@ -18,22 +18,22 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
     private String Play_Display_Name;
 
     @Column(name = "Score", nullable = true)
-    private int Score;
+    private Integer Score;
 
     @Column(name = "Bucket_Display_Name", nullable = true)
     private String Bucket_Display_Name;
 
     @Column(name = "RawScore", nullable = true)
-    private double RawScore;
+    private Double RawScore;
 
     @Column(name = "Probability", nullable = true)
-    private double Probability;
+    private Double Probability;
 
     @Column(name = "Lift", nullable = true)
-    private double Lift;
+    private Double Lift;
 
     @Column(name = "Percentile", nullable = true)
-    private int Percentile;
+    private Integer Percentile;
 
     public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser()
             .parse("{\"type\":\"record\",\"name\":\"ScoreOutput\",\"namespace\":\"com.latticeengines.domain.exposed.scoring\",\"fields\":[{\"name\":\"LeadID\",\"type\":[\"string\",\"null\"],\"columnName\":\"LeadID\",\"sqlType\":\"12\"},{\"name\":\"Bucket_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Bucket_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Lift\",\"type\":[\"double\",\"null\"],\"columnName\":\"Lift\",\"sqlType\":\"7\"},{\"name\":\"Play_Display_Name\",\"type\":[\"string\",\"null\"],\"columnName\":\"Play_Display_Name\",\"sqlType\":\"12\"},{\"name\":\"Percentile\",\"type\":[\"int\",\"null\"],\"columnName\":\"Percentile\",\"sqlType\":\"4\"},{\"name\":\"Probability\",\"type\":[\"double\",\"null\"],\"columnName\":\"Probability\",\"sqlType\":\"7\"},{\"name\":\"RawScore\",\"type\":[\"double\",\"null\"],\"columnName\":\"RawScore\",\"sqlType\":\"7\"},{\"name\":\"Score\",\"type\":[\"int\",\"null\"],\"columnName\":\"Score\",\"sqlType\":\"4\"}]}");
@@ -42,10 +42,11 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
         return SCHEMA$;
     }
 
-    public ScoreOutput(){}
+    public ScoreOutput() {
+    }
 
-    public ScoreOutput(String leadID, String bucketDisplayName, double lift, String playDisplayName, int percentile,
-            double probability, double rawScore, int score) {
+    public ScoreOutput(String leadID, String bucketDisplayName, Double lift, String playDisplayName, Integer percentile,
+            Double probability, Double rawScore, Integer score) {
         this.LeadID = leadID;
         this.Play_Display_Name = playDisplayName;
         this.Bucket_Display_Name = bucketDisplayName;
@@ -72,11 +73,11 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
         this.Play_Display_Name = playDisplayName;
     }
 
-    public int getScore() {
+    public Integer getScore() {
         return this.Score;
     }
 
-    public void setScore(int score) {
+    public void setScore(Integer score) {
         this.Score = score;
     }
 
@@ -88,35 +89,35 @@ public class ScoreOutput extends org.apache.avro.specific.SpecificRecordBase imp
         this.Bucket_Display_Name = bucketDisplayName;
     }
 
-    public double getRawScore() {
+    public Double getRawScore() {
         return this.RawScore;
     }
 
-    public void setRawScore(double rawScore) {
+    public void setRawScore(Double rawScore) {
         this.RawScore = rawScore;
     }
 
-    public double getProbability() {
+    public Double getProbability() {
         return this.Probability;
     }
 
-    public void setProbability(double probability) {
+    public void setProbability(Double probability) {
         this.Probability = probability;
     }
 
-    public double getLift() {
+    public Double getLift() {
         return this.Lift;
     }
 
-    public void setLift(double lift) {
+    public void setLift(Double lift) {
         this.Lift = lift;
     }
 
-    public int getPercentile() {
+    public Integer getPercentile() {
         return this.Percentile;
     }
 
-    public void setPercentile(int percentile) {
+    public void setPercentile(Integer percentile) {
         this.Percentile = percentile;
     }
 

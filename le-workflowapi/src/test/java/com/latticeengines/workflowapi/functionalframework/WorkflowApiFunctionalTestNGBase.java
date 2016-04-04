@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -287,6 +288,12 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
         String podId = CamilleEnvironment.getPodId();
         HdfsUtils.rmdir(yarnConfiguration, "/Pods/" + podId + "/Contracts/" + customerSpace.getContractId());
         HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/" + customerSpace.toString());
+    }
+
+    protected void waitForCompletion(WorkflowExecutionId workflowId) throws Exception {
+        log.info("Workflow id = " + workflowId.getId());
+        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
+        assertEquals(status, BatchStatus.COMPLETED);
     }
 
 }

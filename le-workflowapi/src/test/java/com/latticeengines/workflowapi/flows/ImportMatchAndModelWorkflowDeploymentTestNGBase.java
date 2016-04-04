@@ -1,6 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
@@ -11,7 +10,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -28,21 +26,18 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflow;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
 import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
-import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.SecurityContextUtils;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
-public class ModelAndScoreDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(ModelAndScoreDeploymentTestNGBase.class);
+public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
 
@@ -62,13 +57,7 @@ public class ModelAndScoreDeploymentTestNGBase extends WorkflowApiFunctionalTest
     private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
 
     @Autowired
-    private ScoreWorkflow scoreWorkflow;
-
-    @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
-
-    @Autowired
-    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
 
     protected void setupForWorkflow() throws Exception {
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
@@ -124,16 +113,4 @@ public class ModelAndScoreDeploymentTestNGBase extends WorkflowApiFunctionalTest
         waitForCompletion(workflowId);
     }
 
-    protected void score(String modelId, String tableToScore) throws Exception {
-        ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore);
-        WorkflowExecutionId workflowId = workflowService.start(scoreWorkflow.name(), configuration);
-
-        waitForCompletion(workflowId);
-    }
-
-    private void waitForCompletion(WorkflowExecutionId workflowId) throws Exception {
-        log.info("Workflow id = " + workflowId.getId());
-        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
-        assertEquals(status, BatchStatus.COMPLETED);
-    }
 }

@@ -1,10 +1,12 @@
 package com.latticeengines.leadprioritization.workflow;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
@@ -21,6 +23,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
+        private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("scoreWorkflow", customerSpace, "scoreWorkflow");
@@ -28,6 +31,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
+            combineInputWithScores.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -36,8 +40,10 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder tableName(String tableName) {
+        public Builder inputTableName(String tableName) {
             match.setInputTableName(tableName);
+            // result table name is set during execution
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
 
@@ -51,11 +57,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.setDbUser(matchClientDocument.getUsername());
             match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
             match.setMatchClient(matchClientDocument.getMatchClient().name());
-            return this;
-        }
-
-        public Builder registerScoredTable(Boolean registerScoredTable) {
-            score.setRegisterScoredTable(registerScoredTable);
             return this;
         }
 
@@ -73,10 +74,12 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
+            combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(match);
             configuration.add(addStandardAttributes);
             configuration.add(score);
+            configuration.add(combineInputWithScores);
 
             return configuration;
         }

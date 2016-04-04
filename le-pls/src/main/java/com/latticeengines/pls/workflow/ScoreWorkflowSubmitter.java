@@ -52,8 +52,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchClientDocument(matchClientDocument) //
                 .microServiceHostPort(microserviceHostPort) //
                 .modelId(modelId) //
-                .registerScoredTable(true) //
-                .tableName(tableToScore) //
+                .inputTableName(tableToScore) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .build();
