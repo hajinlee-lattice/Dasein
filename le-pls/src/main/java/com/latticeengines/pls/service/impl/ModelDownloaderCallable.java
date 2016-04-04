@@ -28,9 +28,6 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
     private static final Log log = LogFactory.getLog(ModelDownloaderCallable.class);
     
-    private static final int MS__IDX = 4;
-    private static final int GUID_TOKENS_CNT = 5;
-
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -83,7 +80,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         for (ModelSummary summary : summaries) {
             try {
-                set.add(getIdFromModelSummary(summary));
+                set.add(UuidUtils.extractUuid(summary.getId()));
             } catch (Exception e) {
                 // Skip any model summaries that have unexpected ID syntax
                 log.warn(e);
@@ -93,7 +90,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         for (String file : files) {
             try {
-                String modelSummaryId = UuidUtils.parseUuid(file);
+                String modelSummaryId = UuidUtils.extractUuid(file);
                 if (!set.contains(modelSummaryId)) {
                     String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                     ModelSummary summary = parser.parse(file, contents);
@@ -126,15 +123,6 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         return foundFilesToDownload;
     }
     
-    private static String getIdFromModelSummary(ModelSummary summary) {
-        String id = summary.getId();
-        id = id.substring(MS__IDX);
-        String[] tokens = id.split("\\-");
-        String[] finalTokens = new String[GUID_TOKENS_CNT];
-        System.arraycopy(tokens, 0, finalTokens, 0, GUID_TOKENS_CNT);
-        return StringUtils.join(finalTokens, "-");
-    }
-
     public static class Builder {
         private Tenant tenant;
         private String modelServiceHdfsBaseDir;
