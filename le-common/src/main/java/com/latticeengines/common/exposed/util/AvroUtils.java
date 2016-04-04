@@ -236,7 +236,7 @@ public class AvroUtils {
 
     public static Type getType(Field field) {
         Type bestType = Type.NULL;
-        for (Schema schema: field.schema().getTypes()) {
+        for (Schema schema : field.schema().getTypes()) {
             Type type = schema.getType();
             if (!Type.NULL.equals(type)) {
                 bestType = type;
@@ -378,25 +378,29 @@ public class AvroUtils {
         return assembler.endRecord();
     }
 
-
-    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data) throws IOException {
+    public static void appendToHdfsFile(Configuration configuration, String filePath, List<GenericRecord> data)
+            throws IOException {
         FileSystem fs = FileSystem.get(configuration);
         Path path = new Path(filePath);
 
         if (!HdfsUtils.fileExists(configuration, filePath)) {
-            throw new IOException("File " + filePath + " does not exists, so cannot append.");
+            throw new IOException("File " + filePath + " does not exist, so cannot append.");
         }
 
-        OutputStream out = fs.append(path);
-        DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
-        writer = writer.appendTo(new FsInput(path, configuration), out);
+        try (OutputStream out = fs.create(path)) {
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())
+                    .appendTo(new FsInput(path, configuration), out)) {
+                for (GenericRecord datum : data) {
+                    try {
+                        writer.append(datum);
+                    } catch (Exception e) {
+                        log.warn("Data for the error row: " + datum.toString());
+                        throw new IOException(e);
+                    }
 
-        for (GenericRecord datum : data) {
-            writer.append(datum);
+                }
+            }
         }
-
-        writer.close();
-        out.close();
     }
 
     public static void writeToHdfsFile(Configuration configuration, Schema schema, String filePath,
@@ -408,22 +412,20 @@ public class AvroUtils {
             throw new IOException("File " + filePath + " already exists. Please consider using append.");
         }
 
-        OutputStream out = fs.create(path);
-        DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>());
-        writer = writer.create(schema, out);
+        try (OutputStream out = fs.create(path)) {
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())
+                    .create(schema, out)) {
+                for (GenericRecord datum : data) {
+                    try {
+                        writer.append(datum);
+                    } catch (Exception e) {
+                        log.warn("Data for the error row: " + datum.toString());
+                        throw new IOException(e);
+                    }
 
-        for (GenericRecord datum : data) {
-            try {
-                writer.append(datum);
-            } catch (Exception e) {
-                log.warn("Data for the error row: " + datum.toString());
-                throw new IOException(e);
+                }
             }
-
         }
-
-        writer.close();
-        out.close();
     }
 
     public static void writeToLocalFile(Schema schema, List<GenericRecord> data, String path) throws IOException {
@@ -475,7 +477,7 @@ public class AvroUtils {
         AvroFilesIterator(Configuration configuration, String path) throws IOException {
             matchedFiles = HdfsUtils.getFilesByGlob(configuration, path);
             if (matchedFiles == null || matchedFiles.isEmpty()) {
-                throw new IOException("Cannot find file match " + path);
+                throw new IOException("Could not find any avro file that matches the path pattern [" + path + "]");
             }
             this.configuration = configuration;
             reader = getAvroFileReader(configuration, new Path(matchedFiles.get(fileIdx)));
@@ -505,6 +507,5 @@ public class AvroUtils {
             throw new UnsupportedOperationException("remove is not applicable to this iterator.");
         }
     }
-
 
 }
