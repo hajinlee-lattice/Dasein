@@ -12,6 +12,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
@@ -79,7 +80,7 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
         truncateJdbcTableIfExists(destTable);
 
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
+        builder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
         DbCreds creds = new DbCreds(builder);
         sqoopService.exportDataSync(destTable, avroDir, creds, assignedQueue,
                 customer + "-upload-" + destTable, numMappers, null);

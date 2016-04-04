@@ -38,16 +38,16 @@ def commonOpts():
 
 def testOpts(args):
     if args.groups is None:
-        return ['-P%s' % args.profile, '-Dtest=*%s*' % args.test, 'clean', args.command]
+        return ['-P%s' % p for p in args.profiles.split(',')] + ['-Dtest=*%s*' % args.test, 'clean', args.command]
     else:
-        return ['-P%s' % args.profile, '-D%s.groups=%s' % (args.profile, args.groups), '-Dtest=*%s*' % args.test, 'clean', args.command]
+        return ['-P%s' % p for p in args.profiles.split(',')] + ['-D%s.groups=%s' % (args.profile, args.groups), '-Dtest=*%s*' % args.test, 'clean', args.command]
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')
     parser.add_argument('project', type=str, help='project name. e.g. pls, propdata, eai')
-    parser.add_argument('-p', dest='profile', type=str, default='functional', help='maven profile. default is functional')
+    parser.add_argument('-p', dest='profiles', type=str, default='functional', help='comma separated list of maven profiles. default is functional')
     parser.add_argument('-g', dest='groups', type=str, default=None,
-                        help='test groups (optional). can set multiple by comman sepearted list.')
+                        help='test groups (optional). can set multiple by comma separated list.')
     parser.add_argument('-t', dest='test', type=str, default='',
                         help='replace the token -Dtest=*{}*. For example, -t Model means -Dtest=*Model* . default is empty, meaning all tests.')
     parser.add_argument('-c', dest='command', type=str, default='verify',

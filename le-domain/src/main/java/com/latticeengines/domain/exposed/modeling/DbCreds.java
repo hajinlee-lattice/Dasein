@@ -169,9 +169,22 @@ public class DbCreds {
             return this;
         }
 
+        /**
+         * This method uses clear text password. It is depcreated.
+         * Please use encryptedPassword(String) instead.
+         * @param password
+         * @return
+         */
+        @Deprecated
         public Builder password(String password) {
             this.password = password;
             this.encryptedPassword = CipherUtils.encrypt(password);
+            return this;
+        }
+
+        public Builder encryptedPassword(String encryptedPassword) {
+            this.password = CipherUtils.decrypt(encryptedPassword);
+            this.encryptedPassword = encryptedPassword;
             return this;
         }
 

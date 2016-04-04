@@ -16,6 +16,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -73,14 +74,10 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     public void testExport() {
         createSqlTable();
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser).password(dbPassword);
-        SqoopExporter exporter = new SqoopExporter.Builder()
-                .setCustomer("PropDataTest")
-                .setNumMappers(4)
-                .setTable(sqlTable)
-                .setSourceDir(AVRO_DIR)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .build();
+        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+                .encryptedPassword(CipherUtils.encrypt(dbPassword));
+        SqoopExporter exporter = new SqoopExporter.Builder().setCustomer("PropDataTest").setNumMappers(4)
+                .setTable(sqlTable).setSourceDir(AVRO_DIR).setDbCreds(new DbCreds(credsBuilder)).build();
         AppSubmission submission = sqoopProxy.exportTable(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 600);
@@ -90,16 +87,12 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Test(groups = "deployment", dependsOnMethods = "testExport")
     public void testImport() {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser).password(dbPassword);
+        credsBuilder.jdbcUrl(jdbcUrl).driverClass(dbDriver).user(dbUser)
+                .encryptedPassword(CipherUtils.encrypt(dbPassword));
         cleanupAvroDir();
-        SqoopImporter impoter = new SqoopImporter.Builder()
-                .setCustomer("PropDataTest")
-                .setNumMappers(4)
-                .setTable(sqlTable)
-                .setTargetDir(AVRO_DIR)
-                .setSplitColumn("LE_Last_Upload_Date")
-                .setDbCreds(new DbCreds(credsBuilder))
-                .build();
+        SqoopImporter impoter = new SqoopImporter.Builder().setCustomer("PropDataTest").setNumMappers(4)
+                .setTable(sqlTable).setTargetDir(AVRO_DIR).setSplitColumn("LE_Last_Upload_Date")
+                .setDbCreds(new DbCreds(credsBuilder)).build();
         AppSubmission submission = sqoopProxy.importTable(impoter);
         ApplicationId appId = ConverterUtils.toApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 600);
@@ -135,34 +128,22 @@ public class SqoopResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     private void createSqlTable() {
         if (dbDriver.toLowerCase().contains("mysql")) {
-            String sql = "CREATE TABLE `" + sqlTable + "`(\n" +
-                    "\t`Domain` VARCHAR(255) NOT NULL,\n" +
-                    "\t`Supplier_Name` VARCHAR(255),\n" +
-                    "\t`Segment_Name` VARCHAR(255),\n" +
-                    "\t`HG_Category_1` VARCHAR(255),\n" +
-                    "\t`HG_Category_2` VARCHAR(255),\n" +
-                    "\t`HG_Category_1_Parent` VARCHAR(255),\n" +
-                    "\t`HG_Category_2_Parent` VARCHAR(255),\n" +
-                    "\t`Creation_Date` DATETIME,\n" +
-                    "\t`Last_Verified_Date` DATETIME,\n" +
-                    "\t`LE_Last_Upload_Date` DATETIME,\n" +
-                    "\t`Location_Count` INTEGER,\n" +
-                    "\t`Max_Location_Intensity` INTEGER) ENGINE=InnoDB;";
+            String sql = "CREATE TABLE `" + sqlTable + "`(\n" + "\t`Domain` VARCHAR(255) NOT NULL,\n"
+                    + "\t`Supplier_Name` VARCHAR(255),\n" + "\t`Segment_Name` VARCHAR(255),\n"
+                    + "\t`HG_Category_1` VARCHAR(255),\n" + "\t`HG_Category_2` VARCHAR(255),\n"
+                    + "\t`HG_Category_1_Parent` VARCHAR(255),\n" + "\t`HG_Category_2_Parent` VARCHAR(255),\n"
+                    + "\t`Creation_Date` DATETIME,\n" + "\t`Last_Verified_Date` DATETIME,\n"
+                    + "\t`LE_Last_Upload_Date` DATETIME,\n" + "\t`Location_Count` INTEGER,\n"
+                    + "\t`Max_Location_Intensity` INTEGER) ENGINE=InnoDB;";
             manageDbJdbcTemplate.execute(sql);
         } else {
-            String sql = "CREATE TABLE [" + sqlTable + "](\n" +
-                    "\t[Domain] [nvarchar](255) NOT NULL,\n" +
-                    "\t[Supplier_Name] [nvarchar](255),\n" +
-                    "\t[Segment_Name] [nvarchar](255),\n" +
-                    "\t[HG_Category_1] [nvarchar](255),\n" +
-                    "\t[HG_Category_2] [nvarchar](255),\n" +
-                    "\t[HG_Category_1_Parent] [nvarchar](255),\n" +
-                    "\t[HG_Category_2_Parent] [nvarchar](255),\n" +
-                    "\t[Creation_Date] [DATETIME],\n" +
-                    "\t[Last_Verified_Date] [DATETIME],\n" +
-                    "\t[LE_Last_Upload_Date] [DATETIME],\n" +
-                    "\t[Location_Count] [INT],\n" +
-                    "\t[Max_Location_Intensity] [INT])";
+            String sql = "CREATE TABLE [" + sqlTable + "](\n" + "\t[Domain] [nvarchar](255) NOT NULL,\n"
+                    + "\t[Supplier_Name] [nvarchar](255),\n" + "\t[Segment_Name] [nvarchar](255),\n"
+                    + "\t[HG_Category_1] [nvarchar](255),\n" + "\t[HG_Category_2] [nvarchar](255),\n"
+                    + "\t[HG_Category_1_Parent] [nvarchar](255),\n" + "\t[HG_Category_2_Parent] [nvarchar](255),\n"
+                    + "\t[Creation_Date] [DATETIME],\n" + "\t[Last_Verified_Date] [DATETIME],\n"
+                    + "\t[LE_Last_Upload_Date] [DATETIME],\n" + "\t[Location_Count] [INT],\n"
+                    + "\t[Max_Location_Intensity] [INT])";
             manageDbJdbcTemplate.execute(sql);
         }
     }

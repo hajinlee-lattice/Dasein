@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
@@ -176,8 +177,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         try {
             SqoopImporter importer = getCollectionDbImporter(table, targetDir, splitColumn, whereClause);
             ApplicationId appId = sqoopService.importTable(importer);
-            FinalApplicationStatus status =
-                    YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
+            FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 24 * 3600);
             if (!FinalApplicationStatus.SUCCEEDED.equals(status)) {
                 throw new IllegalStateException("The final state of " + appId + " is not "
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
@@ -219,34 +219,22 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     protected SqoopExporter getCollectionDbExporter(String sqlTable, String avroDir) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
+        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
 
-        return new SqoopExporter.Builder()
-                .setCustomer("PropData-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setTable(sqlTable)
-                .setSourceDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
+        return new SqoopExporter.Builder().setCustomer("PropData-" + sqlTable).setNumMappers(numMappers)
+                .setTable(sqlTable).setSourceDir(avroDir).setDbCreds(new DbCreds(credsBuilder))
                 .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1")
-                .addExtraOption("--batch")
-                .setSync(false)
-                .build();
+                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").setSync(false).build();
     }
 
-    protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir,
-                                                  String splitColumn, String whereClause) {
+    protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String splitColumn,
+            String whereClause) {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
-        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).password(dbPassword);
+        credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
 
-        SqoopImporter.Builder builder = new SqoopImporter.Builder()
-                .setCustomer("PropData-" + sqlTable)
-                .setNumMappers(numMappers)
-                .setSplitColumn(splitColumn)
-                .setTable(sqlTable)
-                .setTargetDir(avroDir)
-                .setDbCreds(new DbCreds(credsBuilder))
-                .setSync(false);
+        SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer("PropData-" + sqlTable)
+                .setNumMappers(numMappers).setSplitColumn(splitColumn).setTable(sqlTable).setTargetDir(avroDir)
+                .setDbCreds(new DbCreds(credsBuilder)).setSync(false);
 
         if (StringUtils.isNotEmpty(whereClause)) {
             builder = builder.addExtraOption("--where").addExtraOption(whereClause);
