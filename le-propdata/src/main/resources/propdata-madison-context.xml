@@ -6,8 +6,8 @@
 
     <context:component-scan base-package="com.latticeengines.propdata.madison"/>
 
-    <import
-            resource="classpath:propdata-madison-quartz-${PROPDATA_MADISON_QUARTZ_ENABLED:disabled}-context.xml"/>
+    <import resource="classpath:propdata-madison-quartz-${PROPDATA_MADISON_QUARTZ_ENABLED:disabled}-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-collection-context.xml"/>
     <import resource="classpath:propdata-madison-persistence-context.xml"/>
     <import resource="classpath:dataplatform-context.xml"/>
 
