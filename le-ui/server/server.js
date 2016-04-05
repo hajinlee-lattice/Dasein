@@ -11,7 +11,7 @@ const request   = require('request');
 const morgan    = require('morgan');
 const fs        = require('fs');
 const helmet    = require('helmet');
-const session   = require('express-session');
+//const session   = require('express-session');
 const compress  = require('compression');
 
 class Server {
@@ -68,6 +68,7 @@ class Server {
         this.app.use(helmet());
         
         // default cookie behavior - favors security
+        /*
         this.app.use(session({
             name: 'sessionId',
             secret: 'LEs3Cur1ty',
@@ -76,6 +77,7 @@ class Server {
                 expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
             }
         }));
+        */
     }
 
     startLogging(log_path) {
