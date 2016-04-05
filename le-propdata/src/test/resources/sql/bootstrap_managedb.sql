@@ -8,9 +8,9 @@ drop table if exists `ColumnMapping`;
 
 drop table if exists `ExternalColumn`;
 
-drop table if exists `MatchCommand`;
-
 drop table if exists `MatchOperation`;
+
+drop table if exists `MatchCommand`;
 
 drop table if exists `RefreshProgress`;
 
@@ -69,9 +69,10 @@ create table `MatchCommand` (
     `LatestStatusUpdate` datetime,
     `MatchStatus` varchar(20) not null,
     `NumRetries` integer,
-    `NumRows` integer not null,
     `Progress` float,
     `RootOperationUID` varchar(100) not null unique,
+    `RowsMatched` integer,
+    `RowsRequested` integer not null,
     `StatusBeforeFailed` varchar(20),
     primary key (`PID`)
 ) ENGINE=InnoDB;
@@ -131,6 +132,10 @@ alter table `ColumnMapping`
     foreign key (ExternalColumnID)
     references `ExternalColumn` (`ExternalColumnID`)
     on delete cascade;
+
+create index IX_UID on `MatchCommand` (`RootOperationUID`);
+
+create index IX_UID on `MatchOperation` (`BlockOperationUID`);
 
 alter table `MatchOperation`
     add index FK78AE1542D791BF6B (RootOperationUID),

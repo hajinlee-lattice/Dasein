@@ -2,6 +2,7 @@ package com.latticeengines.propdata.match.service.impl;
 
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,8 +65,9 @@ public class PropDataYarnServiceImpl implements PropDataYarnService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
-        appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
-        appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
+        if (StringUtils.isNotEmpty(jobConfiguration.getAppName())) {
+            appMasterProperties.put(AppMasterProperty.APP_NAME.name(), jobConfiguration.getAppName());
+        }
 
         Properties containerProperties = new Properties();
         containerProperties.put(PropDataProperty.PROPDATACONFIG, jobConfiguration.toString());

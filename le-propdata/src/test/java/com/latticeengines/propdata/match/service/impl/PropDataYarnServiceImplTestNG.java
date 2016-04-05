@@ -57,7 +57,6 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         PropDataJobConfiguration jobConfiguration = new PropDataJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
         jobConfiguration.setName("PropDataMatchBlock");
-        jobConfiguration.setAppName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("PDTest"));
         jobConfiguration.setAvroPath(avroPath);
         jobConfiguration.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
@@ -65,7 +64,7 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
-        jobConfiguration.setGroupSize(100);
+        jobConfiguration.setGroupSize(10);
 
         ApplicationId applicationId = propDataYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);

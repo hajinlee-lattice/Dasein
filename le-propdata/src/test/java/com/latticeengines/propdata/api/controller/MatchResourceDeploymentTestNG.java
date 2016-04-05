@@ -17,9 +17,11 @@ import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
@@ -36,6 +38,9 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private MatchCommandService matchCommandService;
 
     @Test(groups = "deployment", enabled = true)
     public void testPredefined() {
@@ -63,18 +68,20 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testBulkMatch() {
         hdfsPathBuilder.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
         uploadTestAVro(avroDir, fileName);
         MatchInput input = createAvroBulkMatchInput();
-        MatchCommand queue = matchProxy.matchBulk(input, podId);
-        System.out.println(queue.toString());
-        ApplicationId appId = ConverterUtils.toApplicationId(queue.getApplicationId());
+        MatchCommand command = matchProxy.matchBulk(input, podId);
+        ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
         Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
     }
 
     private MatchInput createAvroBulkMatchInput() {

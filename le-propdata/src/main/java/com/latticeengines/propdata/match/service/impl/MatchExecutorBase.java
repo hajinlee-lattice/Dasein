@@ -10,11 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,12 +50,14 @@ import com.latticeengines.propdata.match.service.DisposableEmailService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.PublicDomainService;
 
-public abstract class MatchExecutorBase implements MatchExecutor{
+public abstract class MatchExecutorBase implements MatchExecutor {
 
     private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
 
-    private static final Integer MAX_FETCH_THREADS = 4;
+    private static final Integer MAX_FETCH_THREADS = 32;
     private LoadingCache<String, Set<String>> tableColumnsCache;
+    private ExecutorService executor = new ThreadPoolExecutor(1, MAX_FETCH_THREADS, 5, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(2 * MAX_FETCH_THREADS));
 
     @Autowired
     private DataSourceService dataSourceService;
@@ -81,12 +84,6 @@ public abstract class MatchExecutorBase implements MatchExecutor{
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Map<String, List<String>> sourceColumnsMap = context.getSourceColumnsMap();
 
-        ExecutorService executor;
-        if (sourceColumnsMap.size() <= MAX_FETCH_THREADS) {
-            executor = Executors.newCachedThreadPool();
-        } else {
-            executor = Executors.newFixedThreadPool(MAX_FETCH_THREADS);
-        }
         Map<String, Future<List<Map<String, Object>>>> futureMap = new HashMap<>();
         for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
             MatchCallable callable = getMatchCallable(sourceColumns.getKey(), sourceColumns.getValue(), context);
@@ -121,7 +118,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
 
     @VisibleForTesting
     List<InternalOutputRecord> distributeResults(List<InternalOutputRecord> records,
-                                                 Map<String, List<Map<String, Object>>> resultsMap) {
+            Map<String, List<Map<String, Object>>> resultsMap) {
         for (Map.Entry<String, List<Map<String, Object>>> result : resultsMap.entrySet()) {
             String sourceName = result.getKey();
             if (isCachedSource(sourceName)) {
@@ -146,14 +143,16 @@ public abstract class MatchExecutorBase implements MatchExecutor{
     }
 
     private void distributeCachedSourceResults(List<InternalOutputRecord> records, String sourceName,
-                                               List<Map<String, Object>> rows) {
+            List<Map<String, Object>> rows) {
         String domainField = getDomainField(sourceName);
         String nameField = getNameField(sourceName);
         String cityField = getCityField(sourceName);
         String stateField = getStateField(sourceName);
         String countryField = getCountryField(sourceName);
         for (InternalOutputRecord record : records) {
-            if (record.isFailed()) { continue; }
+            if (record.isFailed()) {
+                continue;
+            }
             // try using domain first
             boolean matched = false;
             String parsedDomain = record.getParsedDomain();
@@ -185,8 +184,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
                             Object stateInRow = row.get(stateField);
                             Object cityInRow = row.get(cityField);
 
-                            if (countryInRow != null
-                                    && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
+                            if (countryInRow != null && !parsedCountry.equalsIgnoreCase((String) countryInRow)) {
                                 continue;
                             }
 
@@ -272,9 +270,9 @@ public abstract class MatchExecutorBase implements MatchExecutor{
 
                 output.add(value);
 
-                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection()) ||
-                        ColumnSelection.Predefined.DerivedColumns.equals(
-                                matchContext.getInput().getPredefinedSelection())) {
+                if (ColumnSelection.Predefined.Model.equals(matchContext.getInput().getPredefinedSelection())
+                        || ColumnSelection.Predefined.DerivedColumns
+                                .equals(matchContext.getInput().getPredefinedSelection())) {
                     columnMatchCount[i] += (value == null ? 0 : 1);
                     internalRecord.getColumnMatched().add(value != null);
                 } else {
@@ -339,8 +337,8 @@ public abstract class MatchExecutorBase implements MatchExecutor{
 
     @Override
     public MatchOutput appendMetadata(MatchOutput matchOutput, ColumnSelection.Predefined selection) {
-        if (ColumnSelection.Predefined.Model.equals(selection) ||
-                ColumnSelection.Predefined.DerivedColumns.equals(selection)) {
+        if (ColumnSelection.Predefined.Model.equals(selection)
+                || ColumnSelection.Predefined.DerivedColumns.equals(selection)) {
             List<ColumnMetadata> metadata = columnMetadataService.fromPredefinedSelection(selection);
             matchOutput.setMetadata(metadata);
             return matchOutput;
@@ -360,19 +358,26 @@ public abstract class MatchExecutorBase implements MatchExecutor{
         return "Domain";
     }
 
-    private String getNameField(String sourceName) { return "Name"; }
+    private String getNameField(String sourceName) {
+        return "Name";
+    }
 
-    private String getCityField(String sourceName) { return "City"; }
+    private String getCityField(String sourceName) {
+        return "City";
+    }
 
-    private String getStateField(String sourceName) { return "State"; }
+    private String getStateField(String sourceName) {
+        return "State";
+    }
 
-    private String getCountryField(String sourceName) { return "Country"; }
+    private String getCountryField(String sourceName) {
+        return "Country";
+    }
 
     private MatchCallable getMatchCallable(String sourceName, List<String> targetColumns, MatchContext matchContext) {
         JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
         if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)) {
-            CachedMatchCallable callable =
-                    new CachedMatchCallable("Domain", "Name", "Country", "State", "City");
+            CachedMatchCallable callable = new CachedMatchCallable("Domain", "Name", "Country", "State", "City");
             callable.setSourceName(sourceName);
             callable.setTargetColumns(targetColumns);
             callable.setJdbcTemplate(jdbcTemplate);
@@ -381,9 +386,8 @@ public abstract class MatchExecutorBase implements MatchExecutor{
             callable.setRootOperationUID(matchContext.getOutput().getRootOperationUID());
             return callable;
         } else {
-            throw new UnsupportedOperationException(
-                    "Only support match against predefined selection " + ColumnSelection.Predefined.Model
-                            + " and " + ColumnSelection.Predefined.DerivedColumns + " now.");
+            throw new UnsupportedOperationException("Only support match against predefined selection "
+                    + ColumnSelection.Predefined.Model + " and " + ColumnSelection.Predefined.DerivedColumns + " now.");
         }
     }
 
@@ -398,7 +402,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
         private String cityField;
 
         CachedMatchCallable(String domainField, String nameField, String countryField, String stateField,
-                            String cityField) {
+                String cityField) {
             this.domainField = domainField;
             this.nameField = nameField;
             this.countryField = countryField;
@@ -431,7 +435,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains,
-                                         Collection<NameLocation> nameLocations) {
+                Collection<NameLocation> nameLocations) {
 
             List<String> columnsToQuery = new ArrayList<>();
             Set<String> columnsInTable;
@@ -441,7 +445,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
                 throw new RuntimeException(e);
             }
 
-            for (String columnName: columns) {
+            for (String columnName : columns) {
                 if (columnsInTable.contains(columnName.toLowerCase())) {
                     columnsToQuery.add(columnName);
                 } else {
@@ -449,25 +453,23 @@ public abstract class MatchExecutorBase implements MatchExecutor{
                 }
             }
 
-            String sql = "SELECT "
-                    + "[" + nameField + "], "
-                    + "[" + countryField + "], "
-                    + "[" + stateField + "], "
-                    + ( cityField != null ? "[" + cityField + "], " : "" )
-                    + (columnsToQuery.isEmpty() ? "" : "[" + StringUtils.join(columnsToQuery, "], [") + "], ")
-                    + "[" + domainField + "] \n"
-                    + "FROM [" + tableName + "] WITH(NOLOCK) \n"
-                    + "WHERE [" + domainField + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
+            String sql = "SELECT " + "[" + nameField + "], " + "[" + countryField + "], " + "[" + stateField + "], "
+                    + (cityField != null ? "[" + cityField + "], " : "")
+                    + (columnsToQuery.isEmpty() ? "" : "[" + StringUtils.join(columnsToQuery, "], [") + "], ") + "["
+                    + domainField + "] \n" + "FROM [" + tableName + "] WITH(NOLOCK) \n" + "WHERE [" + domainField
+                    + "] IN ('" + StringUtils.join(domains, "', '") + "')\n";
 
             for (NameLocation nameLocation : nameLocations) {
                 if (StringUtils.isNotEmpty(nameLocation.getName())) {
                     sql += " OR ( ";
                     sql += String.format("[%s] = '%s'", nameField, nameLocation.getName().replace("'", "''"));
                     if (StringUtils.isNotEmpty(nameLocation.getCountry())) {
-                        sql += String.format(" AND [%s] = '%s'", countryField, nameLocation.getCountry().replace("'", "''"));
+                        sql += String.format(" AND [%s] = '%s'", countryField,
+                                nameLocation.getCountry().replace("'", "''"));
                     }
                     if (StringUtils.isNotEmpty(nameLocation.getState())) {
-                        sql += String.format(" AND [%s] = '%s'", stateField, nameLocation.getState().replace("'", "''"));
+                        sql += String.format(" AND [%s] = '%s'", stateField,
+                                nameLocation.getState().replace("'", "''"));
                     }
                     if (cityField != null && StringUtils.isNotEmpty(nameLocation.getCity())) {
                         sql += String.format(" AND [%s] = '%s'", cityField, nameLocation.getCity().replace("'", "''"));
@@ -510,7 +512,7 @@ public abstract class MatchExecutorBase implements MatchExecutor{
     }
 
     private void submitSqlMetric(String tableName, JdbcTemplate jdbcTemplate, Integer rows, Integer cols,
-                                 Long timeElapsed) {
+            Long timeElapsed) {
         try {
             SqlQueryMetric metric = new SqlQueryMetric();
             metric.setTableName(tableName);
@@ -573,16 +575,17 @@ public abstract class MatchExecutorBase implements MatchExecutor{
 
     private void buildSourceColumnMapCache() {
         tableColumnsCache = CacheBuilder.newBuilder().concurrencyLevel(4).weakKeys()
-                .expireAfterWrite(1, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, Set<String>>() {
+                .expireAfterWrite(1, TimeUnit.MINUTES).build(new CacheLoader<String, Set<String>>() {
                     public Set<String> load(String key) {
-                        JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
-                        List<String> columnsByQuery = jdbcTemplate.queryForList("SELECT COLUMN_NAME "
-                                + "FROM INFORMATION_SCHEMA.COLUMNS\n"
-                                + "WHERE TABLE_NAME = '" + key
-                                + "' AND TABLE_SCHEMA='dbo'", String.class);
+                        JdbcTemplate jdbcTemplate = dataSourceService
+                                .getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
+                        List<String> columnsByQuery = jdbcTemplate
+                                .queryForList(
+                                        "SELECT COLUMN_NAME " + "FROM INFORMATION_SCHEMA.COLUMNS\n"
+                                                + "WHERE TABLE_NAME = '" + key + "' AND TABLE_SCHEMA='dbo'",
+                                        String.class);
                         Set<String> columnsInSql = new HashSet<>();
-                        for (String columnName: columnsByQuery) {
+                        for (String columnName : columnsByQuery) {
                             columnsInSql.add(columnName.toLowerCase());
                         }
                         return columnsInSql;
