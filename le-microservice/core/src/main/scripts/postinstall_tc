@@ -21,7 +21,7 @@ do
     if [ -f "/tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/${fn}_log4j.properties" ]
     then
         echo "replacing log4j.properties for ${fn}.war"
-        cp -f /tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/$fn_log4j.properties $fn/WEB-INF/classes/log4j.properties
+        cp -f /tmp/le-microservice-tc-rpm/env/${ENV_TYPE}/${fn}_log4j.properties ${fn}/WEB-INF/classes/log4j.properties
     fi
 
     jar cvf $fn.war -C $fn/ .
