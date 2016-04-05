@@ -40,7 +40,7 @@ def testOpts(args):
     if args.groups is None:
         return ['-P%s' % p for p in args.profiles.split(',')] + ['-Dtest=*%s*' % args.test, 'clean', args.command]
     else:
-        return ['-P%s' % p for p in args.profiles.split(',')] + ['-D%s.groups=%s' % (args.profiles.split(',')[0], args.groups), '-Dtest=*%s*' % args.test, 'clean', args.command]
+        return ['-P%s' % p for p in args.profiles.split(',')] + ['-Dfunctional.groups=%s' % args.groups, '-Ddeployment.groups=%s' % args.groups, '-Dtest=*%s*' % args.test, 'clean', args.command]
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Run test(s) using maven.')

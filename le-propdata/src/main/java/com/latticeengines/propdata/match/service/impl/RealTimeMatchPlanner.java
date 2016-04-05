@@ -24,6 +24,7 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
     @MatchStep
     public MatchContext plan(MatchInput input) {
         MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
+        input.setNumRows(input.getData().size());
         MatchContext context = new MatchContext();
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         context.setInput(input);

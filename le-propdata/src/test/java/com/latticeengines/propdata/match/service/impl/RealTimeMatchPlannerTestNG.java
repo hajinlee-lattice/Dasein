@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ public class RealTimeMatchPlannerTestNG extends PropDataMatchFunctionalTestNGBas
     @Test(groups = "functional")
     public void testPrepareOutput() {
         MatchInput input = new MatchInput();
+        input.setUuid(UUID.randomUUID());
         input.setTenant(new Tenant("PD_Test"));
         input.setPredefinedSelection(ColumnSelection.Predefined.Model);
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
