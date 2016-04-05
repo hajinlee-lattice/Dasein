@@ -51,8 +51,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         }
 
         public Builder dedupTargetTableName(String targetTableName) {
-            dedupEventTable.setName(targetTableName);
-            dedupEventTable.setTargetPath(targetTableName);
+            dedupEventTable.setTargetTableName(targetTableName);
             match.setInputTableName(targetTableName);
             return this;
         }

@@ -7,7 +7,6 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
     public CombineInputTableWithScoreDataFlowConfiguration() {
         setBeanName("combineInputTableWithScore");
-        setName("CombineInputTableWithScore");
-        setTargetPath("/CombineInputTableWithScore_" + UUID.randomUUID().toString());
+        setTargetTableName("CombineInputTableWithScore_" + UUID.randomUUID().toString());
     }
 }

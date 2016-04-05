@@ -1,12 +1,13 @@
 package com.latticeengines.prospectdiscovery.workflow.steps;
 
-import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.List;
+import com.latticeengines.domain.exposed.dataflow.flows.CreateAttributeLevelSummaryParameters;
 
 @Component("mockRunAttributeLevelSummaryDataFlows")
 public class MockRunAttributeLevelSummaryDataFlows
@@ -38,8 +39,7 @@ public class MockRunAttributeLevelSummaryDataFlows
 
         runAttributeLevelSummaryDataFlow.getConfiguration().setDataFlowParams(params);
         String name = "CreateAttributeLevelSummary_" + attribute + attrLevelParams.suffix;
-        runAttributeLevelSummaryDataFlow.getConfiguration().setName(name);
-        runAttributeLevelSummaryDataFlow.getConfiguration().setTargetPath("/" + name);
+        runAttributeLevelSummaryDataFlow.getConfiguration().setTargetTableName(name);
         runAttributeLevelSummaryDataFlow.execute();
 
         registerAttributeLevelSummaryReport.execute(name, createReportParams(params.aggregationType, attrs));

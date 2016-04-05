@@ -5,7 +5,6 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class CreatePreMatchEventTableConfiguration extends DataFlowStepConfiguration {
     public CreatePreMatchEventTableConfiguration() {
         setBeanName("preMatchEventTableFlow");
-        setName("PrematchFlow");
-        setTargetPath("/PrematchFlow");
+        setTargetTableName("PrematchFlow");
     }
 }

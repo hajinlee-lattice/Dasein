@@ -91,7 +91,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         }
 
         DataFlowContext ctx = new DataFlowContext();
-        ctx.setProperty("TARGETTABLENAME", dataFlowConfig.getName());
+        ctx.setProperty("TARGETTABLENAME", dataFlowConfig.getTargetTableName());
         ctx.setProperty("CUSTOMER", dataFlowConfig.getCustomerSpace().toString());
 
         if (usesTables) {
@@ -101,7 +101,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         }
         Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 dataFlowConfig.getCustomerSpace());
-        String targetPath = baseTargetPath.append(dataFlowConfig.getTargetPath()).toString();
+        String targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());

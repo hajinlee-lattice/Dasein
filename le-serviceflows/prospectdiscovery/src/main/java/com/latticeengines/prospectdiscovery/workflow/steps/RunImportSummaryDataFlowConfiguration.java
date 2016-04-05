@@ -5,7 +5,6 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class RunImportSummaryDataFlowConfiguration extends DataFlowStepConfiguration {
     public RunImportSummaryDataFlowConfiguration() {
         setBeanName("createImportSummary");
-        setName("CreateImportSummary");
-        setTargetPath("/CreateImportSummary");
+        setTargetTableName("CreateImportSummary");
     }
 }

@@ -17,13 +17,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflowapi.functionalframework.DataFlowApiFunctionalTestNGBase;
 import com.latticeengines.dataflowapi.service.DataFlowService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -109,13 +106,9 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        Table metadata = proxy.getMetadata(config.getCustomerSpace(), config.getName());
+        Table metadata = proxy.getMetadata(config.getCustomerSpace(), config.getTargetTableName());
         assertNotNull(metadata);
         assertEquals(metadata.getExtracts().size(), 1);
-        Path expectedLocation = PathBuilder.buildDataTablePath( //
-                CamilleEnvironment.getPodId(), config.getCustomerSpace());
-        assertEquals(metadata.getExtracts().get(0).getPath(), //
-                expectedLocation.append(config.getTargetPath()).toString());
     }
 
     @Test(groups = "deployment", enabled = false)
@@ -144,7 +137,6 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         sources.add(createDataFlowSource("Stoplist"));
 
         config.setDataSources(sources);
-        config.setTargetPath("/TmpEventTable");
         return config;
     }
 

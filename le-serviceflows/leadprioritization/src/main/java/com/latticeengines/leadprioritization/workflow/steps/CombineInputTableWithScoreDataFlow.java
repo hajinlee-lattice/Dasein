@@ -22,7 +22,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private void configureExport() {
-        executionContext.putString(EXPORT_TABLE_NAME, configuration.getName());
+        executionContext.putString(EXPORT_TABLE_NAME, configuration.getTargetTableName());
     }
 
     private String getInputTableName() {

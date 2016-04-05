@@ -5,7 +5,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfigurati
 public class AddStandardAttributesConfiguration extends DataFlowStepConfiguration {
     public AddStandardAttributesConfiguration() {
         setPurgeSources(true);
-        setName("addStandardAttributes");
+        setTargetTableName("addStandardAttributes");
         setBeanName("addStandardAttributes");
     }
 }

@@ -11,10 +11,6 @@ import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfigurati
 
 public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
-    @NotEmptyString
-    @NotNull
-    private String targetPath;
-
     private Map<String, String> extraSources = new HashMap<>();
 
     @NotEmptyString
@@ -23,21 +19,11 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     @NotEmptyString
     @NotNull
-    private String name;
+    private String targetTableName;
 
     private DataFlowParameters dataFlowParams;
 
     private boolean purgeSources;
-
-    @JsonProperty("target_path")
-    public String getTargetPath() {
-        return targetPath;
-    }
-
-    @JsonProperty("target_path")
-    public void setTargetPath(String targetPath) {
-        this.targetPath = targetPath;
-    }
 
     @JsonProperty("extra_sources")
     public Map<String, String> getExtraSources() {
@@ -59,14 +45,14 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
         this.beanName = beanName;
     }
 
-    @JsonProperty("name")
-    public String getName() {
-        return name;
+    @JsonProperty("target_table_name")
+    public String getTargetTableName() {
+        return targetTableName;
     }
 
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
+    @JsonProperty("target_table_name")
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 
     @JsonProperty("data_flow_params")

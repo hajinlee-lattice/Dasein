@@ -6,6 +6,6 @@ public class RunAttributeLevelSummaryDataFlowConfiguration extends DataFlowStepC
 
     public RunAttributeLevelSummaryDataFlowConfiguration() {
         setBeanName("createAttributeLevelSummary");
-        setName("CreateAttributeLevelSummary");
+        setTargetTableName("CreateAttributeLevelSummary");
     }
 }

@@ -39,8 +39,7 @@ public class RunAttributeLevelSummaryDataFlows extends
 
             runAttributeLevelSummaryDataFlow.getConfiguration().setDataFlowParams(params);
             String name = "CreateAttributeLevelSummary_" + attribute + attrLevelParams.suffix;
-            runAttributeLevelSummaryDataFlow.getConfiguration().setName(name);
-            runAttributeLevelSummaryDataFlow.getConfiguration().setTargetPath("/" + name);
+            runAttributeLevelSummaryDataFlow.getConfiguration().setTargetTableName(name);
             runAttributeLevelSummaryDataFlow.execute();
             
             registerAttributeLevelSummaryReport.execute(name, createReportParams(params.aggregationType, attrs));

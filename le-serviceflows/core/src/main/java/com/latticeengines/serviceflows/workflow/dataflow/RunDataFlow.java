@@ -36,11 +36,10 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     private DataFlowConfiguration setupDataFlow() {
         DataFlowConfiguration dataFlowConfig = new DataFlowConfiguration();
-        dataFlowConfig.setName(configuration.getName());
+        dataFlowConfig.setTargetTableName(configuration.getTargetTableName());
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());
         dataFlowConfig.setDataFlowBeanName(configuration.getBeanName());
         dataFlowConfig.setDataSources(createDataFlowSources());
-        dataFlowConfig.setTargetPath(configuration.getTargetPath());
         dataFlowConfig.setDataFlowParameters(configuration.getDataFlowParams());
         return dataFlowConfig;
     }

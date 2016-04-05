@@ -10,8 +10,7 @@ public class RunScoreTableDataFlowConfiguration extends DataFlowStepConfiguratio
     
     public RunScoreTableDataFlowConfiguration() {
         setBeanName("createScoreTable");
-        setName("CreateScoreTable");
-        setTargetPath("/CreateScoreTable");
+        setTargetTableName("CreateScoreTable");
     }
 
     public String[] getAccountMasterAndPath() {
