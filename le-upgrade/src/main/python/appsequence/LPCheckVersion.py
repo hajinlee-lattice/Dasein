@@ -103,10 +103,14 @@ class LPCheckVersion( StepBase ):
 
   def getSFDCContactFromTargetQuery(self, str):
     s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Contact_Score\"(.*?)</targetQuery>', str)
+    if not s:
+      return ''
     return s.group(1)
 
   def getSFDCLeadFromTargetQuery(self, str):
     s = re.search(r'<targetQuery w=\"Workspace\" t=\"2\" name=\"Q_SFDC_Lead_Score\"(.*?)</targetQuery>', str)
+    if not s:
+      return ''
     return s.group(1)
 
   def parseScoreField(self, str, type, version):
@@ -132,7 +136,7 @@ class LPCheckVersion( StepBase ):
 
     if not s:
       print ( 'Get the Score Field failed' )
-      return s
+      return ''
     return s.group(1)
 
   def parseScoreDateField(self, str, type, version):
@@ -150,7 +154,7 @@ class LPCheckVersion( StepBase ):
 
     if not s:
       print( 'Get the ScoreDate Field failed' )
-      return s
+      return ''
     return s.group(1)
 
 

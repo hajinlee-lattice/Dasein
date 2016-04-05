@@ -85,8 +85,9 @@ class AppSequence( object ):
           continue
 
         thisStep = Applicability.canApply
-        if not step.forceApply():
-          thisStep = step.getApplicability( self )
+        thisStep = step.getApplicability( self )
+        if step.forceApply():
+          thisStep = Applicability.canApply
 
         if thisStep == Applicability.canApply:
           applicability[step.getName()] = 'To Apply'
