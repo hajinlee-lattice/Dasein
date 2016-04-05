@@ -77,9 +77,15 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
             fieldBuilder = fieldAssembler.name(StringUtils.strip(fieldName));
             fieldBuilder = fieldBuilder.prop("Tags", "External");
             fieldBuilder = fieldBuilder.prop("ApprovedUsage", columnMetadata.getApprovedUsageList().get(0).getName());
-            fieldBuilder = fieldBuilder.prop("DisplayName", columnMetadata.getDisplayName());
-            fieldBuilder = fieldBuilder.prop("Description", columnMetadata.getDescription());
-            fieldBuilder = fieldBuilder.prop("Category", columnMetadata.getCategory());
+            if (StringUtils.isNotEmpty(columnMetadata.getDisplayName())) {
+                fieldBuilder = fieldBuilder.prop("DisplayName", columnMetadata.getDisplayName());
+            }
+            if (StringUtils.isNotEmpty(columnMetadata.getDescription())) {
+                fieldBuilder = fieldBuilder.prop("Description", columnMetadata.getDescription());
+            }
+            if (StringUtils.isNotEmpty(columnMetadata.getCategory())) {
+                fieldBuilder = fieldBuilder.prop("Category", columnMetadata.getCategory());
+            }
             if (columnMetadata.getFundamentalType() != null) {
                 fieldBuilder = fieldBuilder.prop("FundamentalType", columnMetadata.getFundamentalType().getName());
             }
