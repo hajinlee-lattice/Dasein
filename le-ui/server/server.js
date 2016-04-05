@@ -68,7 +68,7 @@ class Server {
         this.app.use(helmet());
         
         // default cookie behavior - favors security
-        /*
+        /* don't need this yet
         this.app.use(session({
             name: 'sessionId',
             secret: 'LEs3Cur1ty',

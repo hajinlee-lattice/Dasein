@@ -249,13 +249,16 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $rootScope, $http, JobsService, BrowserStorageUtility) {
+.controller('JobsCtrl', function($scope, $state, $rootScope, $http, JobsService, BrowserStorageUtility) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.cancelling = {};
     $scope.showEmptyJobsMessage = false;
     $scope.succeeded = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
+    //console.log($state.current.name, $state);
+    $scope.state = $state.current.name == 'home.model.jobs.status' ? 'model' : 'all';
+    $scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {

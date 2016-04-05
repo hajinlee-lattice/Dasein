@@ -18,16 +18,18 @@
             </div>
             <div class="eight columns text-right">
                 <input type="text" class="form-control" placeholder="Search for job with type or status" ng-model="query" ng-show="ShowSearch" />
-                <a ui-sref="home.jobs.status" class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
+                <a class="button icon-button white-button" ng-click="ShowSearch = !ShowSearch" ng-init="ShowSearch = false;">
                     <span class="fa fa-search"></span>
                 </a>
-                <a ui-sref="home.jobs.status" class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
+                <a class="button icon-button white-button" ng-click="SortOrder = (SortOrder == 'timestamp' ? '-timestamp' : 'timestamp')" ng-init="SortOrder = '-timestamp';">
                     <span class="fa fa-sort-amount-{{ SortOrder == 'timestamp' ? 'asc' : 'desc' }}"></span>
                 </a>
                 <!--
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
-                <a ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
+                <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
+                <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Score Training Data</button></a>
+                <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Import a Testing Set</button></a>
             </div>
         </div><!-- End .row -->
     </div><!-- End .table-header -->
