@@ -1,7 +1,5 @@
 package com.latticeengines.leadprioritization.workflow.steps;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
