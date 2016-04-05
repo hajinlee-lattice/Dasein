@@ -131,7 +131,8 @@ public class ScoringApiExceptionHandler {
             trace = sw.toString();
         }
 
-        String errorMsg = JsonUtils.serialize(exceptionHandlerErrors) + "\n" + trace;
+        String exceptionHandlerErrorsMsg = JsonUtils.serialize(exceptionHandlerErrors);
+        String errorMsg = exceptionHandlerErrorsMsg + "\n" + trace;
         log.error(errorMsg);
 
         if (fireAlert) {
@@ -146,8 +147,12 @@ public class ScoringApiExceptionHandler {
             alertService.triggerCriticalEvent(errorMessage, logUrl, alertDetails);
         }
 
-        requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
+        requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));
         requestInfo.put("HasError", Boolean.toString(true));
+        requestInfo.put("Error", exceptionHandlerErrorsMsg);
+        if (warnings.hasWarnings()) {
+            requestInfo.put("Warnings", JsonUtils.serialize(warnings.getWarnings()));
+        }
         requestInfo.logSummary();
 
         return exceptionHandlerErrors;

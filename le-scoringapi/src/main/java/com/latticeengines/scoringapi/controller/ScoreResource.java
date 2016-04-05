@@ -112,12 +112,13 @@ public class ScoreResource {
             ScoreResponse response = scoreRequestProcessor.process(customerSpace, scoreRequest, isDebug);
             if (warnings.hasWarnings()) {
                 response.setWarnings(warnings.getWarnings());
+                requestInfo.put("Warnings", JsonUtils.serialize(warnings.getWarnings()));
             }
             if (log.isInfoEnabled()) {
                 log.info(JsonUtils.serialize(response));
             }
 
-            requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
+            requestInfo.put("HasWarning", String.valueOf(warnings.hasWarnings()));
             requestInfo.put("HasError", Boolean.toString(false));
             requestInfo.put("Score", String.valueOf(response.getScore()));
             requestInfo.logSummary();
