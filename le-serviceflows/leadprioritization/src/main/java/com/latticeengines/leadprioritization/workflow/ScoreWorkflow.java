@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
+import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -28,6 +29,9 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     @Autowired
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
+    @Autowired
+    private ExportWorkflow exportWorkflow;
+
     @Bean
     public Job scoreWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -39,6 +43,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
                 .next(addStandardAttributes) //
                 .next(score) //
                 .next(combineInputTableWithScore) //
+                .next(exportWorkflow) //
                 .build();
 
     }

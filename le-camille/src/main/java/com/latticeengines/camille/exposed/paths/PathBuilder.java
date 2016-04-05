@@ -65,11 +65,17 @@ public final class PathBuilder {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES);
     }
 
+    public static Path buildDataFileExportPath(String podId, CustomerSpace space) {
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES)
+                .append(PathConstants.EXPORTS);
+    }
+
     public static Path buildMetadataPath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space).append(PathConstants.METADATA);
     }
 
-    public static Path buildMetadataPathForArtifactType(String podId, CustomerSpace space, String module, ArtifactType artifactType) {
+    public static Path buildMetadataPathForArtifactType(String podId, CustomerSpace space, String module,
+            ArtifactType artifactType) {
         return buildMetadataPath(podId, space).append(module).append(artifactType.getPathToken());
     }
 
@@ -104,7 +110,8 @@ public final class PathBuilder {
     }
 
     public static Path buildMessageQueuePath(String podId, String division, String queueName) {
-        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.DIVISION, division, PathConstants.QUEUES, queueName);
+        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.DIVISION, division,
+                PathConstants.QUEUES, queueName);
     }
 
     public static Path buildMessageQueuePath(String podId, String queueName) {

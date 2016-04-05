@@ -12,12 +12,17 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     public void execute() {
         setupDataFlow();
         super.execute();
+        configureExport();
     }
 
     private void setupDataFlow() {
-        CombineInputTableWithScoreParameters params = //
-        new CombineInputTableWithScoreParameters(getScoreResultTableName(), getInputTableName());
+        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
+                getScoreResultTableName(), getInputTableName());
         configuration.setDataFlowParams(params);
+    }
+
+    private void configureExport() {
+        executionContext.putString(EXPORT_TABLE_NAME, getScoreResultTableName());
     }
 
     private String getInputTableName() {

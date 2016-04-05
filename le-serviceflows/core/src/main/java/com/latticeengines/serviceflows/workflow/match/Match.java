@@ -37,7 +37,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         log.info("Inside Match execute()");
         Table preMatchEventTable = JsonUtils.deserialize(executionContext.getString(PREMATCH_EVENT_TABLE), Table.class);
 
-        Long matchCommandId = match(preMatchEventTable);
+        Long matchCommandId = 124L; // match(preMatchEventTable);
 
         executionContext.putLong(MATCH_COMMAND_ID, matchCommandId);
     }

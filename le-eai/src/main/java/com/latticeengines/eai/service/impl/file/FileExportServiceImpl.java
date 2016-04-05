@@ -1,11 +1,11 @@
 package com.latticeengines.eai.service.impl.file;
 
-import java.util.List;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -27,13 +27,14 @@ public class FileExportServiceImpl extends ExportService {
 
     @Override
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
-        context.setProperty(ExportProperty.HDFSFILE, //
-                exportConfig.getProperties().get(ExportProperty.HDFSFILE));
+        String targetPath = exportConfig.getProperties().get(ExportProperty.TARGETPATH);
+        context.setProperty(ExportProperty.TARGETPATH, //
+                PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), exportConfig.getCustomerSpace())
+                        .append(targetPath).toString());
+        context.setProperty(ExportProperty.CUSTOMER, exportConfig.getCustomerSpace().toString());
         ExportStrategy strategy = ExportStrategy.getExportStrategy(exportConfig.getExportFormat());
-        List<Table> tables = exportConfig.getTables();
-        for (Table table : tables) {
-            strategy.exportData(null, table, null, context);
-        }
+        Table table = exportConfig.getTable();
+        strategy.exportData(null, table, null, context);
     }
 
     @Override

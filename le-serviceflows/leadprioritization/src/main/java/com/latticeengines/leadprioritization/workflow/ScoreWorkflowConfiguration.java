@@ -2,12 +2,16 @@ package com.latticeengines.leadprioritization.workflow;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.eai.ExportDestination;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
@@ -24,6 +28,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private ExportStepConfiguration export = new ExportStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("scoreWorkflow", customerSpace, "scoreWorkflow");
@@ -32,6 +37,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             addStandardAttributes.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            export.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -70,16 +76,29 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder outputFilename(String outputFilename) {
+            export.setExportDestination(ExportDestination.FILE);
+            export.putProperty(ExportProperty.TARGETPATH, outputFilename);
+            return this;
+        }
+
+        public Builder outputFileFormat(ExportFormat format) {
+            export.setExportFormat(format);
+            return this;
+        }
+
         public ScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
+            export.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(match);
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);
+            configuration.add(export);
 
             return configuration;
         }

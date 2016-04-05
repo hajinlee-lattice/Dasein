@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob;
 import com.latticeengines.eai.service.impl.ExportStrategy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -71,14 +72,14 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
     }
 
     private Properties getProperties(ExportContext ctx, Table table) {
+
         Properties props = new Properties();
         props.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
 
         String customer = ctx.getProperty(ExportProperty.CUSTOMER, String.class);
         props.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
 
-        String hdfsFileToExport = ctx.getProperty(ExportProperty.HDFSFILE, String.class);
-        props.setProperty(MapReduceProperty.INPUT.name(), hdfsFileToExport);
+        props.setProperty(MapReduceProperty.INPUT.name(), ExtractUtils.getSingleExtractPath(yarnConfiguration, table));
 
         String targetHdfsPath = ctx.getProperty(ExportProperty.TARGETPATH, String.class);
         props.setProperty(MapReduceProperty.OUTPUT.name(), targetHdfsPath);

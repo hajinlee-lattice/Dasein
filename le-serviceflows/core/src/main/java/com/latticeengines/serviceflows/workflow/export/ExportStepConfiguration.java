@@ -1,60 +1,57 @@
-package com.latticeengines.domain.exposed.eai;
+package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.BasePayloadConfiguration;
-import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.eai.ExportDestination;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 
-public class ExportConfiguration extends BasePayloadConfiguration {
-
+public class ExportStepConfiguration extends MicroserviceStepConfiguration {
+    @NotNull
     private ExportFormat exportFormat;
+
+    @NotNull
     private ExportDestination exportDestination;
-    private Table table;
+
+    private String tableName;
+
     private Map<String, String> properties = new HashMap<>();
 
-    @JsonProperty("export_format")
     public ExportFormat getExportFormat() {
         return exportFormat;
     }
 
-    @JsonProperty("export_format")
     public void setExportFormat(ExportFormat exportFormat) {
         this.exportFormat = exportFormat;
     }
 
-    @JsonProperty("export_destination")
     public ExportDestination getExportDestination() {
         return exportDestination;
     }
 
-    @JsonProperty("export_destination")
     public void setExportDestination(ExportDestination exportDestination) {
         this.exportDestination = exportDestination;
     }
 
-    @JsonProperty("table")
-    public Table getTable() {
-        return table;
+    public String getTableName() {
+        return tableName;
     }
 
-    @JsonProperty("tables")
-    public void setTable(Table table) {
-        this.table = table;
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
-    @JsonProperty("properties")
     public Map<String, String> getProperties() {
         return properties;
     }
 
-    @JsonProperty("properties")
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 
-    public void setProperty(String propertyName, String propertyValue) {
-        properties.put(propertyName, propertyValue);
+    public void putProperty(String property, String value) {
+        properties.put(property, value);
     }
 }

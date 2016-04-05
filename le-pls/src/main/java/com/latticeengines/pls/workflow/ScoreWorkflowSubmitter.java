@@ -2,8 +2,11 @@ package com.latticeengines.pls.workflow;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -29,8 +32,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     private ModelSummaryService modelSummaryService;
 
     public ApplicationId submit(String modelId, String tableToScore) {
-        log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s",
-                modelId, tableToScore, SecurityContextUtils.getCustomerSpace()));
+        log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s", modelId,
+                tableToScore, SecurityContextUtils.getCustomerSpace()));
         ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore);
 
         if (metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), tableToScore) == null) {
@@ -55,6 +58,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .inputTableName(tableToScore) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
+                .outputFileFormat(ExportFormat.CSV) //
+                .outputFilename("/Export_" + DateTime.now().getMillis() + ".csv") //
                 .build();
     }
 }

@@ -55,6 +55,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ATTR_LEVEL_TYPE = "ATTR_LEVEL_TYPE";
     protected static final String IMPORT_DATA_APPLICATION_ID = "IMPORT_DATA_APPLICATION_ID";
     protected static final String ACTIVATE_MODEL_IDS = "ACTIVATE_MODEL_IDS";
+    protected static final String EXPORT_DATA_APPLICATION_ID = "EXPORT_DATA_APPLICATION_ID";
+    protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -111,10 +113,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         System.arraycopy(tokens, 0, newTokens, 0, newTokens.length);
         return "/" + StringUtils.join(newTokens, "/");
     }
-    
+
     private String getDataCompositionContents(Table eventTable) {
         DataComposition dataComposition = new DataComposition();
-        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transforms = eventTable.getRealTimeTransformationMetadata();
+        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transforms = eventTable
+                .getRealTimeTransformationMetadata();
         dataComposition.fields = transforms.getKey();
         dataComposition.transforms = transforms.getValue();
         return JsonUtils.serialize(dataComposition);
@@ -172,25 +175,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void registerSourceFileInContext(SourceFile sourceFile) {
-        Set<String> sourceFiles = getObjectFromContext(WorkflowContextConstants.SOURCE_FILES, Set.class);
-
-        if (sourceFiles == null) {
-            sourceFiles = new HashSet<String>();
-        }
-
-        sourceFiles.add(sourceFile.getName());
-        putObjectInContext(WorkflowContextConstants.SOURCE_FILES, sourceFiles);
-    }
-
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
         if (name == null) {
             return null;
         }
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
         SourceFile sourceFile = proxy.findSourceFileByName(name, space.toString());
-        registerSourceFileInContext(sourceFile);
         return sourceFile;
     }
 
