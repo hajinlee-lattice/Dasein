@@ -4,11 +4,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
-public class SecurityContextUtils {
+public class MultiTenantContext {
     public static Tenant getTenant() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
@@ -21,6 +22,10 @@ public class SecurityContextUtils {
         }
     }
 
+    public static boolean isContextSet() {
+        return getTenant() != null;
+    }
+
     public static CustomerSpace getCustomerSpace() {
         Tenant tenant = getTenant();
         if (tenant == null) {
@@ -29,19 +34,27 @@ public class SecurityContextUtils {
         return CustomerSpace.parse(tenant.getId());
     }
 
-    public static void setTenant(Tenant tenant) {
-        Authentication auth = new TenantToken(tenant);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-    }
-
-    public static String getUser() {
+    public static Session getSession() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
             TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
             if (token.getSession() != null && token.getSession().getEmailAddress() != null) {
-                return token.getSession().getEmailAddress();
+                return token.getSession();
             }
         }
-        return "";
+        return null;
+    }
+
+    public static String getEmailAddress() {
+        Session session = getSession();
+        if (session == null) {
+            return null;
+        }
+        return session.getEmailAddress();
+    }
+
+    public static void setTenant(Tenant tenant) {
+        Authentication auth = new TenantToken(tenant);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }

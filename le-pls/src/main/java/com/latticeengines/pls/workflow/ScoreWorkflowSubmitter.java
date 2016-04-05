@@ -15,7 +15,7 @@ import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -33,14 +33,14 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     public ApplicationId submit(String modelId, String tableToScore) {
         log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s", modelId,
-                tableToScore, SecurityContextUtils.getCustomerSpace()));
+                tableToScore, MultiTenantContext.getCustomerSpace()));
         ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore);
 
-        if (metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), tableToScore) == null) {
+        if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
         }
 
-        if (!modelSummaryService.modelIdinTenant(modelId, SecurityContextUtils.getCustomerSpace().toString())) {
+        if (!modelSummaryService.modelIdinTenant(modelId, MultiTenantContext.getCustomerSpace().toString())) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
@@ -51,7 +51,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         return new ScoreWorkflowConfiguration.Builder() //
-                .customer(SecurityContextUtils.getCustomerSpace()) //
+                .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
                 .microServiceHostPort(microserviceHostPort) //
                 .modelId(modelId) //

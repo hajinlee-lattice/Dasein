@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -82,7 +82,7 @@ public class JobResource {
     }
 
     private Tenant getTenant() {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         return tenantEntityMgr.findByTenantId(tenant.getId());
     }
 

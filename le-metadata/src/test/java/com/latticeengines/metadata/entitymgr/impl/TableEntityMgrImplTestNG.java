@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
@@ -43,7 +43,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findAll(String customerSpace, String tableName) {
-        SecurityContextUtils.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
         List<Table> tables = tableEntityMgr.findAll();
 
         assertEquals(tables.size(), 1);
@@ -51,7 +51,7 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "functional", dataProvider = "tableProvider")
     public void findByName(String customerSpace, String tableName) {
-        SecurityContextUtils.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
 
         Table table = tableEntityMgr.findByName(tableName);
         validateTable(table);

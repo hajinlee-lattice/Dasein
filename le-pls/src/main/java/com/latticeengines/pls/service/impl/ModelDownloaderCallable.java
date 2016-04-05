@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
 
@@ -74,7 +74,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
 
         Set<String> set = new HashSet<>();
-        SecurityContextUtils.setTenant(tenant);
+        MultiTenantContext.setTenant(tenant);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         for (ModelSummary summary : summaries) {
             try {

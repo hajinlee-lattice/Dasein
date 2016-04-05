@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.dataflow.util;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -42,9 +43,9 @@ public class DataFlowUtils {
     public static Node addInternalId(Node last) {
         if (!hasInternalId(last)) {
             FieldMetadata fm = new FieldMetadata(InterfaceName.InternalId.toString(), Long.class);
-            fm.setPropertyValue("logicalType", LogicalDataType.InternalId.toString());
+            fm.setPropertyValue("LogicalType", LogicalDataType.InternalId.toString());
             fm.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
-            fm.setPropertyValue("displayName", "Id");
+            fm.setPropertyValue("DisplayName", "Id");
             last = last.addRowID(fm);
         }
         return last;
@@ -59,5 +60,22 @@ public class DataFlowUtils {
                 return value != null && value.equals(LogicalDataType.InternalId.toString());
             }
         });
+    }
+
+    public static Node removeInternalId(Node last) {
+        if (hasInternalId(last)) {
+            Iterable<FieldMetadata> filtered = Iterables.filter(last.getSchema(), new Predicate<FieldMetadata>() {
+                @Override
+                public boolean apply(@Nullable FieldMetadata input) {
+                    String value = input.getPropertyValue("LogicalDataType");
+                    return value != null && value.equals(LogicalDataType.InternalId.toString());
+                }
+            });
+            Iterator<FieldMetadata> iter = filtered.iterator();
+            while (iter.hasNext()) {
+                last = last.discard(new FieldList(iter.next().getFieldName()));
+            }
+        }
+        return last;
     }
 }

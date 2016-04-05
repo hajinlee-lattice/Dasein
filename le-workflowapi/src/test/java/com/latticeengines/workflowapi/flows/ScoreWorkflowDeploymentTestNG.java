@@ -25,7 +25,7 @@ import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
     private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
@@ -58,7 +58,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         InputStream ins = getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + "/tables/Account.json");
         accountTable = JsonUtils.deserialize(IOUtils.toString(ins), Table.class);
         accountTable.setName("ScoreWorkflowDeploymentTest_Account");
-        metadataProxy.createTable(SecurityContextUtils.getCustomerSpace().toString(), accountTable.getName(),
+        metadataProxy.createTable(MultiTenantContext.getCustomerSpace().toString(), accountTable.getName(),
                 accountTable);
 
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/tables/Account.avro");

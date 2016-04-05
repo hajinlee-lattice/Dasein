@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -49,7 +49,7 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     public void submitWorkflowForTargetMarketAndWorkflowName(TargetMarket targetMarket, String workflowName) {
         checkForRunningWorkflow(targetMarket);
 
-        String customer = SecurityContextUtils.getCustomerSpace().toString();
+        String customer = MultiTenantContext.getCustomerSpace().toString();
         log.info(String.format("Submitting fit model workflow for target market %s and customer %s",
                 targetMarket.getName(), customer));
         try {

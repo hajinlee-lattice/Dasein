@@ -10,6 +10,7 @@ import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWit
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
+import com.latticeengines.serviceflows.workflow.util.WriteOutput;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -32,6 +33,9 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     @Autowired
     private ExportWorkflow exportWorkflow;
 
+    @Autowired
+    private WriteOutput writeOutput;
+
     @Bean
     public Job scoreWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -44,6 +48,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
                 .next(score) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
+                .next(writeOutput) //
                 .build();
 
     }

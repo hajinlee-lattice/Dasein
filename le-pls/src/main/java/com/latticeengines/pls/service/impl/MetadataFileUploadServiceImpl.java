@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.service.MetadataFileUploadService;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 
 @Component("metadataFileUploadService")
@@ -40,7 +40,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
         if (artifactType == null) {
             throw new LedpException(LedpCode.LEDP_18090, new String[] { urlToken });
         }
-        CustomerSpace customerSpace = SecurityContextUtils.getCustomerSpace();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Path path = PathBuilder.buildMetadataPathForArtifactType(CamilleEnvironment.getPodId(), //
                 customerSpace, moduleName, artifactType);
         String hdfsPath = String.format("%s/%s.%s", path.toString(), artifactName, artifactType.getFileType());
@@ -59,7 +59,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
     @Override
     public List<Module> getModules() {
         List<Module> modules = new ArrayList<>();
-        CustomerSpace customerSpace = SecurityContextUtils.getCustomerSpace();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Path path = PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(), customerSpace);
         try {
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, path.toString());
@@ -78,7 +78,7 @@ public class MetadataFileUploadServiceImpl implements MetadataFileUploadService 
     
     @Override
     public List<Artifact> getArtifacts(String moduleName, ArtifactType artifactType) {
-        CustomerSpace customerSpace = SecurityContextUtils.getCustomerSpace();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         String path = String.format("%s/%s/%s", //
                 PathBuilder.buildMetadataPath(CamilleEnvironment.getPodId(), customerSpace).toString(), //
                 moduleName, //

@@ -21,6 +21,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public class CSVExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
@@ -41,7 +42,9 @@ public class CSVExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullW
         schema = AvroJob.getInputKeySchema(config);
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
-            headers.add(field.name());
+            if (outputField(field)) {
+                headers.add(field.name());
+            }
         }
 
         csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
@@ -53,13 +56,19 @@ public class CSVExportMapper extends Mapper<AvroKey<Record>, NullWritable, NullW
     public void map(AvroKey<Record> key, NullWritable value, Context context) throws IOException, InterruptedException {
         Record record = key.datum();
         for (Field field : schema.getFields()) {
-            String fieldValue = String.valueOf(record.get(field.name()));
-            if (fieldValue == null) {
-                fieldValue = "";
+            if (outputField(field)) {
+                String fieldValue = String.valueOf(record.get(field.name()));
+                if (fieldValue == null) {
+                    fieldValue = "";
+                }
+                csvFilePrinter.print(fieldValue);
             }
-            csvFilePrinter.print(fieldValue);
         }
         csvFilePrinter.println();
+    }
+
+    private boolean outputField(Field field) {
+        return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString());
     }
 
     @Override

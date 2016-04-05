@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.hive.util.HiveUtils;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("hiveTableDao")
 public class HiveTableDaoImpl implements HiveTableDao {
@@ -76,7 +76,7 @@ public class HiveTableDaoImpl implements HiveTableDao {
     }
 
     private String getTableName(Table table) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         table.setTenant(tenant);
         return String.format("%s___%s___%s", getSafeTenantId(tenant), table.getName(), table.getTableType());
     }

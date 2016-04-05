@@ -26,7 +26,7 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
@@ -50,7 +50,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     public SourceFile uploadFile(String outputFileName, SchemaInterpretation schemaInterpretation,
             InputStream inputStream) {
         try {
-            Tenant tenant = SecurityContextUtils.getTenant();
+            Tenant tenant = MultiTenantContext.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
             CustomerSpace space = CustomerSpace.parse(tenant.getId());
             String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();
@@ -79,7 +79,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         if (sourceFile.getTableName() == null) {
             return null;
         }
-        return metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), sourceFile.getTableName());
+        return metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), sourceFile.getTableName());
     }
 
     @Override
@@ -95,7 +95,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
 
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
-            Table table = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(),
+            Table table = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
                     sourceFile.getTableName());
 
             Path schemaPath = new Path(table.getExtractsDirectory() + "/error.csv");

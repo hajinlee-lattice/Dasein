@@ -14,7 +14,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("ModelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
@@ -27,7 +27,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public List<VdbMetadataField> getMetadata(String modelId) {
-        String customerSpace = SecurityContextUtils.getCustomerSpace().toString();
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (modelSummary == null) {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
@@ -52,7 +52,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public Table cloneAndUpdateMetadata(String modelSummaryId, List<VdbMetadataField> fields) {
-        String customerSpace = SecurityContextUtils.getCustomerSpace().toString();
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelSummaryId);
         String eventTableName = summary.getEventTableName();
         Table eventTable = metadataProxy.getTable(customerSpace, eventTableName);

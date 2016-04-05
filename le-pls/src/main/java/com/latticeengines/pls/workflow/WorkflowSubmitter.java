@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.service.WorkflowJobService;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public abstract class WorkflowSubmitter {
@@ -24,7 +24,7 @@ public abstract class WorkflowSubmitter {
     protected String microserviceHostPort;
 
     protected CustomerSpace getCustomerSpace() {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             throw new RuntimeException("No tenant in context");
         }

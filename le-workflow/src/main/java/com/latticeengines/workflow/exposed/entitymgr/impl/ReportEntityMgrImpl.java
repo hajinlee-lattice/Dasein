@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 import com.latticeengines.workflow.exposed.dao.ReportDao;
 import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
@@ -78,7 +78,7 @@ public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements Re
     }
 
     private void initialize(Report report) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         report.setPid(null);
         report.setTenant(tenant);
     }

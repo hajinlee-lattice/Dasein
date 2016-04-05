@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 import com.latticeengines.monitor.exposed.metrics.impl.BaseMetricsAspectImpl;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements MetricsAspect {
 
@@ -22,7 +22,7 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
         }
         String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
 
-        String user = SecurityContextUtils.getUser();
+        String user = MultiTenantContext.getEmailAddress();
         return metrics + String.format(" User=%s", user);
     }
 

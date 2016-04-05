@@ -20,7 +20,7 @@ import com.latticeengines.pls.dao.TargetMarketDataFlowOptionDao;
 import com.latticeengines.pls.dao.TargetMarketReportMapDao;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
 
 @Component("targetMarketEntityMgr")
@@ -128,7 +128,7 @@ public class TargetMarketEntityMgrImpl extends BaseEntityMgrImpl<TargetMarket> i
     }
 
     private void initializeForDatabaseEntry(TargetMarket targetMarket) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         targetMarket.setTenant(tenant);
         targetMarket.setTenantId(tenant.getPid());
         targetMarket.setPid(null);

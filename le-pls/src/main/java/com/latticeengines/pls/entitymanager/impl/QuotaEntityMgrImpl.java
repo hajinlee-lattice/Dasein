@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.QuotaDao;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("quotaEntityMgr")
 public class QuotaEntityMgrImpl extends BaseEntityMgrImpl<Quota> implements
@@ -36,7 +36,7 @@ public class QuotaEntityMgrImpl extends BaseEntityMgrImpl<Quota> implements
     public void create(Quota quota) {
         if (this.quotaDao.findQuotaByQuotaId(quota.getId()) != null) {
             throw new RuntimeException(String.format(
-                    "Quota for tenant: %s already exists", SecurityContextUtils
+                    "Quota for tenant: %s already exists", MultiTenantContext
                             .getTenant().getName()));
         }
         this.setTenantAndTenantIdOnQuota(quota);
@@ -74,7 +74,7 @@ public class QuotaEntityMgrImpl extends BaseEntityMgrImpl<Quota> implements
 
     private void setTenantAndTenantIdOnQuota(Quota quota) {
         Tenant tenant = this.tenantEntityMgr
-                .findByTenantId(SecurityContextUtils.getTenant().getId());
+                .findByTenantId(MultiTenantContext.getTenant().getId());
         quota.setTenant(tenant);
         quota.setTenantId(tenant.getPid());
     }

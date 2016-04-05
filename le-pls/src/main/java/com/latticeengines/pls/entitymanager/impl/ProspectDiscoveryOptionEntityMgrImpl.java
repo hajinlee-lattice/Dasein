@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.ProspectDiscoveryOptionDao;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("prospectDiscoveryOptionEntityMgr")
 public class ProspectDiscoveryOptionEntityMgrImpl extends BaseEntityMgrImpl<ProspectDiscoveryOption> implements
@@ -35,7 +35,7 @@ public class ProspectDiscoveryOptionEntityMgrImpl extends BaseEntityMgrImpl<Pros
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(ProspectDiscoveryOption prospectDiscoveryOption) {
         if (this.findProspectDiscoveryOption(prospectDiscoveryOption.getOption()) != null) {
-            throw new RuntimeException(String.format("Prospect Discovery Option for tenant: %s already exists", SecurityContextUtils.getTenant().getName()));
+            throw new RuntimeException(String.format("Prospect Discovery Option for tenant: %s already exists", MultiTenantContext.getTenant().getName()));
         }
         setTenantIdOnProspectDiscoveryOption(prospectDiscoveryOption);
         this.prospectDiscoveryDao.create(prospectDiscoveryOption);
@@ -73,7 +73,7 @@ public class ProspectDiscoveryOptionEntityMgrImpl extends BaseEntityMgrImpl<Pros
     }
 
     private void setTenantIdOnProspectDiscoveryOption(ProspectDiscoveryOption prospectDiscoveryOption) {
-        Tenant tenant = this.tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = this.tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         prospectDiscoveryOption.setTenantId(tenant.getPid());
     }
 }

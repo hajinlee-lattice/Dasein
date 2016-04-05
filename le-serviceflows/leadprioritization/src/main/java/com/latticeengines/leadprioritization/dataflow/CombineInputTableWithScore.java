@@ -20,10 +20,11 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         Node inputTable = addSource(parameters.getInputTableName());
         Node scoreTable = addSource(parameters.getScoreResultsTableName());
 
-        Node combinedResultTable = inputTable.leftOuterJoin(InterfaceName.Id.name(), scoreTable, InterfaceName.Id.name());
+        Node combinedResultTable = inputTable.leftOuterJoin(InterfaceName.Id.name(), scoreTable,
+                InterfaceName.Id.name());
 
         List<String> fieldsToDiscard = new ArrayList<>();
-        if(!parameters.isDebuggingEnabled()){
+        if (!parameters.isDebuggingEnabled()) {
             fieldsToDiscard.add(ScoreResultField.RawScore.name());
         }
         return combinedResultTable.discard(new FieldList(fieldsToDiscard));

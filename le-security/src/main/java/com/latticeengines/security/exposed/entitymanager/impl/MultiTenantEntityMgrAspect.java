@@ -5,13 +5,13 @@ import org.hibernate.SessionFactory;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class MultiTenantEntityMgrAspect {
 
     public void enableMultiTenantFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
             TenantEntityMgr tenantEntityMgr) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             throw new RuntimeException("Problem with multi-tenancy framework");
         }

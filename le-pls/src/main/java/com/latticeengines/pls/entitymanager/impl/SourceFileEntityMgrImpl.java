@@ -15,7 +15,7 @@ import com.latticeengines.pls.dao.SourceFileDao;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("sourceFileEntityMgr")
 public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> implements SourceFileEntityMgr {
@@ -43,7 +43,7 @@ public class SourceFileEntityMgrImpl extends BaseEntityMgrImpl<SourceFile> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(SourceFile sourceFile) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
+        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
         sourceFile.setTenant(tenant);
         sourceFile.setTenantId(tenant.getPid());
         sourceFile.setPid(null);

@@ -33,7 +33,7 @@ import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
@@ -61,8 +61,8 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     protected void setupForWorkflow() throws Exception {
         Tenant tenant = setupTenant(DEMO_CUSTOMERSPACE);
-        SecurityContextUtils.setTenant(tenant);
-        assertNotNull(SecurityContextUtils.getTenant());
+        MultiTenantContext.setTenant(tenant);
+        assertNotNull(MultiTenantContext.getTenant());
         setupUsers(DEMO_CUSTOMERSPACE);
         setupCamille(DEMO_CUSTOMERSPACE);
         setupHdfs(DEMO_CUSTOMERSPACE);
@@ -73,7 +73,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             File file = resolver.getResource(resourcePath).getFile();
             InputStream stream = new FileInputStream(file);
-            Tenant tenant = SecurityContextUtils.getTenant();
+            Tenant tenant = MultiTenantContext.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
             CustomerSpace space = CustomerSpace.parse(tenant.getId());
             String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();

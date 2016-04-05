@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.leadprioritization.workflow.ModelWorkflowConfiguration;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component
 public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -15,7 +15,7 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
     public ApplicationId submit(String eventTableName, String modelName, String sourceSchemaInterpretation) {
-        Table eventTable = metadataProxy.getTable(SecurityContextUtils.getCustomerSpace().toString(), eventTableName);
+        Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), eventTableName);
 
         if (eventTable == null) {
             throw new LedpException(LedpCode.LEDP_18088, new String[] { eventTableName });

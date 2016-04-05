@@ -35,7 +35,7 @@ import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {
@@ -67,7 +67,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFileName));
         }
 
-        String customerSpace = SecurityContextUtils.getTenant().getId().toString();
+        String customerSpace = MultiTenantContext.getTenant().getId().toString();
 
         if (sourceFile.getTableName() != null) {
             metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());

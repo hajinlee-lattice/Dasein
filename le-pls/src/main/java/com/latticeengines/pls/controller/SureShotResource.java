@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -38,7 +38,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
     public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
             return null;
@@ -52,7 +52,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
     public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
             return ResponseDocument.failedResponse(new RuntimeException("Not able to get the tenant"));

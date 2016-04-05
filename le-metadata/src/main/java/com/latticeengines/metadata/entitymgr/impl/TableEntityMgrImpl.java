@@ -32,7 +32,7 @@ import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.metadata.service.impl.MetadataServiceImpl;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("tableEntityMgr")
 public class TableEntityMgrImpl implements TableEntityMgr {
@@ -140,7 +140,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
         if (clone.getExtracts().size() > 0) {
             Path tablesPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
-                    SecurityContextUtils.getCustomerSpace());
+                    MultiTenantContext.getCustomerSpace());
 
             Path sourcePath = tablesPath.append(name);
             Path destPath = tablesPath.append(clone.getName());
@@ -165,7 +165,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     private void setTenantId(Table table) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         // This is because Hibernate is horrible and produces two tenant ids
         if (tenant != null && tenant.getPid() != null && table.getTenantId() == null) {
@@ -186,10 +186,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     private void applyTenantIdToEntity(HasTenantId entity) {
-        Tenant tenant = SecurityContextUtils.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         if (tenant != null && tenant.getPid() != null && entity.getTenantId() == null) {
-            entity.setTenantId(SecurityContextUtils.getTenant().getPid());
+            entity.setTenantId(MultiTenantContext.getTenant().getPid());
         }
     }
 

@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.WorkflowJobDao;
 import com.latticeengines.pls.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.SecurityContextUtils;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("workflowJobEntityMgr")
 public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> implements WorkflowJobEntityMgr {
@@ -39,8 +39,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void create(WorkflowJob workflowJob) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(SecurityContextUtils.getTenant().getId());
-        String user = SecurityContextUtils.getUser();
+        Tenant tenant = tenantEntityMgr.findByTenantId(MultiTenantContext.getTenant().getId());
+        String user = MultiTenantContext.getEmailAddress();
         workflowJob.setTenant(tenant);
         workflowJob.setUser(user);
         super.create(workflowJob);
