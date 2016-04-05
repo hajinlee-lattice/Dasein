@@ -203,9 +203,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertNotNull(originalModelSummary);
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
-        System.out.println("originalModelSummary.getTrainingTableName() is "
-                + originalModelSummary.getTrainingTableName());
-        System.out.println("sourceFile.getTableName() is " + sourceFile.getTableName());
         assertNotNull(originalModelSummary.getTrainingTableName());
     }
 
@@ -279,7 +276,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }));
         assertEquals(found.getSourceSchemaInterpretation(), SchemaInterpretation.SalesforceLead.toString());
         String foundFileTableName = found.getTrainingTableName();
-        System.out.println("found.getTrainingTableName() is " + foundFileTableName);
         assertNotNull(foundFileTableName);
     }
 
