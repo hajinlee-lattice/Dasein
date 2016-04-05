@@ -32,7 +32,7 @@ describe('forgot password tests:', function () {
         passwordChange.assertPasswordChangeSuccessful(true);
         element(by.buttonText('Return to Login')).click();
         browser.waitForAngular();
-        browser.driver.sleep(5000);
+        browser.driver.sleep(15000);
         loginPage.assertLoggedIn(false);
     }, 200000);
 
