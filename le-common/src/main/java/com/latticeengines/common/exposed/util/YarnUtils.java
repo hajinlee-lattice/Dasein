@@ -34,7 +34,6 @@ public class YarnUtils {
 
     public static ApplicationReport getApplicationReport(Configuration yarnConfiguration, ApplicationId applicationId)
             throws YarnException, IOException {
-        String rmAddr = yarnConfiguration.get("dataplatform.yarn.resourcemanager.address");
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();

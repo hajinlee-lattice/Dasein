@@ -388,16 +388,16 @@ public class AvroUtils {
         }
 
         try (OutputStream out = fs.append(path)) {
-            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())
-                    .appendTo(new FsInput(path, configuration), out)) {
-                for (GenericRecord datum : data) {
-                    try {
-                        writer.append(datum);
-                    } catch (Exception e) {
-                        log.warn("Data for the error row: " + datum.toString());
-                        throw new IOException(e);
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
+                try (DataFileWriter<GenericRecord> appender = writer.appendTo(new FsInput(path, configuration), out)) {
+                    for (GenericRecord datum : data) {
+                        try {
+                            appender.append(datum);
+                        } catch (Exception e) {
+                            log.warn("Data for the error row: " + datum.toString());
+                            throw new IOException(e);
+                        }
                     }
-
                 }
             }
         }
@@ -413,16 +413,17 @@ public class AvroUtils {
         }
 
         try (OutputStream out = fs.create(path)) {
-            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())
-                    .create(schema, out)) {
-                for (GenericRecord datum : data) {
-                    try {
-                        writer.append(datum);
-                    } catch (Exception e) {
-                        log.warn("Data for the error row: " + datum.toString());
-                        throw new IOException(e);
-                    }
+            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())) {
+                try (DataFileWriter<GenericRecord> creator = writer.create(schema, out)) {
+                    for (GenericRecord datum : data) {
+                        try {
+                            creator.append(datum);
+                        } catch (Exception e) {
+                            log.warn("Data for the error row: " + datum.toString());
+                            throw new IOException(e);
+                        }
 
+                    }
                 }
             }
         }

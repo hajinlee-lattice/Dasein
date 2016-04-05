@@ -17,6 +17,8 @@ public class FieldMetadata {
     private String fieldName;
     private Schema.Field avroField;
     private Map<String, String> properties = new HashMap<>();
+    
+    @SuppressWarnings("unused")
     private List<Attribute> ancestors = new ArrayList<>();
 
     public FieldMetadata(FieldMetadata fm) {

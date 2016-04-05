@@ -49,6 +49,7 @@ public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestN
 
     private JdbcTemplate jdbcTemplate;
 
+    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional", "functional.production" })
     public void setup() {
         DbCreds.Builder builder = new DbCreds.Builder();

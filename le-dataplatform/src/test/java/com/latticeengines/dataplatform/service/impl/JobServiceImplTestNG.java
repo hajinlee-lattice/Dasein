@@ -357,6 +357,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * 
      * @throws Exception
      */
+    @SuppressWarnings("deprecation")
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();

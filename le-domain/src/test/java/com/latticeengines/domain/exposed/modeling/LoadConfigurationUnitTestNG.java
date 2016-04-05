@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class LoadConfigurationUnitTestNG {
     
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testSerDe() {
         LoadConfiguration config = new LoadConfiguration();

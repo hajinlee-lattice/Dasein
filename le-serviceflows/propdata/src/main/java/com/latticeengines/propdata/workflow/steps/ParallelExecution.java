@@ -128,6 +128,7 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             HdfsUtils.writeToFile(yarnConfiguration, outputFile, JsonUtils.serialize(matchOutput));
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
             Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
+            log.info("Generated " + count + " results.");
             matchCommandService.update(rootOperationUid) //
                     .rowsMatched(count.intValue()).status(MatchStatus.FINISHED).progress(1f).commit();
         } catch (Exception e) {

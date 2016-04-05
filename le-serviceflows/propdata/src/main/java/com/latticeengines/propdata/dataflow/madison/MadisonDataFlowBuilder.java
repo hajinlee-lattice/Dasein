@@ -39,6 +39,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         return lastAggregatedOperatorName;
     }
 
+    @SuppressWarnings("deprecation")
     private String aggregateTodayData() {
         String lastAggregatedOperatorName;
         List<Aggregation> aggregation = new ArrayList<>();
@@ -62,6 +63,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         return lastAggregatedOperatorName;
     }
 
+    @SuppressWarnings("deprecation")
     private String createPctChangeCollumns(String lastAggregatedOperatorName) {
         FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_Total_PctChange",
                 null);
@@ -77,6 +79,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         return lastAggregatedOperatorName;
     }
 
+    @SuppressWarnings("deprecation")
     private String joinWithLastDateData(String todayAggregated) {
         String yesterdayAggregated = addRetain("MadisonLogicForYesterday", new FieldList(new String[] { "DomainID",
                 "Category", "ML_30Day_Category_Total", "ML_30Day_Category_UniqueUsers" }));
@@ -85,6 +88,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
                 new FieldList("DomainID", "Category"));
         FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_Total_PctChange",
                 null);
+        
         String lastAggregatedOperatorName = addFunction(
                 joined, //
                 "MadisonLogicForYesterday__ML_30Day_Category_Total != null ? "

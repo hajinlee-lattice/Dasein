@@ -60,7 +60,6 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
         return response.getPid();
     }
 
-    @SuppressWarnings("unchecked")
     private void waitForMatchCommand(Commands commands) {
         log.info(String.format("Waiting for match command %d to complete", commands.getPid()));
 

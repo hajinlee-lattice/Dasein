@@ -85,19 +85,16 @@ public class SqoopImporter {
     @JsonProperty("queue")
     public void setQueue(String queue) {
         this.queue = queue;
-        boolean queueInArgs = false;
         String queueArg = "-Dmapreduce.job.queuename=" + this.queue;
         List<String> args = new ArrayList<>();
+        args.add(queueArg);
         if (this.hadoopArgs != null) {
             for (String arg : this.hadoopArgs) {
-                if (arg.contains("-Dmapreduce.job.queuename")) {
-                    queueInArgs = true;
-                } else {
+                if (!arg.contains("-Dmapreduce.job.queuename")) {
                     args.add(arg);
                 }
             }
         }
-        args.add(queueArg);
         setHadoopArgs(args);
     }
 

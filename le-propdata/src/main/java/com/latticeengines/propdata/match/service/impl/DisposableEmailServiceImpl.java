@@ -16,6 +16,8 @@ import com.latticeengines.propdata.match.service.DisposableEmailService;
 @Component("disposableEmailServiceImpl")
 public class DisposableEmailServiceImpl implements DisposableEmailService {
 
+    private static final long serialVersionUID = -1147149456703878935L;
+    
     private static Set<String> disposableDomains;
 
     @PostConstruct

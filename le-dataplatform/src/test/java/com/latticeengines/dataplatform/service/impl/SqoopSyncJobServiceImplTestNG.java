@@ -361,6 +361,7 @@ public class SqoopSyncJobServiceImplTestNG extends DataPlatformFunctionalTestNGB
 
     }
 
+    @SuppressWarnings("deprecation")
     private DbCreds getSQLServerCreds() {
 
         DbCreds.Builder builder = new DbCreds.Builder();

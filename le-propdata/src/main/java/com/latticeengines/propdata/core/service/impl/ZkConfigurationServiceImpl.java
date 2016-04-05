@@ -32,7 +32,6 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
     private static final String PROPDATA_SERVICE = "PropData";
     private static final String DATASOURCES = "DataSources";
     private static final String BOOTSTRAP_MODE = "BOOTSTRAP";
-    private static final String RUNTIME_MODE = "RUNTIME";
     private String mode;
 
     @Value("${propdata.source.db.json:source_dbs_dev.json}")

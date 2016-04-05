@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
@@ -19,7 +18,7 @@ public class MetadataProviderUnitTestNG {
                 .port(doc.getPort())
                 .db(doc.getDatabase())
                 .user(doc.getUsername())
-                .password(CipherUtils.decrypt(doc.getEncryptedPassword()));
+                .encryptedPassword(doc.getEncryptedPassword());
         DbCreds creds = new DbCreds(builder);
 
         MetadataProvider provider = new SQLServerMetadataProvider();

@@ -48,6 +48,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         jdbcUrl = jdbcUrl.replaceAll("\\$\\$PASSWD\\$\\$", password);
 
         // SQLServer is the only supported match dbtype
+        @SuppressWarnings("deprecation")
         DbCreds.Builder credsBuilder = new DbCreds.Builder() //
                 .dbType("SQLServer") //
                 .jdbcUrl(jdbcUrl) //

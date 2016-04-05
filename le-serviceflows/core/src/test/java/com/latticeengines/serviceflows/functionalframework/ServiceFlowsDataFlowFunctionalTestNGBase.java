@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,9 +44,6 @@ public abstract class ServiceFlowsDataFlowFunctionalTestNGBase extends AbstractT
 
     @Autowired
     private DataTransformationService dataTransformationService;
-
-    @Autowired
-    private ApplicationContext appContext;
 
     protected Configuration yarnConfiguration = new Configuration();
     protected Map<String, String> sourcePaths = new HashMap<>();

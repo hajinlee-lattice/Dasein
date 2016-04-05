@@ -35,7 +35,7 @@ public class MatchInputValidatorTestNG extends PropDataMatchFunctionalTestNGBase
         matchInput.setInputBuffer(inputBuffer);
 
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
-        keyMap.put(MatchKey.Domain, Collections.<String>singletonList("Website"));
+        keyMap.put(MatchKey.Domain, Collections.singletonList("Website"));
         matchInput.setKeyMap(keyMap);
 
         boolean failed = false;

@@ -3,8 +3,6 @@ package com.latticeengines.propdata.match.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +19,6 @@ import com.latticeengines.propdata.match.service.MatchExecutor;
 
 @Component("realTimeMatchExecutor")
 class RealTimeMatchExecutor extends MatchExecutorBase implements MatchExecutor {
-
-    private static final Log log = LogFactory.getLog(RealTimeMatchExecutor.class);
 
     @Autowired
     private MetricService metricService;

@@ -23,6 +23,7 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("serviceFlowsZkConfigService")
 public class ServiceFlowsZkConfigServiceImpl implements ServiceFlowsZkConfigService {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ServiceFlowsZkConfigServiceImpl.class);
 
     private Camille camille;

@@ -139,6 +139,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return new Pair<>(cols, types);
     }
 
+    @SuppressWarnings("deprecation")
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)

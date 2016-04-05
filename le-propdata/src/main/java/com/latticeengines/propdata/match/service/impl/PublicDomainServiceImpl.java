@@ -16,6 +16,8 @@ import com.latticeengines.propdata.match.service.PublicDomainService;
 @Component("publicDomainService")
 public class PublicDomainServiceImpl implements PublicDomainService {
 
+    private static final long serialVersionUID = -4781741091234003229L;
+    
     private static Set<String> publicDomains;
 
     @PostConstruct

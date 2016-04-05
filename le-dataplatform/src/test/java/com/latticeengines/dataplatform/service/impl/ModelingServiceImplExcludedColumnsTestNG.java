@@ -47,6 +47,7 @@ public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFuncti
 
     private LoadConfiguration loadConfig = new LoadConfiguration();
 
+    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();

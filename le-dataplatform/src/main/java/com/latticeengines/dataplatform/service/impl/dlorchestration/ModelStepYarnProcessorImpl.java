@@ -142,6 +142,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return appIds;
     }
 
+    @SuppressWarnings("deprecation")
     private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommand modelcommand,
             ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();

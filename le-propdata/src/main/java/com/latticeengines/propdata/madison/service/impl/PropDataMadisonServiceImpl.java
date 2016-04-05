@@ -102,6 +102,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.datatarget.password.encrypted}")
     private String targetJdbcPassword;
 
+    @SuppressWarnings("deprecation")
     @Override
     public PropDataContext importFromDB(PropDataContext requestContext) {
 
@@ -255,6 +256,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     }
 
+    @SuppressWarnings("deprecation")
     private String getHdfsWorkflowTargetSchemaPath() {
         String schemaPath = propdataBaseDir + "/" + propdataSourceDir + "/workflow/" + getJobName() + "/schema";
         try {
@@ -371,6 +373,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return response;
     }
 
+    @SuppressWarnings("deprecation")
     private void uploadAggregateData(String sourceDir) {
         log.info("Uploading today's aggregation data=" + sourceDir);
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
@@ -413,6 +416,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         return targetTable + "_new";
     }
 
+    @SuppressWarnings("deprecation")
     private void uploadTodayRawData(String todayIncrementalPath) throws Exception {
 
         if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
