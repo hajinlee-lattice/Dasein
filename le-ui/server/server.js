@@ -94,7 +94,17 @@ class Server {
 
     // trust the load balancer/proxy in production
     trustProxy(WHITELIST) {
-        this.app.set('trust proxy', WHITELIST);
+        this.app.set('trust proxy', ip => {
+            const ips = WHITELIST.split(',');
+            
+            ips.forEach(current_ip => {
+                if (current_ip === ip) {
+                    return true;
+                }
+            });
+
+            return false;
+        });
     }
 
     // forward API requests for dev
