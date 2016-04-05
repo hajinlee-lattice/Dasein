@@ -119,7 +119,19 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
                 configuration.getCustomerSpace(), eventTable.getName());
         restTemplate.postForLocation(url, eventTable);
+
+        deleteMatchTable(dbCreds, matchTableName);
+
         return eventTable;
+    }
+
+    private void deleteMatchTable(DbCreds dbCreds, String matchTableName) throws Exception {
+        Connection conn = DriverManager.getConnection(dbCreds.getJdbcUrl());
+        PreparedStatement pstmt = conn.prepareStatement(String.format("DROP TABLE %s", matchTableName));
+        pstmt.execute();
+
+        pstmt = conn.prepareStatement(String.format("DROP TABLE %s_MetaData", matchTableName));
+        pstmt.execute();
     }
 
     private Attribute getIdColumn(Table table) {
