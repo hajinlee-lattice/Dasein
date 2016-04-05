@@ -103,39 +103,39 @@ public class ColumnMetadataServiceImpl implements ColumnMetadataService {
         }
 
         if (dataType.toLowerCase().contains("varchar")) {
-            return Schema.Type.STRING;
+            return AvroUtils.getAvroType(String.class);
         }
 
         if ("INT".equalsIgnoreCase(dataType)) {
-            return Schema.Type.INT;
+            return AvroUtils.getAvroType(Integer.class);
         }
 
         if ("BIGINT".equalsIgnoreCase(dataType)) {
-            return Schema.Type.LONG;
+            return AvroUtils.getAvroType(Long.class);
         }
 
         if ("REAL".equalsIgnoreCase(dataType)) {
-            return Schema.Type.FLOAT;
+            return AvroUtils.getAvroType(Float.class);
         }
 
         if ("FLOAT".equalsIgnoreCase(dataType)) {
-            return Schema.Type.DOUBLE;
+            return AvroUtils.getAvroType(Double.class);
         }
 
         if ("BIT".equalsIgnoreCase(dataType)) {
-            return Schema.Type.BOOLEAN;
+            return AvroUtils.getAvroType(Boolean.class);
         }
 
         if ("DATETIME".equalsIgnoreCase(dataType)) {
-            return Schema.Type.LONG;
+            return AvroUtils.getAvroType(Long.class);
         }
 
         if ("DATETIME2".equalsIgnoreCase(dataType)) {
-            return Schema.Type.LONG;
+            return AvroUtils.getAvroType(Long.class);
         }
 
         if ("DATE".equalsIgnoreCase(dataType)) {
-            return Schema.Type.LONG;
+            return AvroUtils.getAvroType(Long.class);
         }
 
         throw new RuntimeException("Unknown avro type for sql server data type " + dataType);
