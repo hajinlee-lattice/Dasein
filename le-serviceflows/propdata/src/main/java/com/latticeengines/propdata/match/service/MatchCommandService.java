@@ -9,4 +9,8 @@ public interface MatchCommandService {
 
     MatchCommand start(MatchInput input, ApplicationId appId, String rootOperationUid);
 
+    MatchCommandUpdater update(String rootOperationUid);
+
+    MatchCommand getByRootOperationUid(String rootOperationUid);
+
 }

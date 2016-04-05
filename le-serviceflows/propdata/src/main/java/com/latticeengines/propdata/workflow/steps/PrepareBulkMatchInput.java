@@ -10,12 +10,15 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
+import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
@@ -24,6 +27,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private static Log log = LogFactory.getLog(PrepareBulkMatchInput.class);
     private Schema schema;
+
+    @Autowired
+    private MatchCommandService matchCommandService;
 
     @Override
     public void execute() {
@@ -34,6 +40,11 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         Integer[] blocks = determineBlockSizes(count);
         List<PropDataJobConfiguration> configurations = readAndSplitInputAvro(blocks);
         executionContext.put(BulkMatchContextKey.YARN_JOB_CONFIGS, configurations);
+        executionContext.put(BulkMatchContextKey.ROOT_OPERATION_UID, getConfiguration().getRootOperationUid());
+        matchCommandService.update(getConfiguration().getRootOperationUid()) //
+                .status(MatchStatus.MATCHING) //
+                .progress(0.05f) //
+                .commit();
     }
 
     private Integer[] determineBlockSizes(Long count) {

@@ -90,7 +90,7 @@ public class HdfsPathBuilder {
         return baseDir.append(dateFormat.format(archiveDate));
     }
 
-    public Path constructMatchDir(String rootOperationUid) {
+    private Path constructMatchDir(String rootOperationUid) {
         return propDataDir().append(MATCHES_SEGMENT).append(rootOperationUid);
     }
 
@@ -119,6 +119,11 @@ public class HdfsPathBuilder {
 
     public Path constructMatchBlockDir(String rootOperationUid, String blockOperationUid) {
         return constructMatchDir(rootOperationUid).append(BLOCKS_SEGMENT).append(blockOperationUid);
+    }
+
+    public Path constructMatchBlockAvro(String rootOperationUid, String blockOperationUid) {
+        String fileName = "block_" + blockOperationUid.replace("-", "_").toLowerCase() + ".avro";
+        return constructMatchBlockDir(rootOperationUid, blockOperationUid).append(fileName);
     }
 
     public Path constructMatchBlockErrorFile(String rootOperationUid, String blockOperationUid) {
