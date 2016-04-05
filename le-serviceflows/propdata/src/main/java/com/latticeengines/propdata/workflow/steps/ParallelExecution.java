@@ -180,7 +180,7 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             totalProgress += appProgress;
         }
         // add full progress of finished applications
-        totalProgress = 1.0f * blockUuidMap.size() - reports.size();
+        totalProgress += 1.0f * (blockUuidMap.size() - reports.size());
 
         Float overallProgress = 0.9f * (totalProgress / blockUuidMap.size()) + 0.05f;
         if (overallProgress != this.progress) {
