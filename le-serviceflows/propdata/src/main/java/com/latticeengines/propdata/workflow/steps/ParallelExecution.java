@@ -6,17 +6,14 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.client.AHSProxy;
-import org.apache.hadoop.yarn.client.RMProxy;
-import org.apache.hadoop.yarn.client.api.impl.TimelineClientImpl;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -26,10 +23,15 @@ import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfiguration> {
 
     private static Log log = LogFactory.getLog(ParallelExecution.class);
+    private static int MAX_ERRORS = 100;
 
     @Autowired
     private InternalProxy internalProxy;
 
+    private YarnClient yarnClient;
+    private List<ApplicationId> applicationIds = new ArrayList<>();
+
+    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
         log.info("Inside ParallelExecution execute()");
@@ -54,17 +56,52 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             applicationIds.add(appId);
         }
 
-        LogManager.getLogger(TimelineClientImpl.class).setLevel(Level.WARN);
-        LogManager.getLogger(RMProxy.class).setLevel(Level.WARN);
-        LogManager.getLogger(AHSProxy.class).setLevel(Level.WARN);
-
-        for (ApplicationId appId : applicationIds) {
-            YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600 * 24);
+        initializeYarnClient();
+        int numErrors = 0;
+        try {
+            for (ApplicationId appId : applicationIds) {
+                try {
+                    ApplicationReport report = yarnClient.getApplicationReport(appId);
+                    YarnApplicationState state = report.getYarnApplicationState();
+                    Float progress = report.getProgress();
+                    String logMessage = String.format("Matcher [%s] is at state [%s]", appId, state);
+                    if (YarnApplicationState.RUNNING.equals(state)) {
+                        logMessage += String.format(": %.2f ", progress) + "%";
+                    }
+                    log.info(logMessage);
+                } catch (Exception e) {
+                    numErrors++;
+                    log.error("Failed to read status of application " + appId, e);
+                    if (numErrors > MAX_ERRORS) {
+                        killChildrenApplications();
+                        throw new RuntimeException("Exceeded maximum number of errors " + MAX_ERRORS);
+                    }
+                }
+                try {
+                    Thread.sleep(10000L);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        } finally {
+            yarnClient.stop();
         }
+    }
 
-        LogManager.getLogger(TimelineClientImpl.class).setLevel(Level.INFO);
-        LogManager.getLogger(RMProxy.class).setLevel(Level.INFO);
-        LogManager.getLogger(AHSProxy.class).setLevel(Level.INFO);
+    private void initializeYarnClient() {
+        yarnClient = YarnClient.createYarnClient();
+        yarnClient.init(yarnConfiguration);
+        yarnClient.start();
+    }
+
+    private void killChildrenApplications() {
+        for (ApplicationId appId: applicationIds) {
+            try {
+                yarnClient.killApplication(appId);
+            } catch (Exception e) {
+                log.error("Error when killing the application " + appId, e);
+            }
+        }
     }
 
 }
