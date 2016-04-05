@@ -119,6 +119,7 @@ public class ScoreResource {
 
             requestInfo.put("HasWarning", String.valueOf(!warnings.getWarnings().isEmpty()));
             requestInfo.put("HasError", Boolean.toString(false));
+            requestInfo.put("Score", String.valueOf(response.getScore()));
             requestInfo.logSummary();
 
             return response;
