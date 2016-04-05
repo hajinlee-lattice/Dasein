@@ -387,7 +387,7 @@ public class AvroUtils {
             throw new IOException("File " + filePath + " does not exist, so cannot append.");
         }
 
-        try (OutputStream out = fs.create(path)) {
+        try (OutputStream out = fs.append(path)) {
             try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<GenericRecord>())
                     .appendTo(new FsInput(path, configuration), out)) {
                 for (GenericRecord datum : data) {
