@@ -74,7 +74,7 @@ module.exports = function (grunt) {
                 args: [ './app.js' ]
             },
             nodemon: {
-                cmd: 'nodemon.cmd',
+                cmd: 'nodemon',
                 args: [ './app.js' ]
             },
             pm2: {
@@ -133,6 +133,12 @@ module.exports = function (grunt) {
     grunt.registerTask('local', devText, [
         'env:local',
         'run:node'
+    ]);
+
+    var devText = 'Run Express Server, using Local API Endpoints';
+    grunt.registerTask('localmon', devText, [
+        'env:local',
+        'run:nodemon'
     ]);
 
     var integrationText = 'Run Express Server, using 53 API Endpoints';

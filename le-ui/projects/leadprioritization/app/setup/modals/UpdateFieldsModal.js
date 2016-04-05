@@ -52,7 +52,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             if (result.Success) {
                 $("#modalContainer").modal('hide');
 
-                $state.go('jobs');
+                $state.go('home.jobs.status');
             } else {
                 if (result.ResultErrors != null) {
                     $scope.updateFieldsErrorMessage = result.ResultErrors;
