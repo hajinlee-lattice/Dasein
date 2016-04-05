@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.hibernate.annotations.Index;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -30,6 +31,7 @@ public class MatchOperation implements HasPid {
     @Column(name = "PID", nullable = false)
     private Long pid;
 
+    @Index(name = "IX_UID")
     @Column(name = "BlockOperationUID", nullable = false, length = 100)
     private String blockOperationUid;
 

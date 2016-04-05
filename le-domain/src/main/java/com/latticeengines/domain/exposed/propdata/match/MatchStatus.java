@@ -5,9 +5,7 @@ public enum MatchStatus {
     NEW,
     MATCHING,
     MATCHED,
-    FETCHING,
-    FETCHED,
-    PROCESSING,
-    PROCESSED,
+    FINISHING,
+    ABORTED,
     FINISHED
 }

@@ -22,6 +22,9 @@ public class YarnUtils {
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
 
+    public static final EnumSet<YarnApplicationState> TERMINAL_APP_STATE = EnumSet.of(YarnApplicationState.FAILED,
+            YarnApplicationState.KILLED, YarnApplicationState.FINISHED);
+
     public static boolean isPrempted(String diagnostics) {
         if (Strings.isNullOrEmpty(diagnostics))
             return false;
@@ -29,8 +32,8 @@ public class YarnUtils {
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
     }
 
-    public static ApplicationReport getApplicationReport (
-            Configuration yarnConfiguration, ApplicationId applicationId) throws YarnException, IOException {
+    public static ApplicationReport getApplicationReport(Configuration yarnConfiguration, ApplicationId applicationId)
+            throws YarnException, IOException {
         String rmAddr = yarnConfiguration.get("dataplatform.yarn.resourcemanager.address");
         YarnClient yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
@@ -44,13 +47,13 @@ public class YarnUtils {
         return report;
     }
 
-    public static FinalApplicationStatus waitFinalStatusForAppId(
-            Configuration yarnConfiguration, ApplicationId applicationId) {
+    public static FinalApplicationStatus waitFinalStatusForAppId(Configuration yarnConfiguration,
+            ApplicationId applicationId) {
         return waitFinalStatusForAppId(yarnConfiguration, applicationId, 3600);
     }
 
-    public static FinalApplicationStatus waitFinalStatusForAppId(
-            Configuration yarnConfiguration, ApplicationId applicationId, Integer timeoutInSec) {
+    public static FinalApplicationStatus waitFinalStatusForAppId(Configuration yarnConfiguration,
+            ApplicationId applicationId, Integer timeoutInSec) {
         log.info("Wait " + applicationId + " for " + timeoutInSec + " seconds.");
         FinalApplicationStatus finalStatus = null;
         Long startTime = System.currentTimeMillis();

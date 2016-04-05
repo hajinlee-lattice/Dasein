@@ -137,7 +137,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     }
     
     protected String appName(Properties appMasterProperties, String clientName) {
-        if (appMasterProperties.contains(AppMasterProperty.APP_NAME.name())) {
+        if (appMasterProperties.containsKey(AppMasterProperty.APP_NAME.name())) {
             return appMasterProperties.getProperty(AppMasterProperty.APP_NAME.name());
         } else {
             return jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),

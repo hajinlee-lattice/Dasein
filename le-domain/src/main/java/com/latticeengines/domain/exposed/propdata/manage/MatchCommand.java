@@ -19,10 +19,10 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 
@@ -36,11 +36,15 @@ public class MatchCommand implements HasPid {
     @Column(name = "PID", nullable = false)
     private Long pid;
 
+    @Index(name = "IX_UID")
     @Column(name = "RootOperationUID", unique = true, nullable = false, length = 100)
     private String rootOperationUid;
 
-    @Column(name = "NumRows", nullable = false)
-    private Integer numRows;
+    @Column(name = "RowsRequested", nullable = false)
+    private Integer rowsRequested;
+
+    @Column(name = "RowsMatched")
+    private Integer rowsMatched;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "MatchStatus", nullable = false, length = 20)
@@ -97,12 +101,20 @@ public class MatchCommand implements HasPid {
         this.rootOperationUid = rootOperationUid;
     }
 
-    public Integer getNumRows() {
-        return numRows;
+    public Integer getRowsRequested() {
+        return rowsRequested;
     }
 
-    public void setNumRows(Integer numRows) {
-        this.numRows = numRows;
+    public void setRowsRequested(Integer rowsRequested) {
+        this.rowsRequested = rowsRequested;
+    }
+
+    public Integer getRowsMatched() {
+        return rowsMatched;
+    }
+
+    public void setRowsMatched(Integer rowsMatched) {
+        this.rowsMatched = rowsMatched;
     }
 
     public MatchStatus getMatchStatus() {
