@@ -48,6 +48,15 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
 
     @Test(groups = "deployment.lp", enabled = true)
     public void testEndToEnd() throws InterruptedException, IOException {
+        String modelId = prepareModel();
+        scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId);
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
+    String prepareModel() throws InterruptedException {
         selfServiceModeling.setFileName(fileName);
         System.out.println("Uploading File");
         selfServiceModeling.uploadFile();
@@ -61,7 +70,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         ModelSummary modelSummary = selfServiceModeling.getModelSummary();
         String modelId = modelSummary.getId();
         System.out.println("modeling id: " + modelId);
-        scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId);
+        return modelId;
     }
 
     @SuppressWarnings("rawtypes")
