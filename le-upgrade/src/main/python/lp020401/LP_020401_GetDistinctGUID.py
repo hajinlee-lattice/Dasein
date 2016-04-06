@@ -37,7 +37,21 @@ Adhoc_PullGUIID = '''
       <rdss />
       <validationExtracts />
       <ces />
-      <extractQueries />
+      <extractQueries>
+        <extractQuery qw="Workspace" queryName="Q_Scores_InDateRange" queryAlias="Q_Scores_InDateRange" sw="Workspace" schemaName="Scores_InDateRange_Ref" at="False" ucm="True">
+          <schemas />
+          <specs />
+          <cms>
+            <cm qcn="LeadID" itcn="LeadID" />
+            <cm qcn="Model_GUID" itcn="Model_GUID" />
+            <cm qcn="ScoreDate" itcn="ScoreDate" />
+            <cm qcn="Percentile" itcn="Percentile" />
+            <cm qcn="Probability" itcn="Probability" />
+            <cm qcn="RawScore" itcn="RawScore" />
+            <cm qcn="Score" itcn="Score" />
+          </cms>
+        </extractQuery>
+      </extractQueries>
       <extractQuerySequences />
       <leafExtracts />
       <launchExtracts />
@@ -49,275 +63,22 @@ Adhoc_PullGUIID = '''
       <lds />
       <ecs />
       <gCs />
-    </group> '''
+    </group>
+    '''
 
 
-Q_Get_Model_GUID_InDateRange = '''
-SpecLatticeNamedElements((SpecLatticeNamedElement(
-	SpecLatticeQuery(
-		LatticeAddressSetPushforward(
-			LatticeAddressExpressionFromLAS(
-				LatticeAddressSetMeet(
-					(
-						LatticeAddressSetPi(
-							LatticeAddressExpressionAtomic(
-								LatticeAddressAtomicIdentifier(
-									ContainerElementName("Bard_LeadScoreHistory")
-								)
-							)
-						),
-						LatticeAddressSetFcn(
-							LatticeFunctionExpression(
-								LatticeFunctionOperatorIdentifier("AND"),
-								LatticeFunctionExpression(
-									LatticeFunctionOperatorIdentifier("GreaterOrEqual"),
-									LatticeFunctionExpressionTransform(
-										LatticeFunctionIdentifier(
-											ContainerElementNameTableQualifiedName(
-												LatticeSourceTableIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												),
-												ContainerElementName("ScoreDate")
-											)
-										),
-										LatticeAddressSetPi(
-											LatticeAddressExpressionAtomic(
-												LatticeAddressAtomicIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												)
-											)
-										),
-										FunctionAggregationSelectWhere(
-											FunctionAggregationOperator("Max"),
-											LatticeFunctionIdentifier(
-												ContainerElementNameTableQualifiedName(
-													LatticeSourceTableIdentifier(
-														ContainerElementName("Bard_LeadScoreHistory")
-													),
-													ContainerElementName("ScoreDate")
-												)
-											)
-										)
-									),
-									LatticeFunctionExpressionConstant(
-										"2015/12/14",
-										DataTypeDateTime
-									)
-								),
-								LatticeFunctionExpression(
-									LatticeFunctionOperatorIdentifier("LessOrEqual"),
-									LatticeFunctionExpressionTransform(
-										LatticeFunctionIdentifier(
-											ContainerElementNameTableQualifiedName(
-												LatticeSourceTableIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												),
-												ContainerElementName("ScoreDate")
-											)
-										),
-										LatticeAddressSetPi(
-											LatticeAddressExpressionAtomic(
-												LatticeAddressAtomicIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												)
-											)
-										),
-										FunctionAggregationSelectWhere(
-											FunctionAggregationOperator("Max"),
-											LatticeFunctionIdentifier(
-												ContainerElementNameTableQualifiedName(
-													LatticeSourceTableIdentifier(
-														ContainerElementName("Bard_LeadScoreHistory")
-													),
-													ContainerElementName("ScoreDate")
-												)
-											)
-										)
-									),
-									LatticeFunctionExpressionConstant(
-										"2016/03/18",
-										DataTypeDateTime
-									)
-								)
-							),
-							LatticeAddressSetIdentifier(
-								ContainerElementName("Alias_AllLeadID")
-							)
-						)
-					)
-				)
-			),
-			LatticeAddressSetMeet(
-				(
-					LatticeAddressSetPi(
-						LatticeAddressExpressionAtomic(
-							LatticeAddressAtomicIdentifier(
-								ContainerElementName("Bard_LeadScoreHistory")
-							)
-						)
-					),
-					LatticeAddressSetFcn(
-						LatticeFunctionExpression(
-							LatticeFunctionOperatorIdentifier("AND"),
-							LatticeFunctionExpression(
-								LatticeFunctionOperatorIdentifier("GreaterOrEqual"),
-								LatticeFunctionExpressionTransform(
-									LatticeFunctionIdentifier(
-										ContainerElementNameTableQualifiedName(
-											LatticeSourceTableIdentifier(
-												ContainerElementName("Bard_LeadScoreHistory")
-											),
-											ContainerElementName("ScoreDate")
-										)
-									),
-									LatticeAddressSetPi(
-										LatticeAddressExpressionAtomic(
-											LatticeAddressAtomicIdentifier(
-												ContainerElementName("Bard_LeadScoreHistory")
-											)
-										)
-									),
-									FunctionAggregationSelectWhere(
-										FunctionAggregationOperator("Max"),
-										LatticeFunctionIdentifier(
-											ContainerElementNameTableQualifiedName(
-												LatticeSourceTableIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												),
-												ContainerElementName("ScoreDate")
-											)
-										)
-									)
-								),
-								LatticeFunctionExpressionConstant(
-									"2015/12/14",
-									DataTypeDateTime
-								)
-							),
-							LatticeFunctionExpression(
-								LatticeFunctionOperatorIdentifier("LessOrEqual"),
-								LatticeFunctionExpressionTransform(
-									LatticeFunctionIdentifier(
-										ContainerElementNameTableQualifiedName(
-											LatticeSourceTableIdentifier(
-												ContainerElementName("Bard_LeadScoreHistory")
-											),
-											ContainerElementName("ScoreDate")
-										)
-									),
-									LatticeAddressSetPi(
-										LatticeAddressExpressionAtomic(
-											LatticeAddressAtomicIdentifier(
-												ContainerElementName("Bard_LeadScoreHistory")
-											)
-										)
-									),
-									FunctionAggregationSelectWhere(
-										FunctionAggregationOperator("Max"),
-										LatticeFunctionIdentifier(
-											ContainerElementNameTableQualifiedName(
-												LatticeSourceTableIdentifier(
-													ContainerElementName("Bard_LeadScoreHistory")
-												),
-												ContainerElementName("ScoreDate")
-											)
-										)
-									)
-								),
-								LatticeFunctionExpressionConstant(
-									"2016/03/18",
-									DataTypeDateTime
-								)
-							)
-						),
-						LatticeAddressSetIdentifier(
-							ContainerElementName("Alias_AllLeadID")
-						)
-					)
-				)
-			),
-			LatticeAddressExpressionMeet(
-				(
-					LatticeAddressExpressionAtomic(
-						LatticeAddressAtomicFTOA(
-							LatticeFunctionIdentifier(
-								ContainerElementNameTableQualifiedName(
-									LatticeSourceTableIdentifier(
-										ContainerElementName("Bard_LeadScoreHistory")
-									),
-									ContainerElementName("Play_Display_Name")
-								)
-							),
-							LatticeAddressSetFromFcnSupport(
-								LatticeFunctionIdentifier(
-									ContainerElementNameTableQualifiedName(
-										LatticeSourceTableIdentifier(
-											ContainerElementName("Bard_LeadScoreHistory")
-										),
-										ContainerElementName("Play_Display_Name")
-									)
-								)
-							)
-						)
-					)
-				)
-			)
-		),
-		SpecQueryNamedFunctions(
-			SpecQueryNamedFunctionExpression(
-				ContainerElementName("Model_GUID"),
-				LatticeFunctionIdentifierAddressAtomic(
-					LatticeAddressAtomicFTOA(
-						LatticeFunctionIdentifier(
-							ContainerElementNameTableQualifiedName(
-								LatticeSourceTableIdentifier(
-									ContainerElementName("Bard_LeadScoreHistory")
-								),
-								ContainerElementName("Play_Display_Name")
-							)
-						),
-						LatticeAddressSetFromFcnSupport(
-							LatticeFunctionIdentifier(
-								ContainerElementNameTableQualifiedName(
-									LatticeSourceTableIdentifier(
-										ContainerElementName("Bard_LeadScoreHistory")
-									),
-									ContainerElementName("Play_Display_Name")
-								)
-							)
-						)
-					)
-				)
-			)
-			SpecQueryNamedFunctionEntityFunctionBoundary
-			SpecQueryNamedFunctionExpression(
-				ContainerElementName("TenantName"),
-				LatticeFunctionIdentifier(
-					ContainerElementName("Const_TenantName")
-				)
-			)
-		),
-		SpecQueryResultSetAll
-	),
-	ContainerElementName("Q_Get_Model_GUID_InDateRange")
-)))
-'''
-
-Const_TenantName = '''
-SpecLatticeNamedElements((SpecLatticeNamedElement(
-	SpecLatticeFunction(
-		LatticeFunctionExpressionConstantScalar(
-			"UnknownTenantName",
-			DataTypeVarChar(Length_TenantName)
-		),
-		DataTypeUnknown,
-		SpecFunctionTypeMetric,
-		SpecFunctionSourceTypeCalculation,
-		SpecDefaultValueNull,
-		SpecDescription("")
-	),
-	ContainerElementName("Const_TenantName")
-)))
+Get_Model_GUID_InDateRange_Specs = '''
+SpecLatticeNamedElements((
+SpecLatticeNamedElement(SpecLatticeSourceTable(SpecLatticeSourceTableColumnSet((SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("LeadID"))),DataTypeVarChar(50),SpecFieldTypeMetric(FunctionAggregationOperator("Combine")),SpecColumnContentContainerElementName(ContainerElementName("LeadID")),SpecEndpointTypeNone,SpecDefaultValueNullNoRTrim,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Combine")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Combine"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Model_GUID"))),DataTypeNVarChar(150),SpecFieldTypeMetric(FunctionAggregationOperator("Combine")),SpecColumnContentContainerElementName(ContainerElementName("Model_GUID")),SpecEndpointTypeNone,SpecDefaultValueNullNoRTrim,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Combine")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Combine"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("ScoreDate"))),DataTypeDateTime,SpecFieldTypeMetric(FunctionAggregationOperator("Max")),SpecColumnContentContainerElementName(ContainerElementName("ScoreDate")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Max")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Max"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Percentile"))),DataTypeInt,SpecFieldTypeMetric(FunctionAggregationOperator("Sum")),SpecColumnContentContainerElementName(ContainerElementName("Percentile")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Sum"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Probability"))),DataTypeDouble,SpecFieldTypeMetric(FunctionAggregationOperator("Sum")),SpecColumnContentContainerElementName(ContainerElementName("Probability")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Sum"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("RawScore"))),DataTypeDouble,SpecFieldTypeMetric(FunctionAggregationOperator("Sum")),SpecColumnContentContainerElementName(ContainerElementName("RawScore")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Sum"))),SpecLatticeSourceTableColumn(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Score"))),DataTypeInt,SpecFieldTypeMetric(FunctionAggregationOperator("Sum")),SpecColumnContentContainerElementName(ContainerElementName("Score")),SpecEndpointTypeNone,SpecDefaultValueNull,SpecKeyAggregation(SpecColumnAggregationRuleFunction("Sum")),SpecEquivalenceAggregation(SpecColumnAggregationRuleFunction("Sum"))))),SpecKeys(empty),SpecDescription(""),SpecMaximalIsMaximal,SpecKeyAggregation(SpecColumnAggregationRuleMostRecent),SpecEquivalenceAggregation(SpecColumnAggregationRuleMostRecent)),ContainerElementName("Scores_InDateRange_Ref"))
+,
+SpecLatticeNamedElement(SpecLatticeImportTable(SpecSourceAggregationRuleMostRecent(SpecTotalOrderEffectiveDate),SpecColumnBindings((SpecColumnBinding(ContainerElementName("LeadID"),DataTypeNVarChar(100)),SpecColumnBinding(ContainerElementName("Model_GUID"),DataTypeNVarChar(49)),SpecColumnBinding(ContainerElementName("ScoreDate"),DataTypeDateTime),SpecColumnBinding(ContainerElementName("Percentile"),DataTypeInt),SpecColumnBinding(ContainerElementName("Probability"),DataTypeDouble),SpecColumnBinding(ContainerElementName("RawScore"),DataTypeDouble),SpecColumnBinding(ContainerElementName("Score"),DataTypeInt))),SpecSourceFilterNone),ContainerElementName("Scores_InDateRange_Ref_Import"))
+,
+SpecLatticeNamedElement(SpecLatticeBinder(SpecBoundName(ContainerElementName("Scores_InDateRange_Ref_Import"),NameTypeImportTable),SpecBoundName(ContainerElementName("Scores_InDateRange_Ref"),NameTypeSourceTable)),ContainerElementName("Binder_I2S_T_Scores_InDateRange_Ref_Import_Scores_InDateRange_Ref"))
+,
+SpecLatticeNamedElement(SpecLatticeQuery(LatticeAddressSetPushforward(LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Scores_InDateRange_Ref"))))))),LatticeAddressSetMeet((LatticeAddressSetPi(LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Scores_InDateRange_Ref")))))),LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(LatticeAddressAtomicFTOA(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Model_GUID"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Model_GUID"))))))))),SpecQueryNamedFunctions(SpecQueryNamedFunctionExpression(ContainerElementName("Model_GUID"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicFTOA(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Model_GUID"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Scores_InDateRange_Ref")),ContainerElementName("Model_GUID"))))))) SpecQueryNamedFunctionEntityFunctionBoundary SpecQueryNamedFunctionExpression(ContainerElementName("TenantName"),LatticeFunctionIdentifier(ContainerElementName("Const_TenantName")))),SpecQueryResultSetAll),ContainerElementName("Q_Get_Model_GUID_InDateRange"))
+,
+SpecLatticeNamedElement(SpecLatticeQuery(LatticeAddressSetPushforward(LatticeAddressExpressionFromLAS(LatticeAddressSetMeet((LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),LatticeAddressExpressionAtomic(LatticeAddressAtomicNoKeys(ContainerElementName("Bard_LeadScoreHistory")))),LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Greater"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstantScalar("2015/12/14",DataTypeDateTime)),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Less"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstantScalar("2016/03/14",DataTypeDateTime))),LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory"))))))))),LatticeAddressSetMeet((LatticeAddressSetSourceTable(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),LatticeAddressExpressionAtomic(LatticeAddressAtomicNoKeys(ContainerElementName("Bard_LeadScoreHistory")))),LatticeAddressSetFcn(LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("AND"),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Greater"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstantScalar("2015/12/14",DataTypeDateTime)),LatticeFunctionExpression(LatticeFunctionOperatorIdentifier("Less"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate")))),FunctionAggregationOperator("Max")),LatticeFunctionExpressionConstantScalar("2016/03/14",DataTypeDateTime))),LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))))))),LatticeAddressExpressionMeet((LatticeAddressExpressionAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))))),SpecQueryNamedFunctions(SpecQueryNamedFunctionExpression(ContainerElementName("Bard_LeadScoreHistory"),LatticeFunctionIdentifierAddressAtomic(LatticeAddressAtomicIdentifier(ContainerElementName("Bard_LeadScoreHistory")))) SpecQueryNamedFunctionExpression(ContainerElementName("LeadID"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("LeadID"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("LeadID")))),FunctionAggregationOperator("Sum"))) SpecQueryNamedFunctionExpression(ContainerElementName("Percentile"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Percentile"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Percentile")))),FunctionAggregationOperator("Sum"))) SpecQueryNamedFunctionExpression(ContainerElementName("Model_GUID"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Play_Display_Name"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Play_Display_Name")))),FunctionAggregationOperator("Max"))) SpecQueryNamedFunctionExpression(ContainerElementName("Probability"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Probability"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Probability")))),FunctionAggregationOperator("Sum"))) SpecQueryNamedFunctionExpression(ContainerElementName("RawScore"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("RawScore"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("RawScore")))),FunctionAggregationOperator("Sum"))) SpecQueryNamedFunctionExpression(ContainerElementName("Score"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Score"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("Score")))),FunctionAggregationOperator("Sum"))) SpecQueryNamedFunctionExpression(ContainerElementName("ScoreDate"),LatticeFunctionExpressionTransform(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate"))),LatticeAddressSetFromFcnSupport(LatticeFunctionIdentifier(ContainerElementNameTableQualifiedName(LatticeSourceTableIdentifier(ContainerElementName("Bard_LeadScoreHistory")),ContainerElementName("ScoreDate")))),FunctionAggregationOperator("Max")))),SpecQueryResultSetAll),ContainerElementName("Q_Scores_InDateRange"))
+))
 '''
 
 class LP_020401_GetDistinctGUID( StepBase ):
@@ -325,27 +86,12 @@ class LP_020401_GetDistinctGUID( StepBase ):
   name        = 'LP_020401_GetDistinctGUID'
   description = 'Get the distinctGUID'
   version     = '$Rev: 71042 $'
-  didTenantNameSetted = False
-
 
   def __init__( self, forceApply = False ):
     super( LP_020401_GetDistinctGUID, self ).__init__( forceApply )
 
-
   def getApplicability( self, appseq ):
-    lgm = appseq.getLoadGroupMgr()
-    conn_mgr = appseq.getConnectionMgr()
-    customer_id = appseq.getText('customer_id')
-    tenantNameSpec = appseq.getConnectionMgr().getNamedExpression( 'Const_TenantName' )
-    defn = tenantNameSpec.Object().definition()
-    c = re.search( 'LatticeFunctionExpressionConstantScalar\(\"(.*?)\"', defn )
-    if c:
-      tenantName = c.group(1)
-      if tenantName != 'Unknown':
-        self.didTenantNameSetted = True
-      return Applicability.canApply
-    return Applicability.cannotApplyPass
-
+    return Applicability.canApply
 
   def apply( self, appseq ):
     conn_mgr = appseq.getConnectionMgr()
@@ -354,18 +100,8 @@ class LP_020401_GetDistinctGUID( StepBase ):
     xml_lg = ''
     spec = ''
 
-    customer_id = appseq.getText('customer_id')
-    if self.didTenantNameSetted == False:
-      print ' customer_id = '+ customer_id
-      spec = Const_TenantName
-      length_tenantName = len(customer_id)
-      spec = spec.replace('UnknownTenantName', customer_id)
-      spec = spec.replace('Length_TenantName', str(length_tenantName))
-
-      conn_mgr.setSpec('Const_TenantName', spec)
-
     xml_lg = Adhoc_PullGUIID
-    spec = Q_Get_Model_GUID_InDateRange
+    spec = Get_Model_GUID_InDateRange_Specs
     lgm.setLoadGroup( xml_lg )
     conn_mgr.setSpec('Q_Get_Model_GUID_InDateRange', spec)
     return True
