@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed.entitymgr.impl;
+package com.latticeengines.workflow.entitymanager.impl;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 @Component("keyValueEntityMgr")
 public class KeyValueEntityMgrImpl extends BaseEntityMgrImpl<KeyValue> implements KeyValueEntityMgr {

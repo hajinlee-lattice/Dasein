@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed.entitymgr;
+package com.latticeengines.workflow.exposed.entitymanager;
 
 import java.util.List;
 

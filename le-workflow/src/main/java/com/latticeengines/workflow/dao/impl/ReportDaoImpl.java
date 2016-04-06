@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed.dao.impl;
+package com.latticeengines.workflow.dao.impl;
 
 import org.springframework.stereotype.Component;
 

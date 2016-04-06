@@ -34,15 +34,16 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.WorkflowAppContext;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
-import com.latticeengines.workflow.exposed.entitymgr.WorkflowAppContextEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
+import com.latticeengines.workflow.exposed.user.WorkflowUser;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
@@ -65,13 +66,13 @@ public class WorkflowServiceImpl implements WorkflowService {
     private JobOperator jobOperator;
 
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private WorkflowAppContextEntityMgr workflowAppContextEntityMgr;
-
-    @Autowired
     private WorkflowExecutionCache workflowExecutionCache;
+
+    @Autowired
+    private WorkflowTenantService workflowTenantService;
+
+    @Autowired
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @Override
     public List<String> getNames() {
@@ -79,7 +80,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
+    public long startWorkflowJob(String workflowName, WorkflowConfiguration workflowConfiguration) {
         Job workflow = null;
         try {
             workflow = jobRegistry.getJob(workflowName);
@@ -107,18 +108,36 @@ public class WorkflowServiceImpl implements WorkflowService {
                 | JobParametersInvalidException e) {
             throw new LedpException(LedpCode.LEDP_28001, e, new String[] { workflowName });
         }
+        return jobExecution.getId();
+    }
 
-        if (workflowConfiguration != null && workflowConfiguration.getCustomerSpace() != null) {
-            Tenant tenant = tenantEntityMgr.findByTenantId(workflowConfiguration.getCustomerSpace().toString());
-            if (tenant != null) {
-                WorkflowAppContext workflowAppContext = new WorkflowAppContext();
-                workflowAppContext.setTenant(tenant);
-                workflowAppContext.setWorkflowId(jobExecution.getId());
-                workflowAppContextEntityMgr.create(workflowAppContext);
-            }
+    @Override
+    public WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration) {
+        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
+        Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfiguration);
+        String user = workflowConfiguration.getUserId();
+        user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(tenant);
+        workflowJob.setUserId(user);
+        workflowJob.setWorkflowId(jobExecutionId);
+        workflowJobEntityMgr.create(workflowJob);
+
+        return new WorkflowExecutionId(jobExecutionId);
+    }
+
+    @Override
+    public WorkflowExecutionId start(String workflowName, String applicationId,
+            WorkflowConfiguration workflowConfiguration) {
+        if (applicationId == null) {
+            throw new LedpException(LedpCode.LEDP_28022);
         }
-
-        return new WorkflowExecutionId(jobExecution.getId());
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
+        workflowJob.setWorkflowId(jobExecutionId);
+        workflowJobEntityMgr.update(workflowJob);
+        return new WorkflowExecutionId(jobExecutionId);
     }
 
     @Override
@@ -186,6 +205,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
         return workflowExecutionCache.getJob(workflowId);
     }
+
 
     @Override
     public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
@@ -264,9 +284,10 @@ public class WorkflowServiceImpl implements WorkflowService {
                     break done;
                 }
             } catch (Exception e) {
-                log.warn(String.format("Error while getting status for workflow %d, with error %s",
-                    workflowId.getId(), e.getMessage()));
-                if (--retryOnException == 0) throw e;
+                log.warn(String.format("Error while getting status for workflow %d, with error %s", workflowId.getId(),
+                        e.getMessage()));
+                if (--retryOnException == 0)
+                    throw e;
             } finally {
                 Thread.sleep(10000);
             }
@@ -275,4 +296,14 @@ public class WorkflowServiceImpl implements WorkflowService {
         return status;
     }
 
+    @Override
+    public List<WorkflowExecutionId> getWorkflowExecutions(long tenantPid) {
+        Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
+        List<WorkflowExecutionId> workflowIds = new ArrayList<>();
+        for (WorkflowJob workflowAppContext : workflowJobs) {
+            workflowIds.add(workflowAppContext.getAsWorkflowId());
+        }
+        return workflowIds;
+    }
 }

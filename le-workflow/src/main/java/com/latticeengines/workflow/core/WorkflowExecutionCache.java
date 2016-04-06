@@ -1,5 +1,6 @@
 package com.latticeengines.workflow.core;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,8 +33,10 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
@@ -57,6 +60,9 @@ public class WorkflowExecutionCache {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     @PostConstruct
     public void init() {
@@ -98,6 +104,7 @@ public class WorkflowExecutionCache {
         job.setSteps(getJobSteps(jobExecution));
         job.setReports(getReports(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
+
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());
             cache.put(job.getId(), job);
@@ -126,7 +133,7 @@ public class WorkflowExecutionCache {
         return missingJobs;
     }
 
-    private List<JobStep> getJobSteps(JobExecution jobExecution) {
+    public List<JobStep> getJobSteps(JobExecution jobExecution) {
         List<JobStep> steps = new ArrayList<>();
 
         for (StepExecution stepExecution : jobExecution.getStepExecutions()) {
@@ -186,6 +193,15 @@ public class WorkflowExecutionCache {
         }
         return outputs;
 
+    }
+
+    private Map<String, String> getInputs(String applicationId) {
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        Map<String, String> inputs = new HashMap<>();
+        for (Map.Entry<String, String> entry : workflowJob.getInputContext().entrySet()) {
+            inputs.put(entry.getKey(), entry.getValue());
+        }
+        return inputs;
     }
 
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {

@@ -14,6 +14,8 @@ public interface WorkflowService {
 
     WorkflowExecutionId start(String workflowName, WorkflowConfiguration workflowConfiguration);
 
+    WorkflowExecutionId start(String workflowName, String applicationId, WorkflowConfiguration workflowConfiguration);
+
     WorkflowExecutionId restart(WorkflowExecutionId workflowId);
 
     WorkflowExecutionId restart(WorkflowInstanceId workflowId);
@@ -33,4 +35,8 @@ public interface WorkflowService {
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds);
 
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds, String type);
+
+    long startWorkflowJob(String workflowName, WorkflowConfiguration workflowConfiguration);
+
+    List<WorkflowExecutionId> getWorkflowExecutions(long tenantPid);
 }

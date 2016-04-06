@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed.entitymgr.impl;
+package com.latticeengines.workflow.entitymanager.impl;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.dao.KeyValueDao;
 import com.latticeengines.workflow.exposed.dao.ReportDao;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
 @Component("reportEntityMgr")
 public class ReportEntityMgrImpl extends BaseEntityMgrImpl<Report> implements ReportEntityMgr {

@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.Report;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 
 @Component("reportService")
