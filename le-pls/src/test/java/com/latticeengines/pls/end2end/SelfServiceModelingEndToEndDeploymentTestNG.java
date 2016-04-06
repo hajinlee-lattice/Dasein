@@ -123,8 +123,8 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
-                String.format("%s/pls/models/fileuploads/unnamed?schema=%s", getPLSRestAPIHostPort(),
-                        SchemaInterpretation.SalesforceLead), //
+                String.format("%s/pls/models/fileuploads/unnamed?schema=%s&displayName=%s", getPLSRestAPIHostPort(),
+                        SchemaInterpretation.SalesforceLead, "SelfServiceModeling Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         System.out.println(sourceFile.getName());
@@ -341,11 +341,4 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    private ModelingParameters createModelingParameters(String fileName) {
-        ModelingParameters parameters = new ModelingParameters();
-        parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
-        parameters.setDescription("Test");
-        parameters.setFilename(fileName);
-        return parameters;
-    }
 }

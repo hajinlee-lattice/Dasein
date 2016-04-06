@@ -64,9 +64,12 @@ public class ModelingFileUploadResource {
             @RequestParam("fileName") String fileName, //
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
+            @RequestParam(value = "displayName", required = false) String displayName, //
             @RequestParam("file") MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
+            log.info(String.format("Uploading file %s (displayName=%s, compressed=%s, schema=%s)", fileName,
+                    displayName, compressed, schema));
             if (file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
             }
@@ -78,14 +81,15 @@ public class ModelingFileUploadResource {
 
             stream = modelingFileMetadataService.validateHeaderFields(stream, schema, closeableResourcePool, fileName);
 
-            return ResponseDocument.successResponse(fileUploadService.uploadFile(fileName, schema, stream));
+            return ResponseDocument
+                    .successResponse(fileUploadService.uploadFile(fileName, schema, displayName, stream));
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
         } finally {
             try {
                 closeableResourcePool.close();
             } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
+                throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
             }
         }
     }
@@ -96,8 +100,9 @@ public class ModelingFileUploadResource {
     public ResponseDocument<SourceFile> uploadFile( //
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
+            @RequestParam(value = "displayName", required = false) String displayName, //
             @RequestParam("file") MultipartFile file) {
-        return uploadFile("file_" + DateTime.now().getMillis() + ".csv", schema, compressed, file);
+        return uploadFile("file_" + DateTime.now().getMillis() + ".csv", schema, compressed, displayName, file);
     }
 
     @RequestMapping(value = "{fileName}/metadata", method = RequestMethod.GET)

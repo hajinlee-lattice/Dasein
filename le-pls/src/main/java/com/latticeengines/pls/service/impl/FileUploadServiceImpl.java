@@ -47,8 +47,11 @@ public class FileUploadServiceImpl implements FileUploadService {
     private MetadataProxy metadataProxy;
 
     @Override
-    public SourceFile uploadFile(String outputFileName, SchemaInterpretation schemaInterpretation,
+    public SourceFile uploadFile(String outputFileName, SchemaInterpretation schemaInterpretation, String displayName,
             InputStream inputStream) {
+        log.info(String.format(
+                "Uploading file (outputFileName=%s, schemaInterpretation=%s, displayName=%s, customer=%s)",
+                outputFileName, schemaInterpretation, displayName, MultiTenantContext.getCustomerSpace()));
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             tenant = tenantEntityMgr.findByTenantId(tenant.getId());
@@ -60,13 +63,15 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setPath(outputPath + "/" + outputFileName);
             file.setSchemaInterpretation(schemaInterpretation);
             file.setState(SourceFileState.Uploaded);
+            file.setDisplayName(displayName);
 
             HdfsUtils
                     .copyInputStreamToHdfsWithoutBom(yarnConfiguration, inputStream, outputPath + "/" + outputFileName);
             sourceFileService.create(file);
             return sourceFileService.findByName(file.getName());
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { outputFileName });
+            log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
+            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { displayName });
         }
     }
 
@@ -91,7 +96,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         try {
             if (sourceFile.getState() != SourceFileState.Imported) {
-                throw new RuntimeException(String.format("File %s has not been imported yet.", fileName));
+                throw new LedpException(LedpCode.LEDP_18101, new String[] { sourceFile.getDisplayName() });
             }
 
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
@@ -102,7 +107,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             return fs.open(schemaPath);
 
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18085, new String[] { fileName });
+            throw new LedpException(LedpCode.LEDP_18085, new String[] { sourceFile.getDisplayName() });
         }
     }
 

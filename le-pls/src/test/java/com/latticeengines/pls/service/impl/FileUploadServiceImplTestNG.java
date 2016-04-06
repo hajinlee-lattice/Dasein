@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -71,7 +72,7 @@ public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount,
+        fileUploadService.uploadFile("fileUploadServiceImplTestNG.csv", SchemaInterpretation.SalesforceAccount, null,
                 fileInputStream);
 
         String contents = HdfsUtils

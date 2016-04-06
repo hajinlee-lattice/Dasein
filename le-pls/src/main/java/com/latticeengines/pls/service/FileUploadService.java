@@ -8,7 +8,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 
 public interface FileUploadService {
 
-    SourceFile uploadFile(String outputFileName, SchemaInterpretation interpretation, InputStream fileInputStream);
+    SourceFile uploadFile(String outputFileName, SchemaInterpretation interpretation, String displayName,
+            InputStream fileInputStream);
 
     Table getMetadata(String fileName);
 

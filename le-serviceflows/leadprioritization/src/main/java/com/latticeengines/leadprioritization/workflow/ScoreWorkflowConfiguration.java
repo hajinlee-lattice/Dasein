@@ -15,6 +15,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 import com.latticeengines.serviceflows.workflow.util.WriteOutputStepConfiguration;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -58,7 +59,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
-            writeOutput.putOutput("ModelId", modelId);
+            writeOutput.putOutput(WorkflowContextConstants.Outputs.MODEL_ID, modelId);
             return this;
         }
 
@@ -88,6 +89,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder outputFileFormat(ExportFormat format) {
             export.setExportFormat(format);
+            return this;
+        }
+
+        public Builder sourceDisplayName(String sourceDisplayName) {
+            writeOutput.putOutput(WorkflowContextConstants.Outputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
             return this;
         }
 

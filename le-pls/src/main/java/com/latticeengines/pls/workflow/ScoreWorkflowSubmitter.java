@@ -31,10 +31,11 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String tableToScore) {
-        log.info(String.format("Submitting score workflow for modelId %s and tableToScore %s for customer %s", modelId,
-                tableToScore, MultiTenantContext.getCustomerSpace()));
-        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore);
+    public ApplicationId submit(String modelId, String tableToScore, String sourceDisplayName) {
+        log.info(String.format(
+                "Submitting score workflow for modelId %s and tableToScore %s for customer %s and source %s", modelId,
+                tableToScore, MultiTenantContext.getCustomerSpace(), sourceDisplayName));
+        ScoreWorkflowConfiguration configuration = generateConfiguration(modelId, tableToScore, sourceDisplayName);
 
         if (metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), tableToScore) == null) {
             throw new LedpException(LedpCode.LEDP_18098, new String[] { tableToScore });
@@ -47,7 +48,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         return workflowJobService.submit(configuration);
     }
 
-    public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore) {
+    public ScoreWorkflowConfiguration generateConfiguration(String modelId, String tableToScore,
+            String sourceDisplayName) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         return new ScoreWorkflowConfiguration.Builder() //
@@ -60,6 +62,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis() + ".csv") //
+                .sourceDisplayName(sourceDisplayName) //
                 .build();
     }
 }

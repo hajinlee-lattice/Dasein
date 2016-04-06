@@ -4,6 +4,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,11 +38,11 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
         String trainingTableName = sourceFile.getTableName();
 
         if (trainingTableName == null) {
-            throw new LedpException(LedpCode.LEDP_18099, new String[] { parameters.getFilename() });
+            throw new LedpException(LedpCode.LEDP_18099, new String[] { sourceFile.getDisplayName() });
         }
 
         if (hasRunningWorkflow(sourceFile)) {
-            throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getName() });
+            throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);

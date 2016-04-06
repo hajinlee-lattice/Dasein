@@ -30,7 +30,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         model(params);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void modelLead() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Lead.csv", SchemaInterpretation.SalesforceLead);
         ModelingParameters params = new ModelingParameters();

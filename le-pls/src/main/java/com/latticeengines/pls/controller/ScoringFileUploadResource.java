@@ -42,7 +42,7 @@ public class ScoringFileUploadResource {
     @ResponseBody
     @ApiOperation(value = "Upload a file")
     public SourceFile uploadFile( //
-            @RequestParam(value = "fileName") String fileName, //
+            @RequestParam(value = "displayName") String displayName, //
             @RequestParam(value = "modelId") String modelId, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
             @RequestParam("file") MultipartFile file) {
@@ -57,14 +57,12 @@ public class ScoringFileUploadResource {
             }
 
             // TODO Validate metadata
-            // TODO Add DisplayName mechanism and fix modeling file upload
-            // resource
             // TODO Add SourceFile provenance mechanism and add modelId
 
             return fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                    SchemaInterpretation.TestingData, stream);
+                    SchemaInterpretation.TestingData, displayName, stream);
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, new String[] { fileName });
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
         }
     }
 

@@ -47,6 +47,10 @@ public class ScoreResource {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName()).toString();
+        if (modelSummary.getTrainingTableName() == null) {
+            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
+        }
+
+        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data").toString();
     }
 }

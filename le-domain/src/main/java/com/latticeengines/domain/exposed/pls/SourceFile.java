@@ -46,6 +46,10 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
+    @JsonProperty("display_name")
+    @Column(name = "DISPLAY_NAME", nullable = true)
+    private String displayName;
+
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
@@ -101,6 +105,14 @@ public class SourceFile implements HasName, HasPid, HasTenant, HasTenantId, HasA
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

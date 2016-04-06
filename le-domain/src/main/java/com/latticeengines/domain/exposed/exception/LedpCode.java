@@ -193,6 +193,8 @@ public enum LedpCode {
     LEDP_18097("Problems uploading file."), //
     LEDP_18098("Table with name {0} not found."), //
     LEDP_18099("Could not locate table for file with name {0}."), //
+    LEDP_18100("Could not locate training table for model {0}."), //
+    LEDP_18101("File {0} has not been uploaded yet."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

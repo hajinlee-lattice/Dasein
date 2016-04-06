@@ -6,5 +6,7 @@ public class WorkflowContextConstants {
 
     public static class Outputs {
         public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
+        public static final String MODEL_ID = "MODEL_ID";
+        public static final String SOURCE_DISPLAY_NAME = "SOURCE_DISPLAY_NAME";
     }
 }
