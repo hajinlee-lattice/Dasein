@@ -61,7 +61,7 @@ public class FeatureImportanceParser {
                 String tenant = tokens[0];
                 String modelId = tokens[1];
 
-                
+                System.out.println(String.format("Processing tenant %s and model id %s", tenant, modelId));
                 FileStatus hdfsPath = findHdfsPath(tenant, modelId);
                 if (hdfsPath == null) {
                     hdfsPath = findHdfsPath(String.format("%s.%s.Production", tenant, tenant), modelId);
