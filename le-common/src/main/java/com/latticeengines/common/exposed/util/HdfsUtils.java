@@ -206,6 +206,26 @@ public class HdfsUtils {
         }
     }
 
+    public static final List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
+            throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+            List<FileStatus> filePaths = new ArrayList<>();
+            for (FileStatus status : statuses) {
+                boolean accept = true;
+
+                if (filter != null) {
+                    accept = filter.accept(status);
+                }
+                if (accept) {
+                    filePaths.add(status);
+                }
+            }
+
+            return filePaths;
+        }
+    }
+
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter) throws IOException {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
@@ -223,6 +243,29 @@ public class HdfsUtils {
                         break;
                     }
                     filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), filter));
+                }
+            }
+            return new ArrayList<>(filePaths);
+        }
+    }
+
+    public static final List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws IOException {
+        return getFileStatusesForDirRecursive(configuration, hdfsDir, filter, false);
+    }
+
+    public static final List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+            Set<FileStatus> filePaths = new HashSet<>();
+            for (FileStatus status : statuses) {
+                if (status.isDirectory()) {
+                    filePaths.addAll(getFileStatusesForDir(configuration, status.getPath().toString(), filter));
+                    if (returnFirstMatch && filePaths.size() > 0) {
+                        break;
+                    }
+                    filePaths.addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
