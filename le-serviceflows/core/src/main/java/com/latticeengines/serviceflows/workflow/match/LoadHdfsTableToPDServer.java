@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.AbstractMap;
 
+import com.latticeengines.domain.exposed.util.ExtractUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -60,10 +61,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
         exportConfig.setTable(prematchFlowTable.getName());
         exportConfig.setCustomer(configuration.getCustomerSpace().toString());
-        String path = prematchFlowTable.getExtracts().get(0).getPath();
-        if (path.endsWith("*.avro")) {
-            path = path.replace("*.avro", "");
-        }
+        String path = ExtractUtils.getSingleExtractPath(yarnConfiguration, prematchFlowTable);
         exportConfig.setHdfsDirPath(path);
         exportConfig.setCreds(creds);
 

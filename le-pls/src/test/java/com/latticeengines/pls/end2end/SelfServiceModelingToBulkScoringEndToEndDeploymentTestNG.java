@@ -42,7 +42,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         modelId = selfServiceModeling.prepareModel();
     }
 
-    @Test(groups = "deployment.lp", enabled = false)
+    @Test(groups = "deployment.lp", enabled = true)
     public void testScoreTrainingData() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s/training", getPLSRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
