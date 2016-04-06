@@ -53,7 +53,7 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
 

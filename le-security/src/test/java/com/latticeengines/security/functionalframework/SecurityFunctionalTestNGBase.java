@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -22,6 +23,8 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpRequestWrapper;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -44,6 +47,7 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.SessionService;
@@ -313,6 +317,33 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
         return new HttpEntity<>(JsonUtils.serialize(payload), headers);
+    }
+
+    protected void setupSecurityContext(Tenant t) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(tenant.getId()).thenReturn(t.getId());
+        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
+    protected void setupSecurityContext(Tenant t, String user) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(session.getEmailAddress()).thenReturn(user);
+        Mockito.when(tenant.getId()).thenReturn(t.getId());
+        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
     }
 
 }

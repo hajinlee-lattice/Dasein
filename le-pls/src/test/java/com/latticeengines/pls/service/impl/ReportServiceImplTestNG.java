@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 
 public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {

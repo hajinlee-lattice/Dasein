@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TargetMarketService;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
 public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 

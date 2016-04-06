@@ -7,4 +7,6 @@ public interface SourceFileDao extends BaseDao<SourceFile> {
 
     SourceFile findByName(String name);
 
+    SourceFile findByApplicationId(String applicationId);
+
 }

@@ -11,4 +11,6 @@ public interface SourceFileService {
     void update(SourceFile sourceFile);
 
     void delete(SourceFile sourceFile);
+
+    SourceFile findByApplicationId(String applicationId);
 }

@@ -18,6 +18,11 @@ public class SourceFileServiceImpl implements SourceFileService {
     }
 
     @Override
+    public SourceFile findByApplicationId(String applicationId) {
+        return sourceFileEntityMgr.findByApplicationId(applicationId);
+    }
+
+    @Override
     public void create(SourceFile sourceFile) {
         sourceFileEntityMgr.create(sourceFile);
     }

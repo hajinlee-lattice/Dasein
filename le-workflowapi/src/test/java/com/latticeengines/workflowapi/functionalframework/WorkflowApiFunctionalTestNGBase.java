@@ -69,7 +69,6 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowFunctionalTestNGBas
             .parse("WFAPITests.WFAPITests.WFAPITests");
     protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = 1000L * 60 * 90;
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(WorkflowApiFunctionalTestNGBase.class);
 
     @Value("${workflowapi.microservice.rest.endpoint.hostport}")

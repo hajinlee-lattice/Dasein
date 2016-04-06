@@ -1,5 +1,7 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -88,6 +90,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder sourceDisplayName(String sourceDisplayName) {
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setImportProperties(inputProperties);
             return this;
         }
 

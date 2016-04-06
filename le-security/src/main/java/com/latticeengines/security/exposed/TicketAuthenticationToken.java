@@ -18,7 +18,7 @@ public class TicketAuthenticationToken extends AbstractAuthenticationToken {
     public TicketAuthenticationToken(Object principal, String token) {
         this(principal, new Ticket(token), new ArrayList<GrantedRight>());
     }
-    
+
     public TicketAuthenticationToken(Object principal, Ticket ticket, Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;

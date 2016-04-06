@@ -9,6 +9,7 @@ public class BasePayloadConfiguration implements HasName {
 
     private String name;
     private CustomerSpace customerSpace;
+    private String userId;
 
     @Override
     @JsonProperty("name")
@@ -30,6 +31,16 @@ public class BasePayloadConfiguration implements HasName {
     @JsonProperty("customer_space")
     public void setCustomerSpace(CustomerSpace customerSpace) {
         this.customerSpace = customerSpace;
+    }
+
+    @JsonProperty("user_id")
+    public String getUserId() {
+        return userId;
+    }
+
+    @JsonProperty("user_id")
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.pls.AmAttribute;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.pls.dao.AmAttributeDao;
 import com.latticeengines.pls.entitymanager.AmAttributeEntityMgr;
-import com.latticeengines.workflow.exposed.entitymgr.ReportEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
 @Component("amAttributeEntityMgr")
 public class AmAttributeEntityMgrImpl extends BaseEntityMgrImpl<AmAttribute> implements AmAttributeEntityMgr {

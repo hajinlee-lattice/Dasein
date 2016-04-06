@@ -25,6 +25,7 @@ public class Job implements HasId<Long>, HasName {
     private String user;
     private List<JobStep> steps;
     private List<Report> reports;
+    private Map<String, String> inputs;
     private Map<String, String> outputs;
 
     @Override
@@ -129,6 +130,16 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setReports(List<Report> reports) {
         this.reports = reports;
+    }
+
+    @JsonProperty
+    public Map<String, String> getInputs() {
+        return inputs;
+    }
+
+    @JsonProperty
+    public void setInputs(Map<String, String> inputs) {
+        this.inputs = inputs;
     }
 
     @JsonProperty

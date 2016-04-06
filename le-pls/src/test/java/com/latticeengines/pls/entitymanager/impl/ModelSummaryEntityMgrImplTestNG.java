@@ -30,7 +30,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.workflow.exposed.entitymgr.KeyValueEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 

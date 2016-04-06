@@ -1,9 +1,7 @@
 package com.latticeengines.workflowapi.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -16,19 +14,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.domain.exposed.workflow.WorkflowAppContext;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.workflow.exposed.entitymgr.WorkflowAppContextEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -47,10 +43,7 @@ public class WorkflowResource implements WorkflowInterface {
     private WorkflowService workflowService;
 
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private WorkflowAppContextEntityMgr workflowAppContextEntityMgr;
+    private WorkflowTenantService workflowTenantService;
 
     @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -111,8 +104,8 @@ public class WorkflowResource implements WorkflowInterface {
         WorkflowStatus status = null;
         if (workflowId != null) {
             status = workflowService.getStatus(workflowId);
-            log.info("Found workflowId " + workflowId.getId() + " for app " + applicationId +
-                     " status=" + status.getStatus());
+            log.info("Found workflowId " + workflowId.getId() + " for app " + applicationId + " status="
+                    + status.getStatus());
         }
         return status;
     }
@@ -144,7 +137,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
-        List<WorkflowExecutionId> workflowIds = getWorkflowExecutions(tenantPid);
+        List<WorkflowExecutionId> workflowIds = workflowService.getWorkflowExecutions(tenantPid);
 
         List<Job> jobs = workflowService.getJobs(workflowIds);
         return jobs;
@@ -155,29 +148,10 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
-        List<WorkflowExecutionId> workflowIds = getWorkflowExecutions(tenantPid);
+        List<WorkflowExecutionId> workflowIds = workflowService.getWorkflowExecutions(tenantPid);
 
         List<Job> jobs = workflowService.getJobs(workflowIds, type);
         return jobs;
-    }
-
-    private List<WorkflowExecutionId> getWorkflowExecutions(@PathVariable long tenantPid) {
-        Tenant tenant = new Tenant();
-        tenant.setPid(tenantPid);
-        Tenant tenantWithPid = tenantEntityMgr.findByKey(tenant);
-        if (tenantWithPid == null) {
-            log.info("Could not find tenant with id:" + tenantPid);
-            throw new LedpException(LedpCode.LEDP_28016, new String[] { String.valueOf(tenantPid) });
-        }
-        log.info("Looking for workflows for tenant: " + tenantWithPid.toString());
-        List<WorkflowAppContext> workflowAppContexts = workflowAppContextEntityMgr
-                .findWorkflowIdsByTenant(tenantWithPid);
-
-        List<WorkflowExecutionId> workflowIds = new ArrayList<>();
-        for (WorkflowAppContext workflowAppContext : workflowAppContexts) {
-            workflowIds.add(workflowAppContext.getAsWorkflowId());
-        }
-        return workflowIds;
     }
 
     @RequestMapping(value = "/job/{workflowId}/stop", method = RequestMethod.POST, headers = "Accept=application/json")

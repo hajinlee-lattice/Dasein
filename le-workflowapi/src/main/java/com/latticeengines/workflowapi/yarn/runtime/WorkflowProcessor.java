@@ -13,10 +13,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.domain.exposed.workflow.YarnAppWorkflowId;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflowapi.entitymgr.YarnAppWorkflowIdEntityMgr;
 
 @StepScope
 public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConfiguration> {
@@ -31,9 +29,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private WorkflowService workflowService;
-
-    @Autowired
-    private YarnAppWorkflowIdEntityMgr yarnAppWorkflowIdEntityMgr;
 
     @Autowired
     private VersionManager versionManager;
@@ -57,10 +52,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
             workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart());
         } else {
-            workflowId = workflowService.start(workflowConfig.getWorkflowName(), workflowConfig);
+            workflowId = workflowService.start(workflowConfig.getWorkflowName(), appId.toString(), workflowConfig);
         }
-        YarnAppWorkflowId yarnAppWorkflowId = new YarnAppWorkflowId(appId, workflowId);
-        yarnAppWorkflowIdEntityMgr.create(yarnAppWorkflowId);
 
         WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);
         log.info(String.format("Completed workflow - workflowId:%s status:%s appId:%s startTime:%s endTime:%s",

@@ -11,11 +11,15 @@ import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.workflowapi.entitymgr.YarnAppWorkflowIdEntityMgr;
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
+import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
 @Component("workflowContainerService")
@@ -28,7 +32,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     private JobService jobService;
 
     @Autowired
-    private YarnAppWorkflowIdEntityMgr yarnAppWorkflowIdEntityMgr;
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private WorkflowTenantService workflowTenantService;
+
+    @Autowired
+    private WorkflowJobEntityMgr workflowEntityMgr;
 
     @Override
     public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
@@ -37,11 +47,22 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setId(appId.toString());
         jobEntityMgr.create(job);
 
+        Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
+        String user = workflowConfig.getUserId();
+        user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+
+        WorkflowJob workflowJob = new WorkflowJob();
+        workflowJob.setTenant(tenant);
+        workflowJob.setUserId(user);
+        workflowJob.setApplicationId(appId.toString());
+        workflowJob.setInputContex(workflowConfig.getImportProperties());
+        workflowEntityMgr.create(workflowJob);
+
         return appId;
     }
 
     public WorkflowExecutionId getWorkflowId(ApplicationId appId) {
-        return yarnAppWorkflowIdEntityMgr.findWorkflowIdByApplicationId(appId);
+        return workflowJobEntityMgr.findByApplicationId(appId.toString()).getAsWorkflowId();
     }
 
     private Job createJob(WorkflowConfiguration workflowConfig) {
@@ -52,7 +73,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         job.setCustomer(customer);
 
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer+String.valueOf(System.currentTimeMillis()));
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(),
+                customer + String.valueOf(System.currentTimeMillis()));
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
         appMasterProperties.put("time", String.valueOf(System.currentTimeMillis()));
 

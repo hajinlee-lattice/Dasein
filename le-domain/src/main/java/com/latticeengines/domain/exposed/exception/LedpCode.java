@@ -347,6 +347,8 @@ public enum LedpCode {
     LEDP_28018("Workflow execution {0} cannot be restarted since in non-terminated state:{1}"), //
     LEDP_28019("Problem modeling for PMML:{0}."), //
     LEDP_28020("Could not find artifact with name {0}."), //
+    LEDP_28021("Could not get customerspace from workflow configuration."), //
+    LEDP_28022("Could not get workflow job from null applicationId."), //
 
     // le-dellebi
     LEDP_29000(

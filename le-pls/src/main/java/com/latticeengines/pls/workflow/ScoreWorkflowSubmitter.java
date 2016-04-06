@@ -1,5 +1,8 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -52,6 +55,8 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
             String sourceDisplayName) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put("Source_File_DisplayName", sourceDisplayName);
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
@@ -63,6 +68,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis() + ".csv") //
                 .sourceDisplayName(sourceDisplayName) //
+                .inputProperties(inputProperties) //
                 .build();
     }
 }
