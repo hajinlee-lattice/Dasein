@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.propdata.match;
 public class SqlInputBuffer extends InputBuffer {
 
     public SqlInputBuffer() {
-        setBufferType(Type.SQL);
+        setBufferType(IOBufferType.SQL);
     }
 
 }

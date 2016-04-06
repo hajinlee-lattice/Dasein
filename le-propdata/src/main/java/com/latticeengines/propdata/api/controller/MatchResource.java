@@ -3,6 +3,7 @@ package com.latticeengines.propdata.api.controller;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -73,6 +74,17 @@ public class MatchResource implements MatchInterface {
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);
+        }
+    }
+
+    @RequestMapping(value = "/bulk/{rootuid}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get match status using rootuid (RootOperationUid).")
+    public MatchCommand bulkMatchStatus(@PathVariable String rootuid) {
+        try {
+            return bulkMatchService.status(rootuid.toUpperCase());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_25008, e, new String[]{ rootuid });
         }
     }
 

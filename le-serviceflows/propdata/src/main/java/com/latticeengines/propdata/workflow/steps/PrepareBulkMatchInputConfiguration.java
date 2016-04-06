@@ -27,19 +27,15 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @NotNull
     private String rootOperationUid;
 
+    @NotNull
+    private Integer averageBlockSize;
+
     @NotEmptyString
     @NotNull
     private String hdfsPodId;
 
     @NotNull
-    private Integer groupSize;
-
-    @NotNull
     private ColumnSelection.Predefined predefinedSelection;
-
-    @NotEmptyString
-    @NotNull
-    private String targetDir;
 
     @JsonProperty("input_avro_dir")
     public String getInputAvroDir() {
@@ -91,16 +87,6 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.hdfsPodId = hdfsPodId;
     }
 
-    @JsonProperty("group_size")
-    public Integer getGroupSize() {
-        return groupSize;
-    }
-
-    @JsonProperty("group_size")
-    public void setGroupSize(Integer groupSize) {
-        this.groupSize = groupSize;
-    }
-
     @JsonProperty("predefined_selection")
     public ColumnSelection.Predefined getPredefinedSelection() {
         return predefinedSelection;
@@ -111,14 +97,14 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
         this.predefinedSelection = predefinedSelection;
     }
 
-    @JsonProperty("target_dir")
-    public String getTargetDir() {
-        return targetDir;
+    @JsonProperty("average_block_size")
+    public Integer getAverageBlockSize() {
+        return averageBlockSize;
     }
 
-    @JsonProperty("target_dir")
-    public void setTargetDir(String targetDir) {
-        this.targetDir = targetDir;
+    @JsonProperty("average_block_size")
+    public void setAverageBlockSize(Integer averageBlockSize) {
+        this.averageBlockSize = averageBlockSize;
     }
 }
 

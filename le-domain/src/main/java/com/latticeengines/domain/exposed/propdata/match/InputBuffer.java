@@ -12,16 +12,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public class InputBuffer {
 
-    private Type bufferType;
+    private IOBufferType bufferType;
     private Long numRows;
 
     @JsonProperty("BufferType")
-    public Type getBufferType() {
+    public IOBufferType getBufferType() {
         return bufferType;
     }
 
     @JsonProperty("BufferType")
-    protected void setBufferType(Type bufferType) {
+    protected void setBufferType(IOBufferType bufferType) {
         this.bufferType = bufferType;
     }
 
@@ -33,10 +33,6 @@ public class InputBuffer {
     @JsonIgnore
     public void setNumRows(Long numRows) {
         this.numRows = numRows;
-    }
-
-    public enum Type {
-        SQL, AVRO
     }
 
 }

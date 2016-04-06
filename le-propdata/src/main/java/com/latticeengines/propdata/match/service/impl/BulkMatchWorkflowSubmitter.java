@@ -18,11 +18,6 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
-    public BulkMatchWorkflowSubmitter groupSize(Integer groupSize) {
-        builder = builder.groupSize(groupSize);
-        return this;
-    }
-
     public BulkMatchWorkflowSubmitter hdfsPodId(String hdfsPod) {
         builder = builder.hdfsPodId(hdfsPod);
         return this;
@@ -38,13 +33,13 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
-    public BulkMatchWorkflowSubmitter inputDir(String inputDir) {
-        builder = builder.inputDir(inputDir);
+    public BulkMatchWorkflowSubmitter microserviceHostport(String hostport) {
+        builder = builder.microserviceHostPort(hostport);
         return this;
     }
 
-    public BulkMatchWorkflowSubmitter microserviceHostport(String hostport) {
-        builder = builder.microserviceHostPort(hostport);
+    public BulkMatchWorkflowSubmitter averageBlockSize(Integer blockSize) {
+        builder = builder.averageBlockSize(blockSize);
         return this;
     }
 

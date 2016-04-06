@@ -8,16 +8,18 @@ import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -30,6 +32,18 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     @Autowired
     private MatchCommandService matchCommandService;
+
+    @Autowired
+    private HdfsPathBuilder hdfsPathBuilder;
+
+    @Value("${propdata.match.max.num.blocks:4}")
+    private Integer maxNumBlocks;
+
+    @Value("${propdata.match.num.threads:4}")
+    private Integer threadPoolSize;
+
+    @Value("${propdata.match.group.size:20}")
+    private Integer groupSize;
 
     @Override
     public void execute() {
@@ -52,13 +66,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private Integer determineNumBlocks(Long count) {
-        Long[] thresholds = new Long[] { 3000L, 6000L, 9000L, 12000L, 15000L, 18000L, 21000L };
-        for (int i = 0; i < thresholds.length; i++) {
-            if (count < thresholds[i]) {
-                return i + 1;
-            }
+        Integer numBlocks = 1;
+        Integer averageBlockSize = getConfiguration().getAverageBlockSize();
+        while (count >= averageBlockSize * numBlocks && numBlocks < maxNumBlocks) {
+            numBlocks++;
         }
-        return thresholds.length + 1;
+        return numBlocks;
     }
 
     private Integer[] divideIntoNumBlocks(Long count, Integer numBlocks) {
@@ -70,6 +83,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             sum += blockSize.intValue();
         }
         blocks[numBlocks - 1] = new Long(count - sum).intValue();
+        log.info("Divide input into blocks [" + StringUtils.join(blocks, ", ") + "]");
         return blocks;
     }
 
@@ -89,12 +103,12 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             PropDataJobConfiguration jobConfiguration = generateJobConfiguration();
             jobConfiguration.setBlockSize(blockSize);
             jobConfiguration.setBlockOperationUid(blockOperationUid);
-            String targetDir = getConfiguration().getTargetDir();
-            String targetFile = new Path(targetDir).append(blockOperationUid.replace("-", "_").toLowerCase()).toString()
-                    + ".avro";
+            String targetFile = hdfsPathBuilder.constructMatchBlockInputAvro(jobConfiguration.getRootOperationUid(),
+                    jobConfiguration.getBlockOperationUid()).toString();
             jobConfiguration.setAvroPath(targetFile);
-            jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block(%d/%d)[%s]",
-                    getConfiguration().getRootOperationUid(), blockIdx, blocks.length, blockOperationUid));
+            jobConfiguration.setAppName(String.format("PropDataMatch[%s]~Block(%d/%d)[%s]~%s",
+                    getConfiguration().getRootOperationUid(), blockIdx, blocks.length, blockOperationUid,
+                    getConfiguration().getCustomerSpace().toString()));
             configurations.add(jobConfiguration);
 
             List<GenericRecord> data = new ArrayList<>();
@@ -121,7 +135,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         jobConfiguration.setPredefinedSelection(getConfiguration().getPredefinedSelection());
         jobConfiguration.setKeyMap(getConfiguration().getKeyMap());
         jobConfiguration.setRootOperationUid(getConfiguration().getRootOperationUid());
-        jobConfiguration.setGroupSize(getConfiguration().getGroupSize());
+        jobConfiguration.setGroupSize(groupSize);
+        jobConfiguration.setThreadPoolSize(threadPoolSize);
+        jobConfiguration.setSingleBlock(false);
         return jobConfiguration;
     }
 

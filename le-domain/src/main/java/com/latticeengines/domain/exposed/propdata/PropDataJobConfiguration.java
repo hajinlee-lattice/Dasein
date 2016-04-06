@@ -14,12 +14,14 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String hdfsPodId;
     private Integer blockSize;
     private Integer groupSize;
+    private Integer threadPoolSize;
     private String avroPath;
     private ColumnSelection.Predefined predefinedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private String rootOperationUid;
     private String blockOperationUid;
     private String appName;
+    private Boolean singleBlock;
 
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
@@ -49,6 +51,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("group_size")
     public void setGroupSize(Integer groupSize) {
         this.groupSize = groupSize;
+    }
+
+    @JsonProperty("thread_pool_size")
+    public Integer getThreadPoolSize() {
+        return threadPoolSize;
+    }
+
+    @JsonProperty("thread_pool_size")
+    public void setThreadPoolSize(Integer threadPoolSize) {
+        this.threadPoolSize = threadPoolSize;
     }
 
     @JsonProperty("avro_path")
@@ -109,6 +121,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("app_name")
     public void setAppName(String appName) {
         this.appName = appName;
+    }
+
+    @JsonProperty("single_block")
+    public Boolean getSingleBlock() {
+        return singleBlock;
+    }
+
+    @JsonProperty("single_block")
+    public void setSingleBlock(Boolean singleBlock) {
+        this.singleBlock = singleBlock;
     }
 
     @Override

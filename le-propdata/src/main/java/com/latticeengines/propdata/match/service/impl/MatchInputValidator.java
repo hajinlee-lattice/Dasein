@@ -15,6 +15,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
+import com.latticeengines.domain.exposed.propdata.match.IOBufferType;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
@@ -41,6 +42,16 @@ class MatchInputValidator {
     public static void validateBulkInput(MatchInput input, Configuration yarnConfiguration) {
         if (input.getInputBuffer() == null) {
             throw new IllegalArgumentException("Bulk input must have an IO buffer.");
+        }
+
+        if (input.getOutputBufferType() == null) {
+            log.info("Output buffer type is unset, using the input buffer type "
+                    + input.getInputBuffer().getBufferType() + " as default.");
+            input.setOutputBufferType(input.getInputBuffer().getBufferType());
+        }
+
+        if (IOBufferType.SQL.equals(input.getOutputBufferType())) {
+            throw new UnsupportedOperationException("Only the IOBufferType [AVRO] is supported");
         }
 
         List<String> inputFields;

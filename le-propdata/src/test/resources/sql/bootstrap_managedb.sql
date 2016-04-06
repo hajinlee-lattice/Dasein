@@ -1,20 +1,8 @@
+DROP SCHEMA `LDC_ManageDB`;
+
 CREATE SCHEMA IF NOT EXISTS `LDC_ManageDB`;
 
 USE `LDC_ManageDB`;
-
-drop table if exists `ArchiveProgress`;
-
-drop table if exists `ColumnMapping`;
-
-drop table if exists `ExternalColumn`;
-
-drop table if exists `MatchOperation`;
-
-drop table if exists `MatchCommand`;
-
-drop table if exists `RefreshProgress`;
-
-drop table if exists `SourceColumn`;
 
 create table `ArchiveProgress` (
     `ProgressID` bigint not null auto_increment unique,
@@ -59,25 +47,7 @@ create table `ExternalColumn` (
     primary key (`ExternalColumnID`)
 ) ENGINE=InnoDB;
 
-create table `MatchCommand` (
-    `PID` bigint not null auto_increment,
-    `ApplicationId` varchar(255),
-    `ColumnSelection` varchar(255),
-    `CreateTime` datetime,
-    `Customer` varchar(255),
-    `ErrorMessage` varchar(255),
-    `LatestStatusUpdate` datetime,
-    `MatchStatus` varchar(20) not null,
-    `NumRetries` integer,
-    `Progress` float,
-    `RootOperationUID` varchar(100) not null unique,
-    `RowsMatched` integer,
-    `RowsRequested` integer not null,
-    `StatusBeforeFailed` varchar(20),
-    primary key (`PID`)
-) ENGINE=InnoDB;
-
-create table `MatchOperation` (
+create table `MatchBlock` (
     `PID` bigint not null auto_increment,
     `ApplicationId` varchar(255),
     `ApplicationState` varchar(20) not null,
@@ -90,6 +60,25 @@ create table `MatchOperation` (
     `Progress` float,
     `StateBeforeFailed` varchar(20),
     RootOperationUID bigint not null,
+    primary key (`PID`)
+) ENGINE=InnoDB;
+
+create table `MatchCommand` (
+    `PID` bigint not null auto_increment,
+    `ApplicationId` varchar(50),
+    `ColumnSelection` varchar(50),
+    `CreateTime` datetime,
+    `Customer` varchar(200),
+    `ErrorMessage` varchar(1000),
+    `LatestStatusUpdate` datetime,
+    `MatchStatus` varchar(20) not null,
+    `NumRetries` integer,
+    `Progress` float,
+    `ResultLocation` varchar(400),
+    `RootOperationUID` varchar(100) not null unique,
+    `RowsMatched` integer,
+    `RowsRequested` integer not null,
+    `StatusBeforeFailed` varchar(20),
     primary key (`PID`)
 ) ENGINE=InnoDB;
 
@@ -133,16 +122,16 @@ alter table `ColumnMapping`
     references `ExternalColumn` (`ExternalColumnID`)
     on delete cascade;
 
-create index IX_UID on `MatchCommand` (`RootOperationUID`);
+create index IX_UID on `MatchBlock` (`BlockOperationUID`);
 
-create index IX_UID on `MatchOperation` (`BlockOperationUID`);
-
-alter table `MatchOperation`
-    add index FK78AE1542D791BF6B (RootOperationUID),
-    add constraint FK78AE1542D791BF6B
+alter table `MatchBlock`
+    add index FKE46329E8D791BF6B (RootOperationUID),
+    add constraint FKE46329E8D791BF6B
     foreign key (RootOperationUID)
     references `MatchCommand` (`PID`)
     on delete cascade;
+
+create index IX_UID on `MatchCommand` (`RootOperationUID`);
 
 
 LOAD DATA INFILE '/home/build/Projects/ledp/le-propdata/src/test/resources/sql/SourceColumn.txt' INTO TABLE `SourceColumn`

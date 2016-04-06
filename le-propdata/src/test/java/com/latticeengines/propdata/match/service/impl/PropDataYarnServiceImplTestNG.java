@@ -64,7 +64,9 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
         jobConfiguration.setBlockSize(AvroUtils.count(yarnConfiguration, avroPath).intValue());
         jobConfiguration.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
         jobConfiguration.setBlockOperationUid(UUID.randomUUID().toString().toUpperCase());
+        jobConfiguration.setThreadPoolSize(4);
         jobConfiguration.setGroupSize(10);
+        jobConfiguration.setSingleBlock(false);
 
         ApplicationId applicationId = propDataYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, applicationId);

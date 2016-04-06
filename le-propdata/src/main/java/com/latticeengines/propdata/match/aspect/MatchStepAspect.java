@@ -104,13 +104,21 @@ public class MatchStepAspect {
             for (Object arg : args) {
                 if (arg instanceof MatchContext) {
                     MatchContext matchContext = (MatchContext) arg;
-                    return matchContext.getOutput().getStatistics().getRowsRequested();
+                    if (matchContext.getOutput() != null && matchContext.getOutput().getStatistics() != null) {
+                        return matchContext.getOutput().getStatistics().getRowsRequested();
+                    }
                 } else if (arg instanceof MatchInput) {
                     MatchInput matchInput = (MatchInput) arg;
-                    return matchInput.getData().size();
+                    if (matchInput.getData() != null) {
+                        return matchInput.getData().size();
+                    } else if (matchInput.getNumRows() != null){
+                        return matchInput.getNumRows();
+                    }
                 } else if (arg instanceof MatchOutput) {
                     MatchOutput matchOutput = (MatchOutput) arg;
-                    return matchOutput.getStatistics().getRowsRequested();
+                    if (matchOutput.getStatistics() != null) {
+                        return matchOutput.getStatistics().getRowsRequested();
+                    }
                 }
             }
         } catch (Exception e) {

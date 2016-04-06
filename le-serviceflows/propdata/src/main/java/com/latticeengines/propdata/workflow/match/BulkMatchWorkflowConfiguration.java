@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.propdata.workflow.steps.ParallelExecutionConfiguration;
+import com.latticeengines.propdata.workflow.steps.ParallelBlockExecutionConfiguration;
 import com.latticeengines.propdata.workflow.steps.PrepareBulkMatchInputConfiguration;
 
 public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
@@ -14,16 +14,11 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 
         private BulkMatchWorkflowConfiguration configuration = new BulkMatchWorkflowConfiguration();
         private PrepareBulkMatchInputConfiguration prepareConfig = new PrepareBulkMatchInputConfiguration();
-        private ParallelExecutionConfiguration parallelExecConfig = new ParallelExecutionConfiguration();
+        private ParallelBlockExecutionConfiguration parallelExecConfig = new ParallelBlockExecutionConfiguration();
         private CustomerSpace customerSpace;
 
         public Builder rootOperationUid(String rootUid) {
             prepareConfig.setRootOperationUid(rootUid);
-            return this;
-        }
-
-        public Builder groupSize(Integer groupSize) {
-            prepareConfig.setGroupSize(groupSize);
             return this;
         }
 
@@ -47,8 +42,8 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder inputDir(String inputDir) {
-            prepareConfig.setTargetDir(inputDir);
+        public Builder averageBlockSize(Integer blockSize) {
+            prepareConfig.setAverageBlockSize(blockSize);
             return this;
         }
 

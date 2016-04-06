@@ -40,12 +40,14 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
+import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
+import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
@@ -83,40 +85,41 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private MatchCommandService matchCommandService;
+
     private BlockDivider divider;
     private Tenant tenant;
     private ColumnSelection.Predefined predefinedSelection;
     private Map<MatchKey, List<String>> keyMap;
     private Integer blockSize;
-    private UUID rootUid;
+    private String rootOperationUid;
+    private String blockOperationUid;
     private String avroPath, outputAvro, outputJson;
     private MatchOutput blockOutput;
     private Date receivedAt;
     private Schema schema;
-
-    private final Integer numThreads = 4;
-    private final ExecutorService executor = Executors.newFixedThreadPool(numThreads);
-
+    private Integer numThreads;
+    private Boolean singleBlockMode;
 
     @Override
     public String process(PropDataJobConfiguration jobConfiguration) throws Exception {
-        appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
-        LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
-
-        receivedAt = new Date();
-
-        String podId = jobConfiguration.getHdfsPodId();
-        hdfsPathBuilder.changeHdfsPodId(podId);
-        log.info("Use PodId=" + podId);
-
-        String rootOperationUid = jobConfiguration.getRootOperationUid();
-        String blockOperationUid = jobConfiguration.getBlockOperationUid();
-        rootUid = UUID.fromString(rootOperationUid);
-        outputAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid).toString();
-        outputJson = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid).toString();
-        String errFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid).toString();
-
         try {
+            appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
+            LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
+
+            receivedAt = new Date();
+
+            String podId = jobConfiguration.getHdfsPodId();
+            singleBlockMode = jobConfiguration.getSingleBlock();
+            hdfsPathBuilder.changeHdfsPodId(podId);
+            log.info("Use PodId=" + podId);
+
+            rootOperationUid = jobConfiguration.getRootOperationUid();
+            blockOperationUid = jobConfiguration.getBlockOperationUid();
+            outputAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid).toString();
+            outputJson = hdfsPathBuilder.constructMatchBlockOutputFile(rootOperationUid, blockOperationUid).toString();
+
             String blockRootDir = hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid)
                     .toString();
             if (HdfsUtils.fileExists(yarnConfiguration, blockRootDir)) {
@@ -129,23 +132,29 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             keyMap = jobConfiguration.getKeyMap();
             blockSize = jobConfiguration.getBlockSize();
             Integer groupSize = jobConfiguration.getGroupSize();
+            numThreads = jobConfiguration.getThreadPoolSize();
+            ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
             avroPath = jobConfiguration.getAvroPath();
             divider = new BlockDivider(avroPath, yarnConfiguration, groupSize);
             log.info("Matching a block of " + blockSize + " rows with a group size of " + groupSize);
             schema = constructOutputSchema("PropDataMatchOutput_" + blockOperationUid.replace("-", "_"));
             Integer rowsProcessed = 0;
-            setProgress(0.07f);
+            if (singleBlockMode) {
+                matchCommandService.update(rootOperationUid).progress(0.07f).status(MatchStatus.MATCHING).commit();
+            } else {
+                setProgress(0.07f);
+            }
 
             List<MatchInput> matchInputs = getInputs();
             while (!matchInputs.isEmpty()) {
                 log.info("Processing " + matchInputs.size() + " groups concurrently.");
                 List<Future<MatchContext>> futures = new ArrayList<>();
-                for (MatchInput matchInput: matchInputs) {
+                for (MatchInput matchInput : matchInputs) {
                     Future<MatchContext> future = executor.submit(new MatchCallable(matchInput));
                     futures.add(future);
                 }
-                for (Future<MatchContext> future: futures) {
+                for (Future<MatchContext> future : futures) {
                     MatchContext matchContext = future.get();
                     processMatchOutput(matchContext.getOutput());
                     rowsProcessed += matchContext.getInput().getNumRows();
@@ -154,15 +163,29 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
                 }
                 matchInputs = getInputs();
             }
+
             finalizeBlock();
-            setProgress(1f);
         } catch (Exception e) {
-            HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getFullStackTrace(e));
+            String rootOperationUid = jobConfiguration.getRootOperationUid();
+            String blockOperationUid = jobConfiguration.getBlockOperationUid();
+            String errFile;
+            if (jobConfiguration.getSingleBlock()) {
+                errFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
+                matchCommandService.update(rootOperationUid).status(MatchStatus.FAILED).errorMessage(e.getMessage())
+                        .commit();
+            } else {
+                errFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid).toString();
+            }
+            try {
+                HdfsUtils.writeToFile(yarnConfiguration, errFile, ExceptionUtils.getFullStackTrace(e));
+            } catch (Exception e1) {
+                log.error("Failed to write error to err file.", e1);
+            }
             throw (e);
         }
+
         return null;
     }
-
 
     private List<MatchInput> getInputs() {
         List<MatchInput> matchInputs = new ArrayList<>();
@@ -179,7 +202,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
     private MatchInput constructMatchInputFromData(List<List<Object>> data) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setUuid(rootUid);
+        matchInput.setUuid(UUID.fromString(rootOperationUid));
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
@@ -252,6 +275,10 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
     @MatchStep
     private void finalizeBlock() throws IOException {
+        if (singleBlockMode) {
+            matchCommandService.update(rootOperationUid).progress(0.07f).status(MatchStatus.FINISHING).commit();
+        }
+
         finalizeMatchOutput();
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
         log.info("There are in total " + count + " records in the avro " + outputAvro);
@@ -259,6 +286,15 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             throw new RuntimeException(
                     String.format("RowsMatched in MatchStatistics [%d] does not equal to the count of the avro [%d].",
                             blockOutput.getStatistics().getRowsMatched(), count));
+        }
+
+        if (singleBlockMode) {
+            String matchOutputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+            generateOutputFiles();
+            matchCommandService.update(rootOperationUid).progress(1f).status(MatchStatus.FINISHED)
+                    .resultLocation(matchOutputDir).commit();
+        } else {
+            setProgress(1f);
         }
     }
 
@@ -286,6 +322,41 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         blockOutput.getStatistics().setTimeElapsedInMsec(finishedAt.getTime() - receivedAt.getTime());
         matchExecutor.appendMetadata(blockOutput, predefinedSelection);
         HdfsUtils.writeToFile(yarnConfiguration, outputJson, JsonUtils.serialize(blockOutput));
+    }
+
+    @Override
+    protected void setProgress(float progress) {
+        super.setProgress(progress);
+        if (singleBlockMode) {
+            matchCommandService.update(rootOperationUid).progress(progress).commit();
+        }
+    }
+
+    private void generateOutputFiles() {
+        log.info("Generating match output files ...");
+        try {
+            String matchOutputDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
+            String blockOutputDir = hdfsPathBuilder.constructMatchBlockDir(rootOperationUid, blockOperationUid)
+                    .toString();
+            String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
+            HdfsUtils.copyFiles(yarnConfiguration, blockOutputDir, matchOutputDir);
+            log.info("Copied avro from " + blockOutputDir + " to " + matchOutputDir);
+            HdfsUtils.copyFiles(yarnConfiguration, outputJson, outputFile);
+            log.info("Copied output json from " + blockOutputDir + " to " + matchOutputDir);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to copy block output to match output.", e);
+        }
+
+        try {
+            String matchAvsc = hdfsPathBuilder.constructMatchSchemaFile(rootOperationUid).toString();
+            String blockResultAvro = hdfsPathBuilder.constructMatchBlockAvro(rootOperationUid, blockOperationUid)
+                    .toString();
+            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(blockResultAvro));
+            HdfsUtils.writeToFile(yarnConfiguration, matchAvsc, schema.toString());
+            log.info("Extract avsc into " + matchAvsc);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to write schema file: " + e.getMessage(), e);
+        }
     }
 
     private class MatchCallable implements Callable<MatchContext> {

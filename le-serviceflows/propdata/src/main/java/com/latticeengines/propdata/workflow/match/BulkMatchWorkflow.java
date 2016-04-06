@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.workflow.steps.ParallelExecution;
+import com.latticeengines.propdata.workflow.steps.ParallelBlockExecution;
 import com.latticeengines.propdata.workflow.steps.PrepareBulkMatchInput;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -18,7 +18,7 @@ public class BulkMatchWorkflow extends AbstractWorkflow<BulkMatchWorkflowConfigu
     private PrepareBulkMatchInput prepareBulkMatchInput;
 
     @Autowired
-    private ParallelExecution parallelExecution;
+    private ParallelBlockExecution parallelBlockExecution;
 
     @Bean
     public Job matchWorkflowJob() throws Exception {
@@ -29,7 +29,7 @@ public class BulkMatchWorkflow extends AbstractWorkflow<BulkMatchWorkflowConfigu
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(prepareBulkMatchInput) //
-                .next(parallelExecution) //
+                .next(parallelBlockExecution) //
                 .build();
     }
 }

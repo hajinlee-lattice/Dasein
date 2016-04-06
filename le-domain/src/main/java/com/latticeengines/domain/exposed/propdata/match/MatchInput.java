@@ -28,6 +28,7 @@ public class MatchInput implements Fact, Dimension {
     private int numRows;
 
     private InputBuffer inputBuffer;
+    private IOBufferType outputBufferType;
 
     // optional, but better to provide. if not, will be resolved from the fields
     private Map<MatchKey, List<String>> keyMap;
@@ -89,6 +90,16 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("InputBuffer")
     public void setInputBuffer(InputBuffer buffer) {
         this.inputBuffer = buffer;
+    }
+
+    @JsonProperty("OutputBufferType")
+    public IOBufferType getOutputBufferType() {
+        return outputBufferType;
+    }
+
+    @JsonProperty("OutputBufferType")
+    public void setOutputBufferType(IOBufferType outputBufferType) {
+        this.outputBufferType = outputBufferType;
     }
 
     @JsonIgnore

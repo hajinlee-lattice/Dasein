@@ -7,7 +7,7 @@ public class AvroInputBuffer extends InputBuffer {
     private String avroDir;
 
     public AvroInputBuffer() {
-        setBufferType(Type.AVRO);
+        setBufferType(IOBufferType.AVRO);
     }
 
     @JsonProperty("AvroDir")

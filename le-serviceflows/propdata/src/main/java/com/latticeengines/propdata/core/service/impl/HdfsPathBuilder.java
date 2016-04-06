@@ -98,6 +98,11 @@ public class HdfsPathBuilder {
         return constructMatchDir(rootOperationUid).append("Input");
     }
 
+    public Path constructMatchBlockInputAvro(String rootOperationUid, String blockOperationUid) {
+        String fileName = "block_" + blockOperationUid.replace("-", "_").toLowerCase() + ".avro";
+        return constructMatchInputDir(rootOperationUid).append(fileName);
+    }
+
     public Path constructMatchOutputDir(String rootOperationUid) {
         return constructMatchDir(rootOperationUid).append("Output");
     }

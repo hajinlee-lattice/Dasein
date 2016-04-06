@@ -27,4 +27,10 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
         return post("bulk_match", url, matchInput, MatchCommand.class);
     }
 
+    @Override
+    public MatchCommand bulkMatchStatus(String rootuid) {
+        String url = constructUrl("/bulk/{rootuid}", rootuid);
+        return get("bulk_status", url, MatchCommand.class);
+    }
+
 }

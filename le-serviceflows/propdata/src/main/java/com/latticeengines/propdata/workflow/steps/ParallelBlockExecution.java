@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
+import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
@@ -36,11 +38,11 @@ import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
-@Component("parallelExecution")
+@Component("parallelBlockExecution")
 @Scope("prototype")
-public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfiguration> {
+public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
 
-    private static Log log = LogFactory.getLog(ParallelExecution.class);
+    private static Log log = LogFactory.getLog(ParallelBlockExecution.class);
     private static final int MAX_ERRORS = 100;
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
 
@@ -61,11 +63,13 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
     private float progress;
     private Long progressUpdated;
     private MatchOutput matchOutput;
+    private Random random = new Random(System.currentTimeMillis());
 
     @Override
     public void execute() {
         try {
-            log.info("Inside ParallelExecution execute()");
+            log.info("Inside ParallelBlockExecution execute()");
+            initializeYarnClient();
             List<PropDataJobConfiguration> jobConfigurations = new ArrayList<>();
 
             Object listObj = executionContext.get(BulkMatchContextKey.YARN_JOB_CONFIGS);
@@ -85,7 +89,7 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             waitForMatchBlocks();
             finalizeMatch();
         } catch (Exception e) {
-            failTheWorkflowWithErrorMessage(e.getMessage());
+            failTheWorkflowWithErrorMessage(e.getMessage(), e);
         }
     }
 
@@ -95,13 +99,16 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             ApplicationId appId = ConverterUtils
                     .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
             blockUuidMap.put(appId.toString(), jobConfiguration.getBlockOperationUid());
-            log.info("Submit a match block to application id " + appId);
             applicationIds.add(appId);
+
+            MatchCommand matchCommand = matchCommandService.getByRootOperationUid(rootOperationUid);
+            matchCommandService.startBlock(matchCommand, appId, jobConfiguration.getBlockOperationUid(),
+                    jobConfiguration.getBlockSize());
+            log.info("Submit a match block to application id " + appId);
         }
     }
 
     private void waitForMatchBlocks() {
-        initializeYarnClient();
         progressUpdated = System.currentTimeMillis();
         try {
             while (!applicationIds.isEmpty()) {
@@ -128,9 +135,13 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             HdfsUtils.writeToFile(yarnConfiguration, outputFile, JsonUtils.serialize(matchOutput));
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
             Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
-            log.info("Generated " + count + " results.");
+            log.info("Generated " + count + " results in " + avroDir);
             matchCommandService.update(rootOperationUid) //
-                    .rowsMatched(count.intValue()).status(MatchStatus.FINISHED).progress(1f).commit();
+                    .resultLocation(avroDir) //
+                    .rowsMatched(count.intValue()) //
+                    .status(MatchStatus.FINISHED) //
+                    .progress(1f) //
+                    .commit();
         } catch (Exception e) {
             String errorMessage = "Failed to finalize the match: " + e.getMessage();
             throw new RuntimeException(errorMessage, e);
@@ -166,6 +177,10 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
             String logMessage = String.format("Application [%s] is at state [%s]", appId, state);
             if (YarnApplicationState.RUNNING.equals(state)) {
                 logMessage += String.format(": %.2f ", appProgress * 100) + "%";
+                if (hitThirtyPercentChance()) {
+                    String blockId = blockUuidMap.get(appId.toString());
+                    matchCommandService.updateBlock(blockId).status(state).progress(appProgress).commit();
+                }
             }
             log.info(logMessage);
 
@@ -195,7 +210,9 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
                 this.progressUpdated = currentTimestamp;
             }
         }
-        matchCommandService.update(rootOperationUid).progress(this.progress).commit();
+        if (hitThirtyPercentChance()) {
+            matchCommandService.update(rootOperationUid).progress(this.progress).commit();
+        }
         log.info(String.format("Overall progress is %.2f ", this.progress * 100) + "%.");
     }
 
@@ -203,6 +220,7 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
         for (ApplicationReport report : reports) {
             YarnApplicationState state = report.getYarnApplicationState();
             ApplicationId appId = report.getApplicationId();
+            String blockUid = blockUuidMap.get(appId.toString());
             if (YarnUtils.TERMINAL_APP_STATE.contains(state)) {
                 FinalApplicationStatus status = report.getFinalApplicationStatus();
                 log.info("Application [" + appId + "] is at the terminal state " + state + " with final status "
@@ -215,21 +233,23 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
                     log.warn(errorMsg + ". Killing the whole match");
                     MatchStatus terminalStatus = FinalApplicationStatus.FAILED.equals(status) ? MatchStatus.FAILED
                             : MatchStatus.ABORTED;
-                    failTheWorkflowByFailedBlock(terminalStatus, appId);
+                    failTheWorkflowByFailedBlock(terminalStatus, report);
                 } else if (FinalApplicationStatus.SUCCEEDED.equals(status)) {
+                    matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                     mergeBlockResult(appId);
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
-                    failTheWorkflowByFailedBlock(MatchStatus.FAILED, appId);
+                    failTheWorkflowByFailedBlock(MatchStatus.FAILED, report);
                 }
 
             }
         }
     }
 
-    private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationId failedAppId) {
+    private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
         killChildrenApplications();
+        ApplicationId failedAppId = failedReport.getApplicationId();
         String blockOperationUid = blockUuidMap.get(failedAppId.toString());
         String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
                 .toString();
@@ -244,14 +264,27 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
                     + " : " + e.getMessage());
         }
 
+        for (ApplicationId otherAppId : applicationIds) {
+            try {
+                ApplicationReport otherReport = yarnClient.getApplicationReport(otherAppId);
+                String otherBlockId = blockUuidMap.get(otherAppId.toString());
+                matchCommandService.updateBlockByApplicationReport(otherBlockId, otherReport);
+            } catch (Exception e) {
+                log.error("Failed to update status of block with app id " + otherAppId);
+            }
+        }
+
+        matchCommandService.updateBlockByApplicationReport(blockOperationUid, failedReport);
+
         matchCommandService.update(rootOperationUid) //
                 .status(terminalStatus) //
                 .errorMessage(errorMsg) //
                 .commit();
+
         throw new RuntimeException("Match failed. " + errorMsg);
     }
 
-    private void failTheWorkflowWithErrorMessage(String errorMsg) {
+    private void failTheWorkflowWithErrorMessage(String errorMsg, Exception ex) {
         killChildrenApplications();
         try {
             String matchErrorFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
@@ -259,8 +292,18 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
         } catch (Exception e) {
             log.error("Failed to write the error file: " + e.getMessage(), e);
         }
-        matchCommandService.update(rootOperationUid).status(MatchStatus.FAILED).errorMessage(errorMsg).commit();
-        throw new RuntimeException("Match failed: " + errorMsg);
+
+        MatchCommand matchCommand = matchCommandService.getByRootOperationUid(rootOperationUid);
+        if (!MatchStatus.FAILED.equals(matchCommand.getMatchStatus())
+                && !MatchStatus.ABORTED.equals(matchCommand.getMatchStatus())) {
+            matchCommandService.update(rootOperationUid).status(MatchStatus.FAILED).errorMessage(errorMsg).commit();
+        }
+
+        if (ex != null) {
+            throw new RuntimeException("Match failed: " + errorMsg, ex);
+        } else {
+            throw new RuntimeException("Match failed: " + errorMsg);
+        }
     }
 
     private void mergeBlockResult(ApplicationId appId) {
@@ -307,6 +350,10 @@ public class ParallelExecution extends BaseWorkflowStep<ParallelExecutionConfigu
                     + " to match output dir: " + e.getMessage(), e);
         }
 
+    }
+
+    private Boolean hitThirtyPercentChance() {
+        return random.nextInt(100) < 30;
     }
 
     private void initializeYarnClient() {

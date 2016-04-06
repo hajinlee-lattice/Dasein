@@ -295,6 +295,7 @@ public enum LedpCode {
     LEDP_25005("Column selection type {0} is not supported"), //
     LEDP_25006("Failed to get metadata for predefined column selection [{0}]"), //
     LEDP_25007("Propdata match failed."), //
+    LEDP_25008("Failed to retrieve match status for root operation uid {0}"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
