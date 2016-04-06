@@ -71,10 +71,12 @@ public class FeatureImportanceParser {
                     System.err.println(String.format("No feature importance file for tenant %s with model id %s", tenant, modelId));
                     continue;
                 }
+                System.out.println(String.format("Found HDFS path for tenant %s and model id %s", tenant, modelId));
                 try (FileWriter writer = new FileWriter(new File(outputFile))) {
                     writer.write("Tenant,ModelId,Feature,Importance\n");
                     String path = hdfsPath.getPath().toString();
                     Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
+                    System.out.println(String.format("Retrieved contents for tenant %s and model id %s", tenant, modelId));
                     for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
                         writer.write(String.format("%s,%s,%s,%s,%f\n", //
                                 tenant, //
