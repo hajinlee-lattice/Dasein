@@ -167,7 +167,7 @@ public class ModelingServiceExecutor {
             props.add("Source_Schema_Interpretation=" + builder.getSourceSchemaInterpretation());
         }
         if (builder.getTrainingTableName() != null) {
-            props.add("Source_File_Table_Name=" + builder.getTrainingTableName());
+            props.add("Training_Table_Name=" + builder.getTrainingTableName());
         }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
