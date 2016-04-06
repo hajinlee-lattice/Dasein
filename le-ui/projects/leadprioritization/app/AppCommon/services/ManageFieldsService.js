@@ -40,4 +40,14 @@ angular.module('mainApp.appCommon.services.ManageFieldsService', [
         return (dataItem != null && dataItem.Tags != null && dataItem.Tags.toLowerCase() === "internal");
     };
 
+    this.IsLatticeAttribute = function (dataItem) {
+        if (dataItem == null) {
+            return false;
+        }
+        if (dataItem.Tags == null) {
+            return false;
+        }
+        return dataItem.Tags.toLowerCase() === "external";
+    };
+
 });

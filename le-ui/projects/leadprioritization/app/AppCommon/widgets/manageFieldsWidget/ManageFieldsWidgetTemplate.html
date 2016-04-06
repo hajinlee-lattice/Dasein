@@ -53,8 +53,8 @@
     </script>
     <script id="displayNameTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'DisplayName')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</span>
-        <input type="text" data-ng-if="batchEdit" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
+        <span data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</span>
+        <input type="text" data-ng-if="batchEdit && !isLatticeAttribute(dataItem)" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
     </script>
     <script id="categoryTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'Category')" class='k-dirty'></span>
@@ -64,13 +64,13 @@
     </script>
     <script id="approvedUsageTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'ApprovedUsage')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}" title="{{dataItem.ApprovedUsage}}">{{dataItem.ApprovedUsage || "None"}}</span>
-        <select data-ng-if="batchEdit" data-ng-options="c for c in ApprovedUsageOptions" data-ng-model="dataItem.ApprovedUsage" data-ng-change="valueChanged($event, dataItem, 'ApprovedUsage', '#:ApprovedUsage#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}"></select>
+        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.ApprovedUsage)}" title="{{dataItem.ApprovedUsage}}">{{dataItem.ApprovedUsage}}</span>
+        <select data-ng-if="batchEdit" data-ng-options="c for c in ApprovedUsageOptions" data-ng-model="dataItem.ApprovedUsage" data-ng-change="valueChanged($event, dataItem, 'ApprovedUsage', '#:ApprovedUsage#')" class="form-control"></select>
     </script>
     <script id="fundamentalTypeTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'FundamentalType')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}" title="{{dataItem.FundamentalType}}">{{dataItem.FundamentalType}}</span>
-        <select data-ng-if="batchEdit" data-ng-options="c for c in FundamentalTypeOptions" data-ng-model="dataItem.FundamentalType" data-ng-change="valueChanged($event, dataItem, 'FundamentalType', '#:FundamentalType#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}"></select>
+        <span data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}" title="{{dataItem.FundamentalType}}">{{dataItem.FundamentalType}}</span>
+        <select data-ng-if="batchEdit && !isLatticeAttribute(dataItem)" data-ng-options="c for c in FundamentalTypeOptions" data-ng-model="dataItem.FundamentalType" data-ng-change="valueChanged($event, dataItem, 'FundamentalType', '#:FundamentalType#')" class="form-control" data-ng-class="{'warning': isEmpty(dataItem.FundamentalType)}"></select>
     </script>
     <div id="fieldDetails" class="field-details" data-ng-show="showFieldDetails"></div>
 </div>

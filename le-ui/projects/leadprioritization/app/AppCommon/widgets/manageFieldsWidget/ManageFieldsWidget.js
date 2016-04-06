@@ -44,11 +44,31 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
         });
     }
 
+    function getFieldsToDisplay(metadataFields) {
+        var fields = [];
+        for (var i = 0; i < metadataFields.length; i++) {
+            var dataItem = metadataFields[i];
+            if (dataItem == null) {
+                continue;
+            } else if (dataItem.ApprovedUsage == null && ManageFieldsService.IsLatticeAttribute(dataItem)) {
+                continue;
+            }
+
+            if (dataItem.ApprovedUsage == null || dataItem.ApprovedUsage.toLowerCase() == "none") {
+                dataItem.ApprovedUsage = "None";
+            }
+            if (dataItem.ApprovedUsage != "None" || ! ManageFieldsService.IsLatticeAttribute(dataItem)) {
+                fields.push(dataItem);
+            }
+        }
+        return fields;
+    }
+
     function loadFields() {
         $scope.loading = true;
         MetadataService.GetFieldsForModelSummaryId($scope.modelSummaryId).then(function(result) {
             if (result.Success) {
-                $scope.fields = result.ResultObj;
+                $scope.fields = getFieldsToDisplay(result.ResultObj);
                 renderSelects($scope.fields);
                 renderGrid($scope.fields);
 
@@ -147,7 +167,7 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
                         width: 128
                     },
                     {
-                        field: "FundamentalType", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE'),
+                        field: "FundamentalType", title: ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_ATTRIBUTES_TYPE'),
                         template: kendo.template($("#fundamentalTypeTemplate").html()),
                         width: 128
                     }
@@ -158,6 +178,10 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     $scope.categoryEditable = function(dataItem) {
         return ManageFieldsService.CategoryEditable(dataItem);
+    };
+
+    $scope.isLatticeAttribute = function(dataItem) {
+        return ManageFieldsService.IsLatticeAttribute(dataItem);
     };
 
     $scope.categoryWarning = function(dataItem) {
