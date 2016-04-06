@@ -41,6 +41,10 @@ public class MatchBlock implements HasPid {
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
+    static {
+        formatter.setCalendar(calendar);
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", nullable = false)
