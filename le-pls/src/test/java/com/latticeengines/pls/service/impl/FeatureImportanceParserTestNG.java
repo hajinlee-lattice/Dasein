@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
@@ -45,7 +46,7 @@ public class FeatureImportanceParserTestNG extends PlsFunctionalTestNGBase {
     
     @AfterClass(groups = "unit")
     public void tearDown() throws Exception {
-        //FileUtils.deleteQuietly(new File("outputfile.txt"));
+        FileUtils.deleteQuietly(new File("outputfile.txt"));
         HdfsUtils.rmdir(yarnConfiguration, dir);
     }
     
