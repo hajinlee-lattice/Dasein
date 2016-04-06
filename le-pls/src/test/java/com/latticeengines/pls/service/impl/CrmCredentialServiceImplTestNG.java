@@ -1,22 +1,27 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 
-import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -28,6 +33,9 @@ import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 @SuppressWarnings("unused")
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
+
+    @Autowired
+    private BatonService batonService;
 
     @Autowired
     private CrmCredentialService crmService;
@@ -71,9 +79,16 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         } catch (Exception ex) {
             // ignore
         }
-        camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
-        customerSpace = CustomerSpace.parse(tenantId);
+        CustomerSpaceProperties properties = new CustomerSpaceProperties();
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
+        batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);
 
+        SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
+        spaceConfiguration.setDlAddress("http://10.41.1.187:8081/DLRestService");
+        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA));
+        batonService.setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfiguration);
+
+        customerSpace = CustomerSpace.parse(tenantId);
         validateCredentialProxy.setMicroserviceHostPort("http://localhost:8082");
         httpServer = new StandaloneHttpServer();
         httpServer.init();
