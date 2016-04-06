@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -48,7 +47,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
 
     @Test(groups = "deployment.lp", enabled = true)
     public void testEndToEnd() throws InterruptedException, IOException {
-        String modelId = prepareModel();
+        String modelId = selfServiceModeling.prepareModel();
         scoreCompareService.analyzeScores(tenant.getId(), RESOURCE_BASE + "/" + fileName, modelId);
     }
 
@@ -56,22 +55,6 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
         return restTemplate;
     }
 
-    String prepareModel() throws InterruptedException {
-        selfServiceModeling.setFileName(fileName);
-        System.out.println("Uploading File");
-        selfServiceModeling.uploadFile();
-        sourceFile = selfServiceModeling.getSourceFile();
-        System.out.println(sourceFile.getName());
-        System.out.println("Resolving Metadata");
-        resolveMetadata();
-        System.out.println("Creatinging Model");
-        selfServiceModeling.createModel();
-        selfServiceModeling.retrieveModelSummary();
-        ModelSummary modelSummary = selfServiceModeling.getModelSummary();
-        String modelId = modelSummary.getId();
-        System.out.println("modeling id: " + modelId);
-        return modelId;
-    }
 
     @SuppressWarnings("rawtypes")
     private void resolveMetadata() {

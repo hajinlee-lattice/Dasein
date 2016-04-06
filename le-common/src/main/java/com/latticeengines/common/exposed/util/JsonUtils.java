@@ -1,6 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -61,6 +63,18 @@ public class JsonUtils {
         } catch (JsonProcessingException e) {
             return defaultValue;
         }
+    }
+
+    public static <T> T convertValue(Object rawField, Class<T> clazz) {
+        return new ObjectMapper().convertValue(rawField, clazz);
+    }
+
+    public static <T> List<T> convertList(List<Object> raw, Class<T> elementClazz) {
+        List<T> output = new ArrayList<>();
+        for (Object elt : raw) {
+            output.add(convertValue(elt, elementClazz));
+        }
+        return output;
     }
 
     @SuppressWarnings("unchecked")

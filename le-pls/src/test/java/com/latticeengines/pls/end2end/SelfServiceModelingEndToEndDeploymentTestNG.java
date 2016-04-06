@@ -33,6 +33,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -69,6 +70,23 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private String modelName;
     private ModelSummary originalModelSummary;
     private String fileName;
+
+    public String prepareModel() throws InterruptedException {
+        setFileName(fileName);
+        System.out.println("Uploading File");
+        uploadFile();
+        sourceFile = getSourceFile();
+        System.out.println(sourceFile.getName());
+        System.out.println("Resolving Metadata");
+        resolveMetadata();
+        System.out.println("Creatinging Model");
+        createModel();
+        retrieveModelSummary();
+        ModelSummary modelSummary = getModelSummary();
+        String modelId = modelSummary.getId();
+        System.out.println("modeling id: " + modelId);
+        return modelId;
+    }
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
@@ -229,7 +247,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                         originalModelSummary.getId()), List.class);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Object rawField : rawFields) {
-            VdbMetadataField field = new ObjectMapper().convertValue(rawField, VdbMetadataField.class);
+            VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
             fields.add(field);
 
             if (field.getColumnName().equals("Website")) {
@@ -260,6 +278,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
+
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException {

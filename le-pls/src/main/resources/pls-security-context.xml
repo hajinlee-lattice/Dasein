@@ -169,6 +169,14 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/scores/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/lp2/assets/resources/en-US/ResourceStrings.txt"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"

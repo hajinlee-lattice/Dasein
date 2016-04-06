@@ -39,7 +39,7 @@ public class GASessionCache {
                         } catch (Exception e) {
                             log.warn(String.format("Encountered an error when retrieving session %s from GA: "
                                     + e.getMessage()
-                                    + " Invalidate the cache.", token));
+                                    + " Invalidate the cache.", token), e);
                             return null;
                         }
                     }

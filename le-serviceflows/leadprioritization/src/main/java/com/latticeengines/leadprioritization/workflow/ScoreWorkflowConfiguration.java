@@ -14,8 +14,6 @@ import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfigurati
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
-import com.latticeengines.serviceflows.workflow.util.WriteOutputStepConfiguration;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
@@ -31,7 +29,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
-        private WriteOutputStepConfiguration writeOutput = new WriteOutputStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("scoreWorkflow", customerSpace, "scoreWorkflow");
@@ -41,7 +38,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            writeOutput.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -59,7 +55,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
-            writeOutput.putOutput(WorkflowContextConstants.Outputs.MODEL_ID, modelId);
             return this;
         }
 
@@ -93,7 +88,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder sourceDisplayName(String sourceDisplayName) {
-            writeOutput.putOutput(WorkflowContextConstants.Outputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
             return this;
         }
 
@@ -103,14 +97,12 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
-            writeOutput.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(match);
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);
             configuration.add(export);
-            configuration.add(writeOutput);
 
             return configuration;
         }
