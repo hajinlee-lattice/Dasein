@@ -54,6 +54,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
         var targetElement = $($event.target);
         if (targetElement.hasClass("fa-trash-o") || targetElement.hasClass("delete-model")) {
+            $event.preventDefault();
             DeleteModelModal.show($scope.data.Id);
         } else if (!$scope.nameStatus.editing && !incomplete) {
             $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);

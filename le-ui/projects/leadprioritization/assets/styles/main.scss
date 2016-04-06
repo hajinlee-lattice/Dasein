@@ -684,13 +684,12 @@ Create Model: Validate Import View
 
 #sureshot_iframe_container iframe {
   width: 100%;
-  position:absolute;
-  left:0;
-  right:0;
-  height:100%;
+  position: absolute;
+  bottom: 0;
+  height: calc(100% - 185px);
 }
 .open-nav #sureshot_iframe_container iframe {
-  width: 75%;
+  width: calc(100% - 399px);
 }
 
 
