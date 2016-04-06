@@ -459,7 +459,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Transient
     @JsonIgnore
     public void setDataSource(String dataSource) {
-        setDataSource(Arrays.<String> asList(new String[] { dataSource }));
+        setListPropertyFromString("DataSource", dataSource);
     }
 
     @Transient

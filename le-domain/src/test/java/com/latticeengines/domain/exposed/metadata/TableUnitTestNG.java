@@ -107,7 +107,7 @@ public class TableUnitTestNG {
         activeRetirementParticipants.setFundamentalType("numeric");
         activeRetirementParticipants.setStatisticalType("ratio");
         activeRetirementParticipants.setTags(ModelingMetadata.EXTERNAL_TAG);
-        activeRetirementParticipants.setDataSource("DerivedColumns");
+        activeRetirementParticipants.setDataSource("[DerivedColumns]");
 
         table.addAttribute(pkAttr);
         table.addAttribute(lkAttr);

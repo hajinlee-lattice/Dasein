@@ -218,7 +218,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         attribute.setFundamentalType("numeric");
         attribute.setStatisticalType("ratio");
         attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
-        attribute.setDataSource("DerivedColumns");
+        attribute.setDataSource("[DerivedColumns]");
         attribute.addValidator(new RequiredIfOtherFieldIsEmpty("Test"));
 
         return table;

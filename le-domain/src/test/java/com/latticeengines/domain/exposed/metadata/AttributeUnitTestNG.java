@@ -22,7 +22,7 @@ public class AttributeUnitTestNG {
         attr.setDescription("Description 1");
         attr.setDisplayDiscretizationStrategy("XYZ");
         attr.setDisplayName("Attribute 1");
-        attr.setDataSource("DerivedColumns");
+        attr.setDataSource("[DerivedColumns]");
         attr.setDataQuality("xyz");
         attr.setInterfaceName(InterfaceName.City);
 
@@ -39,6 +39,7 @@ public class AttributeUnitTestNG {
         assertEquals(deserializedAttr.getDisplayName(), attr.getDisplayName());
         assertEquals(deserializedAttr.getDataQuality(), attr.getDataQuality());
         assertEquals(deserializedAttr.getInterfaceName(), attr.getInterfaceName());
+        assertEquals(deserializedAttr.getDataSource().get(0), "DerivedColumns");
     }
 
     @Test(groups = "unit")

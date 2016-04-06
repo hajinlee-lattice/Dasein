@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-
 import org.apache.avro.generic.GenericRecord;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -40,6 +38,7 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -167,7 +166,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         attr.setName("Id");
         attr.setInterfaceName(InterfaceName.Id);
         attr.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-        attr.setDataSource("");
+        attr.setDataSource("[]");
         attr.setDataQuality("");
         attr.setDescription("");
         attr.setDisplayDiscretizationStrategy("");
@@ -186,7 +185,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         lmd.setName("LastModifiedDate");
         lmd.setInterfaceName(InterfaceName.LastModifiedDate);
         lmd.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
-        lmd.setDataSource("");
+        lmd.setDataSource("[]");
         lmd.setDataQuality("");
         lmd.setDescription("");
         lmd.setDisplayDiscretizationStrategy("");
