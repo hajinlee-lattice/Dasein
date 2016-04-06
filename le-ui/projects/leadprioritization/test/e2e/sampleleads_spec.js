@@ -1,10 +1,10 @@
 'use strict';
 
-describe('lead samples', function() {
+describe('sample leads', function() {
 
     var loginPage = require('./po/login.po');
+    var siderbar = require('./po/siderbar.po');
     var modelList = require('./po/modellist.po');
-    var modelTabs = require('./po/modeltabs.po');
 
     it('should validate lead sample tables', function () {
         //==================================================
@@ -19,9 +19,9 @@ describe('lead samples', function() {
         browser.waitForAngular();
 
         //==================================================
-        // Select Sample Leads Tab
+        // Select Sample Leads
         //==================================================
-        modelTabs.getTabByIndex(2).click();
+        siderbar.SampleLeadsLink.click();
         browser.waitForAngular();
 
         //==================================================

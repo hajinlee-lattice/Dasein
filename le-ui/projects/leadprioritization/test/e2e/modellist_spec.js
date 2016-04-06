@@ -4,7 +4,7 @@ describe('model list', function() {
 
     var loginPage = require('./po/login.po');
     var modellist = require('./po/modellist.po');
-    var userDropdown = require('./po/userdropdown.po');
+    var siderbar = require('./po/siderbar.po');
     var model, originalModelName;
     var createdDates;
 
@@ -18,19 +18,19 @@ describe('model list', function() {
     }, 60000);
 
     it('should verify at least 2 models', function () {
-        element.all(by.css('a.model')).count().then(function(n){
+        element.all(by.css('div.model')).count().then(function(n){
             createdDates = _.range(n).map(function(){ return 0; });
             expect(n >= 2).toBe(true);
         });
     });
 
     it('should be able to go into the detail page', function () {
-        element.all(by.css('a.model')).first().click();
-        expect(element(by.css('a.back-button')).isDisplayed()).toBe(true);
+        element.all(by.css('div.model')).first().click();
+        expect(element(by.css('#nav .menu-header > a')).isDisplayed()).toBe(true);
     });
 
     it('should be able to go back', function () {
-        element(by.css('a.back-button')).click();
+        element(by.css('#nav .menu-header > a')).click();
     });
 
     it('should save original model names and create dates', function () {
@@ -147,8 +147,11 @@ describe('model list', function() {
                             originalModelName = text;
                         });
                         model.findElement(by.css('i.fa-trash-o')).click();
+                        browser.waitForAngular();
                         browser.driver.sleep(1000);
                         element(by.xpath(modellist.xpath.DeleteModelLink)).click();
+                        browser.waitForAngular();
+                        browser.driver.sleep(1000);
                         expect(element.all(by.xpath(modellist.xpath.ModelTileWidget)).count()).toBe(count - 1);
                     }
                 );
@@ -158,14 +161,12 @@ describe('model list', function() {
 
     it("should be able to see the deleted model in the creation history, restore the model and see it getting restored", function() {
         // navigate to creation history table
-        userDropdown.toggleDropdown();
-        userDropdown.modelCreationHistory.click();
+        siderbar.ModelCreationHistoryLink.click();
+        browser.waitForAngular();
+        browser.driver.sleep(2000);
 
         assertDeletedModelShowsupAsDeletedInModelCreationHistoryPage(originalModelName);
         undoDeletionOfModelInHistoryPage_makeMakeSureThatModelIsRestored(originalModelName);
-
-        // logout
-        loginPage.logout();
     });
 
     function assertDeletedModelShowsupAsDeletedInModelCreationHistoryPage(modelName) {
@@ -180,24 +181,26 @@ describe('model list', function() {
         if (modelName) {
             var deletedModelTableRow = element(by.cssContainingText('tr', modelName));
             deletedModelTableRow.element(by.linkText('Undo')).click();
-            browser.driver.sleep(500);
+            browser.waitForAngular();
+            browser.driver.sleep(1000);
 
             // make sure that the model name shows up as not "Deleted" in the model creation history
             element(by.cssContainingText('tr', modelName)).getText().then(function(text) {
                 expect(text).not.toContain('Deleted');
             });
 
-            // navigate back to the home page
-            element(by.css('div.brand a')).click();
-            browser.driver.sleep(500);
+            // navigate back to the models page
+            siderbar.PredictionModelsLink.click();
+            browser.waitForAngular();
+            browser.driver.sleep(1000);
 
             // make sure the model with the deleted model name is present
             expect(element(by.cssContainingText('h2', modelName)).isPresent()).toBe(true);
         }
     }
-    
+
     it('should log out', function () {
         loginPage.logout();
-    }, 60000);
+    });
 });
 

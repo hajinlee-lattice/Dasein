@@ -6,7 +6,7 @@ var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidg
     'mainApp.models.modals.ImportModelModal'
 ]);
 
-app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, ModelService, ResourceUtility,
+app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, $state, ModelService, ResourceUtility,
                                                                      FeatureFlagService, NavUtility, ImportModelModal) {
 
     $scope.ResourceUtility = ResourceUtility;
@@ -20,11 +20,11 @@ app.controller('ModelListCreationHistoryWidgetController', function ($scope, $ro
         }
 
         ModelService.undoDeletedModel(modelId).then(function(result){
-            if (result.Success) {
-                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+            if (result.success) {
+                $state.go('home.history', {}, { reload: true } );
             } else {
                 //TODO:song handle errors
-                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+                $state.go('home.history', {}, { reload: true } );
             }
         });
     };

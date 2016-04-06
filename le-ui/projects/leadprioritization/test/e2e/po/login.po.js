@@ -10,7 +10,7 @@ var Login = function() {
 
     this.loginUser = function(name, password, tenantId) {
         this.login(name, password, tenantId);
-        browser.driver.sleep(20000);
+        browser.driver.sleep(15000);
         browser.wait(function(){
             return element(by.id('mainSummaryView')).isPresent();
         }, 100000, 'page title should appear with in 100 sec.');

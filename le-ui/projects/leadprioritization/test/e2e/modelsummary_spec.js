@@ -1,15 +1,17 @@
 'use strict';
 
-describe('internal admin page', function() {
+describe('model summary', function() {
     var loginPage = require('./po/login.po');
-    var modelTabs = require('./po/modeltabs.po');
+    var siderbar = require('./po/siderbar.po');
+    var modelList = require('./po/modellist.po');
     var helper = require('./po/helper.po');
 
-    var modelNamesOnHDFS = ["PLSModel-Eloqua1", "PLSModel-Eloqua2"];
+    var modelNamesOnHDFS = "PLSModel-Eloqua";
+    var modelNamesNotOnHDFS = "PLSModel-Eloqua-00";
     var modelOnHDFSAndPage;
 
-    var expectedAttributesPresentOnInternalAdminPage = ["Model Health Score", "Tenant ID", "Tenant Name", "Dataloader Tenant Name",
-        "Internal ID", "Template Version", "Model Details", "Scored Leads", "Model Performance"];
+    var expectedAttributesPresentOnInternalAdminPage = ["Model Health Score", "Tenant ID", "Tenant Name",
+        "Internal ID", "Model Details", "Scored Leads", "Model Performance"];
 
     var modelDetailFiles = ["modelsummary.json", "predictors.csv", "diagnostics.json", "metadata.avsc"];
     var scoredLeadFiles = ["readout.csv", "scores.csv"];
@@ -21,8 +23,10 @@ describe('internal admin page', function() {
         modelNamesElement.getText().then(function(modelNamesOnPage) {
             for (var i = 0; i < modelNamesOnPage.length; i++) {
                 var modelNameOnPage = modelNamesOnPage[i];
-                if (modelNamesOnHDFS.indexOf(modelNameOnPage.substring(0, modelNamesOnHDFS[0].length)) >= 0) {
+                if (modelNameOnPage.indexOf(modelNamesOnHDFS) >= 0 &&
+                    modelNameOnPage.indexOf(modelNamesNotOnHDFS) < 0) {
                     modelOnHDFSAndPage = modelNameOnPage;
+                    break;
                 }
             }
             expect(modelOnHDFSAndPage != null).toBe(true);
@@ -31,10 +35,9 @@ describe('internal admin page', function() {
 
     it('should have all the necessary attributes on the table', function() {
         element(by.cssContainingText('.editable', modelOnHDFSAndPage)).click();
-        modelTabs.getTabByIndex(2).click();
         browser.driver.sleep(1000);
-        element(by.linkText('Admin')).click();
-        browser.driver.sleep(6000);
+        siderbar.ModelSummaryLink.click();
+        browser.driver.sleep(1000);
 
         var headers = element.all(by.css('table.table tbody tr th')).map(function(tableHeader) {
             return tableHeader.getText();

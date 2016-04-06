@@ -1,6 +1,6 @@
 'use strict';
 
-describe('top predictors', function () {
+describe('attributes', function () {
 
     var helper = require('./po/helper.po');
     var loginPage = require('./po/login.po');

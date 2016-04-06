@@ -1,10 +1,10 @@
 'use strict';
 
-describe('threshold explorer', function() {
+describe('performance', function() {
 
     var loginPage = require('./po/login.po');
+    var siderbar = require('./po/siderbar.po');
     var modelList = require('./po/modellist.po');
-    var modelTabs = require('./po/modeltabs.po');
 
     it('should validate functional threshold explorer chart', function () {
         //==================================================
@@ -19,9 +19,9 @@ describe('threshold explorer', function() {
         browser.waitForAngular();
 
         //==================================================
-        // Select Threshold Explorer Tab
+        // Select Performance
         //==================================================
-        modelTabs.getTabByIndex(1).click();
+        siderbar.PerformanceLink.click();
         browser.waitForAngular();
 
         //==================================================
@@ -89,9 +89,9 @@ describe('threshold explorer', function() {
         //==================================================
         // Check Leads/Score (Assume Reasonable Window Size)
         //==================================================
-        browser.actions().mouseMove({x: 0, y: 100}).perform();
         element(by.css(".lytext")).getText().then(function (leads1) {
             element(by.css(".rytext")).getText().then(function (score1) {
+                element(by.id('thresholdExplorerChart')).click();
                 browser.actions().mouseDown({x: 0, y: 100}).perform();
                 browser.actions().mouseMove({x: 0, y: 100}).perform();
                 element(by.css(".lytext")).getText().then(function (leads2) {

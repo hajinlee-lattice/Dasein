@@ -30,7 +30,11 @@ var Config = function() {
                 //specBasePath + '/tenantdeployment_spec.js',
 
                 specBasePath + '/usermgmt_spec.js',
-                specBasePath + '/predictors_spec.js'
+                specBasePath + '/attributes_spec.js',
+                specBasePath + '/modellist_spec.js',
+                specBasePath + '/performance_spec.js',
+                specBasePath + '/sampleleads_spec.js',
+                specBasePath + '/modelsummary_spec.js'
             ],
 
             params: {
