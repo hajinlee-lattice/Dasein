@@ -19,6 +19,11 @@ angular
                 $scope.jobId = $scope.job.id;
                 $scope.stepsCompletedTimes;
                 $scope.showJobSuccessMessage;
+                if ($scope.job.jobType.toLowerCase() == "scoreworkflow") {
+                    $scope.jobDisplayName = "Batch Scoring";
+                } else {
+                    $scope.jobDisplayName = "Create Model";
+                }
 
                 var periodicQueryId;
                 var TIME_INTERVAL_BETWEEN_JOB_STATUS_CHECKS = 8 * 1000;

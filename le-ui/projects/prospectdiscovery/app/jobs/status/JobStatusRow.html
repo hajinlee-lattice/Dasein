@@ -1,7 +1,7 @@
 <div class="expanded-{{jobRowExpanded}}">
     <div class="clearfix">
         <span class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns four">{{job.jobType}}</span>
+        <span class="columns four">{{jobDisplayName}}</span>
         <span class="columns four {{job.status}}">{{job.status}}
             <span data-ng-show="jobCompleted"> [<a ui-sref="jobs.status.ready({jobId: jobId})">View Report</a>]</span>
             <span data-ng-show="jobRunning"> [<a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">Cancel Job</a>]</span>

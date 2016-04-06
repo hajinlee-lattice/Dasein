@@ -20,6 +20,11 @@ angular
                 $scope.jobCompleted = false;
                 $scope.cancelClicked = ( $scope.cancelling[$scope.jobId] ? true : false );
                 $scope.jobType = $scope.job.jobType;
+                if ($scope.jobType.toLowerCase() == "scoreworkflow") {
+                    $scope.jobDisplayName = "Batch Scoring";
+                } else {
+                    $scope.jobDisplayName = "Create Model";
+                }
                 $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;
 
