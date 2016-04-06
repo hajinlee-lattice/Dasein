@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +62,7 @@ public class FeatureImportanceParser {
                 String modelId = tokens[1];
 
                 
-                String hdfsPath = findHdfsPath(tenant, modelId);
+                FileStatus hdfsPath = findHdfsPath(tenant, modelId);
                 if (hdfsPath == null) {
                     hdfsPath = findHdfsPath(String.format("%s.%s.Production", tenant, tenant), modelId);
                 }
@@ -70,17 +73,28 @@ public class FeatureImportanceParser {
                 }
                 try (FileWriter writer = new FileWriter(new File(outputFile))) {
                     writer.write("Tenant,ModelId,Feature,Importance\n");
-
-                    Map<String, Double> fiMap = parse(hdfsPath, HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath));
+                    String path = hdfsPath.getPath().toString();
+                    Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
                     for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
-                        writer.write(String.format("%s,%s,%s,%f\n", tenant, modelId, entry.getKey(), entry.getValue()));
+                        writer.write(String.format("%s,%s,%s,%s,%f\n", //
+                                tenant, //
+                                modelId, //
+                                convertTime(hdfsPath.getModificationTime()), //
+                                entry.getKey(), //
+                                entry.getValue()));
                     }
                 }
             }
         }
     }
+    
+    private String convertTime(long time) {
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("YYYY-MM-dd");
+        return format.format(date);
+    }
 
-    private String findHdfsPath(String tenant, String modelId) {
+    private FileStatus findHdfsPath(String tenant, String modelId) {
         String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + tenant;
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
@@ -97,10 +111,11 @@ public class FeatureImportanceParser {
         };
 
         try {
-            List<String> files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
+            List<FileStatus> files = HdfsUtils.getFileStatusesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
             modelId = UuidUtils.extractUuid(modelId);
-            for (String file : files) {
-                String uuid = UuidUtils.parseUuid(file);
+            for (FileStatus file : files) {
+                String path = file.getPath().toString();
+                String uuid = UuidUtils.parseUuid(path);
 
                 if (uuid.equals(modelId)) {
                     return file;
