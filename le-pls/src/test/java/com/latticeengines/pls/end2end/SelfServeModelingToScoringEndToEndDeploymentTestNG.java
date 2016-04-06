@@ -6,9 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.avro.Schema;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
@@ -21,7 +19,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 
 @Component
 public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -30,21 +27,13 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
 
     @Autowired
-    private ModelProxy modelProxy;
-
-    @Autowired
     private ScoreCorrectnessService scoreCompareService;
-
-    @Autowired
-    private Configuration yarnConfiguration;
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
 
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceBaseDir;
-
     private SourceFile sourceFile;
 
+//    private String fileName = "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_20160316_170113.csv";
     private String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
 
     private Tenant tenant;
