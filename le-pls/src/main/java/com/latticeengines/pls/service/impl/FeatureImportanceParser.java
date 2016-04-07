@@ -139,7 +139,9 @@ public class FeatureImportanceParser {
                     continue;
                 }
                 String[] tokens = line.split(",");
-                fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
+                if (tokens.length == 2) {
+                    fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
+                }
             }
         }
         return fiMap;
