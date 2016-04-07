@@ -46,6 +46,7 @@ public class GASessionCacheUnitTestNG {
     @BeforeMethod(groups = "unit")
     public void cleanup() {
         cache.removeAll();
+        cache.setRetryIntervalMsec(100L);
         mockSessionMgr.logoutAll();
         mockSessionMgr.login(VALID_TOKEN);
     }
@@ -58,20 +59,20 @@ public class GASessionCacheUnitTestNG {
         Assert.assertNotNull(session.getRights());
         Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
 
-//        session = cache.retrieve(VALID_TOKEN);
-//        Assert.assertNotNull(session, "Should get session from second invocation.");
-//
-//        Assert.assertNotNull(session.getRights());
-//        Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
+        session = cache.retrieve(VALID_TOKEN);
+        Assert.assertNotNull(session, "Should get session from second invocation.");
 
-//        // wait to expire
-//        try {
-//            Thread.sleep(cacheExpirationInSeconds * 1000L + 500L);
-//        } catch (InterruptedException e) {
-//            Assert.fail("Failed to wait for the session to expire", e);
-//        }
-//        session = cache.retrieve(VALID_TOKEN);
-//        Assert.assertNotNull(session, "Should get session after cache expired.");
+        Assert.assertNotNull(session.getRights());
+        Assert.assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_USER.name());
+
+        // wait to expire
+        try {
+            Thread.sleep(cacheExpirationInSeconds * 1000L + 500L);
+        } catch (InterruptedException e) {
+            Assert.fail("Failed to wait for the session to expire", e);
+        }
+        session = cache.retrieve(VALID_TOKEN);
+        Assert.assertNotNull(session, "Should get session after cache expired.");
     }
 
     @Test(groups = "unit", expectedExceptions = LedpException.class)
