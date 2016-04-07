@@ -10,8 +10,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 
 public class InputValidatorWrapper implements Serializable {
-    
-    private static final long serialVersionUID = -1516218977277368626L;
 
     @JsonProperty("raw_type")
     private String rawType;
