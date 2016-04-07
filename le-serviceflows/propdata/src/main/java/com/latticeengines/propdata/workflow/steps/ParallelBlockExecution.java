@@ -107,7 +107,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     jobConfiguration.getBlockSize());
             log.info("Submit a match block to application id " + appId);
         }
-        executionContext.put(BulkMatchContextKey.BLOCK_UUID_MAP, blockUuidMap);
     }
 
     private void waitForMatchBlocks() {

@@ -12,6 +12,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.propdata.manage.MatchBlock;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
@@ -88,39 +90,32 @@ public class UpdateFailedMatchListener implements JobExecutionListener {
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
 
-        Map<?, ?> map = (Map) jobExecution.getExecutionContext().get(BulkMatchContextKey.BLOCK_UUID_MAP);
-        Map<String, String> blockUuidMap = new HashMap<>();
-        if (map != null && !map.isEmpty()) {
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                Object keyObj = entry.getKey();
-                Object valObj = entry.getValue();
-                if (keyObj instanceof String && valObj instanceof String) {
-                    blockUuidMap.put((String) keyObj, (String) valObj);
-                }
-            }
-        }
-        for (ApplicationId appId : applicationIds) {
-            try {
-                ApplicationReport report = yarnClient.getApplicationReport(appId);
-                if (!YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState())) {
-                    yarnClient.killApplication(appId);
-                }
-
+        String rootUid = jobExecution.getExecutionContext().getString(BulkMatchContextKey.ROOT_OPERATION_UID);
+        List<MatchBlock> matchBlocks = matchCommandService.getByRootOperationUid(rootUid).getMatchBlocks();
+        for (MatchBlock block: matchBlocks) {
+            if (!YarnUtils.TERMINAL_APP_STATE.contains(block.getApplicationState())) {
+                ApplicationId appId = ConverterUtils.toApplicationId(block.getApplicationId());
                 try {
-                    log.info("Wait 10 sec to let applications drain.");
-                    Thread.sleep(10000L);
-                } catch (Exception e) {
-                    // ignore
-                }
+                    ApplicationReport report = yarnClient.getApplicationReport(appId);
+                    if (!YarnUtils.TERMINAL_APP_STATE.contains(report.getYarnApplicationState())) {
+                        yarnClient.killApplication(appId);
+                    }
 
-                if (blockUuidMap.containsKey(appId.toString())) {
-                    String blockId = blockUuidMap.get(appId.toString());
+                    try {
+                        log.info("Wait 10 sec to let applications drain.");
+                        Thread.sleep(10000L);
+                    } catch (Exception e) {
+                        // ignore
+                    }
+
+                    String blockId = block.getBlockOperationUid();
                     matchCommandService.updateBlockByApplicationReport(blockId, report);
+                } catch (Exception e) {
+                    log.error("Error when killing the application " + appId, e);
                 }
-            } catch (Exception e) {
-                log.error("Error when killing the application " + appId, e);
             }
         }
+
         try {
             yarnClient.close();
         } catch (IOException e) {
