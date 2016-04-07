@@ -47,7 +47,7 @@ public class GASessionCache {
                                 } finally {
                                     try {
                                         Long currentInterval = retryIntervalMsec.get();
-                                        retryIntervalMsec.set(currentInterval * currentInterval);
+                                        retryIntervalMsec.set(currentInterval * 2);
                                         Thread.sleep(retryIntervalMsec.get()
                                                 + random.nextInt(retryIntervalMsec.get().intValue()));
                                     } catch (Exception e) {
