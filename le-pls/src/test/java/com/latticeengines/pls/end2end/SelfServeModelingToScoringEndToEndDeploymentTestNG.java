@@ -32,7 +32,8 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
 
     private SourceFile sourceFile;
 
-//    private String fileName = "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_20160316_170113.csv";
+    // private String fileName =
+    // "Mulesoft_MKTO_LP3_ModelingLead_OneLeadPerDomain_20160316_170113.csv";
     private String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
 
     private Tenant tenant;
@@ -40,6 +41,7 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
+        selfServiceModeling.setFileName(fileName);
         switchToSuperAdmin();
         tenant = selfServiceModeling.getTenant();
         System.out.println(tenant);
@@ -54,7 +56,6 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     public RestTemplate getRestTemplate() {
         return restTemplate;
     }
-
 
     @SuppressWarnings("rawtypes")
     private void resolveMetadata() {
