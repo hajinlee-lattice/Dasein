@@ -97,7 +97,7 @@ public class FeatureImportanceParser {
     }
 
     private FileStatus findHdfsPath(String tenant, String modelId) {
-        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + tenant;
+        String startingHdfsPoint = modelServiceHdfsBaseDir + "/" + tenant + "/models";
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 
             @Override
@@ -116,8 +116,7 @@ public class FeatureImportanceParser {
             List<FileStatus> files = HdfsUtils.getFileStatusesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
             modelId = UuidUtils.extractUuid(modelId);
             for (FileStatus file : files) {
-                String path = file.getPath().toString();
-                String uuid = UuidUtils.parseUuid(path);
+                String uuid = UuidUtils.parseUuid(file.getPath().toString());
 
                 if (uuid.equals(modelId)) {
                     return file;
