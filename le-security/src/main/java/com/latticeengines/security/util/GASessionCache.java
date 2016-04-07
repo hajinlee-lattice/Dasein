@@ -28,10 +28,8 @@ public class GASessionCache {
     private LoadingCache<String, Session> tokenExpirationCache;
 
     public GASessionCache(final GlobalSessionManagementService globalSessionMgr, int cacheExpiration) {
-        tokenExpirationCache = CacheBuilder.newBuilder()
-                .maximumSize(1000)
-                .expireAfterAccess(cacheExpiration, TimeUnit.SECONDS)
-                .build(new CacheLoader<String, Session>() {
+        tokenExpirationCache = CacheBuilder.newBuilder().maximumSize(1000)
+                .expireAfterAccess(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
                     @Override
                     public Session load(String token) throws Exception {
                         try {
@@ -42,9 +40,8 @@ public class GASessionCache {
                             while (++retries <= MAX_RETRY) {
                                 try {
                                     session = globalSessionMgr.retrieve(ticket);
-                                    break;
                                 } catch (Exception e) {
-                                    log.warn("Encountered an error when retrieving session %s from GA - retry " + retries
+                                    log.warn("Failed to retrieve session " + token + " from GA - retried " + retries
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
@@ -66,8 +63,7 @@ public class GASessionCache {
                             }
                         } catch (Exception e) {
                             log.warn(String.format("Encountered an error when retrieving session %s from GA: "
-                                    + e.getMessage()
-                                    + " Invalidate the cache.", token), e);
+                                    + e.getMessage() + " Invalidate the cache.", token), e);
                             return null;
                         }
                     }
