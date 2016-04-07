@@ -46,7 +46,6 @@ public class GASessionCacheUnitTestNG {
     @BeforeMethod(groups = "unit")
     public void cleanup() {
         cache.removeAll();
-        cache.setRetryIntervalMsec(10L);
         mockSessionMgr.logoutAll();
         mockSessionMgr.login(VALID_TOKEN);
     }
