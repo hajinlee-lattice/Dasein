@@ -32,6 +32,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.modelNameInvalid = false;
     $scope.updateClicked = false;
+    $scope.saveInProgress = false;
 
     $scope.updateFieldsClicked = function ($event) {
         if ($event != null) {
@@ -43,10 +44,10 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             return;
         }
 
-        if ($scope.updateClicked) {
-            return;
-        }
+        if ($scope.updateClicked) { return; }
         $scope.updateClicked = true;
+
+        $scope.saveInProgress = true;
 
         MetadataService.UpdateAndCloneFields($scope.modelName, $scope.modelSummaryId, $scope.editedData).then(function(result){
             if (result.Success) {

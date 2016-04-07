@@ -4,35 +4,51 @@
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h4 class="modal-title">{{ResourceUtility.getString('UPDATE_FIELDS_TITLE')}}</h4>
         </div>
-        <div class="modal-body">
-            <div class="row">
-                <div class="form-group" ng-class="{ 'has-error' : modelform.modelName.$invalid && !modelform.modelName.$pristine }">
-                    <form name="modelform">
-                        <label>Please Confirm & Enter New Model Name <span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p><a href='#'>More information</a>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
-                        <input
-                                type="text"
-                                class="form-control"
-                                name="modelName"
-                                ng-model="modelName"
-                                ng-minlength="1"
-                                ng-maxlength="50"
-                                placeholder="Example: US Enterprise model"
-                                required />
-                        <p class="help-block">* Model Name cannot be empty, and must be less than 50 characters.</p>
 
-                    </form>
+        <div data-ng-show="saveInProgress">
+            <div class="modal-body">
+                <h2>{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+                <div class="meter">
+                    <span class="indeterminate"></span>
                 </div>
-                <div class="row alert-holder">
-                    <div id="updateFieldsError" class="alert-danger">
-                        {{updateFieldsErrorMessage}}
+            </div>
+        </div>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group" ng-class="{ 'has-error' : modelform.modelName.$invalid && !modelform.modelName.$pristine }">
+                        <form name="modelform">
+                            <label>Please Confirm &amp; Enter New Model Name <span class="more-info" tooltips tooltip-template="<h4>Naming Convention</h4><p>We recommend organizing your models based on segment or target market.</p>" tooltip-side="right" tooltip-size="large" tooltip-close-button="true">&#105;</span></label>
+                            <input
+                                    type="text"
+                                    class="form-control"
+                                    name="modelName"
+                                    ng-model="modelName"
+                                    ng-minlength="1"
+                                    ng-maxlength="50"
+                                    placeholder="Example: US Enterprise model"
+                                    required />
+                            <p class="help-block">* Model Name cannot be empty, and must be less than 50 characters.</p>
+
+                        </form>
+                    </div>
+                    <div class="row alert-holder">
+                        <div id="updateFieldsError" class="alert-danger">
+                            {{updateFieldsErrorMessage}}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="button blue-button" type="button" data-ng-click="cancelClicked()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
-            <button class="button orange-button" href="#" ng-disabled="{{ updateClicked }}" data-ng-click="updateFieldsClicked($event)">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</button>
+
+        <div data-ng-hide="saveInProgress">
+            <div class="modal-footer">
+                <button class="button blue-button" type="button" data-ng-click="cancelClicked()">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
+                <button class="button orange-button" href="#" ng-disabled="{{ updateClicked }}" data-ng-click="updateFieldsClicked($event)">{{ResourceUtility.getString('BUTTON_CLONE_AND_REMODEL_LABEL')}}</button>
+            </div>
         </div>
+
     </div>
 </div>
 
