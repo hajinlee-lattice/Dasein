@@ -166,7 +166,7 @@ var ManageFields = function() {
         var tds = tr.all(by.tagName("td"));
         helper.elementExists(tds.get(2).element(by.tagName("input")), true);
         tds.get(3).getText().then(function (tagsVal){
-            if (tagsVal == "Internal") {
+            if (tagsVal == "Internal" || tagsVal == "") {
                 assertCategorySelectExists(tr, AllCategoryOptions);
             } else {
                 assertCategorySelectNotExists(tr);
@@ -271,7 +271,7 @@ var ManageFields = function() {
                 var tds = trs.get(0).all(by.tagName("td"));
                 tds.get(0).getText().then(function (fieldName) {
                     tds.get(3).getText().then(function (tags) {
-                        if (tags == "Internal") {
+                        if (tags == "Internal" || tags == "") {
                             var categorySelect = tds.get(4).element(by.tagName("select"));
                             categorySelect.element(by.css("option[selected]")).getText().then(function (category){
                                 if (AllCategoryOptions.indexOf(category) > -1) {
