@@ -25,19 +25,19 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantDao.findByTenantId(tenantId);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantName(String tenantName) {
         return tenantDao.findByTenantName(tenantName);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(new Date().getTime());
@@ -46,7 +46,7 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
     public void delete(Tenant tenant) {
         Tenant tenant1 = findByTenantId(tenant.getId());
         super.delete(tenant1);

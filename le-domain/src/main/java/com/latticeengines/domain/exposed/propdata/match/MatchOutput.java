@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
-import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -180,7 +179,6 @@ public class MatchOutput {
         }
     }
 
-    @MetricTag(tag = "RootOperationUID")
     @JsonProperty("RootOperationUID")
     public String getRootOperationUID() {
         return rootOperationUID;

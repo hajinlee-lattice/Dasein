@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -35,6 +36,12 @@ public class SessionServiceImpl implements SessionService {
     @PostConstruct
     private void initializeSessionCache() {
         sessionCache = new GASessionCache(globalSessionManagementService, CACHE_TIMEOUT_IN_SEC);
+    }
+
+    @Override
+    public Ticket authenticate(Credentials credentials) {
+        return globalAuthenticationService.authenticateUser(credentials.getUsername().toLowerCase(),
+                credentials.getPassword());
     }
 
     @Override

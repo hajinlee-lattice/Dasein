@@ -95,6 +95,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
 
     private void submitMatchBlocks(List<PropDataJobConfiguration> jobConfigurations) {
         applicationIds = new ArrayList<>();
+        executionContext.put(BulkMatchContextKey.APPLICATION_IDS, applicationIds);
         for (PropDataJobConfiguration jobConfiguration : jobConfigurations) {
             ApplicationId appId = ConverterUtils
                     .toApplicationId(internalProxy.submitYarnJob(jobConfiguration).getApplicationIds().get(0));
@@ -106,6 +107,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     jobConfiguration.getBlockSize());
             log.info("Submit a match block to application id " + appId);
         }
+        executionContext.put(BulkMatchContextKey.BLOCK_UUID_MAP, blockUuidMap);
     }
 
     private void waitForMatchBlocks() {
@@ -128,14 +130,18 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         }
     }
 
-    private void finalizeMatch() throws Exception {
+    private void finalizeMatch() {
         try {
             matchCommandService.update(rootOperationUid).status(MatchStatus.FINISHING).progress(0.98f).commit();
+
+            Long startTime = matchOutput.getReceivedAt().getTime();
+            matchOutput.getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - startTime);
             String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
             HdfsUtils.writeToFile(yarnConfiguration, outputFile, JsonUtils.serialize(matchOutput));
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
             Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
             log.info("Generated " + count + " results in " + avroDir);
+
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //
                     .rowsMatched(count.intValue()) //
@@ -158,7 +164,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 numErrors++;
                 log.error("Failed to read status of application " + appId, e);
                 if (numErrors > MAX_ERRORS) {
-                    killChildrenApplications();
                     throw new RuntimeException("Exceeded maximum number of errors " + MAX_ERRORS);
                 } else {
                     return null;
@@ -248,7 +253,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void failTheWorkflowByFailedBlock(MatchStatus terminalStatus, ApplicationReport failedReport) {
-        killChildrenApplications();
         ApplicationId failedAppId = failedReport.getApplicationId();
         String blockOperationUid = blockUuidMap.get(failedAppId.toString());
         String blockErrorFile = hdfsPathBuilder.constructMatchBlockErrorFile(rootOperationUid, blockOperationUid)
@@ -264,18 +268,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     + " : " + e.getMessage());
         }
 
-        for (ApplicationId otherAppId : applicationIds) {
-            try {
-                ApplicationReport otherReport = yarnClient.getApplicationReport(otherAppId);
-                String otherBlockId = blockUuidMap.get(otherAppId.toString());
-                matchCommandService.updateBlockByApplicationReport(otherBlockId, otherReport);
-            } catch (Exception e) {
-                log.error("Failed to update status of block with app id " + otherAppId);
-            }
-        }
-
-        matchCommandService.updateBlockByApplicationReport(blockOperationUid, failedReport);
-
         matchCommandService.update(rootOperationUid) //
                 .status(terminalStatus) //
                 .errorMessage(errorMsg) //
@@ -285,7 +277,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     }
 
     private void failTheWorkflowWithErrorMessage(String errorMsg, Exception ex) {
-        killChildrenApplications();
         try {
             String matchErrorFile = hdfsPathBuilder.constructMatchErrorFile(rootOperationUid).toString();
             HdfsUtils.writeToFile(yarnConfiguration, matchErrorFile, errorMsg);
@@ -360,16 +351,6 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
         yarnClient = YarnClient.createYarnClient();
         yarnClient.init(yarnConfiguration);
         yarnClient.start();
-    }
-
-    private void killChildrenApplications() {
-        for (ApplicationId appId : applicationIds) {
-            try {
-                yarnClient.killApplication(appId);
-            } catch (Exception e) {
-                log.error("Error when killing the application " + appId, e);
-            }
-        }
     }
 
 }
