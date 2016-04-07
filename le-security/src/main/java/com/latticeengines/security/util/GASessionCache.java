@@ -23,11 +23,12 @@ public class GASessionCache {
 
     private static Log log = LogFactory.getLog(GASessionCache.class);
     private static final Integer MAX_RETRY = 3;
-    private static Long RETRY_INTERVAL_MSEC = 500L;
+    private ThreadLocal<Long> retryIntervalMsec = new ThreadLocal<>();
     private static Random random = new Random(System.currentTimeMillis());
     private LoadingCache<String, Session> tokenExpirationCache;
 
     public GASessionCache(final GlobalSessionManagementService globalSessionMgr, int cacheExpiration) {
+        retryIntervalMsec.set(500L);
         tokenExpirationCache = CacheBuilder.newBuilder().maximumSize(1000)
                 .expireAfterAccess(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
                     @Override
@@ -45,8 +46,10 @@ public class GASessionCache {
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
-                                        Thread.sleep(RETRY_INTERVAL_MSEC * retries
-                                                + random.nextInt(RETRY_INTERVAL_MSEC.intValue()));
+                                        Long currentInterval = retryIntervalMsec.get();
+                                        retryIntervalMsec.set(currentInterval * currentInterval);
+                                        Thread.sleep(retryIntervalMsec.get()
+                                                + random.nextInt(retryIntervalMsec.get().intValue()));
                                     } catch (Exception e) {
                                         // ignore
                                     }
@@ -89,7 +92,7 @@ public class GASessionCache {
 
     @VisibleForTesting
     void setRetryIntervalMsec(Long intervalMsec) {
-        RETRY_INTERVAL_MSEC = intervalMsec;
+        retryIntervalMsec.set(intervalMsec);
     }
 
     private static void interpretGARights(Session session) {
