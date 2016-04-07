@@ -28,13 +28,19 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowFunctionalTestNGBase
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
+    private String tenantId1;
+
+    private String tenantId2;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        tenantId1 = this.getClass().getSimpleName() + "1";
+        tenantId2 = this.getClass().getSimpleName() + "2";
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
@@ -42,11 +48,11 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowFunctionalTestNGBase
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        Tenant tenant1 = tenantService.findByTenantId("TENANT1");
+        Tenant tenant1 = tenantService.findByTenantId(tenantId1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
         }
-        Tenant tenant2 = tenantService.findByTenantId("TENANT2");
+        Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         if (tenant2 != null) {
             tenantService.discardTenant(tenant2);
         }
@@ -55,13 +61,13 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowFunctionalTestNGBase
     @Test(groups = "functional")
     public void testCreateWorkflowJob() {
         Tenant tenant1 = new Tenant();
-        tenant1.setId("TENANT1");
-        tenant1.setName("TENANT1");
+        tenant1.setId(tenantId1);
+        tenant1.setName(tenantId1);
         tenantEntityMgr.create(tenant1);
 
         Tenant tenant2 = new Tenant();
-        tenant2.setId("TENANT2");
-        tenant2.setName("TENANT2");
+        tenant2.setId(tenantId2);
+        tenant2.setName(tenantId2);
         tenantEntityMgr.create(tenant2);
 
         WorkflowJob workflowJob1 = new WorkflowJob();
