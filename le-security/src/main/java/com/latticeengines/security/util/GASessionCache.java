@@ -28,7 +28,7 @@ public class GASessionCache {
     private LoadingCache<String, Session> tokenExpirationCache;
 
     public GASessionCache(final GlobalSessionManagementService globalSessionMgr, int cacheExpiration) {
-        retryIntervalMsec.set(500L);
+        retryIntervalMsec.set(200L);
         tokenExpirationCache = CacheBuilder.newBuilder().maximumSize(1000)
                 .expireAfterAccess(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
                     @Override
