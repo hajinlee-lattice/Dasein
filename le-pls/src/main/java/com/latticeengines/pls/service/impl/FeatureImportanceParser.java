@@ -37,7 +37,7 @@ public class FeatureImportanceParser {
     private String modelServiceHdfsBaseDir;
 
     private Configuration yarnConfiguration;
-    
+
     public FeatureImportanceParser() {
     }
 
@@ -51,35 +51,39 @@ public class FeatureImportanceParser {
         String inputFile = commandLine.getOptionValue("inputfile");
         String outputFile = commandLine.getOptionValue("outputfile");
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(new File(inputFile)))) {
-            String line = null;
-            boolean first = true;
-            while ((line = reader.readLine()) != null) {
-                if (first) {
-                    first = false;
-                    continue;
-                }
-                String[] tokens = line.split(",");
-                String tenant = tokens[0];
-                String modelId = tokens[1];
+        try (FileWriter writer = new FileWriter(new File(outputFile))) {
+            writer.write("Tenant,ModelId,Feature,Importance\n");
+            try (BufferedReader reader = new BufferedReader(new FileReader(new File(inputFile)))) {
+                String line = null;
+                boolean first = true;
+                while ((line = reader.readLine()) != null) {
+                    if (first) {
+                        first = false;
+                        continue;
+                    }
+                    String[] tokens = line.split(",");
+                    String tenant = tokens[0];
+                    String modelId = tokens[1];
 
-                System.out.println(String.format("Processing tenant %s and model id %s", tenant, modelId));
-                FileStatus hdfsPath = findHdfsPath(tenant, modelId);
-                if (hdfsPath == null) {
-                    hdfsPath = findHdfsPath(String.format("%s.%s.Production", tenant, tenant), modelId);
-                }
+                    System.out.println(String.format("Processing tenant %s and model id %s", tenant, modelId));
+                    FileStatus hdfsPath = findHdfsPath(tenant, modelId);
+                    if (hdfsPath == null) {
+                        hdfsPath = findHdfsPath(String.format("%s.%s.Production", tenant, tenant), modelId);
+                    }
 
-                if (hdfsPath == null) {
-                    System.err.println(String.format("No feature importance file for tenant %s with model id %s", tenant, modelId));
-                    continue;
-                }
-                System.out.println(String.format("Found HDFS path for tenant %s and model id %s", tenant, modelId));
-                try (FileWriter writer = new FileWriter(new File(outputFile))) {
-                    writer.write("Tenant,ModelId,Feature,Importance\n");
+                    if (hdfsPath == null) {
+                        System.err.println(String.format("No feature importance file for tenant %s with model id %s",
+                                tenant, modelId));
+                        continue;
+                    }
+                    System.out.println(String.format("Found HDFS path for tenant %s and model id %s", tenant, modelId));
+
+                    
                     String path = hdfsPath.getPath().toString();
                     try {
                         Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
-                        System.out.println(String.format("Retrieved contents for tenant %s and model id %s", tenant, modelId));
+                        System.out.println(
+                                String.format("Retrieved contents for tenant %s and model id %s", tenant, modelId));
                         for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
                             writer.write(String.format("%s,%s,%s,%s,%f\n", //
                                     tenant, //
@@ -95,7 +99,7 @@ public class FeatureImportanceParser {
             }
         }
     }
-    
+
     private String convertTime(long time) {
         Date date = new Date(time);
         Format format = new SimpleDateFormat("YYYY-MM-dd");
@@ -119,7 +123,8 @@ public class FeatureImportanceParser {
         };
 
         try {
-            List<FileStatus> files = HdfsUtils.getFileStatusesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
+            List<FileStatus> files = HdfsUtils.getFileStatusesForDirRecursive(yarnConfiguration, startingHdfsPoint,
+                    filter);
             modelId = UuidUtils.extractUuid(modelId);
             for (FileStatus file : files) {
                 String uuid = UuidUtils.parseUuid(file.getPath().toString());
@@ -148,14 +153,14 @@ public class FeatureImportanceParser {
                     continue;
                 }
                 String[] tokens = line.split(",");
-                if (tokens.length >= 2) {
+                if (tokens.length == 2) {
                     fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
                 }
             }
         }
         return fiMap;
     }
-    
+
     private Map<String, Double> parseOldFiFormat(BufferedReader r) throws IOException {
         Map<String, Double> fiMap = new HashMap<>();
         String line = null;
@@ -172,6 +177,13 @@ public class FeatureImportanceParser {
         List<String> names = new ArrayList<>();
         for (int j = 0; j < count; j++) {
             line = r.readLine();
+
+            String[] tokens = line.split(",");
+
+            if (tokens.length == 2) {
+                fiMap.put(tokens[0], Double.parseDouble(tokens[1]));
+                return parseOldFiFormatv2(r, fiMap);
+            }
             names.add(line.split(",")[0]);
         }
         List<Double> values = new ArrayList<>();
@@ -179,9 +191,20 @@ public class FeatureImportanceParser {
             line = r.readLine();
             values.add(Double.parseDouble(line));
         }
-        
+
         for (int j = 0; j < count; j++) {
             fiMap.put(names.get(j), values.get(j));
+        }
+        return fiMap;
+    }
+
+    private Map<String, Double> parseOldFiFormatv2(BufferedReader r, Map<String, Double> fiMap) throws IOException {
+        String line = null;
+        while ((line = r.readLine()) != null) {
+            String[] tokens = line.split(",");
+            if (tokens.length == 2) {
+                fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
+            }
         }
         return fiMap;
     }
