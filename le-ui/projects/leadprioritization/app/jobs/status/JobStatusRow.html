@@ -1,6 +1,7 @@
 <div class="expanded-{{jobRowExpanded}} {{jobType}}">
     <div class="clearfix">
-        <span class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
+        <span data-ng-if="job.timestamp == null" class="columns four">N/A</span>
+        <span data-ng-if="job.timestamp != null" class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns four">{{jobDisplayName}}</span>
         <span class="columns four {{job.status}}">{{job.status}}
             <span data-ng-show="jobCompleted || jobFailed">
@@ -10,10 +11,10 @@
             <span data-ng-show="jobRunning && ! cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">[Cancel Job]</a></span>
             <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>
 
-            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow'">
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null">
                 <span><i class="fa fa-angle-double-down fa-lg"></i></span>
             </a>
-            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow'">
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null">
                 <span><i class="fa fa-angle-double-up fa-lg"></i></span>
             </a>
         </span>
