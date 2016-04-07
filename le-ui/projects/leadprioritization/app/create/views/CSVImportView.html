@@ -19,7 +19,8 @@
             ng-model="modelName" 
             ng-minlength="1"
             ng-maxlength="50"
-            placeholder="Example: US_Enterprise_model"
+            ng-pattern="/^[a-z0-9A-Z\-]*$/"
+            placeholder="Example: US-Enterprise-model"
             required />
           <p class="help-block">{{ResourceUtility.getString('MODEL_IMPORT_CSV_ERROR_MODELNAME')}}</p>
         </div>

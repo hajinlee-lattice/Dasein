@@ -52,7 +52,7 @@ public class ModelResource {
         if (!NameValidationUtils.validateModelName(modelName)) {
             String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
             log.error(message);
-            return ResponseDocument.failedResponse(new RuntimeException(message));
+            throw new RuntimeException(message);
         }
         log.info(String.format("model called with parameters %s", parameters.toString()));
         return ResponseDocument.successResponse( //

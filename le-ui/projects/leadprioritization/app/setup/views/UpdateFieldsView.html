@@ -27,9 +27,10 @@
                                     ng-model="modelName"
                                     ng-minlength="1"
                                     ng-maxlength="50"
-                                    placeholder="Example: US Enterprise model"
+                                    ng-pattern="/^[a-z0-9A-Z\-]*$/"
+                                    placeholder="Example: US-Enterprise-model"
                                     required />
-                            <p class="help-block">* Model Name cannot be empty, and must be less than 50 characters.</p>
+                            <p class="help-block">* Model Name cannot be empty, must be less than 50 characters and only allows alphanum and dashes.</p>
 
                         </form>
                     </div>
