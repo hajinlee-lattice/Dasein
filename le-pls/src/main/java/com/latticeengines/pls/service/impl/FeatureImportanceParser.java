@@ -144,8 +144,12 @@ public class FeatureImportanceParser {
                     continue;
                 }
                 String[] tokens = line.split(",");
-                if (tokens.length >= 2) {
-                    fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
+                try {
+                    if (tokens.length >= 2) {
+                        fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
+                    }
+                } catch (Exception e) {
+                    continue;
                 }
             }
         }
