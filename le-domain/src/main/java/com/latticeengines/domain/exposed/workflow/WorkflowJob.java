@@ -15,7 +15,6 @@ import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -25,8 +24,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "WORKFLOW_JOB", //
-uniqueConstraints = { @UniqueConstraint(columnNames = { "APPLICATION_ID" }) })
+@Table(name = "WORKFLOW_JOB")
 public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Id
