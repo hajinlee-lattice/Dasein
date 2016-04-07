@@ -20,6 +20,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,15 +76,19 @@ public class FeatureImportanceParser {
                 try (FileWriter writer = new FileWriter(new File(outputFile))) {
                     writer.write("Tenant,ModelId,Feature,Importance\n");
                     String path = hdfsPath.getPath().toString();
-                    Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
-                    System.out.println(String.format("Retrieved contents for tenant %s and model id %s", tenant, modelId));
-                    for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
-                        writer.write(String.format("%s,%s,%s,%s,%f\n", //
-                                tenant, //
-                                modelId, //
-                                convertTime(hdfsPath.getModificationTime()), //
-                                entry.getKey(), //
-                                entry.getValue()));
+                    try {
+                        Map<String, Double> fiMap = parse(path, HdfsUtils.getHdfsFileContents(yarnConfiguration, path));
+                        System.out.println(String.format("Retrieved contents for tenant %s and model id %s", tenant, modelId));
+                        for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
+                            writer.write(String.format("%s,%s,%s,%s,%f\n", //
+                                    tenant, //
+                                    modelId, //
+                                    convertTime(hdfsPath.getModificationTime()), //
+                                    entry.getKey(), //
+                                    entry.getValue()));
+                        }
+                    } catch (Exception e) {
+                        System.err.println(ExceptionUtils.getStackTrace(e));
                     }
                 }
             }
@@ -139,7 +144,7 @@ public class FeatureImportanceParser {
                     continue;
                 }
                 String[] tokens = line.split(",");
-                if (tokens.length == 2) {
+                if (tokens.length >= 2) {
                     fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
                 }
             }
