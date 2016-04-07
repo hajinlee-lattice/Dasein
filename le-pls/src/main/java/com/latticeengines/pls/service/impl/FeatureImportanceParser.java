@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -140,18 +141,47 @@ public class FeatureImportanceParser {
             boolean first = true;
             while ((line = r.readLine()) != null) {
                 if (first) {
+                    if (line.equals("RandomForestClassifier")) {
+                        return parseOldFiFormat(r);
+                    }
                     first = false;
                     continue;
                 }
                 String[] tokens = line.split(",");
-                try {
-                    if (tokens.length >= 2) {
-                        fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
-                    }
-                } catch (Exception e) {
-                    continue;
+                if (tokens.length >= 2) {
+                    fiMap.put(tokens[0], Double.valueOf(tokens[1].trim()));
                 }
             }
+        }
+        return fiMap;
+    }
+    
+    private Map<String, Double> parseOldFiFormat(BufferedReader r) throws IOException {
+        Map<String, Double> fiMap = new HashMap<>();
+        String line = null;
+        int i = 0;
+        int count = -1;
+        while ((line = r.readLine()) != null) {
+            if (i++ < 3) {
+                continue;
+            } else {
+                count = Integer.parseInt(line);
+                break;
+            }
+        }
+        List<String> names = new ArrayList<>();
+        for (int j = 0; j < count; j++) {
+            line = r.readLine();
+            names.add(line.split(",")[0]);
+        }
+        List<Double> values = new ArrayList<>();
+        for (int j = 0; j < count; j++) {
+            line = r.readLine();
+            values.add(Double.parseDouble(line));
+        }
+        
+        for (int j = 0; j < count; j++) {
+            fiMap.put(names.get(j), values.get(j));
         }
         return fiMap;
     }
