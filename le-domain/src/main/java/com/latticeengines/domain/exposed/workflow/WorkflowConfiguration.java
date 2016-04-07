@@ -20,7 +20,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     private WorkflowExecutionId workflowIdToRestart;
 
     @JsonProperty
-    private Map<String, String> importProperties = new HashMap<>();
+    private Map<String, String> inputProperties = new HashMap<>();
 
     protected void add(BaseStepConfiguration configuration) {
         configRegistry.put(configuration.getClass().getName(), configuration.toString());
@@ -60,20 +60,20 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.workflowIdToRestart = workflowIdToRestart;
     }
 
-    public String getImportPropertyValue(String key) {
-        return importProperties.get(key);
+    public String getInputPropertyValue(String key) {
+        return inputProperties.get(key);
     }
 
-    public void setImportPropertyValue(String key, String value) {
-        importProperties.put(key, value);
+    public void setInputPropertyValue(String key, String value) {
+        inputProperties.put(key, value);
     }
 
-    public Map<String, String> getImportProperties() {
-        return importProperties;
+    public Map<String, String> getInputProperties() {
+        return inputProperties;
     }
 
-    public void setImportProperties(Map<String, String> importProperties) {
-        this.importProperties = importProperties;
+    public void setInputProperties(Map<String, String> inputProperties) {
+        this.inputProperties = inputProperties;
     }
 
 }
