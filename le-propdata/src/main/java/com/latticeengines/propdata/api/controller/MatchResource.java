@@ -61,14 +61,14 @@ public class MatchResource implements MatchInterface {
     @ApiOperation(value = "Match to derived column selection. Same input as realtime match, "
             + "except using InputBuffer instead of embedding Data in json body directly. "
             + "The request parameter podid is used to change the hdfs pod id. "
-            + "This parameter is mainly for testing purpose, and only the PDTest tenant can use this parameter. "
+            + "This parameter is mainly for testing purpose, and only the PropDataService tenant can use this parameter. "
             + "Leavt it empty will result in using the pod id defined in camille environment.")
     public MatchCommand matchBulk(@RequestBody MatchInput input,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
-            if (StringUtils.isNotEmpty(hdfsPod) && !(MatchConstants.PDTEST_USER.equals(input.getTenant().getId())
-                    || CustomerSpace.parse(MatchConstants.PDTEST_USER).toString().endsWith(input.getTenant().getId()))) {
-                throw new IllegalArgumentException("Only the user " + MatchConstants.PDTEST_USER
+            if (StringUtils.isNotEmpty(hdfsPod) && !(MatchConstants.SERVICE_CUSTOMERSPACE.equals(input.getTenant().getId())
+                    || CustomerSpace.parse(MatchConstants.SERVICE_CUSTOMERSPACE).toString().endsWith(input.getTenant().getId()))) {
+                throw new IllegalArgumentException("Only the user " + MatchConstants.SERVICE_CUSTOMERSPACE
                         + " can use the podid parameter. Current customer is " + input.getTenant().getId());
             }
             return bulkMatchService.match(input, hdfsPod);

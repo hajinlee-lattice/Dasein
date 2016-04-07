@@ -35,6 +35,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
@@ -43,9 +44,12 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.monitor.metric.service.impl.InfluxDbMetricWriter;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
+import com.latticeengines.propdata.match.metric.MatchResponse;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
@@ -88,6 +92,9 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     @Autowired
     private MatchCommandService matchCommandService;
 
+    @Autowired
+    private MetricService metricService;
+
     private BlockDivider divider;
     private Tenant tenant;
     private ColumnSelection.Predefined predefinedSelection;
@@ -101,12 +108,14 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private Schema schema;
     private Integer numThreads;
     private Boolean singleBlockMode;
+    private MatchInput matchInput;
 
     @Override
     public String process(PropDataJobConfiguration jobConfiguration) throws Exception {
         try {
             appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
+            LogManager.getLogger(InfluxDbMetricWriter.class).setLevel(Level.DEBUG);
 
             receivedAt = new Date();
 
@@ -193,6 +202,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
             if (divider.hasNextGroup()) {
                 MatchInput input = constructMatchInputFromData(divider.nextGroup());
                 matchInputs.add(input);
+                // cache an input to generate output metric
+                this.matchInput = input;
             } else {
                 break;
             }
@@ -280,6 +291,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         }
 
         finalizeMatchOutput();
+        generateOutputMetric(matchInput, blockOutput);
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
         log.info("There are in total " + count + " records in the avro " + outputAvro);
         if (!blockOutput.getStatistics().getRowsMatched().equals(count.intValue())) {
@@ -295,6 +307,20 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
                     .resultLocation(matchOutputDir).commit();
         } else {
             setProgress(1f);
+        }
+    }
+
+    @MatchStep
+    private void generateOutputMetric(MatchInput input, MatchOutput output) {
+        try {
+            MatchContext context = new MatchContext();
+            context.setInput(input);
+            context.setOutput(output);
+            context.setMatchEngine(MatchContext.MatchEngine.BULK);
+            MatchResponse response = new MatchResponse(context);
+            metricService.write(MetricDB.LDC_Match, response);
+        } catch (Exception e) {
+            log.warn("Failed to extract output metric.", e);
         }
     }
 

@@ -16,13 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatistics;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.MatchRequest;
 import com.latticeengines.propdata.match.service.ColumnSelectionService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.PublicDomainService;
@@ -36,6 +39,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     @Autowired
     private PublicDomainService publicDomainService;
+
+    @Autowired
+    private MetricService metricService;
 
     @MatchStep
     protected MatchContext scanInputData(MatchInput input, MatchContext context) {
@@ -66,6 +72,22 @@ public abstract class MatchPlannerBase implements MatchPlanner {
             matchContext.setColumnPriorityMap(columnSelectionService.getColumnPriorityMap(predefined));
         }
         return matchContext;
+    }
+
+    @Override
+    @MatchStep
+    public void generateInputMetric(MatchInput input) {
+        try {
+            Integer selectedCols = null;
+            if (input.getPredefinedSelection() != null) {
+                selectedCols = columnSelectionService.getTargetColumns(input.getPredefinedSelection()).size();
+            }
+
+            MatchRequest request = new MatchRequest(input, selectedCols);
+            metricService.write(MetricDB.LDC_Match, request);
+        } catch (Exception e) {
+            log.warn("Failed to extract input metric.", e);
+        }
     }
 
     protected MatchOutput initializeMatchOutput(MatchInput input) {

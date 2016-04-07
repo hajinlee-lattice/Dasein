@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,8 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.match.service.MatchPlanner;
+import com.latticeengines.propdata.match.service.PropDataTenantService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -51,6 +54,13 @@ public class BulkMatchServiceImpl implements BulkMatchService {
     @Autowired
     private PropDataYarnService yarnService;
 
+    @Autowired
+    private PropDataTenantService propDataTenantService;
+
+    @Autowired
+    @Qualifier(value = "bulkMatchPlanner")
+    private MatchPlanner matchPlanner;
+
     @Value("${propdata.match.max.num.blocks:4}")
     private Integer maxNumBlocks;
 
@@ -69,6 +79,8 @@ public class BulkMatchServiceImpl implements BulkMatchService {
     @Override
     public MatchCommand match(MatchInput input, String hdfsPodId) {
         MatchInputValidator.validateBulkInput(input, yarnConfiguration);
+        input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
+        matchPlanner.generateInputMetric(input);
 
         String uuid = UUID.randomUUID().toString().toUpperCase();
 
@@ -93,6 +105,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
     }
 
     private MatchCommand submitMultipleBlockToWorkflow(MatchInput input, String hdfsPodId, String uuid) {
+        propDataTenantService.bootstrapServiceTenant();
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         ApplicationId appId = submitter //
                 .matchInput(input) //
@@ -102,7 +115,6 @@ public class BulkMatchServiceImpl implements BulkMatchService {
                 .microserviceHostport(microserviceHostport) //
                 .averageBlockSize(averageBlockSize) //
                 .submit();
-
         return matchCommandService.start(input, appId, uuid);
     }
 

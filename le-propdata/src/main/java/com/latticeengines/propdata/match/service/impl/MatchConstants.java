@@ -12,5 +12,5 @@ public final class MatchConstants {
     public static final String SERVICE_CUSTOMERSPACE = CustomerSpace.parse("PropDataService").toString();
     public static final String OUTPUT_RECORD_PREFIX = "PropDataOutput";
     public static final String SOURCE_FIELD_PREFIX = "Source_";
-    public static final String PDTEST_USER = "PDTest";
+    public static final String PDSERVICE_TENANT = "PDService";
 }

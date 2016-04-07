@@ -7,4 +7,6 @@ public interface MatchPlanner {
 
     MatchContext plan(MatchInput input);
 
+    void generateInputMetric(MatchInput input);
+
 }

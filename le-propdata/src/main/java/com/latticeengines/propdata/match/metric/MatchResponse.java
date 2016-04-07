@@ -4,12 +4,12 @@ import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
-public class RealTimeResponse extends BaseMeasurement<MatchContext, MatchContext>
+public class MatchResponse extends BaseMeasurement<MatchContext, MatchContext>
         implements Measurement<MatchContext, MatchContext> {
 
     private MatchContext context;
 
-    public RealTimeResponse(MatchContext context) {
+    public MatchResponse(MatchContext context) {
         this.context = context;
     }
 

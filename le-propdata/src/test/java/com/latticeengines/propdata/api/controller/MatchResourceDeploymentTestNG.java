@@ -58,7 +58,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
@@ -71,7 +71,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -84,7 +84,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testSingleBlockBulkMatch() throws Exception {
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -132,7 +132,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     private MatchInput createAvroBulkMatchInput() {
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(MatchConstants.PDTEST_USER));
+        matchInput.setTenant(new Tenant(MatchConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);

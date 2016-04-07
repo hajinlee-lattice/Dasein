@@ -12,6 +12,7 @@
                 <value>file:camille.properties</value>
                 <value>file:proxy.properties</value>
                 <value>file:monitor.properties</value>
+                <value>file:security.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

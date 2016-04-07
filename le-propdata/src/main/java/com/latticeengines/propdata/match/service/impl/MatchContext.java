@@ -28,7 +28,7 @@ public class MatchContext implements Fact, Dimension {
     private MatchEngine matchEngine;
 
     @MetricFieldGroup(excludes = { "InputRows" })
-    @MetricTagGroup
+    @MetricTagGroup(excludes = { "MatchEngine" })
     public MatchInput getInput() {
         return input;
     }
