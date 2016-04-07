@@ -9,6 +9,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.workflow.core.DataPlatformInfrastructure;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -27,7 +30,12 @@ public class WorkflowFunctionalTestNGBase extends SecurityFunctionalTestNGBase {
     @Autowired
     protected WorkflowService workflowService;
 
+    @Autowired
+    private TenantService tenantService;
+
     protected JobRepositoryTestUtils jobRepositoryTestUtils;
+
+    protected static final String WORKFLOW_TENANT = "Workflow_Tenant";
 
     protected boolean enableJobRepositoryCleanupBeforeTest() {
         // TODO set this back to true for jenkins
@@ -38,6 +46,7 @@ public class WorkflowFunctionalTestNGBase extends SecurityFunctionalTestNGBase {
     public void beforeEachClass() {
         jobRepositoryTestUtils = new JobRepositoryTestUtils(jobRepository, dataSource);
         jobRepositoryTestUtils.setTablePrefix(DataPlatformInfrastructure.WORKFLOW_PREFIX);
+        bootstrapWorkFlowTenant();
     }
 
     @BeforeMethod(enabled = true, firstTimeOnly = true, alwaysRun = true)
@@ -45,6 +54,19 @@ public class WorkflowFunctionalTestNGBase extends SecurityFunctionalTestNGBase {
         if (enableJobRepositoryCleanupBeforeTest()) {
             jobRepositoryTestUtils.removeJobExecutions();
         }
+    }
+
+    protected CustomerSpace bootstrapWorkFlowTenant() {
+        CustomerSpace customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
+        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+        if (tenant != null) {
+            tenantService.discardTenant(tenant);
+        }
+        Tenant tenant1 = new Tenant();
+        tenant1.setId(customerSpace.toString());
+        tenant1.setName(customerSpace.toString());
+        tenantService.registerTenant(tenant1);
+        return customerSpace;
     }
 
 }

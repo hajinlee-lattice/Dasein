@@ -10,6 +10,8 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 
 public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase {
@@ -29,7 +31,10 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowFunctionalTestNGBase
     @Test(groups = "functional", enabled = true)
     public void testRunCompletedStepAgainWorkflow() throws Exception {
         failableStep.setFail(true);
-        WorkflowExecutionId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), null);
+        WorkflowConfiguration configuration = new WorkflowConfiguration();
+        CustomerSpace customerSpace = CustomerSpace.parse("Workflow_Tenant");
+        configuration.setContainerConfiguration("completedStepAgainWorkflow", customerSpace, "CompletedStepAgainWorkflow");
+        WorkflowExecutionId workflowId = workflowService.start(runCompletedStepAgainWorkflow.name(), configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
         assertTrue(stepNames.contains(runAgainWhenCompleteStep.name()));

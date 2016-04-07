@@ -18,7 +18,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
@@ -54,9 +53,6 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     private AnotherSuccessfulStep anotherSuccessfulStep;
 
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
     private TenantService tenantService;
 
     @Autowired
@@ -68,20 +64,11 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
 
     private String customerSpace;
 
+
     @BeforeClass(groups = "functional")
     public void setup() {
-        String tenantName = "Workflow_Tenant";
-        customerSpace = CustomerSpace.parse(tenantName).toString();
-        tenant1 = tenantService.findByTenantId(customerSpace);
-        if (tenant1 != null) {
-            tenantService.discardTenant(tenant1);
-        }
-
+        customerSpace = bootstrapWorkFlowTenant().toString();
         workflowConfig = new WorkflowConfiguration();
-        tenant1 = new Tenant();
-        tenant1.setId(customerSpace);
-        tenant1.setName(customerSpace);
-        tenantEntityMgr.create(tenant1);
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
     }
 
