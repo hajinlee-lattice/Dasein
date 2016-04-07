@@ -47,7 +47,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "WORKFLOW_ID", nullable = true)
     private Long workflowId;
 
-    @Column(name = "USER_ID", nullable = false)
+    @Column(name = "USER_ID")
     private String userId;
 
     @Column(name = "WORKFLOW_INPUT_CONTEXT")
