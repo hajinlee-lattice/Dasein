@@ -104,7 +104,7 @@ public class WorkflowExecutionCache {
         job.setSteps(getJobSteps(jobExecution));
         job.setReports(getReports(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
-        job.setInputs(getInputs(workflowJob.getWorkflowId()));
+        job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
 
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());
@@ -194,24 +194,6 @@ public class WorkflowExecutionCache {
         }
         return outputs;
 
-    }
-
-    private Map<String, String> getInputs(String applicationId) {
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
-        Map<String, String> inputs = new HashMap<>();
-        for (Map.Entry<String, String> entry : workflowJob.getInputContext().entrySet()) {
-            inputs.put(entry.getKey(), entry.getValue());
-        }
-        return inputs;
-    }
-
-    private Map<String, String> getInputs(long workflowId) {
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
-        Map<String, String> inputs = new HashMap<>();
-        for (Map.Entry<String, String> entry : workflowJob.getInputContext().entrySet()) {
-            inputs.put(entry.getKey(), entry.getValue());
-        }
-        return inputs;
     }
 
     private JobStatus getJobStatusFromBatchStatus(BatchStatus batchStatus) {

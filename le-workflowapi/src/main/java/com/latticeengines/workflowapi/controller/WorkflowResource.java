@@ -2,10 +2,12 @@ package com.latticeengines.workflowapi.controller;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +26,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.network.exposed.workflowapi.WorkflowInterface;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -41,9 +42,6 @@ public class WorkflowResource implements WorkflowInterface {
 
     @Autowired
     private WorkflowService workflowService;
-
-    @Autowired
-    private WorkflowTenantService workflowTenantService;
 
     @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -106,6 +104,9 @@ public class WorkflowResource implements WorkflowInterface {
             status = workflowService.getStatus(workflowId);
             log.info("Found workflowId " + workflowId.getId() + " for app " + applicationId + " status="
                     + status.getStatus());
+        } else {
+            status = new WorkflowStatus();
+            status.setStatus(BatchStatus.STARTING);
         }
         return status;
     }
@@ -115,8 +116,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
     @Override
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId) {
-        WorkflowExecutionId workflowId = getWorkflowIdFromAppId(applicationId);
-        return workflowId == null ? null : workflowService.getJob(workflowId);
+        return workflowService.getJob(applicationId);
     }
 
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
@@ -137,9 +137,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
-        List<WorkflowExecutionId> workflowIds = workflowService.getWorkflowExecutions(tenantPid);
-
-        List<Job> jobs = workflowService.getJobs(workflowIds);
+        List<Job> jobs = workflowService.getJobsByTenant(tenantPid);
         return jobs;
     }
 
@@ -148,9 +146,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
-        List<WorkflowExecutionId> workflowIds = workflowService.getWorkflowExecutions(tenantPid);
-
-        List<Job> jobs = workflowService.getJobs(workflowIds, type);
+        List<Job> jobs = workflowService.getJobsByTenant(tenantPid, type);
         return jobs;
     }
 

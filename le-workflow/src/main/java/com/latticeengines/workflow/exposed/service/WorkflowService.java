@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.exposed.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -32,11 +33,18 @@ public interface WorkflowService {
 
     Job getJob(WorkflowExecutionId workflowId);
 
-    List<Job> getJobs(List<WorkflowExecutionId> workflowIds);
+    Job getJob(String applicationId);
+
+    List<Job> getJobsByTenant(long tenantPid);
+
+    List<Job> getJobsByWorkflowIds(List<WorkflowExecutionId> workflowIds);
+
+    List<Job> getJobsByTenant(long tenantPid, String type);
 
     List<Job> getJobs(List<WorkflowExecutionId> workflowIds, String type);
 
     long startWorkflowJob(String workflowName, WorkflowConfiguration workflowConfiguration);
 
-    List<WorkflowExecutionId> getWorkflowExecutions(long tenantPid);
+    Map<String, String> getInputs(Map<String, String> inputContext);
+
 }
