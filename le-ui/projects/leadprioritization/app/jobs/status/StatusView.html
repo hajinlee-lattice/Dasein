@@ -28,7 +28,7 @@
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
                 <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
-                <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Score Training Data</button></a>
+                <button ng-if="state == 'model'" ng-click="handleRescoreClick(); $event.stopPropagation();" type="button" class="button orange-button">Score Training Data</button>
                 <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Import a Testing Set</button></a>
             </div>
         </div><!-- End .row -->

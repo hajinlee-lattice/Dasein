@@ -7,7 +7,7 @@ angular.module('pd.jobs', [
     'mainApp.core.utilities.BrowserStorageUtility',
 ])
 
-.service('JobsService', function($http, $q, _) {
+.service('JobsService', function($http, $q, _, $stateParams) {
 
     var stepsNameDictionary = { 
         "markReportOutOfDate": "load_data", 
@@ -85,10 +85,15 @@ angular.module('pd.jobs', [
     this.getAllJobs = function() {
         var deferred = $q.defer();
         var result;
-        
+        console.log($stateParams);
+        var modelId = $stateParams.modelId;
+        var url = modelId 
+            ? '/pls/scores/jobs/' + modelId 
+            : '/pls/jobs';
+
         $http({
             method: 'GET',
-            url: '/pls/jobs'
+            url: url
         }).then(
             function onSuccess(response) {
                 var jobs = response.data;
@@ -151,6 +156,27 @@ angular.module('pd.jobs', [
                 deferred.resolve(result);
             }, function onError(resposne) {
                 console.log("getting job failed: " + jobId);
+            }
+        );
+        return deferred.promise;
+    };
+
+    this.rescoreTrainingData = function() {
+        var deferred = $q.defer();
+        var result;
+        console.log($stateParams);
+        var modelId = $stateParams.modelId;
+
+        $http({
+            method: 'POST',
+            url: '/pls/scores/' + modelId + '/training'
+        }).then(
+            function onSuccess(response) {
+                console.log('success',response);
+                deferred.resolve(result);
+            }, function onError(response) {
+                console.log('error',response);
+
             }
         );
         return deferred.promise;
@@ -258,7 +284,7 @@ angular.module('pd.jobs', [
     $scope.succeeded = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
     //console.log($state.current.name, $state);
     $scope.state = $state.current.name == 'home.model.jobs.status' ? 'model' : 'all';
-    $scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
+    //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -283,6 +309,10 @@ angular.module('pd.jobs', [
         $scope.expanded = {};
         $scope.statuses = {};
     });
+
+    $scope.handleRescoreClick = function() {
+        JobsService.rescoreTrainingData();
+    }
     
     $scope.closeJobSuccessMessage = function() {
         $scope.succeeded = false;

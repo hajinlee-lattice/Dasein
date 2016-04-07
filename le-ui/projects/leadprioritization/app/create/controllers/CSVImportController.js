@@ -24,9 +24,18 @@ angular.module('mainApp.create.csvImport', [
 .service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
     this.Upload = function(options) {
         var deferred = $q.defer(),
-            formData = new FormData();
+            formData = new FormData(),
+            params = options.params;
         
         formData.append('file', options.file);
+        
+        if (params.schema)
+            formData.append('schema', params.schema)
+        
+        if (params.displayName) {
+            var name = params.displayName.replace('C:\\fakepath\\','');
+            formData.append('displayName', name)
+        }
 
         var xhr = new XMLHttpRequest();
         
@@ -230,7 +239,11 @@ angular.module('mainApp.create.csvImport', [
 
             csvImportService.Upload({
                 file: $scope.csvFile, 
-                url: '/pls/models/fileuploads/unnamed?schema=' + fileType,
+                url: '/pls/models/fileuploads/unnamed',
+                params: {
+                    schema: fileType,
+                    displayName: $scope.csvFileName
+                },
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {
                         xhr.abort();
