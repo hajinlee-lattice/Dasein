@@ -1,5 +1,8 @@
 package com.latticeengines.pls.workflow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,7 @@ import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component
 public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -47,6 +51,9 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndModelWorkflow");
+
         ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -64,6 +71,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .modelName(parameters.getName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .trainingTableName(trainingTableName) //
+                .inputProperties(inputProperties) //
                 .build();
         return configuration;
     }

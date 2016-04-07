@@ -1,5 +1,7 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
@@ -53,6 +55,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder trainingTableName(String trainingTableName) {
             model.setTrainingTableName(trainingTableName);
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
             return this;
         }
 

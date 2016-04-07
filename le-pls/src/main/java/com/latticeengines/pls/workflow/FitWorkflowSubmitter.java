@@ -12,6 +12,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -23,6 +24,7 @@ import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.prospectdiscovery.workflow.FitModelWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component
 public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -66,6 +68,9 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
             MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
+            Map<String, String> inputProperties = new HashMap<>();
+            inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "fitModelWorkflow");
+
             FitModelWorkflowConfiguration configuration = new FitModelWorkflowConfiguration.Builder()
                     .customer(CustomerSpace.parse(customer)) //
                     .microServiceHostPort(microserviceHostPort) //
@@ -88,6 +93,7 @@ public class FitWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                             Arrays.asList(new String[] { "BusinessIndustry", "BusinessIndustry2",
                                     "BusinessRevenueRange", "BusinessEmployeesRange" })) //
                     .modelName("Default Model") //
+                    .inputProperties(inputProperties) //
                     .build();
 
             String payloadName = workflowName + "-" + customer + "-" + targetMarket.getName();

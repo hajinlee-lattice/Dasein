@@ -1,5 +1,7 @@
 package com.latticeengines.leadprioritization.workflow;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -121,6 +123,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder modelName(String modelName) {
             model.setModelName(modelName);
+            return this;
+        }
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
             return this;
         }
 

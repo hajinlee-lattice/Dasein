@@ -90,7 +90,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public Builder inputProperties(Map<String, String> inputProperties) {
-            configuration.setImportProperties(inputProperties);
+            configuration.setInputProperties(inputProperties);
             return this;
         }
 

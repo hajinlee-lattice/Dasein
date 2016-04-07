@@ -33,7 +33,8 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowFunctionalTestNGBase
     private String tenantId2;
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
+    @Override
+    public void beforeEachClass() {
         tenantId1 = this.getClass().getSimpleName() + "1";
         tenantId2 = this.getClass().getSimpleName() + "2";
         Tenant tenant1 = tenantService.findByTenantId(tenantId1);

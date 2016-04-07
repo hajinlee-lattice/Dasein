@@ -59,6 +59,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "scoreWorkflow");
 
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //

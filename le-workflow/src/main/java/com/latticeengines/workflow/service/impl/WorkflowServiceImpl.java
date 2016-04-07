@@ -30,6 +30,7 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
@@ -216,7 +218,10 @@ public class WorkflowServiceImpl implements WorkflowService {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         job.setInputs(workflowJob.getInputContext());
         if (workflowId == null) {
+            Map<String, String> inputProperties = getInputs(workflowJob.getInputContext());
+            job.setInputs(inputProperties);
             job.setJobStatus(JobStatus.PENDING);
+            job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
             return job;
         }
         return getJob(workflowId);
@@ -249,8 +254,10 @@ public class WorkflowServiceImpl implements WorkflowService {
             WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
             if (workflowId == null) {
                 com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-                job.setInputs(getInputs(workflowJob.getInputContext()));
+                Map<String, String> inputProperties = getInputs(workflowJob.getInputContext());
+                job.setInputs(inputProperties);
                 job.setJobStatus(JobStatus.PENDING);
+                job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
                 jobs.add(job);
             } else {
                 workflowIds.add(workflowId);

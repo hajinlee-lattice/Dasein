@@ -148,6 +148,11 @@ public class FitModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            fitModel.setInputProperties(inputProperties);
+            return this;
+        }
+
         public FitModelWorkflowConfiguration build() {
             importData.microserviceStepConfiguration(microservice);
             preMatchDataFlow.microserviceStepConfiguration(microservice);

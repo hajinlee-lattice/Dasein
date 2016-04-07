@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component("pmmlModelWorkflowSubmitter")
 public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -42,6 +43,9 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_28020, new String[] { pivotArtifactName });
         }
 
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "pmmlModelWorkflow");
+
         PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration.Builder()
                 .podId(CamilleEnvironment.getPodId()) //
                 .microServiceHostPort(microserviceHostPort) //
@@ -51,6 +55,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .modelName(modelName) //
                 .pmmlArtifactPath(pmmlArtifact.getPath()) //
                 .pivotArtifactPath(pivotArtifact.getPath()) //
+                .inputProperties(inputProperties) //
                 .build();
         return workflowJobService.submit(configuration);
     }
