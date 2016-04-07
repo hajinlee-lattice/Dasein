@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-import com.latticeengines.monitor.metric.service.impl.InfluxDbMetricWriter;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
@@ -115,7 +114,6 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         try {
             appContext = loadSoftwarePackages("propdata", softwareLibraryService, appContext, versionManager);
             LogManager.getLogger(MatchStepAspect.class).setLevel(Level.DEBUG);
-            LogManager.getLogger(InfluxDbMetricWriter.class).setLevel(Level.DEBUG);
 
             receivedAt = new Date();
 
