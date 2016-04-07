@@ -39,7 +39,7 @@ public class GASessionCache {
 
                             Integer retries = 0;
                             Session session = null;
-                            while (retries++ < MAX_RETRY) {
+                            while (++retries <= MAX_RETRY) {
                                 try {
                                     session = globalSessionMgr.retrieve(ticket);
                                     break;
