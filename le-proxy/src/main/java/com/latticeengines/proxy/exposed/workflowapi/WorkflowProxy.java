@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -65,14 +66,14 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
     @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
-        return get("getWorkflowExecutionsForTenant", url, List.class);
+        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type) {
         String url = constructUrl("/jobs/{tenantPid}/find?type={type}", tenantPid, type);
-        return get("getWorkflowExecutionsForTenant", url, List.class);
+        return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }
 
     @Override

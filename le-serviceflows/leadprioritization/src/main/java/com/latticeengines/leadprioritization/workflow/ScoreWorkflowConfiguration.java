@@ -89,10 +89,6 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
-        public Builder sourceDisplayName(String sourceDisplayName) {
-            return this;
-        }
-
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setImportProperties(inputProperties);
             return this;

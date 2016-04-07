@@ -195,6 +195,9 @@ public enum LedpCode {
     LEDP_18099("Could not locate table for file with name {0}."), //
     LEDP_18100("Could not locate training table for model {0}."), //
     LEDP_18101("File {0} has not been uploaded yet."), //
+    LEDP_18102("Failed to download results CSV file for job {0}."), //
+    LEDP_18103("Scoring job is not completed yet for job {0}."), //
+    LEDP_18104("No job could be found with id {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),

@@ -19,6 +19,7 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
+import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component
 public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -56,7 +57,9 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put("Source_File_DisplayName", sourceDisplayName);
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
+        inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
+
         return new ScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
@@ -67,7 +70,6 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDestTables("DerivedColumnsCache") //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/Export_" + DateTime.now().getMillis() + ".csv") //
-                .sourceDisplayName(sourceDisplayName) //
                 .inputProperties(inputProperties) //
                 .build();
     }

@@ -8,11 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
+import com.latticeengines.pls.service.ScoringJobService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -23,10 +19,7 @@ public class ScoreResource {
     // TODO rights
 
     @Autowired
-    private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    private ScoringJobService scoringJobService;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.POST)
     @ResponseBody
@@ -42,15 +35,6 @@ public class ScoreResource {
     @ResponseBody
     @ApiOperation(value = "Score the training data for the provided model.")
     public String scoreTrainingData(@PathVariable String modelId) {
-        ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(modelId);
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-
-        if (modelSummary.getTrainingTableName() == null) {
-            throw new LedpException(LedpCode.LEDP_18100, new String[] { modelId });
-        }
-
-        return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data").toString();
+        return scoringJobService.scoreTrainingData(modelId);
     }
 }

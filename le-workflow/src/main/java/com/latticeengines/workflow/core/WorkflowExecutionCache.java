@@ -1,6 +1,5 @@
 package com.latticeengines.workflow.core;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -94,7 +93,8 @@ public class WorkflowExecutionCache {
         log.info(String.format("Job with id: %s is not in the cache, reloading.", workflowId.getId()));
         JobExecution jobExecution = jobExplorer.getJobExecution(workflowId.getId());
         JobInstance jobInstance = jobExecution.getJobInstance();
-        WorkflowStatus workflowStatus = this.workflowService.getStatus(workflowId);
+        WorkflowStatus workflowStatus = workflowService.getStatus(workflowId);
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
 
         Job job = new Job();
         job.setId(workflowId.getId());
@@ -104,6 +104,7 @@ public class WorkflowExecutionCache {
         job.setSteps(getJobSteps(jobExecution));
         job.setReports(getReports(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
+        job.setInputs(getInputs(workflowJob.getApplicationId()));
 
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());

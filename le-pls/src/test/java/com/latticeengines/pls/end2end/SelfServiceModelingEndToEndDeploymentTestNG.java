@@ -279,7 +279,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
     }
 
-
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
     public void retrieveModelSummaryForClonedModel() throws InterruptedException {
         ModelSummary found = getModelSummary(modelName);
