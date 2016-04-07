@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.testng.AssertJUnit;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -116,7 +115,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 entity, byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
-        AssertJUnit.assertTrue(results.length() > 0);
+        assertTrue(results.length() > 0);
     }
 
     private void sleep(long msec) {
