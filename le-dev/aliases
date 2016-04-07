@@ -1,4 +1,4 @@
-alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -T8 -Pgenerate -DskipTests clean install'
+alias cplfresh='rm -Rf $HOME/.m2/repository/com/latticeengines && mvn -Pgenerate -DskipTests clean install'
 alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -d \< -f 2 | cut -d \> -f 2'
 
 alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
