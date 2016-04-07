@@ -1,6 +1,7 @@
 package com.latticeengines.security.util;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -23,6 +24,7 @@ public class GASessionCache {
     private static Log log = LogFactory.getLog(GASessionCache.class);
     private static final Integer MAX_RETRY = 3;
     private static Long RETRY_INTERVAL_MSEC = 500L;
+    private static Random random = new Random(System.currentTimeMillis());
     private LoadingCache<String, Session> tokenExpirationCache;
 
     public GASessionCache(final GlobalSessionManagementService globalSessionMgr, int cacheExpiration) {
@@ -46,7 +48,8 @@ public class GASessionCache {
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
-                                        Thread.sleep(RETRY_INTERVAL_MSEC * retries);
+                                        Thread.sleep(RETRY_INTERVAL_MSEC * retries
+                                                + random.nextInt(RETRY_INTERVAL_MSEC.intValue()));
                                     } catch (Exception e) {
                                         // ignore
                                     }
