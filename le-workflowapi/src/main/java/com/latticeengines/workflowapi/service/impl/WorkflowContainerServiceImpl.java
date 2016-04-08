@@ -178,7 +178,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy.getJobStatus(applicationId);
         if (YarnUtils.TERMINAL_APP_STATE.contains(yarnJobStatus.getState())) {
             job.setJobStatus(JobStatus.FAILED);
-            job.setStartTimestamp(new Date());
+            job.setStartTimestamp(new Date(yarnJobStatus.getFinishTime()));
         } else {
             job.setJobStatus(JobStatus.PENDING);
         }
