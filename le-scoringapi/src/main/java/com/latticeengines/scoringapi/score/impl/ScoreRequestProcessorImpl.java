@@ -9,6 +9,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +68,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     @Autowired
     private RequestInfo requestInfo;
 
+    private DateTimeFormatter timestampFormatter = ISODateTimeFormat.dateTime();
+
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
         split("requestPreparation");
@@ -71,8 +77,8 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             throw new ScoringApiException(LedpCode.LEDP_31101);
         }
 
-        requestInfo.put("Rule", "NotAvailable");
-        requestInfo.put("Source", "NotAvailable");
+        requestInfo.put("Rule", Strings.nullToEmpty(request.getRule()));
+        requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
 
         ScoringArtifacts scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
         requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
@@ -104,11 +110,11 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             scoreResponse = generateScoreResponse(scoringArtifacts, transformedRecord);
         }
         scoreResponse.setId(recordId);
+        scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
         split("scoreRecord");
 
         return scoreResponse;
     }
-
 
     private String getIdIfAvailable(InterpretedFields interpretedFields,
             Map<String, Object> record) {
