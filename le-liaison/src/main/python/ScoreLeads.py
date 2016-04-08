@@ -5,22 +5,47 @@ from datetime import datetime
 import time
 import multiprocessing
 import subprocess
+import hashlib
 
-#SCORING_ENDPOINT = 'http://api2.lattice.local/score'
-SCORING_ENDPOINT = 'http://10.41.1.180:8080/score'
-#OAUTH2_ENDPOINT = 'http://10.41.0.16:8072/'
-OAUTH2_ENDPOINT = 'http://10.41.0.52:8080/pls/oauth2'
+PLS_ENDPOINT = 'https://app3.lattice-engines.com/pls'
+SCORING_ENDPOINT = 'https://api3.lattice-engines.com/score'
+#SCORING_ENDPOINT = 'http://10.41.1.180:8080/score'
+#OAUTH2_ENDPOINT = 'https://app3.lattice-engines.com/pls/oauth2'
+#OAUTH2_ENDPOINT = 'http://10.41.0.52:8080/pls/oauth2'
 
-def scoreLeads(tenantID, authorization, leadFileName):
+def scoreLeads(tenant, username, password, leadFileName):
 
-    token = getAccessToken(tenantID, authorization)
+    authorization = getAuthenticationToken(tenant, username, password)
+    token = getAccessToken(tenant, authorization)
     modelGUID = getModelGUID(token)
     requiredFieldNames = getRequiredFields(token, modelGUID)
     scoreLeadFile(token, modelGUID, leadFileName, requiredFieldNames)
 
 
-def getAccessToken(tenantID, authorization):
-    url = OAUTH2_ENDPOINT + '/accesstoken?tenantId={0}'.format(tenantID)
+def getAuthenticationToken(tenant, username, password):
+    # print 'Password: ' + password
+    tenantID = '{0}.{0}.Production'.format(tenant)
+    url = PLS_ENDPOINT + '/login'
+    body_login = {"Username": username, "Password": password}
+    header_login = {"Content-Type": "application/json"}
+    response = requests.post(url, headers=header_login, data=json.dumps(body_login))
+    assert response.status_code == 200, 'Request failed for logging in to LP.\n' + response.content
+    results = json.loads(response.text)
+    auth_token = results["Uniqueness"] + '.' + results["Randomness"]
+
+    url_attach = PLS_ENDPOINT + '/attach'
+    body_attach = {"Identifier": '%s' % tenantID, "DisplayName": tenant}
+    header_attach = {"Content-Type": "application/json", "Authorization": auth_token}
+    response_attach = requests.post(url_attach, headers=header_attach, data=json.dumps(body_attach))
+
+    assert response_attach.status_code == 200, 'Request failed for logging in to LP.\n' + response_attach.content
+    # print 'got the auth token: ' + auth_token
+    return auth_token
+
+
+def getAccessToken(tenant, authorization):
+    tenantID = '{0}.{0}.Production'.format(tenant)
+    url = PLS_ENDPOINT + '/oauth2/accesstoken?tenantId={0}'.format(tenantID)
     header = {'Authorization': '{0}'.format(authorization)}
     response = requests.get(url, headers=header)
     return response.content
@@ -31,6 +56,7 @@ def getModelGUID(token):
     header = {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer {0}'.format(token)}
     response = requests.get(url, headers=header)
     models = response.json()
+    print models
 
     print ''
     print 'Available Models:'
@@ -155,7 +181,7 @@ def usage(cmd, exit_code):
 
     print ''
     print 'PATH: {0}'.format(path)
-    print 'Usage: {0} <TenantID> <Authorization> <LeadFile.csv>'.format(cmd)
+    print 'Usage: {0} <tenant> <username> <password> <leadfile.csv>'.format(cmd)
     print ''
 
     exit(exit_code)
@@ -166,11 +192,12 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         usage(sys.argv[0], 0)
 
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         usage(sys.argv[0], 1)
 
-    tenantID = sys.argv[1]
-    authorization = sys.argv[2]
-    leadFileName = sys.argv[3]
+    tenant = sys.argv[1]
+    username = sys.argv[2]
+    password = hashlib.sha256(sys.argv[3]).hexdigest()
+    leadFileName = sys.argv[4]
 
-    scoreLeads(tenantID, authorization, leadFileName)
+    scoreLeads(tenant, username, password, leadFileName)
