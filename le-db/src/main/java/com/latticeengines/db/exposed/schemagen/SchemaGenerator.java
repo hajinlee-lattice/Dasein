@@ -82,7 +82,7 @@ public class SchemaGenerator {
 
         SchemaExport export = new SchemaExport(cfg);
         export.setDelimiter(";");
-        export.setFormat(true);
+        export.setFormat(false);
         if (outputFileName != null) {
             export.setOutputFile(outputFileName);
         }
