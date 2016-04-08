@@ -56,10 +56,10 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
+public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private final static String tenantName = "Global Test Tenant";
-    private final static Log log = LogFactory.getLog(EndToEndDeploymentTestNG.class);
+    private final static Log log = LogFactory.getLog(LP2EndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
 
@@ -129,7 +129,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrate a full tenant.
      **/
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment_lp2")
     public void setup() throws Exception {
         tenantId = testContract + tenantId;
         contractId = tenantId;
@@ -157,7 +157,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify ZK states
     // ==================================================
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment_lp2")
     public void verifyZKStatesInMainTestTenant() {
         verifyZKState();
     }
@@ -166,17 +166,17 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify tenant truly exists
     // ==================================================
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyJAMSMainTestTenantExists() throws Exception {
         verifyJAMSTenantExists();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyPLSMainTestTenantExists() throws Exception {
         verifyPLSTenantExists();
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists();
     }
@@ -185,7 +185,7 @@ public class EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify cross component workflows
     // ==================================================
 
-    @Test(groups = "deployment", dependsOnMethods = "verifyPLSMainTestTenantExists")
+    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyPLSMainTestTenantExists")
     public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
         verifyPLSTenantKnowsTopology();
     }
