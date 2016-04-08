@@ -2,6 +2,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.appCommon.services.ManageFieldsService',
     'mainApp.setup.utilities.SetupUtility',
     'mainApp.setup.modals.UpdateFieldsModal'
 ])
@@ -22,7 +23,7 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
 })
 
 .controller('EditFieldController', function ($scope, $state, ResourceUtility, StringUtility,
-                                              SetupUtility, UpdateFieldsModal) {
+                                              SetupUtility, UpdateFieldsModal, ManageFieldsService) {
     $scope.manageFieldsScope.showFieldDetails = true;
     $scope.ResourceUtility = ResourceUtility;
 
@@ -33,6 +34,11 @@ angular.module('mainApp.setup.modals.EditFieldModel', [
     $scope.statisticalTypesToSelect = $scope.$parent.StatisticalTypeOptions;
     $scope.categoryEditable = $scope.$parent.categoryEditable($scope.field);
     $scope.fieldCopy = angular.copy($scope.field);
+
+    $scope.isLatticeAttribute = false;
+    if (ManageFieldsService.IsLatticeAttribute($scope.field)) {
+        $scope.isLatticeAttribute = true;
+    }
 
     $scope.saveClicked = function($event) {
         if ($event != null) {

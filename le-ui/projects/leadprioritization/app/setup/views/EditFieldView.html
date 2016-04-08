@@ -36,8 +36,9 @@
                            <td><select class="form-control" data-ng-options="u as u for u in approvedUsagesToSelect" data-ng-model="field.ApprovedUsage"></select></td>
                        </tr>
                        <tr data-ng-class="shaded">
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_FUNDAMENTAL_TYPE')}}</td>
-                           <td><select class="form-control" data-ng-options="f as f for f in fundamentalTypesToSelect" data-ng-model="field.FundamentalType"></select></td>
+                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_ATTRIBUTES_TYPE')}}</td>
+                           <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="f as f for f in fundamentalTypesToSelect" data-ng-model="field.FundamentalType"></select></td>
+                           <td data-ng-if="isLatticeAttribute">{{field.FundamentalType}}</td>
                        </tr>
                        <tr>
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_STATISTICAL_TYPE')}}</td>
