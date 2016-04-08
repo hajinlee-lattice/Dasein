@@ -27,5 +27,6 @@
     <import resource="classpath:workflow-context.xml"/>
     <import resource="classpath:dataplatform-context.xml"/>
     <import resource="classpath:workflowapi-yarn-client-context.xml"/>
+    <import resource="classpath:proxy-context.xml"/>
 
 </beans>
