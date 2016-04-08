@@ -81,7 +81,7 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterDeploymentTes
         deleteBardJamsTenant(tenantId);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment_lp2")
     public void testInstallation() {
         orchestrateVisiDBAndBardJams();
 

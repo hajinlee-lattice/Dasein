@@ -129,7 +129,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrate a full tenant.
      **/
-    @BeforeClass(groups = "deployment_lp2")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         tenantId = testContract + tenantId;
         contractId = tenantId;
@@ -157,7 +157,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify ZK states
     // ==================================================
 
-    @Test(groups = "deployment_lp2")
+    @Test(groups = "deployment")
     public void verifyZKStatesInMainTestTenant() {
         verifyZKState();
     }
@@ -166,17 +166,17 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify tenant truly exists
     // ==================================================
 
-    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyJAMSMainTestTenantExists() throws Exception {
         verifyJAMSTenantExists();
     }
 
-    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyPLSMainTestTenantExists() throws Exception {
         verifyPLSTenantExists();
     }
 
-    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyZKStatesInMainTestTenant")
+    @Test(groups = "deployment", dependsOnMethods = "verifyZKStatesInMainTestTenant")
     public void verifyVisiDBDLMainTestTenantExists() throws Exception {
         verifyVisiDBDLTenantExists();
     }
@@ -185,7 +185,7 @@ public class LP2EndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     // verify cross component workflows
     // ==================================================
 
-    @Test(groups = "deployment_lp2", dependsOnMethods = "verifyPLSMainTestTenantExists")
+    @Test(groups = "deployment", dependsOnMethods = "verifyPLSMainTestTenantExists")
     public void verifyPLSTenantKnowsTopologyInMainTestTenant() throws Exception {
         verifyPLSTenantKnowsTopology();
     }
