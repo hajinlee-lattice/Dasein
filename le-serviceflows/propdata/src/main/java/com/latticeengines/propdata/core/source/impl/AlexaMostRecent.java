@@ -18,10 +18,10 @@ public class AlexaMostRecent implements MostRecentSource, DomainBased, HasSqlPre
     private static final long serialVersionUID = 5703265655999503611L;
 
     @Value("${propdata.job.alexa.refresh.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Autowired
-    Alexa baseSource;
+    private Alexa baseSource;
 
     @Override
     public String getSourceName() {
@@ -69,12 +69,18 @@ public class AlexaMostRecent implements MostRecentSource, DomainBased, HasSqlPre
     }
 
     @Override
-    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NUM_VERSIONS; }
+    public PurgeStrategy getPurgeStrategy() {
+        return PurgeStrategy.NUM_VERSIONS;
+    }
 
     @Override
-    public Integer getNumberOfVersionsToKeep() { return 2; }
+    public Integer getNumberOfVersionsToKeep() {
+        return 2;
+    }
 
     @Override
-    public Integer getNumberOfDaysToKeep() { return 7; }
+    public Integer getNumberOfDaysToKeep() {
+        return 7;
+    }
 
 }

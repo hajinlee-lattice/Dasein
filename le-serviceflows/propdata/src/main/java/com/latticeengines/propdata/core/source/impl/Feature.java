@@ -11,13 +11,17 @@ public class Feature implements CollectedSource {
     private static final long serialVersionUID = 2079061038810691592L;
 
     @Value("${propdata.job.feature.archive.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Override
-    public String getSourceName() { return "Feature"; }
+    public String getSourceName() {
+        return "Feature";
+    }
 
     @Override
-    public String getDownloadSplitColumn() { return "LE_Last_Upload_Date"; }
+    public String getDownloadSplitColumn() {
+        return "LE_Last_Upload_Date";
+    }
 
     @Override
     public String getCollectedTableName() {
@@ -25,11 +29,17 @@ public class Feature implements CollectedSource {
     }
 
     @Override
-    public String getTimestampField() { return "LE_Last_Upload_Date"; }
+    public String getTimestampField() {
+        return "LE_Last_Upload_Date";
+    }
 
     @Override
-    public String[] getPrimaryKey() { return new String[] { "URL", "Feature", "LE_Last_Upload_Date"  };  }
+    public String[] getPrimaryKey() {
+        return new String[] { "URL", "Feature", "LE_Last_Upload_Date" };
+    }
 
     @Override
-    public String getDefaultCronExpression() { return cronExpression; }
+    public String getDefaultCronExpression() {
+        return cronExpression;
+    }
 }

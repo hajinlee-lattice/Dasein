@@ -27,7 +27,7 @@ public abstract class AbstractMostRecentService extends AbstractRefreshService i
 
     @Override
     public String findBaseVersionForNewProgress() {
-        CollectedSource baseSource = getSource().getBaseSources()[0];
+        CollectedSource baseSource = (CollectedSource) getSource().getBaseSources()[0];
         Date collectedLatest = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
         String targetVersion = HdfsPathBuilder.dateFormat.format(collectedLatest);
         if (getProgressEntityMgr().findProgressByBaseVersion(getSource(), targetVersion) == null) {

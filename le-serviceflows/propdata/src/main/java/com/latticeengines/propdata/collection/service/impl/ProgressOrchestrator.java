@@ -26,7 +26,7 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
 import com.latticeengines.propdata.core.source.DerivedSource;
-import com.latticeengines.propdata.core.source.RawSource;
+import com.latticeengines.propdata.core.source.DataImportedFromDB;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("progressOrchestrator")
@@ -45,10 +45,10 @@ public class ProgressOrchestrator {
     private List<RefreshService> refreshServiceList;
 
     @Value("${propdata.job.schedule.dryrun:true}")
-    Boolean dryrun;
+    private Boolean dryrun;
 
     private Log log = LogFactory.getLog(this.getClass());
-    private Map<RawSource, ArchiveService> archiveServiceMap = new HashMap<>();
+    private Map<DataImportedFromDB, ArchiveService> archiveServiceMap = new HashMap<>();
     private Map<DerivedSource, RefreshService> refreshServiceMap = new HashMap<>();
     private static final int jobExpirationHours = 48; // expire after 48 hour
     private static final long jobExpirationMilliSeconds = TimeUnit.HOURS.toMillis(jobExpirationHours);
@@ -58,10 +58,10 @@ public class ProgressOrchestrator {
     @PostConstruct
     private void constructMaps() {
         for (Source source : sourceService.getSources()) {
-            if (source instanceof RawSource) {
+            if (source instanceof DataImportedFromDB) {
                 for (ArchiveService archiveService : archiveServiceList) {
                     if (source.equals(archiveService.getSource())) {
-                        archiveServiceMap.put((RawSource) source, archiveService);
+                        archiveServiceMap.put((DataImportedFromDB) source, archiveService);
                         executorMap.put(source.getSourceName(), new ArchiveExecutor(archiveService));
                     }
                 }
@@ -80,15 +80,15 @@ public class ProgressOrchestrator {
         executorService = Executors.newFixedThreadPool(executorMap.size());
         for (Source source : sourceService.getSources()) {
             if (serviceFlowsZkConfigService.refreshJobEnabled(source) && (!dryrun)) {
-                    try {
-                        if (source instanceof RawSource) {
-                            submitProgress(findArchiveProgressToProceed((RawSource) source));
-                        } else if (source instanceof DerivedSource) {
-                            submitProgress(findRefreshProgressToProceed((DerivedSource) source));
-                        }
-                    } catch (Exception e) {
-                        log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
+                try {
+                    if (source instanceof DataImportedFromDB) {
+                        submitProgress(findArchiveProgressToProceed((DataImportedFromDB) source));
+                    } else if (source instanceof DerivedSource) {
+                        submitProgress(findRefreshProgressToProceed((DerivedSource) source));
                     }
+                } catch (Exception e) {
+                    log.error("Failed to find progress to proceed for " + source.getSourceName(), e);
+                }
             }
             if (source instanceof DerivedSource) {
                 try {
@@ -119,7 +119,7 @@ public class ProgressOrchestrator {
     }
 
     @SuppressWarnings("unchecked")
-    ArchiveProgress findArchiveProgressToProceed(RawSource source) {
+    ArchiveProgress findArchiveProgressToProceed(DataImportedFromDB source) {
         ArchiveService archiveService = archiveServiceMap.get(source);
         return (ArchiveProgress) findProgressToProceedForSource((SourceRefreshServiceBase<Progress>) archiveService);
     }
@@ -163,13 +163,13 @@ public class ProgressOrchestrator {
         }
     }
 
-    void setServiceMaps(Map<RawSource, ArchiveService> archiveServiceMap,
+    void setServiceMaps(Map<DataImportedFromDB, ArchiveService> archiveServiceMap,
             Map<DerivedSource, RefreshService> pivotServiceMap) {
         this.archiveServiceMap = archiveServiceMap;
         this.refreshServiceMap = pivotServiceMap;
     }
 
-    public ArchiveService getArchiveService(RawSource source) {
+    public ArchiveService getArchiveService(DataImportedFromDB source) {
         if (archiveServiceMap.containsKey(source)) {
             return archiveServiceMap.get(source);
         } else {

@@ -36,9 +36,9 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.SourceService;
+import com.latticeengines.propdata.core.source.DataImportedFromDB;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.MostRecentSource;
-import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.core.util.LoggingUtils;
@@ -331,7 +331,8 @@ public class PropDataAdminTool {
             promptContinue();
 
             loadApplicationContext();
-            RawSource source = (RawSource) sourceService.findBySourceName(sourceToBeArchived.getName());
+            DataImportedFromDB source = (DataImportedFromDB) sourceService
+                    .findBySourceName(sourceToBeArchived.getName());
             CollectedArchiveService collectedArchiveService = (CollectedArchiveService) progressOrchestrator
                     .getArchiveService(source);
 
@@ -342,7 +343,8 @@ public class PropDataAdminTool {
             System.out.println("========================================\n");
 
             loadApplicationContext();
-            RawSource source = (RawSource) sourceService.findBySourceName(sourceToBeArchived.getName());
+            DataImportedFromDB source = (DataImportedFromDB) sourceService
+                    .findBySourceName(sourceToBeArchived.getName());
             BulkArchiveService archiveService = (BulkArchiveService) progressOrchestrator.getArchiveService(source);
 
             executeArchiveBulk(archiveService);
@@ -533,8 +535,8 @@ public class PropDataAdminTool {
 
     enum PropDataDerivedSource {
         ALEXA("AlexaMostRecent"), ORB("OrbIntelligenceMostRecent"), FEATURE("FeatureMostRecent"), FEATURE_PIVOTED(
-                "FeaturePivoted"), BUILTWITH("BuiltWithMostRecent"), BUILTWITH_PIVOTED("BuiltWithPivoted"), HGDATA(
-                        "HGData"), HGDATA_PIVOTED("HGDataPivoted");
+                "FeaturePivoted"), BUILTWITH("BuiltWithMostRecent"), BUILTWITH_PIVOTED(
+                        "BuiltWithPivoted"), HGDATA("HGData"), HGDATA_PIVOTED("HGDataPivoted");
 
         private static Map<String, PropDataDerivedSource> nameMap;
 

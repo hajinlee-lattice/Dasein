@@ -12,7 +12,7 @@ public class BuiltWith implements CollectedSource, HasSqlPresence {
     private static final long serialVersionUID = -1192390855705582815L;
 
     @Value("${propdata.job.buitwith.archive.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Override
     public String getSourceName() { return "BuiltWith"; }

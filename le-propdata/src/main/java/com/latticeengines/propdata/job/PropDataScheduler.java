@@ -23,8 +23,8 @@ import com.latticeengines.propdata.collection.service.ArchiveService;
 import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
+import com.latticeengines.propdata.core.source.DataImportedFromDB;
 import com.latticeengines.propdata.core.source.DerivedSource;
-import com.latticeengines.propdata.core.source.RawSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("propDataScheduler")
@@ -34,16 +34,16 @@ public class PropDataScheduler {
     private Log log = LogFactory.getLog(PropDataScheduler.class);
 
     @Value("${propdata.job.schedule.dryrun:true}")
-    Boolean dryrun;
+    private Boolean dryrun;
 
     @Autowired
-    List<Source> sourceList;
+    private List<Source> sourceList;
 
     @Autowired
-    ServiceFlowsZkConfigService serviceFlowsZkConfigService;
+    private ServiceFlowsZkConfigService serviceFlowsZkConfigService;
 
     @Autowired
-    ProgressOrchestrator progressOrchestrator;
+    private ProgressOrchestrator progressOrchestrator;
 
     @PostConstruct
     private void registerJobs() throws SchedulerException {
@@ -75,14 +75,14 @@ public class PropDataScheduler {
     }
 
     private void registerJob(Source source) throws SchedulerException {
-        if (source instanceof RawSource) {
-            registerArchiveJob((RawSource) source);
+        if (source instanceof DataImportedFromDB) {
+            registerArchiveJob((DataImportedFromDB) source);
         } else if (source instanceof DerivedSource) {
             registerRefreshJob((DerivedSource) source);
         }
     }
 
-    private void registerArchiveJob(RawSource source) throws SchedulerException {
+    private void registerArchiveJob(DataImportedFromDB source) throws SchedulerException {
         ArchiveService service = progressOrchestrator.getArchiveService(source);
         if (service != null) {
             JobDetail job = JobBuilder.newJob(ArchiveScheduler.class).usingJobData("dryrun", dryrun).build();

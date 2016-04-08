@@ -36,6 +36,16 @@ import com.latticeengines.proxy.exposed.propdata.InternalProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
+    private static final String SQOOP_OPTION_WHERE = "--where";
+
+    private static final String SQOOP_OPTION_BATCH = "--batch";
+
+    private static final String JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION = "-Dexport.statements.per.transaction=1";
+
+    private static final String JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT = "-Dsqoop.export.records.per.statement=1000";
+
+    private static final String SQOOP_CUSTOMER_PROPDATA = "PropData-";
+
     abstract ProgressEntityMgr<P> getProgressEntityMgr();
 
     abstract Log getLogger();
@@ -221,10 +231,10 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
 
-        return new SqoopExporter.Builder().setCustomer("PropData-" + sqlTable).setNumMappers(numMappers)
+        return new SqoopExporter.Builder().setCustomer(SQOOP_CUSTOMER_PROPDATA + sqlTable).setNumMappers(numMappers)
                 .setTable(sqlTable).setSourceDir(avroDir).setDbCreds(new DbCreds(credsBuilder))
-                .addHadoopArg("-Dsqoop.export.records.per.statement=1000")
-                .addHadoopArg("-Dexport.statements.per.transaction=1").addExtraOption("--batch").setSync(false).build();
+                .addHadoopArg(JVM_PARAM_EXPORT_RECORDS_PER_STATEMENT)
+                .addHadoopArg(JVM_PARAM_EXPORT_STATEMENTS_PER_TRANSACTION).addExtraOption(SQOOP_OPTION_BATCH).setSync(false).build();
     }
 
     protected SqoopImporter getCollectionDbImporter(String sqlTable, String avroDir, String splitColumn,
@@ -232,12 +242,12 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         DbCreds.Builder credsBuilder = new DbCreds.Builder();
         credsBuilder.host(dbHost).port(dbPort).db(db).user(dbUser).encryptedPassword(CipherUtils.encrypt(dbPassword));
 
-        SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer("PropData-" + sqlTable)
+        SqoopImporter.Builder builder = new SqoopImporter.Builder().setCustomer(SQOOP_CUSTOMER_PROPDATA + sqlTable)
                 .setNumMappers(numMappers).setSplitColumn(splitColumn).setTable(sqlTable).setTargetDir(avroDir)
                 .setDbCreds(new DbCreds(credsBuilder)).setSync(false);
 
         if (StringUtils.isNotEmpty(whereClause)) {
-            builder = builder.addExtraOption("--where").addExtraOption(whereClause);
+            builder = builder.addExtraOption(SQOOP_OPTION_WHERE).addExtraOption(whereClause);
         }
 
         return builder.build();

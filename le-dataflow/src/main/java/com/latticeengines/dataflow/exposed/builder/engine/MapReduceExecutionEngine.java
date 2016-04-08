@@ -29,7 +29,7 @@ public class MapReduceExecutionEngine extends ExecutionEngine {
 
     @Override
     public boolean isDefault() {
-        return true;
+        return false;
     }
 
 }

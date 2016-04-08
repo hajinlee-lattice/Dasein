@@ -11,10 +11,12 @@ public class OrbIntelligence implements CollectedSource {
     private static final long serialVersionUID = 3359238491845056238L;
 
     @Value("${propdata.job.orb.archive.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Override
-    public String getSourceName() { return "OrbIntelligence"; }
+    public String getSourceName() {
+        return "OrbIntelligence";
+    }
 
     @Override
     public String getDownloadSplitColumn() {
@@ -33,13 +35,7 @@ public class OrbIntelligence implements CollectedSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[]{
-                "domain",
-                "address_city",
-                "address_state",
-                "address_country",
-                "LE_Last_Upload_Date"
-        };
+        return new String[] { "domain", "address_city", "address_state", "address_country", "LE_Last_Upload_Date" };
     }
 
     @Override

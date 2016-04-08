@@ -11,7 +11,7 @@ public class Alexa implements CollectedSource {
     private static final long serialVersionUID = -7791007783522497933L;
 
     @Value("${propdata.job.alexa.archive.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Override
     public String getSourceName() {

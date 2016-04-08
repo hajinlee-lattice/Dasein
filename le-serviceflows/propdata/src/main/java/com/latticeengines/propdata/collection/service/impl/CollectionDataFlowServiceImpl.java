@@ -65,7 +65,7 @@ public class CollectionDataFlowServiceImpl implements CollectionDataFlowService 
 
         String flowName = CollectionDataFlowKeys.MOST_RECENT_FLOW;
 
-        CollectedSource baseSource = source.getBaseSources()[0];
+        CollectedSource baseSource = (CollectedSource) source.getBaseSources()[0];
         Date latestToArchive = hdfsSourceEntityMgr.getLatestTimestamp(baseSource);
         Date earliestToArchive = new Date(latestToArchive.getTime() - source.periodToKeep());
 

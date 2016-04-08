@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.core.source;
 
-public interface CollectedSource extends RawSource {
+public interface CollectedSource extends DataImportedFromDB {
 
     String getCollectedTableName();
 

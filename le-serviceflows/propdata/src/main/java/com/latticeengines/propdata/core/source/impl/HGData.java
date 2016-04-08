@@ -16,45 +16,65 @@ public class HGData implements DomainBased, DerivedSource, HasSqlPresence {
     private static final long serialVersionUID = 603829385601451984L;
 
     @Value("${propdata.job.hgdata.refresh.schedule:}")
-    String cronExpression;
+    private String cronExpression;
 
     @Autowired
-    HGDataRaw baseSource;
+    private HGDataRaw baseSource;
 
     @Override
-    public String getSourceName() { return "HGData"; }
-
-    @Override
-    public String getSqlTableName() { return "HGData_Source"; }
-
-    @Override
-    public String[] getPrimaryKey() {
-        return new String[]{"Domain", "Supplier_Name", "Segment_Name",
-                "HG_Category_1", "HG_Category_2", "HG_Category_1_Parent", "HG_Category_2_Parent"};
+    public String getSourceName() {
+        return "HGData";
     }
 
     @Override
-    public String getTimestampField() { return "LE_Last_Upload_Date"; }
+    public String getSqlTableName() {
+        return "HGData_Source";
+    }
 
     @Override
-    public String getDomainField() {  return "Domain"; }
+    public String[] getPrimaryKey() {
+        return new String[] { "Domain", "Supplier_Name", "Segment_Name", "HG_Category_1", "HG_Category_2",
+                "HG_Category_1_Parent", "HG_Category_2_Parent" };
+    }
 
     @Override
-    public Source[] getBaseSources() { return new Source[]{ baseSource }; }
+    public String getTimestampField() {
+        return "LE_Last_Upload_Date";
+    }
 
     @Override
-    public String getDefaultCronExpression() { return cronExpression; }
+    public String getDomainField() {
+        return "Domain";
+    }
 
     @Override
-    public String getSqlMatchDestination() { return "HGData_Source"; }
+    public Source[] getBaseSources() {
+        return new Source[] { baseSource };
+    }
 
     @Override
-    public PurgeStrategy getPurgeStrategy() {  return PurgeStrategy.NEVER; }
+    public String getDefaultCronExpression() {
+        return cronExpression;
+    }
 
     @Override
-    public Integer getNumberOfVersionsToKeep() { return null; }
+    public String getSqlMatchDestination() {
+        return "HGData_Source";
+    }
 
     @Override
-    public Integer getNumberOfDaysToKeep() { return null; }
+    public PurgeStrategy getPurgeStrategy() {
+        return PurgeStrategy.NEVER;
+    }
+
+    @Override
+    public Integer getNumberOfVersionsToKeep() {
+        return null;
+    }
+
+    @Override
+    public Integer getNumberOfDaysToKeep() {
+        return null;
+    }
 
 }

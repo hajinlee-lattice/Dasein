@@ -22,12 +22,12 @@ import com.latticeengines.propdata.core.source.MostRecentSource;
 
 abstract public class MostRecentServiceImplTestNGBase extends PropDataCollectionFunctionalTestNGBase {
 
-    RefreshService refreshService;
-    RefreshProgressEntityMgr progressEntityMgr;
-    MostRecentSource source;
-    CollectedSource baseSource;
-    Date[] dates;
-    Collection<RefreshProgress> progresses = new HashSet<>();
+    private RefreshService refreshService;
+    private RefreshProgressEntityMgr progressEntityMgr;
+    private MostRecentSource source;
+    private CollectedSource baseSource;
+    private Date[] dates;
+    private Collection<RefreshProgress> progresses = new HashSet<>();
 
     abstract RefreshService getRefreshService();
 
@@ -47,7 +47,7 @@ abstract public class MostRecentServiceImplTestNGBase extends PropDataCollection
 
         refreshService = getRefreshService();
         progressEntityMgr = getProgressEntityMgr();
-        baseSource = source.getBaseSources()[0];
+        baseSource = (CollectedSource) source.getBaseSources()[0];
         dates = getBaseSourceTestBean().getDates();
     }
 
