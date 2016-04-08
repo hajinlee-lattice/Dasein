@@ -14,6 +14,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -21,8 +22,19 @@ public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGB
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
         turnOffSslChecking();
+        deleteTwoTenants();
+        setupTestEnvironment();
         switchToSuperAdmin();
     }
+
+    private void deleteTwoTenants() throws Exception {
+        turnOffSslChecking();
+        setTestingTenants();
+        for (Tenant tenant : testingTenants) {
+            deleteTenantByRestCall(tenant.getId());
+        }
+    }
+
 
     @Test(groups = "deployment")
     public void testGetAvariableAttributes() {
