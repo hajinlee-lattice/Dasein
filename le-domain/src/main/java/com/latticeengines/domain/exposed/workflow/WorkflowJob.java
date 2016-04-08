@@ -2,10 +2,13 @@ package com.latticeengines.domain.exposed.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,9 +18,11 @@ import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
+
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -54,6 +59,13 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Lob
     @Type(type = "org.hibernate.type.SerializableToBlobType")
     private Map<String, String> inputContext = new HashMap<>();
+
+    @Column(name = "State")
+    @Enumerated(EnumType.STRING)
+    private YarnApplicationState state;
+
+    @Column(name = "StartTimeInMillis")
+    private Long startTimeInMillis;
 
     @Override
     public Long getPid() {
@@ -137,6 +149,22 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     public void setInputContex(Map<String, String> inputContext) {
         this.inputContext = inputContext;
+    }
+
+    public YarnApplicationState getState() {
+        return state;
+    }
+
+    public void setState(YarnApplicationState state) {
+        this.state = state;
+    }
+
+    public Long getStartTimeInMillis() {
+        return startTimeInMillis;
+    }
+
+    public void setStartTimeInMillis(Long startTimeInMillis) {
+        this.startTimeInMillis = startTimeInMillis;
     }
 
     @Override

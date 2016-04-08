@@ -10,9 +10,11 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobService;
@@ -128,8 +130,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJobByApplicationId(String applicationId) {
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
-        if(workflowJob == null){
-            throw new LedpException(LedpCode.LEDP_28023, new String[]{applicationId});
+        if (workflowJob == null) {
+            throw new LedpException(LedpCode.LEDP_28023, new String[] { applicationId });
         }
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
@@ -168,19 +170,33 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         return jobs;
     }
 
-    private com.latticeengines.domain.exposed.workflow.Job getJobStatusForJobWithoutWorkflowId(WorkflowJob workflowJob){
+    @Override
+    public com.latticeengines.domain.exposed.workflow.Job getJobStatusForJobWithoutWorkflowId(WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         Map<String, String> inputProperties = workflowService.getInputs(workflowJob.getInputContext());
         job.setInputs(inputProperties);
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
 
-        String applicationId = workflowJob.getApplicationId();
-        com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy.getJobStatus(applicationId);
-        if (YarnUtils.TERMINAL_APP_STATE.contains(yarnJobStatus.getState())) {
+        // WorkflowId null, try to get state from db directly without talking to
+        // Yarn
+        if (workflowJob.getState() != null && YarnUtils.TERMINAL_APP_STATE.contains(workflowJob.getState())) {
             job.setJobStatus(JobStatus.FAILED);
-            job.setStartTimestamp(new Date(yarnJobStatus.getFinishTime()));
+            if (workflowJob.getStartTimeInMillis() != null) {
+                job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
+            }
         } else {
-            job.setJobStatus(JobStatus.PENDING);
+            String applicationId = workflowJob.getApplicationId();
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
+                    .getJobStatus(applicationId);
+            if (YarnUtils.TERMINAL_APP_STATE.contains(yarnJobStatus.getState())) {
+                job.setJobStatus(JobStatus.FAILED);
+                job.setStartTimestamp(new Date(yarnJobStatus.getStartTime()));
+                workflowJob.setState(YarnApplicationState.FAILED);
+                workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
+                workflowJobEntityMgr.update(workflowJob);
+            } else {
+                job.setJobStatus(JobStatus.PENDING);
+            }
         }
         return job;
     }
@@ -205,6 +221,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         }
 
         return jobs;
+    }
+
+    @VisibleForTesting
+    void setJobProxy(JobProxy jobProxy) {
+        this.jobProxy = jobProxy;
     }
 
 }

@@ -7,6 +7,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public interface WorkflowContainerService {
 
@@ -21,4 +22,6 @@ public interface WorkflowContainerService {
     List<Job> getJobsByTenant(long tenantPid, String type);
 
     List<Job> getJobsByTenant(long tenantPid);
+
+    Job getJobStatusForJobWithoutWorkflowId(WorkflowJob workflowJob);
 }
