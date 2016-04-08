@@ -82,6 +82,37 @@ angular.module('pd.jobs', [
         return deferred.promise;
     }
 
+    this.getScoringResults = function(job) {
+        var deferred = $q.defer();
+        
+        $http({
+            method: 'GET',
+            url: '/pls/scores/jobs/' + (job.applicationId || job.id) + '/results',
+            headers: { 
+                'Accept': 'text/plain;charset=utf-8' 
+            }
+        }).then(
+            function onSuccess(response) {
+                var result = response.data;
+
+                deferred.resolve(result);
+            }, function onError(response) {
+                if (!response.data) {
+                    response.data = {};
+                }
+
+                var errorCode = response.data.errorCode || 'Error';
+                var errorMsg = response.data.errorMsg || 'unspecified error.';
+
+                alert(errorCode + ': ' + errorMsg);
+
+                deferred.reject(errorMsg);
+            }
+        );
+
+        return deferred.promise;
+    }
+
     this.getAllJobs = function() {
         var deferred = $q.defer();
         var result;

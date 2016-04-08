@@ -29,12 +29,13 @@ angular.module('mainApp.create.csvImport', [
         
         formData.append('file', options.file);
         
-        if (params.schema)
-            formData.append('schema', params.schema)
+        if (params.schema) {
+            formData.append('schema', params.schema);
+        }
         
         if (params.displayName) {
             var name = params.displayName.replace('C:\\fakepath\\','');
-            formData.append('displayName', name)
+            formData.append('displayName', name);
         }
 
         var xhr = new XMLHttpRequest();

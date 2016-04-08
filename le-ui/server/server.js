@@ -85,10 +85,26 @@ class Server {
 
         try {
             var accessLogStream = fs.createWriteStream(logDirectory + '/le-ui_access.log', {flags: 'a'})
-            this.app.use(morgan('combined', { stream: accessLogStream }));
-            this.app.use(morgan('dev', { 
-                skip: function (req, res) { return res.statusCode < 400 } 
-            }));
+            
+            morgan.token("datetime", function getDateTime() { 
+                return new Date().getTime();
+            });
+            
+            this.app.use(morgan(
+                ':datetime :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', 
+                { 
+                    stream: accessLogStream 
+                }
+            ));
+
+            this.app.use(morgan(
+                ':datetime :method :url :status :response-time ms - :res[content-length]', 
+                { 
+                    skip: function (req, res) { 
+                        return res.statusCode < 400
+                    } 
+                }
+            ));
         } catch(err) {
             console.log(err);
         }

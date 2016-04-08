@@ -7,6 +7,13 @@
             <span data-ng-show="jobCompleted || jobFailed">
                 <a ui-sref="home.jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">[View Report]</a>
                 <a ui-sref="home.jobs.status.csv({jobId: jobId})" ng-show="jobType == 'importMatchAndModelWorkflow'">[View Report]</a>
+                <a 
+                    ui-sref="javascript:void(0)" 
+                    ng-click="clickGetScoringResults" 
+                    ng-show="jobType == 'scoreWorkflow'"
+                >
+                    [Download Result]
+                </a>
             </span>
             <span data-ng-show="jobRunning && ! cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">[Cancel Job]</a></span>
             <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>

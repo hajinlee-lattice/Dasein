@@ -20,6 +20,9 @@ angular
                 $scope.jobCompleted = false;
                 $scope.cancelClicked = ( $scope.cancelling[$scope.jobId] ? true : false );
                 $scope.jobType = $scope.job.jobType;
+                if (!$scope.jobType) {
+                    $scope.jobType = 'placeholder';
+                }
                 if ($scope.jobType.toLowerCase() == "scoreworkflow") {
                     $scope.jobDisplayName = "Batch Scoring";
                 } else {
@@ -65,6 +68,23 @@ angular
                             }
                         });
                     }
+                };
+
+                $scope.clickGetScoringResults = function($event) {
+                    JobsService.getScoringResults($scope.job).then(function(result) {
+                        var blob = new Blob([ result ], { type: "text/plain" }),
+                            date = new Date(),
+                            year = date.getFullYear(),
+                            month = (1 + date.getMonth()).toString(),
+                            month = month.length > 1 ? month : '0' + month,
+                            day = date.getDate().toString(),
+                            day = day.length > 1 ? day : '0' + day,
+                            filename = 'score.' + $scope.job.id + '.' + year + month + day + '.csv';
+                        
+                        saveAs(blob, filename);
+                    }, function(reason) {
+                        alert('Failed: ' + reason);
+                    });
                 };
                 
                 function isCompleted() {
