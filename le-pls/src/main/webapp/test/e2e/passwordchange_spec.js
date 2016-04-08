@@ -34,6 +34,8 @@ describe('forgot password tests:', function () {
         browser.waitForAngular();
         browser.driver.sleep(20000);
         loginPage.assertLoggedIn(false);
+        browser.waitForAngular();
+        browser.driver.sleep(20000);
     }, 200000);
 
     it('login with alternative password and assert it worked', function () {
