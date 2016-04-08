@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api(value = "score", description = "REST resource for checking health of score API")
+@Api(value = "health", description = "REST resource for checking health of score API")
 @RestController
 @RequestMapping("/health")
 public class HealthCheckResource {
 
-    public static final String MESSAGE = "Score API is online.";
+    public static final String MESSAGE = "{\"status\":\"online\"}";
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

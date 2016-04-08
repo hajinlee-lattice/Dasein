@@ -40,7 +40,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         ApiInfo apiInfo = new ApiInfo("Lattice Engines Score REST API", //
-                "This is the REST API exposed for the Lattice Engines score service.", //
+                "This is the REST API exposed for the Lattice Engines score service.  In order to make authorized calls to Lattice APIs, your application must first obtain an OAuth access token.", //
                 "termsofservice.html", //
                 "Terms of service", //
                 "", //
