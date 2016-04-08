@@ -1,6 +1,5 @@
 package com.latticeengines.pls.service.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -84,7 +82,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);
 
         SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
-        spaceConfiguration.setDlAddress("http://10.41.1.187:8081/DLRestService");
         spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA));
         batonService.setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfiguration);
 
@@ -143,38 +140,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 //        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "getCredentialUsingEai")
-    public void verifyCredentialUsingDL() {
-        // sfdc
-        CrmCredential crmCredential = sfdcProductionCredentials();
-        CrmCredential newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE,
-                crmCredential);
-        Assert.assertEquals(newCrmCredential.getOrgId(), SFDC_PROD_ORG_ID);
-
-
-        //TODO: need to update sandbox credentials
-//        // beware that password might change for this sandbox user
-//        crmCredential = sfdcSandboxCredentials();
-//        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_SFDC, fullId, Boolean.FALSE, crmCredential);
-//        Assert.assertEquals(newCrmCredential.getOrgId(), SFDC_SANDBOX_ORG_ID);
-
-        // marketo
-        crmCredential = new CrmCredential();
-        crmCredential.setUrl(MKTO_URL);
-        crmCredential.setUserName(MKTO_USER);
-        crmCredential.setPassword(MKTO_PASSSWD);
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_MARKETO, fullId, null, crmCredential);
-        Assert.assertNotNull(newCrmCredential);
-
-        // eloqua
-        crmCredential = new CrmCredential();
-        crmCredential.setUserName(ELQ_USER);
-        crmCredential.setPassword(ELQ_PASSWORD);
-        crmCredential.setCompany(ELQ_COMPANY);
-        newCrmCredential = crmService.verifyCredential(CrmConstants.CRM_ELOQUA, fullId, null, crmCredential);
-        Assert.assertNotNull(newCrmCredential);
-    }
-
     @Test(groups = "functional")
     public void verifyCredentialWrongPassword() {
         // sfdc
@@ -201,45 +166,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
             encounteredException = true;
         }
         Assert.assertTrue(encounteredException, "Wrong password should cause exception while validating sfdcsandbox.");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "verifyCredentialUsingDL")
-    public void getCredentialUsingDL() {
-        CrmCredential newCrmCredential = crmService.getCredential(CrmConstants.CRM_SFDC, fullId, Boolean.TRUE);
-        Assert.assertEquals(newCrmCredential.getOrgId(), SFDC_PROD_ORG_ID);
-        Assert.assertEquals(newCrmCredential.getPassword(), SFDC_PROD_PASSWD);
-
-        newCrmCredential = crmService.getCredential(CrmConstants.CRM_MARKETO, fullId, Boolean.TRUE);
-        Assert.assertEquals(newCrmCredential.getUserName(), MKTO_USER);
-
-        newCrmCredential = crmService.getCredential(CrmConstants.CRM_ELOQUA, fullId, Boolean.TRUE);
-        Assert.assertEquals(newCrmCredential.getPassword(), ELQ_PASSWORD);
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "getCredentialUsingDL")
-    public void removeCredentials() {
-        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, true);
-        crmService.removeCredentials(CrmConstants.CRM_SFDC, fullId, false);
-        crmService.removeCredentials(CrmConstants.CRM_MARKETO, fullId, true);
-        crmService.removeCredentials(CrmConstants.CRM_ELOQUA, fullId, true);
-
-        for (String crmType : Arrays.asList(CrmConstants.CRM_SFDC, CrmConstants.CRM_MARKETO, CrmConstants.CRM_ELOQUA)) {
-            boolean exception = false;
-            try {
-                crmService.getCredential(crmType, fullId, Boolean.TRUE);
-            } catch (LedpException e) {
-                exception = true;
-            }
-            Assert.assertTrue(exception);
-
-            exception = false;
-            try {
-                crmService.getCredential(crmType, fullId, Boolean.FALSE);
-            } catch (LedpException e) {
-                exception = true;
-            }
-            Assert.assertTrue(exception);
-        }
     }
 
     private CrmCredential sfdcProductionCredentials() {
