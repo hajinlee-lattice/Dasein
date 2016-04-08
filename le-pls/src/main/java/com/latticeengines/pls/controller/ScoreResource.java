@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -15,8 +16,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "scores", description = "REST resource for interacting with score workflows")
 @RestController
 @RequestMapping("/scores")
+@PreAuthorize("hasRole('View_PLS_Data')")
 public class ScoreResource {
-    // TODO rights
 
     @Autowired
     private ScoringJobService scoringJobService;

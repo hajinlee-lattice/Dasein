@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,8 +25,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "scores/jobs", description = "REST resource for retrieving job information for score operations")
 @RestController
 @RequestMapping("/scores/jobs")
+@PreAuthorize("hasRole('View_PLS_Data')")
 public class ScoringJobResource {
-    // TODO Rights
 
     @Autowired
     private ScoringJobService scoringJobService;

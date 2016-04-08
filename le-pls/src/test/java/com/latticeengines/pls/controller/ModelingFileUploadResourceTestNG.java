@@ -83,7 +83,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void uploadFile() throws Exception {
-        switchToExternalAdmin();
+        switchToExternalUser();
         ResponseDocument<SourceFile> response = submitFile(false, PATH, false);
         assertTrue(response.isSuccess());
         SourceFile fileResponse = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -93,16 +93,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
         List<SourceFile> files = sourceFileEntityMgr.findAll();
         String path = fileResponse.getPath();
-
-        boolean found = false;
-        for (SourceFile file : files) {
-            if (file.getPath().equals(path)) {
-                String[] split = path.split("/");
-                assertEquals(file.getName(), split[split.length - 1]);
-                found = true;
-            }
-        }
-        assertTrue(found);
+        foundTheFiles(path, files);
     }
 
     @Test(groups = "functional")
@@ -116,16 +107,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileEntityMgr.findAll();
-        boolean found = false;
-        for (SourceFile file : files) {
-            if (file.getPath().equals(path)) {
-                String[] split = path.split("/");
-                assertEquals(file.getName(), split[split.length - 1]);
-                found = true;
-            }
-        }
-
-        assertTrue(found);
+        foundTheFiles(path, files);
     }
 
     @Test(groups = "functional")
@@ -140,6 +122,10 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(contents, expectedContents);
 
         List<SourceFile> files = sourceFileEntityMgr.findAll();
+        foundTheFiles(path, files);
+    }
+
+    private void foundTheFiles(String path, List<SourceFile> files) {
         boolean found = false;
         for (SourceFile file : files) {
             if (file.getPath().equals(path)) {
@@ -148,7 +134,6 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
                 found = true;
             }
         }
-
         assertTrue(found);
     }
 

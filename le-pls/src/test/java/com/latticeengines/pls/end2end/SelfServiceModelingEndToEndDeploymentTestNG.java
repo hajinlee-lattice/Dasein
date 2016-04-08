@@ -3,6 +3,7 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -222,6 +223,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(originalModelSummary.getSourceSchemaInterpretation(),
                 SchemaInterpretation.SalesforceLead.toString());
         assertNotNull(originalModelSummary.getTrainingTableName());
+        assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")

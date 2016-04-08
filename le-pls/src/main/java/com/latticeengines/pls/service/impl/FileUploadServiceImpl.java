@@ -31,7 +31,6 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 @Component("fileUploadService")
 public class FileUploadServiceImpl implements FileUploadService {
 
-    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(FileUploadServiceImpl.class);
 
     @Autowired

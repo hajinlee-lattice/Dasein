@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,10 +40,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "models/fileuploads", description = "REST resource for uploading csv files for modeling")
 @RestController
 @RequestMapping("/models/fileuploads")
+@PreAuthorize("hasRole('View_PLS_Data')")
 public class ModelingFileUploadResource {
-    // TODO rights
 
-    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(ModelingFileUploadResource.class);
 
     @Autowired
