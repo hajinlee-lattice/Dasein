@@ -42,7 +42,8 @@
                        </tr>
                        <tr>
                            <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_STATISTICAL_TYPE')}}</td>
-                           <td><select class="form-control" data-ng-options="s as s for s in statisticalTypesToSelect" data-ng-model="field.StatisticalType"></select></td>
+                           <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="s as s for s in statisticalTypesToSelect" data-ng-model="field.StatisticalType"></select></td>
+                           <td data-ng-if="isLatticeAttribute">{{field.StatisticalType}}</td>
                        </tr>
                    </tbody>
             </table>
