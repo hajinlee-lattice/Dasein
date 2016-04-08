@@ -3,10 +3,11 @@
 var ManageFields = function() {
     var helper = require('./helper.po');
 
-    var AllCategoryOptions = ["Lead Information", "Marketing Activity"];
+    var AllCategoryOptions = ["Lead Information", "Marketing Activity", "Firmographics", "Growth Trends",
+                              "Online Presence", "Technology Profile", "Website Keywords", "Website Profile"];
     var AllStatisticalTypeOptions = ["interval", "nominal", "ordinal", "ratio"];
     var AllApprovedUsageOptions = ["None", "Model", "ModelAndAllInsights", "ModelAndModelInsights"];
-    var AllFundamentalTypeOptions = ["alpha", "boolean", "currency", "numeric", "percentage", "year"];
+    var AllAttributesTypeOptions = ["alpha", "boolean", "currency", "numeric", "percentage", "year"];
 
     this.testFilters = function(grid) {
         var table = grid.element(by.tagName('table'));
@@ -14,11 +15,8 @@ var ManageFields = function() {
 
         testFieldNameFilter(grid);
 
-        var sourceOptions = element(by.model("source")).all(by.tagName('option'));
-        testOptionFilter(sourceOptions, 1, grid);
-
         var categoryOptions = element(by.model("category")).all(by.tagName('option'));
-        testOptionFilter(categoryOptions, 4, grid);
+        testOptionFilter(categoryOptions, 2, grid);
 
         testWarningFilter(grid);
     };
@@ -47,7 +45,7 @@ var ManageFields = function() {
                 trs.each(function(tr, index) {
                     var tds = tr.all(by.tagName("td"));
                     tds.get(0).getText().then(function(fieldName) {
-                        tds.get(2).getText().then(function(displayName) {
+                        tds.get(1).getText().then(function(displayName) {
                             var contains = false;
                             if (fieldName != null) {
                                 contains = fieldName.toLowerCase().indexOf(nameFilter.toLowerCase()) > -1;
@@ -139,6 +137,7 @@ var ManageFields = function() {
     }
 
     this.testEditable = function(grid) {
+        filterEditableFields();
         var table = grid.element(by.tagName('table'));
         helper.elementExists(table, true);
         var tbody = table.element(by.tagName("tbody"));
@@ -157,42 +156,27 @@ var ManageFields = function() {
         element(by.id("edit-field-cancel")).click();
         sleep(1000);
 
-        clickEditFieldsButton();
-        element(by.id("manage-fields-cancel")).click();
-        sleep(1000);
-        helper.elementExists(element(by.id("discard-edit-yes")), false);
+        //clickEditFieldsButton();
+        //element(by.id("manage-fields-cancel")).click();
+        //sleep(1000);
+        //helper.elementExists(element(by.id("discard-edit-yes")), false);
 
         clickEditFieldsButton();
         var tds = tr.all(by.tagName("td"));
-        helper.elementExists(tds.get(2).element(by.tagName("input")), true);
-        tds.get(3).getText().then(function (tagsVal){
-            if (tagsVal == "Internal") {
-                assertCategorySelectExists(tr, AllCategoryOptions);
-            } else {
-                assertCategorySelectNotExists(tr);
-            }
+        helper.elementExists(tds.get(1).element(by.tagName("input")), true);
 
-            var approvedUsageSelect = tr.all(by.tagName("td")).get(5).element(by.tagName("select"));
-            helper.elementExists(approvedUsageSelect, true);
-            assertSelectOptions(approvedUsageSelect, AllApprovedUsageOptions);
-            var fundamentalTypeSelect = tr.all(by.tagName("td")).get(6).element(by.tagName("select"));
-            helper.elementExists(fundamentalTypeSelect, true);
-            assertSelectOptions(fundamentalTypeSelect, AllFundamentalTypeOptions);
-
-            element(by.id("manage-fields-cancel")).click();
-            sleep(1000);
-        });
-    }
-
-    function assertCategorySelectExists(tr, AllCategoryOptions) {
-        var categorySelect = tr.all(by.tagName("td")).get(4).element(by.tagName("select"));
+        var categorySelect = tds.get(2).element(by.tagName("select"));
         helper.elementExists(categorySelect, true);
-        assertSelectOptions(categorySelect, AllCategoryOptions);
-    }
+        //assertSelectOptions(categorySelect, AllCategoryOptions);
 
-    function assertCategorySelectNotExists(tr) {
-        var categorySelect = tr.all(by.tagName("td")).get(4).element(by.tagName("select"));
-        expect(categorySelect.isPresent()).toBe(false);
+        var approvedUsageSelect = tds.get(3).element(by.tagName("select"));
+        helper.elementExists(approvedUsageSelect, true);
+        assertSelectOptions(approvedUsageSelect, AllApprovedUsageOptions);
+
+        var attributesTypeSelect = tds.get(4).element(by.tagName("select"));
+        helper.elementExists(attributesTypeSelect, true);
+        assertSelectOptions(attributesTypeSelect, AllAttributesTypeOptions);
+        clickSaveFieldsButton();
     }
 
     function assertSelectOptions(select, allOptions) {
@@ -218,84 +202,38 @@ var ManageFields = function() {
         });
     }
 
-    this.testEditDisplayName = function(grid) {
-        var table = grid.element(by.tagName('table'));
-        helper.elementExists(table, true);
-        var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
-        trs.count().then(function (count) {
-            if (count > 0) {
-                clickEditFieldsButton();
-                var tds = trs.get(0).all(by.tagName("td"));
-                tds.get(0).getText().then(function (fieldName) {
-                    var displayNameInput = tds.get(2).element(by.tagName("input"));
-                    displayNameInput.getAttribute('value').then(function (displayName) {
-                        var newDisplayName = "DisplayName_e2eTest";
-                        displayNameInput.clear();
-                        displayNameInput.sendKeys(newDisplayName);
-                        sleep(500);
-                        clickSaveFieldsButton();
-
-                        clickEditFieldLink(grid, fieldName);
-                        element(by.model('field.DisplayName')).getAttribute('value').then(function (editedValue){
-                            expect(newDisplayName == editedValue).toBe(true);
-                            element(by.model('field.DisplayName')).clear();
-                            if (displayName != null) {
-                                element(by.model('field.DisplayName')).sendKeys(displayName);
-                            }
-                            sleep(500);
-                            clickSaveFieldButton();
-
-                            clickEditFieldLink(grid, fieldName);
-                            element(by.model('field.DisplayName')).getAttribute('value').then(function (value){
-                                if (displayName == null) {
-                                    expect(value == null || value == "").toBe(true);
-                                } else {
-                                    expect(displayName == value).toBe(true);
-                                }
-                            });
-                        });
-                    });
-                });
-            }
-        });
-    };
-
     this.testEditCategory = function(grid) {
+        filterEditableFields();
         var table = grid.element(by.tagName('table'));
         helper.elementExists(table, true);
         var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
         trs.count().then(function (count) {
             if (count > 0) {
-                sortColumnDesc(table, 3);
                 clickEditFieldsButton();
                 var tds = trs.get(0).all(by.tagName("td"));
                 tds.get(0).getText().then(function (fieldName) {
-                    tds.get(3).getText().then(function (tags) {
-                        if (tags == "Internal") {
-                            var categorySelect = tds.get(4).element(by.tagName("select"));
-                            categorySelect.element(by.css("option[selected]")).getText().then(function (category){
-                                if (AllCategoryOptions.indexOf(category) > -1) {
-                                    var newCategory = (category == AllCategoryOptions[0]) ? AllCategoryOptions[1] : AllCategoryOptions[0];
-                                    categorySelect.element(by.css("option[label='" + newCategory + "']")).click();
-                                    sleep(500);
-                                    clickSaveFieldsButton();
+                    var categorySelect = tds.get(2).element(by.tagName("select"));
+                    categorySelect.element(by.css("option[selected]")).getText().then(function (category){
+                        if (AllCategoryOptions.indexOf(category) > -1) {
+                            var newCategory = (category == AllCategoryOptions[0]) ? AllCategoryOptions[1] : AllCategoryOptions[0];
+                            categorySelect.element(by.css("option[label='" + newCategory + "']")).click();
+                            sleep(500);
+                            clickSaveFieldsButton();
 
-                                    element(by.model("category")).all(by.tagName('option')).get(0).click();
-                                    sleep(1000);
-                                    filterFields(fieldName);
-                                    clickEditFieldLink(grid, fieldName);
-                                    element(by.model('field.Category')).element(by.css("option[selected]")).getText().then(function (editedValue){
-                                        expect(newCategory == editedValue).toBe(true);
-                                        element(by.model('field.Category')).element(by.css("option[label='" + category + "']")).click();
-                                        sleep(500);
-                                        clickSaveFieldButton();
+                            element(by.model("category")).all(by.tagName('option')).get(0).click();
+                            sleep(1000);
+                            filterFields(fieldName);
+                            clickEditFieldLink(grid, fieldName);
+                            element(by.model('field.Category')).element(by.css("option[selected]")).getText().then(function (editedValue){
+                                expect(newCategory == editedValue).toBe(true);
+                                element(by.model('field.Category')).element(by.css("option[label='" + category + "']")).click();
+                                sleep(500);
+                                clickSaveFieldButton();
 
-                                        clickEditFieldLink(grid, fieldName);
-                                        element(by.model('field.Category')).element(by.css("option[selected]")).getText().then(function (value){
-                                            expect(category == value).toBe(true);
-                                        });
-                                    });
-                                }
+                                clickEditFieldLink(grid, fieldName);
+                                element(by.model('field.Category')).element(by.css("option[selected]")).getText().then(function (value){
+                                    expect(category == value).toBe(true);
+                                });
                             });
                         }
                     });
@@ -305,16 +243,16 @@ var ManageFields = function() {
     };
 
     this.testEditApprovedUsage = function(grid) {
+        filterEditableFields();
         var table = grid.element(by.tagName('table'));
         helper.elementExists(table, true);
         var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
         trs.count().then(function (count) {
             if (count > 0) {
-                sortColumnDesc(table, 5);
                 clickEditFieldsButton();
                 var tds = trs.get(0).all(by.tagName("td"));
                 tds.get(0).getText().then(function (fieldName) {
-                    var approvedUsageSelect = tds.get(5).element(by.tagName("select"));
+                    var approvedUsageSelect = tds.get(3).element(by.tagName("select"));
                     approvedUsageSelect.element(by.css("option[selected]")).getText().then(function (approvedUsage){
                         if (AllApprovedUsageOptions.indexOf(approvedUsage) > -1) {
                             var newApprovedUsage = (approvedUsage == AllApprovedUsageOptions[0]) ? AllApprovedUsageOptions[1] : AllApprovedUsageOptions[0];
@@ -342,21 +280,21 @@ var ManageFields = function() {
         });
     };
 
-    this.testEditFundamentalType = function(grid) {
+    this.testEditAttributesType = function(grid) {
+        filterEditableFields();
         var table = grid.element(by.tagName('table'));
         helper.elementExists(table, true);
         var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
         trs.count().then(function (count) {
             if (count > 0) {
-                sortColumnDesc(table, 6);
                 clickEditFieldsButton();
                 var tds = trs.get(0).all(by.tagName("td"));
                 tds.get(0).getText().then(function (fieldName) {
-                    var fundamentalTypeSelect = tds.get(6).element(by.tagName("select"));
-                    fundamentalTypeSelect.element(by.css("option[selected]")).getText().then(function (fundamentalType){
-                        if (AllFundamentalTypeOptions.indexOf(fundamentalType) > -1) {
-                            var newFundamentalType = (fundamentalType == AllFundamentalTypeOptions[0]) ? AllFundamentalTypeOptions[1] : AllFundamentalTypeOptions[0];
-                            fundamentalTypeSelect.element(by.css("option[label='" + newFundamentalType + "']")).click();
+                    var attributesTypeSelect = tds.get(4).element(by.tagName("select"));
+                    attributesTypeSelect.element(by.css("option[selected]")).getText().then(function (fundamentalType){
+                        if (AllAttributesTypeOptions.indexOf(fundamentalType) > -1) {
+                            var newFundamentalType = (fundamentalType == AllAttributesTypeOptions[0]) ? AllAttributesTypeOptions[1] : AllAttributesTypeOptions[0];
+                            attributesTypeSelect.element(by.css("option[label='" + newFundamentalType + "']")).click();
                             sleep(500);
                             clickSaveFieldsButton();
 
@@ -374,90 +312,6 @@ var ManageFields = function() {
                                 });
                             });
                         }
-                    });
-                });
-            }
-        });
-    };
-
-    this.testEditDescription = function(grid) {
-        var table = grid.element(by.tagName('table'));
-        helper.elementExists(table, true);
-        var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
-        trs.count().then(function (count) {
-            if (count > 0) {
-                var tds = trs.get(0).all(by.tagName("td"));
-                tds.get(0).getText().then(function (fieldName) {
-                    clickEditFieldLink(grid, fieldName);
-                    element(by.model('field.Description')).getAttribute('value').then(function (description){
-                        var newDescription = "Description_e2eTest";
-                        element(by.model('field.Description')).clear();
-                        element(by.model('field.Description')).sendKeys(newDescription);
-                        sleep(500);
-                        clickSaveFieldButton();
-
-                        clickEditFieldLink(grid, fieldName);
-                        element(by.model('field.Description')).getAttribute('value').then(function (editedValue){
-                            expect(newDescription == editedValue).toBe(true);
-
-                            element(by.model('field.Description')).clear();
-                            if (description != null) {
-                                element(by.model('field.Description')).sendKeys(description);
-                            }
-                            sleep(500);
-                            clickSaveFieldButton();
-
-                            clickEditFieldLink(grid, fieldName);
-                            element(by.model('field.Description')).getAttribute('value').then(function (value){
-                                if (description == null) {
-                                    expect(value == null || value == "").toBe(true);
-                                } else {
-                                    expect(description == value).toBe(true);
-                                }
-                            });
-                        });
-                    });
-                });
-            }
-        });
-    };
-
-    this.testEditDisplayDiscretization = function(grid) {
-        var table = grid.element(by.tagName('table'));
-        helper.elementExists(table, true);
-        var trs = table.element(by.tagName("tbody")).all(by.tagName("tr"));
-        trs.count().then(function (count) {
-            if (count > 0) {
-                var tds = trs.get(0).all(by.tagName("td"));
-                tds.get(0).getText().then(function (fieldName) {
-                    clickEditFieldLink(grid, fieldName);
-                    element(by.model('field.DisplayDiscretization')).getAttribute('value').then(function (displayDiscretization){
-                        var newDisplayDiscretization = "{\"geometric\": { \"minValue\":1,\"multiplierList\":[1,1.5,2],\"minSamples\":50,\"minFreq\":0.1,\"maxBuckets\":10,\"maxPercentile\":1}}";
-                        element(by.model('field.DisplayDiscretization')).clear();
-                        element(by.model('field.DisplayDiscretization')).sendKeys(newDisplayDiscretization);
-                        sleep(500);
-                        clickSaveFieldButton();
-
-                        clickEditFieldLink(grid, fieldName);
-                        element(by.model('field.DisplayDiscretization')).getAttribute('value').then(function (editedValue){
-                            expect(newDisplayDiscretization == editedValue).toBe(true);
-
-                            element(by.model('field.DisplayDiscretization')).clear();
-                            if (displayDiscretization != null) {
-                                element(by.model('field.DisplayDiscretization')).sendKeys(displayDiscretization);
-                            }
-                            sleep(500);
-                            clickSaveFieldButton();
-
-                            clickEditFieldLink(grid, fieldName);
-                            element(by.model('field.DisplayDiscretization')).getAttribute('value').then(function (value){
-                                if (displayDiscretization == null) {
-                                    expect(value == null || value == "").toBe(true);
-                                } else {
-                                    expect(displayDiscretization == value).toBe(true);
-                                }
-                            });
-                        });
                     });
                 });
             }
@@ -500,17 +354,6 @@ var ManageFields = function() {
         });
     };
 
-    this.testBuildModel = function() {
-        var buildModel = element(by.id('manage-fields-build-model'));
-        helper.elementExists(buildModel, true);
-        var buildModelSpin = element(by.id('manage-fields-build-model-spin'));
-        buildModelSpin.isDisplayed().then(function (displayed) {
-            buildModel.getAttribute('class').then(function (classes) {
-                expect(classes.split(' ').indexOf('disabled') > -1).toBe(displayed);
-            });
-        });
-    };
-
     function sortColumnDesc(table, columnIndex) {
         var ths = table.element(by.tagName("thead")).all(by.tagName("th"));
         ths.get(columnIndex).click();
@@ -519,8 +362,14 @@ var ManageFields = function() {
         sleep(1000);
     }
 
+    function filterEditableFields() {
+        filterFields("Title_Length");
+    }
+
     function filterFields(fieldName) {
-        element(by.model("field")).sendKeys(fieldName);
+        var input = element(by.model("field"));
+        input.clear();
+        input.sendKeys(fieldName);
         element(by.id("manage-fields-search")).click();
         sleep(1500);
     }
@@ -532,7 +381,7 @@ var ManageFields = function() {
 
     function clickSaveFieldsButton() {
         element(by.id("manage-fields-save")).click();
-        sleep(25000);
+        sleep(5000);
     }
 
     function clickEditFieldLink(grid, fieldName) {
@@ -544,7 +393,7 @@ var ManageFields = function() {
 
     function clickSaveFieldButton() {
         element(by.id("edit-field-save")).click();
-        sleep(25000);
+        sleep(5000);
     }
 
     function sleep(ms) {

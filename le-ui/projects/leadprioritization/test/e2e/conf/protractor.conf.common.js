@@ -34,7 +34,8 @@ var Config = function() {
                 specBasePath + '/modellist_spec.js',
                 specBasePath + '/performance_spec.js',
                 specBasePath + '/sampleleads_spec.js',
-                specBasePath + '/modelsummary_spec.js'
+                specBasePath + '/modelsummary_spec.js',
+                specBasePath + '/refineandclone_spec.js'
             ],
 
             params: {
