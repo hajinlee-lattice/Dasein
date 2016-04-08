@@ -36,14 +36,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
@@ -132,19 +130,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName, String applicationId,
-            WorkflowConfiguration workflowConfiguration) {
-        if (applicationId == null) {
-            throw new LedpException(LedpCode.LEDP_28022);
-        }
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
-        long jobExecutionId = startWorkflowJob(workflowName, workflowConfiguration);
-        workflowJob.setWorkflowId(jobExecutionId);
-        workflowJobEntityMgr.update(workflowJob);
-        return new WorkflowExecutionId(jobExecutionId);
-    }
-
-    @Override
     public WorkflowExecutionId restart(WorkflowInstanceId workflowInstanceId) {
         Long jobExecutionId = -1L;
         List<Long> jobExecutions;
@@ -211,24 +196,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJob(String applicationId) {
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
-        WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-
-        com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-        job.setInputs(workflowJob.getInputContext());
-        if (workflowId == null) {
-            Map<String, String> inputProperties = getInputs(workflowJob.getInputContext());
-            job.setInputs(inputProperties);
-            job.setJobStatus(JobStatus.PENDING);
-            job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
-            return job;
-        }
-        return getJob(workflowId);
-    }
-
-    @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByWorkflowIds(
+    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(
             List<WorkflowExecutionId> workflowIds) {
         List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
 
@@ -236,60 +204,6 @@ public class WorkflowServiceImpl implements WorkflowService {
             jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
         } catch (Exception e) {
             log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
-                    e.getMessage()));
-        }
-
-        return jobs;
-    }
-
-    @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid) {
-        Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByTenant(tenant);
-
-        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
-        List<WorkflowExecutionId> workflowIds = new ArrayList<>();
-
-        for (WorkflowJob workflowJob : workflowJobs) {
-            WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-            if (workflowId == null) {
-                com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-                Map<String, String> inputProperties = getInputs(workflowJob.getInputContext());
-                job.setInputs(inputProperties);
-                job.setJobStatus(JobStatus.PENDING);
-                job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
-                jobs.add(job);
-            } else {
-                workflowIds.add(workflowId);
-            }
-        }
-
-        try {
-            jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
-        } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
-                    e.getMessage()));
-        }
-
-        return jobs;
-    }
-
-    @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobsByTenant(long tenantPid, String type) {
-        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
-
-        try {
-            jobs.addAll(getJobsByTenant(tenantPid));
-            if (type != null) {
-                Iterator<com.latticeengines.domain.exposed.workflow.Job> iter = jobs.iterator();
-                while (iter.hasNext()) {
-                    if (!iter.next().getJobType().equals(type)) {
-                        iter.remove();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for tenant pid %s, with error %s", tenantPid,
                     e.getMessage()));
         }
 

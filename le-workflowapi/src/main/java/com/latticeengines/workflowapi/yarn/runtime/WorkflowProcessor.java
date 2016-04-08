@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
+import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
 @StepScope
 public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConfiguration> {
@@ -29,6 +30,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
     @Autowired
     private WorkflowService workflowService;
+
+    @Autowired
+    private WorkflowContainerService workflowContainerService;
 
     @Autowired
     private VersionManager versionManager;
@@ -52,7 +56,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             log.info("Restarting workflow " + workflowConfig.getWorkflowIdToRestart().getId());
             workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart());
         } else {
-            workflowId = workflowService.start(workflowConfig.getWorkflowName(), appId.toString(), workflowConfig);
+            workflowId = workflowContainerService.start(workflowConfig.getWorkflowName(), appId.toString(),
+                    workflowConfig);
         }
 
         WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);

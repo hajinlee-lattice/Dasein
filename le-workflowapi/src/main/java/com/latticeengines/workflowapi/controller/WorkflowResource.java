@@ -116,7 +116,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get status about a submitted workflow from a YARN application id")
     @Override
     public Job getWorkflowJobFromApplicationId(@PathVariable String applicationId) {
-        return workflowService.getJob(applicationId);
+        return workflowContainerService.getJobByApplicationId(applicationId);
     }
 
     private WorkflowExecutionId getWorkflowIdFromAppId(String applicationId) {
@@ -137,7 +137,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid) {
-        List<Job> jobs = workflowService.getJobsByTenant(tenantPid);
+        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid);
         return jobs;
     }
 
@@ -146,7 +146,7 @@ public class WorkflowResource implements WorkflowInterface {
     @ApiOperation(value = "Get list of workflow executions for a tenant filtered by job type")
     @Override
     public List<Job> getWorkflowExecutionsForTenant(@PathVariable long tenantPid, @RequestParam("type") String type) {
-        List<Job> jobs = workflowService.getJobsByTenant(tenantPid, type);
+        List<Job> jobs = workflowContainerService.getJobsByTenant(tenantPid, type);
         return jobs;
     }
 
