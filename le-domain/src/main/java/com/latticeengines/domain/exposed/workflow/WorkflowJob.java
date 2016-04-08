@@ -60,11 +60,11 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Type(type = "org.hibernate.type.SerializableToBlobType")
     private Map<String, String> inputContext = new HashMap<>();
 
-    @Column(name = "State")
+    @Column(name = "STATE")
     @Enumerated(EnumType.STRING)
     private YarnApplicationState state;
 
-    @Column(name = "StartTimeInMillis")
+    @Column(name = "START_TIME")
     private Long startTimeInMillis;
 
     @Override
