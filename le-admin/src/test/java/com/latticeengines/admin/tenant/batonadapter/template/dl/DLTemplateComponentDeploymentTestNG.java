@@ -55,7 +55,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
 
     private String tenant;
 
-    @BeforeClass(groups = { "deployment" })
+    @BeforeClass(groups = { "deployment_lp2" })
     @Override
     public void setup() throws Exception {
         super.setup();
@@ -68,7 +68,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
         visiDBDLComponentTestNG.clearDatastore(dataStoreServer, permStoreServer, visiDBServerName, tenant);
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = { "deployment_lp2" })
     @Override
     public void tearDown() throws Exception {
         visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
@@ -89,7 +89,7 @@ public class DLTemplateComponentDeploymentTestNG extends BatonAdapterDeploymentT
                 prodAndExternalAminInfo);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment_lp2")
     public void testInstallation() throws InterruptedException, IOException {
         InstallResult response = visiDBDLComponentTestNG.deleteVisiDBDLTenantWithRetry(tenant);
         Assert.assertEquals(response.getStatus(), 5);
