@@ -201,13 +201,18 @@ public class ModelRetrieverImpl implements ModelRetriever {
     }
 
     @VisibleForTesting
+    /*
+     * The purpose of this function is to remove certain transforms from the eventtable-generated datacomposition.
+     * This is needed because during profiling certain fields get removed so that the final datascience-generated
+     * datacomposition ends up being a subset of the eventtable-generated datacomposition.
+     */
     void removeDroppedDataScienceFieldEventTableTransforms(DataComposition eventTableDataComposition,
             DataComposition dataScienceDataComposition) {
         Set<String> difference = new HashSet<>(eventTableDataComposition.fields.keySet());
+        difference.removeAll(dataScienceDataComposition.fields.keySet());
         if (log.isDebugEnabled()) {
             log.debug("Difference in datacompositions:" + JsonUtils.serialize(difference));
         }
-        difference.removeAll(dataScienceDataComposition.fields.keySet());
 
         List<TransformDefinition> transformsToKeep = new ArrayList<>();
 

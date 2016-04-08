@@ -21,6 +21,18 @@ public class ScoreResponse {
     @ApiModelProperty(required = true)
     private String id = "";
 
+    @JsonProperty("timestamp")
+    @ApiModelProperty(value = "The UTC timestamp of this score in ISO8601 format", required = true)
+    private String timestamp = "";
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getId() {
         return id;
     }
