@@ -16,7 +16,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
+// TOOD: Waiting to be covnerted to deployment test, with proper setup
 public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
+
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
@@ -30,13 +32,13 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setErrorHandler(statusErrorHandler);
     }
     
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void delete() {
         restTemplate.delete(getRestAPIHostPort() + "/pls/segments/SMB", new HashMap<>());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "delete" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "delete" }, enabled = false)
     public void createSegmentHasEditPlsModelsRight() {
         List summaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         Map<String, String> map = (Map) summaries.get(0);
@@ -49,12 +51,12 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(response.isSuccess());
     }
 
-    @Test(groups = { "functional", "deployment" })
+    @Test(groups = { "functional", "deployment" }, enabled = false)
     public void createSegmentNoEditPlsModelsRight() {
         switchToExternalUser();
     }
 
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" }, enabled = false)
     public void getSegmentByName() {
         Segment segment = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/EMEA", Segment.class);
         assertNotNull(segment);
@@ -62,13 +64,13 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "createSegmentHasEditPlsModelsRight" }, enabled = false)
     public void getSegments() {
         List segments = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/", List.class);
         assertEquals(segments.size(), 1);
     }
 
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getSegmentByName" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getSegmentByName" }, enabled = false)
     public void update() {
         Segment segment = restTemplate.getForObject(getRestAPIHostPort() + "/pls/segments/EMEA", Segment.class);
         segment.setPriority(2);
