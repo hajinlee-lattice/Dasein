@@ -78,15 +78,15 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     }
 
     @Override
-    public InputStream getResults(String applicationId) {
-        Job job = workflowProxy.getWorkflowJobFromApplicationId(applicationId);
+    public InputStream getResults(String workflowJobId) {
+        Job job = workflowProxy.getWorkflowExecution(workflowJobId);
         if (job == null) {
-            throw new LedpException(LedpCode.LEDP_18104, new String[] { applicationId });
+            throw new LedpException(LedpCode.LEDP_18104, new String[] { workflowJobId });
         }
 
         String path = job.getOutputs().get(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         if (path == null) {
-            throw new LedpException(LedpCode.LEDP_18103, new String[] { applicationId });
+            throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
         }
 
         try {
@@ -94,7 +94,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             return fs.open(new Path(path));
 
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18102, new String[] { applicationId });
+            throw new LedpException(LedpCode.LEDP_18102, new String[] { workflowJobId });
         }
     }
 

@@ -58,7 +58,7 @@ angular.module('pd.jobs', [
             method: 'GET',
             url: '/pls/fileuploads/' + JobReport.name.replace('_Report','') + '/import/errors',
             headers: { 
-                'Accept': 'text/plain;charset=utf-8' 
+                'Accept': 'application/csv;charset=utf-8' 
             }
         }).then(
             function onSuccess(response) {
@@ -87,9 +87,9 @@ angular.module('pd.jobs', [
         
         $http({
             method: 'GET',
-            url: '/pls/scores/jobs/' + (job.applicationId || job.id) + '/results',
+            url: '/pls/scores/jobs/' + job.id + '/results',
             headers: { 
-                'Accept': 'text/plain;charset=utf-8' 
+                'Accept': 'application/csv;charset=utf-8' 
             }
         }).then(
             function onSuccess(response) {

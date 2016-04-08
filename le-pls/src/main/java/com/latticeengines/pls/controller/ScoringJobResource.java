@@ -38,12 +38,12 @@ public class ScoringJobResource {
         return scoringJobService.getJobs(modelId);
     }
 
-    @RequestMapping(value = "{applicationId}/results", method = RequestMethod.GET, produces = "application/csv")
+    @RequestMapping(value = "{jobId}/results", method = RequestMethod.GET, produces = "application/csv")
     @ResponseBody
-    @ApiOperation(value = "Retrieve results csv for the provided applicationId")
-    public void getResultsCsv(@PathVariable String applicationId, HttpServletResponse response) {
+    @ApiOperation(value = "Retrieve results csv for the provided jobId")
+    public void getResultsCsv(@PathVariable String jobId, HttpServletResponse response) {
         try {
-            InputStream is = scoringJobService.getResults(applicationId);
+            InputStream is = scoringJobService.getResults(jobId);
             response.setContentType("application/csv");
             response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", "results.csv"));
             IOUtils.copy(is, response.getOutputStream());

@@ -19,7 +19,7 @@ angular.module('mainApp.create.csvReport', [
 
         $scope.clickGetErrorLog = function($event) {
             JobsService.getErrorLog(JobReport).then(function(result) {
-                var blob = new Blob([ result ], { type: "text/plain" }),
+                var blob = new Blob([ result ], { type: "application/csv" }),
                     date = new Date(),
                     year = date.getFullYear(),
                     month = (1 + date.getMonth()).toString(),

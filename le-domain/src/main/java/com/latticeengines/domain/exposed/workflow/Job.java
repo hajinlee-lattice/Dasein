@@ -18,6 +18,7 @@ public class Job implements HasId<Long>, HasName {
     private Long id;
     private String name;
     private String description;
+    private String applicationId;
     private Date startTimestamp;
     private Date endTimestamp;
     private JobStatus jobStatus;
@@ -150,6 +151,16 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setOutputs(Map<String, String> outputs) {
         this.outputs = outputs;
+    }
+
+    @JsonProperty
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    @JsonProperty
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     @Override

@@ -9,7 +9,7 @@ public interface ScoringJobService {
 
     List<Job> getJobs(String modelId);
 
-    InputStream getResults(String applicationId);
+    InputStream getResults(String workflowJobId);
 
     String scoreTrainingData(String modelId);
 

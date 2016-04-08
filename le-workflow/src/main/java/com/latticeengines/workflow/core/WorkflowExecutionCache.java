@@ -104,7 +104,10 @@ public class WorkflowExecutionCache {
         job.setSteps(getJobSteps(jobExecution));
         job.setReports(getReports(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
-        job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
+        if (workflowJob != null) {
+            job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
+            job.setApplicationId(workflowJob.getApplicationId());
+        }
 
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
             job.setEndTimestamp(workflowStatus.getEndTime());

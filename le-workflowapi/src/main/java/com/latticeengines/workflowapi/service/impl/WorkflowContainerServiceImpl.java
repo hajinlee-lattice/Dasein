@@ -181,6 +181,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         // Yarn
         if (workflowJob.getState() != null && YarnUtils.TERMINAL_APP_STATE.contains(workflowJob.getState())) {
             job.setJobStatus(JobStatus.FAILED);
+            job.setApplicationId(workflowJob.getApplicationId());
             if (workflowJob.getStartTimeInMillis() != null) {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
