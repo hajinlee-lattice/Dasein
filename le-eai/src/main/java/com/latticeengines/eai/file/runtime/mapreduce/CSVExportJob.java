@@ -31,17 +31,15 @@ public class CSVExportJob extends Configured implements Tool, MRJobCustomization
 
     public static final String CSV_EXPORT_JOB_TYPE = "eaiCSVExportJob";
 
-    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
-
     public static final String PROP_MAPRED_MAP_TASKS = "mapred.map.tasks";
-
-    // pUBLIC static final String MAP_INPUT_SCHEMA = "avro.map.input.schema";
-
-    private VersionManager versionManager;
 
     private static final String dependencyPath = "/app/";
 
     private static final String jarDependencyPath = "/eai/lib";
+
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
+    private VersionManager versionManager;
 
     public CSVExportJob(Configuration config) {
         setConf(config);
