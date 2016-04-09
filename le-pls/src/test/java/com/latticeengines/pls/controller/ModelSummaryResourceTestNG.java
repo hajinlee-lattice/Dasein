@@ -234,7 +234,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
                 + modelId, List.class);
         assertNotNull(response);
         int size = response.size();
-        assertEquals(size, 185);
+        assertEquals(size, 183);
 
         Map<String, Object> firstPredictor = (Map) response.get(0);
         Map<String, Object> lastPredictor = (Map) response.get(size - 1);
