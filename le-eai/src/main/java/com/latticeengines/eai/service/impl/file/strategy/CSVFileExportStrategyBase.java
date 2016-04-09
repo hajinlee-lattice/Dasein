@@ -12,10 +12,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
-import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
@@ -29,19 +27,13 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @Component("csvFileExportStrategyBase")
 public class CSVFileExportStrategyBase extends ExportStrategy {
 
-    @Autowired
-    private SqoopSyncJobService sqoopSyncJobService;
-
+    private static final Log log = LogFactory.getLog(CSVFileExportStrategyBase.class);
+    
     @Autowired
     private JobService jobService;
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private VersionManager versionManager;
-
-    private static final Log log = LogFactory.getLog(CSVFileExportStrategyBase.class);
 
     public CSVFileExportStrategyBase() {
         this(ExportFormat.CSV);
