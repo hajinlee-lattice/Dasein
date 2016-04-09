@@ -34,7 +34,7 @@ angular
                 }
             })
             .state('home.jobs.status', {
-                url: '/status',
+                url: '/status/:{jobCreationSuccess}',
                 views: {
                     "summary@": {
                         resolve: { 

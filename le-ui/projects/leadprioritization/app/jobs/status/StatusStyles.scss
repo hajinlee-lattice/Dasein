@@ -48,7 +48,7 @@
 }
 .job-success-message {
     background: rgb(113, 188, 81);
-    margin-top: 50px;
+    margin-top: 20px;
     padding: 15px 10px 15px 40px;
     color: white !important;
     
@@ -57,6 +57,24 @@
         font-size: 20px;
         position: relative;
         
+        i {
+            position: absolute;
+            right: 25px;
+            top: 16px;
+        }
+    }
+}
+.job-creation-failed {
+    background: rgb(164, 1, 15);
+    margin-top: 20px;
+    padding: 15px 10px 15px 40px;
+    color: white !important;
+
+    div {
+        color: white;
+        font-size: 20px;
+        position: relative;
+
         i {
             position: absolute;
             right: 25px;

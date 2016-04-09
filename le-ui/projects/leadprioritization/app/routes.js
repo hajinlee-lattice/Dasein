@@ -147,7 +147,7 @@ angular
 
                             csvImportService.SetUnknownColumns(csvMetaData, this.data).then(function(result) {
                                 csvImportService.StartModeling(csvMetaData).then(function(result) {
-                                    $state.go('home.jobs.status');
+                                    $state.go('home.jobs.status', {'jobCreationSuccess': result.Success });
                                 });
                             });
                         }

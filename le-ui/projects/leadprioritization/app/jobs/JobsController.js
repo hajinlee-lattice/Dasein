@@ -306,7 +306,7 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $state, $rootScope, $http, JobsService, BrowserStorageUtility) {
+.controller('JobsCtrl', function($scope, $state, $stateParams, $rootScope, $http, $timeout, JobsService, BrowserStorageUtility) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
@@ -316,6 +316,16 @@ angular.module('pd.jobs', [
     //console.log($state.current.name, $state);
     $scope.state = $state.current.name == 'home.model.jobs.status' ? 'model' : 'all';
     //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
+    $scope.hideCreationMessage = true;
+    if ($stateParams.jobCreationSuccess !== null && $stateParams.jobCreationSuccess != "") {
+        $scope.jobCreationSuccess = JSON.parse($stateParams.jobCreationSuccess);
+        $scope.hideCreationMessage = false;
+
+        $scope.timeoutTask = $timeout(function() {
+            $scope.jobCreationSuccess = null;
+            $state.go('home.jobs.status', { 'jobCreationSuccess': null });
+        }, 15000);
+    }
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -349,4 +359,14 @@ angular.module('pd.jobs', [
         $scope.succeeded = false;
         BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(false);
     };
+
+    $scope.closeJobCreationMessage = function() {
+        $scope.hideCreationMessage = true;
+        $state.go('home.jobs.status', { 'jobCreationSuccess': null });
+    };
+
+    $scope.$on('$destroy', function() {
+        $timeout.cancel($scope.timeoutTask);
+    });
+
 });
