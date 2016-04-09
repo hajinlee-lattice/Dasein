@@ -15,9 +15,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Company;
 import com.latticeengines.pls.entitymanager.CompanyEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class CompanyEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class CompanyEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private CompanyEntityMgr companyEntityMgr;

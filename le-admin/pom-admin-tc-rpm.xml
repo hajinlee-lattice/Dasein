@@ -32,14 +32,19 @@
                     <changelogFile>src/main/resources/changelog</changelogFile>
                     <mappings>
                         <mapping>
-                            <directory>/usr/share/tomcat/webapps/admin</directory>
-                            <username>tomcat</username>
-                            <groupname>tomcat</groupname>
-                            <filemode>775</filemode>
+                            <directory>/tmp/le-admin-tc-rpm/war</directory>
                             <sources>
                                 <source>
                                     <location>target/le-admin-${le.rpm.version}.war</location>
                                     <destination>ROOT.war</destination>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/le-admin-tc-rpm/env</directory>
+                            <sources>
+                                <source>
+                                    <location>conf/env</location>
                                 </source>
                             </sources>
                         </mapping>

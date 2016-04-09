@@ -14,11 +14,14 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -56,11 +59,10 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
  */
 public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private static final String MODEL_ID = "ms__8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a-PLSModel";
-
+    private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
     private String tenantId;
 
-    private String modelId = MODEL_ID;
+    private String modelId;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
@@ -76,10 +78,12 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
 
-        tenantId = testingTenants.get(0).getId();
-        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + MODEL_ID + "/container_01/";
+        tenantId = eloquaTenant.getId();
+        modelId = eloquaModelId;
+
+        String dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + eloquaModelId + "/container_01/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
         URL metadataDiagnosticsUrl = ClassLoader
@@ -118,8 +122,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/alerts/someModel", ModelAlerts.class);
             Assert.fail("Should have thrown an exception.");
         } catch (Exception e) {
-            String code = e.getMessage();
-            assertEquals(code, "403");
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.FORBIDDEN,
+                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
         }
     }
 
@@ -127,7 +132,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     public void testGenerateModelAlert() {
         String response = null;
         try {
-            response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/alerts/" + MODEL_ID,
+            response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/alerts/" + eloquaModelId,
                     String.class);
         } catch (Exception e) {
             System.out.println(ExceptionUtils.getFullStackTrace(e));
@@ -148,6 +153,19 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertDeleteModelSummaryGet403();
     }
 
+    private void assertDeleteModelSummaryGet403() {
+        boolean exception = false;
+        try {
+            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
+        } catch (Exception e) {
+            exception = true;
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.FORBIDDEN,
+                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
+        }
+        assertTrue(exception);
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional" })
     public void getModelSummariesAndPredictorsHasViewPlsModelsRight() {
@@ -162,7 +180,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         List<Predictor> predictors = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/modelsummaries/predictors/all/" + summary.getId(), List.class);
         assertNotNull(predictors);
-        assertEquals(predictors.size(), 185);
+        assertEquals(predictors.size(), 183);
 
         List<Predictor> predictorsForBi = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/modelsummaries/predictors/bi/" + summary.getId(), List.class);
@@ -274,7 +292,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
                     + modelId, List.class);
             assertNotNull(response);
             int size = response.size();
-            assertEquals(size, 185);
+            assertEquals(size, 183);
 
             Map<String, Object> firstPredictor = (Map) response.get(0);
             boolean firstPredictorPredictorIsUsed = Boolean.parseBoolean(firstPredictor.get("UsedForBuyerInsights")
@@ -285,9 +303,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/predictors/" + modelId, attrMap,
                     new HashMap<>());
         } catch (Exception e) {
-            String code = e.getMessage();
             exception = true;
-            assertEquals(code, "403");
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.FORBIDDEN,
+                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
@@ -366,18 +385,21 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     public void postModelSummariesUsingRaw() throws IOException {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         int originalNumModels = response.size();
-
-        InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-        assertNotNull(ins, "Testing json file is missing");
-
         ModelSummary data = new ModelSummary();
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
+        String uuid = eloquaModelId.replace("-" + eloquaModelName, "").replace(modelIdPrefix, "");
+        contents = contents.replace("{uuid}", uuid);
+        contents = contents.replace("{tenantId}", eloquaTenant.getId());
+        contents = contents.replace("{modelName}", eloquaModelName);
+
         Tenant fakeTenant = new Tenant();
         fakeTenant.setId("FAKE_TENANT");
         fakeTenant.setName("Fake Tenant");
         fakeTenant.setPid(-1L);
         data.setTenant(fakeTenant);
-        data.setRawFile(new String(IOUtils.toByteArray(ins)));
+        data.setRawFile(contents);
 
         ModelSummary newSummary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries?raw=true",
                 data, ModelSummary.class);
@@ -389,18 +411,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + newSummary.getId());
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertEquals(response.size(), originalNumModels);
-    }
-
-    private void assertDeleteModelSummaryGet403() {
-        boolean exception = false;
-        try {
-            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
-        } catch (Exception e) {
-            String code = e.getMessage();
-            exception = true;
-            assertEquals(code, "403");
-        }
-        assertTrue(exception);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -452,9 +462,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             attrMap.put("Name", "xyz");
             restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
         } catch (Exception e) {
-            String code = e.getMessage();
             exception = true;
-            assertEquals(code, "403");
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.FORBIDDEN,
+                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
@@ -468,19 +479,17 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
             restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
         } catch (Exception e) {
-            String code = e.getMessage();
             exception = true;
-            assertEquals(code, "403");
+            HttpStatus status = getErrorHandler().getStatusCode();
+            assertEquals(status, HttpStatus.FORBIDDEN,
+                    "Should return forbidden 403, but got " + getErrorHandler().getResponseString());
         }
         assertTrue(exception);
     }
 
     @SuppressWarnings("rawtypes")
     private void assertCreateModelSummariesSuccess() throws IOException {
-        InputStream ins = getClass().getClassLoader().getResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-        assertNotNull(ins, "Testing json file is missing");
-        ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
+        ModelSummary modelSummary = getDetails(eloquaTenant, "eloqua");
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         int originalNumModels = response.size();
 

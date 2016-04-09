@@ -21,12 +21,12 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("internalResourceTestNG")
-public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
+public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -38,7 +38,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
 
         tenant = new Tenant();
         tenant.setName("Internal Resource Test Tenant");

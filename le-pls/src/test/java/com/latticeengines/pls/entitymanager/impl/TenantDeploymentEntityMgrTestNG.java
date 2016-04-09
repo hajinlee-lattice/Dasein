@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.pls.TenantDeployment;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStatus;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.pls.entitymanager.TenantDeploymentEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class TenantDeploymentEntityMgrTestNG extends PlsFunctionalTestNGBase {
+public class TenantDeploymentEntityMgrTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private TenantDeploymentEntityMgr tenantDeploymentEntityMgr;

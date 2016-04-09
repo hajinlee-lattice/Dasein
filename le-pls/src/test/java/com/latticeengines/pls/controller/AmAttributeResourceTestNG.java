@@ -24,15 +24,15 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
+public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PLS_ATTR_URL = "pls/amattributes/";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
     }
 
     @BeforeMethod(groups = { "functional" })

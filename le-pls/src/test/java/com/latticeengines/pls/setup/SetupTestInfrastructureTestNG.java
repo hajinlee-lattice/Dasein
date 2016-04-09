@@ -23,11 +23,11 @@ import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 
-public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
+public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private static final Log log = LogFactory.getLog(SetupTestInfrastructureTestNG.class);
 
     @Autowired

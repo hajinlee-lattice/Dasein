@@ -10,9 +10,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     QuotaEntityMgr quotaEntityMgr;
@@ -22,13 +22,13 @@ public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         QUOTA.setId(TEST_QUOTA_ID);
         QUOTA.setBalance(BALANCE);
 
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
         cleanupQuotaDB();
     }
 
     @Test(groups = { "functional" })
     public void create_calledWithParameters_assertQuotaIsCreated() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         assertNull(this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID));
 
         this.quotaEntityMgr.create(QUOTA);
@@ -49,7 +49,7 @@ public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @Test(groups = {"functional" }, dependsOnMethods = { "createdQuotaInOneTenant_findQuotaInAnotherTenant_quotaCannotBeFound" })
     public void update_calledWithParameters_assertQuotaIsUpdated() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
 
         QUOTA.setPid(null);
         QUOTA.setBalance(BALANCE_1);

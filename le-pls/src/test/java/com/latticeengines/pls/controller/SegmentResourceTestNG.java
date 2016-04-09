@@ -14,15 +14,15 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.Segment;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
 // TOOD: Waiting to be covnerted to deployment test, with proper setup
-public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
+public class SegmentResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })

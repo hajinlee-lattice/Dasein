@@ -21,13 +21,10 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.AccessLevel;
 
 public class TenantConfigResourceTestNG extends PlsFunctionalTestNGBase {
 
-    private Tenant tenant;
     private String PlsTenantId;
 
     @Autowired
@@ -35,10 +32,9 @@ public class TenantConfigResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        super.setup();
 
-        tenant = testingTenants.get(1);
-        PlsTenantId = tenant.getId();
+        PlsTenantId = mainTestTenant.getId();
         String contractId = CustomerSpace.parse(PlsTenantId).getContractId();
         String tenantId = CustomerSpace.parse(PlsTenantId).getTenantId();
         String spaceId = CustomerSpace.parse(PlsTenantId).getSpaceId();
@@ -77,7 +73,7 @@ public class TenantConfigResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void getSfdcTopology() throws IOException {
-        loginAndAttach(AccessLevel.SUPER_ADMIN, tenant);
+        switchToSuperAdmin();
         String response = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/config/topology?tenantId=" + PlsTenantId, String.class);
         ObjectMapper mapper = new ObjectMapper();

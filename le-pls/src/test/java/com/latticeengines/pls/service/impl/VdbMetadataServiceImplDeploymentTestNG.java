@@ -16,12 +16,12 @@ import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.liaison.exposed.service.ConnectionMgr;
 import com.latticeengines.liaison.exposed.service.ConnectionMgrFactory;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.service.VdbMetadataService;
 
-public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class VdbMetadataServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @Autowired
     private TenantConfigService tenantConfigService;

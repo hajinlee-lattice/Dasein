@@ -1,0 +1,66 @@
+{
+  "ConfigDirectories": [
+    {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[\"ysong@lattice-engines.com\"]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[\"bnguyen@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        }
+      ]
+    },
+    {
+      "RootPath": "/Metadata",
+      "Nodes": []
+    },
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+        ]
+    }
+  ],
+  "CustomerSpaceInfo": {
+    "properties": {
+      "displayName": "LP3_${TENANT}",
+      "description": "A LP3 solution for ${TENANT} in ${TENANT}"
+    },
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true}"
+  },
+  "TenantInfo": {
+    "properties": {
+      "displayName": "LP3 ${TENANT}",
+      "description": "A LP3 tenant under the contract ${TENANT}"
+    }
+  },
+  "ContractInfo": {
+    "properties": {}
+  },
+  "SpaceConfig": {
+    "Product": "Prospect Discovery",
+    "Products": [
+      "Prospect Discovery"
+    ],
+    "Topology": "${TOPOLOGY}",
+    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
+  }
+}

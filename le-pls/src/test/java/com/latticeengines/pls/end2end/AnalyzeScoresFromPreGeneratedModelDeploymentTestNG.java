@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
 @Component
-public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final String TENANT_ID = "DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production";

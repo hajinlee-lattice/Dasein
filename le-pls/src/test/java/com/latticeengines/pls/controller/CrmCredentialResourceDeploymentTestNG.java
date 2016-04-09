@@ -10,10 +10,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 
-public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class CrmCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private CustomerSpace customerSpace;
     private static String tenant;

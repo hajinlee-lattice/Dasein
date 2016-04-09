@@ -27,12 +27,12 @@ import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
-public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -42,7 +42,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
-public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
+public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private Tenant tenant;
 

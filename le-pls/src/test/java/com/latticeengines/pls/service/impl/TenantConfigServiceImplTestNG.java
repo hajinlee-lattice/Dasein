@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 import com.latticeengines.domain.exposed.pls.TenantDeployment;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.DefaultFeatureFlagProvider;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.TenantConfigService;
@@ -41,7 +41,7 @@ import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 
-public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class TenantConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private final static String contractId = "PLSTenantConfig";
     private final static String tenantId = contractId;

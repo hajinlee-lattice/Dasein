@@ -15,9 +15,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
+public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Value("${pls.default.buyerinsights.num.predictors}")
     private int defaultBiPredictorNum;

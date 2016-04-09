@@ -14,9 +14,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Company;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class CompanyResourceTestNG extends PlsFunctionalTestNGBase {
+public class CompanyResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PLS_COMPANY_URL = "pls/companies/";
     private static final String PLS_COUNT_URL = "pls/companies/count/";

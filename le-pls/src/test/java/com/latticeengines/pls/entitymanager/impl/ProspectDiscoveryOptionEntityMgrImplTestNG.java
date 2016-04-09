@@ -10,9 +10,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
@@ -28,7 +28,7 @@ public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTes
     
     @Test(groups = { "functional" })
     public void updateOption_calledForNonExistingOption_assertOptionIsCreated() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         assertNull(this.prospectDiscoveryOptionEntityMgr.findProspectDiscoveryOption(OPTION_1.toString()));
         
         this.prospectDiscoveryOptionEntityMgr.updateProspectDiscoveryOption(OPTION_1.toString(), STRING_VALUE);
@@ -41,7 +41,7 @@ public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTes
     
     @Test(groups = { "functional" }, dependsOnMethods = { "updateOption_calledForNonExistingOption_assertOptionIsCreated" })
     public void updateOption_calledForExistingOption_assertOptionValueIsUpdated() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         assertNotNull(this.prospectDiscoveryOptionEntityMgr.findProspectDiscoveryOption(OPTION_1.toString()));
         
         this.prospectDiscoveryOptionEntityMgr.updateProspectDiscoveryOption(OPTION_1.toString(), STRING_VALUE_1);
@@ -61,7 +61,7 @@ public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTes
     
     @Test(groups = { "functional" }, dependsOnMethods = { "findOption_calledFromAnotherTenant_assertOptionCannotBeFound" })
     public void deleteOption_calledForExistingOption_assertOptionIsDeleted() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         assertNotNull(this.prospectDiscoveryOptionEntityMgr.findProspectDiscoveryOption(OPTION_1.toString()));
     
         this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(OPTION_1.toString());

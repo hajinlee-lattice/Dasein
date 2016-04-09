@@ -23,14 +23,14 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.functionalframework.SourceCredentialValidationServlet;
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 @SuppressWarnings("unused")
-public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private BatonService batonService;

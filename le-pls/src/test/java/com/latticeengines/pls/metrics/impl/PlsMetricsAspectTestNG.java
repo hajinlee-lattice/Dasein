@@ -27,11 +27,11 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
-public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBase {
+public class PlsMetricsAspectTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private ModelSummaryResource modelSummaryResource;

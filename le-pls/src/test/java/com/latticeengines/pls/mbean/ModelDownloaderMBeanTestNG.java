@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
 @ContextConfiguration(locations = {"classpath:pls-modeldownload-quartz-context.xml"})
-public class ModelDownloaderMBeanTestNG extends PlsFunctionalTestNGBase {
+public class ModelDownloaderMBeanTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
 	@Autowired
 	private ModelDownloaderMBean modelDownloaderMBean;

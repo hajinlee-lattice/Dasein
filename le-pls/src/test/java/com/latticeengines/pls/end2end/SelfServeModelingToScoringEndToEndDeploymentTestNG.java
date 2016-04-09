@@ -17,10 +17,10 @@ import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
 @Component
-public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;

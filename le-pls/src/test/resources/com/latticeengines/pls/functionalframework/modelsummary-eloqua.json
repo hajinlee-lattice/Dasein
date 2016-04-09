@@ -11041,8 +11041,8 @@
         }
     ], 
     "ModelDetails": {
-        "Name": "PLSModel-Eloqua", 
-        "LookupID": "TENANT1|Q_PLS_Modeling_TENANT1|8195dcf1-0898-4ad3-b94d-0d0f806e979e", 
+        "Name": "{modelName}",
+        "LookupID": "{tenantId}|Q_PLS_Modeling_TENANT1|{uuid}",
         "TotalLeads": 19114, 
         "TestingLeads": 3738, 
         "TrainingLeads": 15376, 
@@ -11178,7 +11178,7 @@
     ], 
     "EventTableProvenance": {
         "SourceURL": "https://bodcdevvint187.dev.lattice.local:8080//DLRestService", 
-        "TenantName": "BD_ADEDTBDd69264296nJ26263627n1", 
+        "TenantName": "BD_ADEDTBDd69264296nJ26263627n1",
         "QueryName": "Q_PLS_Modeling"
     }
 }

@@ -23,12 +23,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
+public class PLSComponentTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final BatonService batonService = new BatonServiceImpl();
     private static final String serviceName = "PLS";

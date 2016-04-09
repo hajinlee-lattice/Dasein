@@ -13,11 +13,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class TargetMarketServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class TargetMarketServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     
     private static final String TENANT1 = "TENANT1";
     private static final String TENANT2 = "TENANT2";

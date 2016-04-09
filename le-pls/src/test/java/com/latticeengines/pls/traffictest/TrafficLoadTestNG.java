@@ -48,14 +48,14 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 
-public class TrafficLoadTestNG extends PlsDeploymentTestNGBase {
+public class TrafficLoadTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static Log log = LogFactory.getLog(TrafficLoadTestNG.class);
 

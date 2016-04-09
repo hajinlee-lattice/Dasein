@@ -8,9 +8,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
-public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -21,7 +21,7 @@ public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void getCredentialAuthenticationLink() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestingTenant.getId(), String.class);
+                + mainTestTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
 
         String url = restTemplate.getForObject(getRestAPIHostPort() + "/pls/sureshot/credentials?crmType=marketo",
@@ -35,7 +35,7 @@ public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void getSureShotUrls() {
         switchToSuperAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/accesstoken?tenantId="
-                + mainTestingTenant.getId(), String.class);
+                + mainTestTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
 
         ResponseDocument<SureShotUrls> response = restTemplate.getForObject(getRestAPIHostPort()

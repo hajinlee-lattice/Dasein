@@ -50,13 +50,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
 @Component
-public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
     @Autowired
     private WorkflowProxy workflowProxy;
 

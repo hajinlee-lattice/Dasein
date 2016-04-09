@@ -8,11 +8,11 @@ import static org.testng.Assert.assertEquals;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;

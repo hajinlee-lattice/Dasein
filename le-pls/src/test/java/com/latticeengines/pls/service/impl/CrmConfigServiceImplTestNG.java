@@ -26,11 +26,11 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConfig;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 
-public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private CrmConfigService crmService;

@@ -15,15 +15,15 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ReportResourceTestNG extends PlsFunctionalTestNGBase {
+public class ReportResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String REPORT_DATA = "{\"report\":\"abd\"}";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
     }
 
     @SuppressWarnings("unchecked")

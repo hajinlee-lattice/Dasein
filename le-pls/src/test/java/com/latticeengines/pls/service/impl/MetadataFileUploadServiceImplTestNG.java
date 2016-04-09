@@ -18,10 +18,10 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Module;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 
-public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     
     @Autowired
     private Configuration yarnConfiguration;
@@ -33,7 +33,7 @@ public class MetadataFileUploadServiceImplTestNG extends PlsFunctionalTestNGBase
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant2", contractId));
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
         switchToSuperAdmin();
     }
 

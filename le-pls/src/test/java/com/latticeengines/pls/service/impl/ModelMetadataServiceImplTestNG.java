@@ -16,10 +16,10 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 
-public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private InputStream fileInputStream;
 

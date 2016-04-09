@@ -30,9 +30,9 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
+public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
     private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.zip";
@@ -46,7 +46,7 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
     }
 
     @BeforeMethod

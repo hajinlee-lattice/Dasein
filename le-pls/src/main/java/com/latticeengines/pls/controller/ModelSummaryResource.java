@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -93,6 +94,7 @@ public class ModelSummaryResource {
         String tenantId = tenant.getId();
         if (!modelSummaryService.modelIdinTenant(modelId, tenant.getId())) {
             response.setStatus(403);
+            log.warn("Tenant " + tenant.getId() + " does not have the model " + modelId);
             return null;
         }
 

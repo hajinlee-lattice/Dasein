@@ -14,9 +14,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Contact;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ContactResourceTestNG extends PlsFunctionalTestNGBase {
+public class ContactResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PLS_CONTACT_URL = "pls/contacts/";
     private static final String PLS_COUNT_URL = "pls/contacts/count/";

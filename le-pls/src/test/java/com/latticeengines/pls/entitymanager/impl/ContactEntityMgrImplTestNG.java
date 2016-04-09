@@ -15,9 +15,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Contact;
 import com.latticeengines.pls.entitymanager.ContactEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ContactEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class ContactEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private ContactEntityMgr contactEntityMgr;

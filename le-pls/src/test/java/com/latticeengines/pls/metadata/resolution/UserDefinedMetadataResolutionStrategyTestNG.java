@@ -17,9 +17,9 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTestNGBase {
+public class UserDefinedMetadataResolutionStrategyTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private Configuration yarnConfiguration;

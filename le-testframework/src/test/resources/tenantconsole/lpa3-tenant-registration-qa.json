@@ -1,0 +1,89 @@
+{
+  "ConfigDirectories": [
+    {
+      "RootPath": "/Eai",
+      "Nodes": [
+        {
+          "Node": "SalesforceEndpointConfig",
+          "Children": [
+            {
+              "Node": "HttpClient",
+              "Children": [
+                {
+                  "Node": "ConnectTimeout",
+                  "Data": "60000"
+                },
+                {
+                  "Node": "ImportTimeout",
+                  "Data": "3600000"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+        ]
+    },
+    {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[\"ysong@lattice-engines.com\"]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[\"bnguyen@lattice-engines.com\",\"bross@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        }
+      ]
+    },
+    {
+      "RootPath": "/Metadata",
+      "Nodes": []
+    }
+  ],
+  "CustomerSpaceInfo": {
+    "properties": {
+      "displayName": "PD_${TENANT}",
+      "description": "A PD solution for ${TENANT} in ${TENANT}"
+    },
+    "featureFlags": "{\"TargetMarket\":true,\"Quota\":true,\"ValidateCredsUsingEai\":true}"
+  },
+  "TenantInfo": {
+    "properties": {
+      "displayName": "PD ${TENANT}",
+      "description": "A PD tenant under the contract ${TENANT}"
+    }
+  },
+  "ContractInfo": {
+    "properties": {}
+  },
+  "SpaceConfig": {
+    "Product": "Prospect Discovery",
+    "Products": [
+      "Prospect Discovery"
+    ],
+    "Topology": "${TOPOLOGY}",
+    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
+  }
+}

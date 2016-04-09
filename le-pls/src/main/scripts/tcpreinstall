@@ -1,6 +1,7 @@
 #!/bin/bash
 source /etc/profile
 rm -rf $CATALINA_HOME/webapps/pls/*.war
+rm -rf /tmp/le-pls-tc-rpm
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat

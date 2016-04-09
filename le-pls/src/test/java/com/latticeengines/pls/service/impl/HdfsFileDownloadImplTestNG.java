@@ -13,11 +13,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.HdfsFileDownloader;
 import com.latticeengines.pls.service.impl.HdfsFileDownloaderImpl.DownloadBuilder;
 
-public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBase {
+public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static String CONTENTS = "contents";
     private String tenantId;

@@ -21,13 +21,13 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 
 /**
  * This test needs access to remote Modeling Service API and HDP cluster.
  */
-public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final Log LOGGER = LogFactory.getLog(LeadPrioritizationEndToEndDeploymentTestNG.class);
 

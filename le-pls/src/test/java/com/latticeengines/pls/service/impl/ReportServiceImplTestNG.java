@@ -15,12 +15,12 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 
-public class ReportServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String TENANT1 = "TENANT1";
     private static final String TENANT2 = "TENANT2";

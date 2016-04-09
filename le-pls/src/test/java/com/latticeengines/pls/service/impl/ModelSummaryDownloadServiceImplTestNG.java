@@ -20,12 +20,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private ModelSummaryDownloadServiceImpl modelSummaryDownloadService;

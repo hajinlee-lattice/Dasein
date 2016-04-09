@@ -16,13 +16,13 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class FileUploadServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
     private FileUploadService fileUploadService;

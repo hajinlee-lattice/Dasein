@@ -8,6 +8,9 @@ microservicePid = None
 adminPid = None
 plsPid = None
 
+WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ['WSHOME'] = WSHOME
+
 def isProcessRunning(processName):
     print "Checking if {0} is running".format(processName)
     psFormatString = "ps -ewf | grep {0} | grep -v grep"

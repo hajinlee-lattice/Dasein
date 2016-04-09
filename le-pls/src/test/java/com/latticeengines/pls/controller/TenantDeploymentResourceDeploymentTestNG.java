@@ -29,17 +29,17 @@ import com.latticeengines.domain.exposed.pls.TenantDeployment;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStatus;
 import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.Constants;
 
-public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
     
     private FeatureFlagDefinition def;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         switchToSuperAdmin();
-        setupCamille(mainTestingTenant);
+        setupCamille(mainTestTenant);
     }
 
     private void setupCamille(Tenant tenant) throws Exception {
@@ -76,11 +76,11 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=" +  mainTestingTenant.getId() +   "&isProduction=true&verifyOnly=false",
+                + "/pls/credentials/sfdc?tenantId=" +  mainTestTenant.getId() +   "&isProduction=true&verifyOnly=false",
                 crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
-        CustomerSpace customerSpace = CustomerSpace.parse(mainTestingTenant.getId());
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         FeatureFlagClient.removeFromSpace(customerSpace, LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName());
         def.setConfigurable(false);
         FeatureFlagClient.setDefinition(LatticeFeatureFlag.USE_EAI_VALIDATE_CREDENTIAL.getName(), def);

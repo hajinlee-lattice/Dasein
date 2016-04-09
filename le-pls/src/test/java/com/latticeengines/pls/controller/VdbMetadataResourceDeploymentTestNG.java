@@ -15,9 +15,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
-public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final Integer maxUpdatesCount = 5;
 

@@ -13,9 +13,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class FeatureImportanceParserTestNG extends PlsFunctionalTestNGBase {
+public class FeatureImportanceParserTestNG extends PlsFunctionalTestNGBaseDeprecated {
     
     @Autowired
     private Configuration yarnConfiguration = new Configuration();

@@ -26,11 +26,11 @@ import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
-public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;

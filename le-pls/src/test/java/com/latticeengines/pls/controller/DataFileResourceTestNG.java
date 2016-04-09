@@ -28,12 +28,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
+public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFileResourceTestNG.class);
@@ -66,7 +66,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
         setupDbWithEloquaSMB(TENANT_ID, TENANT_ID);
 
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestingTenant.getId());
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + mainTestTenant.getId());
         String dir = modelingServiceHdfsBaseDir + "/" + TENANT_ID + "/models/Q_PLS_Modeling_TENANT1/" + UUID
                 + "/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader

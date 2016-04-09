@@ -12,19 +12,18 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.security.exposed.AccessLevel;
 
 public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static final Log log = LogFactory.getLog(PDMockedEndToEndDeploymentTestNG.class);
@@ -42,38 +41,24 @@ public class PDMockedEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Autowired
     private WorkflowProxy workflowProxy;
 
-    private static String tenant;
-    private static Tenant tenantToAttach;
+    private static String tenantId;
     private CustomerSpace customerSpace;
 
     @BeforeClass(groups = "deployment.precheckin")
     public void setup() throws Exception {
-        System.out.println("Deleting existing test tenants ...");
-        deleteTwoTenants();
-
         System.out.println("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironment("pd", true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.PD);
 
-        System.out.println("Setting up testing users ...");
-        tenantToAttach = testingTenants.get(1);
-        if (tenantToAttach.getName().contains("Tenant 1")) {
-            tenantToAttach = testingTenants.get(0);
-        }
-        tenant = tenantToAttach.getId();
-        customerSpace = CustomerSpace.parse(tenant);
-        UserDocument doc = loginAndAttach(AccessLevel.SUPER_ADMIN, tenantToAttach);
-        useSessionDoc(doc);
+        tenantId = testBed.getMainTestTenant().getId();
+        customerSpace = CustomerSpace.parse(tenantId);
 
         log.info("Test environment setup finished.");
         System.out.println("Test environment setup finished.");
     }
 
-    private void deleteTwoTenants() throws Exception {
-        turnOffSslChecking();
-        setTestingTenants();
-        for (Tenant tenant : testingTenants) {
-            deleteTenantByRestCall(tenant.getId());
-        }
+    @AfterClass(groups = "deployment.precheckin")
+    public void tearDown() throws Exception {
+        testBed.cleanup();
     }
 
     @Test(groups = "deployment.precheckin")

@@ -15,9 +15,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
-public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class LeadEnrichmentResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {

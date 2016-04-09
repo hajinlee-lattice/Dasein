@@ -54,7 +54,7 @@ public class GASessionCache {
                                     }
                                 }
                             }
-                            if (session.getRights() != null && !session.getRights().isEmpty()) {
+                            if (session !=null && session.getRights() != null && !session.getRights().isEmpty()) {
                                 interpretGARights(session);
                             }
                             return session;

@@ -1,4 +1,31 @@
 #!/bin/bash
 
+source /etc/profile
+echo "getting environment information"
+echo $ENV_TYPE
+
+echo "repackaging wars"
+cd /tmp/le-pls-tc-rpm/war
+
+mkdir ROOT
+pushd ROOT
+jar xvf ../ROOT.war
+popd
+rm -rf ROOT.war
+
+if [ -f "/tmp/le-pls-tc-rpm/env/${ENV_TYPE}/log4j.properties" ]
+then
+    echo "replacing log4j.properties for ROOT.war"
+    cp -f /tmp/le-pls-tc-rpm/env/${ENV_TYPE}/log4j.properties ROOT/WEB-INF/classes/log4j.properties
+fi
+
+jar cvf ROOT.war -C ROOT/ .
+cp -f ROOT.war /usr/share/tomcat/webapps/pls
+
+chown -R tomcat:tomcat /usr/share/tomcat/webapps/pls
+chmod -R 775 /usr/share/tomcat/webapps/pls
+
+rm -rf /tmp/le-pls-tc-rpm
+
 echo "finishing"
-ll $CATALINA_HOME/webapps/pls/*.war
+ll /usr/share/tomcat/webapps/pls/*.war

@@ -17,9 +17,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
+public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     
     private static final String PATH = "com/latticeengines/pls/service/impl/metadatafileuploadserviceimpl/rfpmml.xml";
     
@@ -29,7 +29,7 @@ public class MetadataFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
-        setUpMarketoEloquaTestEnvironment();
+        setupMarketoEloquaTestEnvironment();
     }
 
     @Test(groups = "functional", dependsOnMethods = { "uploadFile" })

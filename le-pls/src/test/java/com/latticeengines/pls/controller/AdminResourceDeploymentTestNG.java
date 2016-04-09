@@ -11,10 +11,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.Constants;
 
-public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
+public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final String USER_EMAIL = "ron@lattice-engines.com";
 
@@ -32,7 +32,7 @@ public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
     @Test(groups = "deployment")
     public void addAdminUser() {
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
-        userRegistrationWithTenant.setTenant(mainTestingTenant.getId());
+        userRegistrationWithTenant.setTenant(mainTestTenant.getId());
         UserRegistration userRegistration = new UserRegistration();
         userRegistrationWithTenant.setUserRegistration(userRegistration);
         userRegistration.setUser(AdminResourceTestNG.getUser());
@@ -44,7 +44,7 @@ public class AdminResourceDeploymentTestNG extends PlsDeploymentTestNGBase{
                 userRegistrationWithTenant, Boolean.class);
         Assert.assertTrue(result);
 
-        UserDocument userDoc = loginAndAttach(USER_EMAIL, generalPassword, mainTestingTenant);
+        UserDocument userDoc = loginAndAttach(USER_EMAIL, generalPassword, mainTestTenant);
         Assert.assertNotNull(userDoc);
     }
 

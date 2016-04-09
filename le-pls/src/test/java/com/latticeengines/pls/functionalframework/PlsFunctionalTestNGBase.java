@@ -1,19 +1,21 @@
 package com.latticeengines.pls.functionalframework;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.testng.Assert;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -21,34 +23,24 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
 import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
+import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
 public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
-    protected static boolean usersInitialized = false;
-
-    protected static final String passwordTester = "pls-password-tester@test.lattice-engines.ext";
-    protected static final String passwordTesterPwd = "Lattice123";
-
     protected static final String BISAP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000WjNY";
     protected static final String BISLP_URL = "https://login.salesforce.com/packaging/installPackage.apexp?p0=04tF0000000Kk28";
-
-    private static Map<AccessLevel, User> testingUsers;
-
-    @Autowired
-    private InternalTestUserService internalTestUserService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -77,26 +69,30 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     @Value("${pls.test.functional.api:http://localhost:8080/}")
     private String hostPort;
 
-    protected void createUser(String username, String email, String firstName, String lastName) {
-        internalTestUserService.createUser(username, email, firstName, lastName);
+    @Autowired
+    private GlobalAuthFunctionalTestBed functionalTestBed;
+
+    protected Tenant marketoTenant;
+    protected Tenant eloquaTenant;
+    protected String marketoModelId;
+    protected String eloquaModelId;
+    protected static final String eloquaModelName = "PLSModel-Eloqua";
+    protected static final String marketoModelName = "PLSModel";
+    protected static final String modelIdPrefix = "ms__";
+
+    @PostConstruct
+    private void postConstruct() {
+        setTestBed(functionalTestBed);
     }
 
-    protected void createUser(String username, String email, String firstName, String lastName, String password) {
-        internalTestUserService.createUser(username, email, firstName, lastName, password);
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        setupTestEnvironmentWithOneGATenant();
     }
 
-    protected void deleteUserWithUsername(String username) {
-        internalTestUserService.deleteUserWithUsername(username);
-    }
-
-    protected boolean createTenantByRestCall(String tenantName) {
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantName);
-        tenant.setName(tenantName);
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        return magicRestTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class,
-                new HashMap<>());
+    @AfterClass(groups = "functional")
+    public void teardown() throws Exception {
+        testBed.cleanup();
     }
 
     @Override
@@ -104,20 +100,37 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         return hostPort.endsWith("/") ? hostPort.substring(0, hostPort.length() - 1) : hostPort;
     }
 
-    private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {
-        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s.json", suffix);
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
-        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
-        String fakePath = String.format("/user/s-analytics/customers/%s-%s", tenant.getId(), suffix);
-        ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
-        summary.setTenant(tenant);
-        return summary;
+    /**
+     * bootstrap one tenant with random tenantId
+     * 
+     * @throws Exception
+     */
+    protected void setupTestEnvironmentWithOneGATenant() throws Exception {
+        testBed.bootstrap(1);
+        mainTestTenant = testBed.getMainTestTenant();
+        switchToSuperAdmin();
     }
 
-    protected void setUpMarketoEloquaTestEnvironment() throws Exception {
-        setTestingTenants();
+    /**
+     * bootstrap two tenants with random tenantIds. The first has a marketo
+     * modelsummary, the second has an eloqua one. The tenants are marketoTenant
+     * and eloquaTenant, the modelIds are marketoModelId and eloquaModelId.
+     * 
+     * @throws Exception
+     */
+    protected void setupMarketoEloquaTestEnvironment() throws Exception {
+        testBed.bootstrap(2);
         setupDbUsingDefaultTenantIds();
-        setupUsers();
+        switchToSuperAdmin();
+    }
+
+    /**
+     * the LedpResponseErrorHandler bound to the testbed's restTemplate. Can be used to assert http errors.
+     *
+     * @throws Exception
+     */
+    protected LedpResponseErrorHandler getErrorHandler() {
+        return testBed.getErrorHandler();
     }
 
     protected void setupDbUsingDefaultTenantIds() throws Exception {
@@ -130,34 +143,26 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
             boolean createSegments) throws Exception {
-        String tenant1Id = useTenant1 ? testingTenants.get(0).getId() : null;
-        String tenant1Name = useTenant1 ? testingTenants.get(0).getName() : null;
-        String tenant2Id = useTenant2 ? testingTenants.get(1).getId() : null;
-        String tenant2Name = useTenant2 ? testingTenants.get(1).getName() : null;
-        setupDbWithMarketoSMB(tenant1Id, tenant1Name, createSummaries, createSegments);
-        setupDbWithEloquaSMB(tenant2Id, tenant2Name, createSummaries, createSegments);
+        marketoTenant = testTenants().get(0);
+        eloquaTenant = testTenants().get(1);
+        testBed.setMainTestTenant(eloquaTenant);
+        mainTestTenant = testBed.getMainTestTenant();
+        setupDbWithMarketoSMB(marketoTenant, createSummaries, createSegments);
+        setupDbWithEloquaSMB(eloquaTenant, createSummaries, createSegments);
     }
 
-    protected void setupDbWithMarketoSMB(String tenantId, String tenantName) throws Exception {
-        setupDbWithMarketoSMB(tenantId, tenantName, true, true);
+    protected void setupDbWithMarketoSMB(Tenant tenant) throws Exception {
+        setupDbWithMarketoSMB(tenant, true, true);
     }
 
-    protected void setupDbWithMarketoSMB(String tenantId, String tenantName, boolean createSummaries,
-            boolean createSegments) throws Exception {
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-        tenant.setName(tenantName);
-        if (tenantService.hasTenantId(tenantId)) {
-            tenantEntityMgr.delete(tenant);
-        }
-        tenantService.registerTenant(tenant);
+    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+            throws Exception {
 
         ModelSummary summary1 = null;
         if (createSummaries) {
             summary1 = getDetails(tenant, "marketo");
             String[] tokens = summary1.getLookupId().split("\\|");
-            tokens[0] = tenantId;
-            tokens[1] = "Q_PLS_Modeling_" + tenantId;
+            tokens[1] = "Q_PLS_Modeling_" + tenant.getId();
             summary1.setLookupId(String.format("%s|%s|%s", tokens[0], tokens[1], tokens[2]));
 
             String modelId = summary1.getId();
@@ -188,20 +193,12 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         }
     }
 
-    protected void setupDbWithEloquaSMB(String tenantId, String tenantName) throws Exception {
-        setupDbWithEloquaSMB(tenantId, tenantName, true, true);
+    protected void setupDbWithEloquaSMB(Tenant tenant) throws Exception {
+        setupDbWithEloquaSMB(tenant, true, true);
     }
 
-    protected void setupDbWithEloquaSMB(String tenantId, String tenantName, boolean createSummaries,
-            boolean createSegments) throws Exception {
-        Tenant tenant = new Tenant();
-        tenant.setId(tenantId);
-        tenant.setName(tenantName);
-        if (tenantService.hasTenantId(tenantId)) {
-            tenantEntityMgr.delete(tenant);
-        }
-        tenantService.registerTenant(tenant);
-
+    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+            throws Exception {
         ModelSummary summary2 = null;
         if (createSummaries) {
             summary2 = getDetails(tenant, "eloqua");
@@ -263,44 +260,53 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         }
     }
 
-    protected void setupUsers() throws Exception {
-        if (usersInitialized) {
-            return;
-        }
-        setTestingTenants();
-        loginTestingUsersToMainTenant();
-        usersInitialized = true;
-    }
-
-    protected User getTheTestingUserAtLevel(AccessLevel level) {
-        if (testingUsers == null || testingUsers.isEmpty()) {
-            testingUsers = internalTestUserService
-                    .createAllTestUsersIfNecessaryAndReturnStandardTestersAtEachAccessLevel(testingTenants);
-        }
-        return testingUsers.get(level);
-    }
-
-    @Override
-    protected void setTestingTenants() {
-        if (testingTenants == null || testingTenants.isEmpty()) {
-            List<String> subTenantIds = Arrays.asList(contractId + "PLSTenant1", contractId + "PLSTenant2");
-            testingTenants = new ArrayList<>();
-            for (String subTenantId : subTenantIds) {
-                String tenantId = CustomerSpace.parse(subTenantId).toString();
-                if (!tenantService.hasTenantId(tenantId)) {
-                    Tenant tenant = new Tenant();
-                    tenant.setId(tenantId);
-                    String name = subTenantId.endsWith("Tenant1") ? "Tenant 1" : "Tenant 2";
-                    tenant.setName(contractId + " " + name);
-                    tenantService.registerTenant(tenant);
-                }
-                Tenant tenant = tenantService.findByTenantId(tenantId);
-                Assert.assertNotNull(tenant);
-                testingTenants.add(tenant);
+    protected void cleanupTargetMarketDB() {
+        setupSecurityContext(mainTestTenant);
+        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.findAllTargetMarkets();
+        for (TargetMarket targetMarket : targetMarkets) {
+            if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
+                this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
             }
-            mainTestingTenant = testingTenants.get(0);
-            ALTERNATIVE_TESTING_TENANT = testingTenants.get(1);
         }
+    }
+
+    protected void cleanupQuotaDB() {
+        setupSecurityContext(mainTestTenant);
+        List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
+        for (Quota quota : quotas) {
+            if (quota.getId().startsWith("TEST")) {
+                this.quotaEntityMgr.deleteQuotaByQuotaId(quota.getId());
+            }
+        }
+    }
+
+    protected void cleanupProspectDiscoveryOptionDB() {
+        setupSecurityContext(mainTestTenant);
+        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr
+                .findAllProspectDiscoveryOptions();
+        for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
+            this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
+        }
+    }
+
+    protected ModelSummary getDetails(Tenant tenant, String suffix) throws IOException {
+        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s.json", suffix);
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
+        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
+        String uuid = UUID.randomUUID().toString();
+        contents = contents.replace("{uuid}", uuid);
+        contents = contents.replace("{tenantId}", tenant.getId());
+        if ("eloqua".equals(suffix)) {
+            eloquaModelId = modelIdPrefix + uuid + "-" + eloquaModelName;
+            contents = contents.replace("{modelName}", eloquaModelName);
+        } else {
+            marketoModelId = modelIdPrefix + uuid + "-" + marketoModelName;
+            contents = contents.replace("{modelName}", marketoModelName);
+        }
+        String fakePath = String.format("/user/s-analytics/customers/%s", tenant.getId());
+        ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
+        summary.setTenant(tenant);
+        return summary;
     }
 
     protected void setupSecurityContext(ModelSummary summary) {
@@ -311,34 +317,31 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupSecurityContext(segment.getTenant());
     }
 
-
-    protected void cleanupTargetMarketDB() {
-        setupSecurityContext(mainTestingTenant);
-        List<TargetMarket> targetMarkets = this.targetMarketEntityMgr.findAllTargetMarkets();
-        for (TargetMarket targetMarket : targetMarkets) {
-            if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
-                this.targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
-            }
-        }
+    protected void setupSecurityContext(Tenant t) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(tenant.getId()).thenReturn(t.getId());
+        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
     }
 
-    protected void cleanupQuotaDB() {
-        setupSecurityContext(mainTestingTenant);
-        List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
-        for (Quota quota : quotas) {
-            if (quota.getId().startsWith("TEST")) {
-                this.quotaEntityMgr.deleteQuotaByQuotaId(quota.getId());
-            }
-        }
-    }
-
-    protected void cleanupProspectDiscoveryOptionDB() {
-        setupSecurityContext(mainTestingTenant);
-        List<ProspectDiscoveryOption> prospectDiscoveryOptions = this.prospectDiscoveryOptionEntityMgr
-                .findAllProspectDiscoveryOptions();
-        for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
-            this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
-        }
+    protected void setupSecurityContext(Tenant t, String user) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(session.getEmailAddress()).thenReturn(user);
+        Mockito.when(tenant.getId()).thenReturn(t.getId());
+        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
     }
 
 }

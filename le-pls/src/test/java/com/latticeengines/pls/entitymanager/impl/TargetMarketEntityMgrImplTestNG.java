@@ -25,12 +25,12 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.workflow.exposed.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.ReportEntityMgr;
 
-public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String REPORT_PAYLOAD = "{ \"foo\":\"bar\" }";
     private static final ReportPurpose REPORT_PURPOSE = ReportPurpose.IMPORT_SUMMARY;
@@ -77,7 +77,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" })
     public void testCreate() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         assertNull(targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME));
 
         targetMarketEntityMgr.create(TARGET_MARKET);
@@ -130,7 +130,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" }, dependsOnMethods = { "testFindAllInAlternativeTenantReturnsEmpty" })
     public void testUpdate() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
 
         TARGET_MARKET.setPid(null);
         TARGET_MARKET.setNumProspectsDesired(NUM_PROPSPECTS_DESIRED_1);
@@ -161,7 +161,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional" }, dependsOnMethods = { "testRegisterReport" })
     public void testDelete() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         TargetMarket targetMarket = targetMarketEntityMgr.findTargetMarketByName(TEST_TARGET_MARKET_NAME);
         assertNotNull(targetMarket);
 
@@ -185,7 +185,7 @@ public class TargetMarketEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
             }
         }));
 
-        List<KeyValue> allKeyValues = keyValueEntityMgr.findByTenantId(mainTestingTenant.getPid());
+        List<KeyValue> allKeyValues = keyValueEntityMgr.findByTenantId(mainTestTenant.getPid());
         assertFalse(Iterables.any(allKeyValues, new Predicate<KeyValue>() {
             @Override
             public boolean apply(KeyValue keyValue) {

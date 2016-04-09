@@ -11,9 +11,9 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
+public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @BeforeClass(groups = { "deployment" }, enabled = false)
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();

@@ -14,11 +14,11 @@ import static org.testng.Assert.assertNotEquals;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
 
-public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @Autowired
     private Oauth2Interface oauth2Service;

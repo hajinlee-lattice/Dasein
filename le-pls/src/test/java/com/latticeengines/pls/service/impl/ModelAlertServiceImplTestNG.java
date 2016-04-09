@@ -21,10 +21,10 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.ModelAlertService;
 
-public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
+public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String MODEL_ID = "ms__8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a-PLSModel";
     private String tenantId;

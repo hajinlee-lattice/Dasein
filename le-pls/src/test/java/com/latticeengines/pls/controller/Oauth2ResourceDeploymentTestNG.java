@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertTrue;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 
 
-public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -18,7 +18,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createApiToken() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort() + "/pls/oauth2/apitoken?tenantId="
-                + mainTestingTenant.getId(), String.class);
+                + mainTestTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
     }
 
@@ -26,7 +26,7 @@ public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void createOAuth2AccessToken() {
         switchToExternalAdmin();
         String token = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/oauth2/accesstoken?tenantId=" + mainTestingTenant.getId(), String.class);
+                + "/pls/oauth2/accesstoken?tenantId=" + mainTestTenant.getId(), String.class);
         assertTrue(StringUtils.isNotEmpty(token));
     }
 }

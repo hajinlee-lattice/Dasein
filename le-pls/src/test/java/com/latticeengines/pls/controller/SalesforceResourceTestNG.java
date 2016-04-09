@@ -14,11 +14,11 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.SalesforceURL;
 import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.SalesforceURLConstants;
 import com.latticeengines.pls.service.SalesforceURLService;
 
-public class SalesforceResourceTestNG extends PlsFunctionalTestNGBase {
+public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private SalesforceURL sfdcURLLPCreated;
     private SalesforceURL sfdcURLAPCreated;
 

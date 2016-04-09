@@ -10,10 +10,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.pls.service.CrmCredentialService;
 
-public class CrmCredentialServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class CrmCredentialServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     @Autowired
     private CrmCredentialService crmService;

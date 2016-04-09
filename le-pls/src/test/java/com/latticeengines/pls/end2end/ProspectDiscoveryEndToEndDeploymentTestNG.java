@@ -22,11 +22,11 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 
-public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ProspectDiscoveryEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final Log log = LogFactory.getLog(ProspectDiscoveryEndToEndDeploymentTestNG.class);
 

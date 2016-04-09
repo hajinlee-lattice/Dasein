@@ -6,9 +6,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.SalesforceURL;
 import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class SalesforceURLEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class SalesforceURLEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @Autowired
     private SalesforceURLEntityMgr salesforceURLEntityMgr;
 

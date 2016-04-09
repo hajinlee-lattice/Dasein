@@ -10248,8 +10248,8 @@
         }
     ], 
     "ModelDetails": {
-        "Name": "PLSModel", 
-        "LookupID": "BD2_ADEDTBDd69264296nJ26263627n12|Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12|8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a", 
+        "Name": "{modelName}",
+        "LookupID": "{tenantId}|Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12|{uuid}",
         "TotalLeads": 10498, 
         "TestingLeads": 2112, 
         "TrainingLeads": 8386, 

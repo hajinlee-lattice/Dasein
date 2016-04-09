@@ -36,11 +36,11 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
 
-public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
@@ -85,7 +85,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         deleteTwoTenants();
 
         setupTestEnvironment("pd", true);
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         cleanupTargetMarketDB();
         switchToExternalAdmin();
     }
@@ -110,14 +110,14 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateDefault")
     public void testResetDefaultTargetMarket() throws Exception {
-        String tenantId = mainTestingTenant.getId();
+        String tenantId = mainTestTenant.getId();
         CustomerSpace space = CustomerSpace.parse(tenantId);
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         microServiceRestTemplate.getInterceptors().add(addMagicAuthHeader);
 
         if (metadataProxy.getImportTables(space.toString()).size() == 0) {
-            provisionMetadataTables(mainTestingTenant);
+            provisionMetadataTables(mainTestTenant);
         }
 
         List<Table> importTables = metadataProxy.getImportTables(space.toString());
@@ -327,7 +327,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     protected void cleanupTargetMarketDB() {
-        setupSecurityContext(mainTestingTenant);
+        setupSecurityContext(mainTestTenant);
         List<TargetMarket> targetMarkets = targetMarketEntityMgr.findAllTargetMarkets();
         for (TargetMarket targetMarket : targetMarkets) {
             if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {

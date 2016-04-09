@@ -8,9 +8,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryConfiguration;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 
-public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBase {
+public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL = "pls/prospectdiscoveryconfigs/";
     

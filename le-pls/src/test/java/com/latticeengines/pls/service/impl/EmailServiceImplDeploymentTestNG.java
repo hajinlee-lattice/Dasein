@@ -32,11 +32,11 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
 
 
-public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";

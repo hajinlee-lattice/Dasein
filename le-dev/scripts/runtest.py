@@ -26,6 +26,7 @@ def propDirsOpts():
 def commonOpts():
     args = [
         '-Djavax.net.ssl.trustStore=../le-security/certificates/laca-ldap.dev.lattice.local.jks',
+        '-Djava.util.logging.config.file=../le-dev/test-logging.properties',
         '-Dsqoop.throwOnError=true'
     ]
 
@@ -60,4 +61,6 @@ if __name__ == "__main__":
     args = parseCliArgs()
     chdirToProjectDir('le-' + args.project)
     print 'Executing [with common opts added]: ' + ' '.join(['mvn'] + testOpts(args))
-    subprocess.call(['mvn'] + propDirsOpts() + commonOpts() + testOpts(args))
+    my_env = os.environ
+    my_env["MAVEN_OPTS"] = "-Xmx1g -XX:MaxPermSize=1g"
+    subprocess.call(['mvn'] + propDirsOpts() + commonOpts() + testOpts(args), env=my_env)
