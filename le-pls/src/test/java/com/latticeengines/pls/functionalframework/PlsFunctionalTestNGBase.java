@@ -290,7 +290,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     }
 
     protected ModelSummary getDetails(Tenant tenant, String suffix) throws IOException {
-        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s.json", suffix);
+        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s-token.json", suffix);
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
         String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
         String uuid = UUID.randomUUID().toString();
