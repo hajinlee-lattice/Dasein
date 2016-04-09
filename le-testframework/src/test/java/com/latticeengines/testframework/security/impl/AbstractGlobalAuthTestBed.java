@@ -31,7 +31,6 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     private Map<String, UserDocument> userTenantSessions = new HashMap<>();
 
     protected List<Tenant> testTenants = new ArrayList<>();
-    private static final String tenantIdPrefix = "LETest";
     private Integer mainTenantIdx = 0;
 
     protected RestTemplate restTemplate = new RestTemplate();
@@ -198,7 +197,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     }
 
     protected Tenant addBuiltInTestTenant() {
-        String fullTenantId = tenantIdPrefix + String.valueOf(System.currentTimeMillis());
+        String fullTenantId = TestFrameworkUtils.TENANTID_PREFIX + String.valueOf(System.currentTimeMillis());
         return addTestTenant(fullTenantId);
     }
 

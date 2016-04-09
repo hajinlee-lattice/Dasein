@@ -45,6 +45,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private static final String sfdcTopology = CRMTopology.SFDC.getName();
     private static final List<String> testCustomerSpaces = new ArrayList<>();
 
+    public static final String ENV_QA = "qa";
+    public static final String ENV_PROD = "prod";
+
     private String enviroment;
     private String plsApiHostPort;
     private String adminApiHostPort;
@@ -54,9 +57,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         setPlsApiHostPort(plsApiHostPort);
         setAdminApiHostPort(adminApiHost);
         if (environment.contains("prod")) {
-            this.enviroment = "prod";
+            this.enviroment = ENV_PROD;
         } else {
-            this.enviroment = "qa";
+            this.enviroment = ENV_QA;
         }
 
     }
