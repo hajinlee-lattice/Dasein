@@ -27,7 +27,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
@@ -41,14 +40,12 @@ import com.latticeengines.eai.service.ExportService;
 public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("TestCustomer");
+    
     @Autowired
     private ExportService fileExportService;
 
     @Autowired
     private Configuration yarnConfiguration;
-
-    @Autowired
-    private JobService jobService;
 
     private URL dataUrl;
 
@@ -64,13 +61,11 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, sourceAvroPath);
         HdfsUtils.rmdir(yarnConfiguration, targetCSVPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), sourceAvroPath);
-
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, sourceAvroPath);
-        // HdfsUtils.rmdir(yarnConfiguration, targetCSVPath);
     }
 
     @Test(groups = "functional")
