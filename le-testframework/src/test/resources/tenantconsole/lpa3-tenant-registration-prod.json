@@ -48,7 +48,7 @@
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "LP3 ${TENANT}",
+      "displayName": "${TENANT}_LP3",
       "description": "A LP3 tenant under the contract ${TENANT}"
     }
   },
