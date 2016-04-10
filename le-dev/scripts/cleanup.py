@@ -25,6 +25,27 @@ print 'Remaining tenants in PLS_MultiTenantDB:'
 data = json.loads(response.read())
 print json.dumps(data, sort_keys=True, indent=2, separators=(',', ': '))
 
+print 'Clean up folders in HDFS:'
+webhdfs = httplib.HTTPConnection("localhost", 50070)
+for tenant in tenants:
+	tenantId = tenant['Identifier']
+	tenantName = tenantId.split(".")[0]
+	print 'Clean up for tenant %s ...' % tenantName
+	if 'LETest' in tenantId:
+		path = '/webhdfs/v1/user/s-analytics/customers/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantId
+		conn.request("DELETE", path, "", headers)
+		response = conn.getresponse()
+		print response.status, response.reason, response.read()
+
+		path = '/webhdfs/v1/user/s-analytics/customers/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantName
+		conn.request("DELETE", path, "", headers)
+		response = conn.getresponse()
+		print response.status, response.reason, response.read()
+
+		path = '/webhdfs/v1/Pods/Default/Contracts/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantName
+		conn.request("DELETE", path, "", headers)
+		response = conn.getresponse()
+		print response.status, response.reason, response.read()
 
 print 'Clean up contracts in ZK:'
 zk = KazooClient(hosts='127.0.0.1:2181')
@@ -42,24 +63,3 @@ print json.dumps(data, sort_keys=True, indent=2, separators=(',', ': '))
 
 zk.stop()
 
-print 'Clean up folders in HDFS:'
-webhdfs = httplib.HTTPConnection("localhost", 50070)
-for tenant in tenants:
-	tenantId = tenant['Identifier']
-	tenantName = tenant['DisplayName']
-	print 'Clean up for tenant %s ...' % tenantName
-	if 'LETest' in tenantId:
-		path = '/webhdfs/v1/user/s-analytics/customers/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantId
-		conn.request("DELETE", path, "", headers)
-		response = conn.getresponse()
-		print response.status, response.reason, response.read()
-
-		path = '/webhdfs/v1/user/s-analytics/customers/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantName
-		conn.request("DELETE", path, "", headers)
-		response = conn.getresponse()
-		print response.status, response.reason, response.read()
-
-		path = '/webhdfs/v1/Pods/Default/Contracts/%s?user.name=yarn&doas=yarn&op=DELETE&&recursive=true' % tenantName
-		conn.request("DELETE", path, "", headers)
-		response = conn.getresponse()
-		print response.status, response.reason, response.read()
