@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.propdata.manage.RefreshProgress;
 import com.latticeengines.propdata.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.propdata.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.propdata.collection.service.PivotService;
@@ -34,5 +35,16 @@ public class FeaturePivotService extends AbstractPivotService implements PivotSe
     @Override
     Log getLogger() { return log; }
 
+
+
+    @Override
+    protected void executeDataFlow(RefreshProgress progress) {
+        collectionDataFlowService.executePivotData(
+                source,
+                progress.getBaseSourceVersion(),
+                progress.getRootOperationUID(),
+                "featurePivotFlow"
+        );
+    }
 
 }

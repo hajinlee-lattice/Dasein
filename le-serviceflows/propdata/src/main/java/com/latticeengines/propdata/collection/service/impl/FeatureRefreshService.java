@@ -40,9 +40,4 @@ public class FeatureRefreshService extends AbstractMostRecentService implements 
     Log getLogger() {
         return log;
     }
-
-    @Override
-    protected void executeDataFlow(RefreshProgress progress) {
-        collectionDataFlowService.executeMergeRawData(source, progress.getRootOperationUID(), "featureRefreshFlow");
-    }
 }
