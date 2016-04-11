@@ -157,7 +157,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
-        String sql = "SELECT * FROM (SELECT PL.[Play_ID] AS ID, PL.[Display_Name] AS DisplayName, "
+        String sql = "SELECT * FROM (SELECT PL.[Play_ID] AS ID, PL.[External_ID] AS External_ID, PL.[Display_Name] AS DisplayName, "
                 + "PL.[Description] AS Description, PL.[Average_Probability] AS AverageProbability,"
                 + "DATEDIFF(s,'19700101 00:00:00:000', PL.[Last_Modification_Date]) AS LastModificationDate, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
