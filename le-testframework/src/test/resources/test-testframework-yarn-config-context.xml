@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:yarn="http://www.springframework.org/schema/yarn"
+       xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <yarn:configuration>
+        dfs.client.failover.proxy.provider.${dataplatform.dfs.nameservices}=${dataplatform.dfs.client.failover.proxy.provider}
+        dfs.nameservices=${dataplatform.dfs.nameservices}
+        dfs.ha.namenodes.${dataplatform.dfs.nameservices}=nn1,nn2
+        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn1=${dfs.namenode.rpc-address.nn1}
+        dfs.namenode.rpc-address.${dataplatform.dfs.nameservices}.nn2=${dfs.namenode.rpc-address.nn2}
+        fs.defaultFS=${dataplatform.fs.defaultFS}
+        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
+        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+        yarn.resourcemanager.webapp.address=${dataplatform.yarn.resourcemanager.webapp.address}
+        yarn.nodemanager.remote-app-log-dir=${dataplatform.yarn.nodemanager.remote-app-log-dir}
+    </yarn:configuration>
+
+</beans>

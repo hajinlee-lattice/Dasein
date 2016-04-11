@@ -25,7 +25,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-testframework-cleanup-properties-context.xml",
+@ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml",
         "classpath:camille-runtime-context.xml" })
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
