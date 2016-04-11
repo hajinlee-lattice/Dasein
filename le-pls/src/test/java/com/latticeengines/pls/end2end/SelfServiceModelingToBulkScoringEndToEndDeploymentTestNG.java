@@ -37,6 +37,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private String modelId;
     private String applicationId;
+    private Long jobId;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -94,6 +95,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             Job job = selfServiceModeling.getRestTemplate().getForObject(
                     String.format("%s/pls/jobs/yarnapps/%s", getPLSRestAPIHostPort(), applicationId), Job.class);
             assertNotNull(job);
+            jobId = job.getId();
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
                 terminal = job.getJobStatus();
                 break;
@@ -111,8 +113,8 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%s/results", getPLSRestAPIHostPort(), applicationId), HttpMethod.GET,
-                entity, byte[].class);
+                String.format("%s/pls/scores/jobs/%d/results", getPLSRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(results.length() > 0);
