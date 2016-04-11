@@ -4,7 +4,7 @@
         <span data-ng-if="job.timestamp != null" class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns four">{{jobDisplayName}}</span>
         <span class="columns four {{job.status}}">{{job.status}}
-            <span data-ng-show="jobCompleted || jobFailed">
+            <span data-ng-show="(jobCompleted || jobFailed) && jobId != null">
                 <a ui-sref="home.jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">[View Report]</a>
                 <a ui-sref="home.jobs.status.csv({jobId: jobId})" ng-show="jobType == 'importMatchAndModelWorkflow'">[View Report]</a>
                 <a 
@@ -18,10 +18,10 @@
             <span data-ng-show="jobRunning && ! cancelClicked"> <a href="javascript:void(0)" data-ng-click="cancelJob(jobId)">[Cancel Job]</a></span>
             <span data-ng-show="jobRunning && cancelClicked"> <span>[Cancelling...]</span></span>
 
-            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null">
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="expandJobStatus()" data-ng-show="! jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null && job.id != null">
                 <span><i class="fa fa-angle-double-down fa-lg"></i></span>
             </a>
-            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null">
+            <a class="pull-right" href="javascript:void(0)" data-toggle="collapse" data-ng-click="unexpandJobStatus()" data-ng-show="jobRowExpanded && jobType != 'modelWorkflow' && jobType != 'modelAndEmailWorkflow' && job.timestamp != null && job.id != null">
                 <span><i class="fa fa-angle-double-up fa-lg"></i></span>
             </a>
         </span>

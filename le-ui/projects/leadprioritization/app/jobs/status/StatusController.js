@@ -61,7 +61,7 @@ angular
                     $scope.jobRowExpanded = true;
                     $scope.expanded[$scope.jobId] = true;
 
-                    if (! isCompleted()) {
+                    if (! isCompleted() && $scope.job.id != null) {
                         JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
                             if (jobStatus.success) {
                                 updateStatesBasedOnJobStatus(jobStatus.resultObj);
