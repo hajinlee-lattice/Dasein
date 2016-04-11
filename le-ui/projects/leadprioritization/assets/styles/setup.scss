@@ -110,7 +110,7 @@
   margin-left: 6px;
   width: 18px;
   height: 16px;
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat;
+  background: url(./CommonAssets/images/ic_warning_sm.png) no-repeat;
   vertical-align: middle;
 }
 
@@ -254,7 +254,7 @@
   display: inline-block;
   width: 20px;
   height: 16px;
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 2px 0;
+  background: url(./CommonAssets/images/ic_warning_sm.png) no-repeat 2px 0;
   vertical-align: middle;
 }
 
@@ -262,12 +262,12 @@
   display: block;
   width: 22px;
   height: 16px;
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 5px 1px;
+  background: url(./CommonAssets/images/ic_warning_sm.png) no-repeat 5px 1px;
 }
 
 #setup .fields-grid table input[type="text"].warning,
 #setup .fields-grid table select.warning {
-  background: url(../CommonAssets/images/ic_warning_sm.png) no-repeat 4px 50%;
+  background: url(./CommonAssets/images/ic_warning_sm.png) no-repeat 4px 50%;
   background-color: white;
 }
 
@@ -646,7 +646,7 @@
   height: 35px;
   vertical-align: middle;
   margin-right: 6px;
-  background: url(../CommonAssets/images/ic_csv.ico) no-repeat 0px 0px;
+  background: url(./CommonAssets/images/ic_csv.ico) no-repeat 0px 0px;
 }
 
 #deploymentWizard .step-area {

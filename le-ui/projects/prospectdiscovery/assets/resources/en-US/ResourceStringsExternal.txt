@@ -23,6 +23,6 @@ RESET_PASSWORD_FAIL=We are unable to reset your password at this time. Please co
 RESET_PASSWORD_USERNAME_INVALID=The username you entered is not in our system. Please try again.
 RETURN_TO_LOGIN=Return to Login
 FORGOT_PASSWORD_EMAIL_SENT_TITLE=We have sent you an email.
-FORGOT_PASSWORD_EMAIL_SENT_BODY=It should appear in your inbox momentarily.
+FORGOT_PASSWORD_EMAIL_SENT_BODY=Instructions regarding resetting your password have been sent to your email address. If no email is received within ten minutes, check that the submitted address is correct.
 TENANT_SELECTION_FORM_TITLE=Choose the PLS Tenant
 NO_TENANT_MESSAGE=This user is not associated with any tenants.
