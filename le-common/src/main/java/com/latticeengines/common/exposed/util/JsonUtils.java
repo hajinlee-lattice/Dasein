@@ -2,7 +2,9 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -69,11 +71,22 @@ public class JsonUtils {
         return new ObjectMapper().convertValue(rawField, clazz);
     }
 
-    public static <T> List<T> convertList(List<Object> raw, Class<T> elementClazz) {
+    public static <T> List<T> convertList(List raw, Class<T> elementClazz) {
         List<T> output = new ArrayList<>();
         for (Object elt : raw) {
             output.add(convertValue(elt, elementClazz));
         }
+        return output;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> Map<K, V> convertMap(Map raw, Class<K> keyClazz, Class<V> valueClazz) {
+        Map<K, V> output = new HashMap<>();
+        for (Object entry : raw.entrySet()) {
+            Map.Entry<Object, Object> casted = (Map.Entry<Object, Object>) entry;
+            output.put(convertValue(casted.getKey(), keyClazz), convertValue(casted.getValue(), valueClazz));
+        }
+
         return output;
     }
 

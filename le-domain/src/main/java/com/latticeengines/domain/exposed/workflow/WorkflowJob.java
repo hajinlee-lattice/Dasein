@@ -14,15 +14,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.Type;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -55,10 +55,8 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "USER_ID")
     private String userId;
 
-    @Column(name = "WORKFLOW_INPUT_CONTEXT")
-    @Lob
-    @Type(type = "org.hibernate.type.SerializableToBlobType")
-    private Map<String, String> inputContext = new HashMap<>();
+    @Column(name = "INPUT_CONTEXT", length = 4096)
+    private String inputContextString;
 
     @Column(name = "STATE")
     @Enumerated(EnumType.STRING)
@@ -125,16 +123,6 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     }
 
     @Transient
-    public String getInputContextValue(String key) {
-        return inputContext.get(key);
-    }
-
-    @Transient
-    public void setInputContextValue(String key, String value) {
-        inputContext.put(key, value);
-    }
-
-    @Transient
     public WorkflowExecutionId getAsWorkflowId() {
         if (workflowId != null) {
             return new WorkflowExecutionId(workflowId);
@@ -143,12 +131,39 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         }
     }
 
+    @Transient
     public Map<String, String> getInputContext() {
-        return inputContext;
+        if (inputContextString == null) {
+            setInputContext(new HashMap<String, String>());
+        }
+        Map raw = JsonUtils.deserialize(inputContextString, Map.class);
+        return JsonUtils.convertMap(raw, String.class, String.class);
     }
 
-    public void setInputContex(Map<String, String> inputContext) {
-        this.inputContext = inputContext;
+    @Transient
+    public void setInputContext(Map<String, String> inputContext) {
+        this.inputContextString = JsonUtils.serialize(inputContext);
+    }
+
+    @Transient
+    public String getInputContextValue(String key) {
+        Map<String, String> context = getInputContext();
+        return context.get(key);
+    }
+
+    @Transient
+    public void setInputContextValue(String key, String value) {
+        Map<String, String> context = getInputContext();
+        context.put(key, value);
+        setInputContext(context);
+    }
+
+    public String getInputContextString() {
+        return inputContextString;
+    }
+
+    public void setInputContextString(String inputContextString) {
+        this.inputContextString = inputContextString;
     }
 
     public YarnApplicationState getState() {

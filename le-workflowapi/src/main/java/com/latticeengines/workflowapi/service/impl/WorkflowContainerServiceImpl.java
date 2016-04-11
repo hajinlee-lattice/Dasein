@@ -79,7 +79,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
         workflowJob.setApplicationId(appId.toString());
-        workflowJob.setInputContex(workflowConfig.getInputProperties());
+        workflowJob.setInputContext(workflowConfig.getInputProperties());
         workflowEntityMgr.create(workflowJob);
 
         return appId;
