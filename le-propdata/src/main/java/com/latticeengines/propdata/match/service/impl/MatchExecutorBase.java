@@ -1,6 +1,5 @@
 package com.latticeengines.propdata.match.service.impl;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,8 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -33,8 +30,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.monitor.metric.SqlQueryMetric;
 import com.latticeengines.domain.exposed.propdata.DataSourcePool;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -44,7 +39,6 @@ import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
-import com.latticeengines.propdata.match.metric.FetchDataFromSql;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.DisposableEmailService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
@@ -429,8 +423,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet, nameLocationSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
                     + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
-            submitSqlMetric(getSourceTableName(), jdbcTemplate, results.size(), targetColumns.size(),
-                    System.currentTimeMillis() - beforeQuerying);
             return results;
         }
 
@@ -500,43 +492,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
                     + (System.currentTimeMillis() - beforeQuerying) + " RootOperationUID=" + rootOperationUID);
-            submitSqlMetric(getSourceTableName(), jdbcTemplate, results.size(), targetColumns.size(),
-                    System.currentTimeMillis() - beforeQuerying);
             return results;
         }
 
         private String constructSqlQuery(List<String> columns, String tableName, Collection<String> domains) {
             return "SELECT [" + StringUtils.join(columns, "], [") + "Domain] \n" + "FROM [" + tableName
                     + "] WITH(NOLOCK) \n" + "WHERE [Domain] IN ('" + StringUtils.join(domains, "', '") + "')";
-        }
-    }
-
-    private void submitSqlMetric(String tableName, JdbcTemplate jdbcTemplate, Integer rows, Integer cols,
-            Long timeElapsed) {
-        try {
-            SqlQueryMetric metric = new SqlQueryMetric();
-            metric.setTableName(tableName);
-            metric.setCols(cols);
-            metric.setRows(rows);
-            metric.setTimeElapsed(Integer.valueOf(String.valueOf(timeElapsed)));
-
-            Connection connection = jdbcTemplate.getDataSource().getConnection();
-            String productName = connection.getMetaData().getDatabaseProductName();
-            metric.setServerType(productName);
-
-            Pattern pattern = Pattern.compile("//(.*?)[:;/$]");
-            Matcher matcher = pattern.matcher(connection.getMetaData().getURL());
-            if (matcher.find()) {
-                String token = matcher.group(0);
-                String host = token.substring(2, token.length() - 1);
-                metric.setHostName(host);
-            }
-
-            FetchDataFromSql fetchDataFromSql = new FetchDataFromSql(metric);
-            metricService.write(MetricDB.LDC_Match, fetchDataFromSql);
-
-        } catch (Exception e) {
-            log.warn("Failed to store sql metric.", e);
         }
     }
 
