@@ -33,6 +33,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
     $scope.modelNameInvalid = false;
     $scope.updateClicked = false;
     $scope.saveInProgress = false;
+    $scope.cloneError = false;
 
     $scope.updateFieldsClicked = function ($event) {
         if ($event != null) {
@@ -45,6 +46,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
         }
 
         if ($scope.updateClicked) { return; }
+        $scope.cloneError = false;
         $scope.updateClicked = true;
 
         $scope.saveInProgress = true;
@@ -60,6 +62,9 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
                 } else {
                     $scope.updateFieldsErrorMessage = ResourceUtility.getString('UPDATE_FIELDS_ERROR_MESSAGE');
                 }
+                $scope.saveInProgress = false;
+                $scope.cloneError = true;
+                $scope.updateClicked = false;
                 $("#updateFieldsError").fadeIn();
             }
         });

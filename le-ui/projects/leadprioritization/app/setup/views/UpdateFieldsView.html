@@ -34,8 +34,8 @@
 
                         </form>
                     </div>
-                    <div class="row alert-holder">
-                        <div id="updateFieldsError" class="alert-danger">
+                    <div ng-if="cloneError" class="row alert-holder">
+                        <div id="updateFieldsError" class="global-error">
                             {{updateFieldsErrorMessage}}
                         </div>
                     </div>

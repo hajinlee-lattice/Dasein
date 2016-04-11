@@ -102,7 +102,7 @@ angular.module('mainApp.setup.services.MetadataService', [
                 result.Success = true;
                 result.ResultObj = data;
             } else {
-                result.ResultErrors = ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELDS_ERROR');
+                result.ResultErrors = ResourceUtility.getString('UPDATE_FIELDS_ERROR_MESSAGE');
             }
             deferred.resolve(result);
         })
@@ -110,7 +110,7 @@ angular.module('mainApp.setup.services.MetadataService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('SETUP_MANAGE_FIELDS_UPDATE_FIELD_ERROR')
+                ResultErrors: ResourceUtility.getString('UPDATE_FIELDS_ERROR_MESSAGE')
             };
             deferred.resolve(result);
         });
