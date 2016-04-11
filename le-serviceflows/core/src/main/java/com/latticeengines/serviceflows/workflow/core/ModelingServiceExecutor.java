@@ -144,7 +144,7 @@ public class ModelingServiceExecutor {
     public String model() throws Exception {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
+
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
@@ -199,7 +199,7 @@ public class ModelingServiceExecutor {
     public String modelForPMML() throws Exception {
         PMMLAlgorithm pmmlAlgorithm = new PMMLAlgorithm();
         pmmlAlgorithm.setPriority(0);
-        pmmlAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
+
         pmmlAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
