@@ -37,7 +37,7 @@ public class FeaturePivotServiceImplTestNG extends PivotServiceImplTestNGBase {
 
     @Override
     Integer getExpectedRows() {
-        return 5;
+        return 3;
     }
 
 }
