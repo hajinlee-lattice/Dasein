@@ -11,7 +11,7 @@ public class BomboraDepivoted implements FixedIntervalSource {
 
     private static final long serialVersionUID = 2471824706529427531L;
 
-    @Value("${propdata.job.bomboraDepivoted.fixedInterval.schedule:0 0 15 * * *}")
+    @Value("${propdata.job.bomboradepivoted.fixedinterval.schedule:0 0 15 * * *}")
     private String cronExpression;
 
     @Autowired

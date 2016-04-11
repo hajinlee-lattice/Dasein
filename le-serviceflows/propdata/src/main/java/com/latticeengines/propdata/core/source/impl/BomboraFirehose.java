@@ -16,7 +16,7 @@ public class BomboraFirehose implements TransformedToAvroSource {
     @Autowired
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Value("${propdata.job.bomboraFirehose.archive.schedule:0 0 13 * * *}")
+    @Value("${propdata.job.bomborafirehose.archive.schedule:0 0 13 * * *}")
     private String cronExpression;
 
     @Override
