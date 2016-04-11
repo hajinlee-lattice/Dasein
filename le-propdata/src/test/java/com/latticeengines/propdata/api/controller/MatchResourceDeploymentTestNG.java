@@ -58,7 +58,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
@@ -71,7 +71,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -84,7 +84,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testSingleBlockBulkMatch() throws Exception {
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -106,7 +106,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() {
         hdfsPathBuilder.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());

@@ -49,6 +49,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     public void execute() {
         log.info("Inside PrepareBulkMatchInput execute()");
         String avroDir = getConfiguration().getInputAvroDir();
+        hdfsPathBuilder.changeHdfsPodId(getConfiguration().getHdfsPodId());
         Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
         schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
         Integer[] blocks = determineBlockSizes(count);
