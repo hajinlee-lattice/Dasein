@@ -13,6 +13,7 @@ def metadata():
             , 'DisplayName'     : 'Has Technical Title'
             , 'Category'        : 'Lead Information'
             , 'StatisticalType' : 'ordinal'
+            , 'FundamentalType' : 'boolean'
             , 'Tags'            : 'Internal' }
 
 
