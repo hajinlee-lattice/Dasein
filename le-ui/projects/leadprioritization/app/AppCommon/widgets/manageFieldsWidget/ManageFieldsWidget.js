@@ -333,6 +333,17 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
             $event.preventDefault();
         }
 
+        $scope.batchEdit = false;
+        $scope.showEditFieldsError = false;
+        $scope.saveInProgress = false;
+        $scope.discardAllChanges();
+    };
+
+    $scope.resetSettingsClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
         if ($scope.saveInProgress) { return; }
 
         var editedData = getAllEditedData();
