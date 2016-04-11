@@ -4,11 +4,11 @@
         <span>Analytics are now available.</span>
     </div>
     <div data-ng-if="!hideCreationMessage && jobCreationSuccess" class="job-success-message">
-        <div>Your job has been submitted to Pending<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
-        <span>we will start it shortly</span>
+        <div>Your model has been queued for creation.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+        <span>It will start running shortly, which will allow you to track the progress</span>
     </div>
     <div data-ng-if="!hideCreationMessage && !jobCreationSuccess" class="job-creation-failed">
-        <div>The job failed to submit<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
+        <div>Your model failed to start running.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeJobCreationMessage()"></i></a></div>
         <span>Please retry or wait for a fix</span>
     </div>
 
