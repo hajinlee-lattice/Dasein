@@ -8,6 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +46,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "login", description = "REST resource for logging in using Lattice Global Auth")
 @RestController
 public class LoginResource {
+
+    private static final Log log = LogFactory.getLog(LoginResource.class);
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -136,13 +140,17 @@ public class LoginResource {
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
     public boolean forgotPassword(@RequestBody ResetPasswordRequest request) {
-        String username = request.getUsername();
-        String tempPass = globalUserManagementService.resetLatticeCredentials(username);
+        try {
+            String username = request.getUsername();
+            String tempPass = globalUserManagementService.resetLatticeCredentials(username);
 
-        if (LatticeProduct.LPA.equals(request.getProduct())) {
-            User user = userService.findByUsername(username);
-            String host = request.getHostPort();
-            emailService.sendPlsForgetPasswordEmail(user, tempPass, host);
+            if (LatticeProduct.LPA.equals(request.getProduct())) {
+                User user = userService.findByUsername(username);
+                String host = request.getHostPort();
+                emailService.sendPlsForgetPasswordEmail(user, tempPass, host);
+            }
+        } catch (Exception e) {
+            log.error("Failed to reset password and send an email.", e);
         }
 
         return true;
