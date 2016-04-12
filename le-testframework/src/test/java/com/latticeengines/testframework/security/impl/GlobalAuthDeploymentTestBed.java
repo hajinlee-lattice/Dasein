@@ -5,12 +5,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,11 +23,13 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
+import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -34,6 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.testframework.security.GlobalAuthTestBed;
@@ -51,6 +56,11 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private String enviroment;
     private String plsApiHostPort;
     private String adminApiHostPort;
+    private Boolean involvedDL;
+    private Boolean involvedZK;
+
+    @Autowired
+    private DataLoaderService dataLoaderService;
 
     public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHost, String environment) {
         super();
@@ -61,7 +71,6 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         } else {
             this.enviroment = ENV_QA;
         }
-
     }
 
     protected void setPlsApiHostPort(String plsApiHostPort) {
@@ -79,27 +88,28 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     @Override
+    public void bootstrap(Integer numTenants) {
+        involvedDL = false;
+        involvedZK = false;
+        super.bootstrap(numTenants);
+    }
+
+    @Override
     public void bootstrapForProduct(LatticeProduct product) {
         bootstrapViaTenantConsole(product, enviroment);
+        involvedDL = (LatticeProduct.LPA.equals(product));
+        involvedZK = false;
     }
 
     @Override
     public void cleanup() {
-        Path contractPath = null;
-        for (Tenant tenant: testTenants) {
-            log.info("Clean up test tenant " + tenant.getId() + " from zk.");
-            Camille camille = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-            String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
-            contractPath = PathBuilder.buildContractPath(podId, contractId);
-            try {
-                camille.delete(contractPath);
-            } catch (Exception e) {
-                log.error("Failed delete contract path " + contractPath + " from zk.");
-            }
-        }
-
         super.cleanup();
+        if (involvedZK) {
+            cleanupTenantsInZK();
+        }
+        if (involvedDL) {
+            cleanupTenantsInDL();
+        }
     }
 
     @Override
@@ -146,12 +156,13 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         Boolean success = magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/users", userRegistrationWithTenant, Boolean.class);
         log.info("Create admin user " + username + ": success=" + success);
 
-        UserDocument userDocument = loginAndAttach(username, TestFrameworkUtils.GENERAL_PASSWORD, tenant);
-        UserUpdateData userUpdateData = new UserUpdateData();
-        userUpdateData.setAccessLevel(accessLevel.name());
-        useSessionDoc(userDocument);
-        restTemplate.put(plsApiHostPort + "/pls/users/" + username, userUpdateData);
-        log.info("Change user " + username + " access level to tenant " + tenant.getId() + " to " + accessLevel);
+        if (!AccessLevel.SUPER_ADMIN.equals(accessLevel)) {
+            UserUpdateData userUpdateData = new UserUpdateData();
+            userUpdateData.setAccessLevel(accessLevel.name());
+            switchToSuperAdmin(tenant);
+            restTemplate.put(plsApiHostPort + "/pls/users/" + username, userUpdateData);
+            log.info("Change user " + username + " access level to tenant " + tenant.getId() + " to " + accessLevel);
+        }
     }
 
     @Override
@@ -203,7 +214,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
-        long timeout = 1800000L; // bardjams has a long long timeout
+        Long timeout = TimeUnit.MINUTES.toMillis(5L);
         long totTime = 0L;
         String url = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
                 + customerSpace.getContractId();
@@ -230,7 +241,59 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         }
 
         if (!BootstrapState.State.OK.equals(state.state)) {
-            throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
+            if (involvedDL) {
+                // bardjams may fail, and it won't impact test
+                log.warn("The tenant state is not OK after " + timeout + " msec.");
+            } else  {
+                throw new IllegalArgumentException("The tenant state is not OK after " + timeout + " msec.");
+            }
+        }
+    }
+
+    private void cleanupTenantsInZK() {
+        for (Tenant tenant: testTenants) {
+            log.info("Clean up test tenant " + tenant.getId() + " from zk.");
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            String contractId = CustomerSpace.parse(tenant.getId()).getContractId();
+            Path contractPath = PathBuilder.buildContractPath(podId, contractId);
+            try {
+                camille.delete(contractPath);
+            } catch (Exception e) {
+                log.error("Failed delete contract path " + contractPath + " from zk.");
+            }
+        }
+    }
+
+    private void cleanupTenantsInDL() {
+        for (Tenant tenant: testTenants) {
+            log.info("Clean up test tenant " + tenant.getId() + " from DL.");
+            CustomerSpace customerSpace =CustomerSpace.parse(tenant.getId());
+            String tenantName = customerSpace.getTenantId();
+
+            try {
+                String permStoreUrl = adminApiHostPort + "/admin/internal/BODCDEVVINT207/BODCDEVVINT187/" + tenantName;
+                magicRestTemplate.delete(permStoreUrl);
+                log.info("Cleanup VDB permstore for tenant " + tenantName);
+            } catch (Exception e) {
+                log.error("Failed to clean up permstore for vdb " + tenantName + " : "
+                        + getErrorHandler().getStatusCode() + ", " + getErrorHandler().getResponseString());
+            }
+
+            try {
+                List<BasicNameValuePair> adHeaders = loginAd();
+                String adminUrl = adminApiHostPort + "/admin/tenants/" + customerSpace.getTenantId() + "?contractId="
+                        + customerSpace.getContractId();
+                String response = HttpClientWithOptionalRetryUtils.sendGetRequest(adminUrl, false, adHeaders);
+                TenantDocument tenantDoc = JsonUtils.deserialize(response, TenantDocument.class);
+                String dlUrl = tenantDoc.getSpaceConfig().getDlAddress();
+                DeleteVisiDBDLRequest request = new DeleteVisiDBDLRequest(tenantName, "3");
+                InstallResult result = dataLoaderService.deleteDLTenant(request, dlUrl, true);
+                log.info("Delete DL tenant " + tenantName + " result=" + JsonUtils.serialize(result));
+            } catch (Exception e) {
+                log.error("Failed to clean up dl tenant " + tenantName + " : "
+                        + getErrorHandler().getStatusCode() + ", " + getErrorHandler().getResponseString());
+            }
         }
     }
 
