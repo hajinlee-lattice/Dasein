@@ -13,7 +13,7 @@ public class ScoreRequest {
     private String modelId;
 
     @JsonProperty("source")
-    @ApiModelProperty(value = "Name of the source system that originated this score request")
+    @ApiModelProperty(value = "Name of the source system that originated this score request.")
     private String source;
 
     @JsonProperty("rule")
