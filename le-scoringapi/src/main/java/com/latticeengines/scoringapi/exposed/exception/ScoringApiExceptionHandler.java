@@ -1,5 +1,6 @@
 package com.latticeengines.scoringapi.exposed.exception;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -83,23 +84,39 @@ public class ScoringApiExceptionHandler {
 
     @ExceptionHandler
     @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionHandlerErrors handleException(Exception ex) {
+        return generateExceptionResponse("general_error", ex, true);
+    }
+
+    @ExceptionHandler
+    @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionHandlerErrors handleException(HttpMessageNotReadableException ex) {
-        return generateExceptionResponse("message_not_readable", ex, false);
+        return generateExceptionResponseNoAlert("message_not_readable", ex);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(HttpMessageNotWritableException ex) {
-        return generateExceptionResponse("message_not_writable", ex, false);
+        return generateExceptionResponseNoAlert("message_not_writable", ex);
     }
 
     @ExceptionHandler
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionHandlerErrors handleException(Exception ex) {
-        return generateExceptionResponse("general_error", ex, true);
+    public ExceptionHandlerErrors handleException(IOException ex) {
+        String trace = getStackTraceAsString(ex);
+        if (trace.contains("org.apache.catalina.connector.ClientAbortException")) {
+            return generateExceptionResponseNoAlert("client_abort", ex);
+        } else {
+            return generateExceptionResponse("io_error", ex, true);
+        }
+    }
+
+    private ExceptionHandlerErrors generateExceptionResponseNoAlert(String code, Exception ex) {
+        return generateExceptionResponse(code, ex, false);
     }
 
     private ExceptionHandlerErrors generateExceptionResponse(String code, Exception ex, boolean fireAlert) {
@@ -126,9 +143,7 @@ public class ScoringApiExceptionHandler {
 
         String trace = "";
         if (includeTrace) {
-            StringWriter sw = new StringWriter();
-            ex.printStackTrace(new PrintWriter(sw));
-            trace = sw.toString();
+            trace = getStackTraceAsString(ex);
         }
 
         String exceptionHandlerErrorsMsg = JsonUtils.serialize(exceptionHandlerErrors);
@@ -136,8 +151,10 @@ public class ScoringApiExceptionHandler {
         log.error(errorMsg);
 
         if (fireAlert) {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            String identifier = String.valueOf(attributes.getRequest().getAttribute(RequestLogInterceptor.IDENTIFIER_KEY));
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
+            String identifier = String.valueOf(attributes.getRequest().getAttribute(
+                    RequestLogInterceptor.IDENTIFIER_KEY));
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
             alertDetails.add(new BasicNameValuePair(RequestLogInterceptor.REQUEST_ID, identifier));
@@ -156,5 +173,13 @@ public class ScoringApiExceptionHandler {
         requestInfo.logSummary();
 
         return exceptionHandlerErrors;
+    }
+
+    private String getStackTraceAsString(Exception ex) {
+        String trace = "";
+        StringWriter sw = new StringWriter();
+        ex.printStackTrace(new PrintWriter(sw));
+        trace = sw.toString();
+        return trace;
     }
 }
