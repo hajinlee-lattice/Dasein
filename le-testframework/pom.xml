@@ -12,6 +12,7 @@
         <le.common.version>2.0.24-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.24-SNAPSHOT</le.domain.version>
         <le.security.version>2.0.24-SNAPSHOT</le.security.version>
+        <le.remote.version>2.0.24-SNAPSHOT</le.remote.version>
         <le.camille.version>2.0.24-SNAPSHOT</le.camille.version>
     </properties>
 
@@ -91,6 +92,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-security</artifactId>
             <version>${le.security.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-remote</artifactId>
+            <version>${le.remote.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>

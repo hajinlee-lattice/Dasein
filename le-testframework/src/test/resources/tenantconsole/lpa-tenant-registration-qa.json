@@ -1,0 +1,239 @@
+{
+  "ConfigDirectories": [
+    {
+      "RootPath": "/VisiDBTemplate",
+      "Nodes": []
+    },
+    {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        }
+      ]
+    },
+    {
+      "RootPath": "/DLTemplate",
+      "Nodes": []
+    },
+    {
+      "RootPath": "/VisiDBDL",
+      "Nodes": [
+        {
+          "Node": "DL",
+          "Children": [
+            {
+              "Node": "DataStore",
+              "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers"
+            },
+            {
+              "Node": "DataStore_Backup",
+              "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Backup"
+            },
+            {
+              "Node": "DataStore_Launch",
+              "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Launch"
+            },
+            {
+              "Node": "DataStore_Status",
+              "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Status"
+            },
+            {
+              "Node": "OwnerEmail",
+              "Data": "richard.liu@lattice-engines.com"
+            }
+          ]
+        },
+        {
+          "Node": "TemplateVersion",
+          "Data": "2.0"
+        },
+        {
+          "Node": "TenantAlias",
+          "Data": ""
+        },
+        {
+          "Node": "VisiDB",
+          "Children": [
+            {
+              "Node": "CacheLimit",
+              "Data": "8192"
+            },
+            {
+              "Node": "CaseSensitive",
+              "Data": "false"
+            },
+            {
+              "Node": "CreateNewVisiDB",
+              "Data": "true"
+            },
+            {
+              "Node": "DiskspaceLimit",
+              "Data": "0"
+            },
+            {
+              "Node": "PermStoreFullPath",
+              "Data": "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore\\BODCDEVVINT187\\${TENANT}"
+            },
+            {
+              "Node": "PermanentStore",
+              "Data": "\\\\BODCDEVVINT207\\VisiDB\\PermanentStore"
+            },
+            {
+              "Node": "PermanentStoreOption",
+              "Data": "Master"
+            },
+            {
+              "Node": "ServerName",
+              "Data": "BODCDEVVINT187"
+            },
+            {
+              "Node": "VisiDBFileDirectory",
+              "Data": ""
+            },
+            {
+              "Node": "VisiDBName",
+              "Data": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "RootPath": "/Modeling",
+      "Nodes": [
+        {
+          "Node": "FeaturesThreshold",
+          "Data": "-1"
+        }
+        ]
+    },
+    {
+      "RootPath": "/BardJams",
+      "Nodes": [
+        {
+          "Node": "Active",
+          "Data": "1"
+        },
+        {
+          "Node": "Agent_Name",
+          "Data": "10.51.1.131"
+        },
+        {
+          "Node": "DL_Password",
+          "Data": "adm1nDLpr0d"
+        },
+        {
+          "Node": "DL_TenantName",
+          "Data": "${TENANT}"
+        },
+        {
+          "Node": "DL_URL",
+          "Data": "http://bodcdevvint187.dev.lattice.local:8081"
+        },
+        {
+          "Node": "DL_User",
+          "Data": "admin.dataloader@lattice-engines.com"
+        },
+        {
+          "Node": "DanteManifestPath",
+          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Launch"
+        },
+        {
+          "Node": "DanteTool_Path",
+          "Data": "C:\\Lattice\\Dante3\\Tools\\bin\\"
+        },
+        {
+          "Node": "Dante_Queue_Name",
+          "Data": ""
+        },
+        {
+          "Node": "DataLoaderTools_Path",
+          "Data": "C:\\LEO\\DLTools\\"
+        },
+        {
+          "Node": "Data_ArchivePath",
+          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Backup"
+        },
+        {
+          "Node": "Data_LaunchPath",
+          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Launch"
+        },
+        {
+          "Node": "ImmediateFolderStruct",
+          "Data": "DanteTesting\\Immediate"
+        },
+        {
+          "Node": "JAMSUser",
+          "Data": "PROD\\s-jams"
+        },
+        {
+          "Node": "NotificationEmail",
+          "Data": "platformoperations@lattice-engines.com"
+        },
+        {
+          "Node": "NotifyEmailJob",
+          "Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
+        },
+        {
+          "Node": "Queue_Name",
+          "Data": ""
+        },
+        {
+          "Node": "ScheduledFolderStruct",
+          "Data": "DataLoader\\DL TEST\\Scheduled Jobs"
+        },
+        {
+          "Node": "TenantType",
+          "Data": "P"
+        },
+        {
+          "Node": "WeekdaySchedule_Name",
+          "Data": "All_Weekday"
+        },
+        {
+          "Node": "WeekendSchedule_Name",
+          "Data": "All_Weekend"
+        }
+      ]
+    }
+  ],
+  "CustomerSpaceInfo": {
+    "properties": {
+      "displayName": "LPA_${TENANT}",
+      "description": "A LPA solution for ${TENANT} in ${TENANT}"
+    },
+    "featureFlags": "{\"Dante\":false}"
+  },
+  "TenantInfo": {
+    "properties": {
+      "displayName": "LPA ${TENANT}",
+      "description": "A LPA tenant under the contract ${TENANT}"
+    }
+  },
+  "ContractInfo": {
+    "properties": {}
+  },
+  "SpaceConfig": {
+    "Product": "Lead Prioritization",
+    "Topology": "${TOPOLOGY}",
+    "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
+  }
+}
