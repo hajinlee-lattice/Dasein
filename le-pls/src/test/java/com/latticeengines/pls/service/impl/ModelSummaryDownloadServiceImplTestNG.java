@@ -50,6 +50,9 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Autowired
     private TimeStampContainer timeStampContainer;
+    
+    @Autowired
+    private FeatureImportanceParser featureImportanceParser;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
@@ -66,6 +69,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setModelSummaryDownloadExecutor(modelSummaryDownloadExecutor);
         modelSummaryDownloadService.setModelSummaryParser(modelSummaryParser);
         modelSummaryDownloadService.setTimeStampContainer(timeStampContainer);
+        modelSummaryDownloadService.setFeatureImportanceParser(featureImportanceParser);
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID));
     }
 

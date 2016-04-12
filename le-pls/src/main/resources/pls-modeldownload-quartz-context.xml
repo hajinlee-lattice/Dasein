@@ -15,6 +15,7 @@
                 <entry key="modelSummaryEntityMgr" value-ref="modelSummaryEntityMgr" />
                 <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
                 <entry key="modelSummaryParser" value-ref="modelSummaryParser" />
+                <entry key="featureImportanceParser" value-ref="featureImportanceParser" />
                 <entry key="timeStampContainer" value-ref="timeStampContainer" />
             </map>
         </property>

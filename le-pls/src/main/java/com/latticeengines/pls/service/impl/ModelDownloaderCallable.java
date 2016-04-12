@@ -3,10 +3,14 @@ package com.latticeengines.pls.service.impl;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,6 +22,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
@@ -31,6 +36,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
+    private FeatureImportanceParser featureImportanceParser;
 
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
@@ -38,6 +44,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         this.modelSummaryEntityMgr = builder.getModelSummaryEntityMgr();
         this.yarnConfiguration = builder.getYarnConfiguration();
         this.parser = builder.getModelSummaryParser();
+        this.featureImportanceParser = builder.getFeatureImportanceParser();
     }
 
     @Override
@@ -94,6 +101,13 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                     ModelSummary summary = parser.parse(file, contents);
                     String[] tokens = file.split("/");
                     summary.setTenant(tenant);
+                    
+                    try {
+                        setFeatureImportance(summary, file);
+                    } catch (IOException e) {
+                        log.warn("Errors fetching RF feature importance file. Skipping...", e);
+                    }
+                    
                     try {
                         summary.setApplicationId("application_" + tokens[tokens.length - 3]);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -121,12 +135,40 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         return foundFilesToDownload;
     }
     
+    private void setFeatureImportance(ModelSummary summary, String modelSummaryHdfsPath) throws IOException {
+        String fiPath = getRandomForestFiHdfsPath(modelSummaryHdfsPath);
+        Map<String, Double> fiMap = featureImportanceParser.parse(fiPath, //
+                HdfsUtils.getHdfsFileContents(yarnConfiguration, fiPath));
+        
+        List<Predictor> predictors = summary.getPredictors();
+        Map<String, Predictor> map = new HashMap<>();
+        for (Predictor predictor : predictors) {
+            map.put(predictor.getName(), predictor);
+        }
+        for (Map.Entry<String, Double> entry : fiMap.entrySet()) {
+            Predictor p = map.get(entry.getKey());
+            
+            if (p != null) {
+                p.setFeatureImportance(entry.getValue());
+            }
+        }
+    }
+    
+    private static String getRandomForestFiHdfsPath(String modelSummaryHdfsPath) {
+        String[] tokens = modelSummaryHdfsPath.split("/");
+        String[] rfModelTokens = new String[tokens.length-1];
+        System.arraycopy(tokens, 0, rfModelTokens, 0, rfModelTokens.length-1);
+        rfModelTokens[rfModelTokens.length-1] ="rf_model.txt";
+        return StringUtils.join(rfModelTokens, "/");
+    }
+    
     public static class Builder {
         private Tenant tenant;
         private String modelServiceHdfsBaseDir;
         private ModelSummaryEntityMgr modelSummaryEntityMgr;
         private Configuration yarnConfiguration;
         private ModelSummaryParser modelSummaryParser;
+        private FeatureImportanceParser featureImportanceParser;
 
         public Builder() {
 
@@ -157,6 +199,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
             return this;
         }
 
+        public Builder featureImportanceParser(FeatureImportanceParser featureImportanceParser) {
+            this.featureImportanceParser = featureImportanceParser;
+            return this;
+        }
+
         public Tenant getTenant() {
             return tenant;
         }
@@ -175,6 +222,10 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
 
         public ModelSummaryParser getModelSummaryParser() {
             return modelSummaryParser;
+        }
+        
+        public FeatureImportanceParser getFeatureImportanceParser() {
+            return featureImportanceParser;
         }
 
     }

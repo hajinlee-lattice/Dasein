@@ -40,6 +40,8 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     private ModelSummaryParser modelSummaryParser;
 
     private TimeStampContainer timeStampContainer;
+    
+    private FeatureImportanceParser featureImportanceParser;
 
     public Future<Boolean> downloadModel(Tenant tenant) {
         log.info("Downloading model for tenant " + tenant.getId());
@@ -48,7 +50,8 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
             .tenant(tenant) //
             .modelSummaryEntityMgr(modelSummaryEntityMgr) //
             .yarnConfiguration(yarnConfiguration) //
-            .modelSummaryParser(modelSummaryParser);
+            .modelSummaryParser(modelSummaryParser) //
+            .featureImportanceParser(featureImportanceParser);
         ModelDownloaderCallable callable = new ModelDownloaderCallable(builder);
         return modelSummaryDownloadExecutor.submit(callable);
     }
@@ -131,4 +134,13 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     public void setTimeStampContainer(TimeStampContainer timeStampContainer){
         this.timeStampContainer = timeStampContainer;
     }
+    
+    public FeatureImportanceParser getFeatureImportanceParser() {
+        return featureImportanceParser;
+    }
+    
+    public void setFeatureImportanceParser(FeatureImportanceParser featureImportanceParser) {
+        this.featureImportanceParser = featureImportanceParser;
+    }
+    
 }
