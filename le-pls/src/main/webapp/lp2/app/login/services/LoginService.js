@@ -121,7 +121,7 @@ angular.module('mainApp.login.services.LoginService', [
             if (data != null && data.Success === true) {
                 BrowserStorageUtility.clear(false);
                 ResourceUtility.clearResourceStrings();
-                window.location.reload();
+                window.location = window.location.protocol + "//" + window.location.host;
             } else {
                 SessionService.HandleResponseErrors(data, status);
             }
