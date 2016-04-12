@@ -199,7 +199,6 @@ public class ModelingServiceExecutor {
     public String modelForPMML() throws Exception {
         PMMLAlgorithm pmmlAlgorithm = new PMMLAlgorithm();
         pmmlAlgorithm.setPriority(0);
-
         pmmlAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
