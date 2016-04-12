@@ -66,8 +66,14 @@ public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiCo
     @Column(name = "Priority", nullable = false)
     private int priority;
 
+    @Column(name = "QuartzJob", nullable = false)
+    private String quartzJob;
+
     @Column(name = "FilePattern", nullable = false)
     private String filePattern;
+
+    @Column(name = "PostStoreProcedure", nullable = true)
+    private String postStoreProcedure;
 
     @Override
     public Long getPid() {
@@ -128,6 +134,14 @@ public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiCo
 
     public String getFilePattern() {
         return filePattern;
+    }
+
+    public String getQuartzJob() {
+        return quartzJob;
+    }
+
+    public String getPostStoreProcedure() {
+        return postStoreProcedure;
     }
 
     @Override

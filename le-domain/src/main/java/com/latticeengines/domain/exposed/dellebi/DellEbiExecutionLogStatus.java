@@ -7,6 +7,7 @@ public enum DellEbiExecutionLogStatus {
     Transformed(3), //
     Exported(4), //
     Completed(5), //
+    TriedFailed(-2), //
     Failed(-1);
 
     private int status;

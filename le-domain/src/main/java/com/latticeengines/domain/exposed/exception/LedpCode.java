@@ -361,6 +361,8 @@ public enum LedpCode {
     LEDP_29002("The input parameter {0} is null."), //
     LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
     LEDP_29004("Failed to download or unzip File , name={0}."), //
+    LEDP_29005("The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
+    LEDP_29006("The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //
