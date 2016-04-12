@@ -25,18 +25,17 @@ describe('forgot password tests:', function () {
         changePasswordButNewPasswordAndConfirmPasswordAreDifferent_assertError();
     });
 
-    /**
+
     it('login and change password to alternative password', function () {
         passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingPassword);
         passwordChange.navigateFromHomePageToChangePasswordPage();
         passwordChange.changePasswordFromOldToNew(passwordChange.params.passwordTestingPassword, passwordChange.params.passwordTestingAlternativePassword);
+        browser.waitForAngular();
+        browser.driver.sleep(10000);
         passwordChange.assertPasswordChangeSuccessful(true);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
         element(by.buttonText('Return to Login')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(20000);
-        loginPage.assertLoggedIn(false);
-        browser.waitForAngular();
-        browser.driver.sleep(20000);
     }, 200000);
 
     it('login with alternative password and assert it worked', function () {
@@ -46,7 +45,6 @@ describe('forgot password tests:', function () {
         loginPage.assertLoggedIn(true);
         loginPage.logout();
     }, 200000);
-    **/
 
     function changePasswordWithWrongUsername_assertError() {
         loginPage.get();
