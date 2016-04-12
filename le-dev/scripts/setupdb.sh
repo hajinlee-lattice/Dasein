@@ -28,11 +28,7 @@ cd $WSHOME/le-db
 mvn -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-# Remove alter table drop foreign key statements from the script
-sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-dataplatform/ddl_leadscoringdb_mysql.sql
-sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_ldc_managedb_mysql5innodb.sql
-sed -i 's/alter table .* drop foreign key .*;//g' $WSHOME/le-db/ddl_pls_multitenant_mysql5innodb.sql
-
-# Replace WSHOME with the environment variables that's been set
-sed -i "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/testartifacts/sql/ddl_data_leadscoringdb_mysql5innodb.sql
-sed "s|WSHOME|$WSHOME|g" $WSHOME/le-dev/scripts/setupdb.sql | mysql -u root -pwelcome
+$WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
+$WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+$WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
+$WSHOME/le-dev/scripts/setupdb_oauth2.sh
