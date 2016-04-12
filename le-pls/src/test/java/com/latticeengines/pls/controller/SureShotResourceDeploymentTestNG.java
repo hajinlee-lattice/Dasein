@@ -8,13 +8,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class SureShotResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironment();
+        setupTestEnvironmentWithOneTenant();
     }
 
     @Test(groups = { "deployment" })
