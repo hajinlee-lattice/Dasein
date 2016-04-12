@@ -44,6 +44,7 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
     private List<PredictorElement> predictorElements = new ArrayList<>();
     private Long tenantId;
     private Boolean usedForBuyerInsights = false;
+    private Double featureImportance;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -189,6 +190,17 @@ public class Predictor implements HasName, HasPid, HasTenantId, Comparable<Predi
         return ObjectUtils.compare(
                 predictor != null && predictor.getUncertaintyCoefficient() != null ? predictor
                         .getUncertaintyCoefficient() : null,
-                this.uncertaintyCoefficient != null ? this.uncertaintyCoefficient : null);
+                uncertaintyCoefficient != null ? uncertaintyCoefficient : null);
+    }
+
+    @Column(name = "RF_FEATURE_IMPORTANCE", nullable = true)
+    @JsonProperty("FeatureImportance")
+    public Double getFeatureImportance() {
+        return featureImportance;
+    }
+
+    @JsonProperty("FeatureImportance")
+    public void setFeatureImportance(Double featureImportance) {
+        this.featureImportance = featureImportance;
     }
 }
