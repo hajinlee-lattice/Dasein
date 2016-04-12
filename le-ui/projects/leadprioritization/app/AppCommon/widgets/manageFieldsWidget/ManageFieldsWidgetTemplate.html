@@ -48,13 +48,9 @@
             </div>
         </div>
     </div>
-    <script id="fieldTemplate" type="text/x-kendo-tmpl">
-        <a data-ng-if="!batchEdit" href="javascript:void(0)" data-ng-click="fieldLinkClicked($event, dataItem)" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</a>
-        <span data-ng-if="batchEdit" title="{{dataItem.ColumnName}}">{{dataItem.ColumnName}}</span>
-    </script>
     <script id="displayNameTemplate" type="text/x-kendo-tmpl">
         <span data-ng-if="batchEdit && isChanged(dataItem.uid, 'DisplayName')" class='k-dirty'></span>
-        <span data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</span>
+        <a href="javascript:void(0)" data-ng-if="!batchEdit || isLatticeAttribute(dataItem)" data-ng-click="fieldLinkClicked($event, dataItem)" data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" title="{{dataItem.DisplayName}}">{{dataItem.DisplayName}}</a>
         <input type="text" data-ng-if="batchEdit && !isLatticeAttribute(dataItem)" data-ng-model="dataItem.DisplayName" data-ng-change="valueChanged($event, dataItem, 'DisplayName', '#:DisplayName#')" class='form-control' data-ng-class="{'warning': isEmpty(dataItem.DisplayName)}" data-ng-click="textboxClicked($event)" />
     </script>
     <script id="categoryTemplate" type="text/x-kendo-tmpl">

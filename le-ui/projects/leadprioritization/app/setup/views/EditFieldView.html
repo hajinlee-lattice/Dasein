@@ -9,7 +9,7 @@
     </div>
     <div data-ng-hide="saveInProgress">
         <div class="title">
-            <h2>{{field.ColumnName}}<span data-ng-if="field.SourceToDisplay != null && field.SourceToDisplay != ''">&nbsp;({{field.SourceToDisplay}})</span></h2>
+            <h2>{{field.DisplayName}}<span data-ng-if="field.SourceToDisplay != null && field.SourceToDisplay != ''">&nbsp;({{field.SourceToDisplay}})</span></h2>
             <div class="button-area">
                 <button id="edit-field-cancel" data-ng-click="cancelClicked($event)" class="button blue-button">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
                 <button id="edit-field-save" data-ng-click="saveClicked($event)" class="button orange-button">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>
@@ -23,29 +23,25 @@
                     <th>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_FIELD_DETILS_COLUMN_VALUE')}}</th>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_COLUMN_NAME')}}</td>
-                        <td>{{field.ColumnName}}</td>
-                    </tr>
-                       <tr data-ng-class="shaded">
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME')}}</td>
-                           <td>{{field.DisplayName}}</td>
-                       </tr>
-                       <tr data-ng-class="shaded">
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE')}}</td>
-                           <td><select class="form-control" data-ng-options="u as u for u in approvedUsagesToSelect" data-ng-model="field.ApprovedUsage"></select></td>
-                       </tr>
-                       <tr data-ng-class="shaded">
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_ATTRIBUTES_TYPE')}}</td>
-                           <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="f as f for f in fundamentalTypesToSelect" data-ng-model="field.FundamentalType"></select></td>
-                           <td data-ng-if="isLatticeAttribute">{{field.FundamentalType}}</td>
-                       </tr>
-                       <tr>
-                           <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_STATISTICAL_TYPE')}}</td>
-                           <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="s as s for s in statisticalTypesToSelect" data-ng-model="field.StatisticalType"></select></td>
-                           <td data-ng-if="isLatticeAttribute">{{field.StatisticalType}}</td>
-                       </tr>
-                   </tbody>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_DISPLAY_NAME')}}</td>
+                       <td>{{field.DisplayName}}</td>
+                   </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_APPROVED_USAGE')}}</td>
+                       <td><select class="form-control" data-ng-options="u as u for u in approvedUsagesToSelect" data-ng-model="field.ApprovedUsage"></select></td>
+                   </tr>
+                   <tr data-ng-class="shaded">
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_ATTRIBUTES_TYPE')}}</td>
+                       <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="f as f for f in fundamentalTypesToSelect" data-ng-model="field.FundamentalType"></select></td>
+                       <td data-ng-if="isLatticeAttribute">{{field.FundamentalType}}</td>
+                   </tr>
+                   <tr>
+                       <td>{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_GRID_STATISTICAL_TYPE')}}</td>
+                       <td data-ng-if="!isLatticeAttribute"><select class="form-control" data-ng-options="s as s for s in statisticalTypesToSelect" data-ng-model="field.StatisticalType"></select></td>
+                       <td data-ng-if="isLatticeAttribute">{{field.StatisticalType}}</td>
+                   </tr>
+               </tbody>
             </table>
         </div>
     </div>
