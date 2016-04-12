@@ -1,17 +1,19 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertTrue;
+
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import static org.testng.Assert.assertTrue;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 
-public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class Oauth2ResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironment();
+        setupTestEnvironmentWithOneTenant();
     }
 
     @Test(groups = { "deployment" })

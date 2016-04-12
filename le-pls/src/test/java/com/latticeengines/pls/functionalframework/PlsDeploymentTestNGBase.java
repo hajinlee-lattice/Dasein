@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.annotations.AfterClass;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.testframework.security.impl.GlobalAuthDeploymentTestBed;
@@ -21,6 +22,11 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
     @Value("${pls.test.deployment.api}")
     private String deployedHostPort;
+
+    @AfterClass(groups = "deployment")
+    public void teardown() throws Exception {
+        testBed.cleanup();
+    }
 
     @PostConstruct
     private void postConstruct() {
