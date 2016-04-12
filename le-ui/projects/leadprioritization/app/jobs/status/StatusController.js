@@ -24,9 +24,9 @@ angular
                     $scope.jobType = 'placeholder';
                 }
                 if ($scope.jobType.toLowerCase() == "scoreworkflow") {
-                    $scope.jobDisplayName = "Batch Scoring";
+                    $scope.job.displayName = "Batch Scoring";
                 } else {
-                    $scope.jobDisplayName = "Create Model";
+                    $scope.job.displayName = "Create Model";
                 }
                 $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;

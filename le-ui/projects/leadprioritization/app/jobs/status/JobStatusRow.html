@@ -2,7 +2,7 @@
     <div class="clearfix">
         <span data-ng-if="job.timestamp == null" class="columns four">N/A</span>
         <span data-ng-if="job.timestamp != null" class="columns four">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
-        <span class="columns four">{{jobDisplayName}}</span>
+        <span class="columns four">{{job.displayName}}</span>
         <span class="columns four {{job.status}}">{{job.status}}
             <span data-ng-show="(jobCompleted || jobFailed) && jobId != null">
                 <a ui-sref="home.jobs.status.ready({jobId: jobId})" ng-show="jobType == 'fitModelWorkflow'">[View Report]</a>
