@@ -155,7 +155,17 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
             log.info(String.format("Putting to %s", url));
             restTemplate.put(url, result);
         } catch (Exception e) {
-            throw new RuntimeException("sendEmail: Remote call failure", e);
+            throw new RuntimeException("sendCreateModelEmail: Remote call failure", e);
+        }
+    }
+
+    public void sendPlsScoreEmail(String result, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/emails/score/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, result);
+        } catch (Exception e) {
+            throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }
     }
 }

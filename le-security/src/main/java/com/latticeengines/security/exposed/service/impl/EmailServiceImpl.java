@@ -390,10 +390,54 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipart();
-            sendMultiPartEmail("Lead Prioritization - Model Creation Failed", mp, Collections.singleton(user.getEmail()));
+            sendMultiPartEmail("Lead Prioritization - Model Creation Failed", mp,
+                    Collections.singleton(user.getEmail()));
             log.info("Sending PLS create model error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS create model error email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsScoreCompletionEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS scoring complete email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_SUCCESS);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{completemsg}}", "We have completed the scoring.");
+            builder.replaceToken("{{currentstep}}", "");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Scoring Completed", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS scoring complete email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsScoreErrorEmail(User user, String hostport) {
+        try {
+            log.info("Sending PLS scoring error email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_DEPLOYMENT_STEP_ERROR);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+            builder.replaceToken("{{lastname}}", user.getLastName());
+            builder.replaceToken("{{job}}", "model creation");
+            builder.replaceToken("{{errormsg}}", "Failed to score.");
+            builder.replaceToken("{{linkmsg}}", "Sign in to Lattice to retry.");
+            builder.replaceToken("{{url}}", hostport);
+
+            Multipart mp = builder.buildMultipart();
+            sendMultiPartEmail("Lead Prioritization - Scoring Failed", mp, Collections.singleton(user.getEmail()));
+            log.info("Sending PLS create scoring email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS scoring error email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 }

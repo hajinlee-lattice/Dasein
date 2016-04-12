@@ -44,4 +44,8 @@ public interface EmailService {
     void sendPlsCreateModelCompletionEmail(User user, String hostport);
 
     void sendPlsCreateModelErrorEmail(User user, String hostport);
+
+    void sendPlsScoreCompletionEmail(User user, String hostport);
+
+    void sendPlsScoreErrorEmail(User user, String hostport);
 }

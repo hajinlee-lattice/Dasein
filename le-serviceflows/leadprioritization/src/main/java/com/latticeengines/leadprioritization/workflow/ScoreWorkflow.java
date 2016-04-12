@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributes;
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
@@ -32,6 +33,9 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     @Autowired
     private ExportWorkflow exportWorkflow;
 
+    @Autowired
+    private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
+
     @Bean
     public Job scoreWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -44,6 +48,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
                 .next(score) //
                 .next(combineInputTableWithScore) //
                 .next(exportWorkflow) //
+                .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
 
     }

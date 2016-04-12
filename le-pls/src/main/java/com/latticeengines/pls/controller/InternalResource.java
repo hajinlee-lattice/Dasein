@@ -376,6 +376,23 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/score/result/{result}/" + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after scoring")
+    public void sendPlsScoreEmail(@PathVariable("result") String result, @PathVariable("tenantId") String tenantId,
+            HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        for (User user : users) {
+            if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                if (result.equals("COMPLETED")) {
+                    emailService.sendPlsScoreCompletionEmail(user, appPublicUrl);
+                } else {
+                    emailService.sendPlsScoreErrorEmail(user, appPublicUrl);
+                }
+            }
+        }
+    }
+
     @RequestMapping(value = "/testtenants", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset the testing environment for protractor tests.")
@@ -409,8 +426,9 @@ public class InternalResource extends InternalResourceBase {
         } else {
             if (StringUtils.isEmpty(productPrefix)) {
                 Camille camille = CamilleEnvironment.getCamille();
-                Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(tenant1Id)).append("SpaceConfiguration").append("Products");
+                Path productsPath = PathBuilder
+                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1Id))
+                        .append("SpaceConfiguration").append("Products");
                 try {
                     camille.upsert(productsPath,
                             new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
@@ -418,8 +436,9 @@ public class InternalResource extends InternalResourceBase {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(),
-                        CustomerSpace.parse(tenant2Id)).append("SpaceConfiguration").append("Products");
+                productsPath = PathBuilder
+                        .buildCustomerSpacePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant2Id))
+                        .append("SpaceConfiguration").append("Products");
                 try {
                     camille.upsert(productsPath,
                             new Document(JsonUtils.serialize(Collections.singleton(LatticeProduct.LPA.getName()))),
