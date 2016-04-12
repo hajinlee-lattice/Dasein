@@ -116,7 +116,7 @@ public class SchemaGenerator {
         Iterable<File> iterable = Files.fileTreeTraverser()
                 .children(new File("src/main/resources/staticsql/" + leafFolder));
         for (File f : iterable) {
-            if (f.getName().equals(".svn") || f.isDirectory()) {
+            if (f.getName().equals(".svn") || f.getName().contains("quartz") || f.isDirectory()) {
                 continue;
             }
             log.info(String.format("appending %s to %s", f.getAbsolutePath(), exportFile.getAbsolutePath()));
