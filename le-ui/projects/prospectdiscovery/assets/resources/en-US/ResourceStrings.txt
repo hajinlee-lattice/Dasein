@@ -1,6 +1,6 @@
 LOGIN_COPYRIGHT={0} ALL RIGHTS RESERVED. LATTICE.
 FOOTER_COPYRIGHT={0} All rights reserved. Lattice.
-LOGIN_USERNAME=User Name
+LOGIN_USERNAME=Email
 LOGIN_PASSWORD=Password
 HEADER_LOGOUT=Sign Out
 HEADER_UPDATE_PASSWORD=Update Password
@@ -28,7 +28,7 @@ BUTTON_SAVE_AND_VERIFY=Save & Verify
 BUTTON_EDIT_LABEL=Edit
 BUTTON_SEARCH_LABEL=Search
 FORGOT_PASSWORD_TITLE=Forgot your password?
-FORGOT_PASSWORD_MESSAGE=Enter your username below and we'll send you a temporary password to use for login.
+FORGOT_PASSWORD_MESSAGE=Enter your email below and we'll send you a temporary password to use for login.
 FORGOT_PASSWORD_SUCCESS_MESSAGE=An email has been sent to you with more details for resetting your password.
 FORGOT_PASSWORD_FAILURE_MESSAGE=There was an issue resetting your password. Please contact your system administrator for assistance.
 FORGOT_PASSWORD_INPUT_PLACEHOLDER=Username

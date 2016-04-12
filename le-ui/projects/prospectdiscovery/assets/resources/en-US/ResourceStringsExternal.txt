@@ -1,5 +1,5 @@
 LOGIN_COPYRIGHT={0} ALL RIGHTS RESERVED. LATTICE.
-LOGIN_USERNAME=User Name
+LOGIN_USERNAME=Email
 LOGIN_PASSWORD=Password
 HEADER_LOGOUT=Sign Out
 HEADER_SETTINGS=Settings
@@ -9,7 +9,7 @@ HEADER_PRIVACY_POLICY=Privacy Policy
 LOGIN_FORGOT_PASSWORD_LABEL=Forgot Password?
 BUTTON_CANCEL_LABEL=Cancel
 FORGOT_PASSWORD_TITLE=Forgot your password?
-FORGOT_PASSWORD_MESSAGE=Enter your username below and we'll send you a temporary password to use for login.
+FORGOT_PASSWORD_MESSAGE=Enter your email below and we'll send you a temporary password to use for login.
 FORGOT_PASSWORD_SUCCESS_MESSAGE=An email has been sent to you with more details for resetting your password.
 FORGOT_PASSWORD_FAILURE_MESSAGE=There was an issue resetting your password. Please contact your system administrator for assistance.
 FORGOT_PASSWORD_INPUT_PLACEHOLDER=Username
