@@ -53,26 +53,26 @@ create table authorities (
   authority varchar(256)
 );
 
-drop table if exists `tenant`;
-create table tenant (
-    pid int not null auto_increment,
-    tenant_name varchar(256) not null,
-    external_id varchar(256) null,
-    jdbc_driver varchar(256) not null,
-    jdbc_url varchar(256) not null,
-    jdbc_username varchar(256) null,
-    jdbc_password varchar(256) null,
-    primary key(pid)
+drop table if exists `TENANT`;
+create table TENANT (
+    PID int not null auto_increment,
+    TENANT_NAME varchar(256) not null,
+    EXTERNAL_ID varchar(256) null,
+    JDBC_DRIVER varchar(256) not null,
+    JDBC_URL varchar(256) not null,
+    JDBC_USERNAME varchar(256) null,
+    JDBC_PASSWORD varchar(256) null,
+    primary key(PID)
 );
 
-drop table if exists `oauthuser`;
-create table oauthuser (
-    pid int not null auto_increment,
-    userid varchar(256) not null,
-    encryptedpassword varchar(256) not null,
-    passwordexpired bit not null,
-    passwordexpiration datetime null,
-    primary key(pid)
+drop table if exists `OAuthUser`;
+create table OAuthUser (
+    PID int not null auto_increment,
+    UserId varchar(256) not null,
+    EncryptedPassword varchar(256) not null,
+    PasswordExpired bit not null,
+    PasswordExpiration datetime null,
+    primary key(PID)
 );
 
 insert into oauth_client_details
