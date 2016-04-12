@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -41,11 +43,45 @@ public class JsonUtils {
         return deserializedSchema;
     }
 
+    public static <T> T deserialize(String jsonStr, Class<T> clazz, Boolean allowUnquotedFieldName) {
+        if (jsonStr == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        if(allowUnquotedFieldName == true)
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        T deserializedSchema;
+        try {
+            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return deserializedSchema;
+    }
+
     public static <T> T deserialize(String jsonStr, TypeReference<T> typeRef) {
         if (jsonStr == null) {
             return null;
         }
         ObjectMapper objectMapper = new ObjectMapper();
+        T deserializedSchema;
+        try {
+            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
+        return deserializedSchema;
+    }
+
+    public static <T> T deserialize(String jsonStr, TypeReference<T> typeRef, Boolean allowSingleQuotes) {
+        if (jsonStr == null) {
+            return null;
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        if(allowSingleQuotes == true)
+            objectMapper.configure(Feature.ALLOW_SINGLE_QUOTES, true);
+
         T deserializedSchema;
         try {
             deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), typeRef);

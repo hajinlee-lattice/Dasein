@@ -357,6 +357,18 @@
             <version>1.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.latticeengines.scoringapi</groupId>
+            <artifactId>transform.impl</artifactId>
+            <version>0.0.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.voc</groupId>
+            <artifactId>python-java</artifactId>
+            <version>0.0.2</version>
+        </dependency>
+
     </dependencies>
 
 </project>

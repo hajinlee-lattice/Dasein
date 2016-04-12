@@ -108,17 +108,6 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dataProvider = "tenants", enabled = true)
-    public void transformTenant10(String tenantPath, String keyColumn) throws Exception {
-        System.setProperty("TENANT", "tenant10");
-        String tenantName = new File(tenantPath).getName();
-        if (skip(tenantName)) {
-            return;
-        } else {
-            transform(tenantPath, keyColumn);
-        }
-    }
-
-    @Test(groups = "functional", dataProvider = "tenants", enabled = false)
     public void transform(String tenantPath, String keyColumn) throws Exception {
         String modelFilePath = tenantPath + "/model.json";
         String dataToScorePath = tenantPath + "/datatoscore.avro";
@@ -277,17 +266,35 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                 }
                 Double key = record.getKey();
                 try {
-                    Map<String, Object> transformed = recordTransformer.transform(modelPath, transforms, record.getValue());
-                    Map<ScoreType, Object> evaluation = pmmlEvaluator.evaluate(transformed, derivation);
-                    Double expectedScore = expectedScores.get(record.getKey());
-                    Double score = (double) evaluation.get(ScoreType.PROBABILITY);
+                    Map<String, Object> transformedFast = recordTransformer.transform(modelPath, transforms, record.getValue());
 
-                    if (Math.abs(expectedScore - score) > 0.0000001) {
+                    Map<ScoreType, Object> evaluationFast = null;
+                    evaluationFast = pmmlEvaluator.evaluate(transformedFast, derivation);
+
+                    Double expectedScore = expectedScores.get(record.getKey());
+                    Double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
+
+                    if (Math.abs(expectedScore - scoreFast) > 0.0000001) {
+                        Map<String, Object> transformed = recordTransformer.transformOld(modelPath, transforms, record.getValue());
+                        for(String keyFromTransformed : transformed.keySet()) {
+                            if(transformed.containsKey(keyFromTransformed) == true && transformedFast.containsKey(keyFromTransformed) == true) {
+                                if(transformed.get(keyFromTransformed) != null && transformedFast.get(keyFromTransformed) != null) {
+                                    if(transformed.get(keyFromTransformed).toString().equals(transformedFast.get(keyFromTransformed).toString()) == false) {
+                                        System.out.println("Error Key: " + keyFromTransformed + " T:" +
+                                                transformed.get(keyFromTransformed) + " TF:" + transformedFast.get(keyFromTransformed));
+                                    }
+                                }
+                            } else {
+                                System.out.println("Key Error for " + keyFromTransformed);
+                            }
+                        }
                         System.out.println(String.format("Record id %f has value %f, expected is %f", //
-                                key, score, expectedScore));
-                        errorQueue.put(new QueueEntry<Double, Double>(key, Math.abs(expectedScore - score)));
+                                key, scoreFast, expectedScore));
+                        System.out.println("Difference," + Math.abs(expectedScore - scoreFast));
+
+                        errorQueue.put(new QueueEntry<Double, Double>(key, Math.abs(expectedScore - scoreFast)));
                     } else {
-                        outputQueue.put(new QueueEntry<Double, Double>(key, score));
+                        outputQueue.put(new QueueEntry<Double, Double>(key, scoreFast));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

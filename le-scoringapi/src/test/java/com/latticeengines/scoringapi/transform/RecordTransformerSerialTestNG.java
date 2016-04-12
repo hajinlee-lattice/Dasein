@@ -104,7 +104,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         return true;
     }
 
-    @Test(groups = "functional", dataProvider = "tenants", enabled = false)
+    @Test(groups = "functional", dataProvider = "tenants", enabled = true)
     public void transform(String tenantPath, String keyColumn) throws Exception {
         String modelFilePath = tenantPath + "/model.json";
         String dataToScorePath = tenantPath + "/datatoscore.avro";
@@ -149,9 +149,11 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
         Map<Double, Double> expectedScores = getExpectedScores(expectedScoresPath);
         int i = 0;
 
+        long totalFastTransformTime = 0;
         long totalTransformTime = 0;
         long totalEvaluationTime = 0;
         long time0 = System.currentTimeMillis();
+        int transformDifferences = 0;
         int errors = 0;
         List<Map.Entry<Double, Double>> errorKeys = new ArrayList<>();
         for (GenericRecord record : reader) {
@@ -173,37 +175,61 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
                 }
                 recordAsMap.put(f.name(), value);
             }
-            long time1 = System.currentTimeMillis();
-            Map<String, Object> transformed = recordTransformer.transform(
+            long time9 = System.currentTimeMillis();
+            Map<String, Object> transformedFast = recordTransformer.transform(
                     modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
-            long time2 = System.currentTimeMillis();
-            totalTransformTime += (time2 - time1);
+            long time10 = System.currentTimeMillis();
+            totalFastTransformTime += (time10 - time9);
 
             try {
-                Map<ScoreType, Object> evaluation = pmmlEvaluator.evaluate(transformed, derivation);
-                totalEvaluationTime += (System.currentTimeMillis() - time2);
+                Map<ScoreType, Object> evaluationFast = pmmlEvaluator.evaluate(transformedFast, derivation);
+                totalEvaluationTime += (System.currentTimeMillis() - time10);
                 double expectedScore = expectedScores.get(recIdAsDouble);
-                double score = (double) evaluation.get(ScoreType.PROBABILITY);
-                if (Math.abs(expectedScore - score) > 0.0000001) {
+                double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY);
+
+                if (Math.abs(expectedScore - scoreFast) > 0.0000001) {
+                    Map<String, Object> transformed = recordTransformer.transformOld(
+                            modelExtractionDir.getAbsolutePath(), transforms, recordAsMap);
+                    for(String key : transformed.keySet()) {
+                        if(transformed.containsKey(key) && transformedFast.containsKey(key)) {
+                            if(transformed.get(key) != null && transformedFast.get(key) != null) {
+                                if(transformed.get(key).toString().equals(transformedFast.get(key).toString()) == false) {
+                                    transformDifferences++;
+                                    System.out.println("Difference in transforms for Key: " + key + " T:" + transformed.get(key) + " TF:" + transformedFast.get(key));
+                                }
+                            }
+                        }
+                    }
+
                     errors++;
                     errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble, Math
-                            .abs(expectedScore - score)));
-                    System.out.println(String.format("Record id %d has value %f, expected is %f",
-                            recId, score, expectedScore));
+                            .abs(expectedScore - scoreFast)));
+                    System.out.println(String.format("Difference for Record id %d has diff of %f value %f, expected is %f",
+                            recId, Math.abs(expectedScore - scoreFast) , scoreFast, expectedScore));
                 }
             } catch (Exception e) {
+                errors++;
+                System.out.println(e);
                 errorKeys.add(new AbstractMap.SimpleEntry<Double, Double>(recIdAsDouble, -1.0));
             }
 
-            if (i % 1000 == 0) {
+            if (i % 1000 == 1) {
                 System.out.println("At record " + i + " in " + (System.currentTimeMillis() - time0)
                         + " ms.");
+                System.out.println(String.format("Average transform time per record = %.3f",
+                        (double) totalTransformTime / (double) i));
+                System.out.println(String.format("Average fast transform time per record = %.3f",
+                        (double) totalFastTransformTime  / (double) i ));
+                System.out.println(String.format("Differences fast transform vs transform = %d",
+                        transformDifferences ));
             }
             i++;
         }
 
         System.out.println(String.format("Average transform time per record = %.3f",
                 (double) totalTransformTime / (double) i));
+        System.out.println(String.format("Average fast transform time per record = %.3f",
+                (double) totalFastTransformTime / (double) i));
         System.out.println(String.format("Average evaluation time per record = %.3f",
                 (double) totalEvaluationTime / (double) i));
         System.out.println("Number of errors = " + errors);
