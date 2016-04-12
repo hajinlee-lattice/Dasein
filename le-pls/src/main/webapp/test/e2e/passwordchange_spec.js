@@ -25,6 +25,7 @@ describe('forgot password tests:', function () {
         changePasswordButNewPasswordAndConfirmPasswordAreDifferent_assertError();
     });
 
+    /**
     it('login and change password to alternative password', function () {
         passwordChange.loginAsTestingUserWithPasswordAndTenant(passwordChange.params.passwordTestingPassword);
         passwordChange.navigateFromHomePageToChangePasswordPage();
@@ -45,6 +46,7 @@ describe('forgot password tests:', function () {
         loginPage.assertLoggedIn(true);
         loginPage.logout();
     }, 200000);
+    **/
 
     function changePasswordWithWrongUsername_assertError() {
         loginPage.get();
