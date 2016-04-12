@@ -14,7 +14,7 @@ public interface FileFlowService {
 
     String getTargetDB(String type);
 
-    FileType getFileType(String zipFileName);
+    String getFileType(String zipFileName);
 
     boolean deleteFile(String fileName);
 

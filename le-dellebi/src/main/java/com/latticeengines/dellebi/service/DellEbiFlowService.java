@@ -25,7 +25,7 @@ public interface DellEbiFlowService {
 
     boolean deleteFile(DataFlowContext context);
 
-    FileType getFileType(DataFlowContext context);
+    String getFileType(DataFlowContext context);
 
     String getZipDir(DataFlowContext context);
 

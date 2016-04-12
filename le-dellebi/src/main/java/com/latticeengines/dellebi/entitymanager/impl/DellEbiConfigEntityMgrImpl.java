@@ -3,6 +3,8 @@ package com.latticeengines.dellebi.entitymanager.impl;
 import java.sql.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,6 +25,8 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
     private DellEbiConfigDao dellEbiConfigDao;
 
     private List<DellEbiConfig> configs;
+
+    private static final Log log = LogFactory.getLog(DellEbiConfigEntityMgrImpl.class);
 
     @Override
     @Transactional(value = "transactionManagerDellEbiCfg", propagation = Propagation.REQUIRED)
@@ -104,13 +108,38 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
                 return config;
             }
         }
+        log.warn("Type " + type + " is not defined in the config table.");
+        return null;
+    }
 
-        throw new LedpException(LedpCode.LEDP_29000, new String[] { type });
+    @Override
+    public DellEbiConfig getConfigByBean(String bean) {
+
+        for (DellEbiConfig config : configs) {
+            if (config.getBean().equalsIgnoreCase(bean)) {
+                return config;
+            }
+        }
+
+        throw new LedpException(LedpCode.LEDP_29005, new String[] { bean });
+    }
+
+    @Override
+    public DellEbiConfig getConfigByFileName(String fileName) {
+
+        for (DellEbiConfig config : configs) {
+            String regexStr = config.getFilePattern().replace("*", ".*");
+            regexStr = regexStr.replace("?", ".");
+            if (fileName.matches(regexStr)) {
+                return config;
+            }
+        }
+
+        throw new LedpException(LedpCode.LEDP_29006, new String[] { fileName });
     }
 
     @Override
     public Date getStartDate(String type) {
-
         if (type == null) {
             throw new LedpException(LedpCode.LEDP_29001);
         }
@@ -141,7 +170,7 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
 
         DellEbiConfig config = getConfigByType(type);
 
-        return config.getIsDeleted();
+        return (config.getIsDeleted() == null ? false : config.getIsDeleted());
     }
 
     @Override
@@ -153,7 +182,7 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
 
         DellEbiConfig config = getConfigByType(type);
 
-        return config.getIsActive();
+        return (config.getIsActive() == null ? false : config.getIsActive());
     }
 
     @Override
@@ -201,5 +230,38 @@ public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig>
         DellEbiConfig config = getConfigByType(type);
 
         return config.getPriority();
+    }
+
+    @Override
+    public String getTypeByBean(String bean) {
+        if (bean == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        DellEbiConfig config = getConfigByBean(bean);
+
+        return config.getType();
+    }
+
+    @Override
+    public String getTypeByFileName(String fileName) {
+        if (fileName == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        DellEbiConfig config = getConfigByFileName(fileName);
+
+        return config.getType();
+    }
+
+    @Override
+    public String getPostStoreProcedure(String type) {
+        if (type == null) {
+            throw new LedpException(LedpCode.LEDP_29001);
+        }
+
+        DellEbiConfig config = getConfigByType(type);
+
+        return config.getPostStoreProcedure();
     }
 }

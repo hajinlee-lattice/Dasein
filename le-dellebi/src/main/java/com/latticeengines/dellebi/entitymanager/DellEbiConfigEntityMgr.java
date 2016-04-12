@@ -45,4 +45,14 @@ public interface DellEbiConfigEntityMgr {
     String getFilePattern(String type);
 
     int getPriority(String type);
+
+    DellEbiConfig getConfigByBean(String bean);
+
+    String getTypeByBean(String bean);
+
+    DellEbiConfig getConfigByFileName(String fileName);
+
+    String getTypeByFileName(String fileName);
+
+    String getPostStoreProcedure(String type);
 }

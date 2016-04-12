@@ -67,7 +67,7 @@ public class LocalFileFlowServiceImpl extends BaseFileFlowService {
             String txtFileName = null;
 
             String zipFileName = scanedFile.getName();
-            String fileType = getFileType(zipFileName).getType();
+            String fileType = getFileType(zipFileName);
 
             DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
 

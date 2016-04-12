@@ -53,7 +53,7 @@ public class DellEbiTestNGBase extends AbstractTestNGSpringContextTests {
             for (Object[] obj : fileProviderData) {
                 String qualifierFileName = (String) obj[0];
                 String objFileName = getFileNameFromPath(qualifierFileName);
-                String fileType = smbFileFlowService.getFileType(objFileName).getType();
+                String fileType = smbFileFlowService.getFileType(objFileName);
                 String smbInboxPath = dellEbiConfigEntityMgr.getInboxPath(fileType);
                 smbPut(smbInboxPath, qualifierFileName);
             }

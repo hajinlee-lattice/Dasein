@@ -76,6 +76,9 @@ public class DailyFlow {
     private MailSender mailSender;
 
     @Autowired
+    private FlowDefinition flowDefinition;
+
+    @Autowired
     private ApplicationContext applicationContext;
 
     public DataFlowContext doDailyFlow(String[] typesList) {
@@ -151,12 +154,14 @@ public class DailyFlow {
 
         List<DellEbiConfig> configsList = dellEbiConfigEntityMgr.getConfigs();
         for (DellEbiConfig config : configsList) {
-            if (config.getType().equalsIgnoreCase(dellEbiFlowService.getFileType(context).getType())) {
-                FlowDef flow = (FlowDef) applicationContext.getBean(config.getBean());
+            if (config.getType().equalsIgnoreCase(dellEbiFlowService.getFileType(context))) {
+
+                FlowDef flow = flowDefinition.populateFlowDefByType(config.getType());
                 HadoopFileSystemOperations.addClasspath(flow, versionManager.getCurrentVersion());
                 return flow;
             }
         }
         return null;
     }
+
 }

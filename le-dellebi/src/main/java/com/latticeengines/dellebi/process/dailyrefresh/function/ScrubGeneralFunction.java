@@ -90,7 +90,8 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
                 break;
 
             default:
-                result.add(argument.getString(fieldName));
+                String tmpStr = trimStringOfNaughtyCharacters(argument.getString(fieldName));
+                result.add(tmpStr);
             }
         }
 
@@ -173,5 +174,15 @@ public class ScrubGeneralFunction extends BaseOperation implements Function {
             return "";
         }
         return s;
+    }
+
+    private String trimStringOfNaughtyCharacters(String strToBeTrimed) {
+        if (strToBeTrimed == null)
+            return null;
+        strToBeTrimed = strToBeTrimed.replaceAll("\\x00", "");
+        if (strToBeTrimed.equalsIgnoreCase("")) {
+            return null;
+        }
+        return strToBeTrimed.trim();
     }
 }

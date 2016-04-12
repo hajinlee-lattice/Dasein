@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
@@ -17,7 +18,6 @@ import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
-import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiConfig;
@@ -41,6 +41,9 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Autowired
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
+
+    @Autowired
+    private JdbcTemplate dellEbiTargetJDBCTemplate;
 
     @Override
     public DataFlowContext getFile(DataFlowContext context) {
@@ -104,7 +107,7 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     }
 
     @Override
-    public FileType getFileType(DataFlowContext context) {
+    public String getFileType(DataFlowContext context) {
         String zipFileName = context.getProperty(ZIP_FILE_NAME, String.class);
         if (isSmb(context)) {
             return smbFileFlowService.getFileType(zipFileName);
@@ -127,11 +130,11 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         Boolean isDeleted;
         String fileType;
 
-        fileType = getFileType(context).getType();
+        fileType = getFileType(context);
 
         isDeleted = dellEbiConfigEntityMgr.getIsDeleted(fileType);
 
-        if (!isDeleted || isDeleted == false)
+        if (isDeleted == null || isDeleted == false)
             return true;
 
         if (isSmb(context)) {
@@ -154,9 +157,13 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
     @Override
     public boolean runStoredProcedure(DataFlowContext context) {
-
         String type = context.getProperty(FILE_TYPE, String.class);
-        if (isSmb(context) && type.equals(FileType.QUOTE.getType())) {
+        String spName = dellEbiConfigEntityMgr.getPostStoreProcedure(type);
+        if (isSmb(context) && spName != null) {
+            String sqlStr = "exec " + spName;
+            log.info("Begin to execute the Store Procedure= " + spName);
+            dellEbiTargetJDBCTemplate.execute(sqlStr);
+            log.info("Finished executing the Store Procedure= " + spName);
             return true;
         }
         return false;
@@ -192,6 +199,7 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
         List<DellEbiConfig> configsList = new ArrayList<DellEbiConfig>();
 
         for (String type : types) {
+            type = type.trim();
             DellEbiConfig config = dellEbiConfigEntityMgr.getConfigByType(type);
             if (config != null) {
                 log.info("The configuration for: " + type + " is " + config.toString());

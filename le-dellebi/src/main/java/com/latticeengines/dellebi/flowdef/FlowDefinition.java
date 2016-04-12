@@ -4,9 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import cascading.flow.FlowDef;
 import cascading.pipe.Pipe;
@@ -17,11 +15,10 @@ import cascading.tap.hadoop.Hfs;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
-import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.dellebi.util.PipeFactory;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
-@Configuration
+@Component
 public class FlowDefinition {
 
     @Value("${dellebi.cascadinginputdelimiter}")
@@ -35,62 +32,8 @@ public class FlowDefinition {
 
     private static final Log log = LogFactory.getLog(FlowDefinition.class);
 
-    @Bean
-    @Scope("prototype")
-    public FlowDef getOrderSumDailyFlow() {
-        return getGenericItemDailyFlow(FileType.ORDER_SUMMARY.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getOrderDetailDailyFlow() {
-        return getGenericItemDailyFlow(FileType.ORDER_DETAIL.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getQuoteDailyFlow() {
-        return getGenericItemDailyFlow(FileType.QUOTE.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getSkuItemClassDailyFlow() {
-        return getGenericItemDailyFlow(FileType.SKU_ITM_CLS_CODE.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getSkuMfgDailyFlow() {
-        return getGenericItemDailyFlow(FileType.SKU_MANUFACTURER.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getSkuGlobalDailyFlow() {
-        return getGenericItemDailyFlow(FileType.SKU_GLOBAL.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getWarrantyDailyFlow() {
-        return getGenericItemDailyFlow(FileType.WARRANTY.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getCalendarDailyFlow() {
-        return getGenericItemDailyFlow(FileType.CALENDAR.getType());
-    }
-
-    @Bean
-    @Scope("prototype")
-    public FlowDef getChannelDailyFlow() {
-        return getGenericItemDailyFlow(FileType.CHANNEL.getType());
-    }
-
     @SuppressWarnings("rawtypes")
-    public FlowDef getGenericItemDailyFlow(String type) {
+    public FlowDef populateFlowDefByType(String type) {
 
         log.info("Initial " + type + " flow definition!");
         DataFlowContext context = new DataFlowContext();

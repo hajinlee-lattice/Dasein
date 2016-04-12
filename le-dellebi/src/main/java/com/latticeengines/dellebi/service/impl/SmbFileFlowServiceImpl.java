@@ -87,7 +87,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             String txtFileName = null;
 
             String zipFileName = scanedFile.getName();
-            String fileType = getFileType(zipFileName).getType();
+            String fileType = getFileType(zipFileName);
 
             DellEbiExecutionLog dellEbiExecutionLog = new DellEbiExecutionLog();
 
@@ -137,7 +137,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
     @Override
     public String getTargetDB(String type) {
-        if (type.equals(FileType.QUOTE.getType()))
+        if (type.equalsIgnoreCase(FileType.QUOTE.getType()))
             return quoteTargetDB;
         else
             return stageFinalTargetDB;
@@ -183,11 +183,8 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     }
 
     protected String getSmbInboxPathByFileName(String fileName) {
-        FileType type = getFileType(fileName);
-        if (type == null) {
-            return null;
-        }
-        String typeName = type.getType();
+
+        String typeName = getFileType(fileName);
 
         return dellEbiConfigEntityMgr.getInboxPath(typeName);
 

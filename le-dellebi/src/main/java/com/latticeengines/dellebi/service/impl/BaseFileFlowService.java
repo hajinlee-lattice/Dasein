@@ -54,47 +54,10 @@ public abstract class BaseFileFlowService implements FileFlowService {
     }
 
     @Override
-    public FileType getFileType(String zipFileName) {
-        if (zipFileName.startsWith("tgt_quote_trans_global")) {
-            return FileType.QUOTE;
-        }
+    public String getFileType(String zipFileName) {
 
-        if (zipFileName.startsWith("tgt_lat_order_summary_global")) {
-            return FileType.ORDER_SUMMARY;
-        }
-
-        if (zipFileName.startsWith("tgt_order_detail_global")) {
-            return FileType.ORDER_DETAIL;
-        }
-
-        if (zipFileName.startsWith("tgt_ship_to_addr_lattice")) {
-            return FileType.SHIP;
-        }
-
-        if (zipFileName.startsWith("tgt_warranty_global")) {
-            return FileType.WARRANTY;
-        }
-
-        if (zipFileName.startsWith("tgt_lattice_mfg_ext")) {
-            return FileType.SKU_MANUFACTURER;
-        }
-
-        if (zipFileName.startsWith("tgt_itm_cls_code")) {
-            return FileType.SKU_ITM_CLS_CODE;
-        }
-
-        if (zipFileName.startsWith("tgt_all_chnl")) {
-            return FileType.CHANNEL;
-        }
-
-        if (zipFileName.startsWith("global_sku_lookup")) {
-            return FileType.SKU_GLOBAL;
-        }
-
-        if (zipFileName.startsWith("fiscal_day_calendar")) {
-            return FileType.CALENDAR;
-        }
-        return null;
+        dellEbiConfigEntityMgr.getTypeByFileName(zipFileName);
+        return dellEbiConfigEntityMgr.getTypeByFileName(zipFileName);
     }
 
     protected boolean isFailedFile(String zipFileName) {
@@ -126,7 +89,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     protected String downloadAndUnzip(InputStream is, String fileName) {
         String zipDir = getZipDir();
-        String txtDir = getTxtDir(getFileType(fileName).getType());
+        String txtDir = getTxtDir(getFileType(fileName));
 
         try {
             Configuration conf = new Configuration();
@@ -169,8 +132,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
         ZipEntry entry = zipIn.getNextEntry();
         String txtFileName = null;
 
-        FileType type = getFileType(zipFileName);
-        String typeName = type.toString();
+        String typeName = getFileType(zipFileName);
         String headers = dellEbiConfigEntityMgr.getHeaders(typeName);
         while (entry != null) {
             txtFileName = entry.getName();
@@ -228,10 +190,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     protected boolean isActive(String fileName) {
 
-        FileType type = getFileType(fileName);
-        if (type == null)
-            return false;
-        String typeName = type.getType();
+        String typeName = getFileType(fileName);
 
         Boolean isActive = dellEbiConfigEntityMgr.getIsActive(typeName);
 
@@ -259,11 +218,7 @@ public abstract class BaseFileFlowService implements FileFlowService {
 
     protected boolean isValidForDate(String fileName, Long lastModified) {
         Long dateLong;
-        FileType type = getFileType(fileName);
-        if (type == null)
-            return false;
-
-        String typeName = type.getType();
+        String typeName = getFileType(fileName);
 
         Date startDate = dellEbiConfigEntityMgr.getStartDate(typeName);
 

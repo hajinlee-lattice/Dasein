@@ -10,8 +10,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
@@ -34,9 +32,6 @@ public class ExportAndReportService {
 
     @Value("${dellebi.customer}")
     private String customer;
-
-    @Value("${dellebi.quotetrans.storeprocedure}")
-    private String quote_sp;
 
     @Value("${dellebi.output.hdfsdata.remove}")
     private boolean doRemove;
@@ -76,14 +71,10 @@ public class ExportAndReportService {
     @Autowired
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
-    @Autowired
-    private JdbcTemplate dellEbiTargetJDBCTemplate;
-
     public boolean export(DataFlowContext context) {
 
         String sourceDir = dellEbiFlowService.getOutputDir(context);
         String successFile = dellEbiFlowService.getOutputDir(context) + "/_SUCCESS";
-        String sqlStr = "exec " + quote_sp;
         DellEbiExecutionLog dellEbiExecutionLog = context.getProperty(DellEbiFlowService.LOG_ENTRY,
                 DellEbiExecutionLog.class);
 
@@ -133,20 +124,15 @@ public class ExportAndReportService {
 
         if (errorMsg == null) {
             try {
-                if (dellEbiFlowService.runStoredProcedure(context)) {
-                    log.info("Begin to execute the Store Procedure= " + quote_sp);
-
-                    dellEbiTargetJDBCTemplate.execute(sqlStr);
-                    log.info("Finished executing the Store Procedure= " + quote_sp);
-                }
+                dellEbiFlowService.runStoredProcedure(context);
             } catch (Exception e) {
-                errorMsg = "Failed to execute the Store Procedure= " + quote_sp;
+                errorMsg = "Failed to execute the Store Procedure";
                 log.error(errorMsg, e);
             }
         }
 
         String fileName = context.getProperty(DellEbiFlowService.ZIP_FILE_NAME, String.class);
-        ;
+
         if (errorMsg == null) {
             try {
                 List<String> files = HdfsUtils.getFilesByGlob(conf, dellEbiFlowService.getTxtDir(context) + "/*.txt");

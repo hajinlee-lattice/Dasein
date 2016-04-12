@@ -74,8 +74,8 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
     @Test(groups = "functional", dataProvider = "fileDataProvider")
     public void testExecute(String file, String sourceType, Boolean isProcessed) throws Exception {
         String fileName = getFileNameFromPath(file);
-        String typesStr = "order_detail,Order_Summary,Warranty,SKU_Global,SKU_Manufacturer,"
-                + "SKU_Itm_Cls_Code,Calendar,Channel,quote";
+        String typesStr = "WrongType, order_detail ,Order_Summary ,Warranty,SKU_Global,SKU_Manufacturer,"
+                + "SKU_Itm_Cls_Code,Calendar,Channel,quote,Account_Cust";
         String[] typesList = typesStr.split(",");
         String smbInboxPath = getSmbInboxPathByFileName(fileName);
 
@@ -190,6 +190,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         return new Object[][] {
 
                 { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
+                { "./src/test/resources/tgt_all_account_cust_1_20160404_034341.zip", "SMB", false },
                 { "./src/test/resources/fiscal_day_calendar_1_20151125_200027.zip", "SMB", false },
                 { "./src/test/resources/global_sku_lookup_1_20151007_035025.zip", "SMB", false },
                 { "./src/test/resources/tgt_all_chnl_hier_1_20151125_201055.zip", "SMB", false },
@@ -198,7 +199,8 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
                 { "./src/test/resources/tgt_lattice_mfg_ext_1_20151216_020122.zip", "SMB", false },
                 { "./src/test/resources/tgt_order_detail_global_1_20151127_235435.zip", "SMB", false },
                 { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", false },
-                { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true }
+                { "./src/test/resources/tgt_warranty_global_1_20151129_185719.zip", "SMB", true },
+                { "./src/test/resources/tgt_quote_trans_global_4_2015.zip", "SMB", false }
 
         };
     }
@@ -243,7 +245,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
 
         String type = dellEbiFlowService.getFileType(context).toString();
 
-        return dellEbiConfigEntityMgr.getIsDeleted(type);
+        return ( dellEbiConfigEntityMgr.getIsDeleted(type) == null ? false : dellEbiConfigEntityMgr.getIsDeleted(type));
 
     }
 
@@ -261,7 +263,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         DataFlowContext context = new DataFlowContext();
         context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, fileName);
 
-        String type = dellEbiFlowService.getFileType(context).getType();
+        String type = dellEbiFlowService.getFileType(context);
 
         Date date = dellEbiConfigEntityMgr.getStartDate(type);
 
@@ -275,7 +277,7 @@ public class DailyJobFunctionalTestNG extends DellEbiTestNGBase {
         DataFlowContext context = new DataFlowContext();
         context.setProperty(DellEbiFlowService.ZIP_FILE_NAME, fileName);
 
-        String type = dellEbiFlowService.getFileType(context).getType();
+        String type = dellEbiFlowService.getFileType(context);
 
         return dellEbiConfigEntityMgr.getInboxPath(type);
 
