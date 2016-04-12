@@ -8,24 +8,10 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
 .controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
-
-    /*
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
-        FeatureFlagService.GetAllFlags().then(function() {
-            var flags = FeatureFlagService.Flags();
-            $scope.userDisplayName = clientSession.DisplayName;
-            $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
-            $scope.showSystemSetup = FeatureFlagService.FlagIsEnabled(flags.SYSTEM_SETUP_PAGE);
-            $scope.showModelCreationHistoryDropdown = FeatureFlagService.FlagIsEnabled(flags.MODEL_HISTORY_PAGE);
-            $scope.showActivateModel = FeatureFlagService.FlagIsEnabled(flags.ACTIVATE_MODEL_PAGE);
-            $scope.showSetup = FeatureFlagService.FlagIsEnabled(flags.SETUP_PAGE);
-            $scope.showDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.DEPLOYMENT_WIZARD_PAGE);
-            $scope.redirectToDeploymentWizard = FeatureFlagService.FlagIsEnabled(flags.REDIRECT_TO_DEPLOYMENT_WIZARD_PAGE);
-            $scope.showLeadEnrichment = FeatureFlagService.FlagIsEnabled(flags.LEAD_ENRICHMENT_PAGE);
-        });
+        $scope.userDisplayName = clientSession.DisplayName;
     }
-    */
 
     checkBrowserWidth();
     $(window).resize(checkBrowserWidth);
