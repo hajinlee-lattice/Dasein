@@ -46,7 +46,7 @@ describe('forgot password tests:', function () {
         loginPage.logout();
     }, 200000);
     */
-    
+
     function changePasswordWithWrongUsername_assertError() {
         loginPage.get();
         browser.waitForAngular();
