@@ -120,14 +120,16 @@ public class RecordTransformer {
                 }
                 // Cast transformed value on successfulInvocation
                 else if (successfulInvocation) {
-                    if (entry.type.type() == Boolean.class) {
+                    if(value == null) {
+                        value = null;
+                    } else if (entry.type.type() == Boolean.class) {
                         Integer value1 = ((PyInteger) value).getValue();
                         value = entry.type.type().cast(value1 == 1);
                     }
                     else if (entry.type.type() == Double.class) {
                         try{
                             if(value.toString().toLowerCase().equals("true") == true) {
-                                value = entry.type.type().cast(Double.valueOf("1.0")); 
+                                value = entry.type.type().cast(Double.valueOf("1.0"));
                             } else if(value.toString().toLowerCase().equals("false") == true) {
                                 value = entry.type.type().cast(Double.valueOf("0.0"));
                             } else if(value.toString().equals("null") == false && value.toString().equals("None") == false) {
@@ -149,8 +151,6 @@ public class RecordTransformer {
                         } catch(Exception e) {
                             log.warn(String.format("Problem parsing Python value to Java Long"), e);
                         }
-                    } else {
-                        value = null;
                     }
 
                     result.put(entry.output, value);
