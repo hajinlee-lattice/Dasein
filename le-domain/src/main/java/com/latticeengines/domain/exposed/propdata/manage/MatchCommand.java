@@ -1,11 +1,7 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -21,8 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Index;
@@ -40,15 +34,6 @@ import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 @Table(name = "MatchCommand")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MatchCommand implements HasPid {
-
-    private static Log log = LogFactory.getLog(MatchCommand.class);
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
-    private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-    private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-
-    static {
-        formatter.setCalendar(calendar);
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,7 +84,6 @@ public class MatchCommand implements HasPid {
 
     @Column(name = "ResultLocation", length=400)
     protected String resultLocation;
-
 
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "matchCommand")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -270,37 +254,22 @@ public class MatchCommand implements HasPid {
 
     @JsonProperty("CreateTime")
     private String getCreateTimeAsString() {
-        return createTime == null ? null : formatter.format(createTime);
+        return DateTimeUtils.format(createTime);
     }
 
     @JsonProperty("CreateTime")
     private void setCreateTimeByString(String createTimeString) {
-        try {
-            SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-            formatter.setCalendar(calendar);
-            this.createTime = formatter.parse(createTimeString);
-        } catch (Exception e) {
-            log.error("Failed to parse timestamp ReceviedAt [" + createTimeString + "]", e);
-            this.createTime = null;
-        }
+        this.createTime = DateTimeUtils.parse(createTimeString);
     }
 
     @JsonProperty("LatestStatusUpdate")
     private String getLatestStatusUpdateAsString() {
-        return latestStatusUpdate == null ? null : formatter.format(latestStatusUpdate);
+        return DateTimeUtils.format(latestStatusUpdate);
     }
 
     @JsonProperty("LatestStatusUpdate")
     private void setLatestStatusUpdateByString(String latestStatusUpdateString) {
-        try {
-            SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-            formatter.setCalendar(calendar);
-            this.latestStatusUpdate = formatter.parse(latestStatusUpdateString);
-        } catch (Exception e) {
-            log.error("Failed to parse timestamp ReceviedAt [" + latestStatusUpdateString + "]", e);
-            this.latestStatusUpdate = null;
-        }
+        this.latestStatusUpdate = DateTimeUtils.parse(latestStatusUpdateString);
     }
-
 
 }
