@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -161,7 +162,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
             UserUpdateData userUpdateData = new UserUpdateData();
             userUpdateData.setAccessLevel(accessLevel.name());
             switchToSuperAdmin(tenant);
-            restTemplate.put(plsApiHostPort + "/pls/users/" + username, userUpdateData);
+            restTemplate.put(plsApiHostPort + "/pls/users/" + username, userUpdateData, new HashMap<String, Object>());
             log.info("Change user " + username + " access level to tenant " + tenant.getId() + " to " + accessLevel);
         }
     }
