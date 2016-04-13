@@ -50,7 +50,11 @@
         <!-- Script needed to get filepath and place it into the input field -->
         <script>
           document.getElementById("uploadBtn").onchange = function () {
-              document.getElementById("uploadFileInput").value = this.value.substring(12);
+              if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1){
+                document.getElementById("uploadFileInput").value = this.value
+              } else {
+                document.getElementById("uploadFileInput").value = this.value.substring(12);
+              }
           };
         </script>
 
