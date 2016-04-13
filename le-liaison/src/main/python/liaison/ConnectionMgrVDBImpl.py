@@ -746,13 +746,19 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         except ValueError as e:
             if self.isVerbose():
                 print 'HTTP Endpoint did not return the expected response'
-            raise EndpointError( e )
+            raise EndpointError(e)
+
+        if status == 5:
+            if self.isVerbose():
+                print 'Failed to execute Load Group \'{0}\': status={1}'.format(payload['groupName'], status)
+                print errmsg
+            raise DataLoaderError('ConnectionMgrVDBImpl.executeGroup(): {0}'.format(payload['tenantName']))
 
         if status != 3:
             if self.isVerbose():
-                print 'Failed to execute Load Group \'{0}\''.format( payload['groupName'] )
+                print 'Failed to execute Load Group \'{0}\': status={1}'.format(payload['groupName'], status)
                 print errmsg
-            raise TenantNotFoundAtURL( 'ConnectionMgrVDBImpl.executeGroup(): {0}'.format(payload['tenantName']) )
+            raise TenantNotFoundAtURL('ConnectionMgrVDBImpl.executeGroup(): {0}'.format(payload['tenantName']))
 
         valuedict  = response.json()['Value'][0]
         launchid = valuedict['Value']

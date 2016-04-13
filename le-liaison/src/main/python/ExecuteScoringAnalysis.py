@@ -15,6 +15,7 @@ def executeScoringAnalysis(tenants):
 
 
     tasks = []
+    resultsContainer = []
 
     for t in tenants:
 
@@ -30,25 +31,34 @@ def executeScoringAnalysis(tenants):
         tasks.append(tdata)
 
     pool = multiprocessing.Pool()
-    r = pool.map_async(executeForTenant, tasks)
+    r = pool.map_async(executeForTenant, tasks, callback=resultsContainer.append)
     r.wait()
+    if len(resultsContainer) == 0:
+        print 'No results returned'
+    else:
+        results = resultsContainer[0]
+        with open('scoringAnalysisResults.csv', mode='w') as resultFile:
+            resultFile.write('Tenant,Succes\n')
+            for d in results:
+                for (key,value) in d.iteritems():
+                    resultFile.write('{0},{1}\n'.format(key, value))
 
 
 def executeForTenant(tdata):
     (tenant, conn_mgr) = tdata
 
-    executeNext = installValidationQuery(tenant, conn_mgr)
-    if not executeNext:
-        return
-
     setMonitorTenant(tenant, conn_mgr, False)
+    executeAll = False
 
-    executeAll = waitForLastPushToScoring(tenant, conn_mgr)
+    executeNext = installValidationQuery(tenant, conn_mgr)
+    if executeNext:
+        executeAll = waitForLastPushToScoring(tenant, conn_mgr)
+    
     if executeAll:
 
         executeNext = True
-        print '{0:20s}: Waiting 15 Minutes'.format(tenant)
-        time.sleep(900)
+        print '{0:20s}: Waiting 5 Minutes'.format(tenant)
+        time.sleep(300)
 
         attempts = 5
         while attempts > 0:
@@ -62,22 +72,26 @@ def executeForTenant(tdata):
         executeNext = execScoresInDateRange(tenant, conn_mgr, executeNext)
 
         if executeNext:
-            print '{0:20s}: Waiting 15 Minutes'.format(tenant)
-            time.sleep(900)
+            print '{0:20s}: Waiting 10 Minutes'.format(tenant)
+            time.sleep(600)
 
-        attempts = 5
-        while attempts > 0:
-            attempts -= 1
-            executeNext = execPullFromScoring(tenant, conn_mgr, executeNext)
-            executeNext = execValidationQuery(tenant, conn_mgr, executeNext)
-            if executeNext:
-                break
+            attempts = 5
+            while attempts > 0:
+                attempts -= 1
+                executeNext = execPullFromScoring(tenant, conn_mgr, executeNext)
+                executeNext = execValidationQuery(tenant, conn_mgr, executeNext)
+                if executeNext:
+                    break
 
         executeNext = execExtractScores(tenant, conn_mgr, 'test', executeNext)
         executeNext = execExportSummary(tenant, conn_mgr, executeNext)
+    else:
+        executeNext = False
 
     setMonitorTenant(tenant, conn_mgr, True)
     print '{0:20s}: Completed'.format(tenant)
+    result = {tenant:executeNext}
+    return result
 
 
 def waitForLastPushToScoring(tenant, conn_mgr):
@@ -136,7 +150,12 @@ def execPTLD(tenant, conn_mgr, execute):
     if execute:
         print '{0:20s}: Executing PushToLeadDestination'.format(tenant)
 
-        launchid = conn_mgr.executeGroup('PushToLeadDestination', 'mwilson@lattice-engines.com')
+        try:
+            launchid = conn_mgr.executeGroup('PushToLeadDestination', 'mwilson@lattice-engines.com')
+        except:
+            print '{0:20s}: ERROR Cannot Execute PushToLeadDestination'.format(tenant)
+            return False
+
         while True:
             status = conn_mgr.getLaunchStatus(launchid)
             if status['Running'] == 'False':
@@ -177,7 +196,12 @@ def execExtractScores(tenant, conn_mgr, mode, execute):
 
         print '{0:20s}: Executing {1}'.format(tenant, loadGroup)
 
-        launchid = conn_mgr.executeGroup(loadGroup, 'mwilson@lattice-engines.com')
+        try:
+            launchid = conn_mgr.executeGroup(loadGroup, 'mwilson@lattice-engines.com')
+        except:
+            print '{0:20s}: ERROR Cannot Execute {1}'.format(tenant, loadGroup)
+            return False
+
         while True:
             status = conn_mgr.getLaunchStatus(launchid)
             if status['Running'] == 'False':
@@ -194,7 +218,12 @@ def execScoresInDateRange(tenant, conn_mgr, execute):
     if execute:
         print '{0:20s}: Executing BulkScoring_ScoresInDateRange'.format(tenant)
 
-        launchid = conn_mgr.executeGroup('BulkScoring_ScoresInDateRange', 'mwilson@lattice-engines.com')
+        try:
+            launchid = conn_mgr.executeGroup('BulkScoring_ScoresInDateRange', 'mwilson@lattice-engines.com')
+        except:
+            print '{0:20s}: ERROR Cannot Execute BulkScoring_ScoresInDateRange'.format(tenant)
+            return False
+
         while True:
             status = conn_mgr.getLaunchStatus(launchid)
             if status['Running'] == 'False':
@@ -211,7 +240,12 @@ def execPullFromScoring(tenant, conn_mgr, execute):
     if execute:
         print '{0:20s}: Executing BulkScoring_PullFromScoringDB'.format(tenant)
 
-        launchid = conn_mgr.executeGroup('BulkScoring_PullFromScoringDB', 'mwilson@lattice-engines.com')
+        try:
+            launchid = conn_mgr.executeGroup('BulkScoring_PullFromScoringDB', 'mwilson@lattice-engines.com')
+        except:
+            print '{0:20s}: ERROR Cannot Execute BulkScoring_PullFromScoringDB'.format(tenant)
+            return False
+
         while True:
             status = conn_mgr.getLaunchStatus(launchid)
             if status['Running'] == 'False':
@@ -228,7 +262,12 @@ def execExportSummary(tenant, conn_mgr, execute):
     if execute:
         print '{0:20s}: Executing Diagnostic_Summary_ScoresInDateRange'.format(tenant)
 
-        launchid = conn_mgr.executeGroup('Diagnostic_Summary_ScoresInDateRange', 'mwilson@lattice-engines.com')
+        try:
+            launchid = conn_mgr.executeGroup('Diagnostic_Summary_ScoresInDateRange', 'mwilson@lattice-engines.com')
+        except:
+            print '{0:20s}: ERROR Cannot Execute Diagnostic_Summary_ScoresInDateRange'.format(tenant)
+            return False
+
         while True:
             status = conn_mgr.getLaunchStatus(launchid)
             if status['Running'] == 'False':
