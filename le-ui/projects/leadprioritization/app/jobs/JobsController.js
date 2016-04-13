@@ -325,6 +325,7 @@ angular.module('pd.jobs', [
     //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
     $scope.hideCreationMessage = true;
     if ($stateParams.jobCreationSuccess !== null && $stateParams.jobCreationSuccess != "") {
+        console.log($stateParams);
         $scope.jobCreationSuccess = JSON.parse($stateParams.jobCreationSuccess);
         $scope.hideCreationMessage = false;
 
