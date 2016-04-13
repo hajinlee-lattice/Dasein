@@ -28,7 +28,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
-    private static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
+    protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -66,7 +66,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(), parent);
     }
 
-    private void setupModels() throws IOException {
+    protected void setupModels() throws IOException {
         URL url = getClass().getClassLoader().getResource(RESOURCE_BASE + "/models/AccountModel");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, url.getPath(),
                 "/user/s-analytics/customers/" + DEMO_CUSTOMERSPACE.toString()
@@ -80,7 +80,7 @@ public class ScoreWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDe
         score(summary.getId(), accountTable.getName());
     }
 
-    private ModelSummary locateModelSummary(String name, CustomerSpace space) {
+    protected ModelSummary locateModelSummary(String name, CustomerSpace space) {
         String startingHdfsPoint = "/user/s-analytics/customers/" + space;
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
 

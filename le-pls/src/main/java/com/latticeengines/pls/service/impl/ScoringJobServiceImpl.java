@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ScoringJobService;
+import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
@@ -42,6 +43,9 @@ public class ScoringJobServiceImpl implements ScoringJobService {
     private ScoreWorkflowSubmitter scoreWorkflowSubmitter;
 
     @Autowired
+    private ImportMatchAndScoreWorkflowSubmitter importMatchAndScoreWorkflowSubmitter;
+
+    @Autowired
     private Configuration yarnConfiguration;
 
     @Override
@@ -56,6 +60,11 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
 
         return scoreWorkflowSubmitter.submit(modelId, modelSummary.getTrainingTableName(), "Training Data").toString();
+    }
+
+    @Override
+    public String scoreTestingData(String modelId, String fileName) {
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName, "Testing Data").toString();
     }
 
     @Override
@@ -102,4 +111,5 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         Tenant tenant = MultiTenantContext.getTenant();
         return tenantEntityMgr.findByTenantId(tenant.getId());
     }
+
 }

@@ -13,4 +13,6 @@ public interface ScoringJobService {
 
     String scoreTrainingData(String modelId);
 
+    String scoreTestingData(String modelId, String fileName);
+
 }

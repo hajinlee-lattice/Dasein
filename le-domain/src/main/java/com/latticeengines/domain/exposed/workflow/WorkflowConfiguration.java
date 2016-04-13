@@ -26,6 +26,10 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         configRegistry.put(configuration.getClass().getName(), configuration.toString());
     }
 
+    protected void add(WorkflowConfiguration configuration) {
+        configRegistry.putAll(configuration.configRegistry);
+    }
+
     public Map<String, String> getConfigRegistry() {
         return configRegistry;
     }

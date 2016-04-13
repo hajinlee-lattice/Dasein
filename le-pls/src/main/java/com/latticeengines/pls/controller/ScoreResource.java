@@ -28,8 +28,7 @@ public class ScoreResource {
     public String score( //
             @PathVariable String modelId, //
             @RequestParam(value = "fileName") String fileName) {
-        // TODO implement
-        return null;
+        return scoringJobService.scoreTestingData(modelId, fileName);
     }
 
     @RequestMapping(value = "/{modelId}/training", method = RequestMethod.POST)

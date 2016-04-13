@@ -37,6 +37,7 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiFunctionalTestNGBase {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
 
     protected static final CustomerSpace DEMO_CUSTOMERSPACE = CustomerSpace.parse("DemoContract.DemoTenant.Production");
