@@ -9,7 +9,7 @@
     </div>
     <div data-ng-hide="saveInProgress">
         <div class="title">
-            <h2>{{field.DisplayName}}<span data-ng-if="field.SourceToDisplay != null && field.SourceToDisplay != ''">&nbsp;({{field.SourceToDisplay}})</span></h2>
+            <h2>{{field.DisplayName}}</h2>
             <div class="button-area">
                 <button id="edit-field-cancel" data-ng-click="cancelClicked($event)" class="button blue-button">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>
                 <button id="edit-field-save" data-ng-click="saveClicked($event)" class="button orange-button">{{ResourceUtility.getString('BUTTON_SAVE_LABEL')}}</button>

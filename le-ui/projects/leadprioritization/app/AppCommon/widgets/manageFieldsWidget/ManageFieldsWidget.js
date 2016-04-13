@@ -89,7 +89,6 @@ angular.module('mainApp.appCommon.widgets.ManageFieldsWidget', [
 
     function renderSelects(fields) {
         var obj = ManageFieldsService.GetOptionsForSelects(fields);
-        $scope.sourcesToSelect = obj.sourcesToSelect;
         $scope.categoriesToSelect = obj.categoriesToSelect;
         $scope.allOptions = obj.allOptions;
     }

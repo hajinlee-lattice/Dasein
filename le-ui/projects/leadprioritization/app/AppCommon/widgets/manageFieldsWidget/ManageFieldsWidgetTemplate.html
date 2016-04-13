@@ -31,9 +31,6 @@
                 <button id="manage-fields-search" data-ng-click="filterFields($event)" class="btn btn-primary">{{ResourceUtility.getString('BUTTON_SEARCH_LABEL')}}</button>
             </div>
             <div class="form-group">
-                <select data-ng-options="s as s for s in sourcesToSelect" data-ng-model="source" data-ng-change="selectChanged($event, 'source')" class="form-control">
-                    <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_SOURCES')}}</option>
-                </select>
                 <select data-ng-options="c for c in categoriesToSelect" data-ng-model="category" data-ng-change="selectChanged($event, 'category')" class="form-control">
                     <option value="">{{ResourceUtility.getString('SETUP_MANAGE_FIELDS_SELECT_ALL_CATEGORIES')}}</option>
                 </select>
