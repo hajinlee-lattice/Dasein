@@ -68,7 +68,7 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
 
             UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) getAuthenticationManager()
                     .authenticate(authRequest);
-            
+
             try {
                 String token = buildToken(auth);
                 response.setContentType("application/json; charset=UTF-8");
@@ -86,7 +86,7 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             }
         }
     }
-    
+
     private String buildToken(UsernamePasswordAuthenticationToken auth) throws Exception {
         LdapUserDetailsImpl ldapDetails = (LdapUserDetailsImpl) auth.getPrincipal();
         StringBuilder token = new StringBuilder(ldapDetails.getUsername());
@@ -100,18 +100,18 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         oNode.put("Principal", ldapDetails.getUsername());
         oNode.putArray("Roles");
         ArrayNode aNode = (ArrayNode) oNode.get("Roles");
-        for(GrantedAuthority right : rights) {
+        for (GrantedAuthority right : rights) {
             aNode.add(right.getAuthority());
         }
         return oNode.toString();
     }
-    
+
     private UsernamePasswordAuthenticationToken buildAuth(String ticket) throws Exception {
         String decrypted = CipherUtils.decrypt(ticket);
         String[] tokens = decrypted.split("\\|");
-        
+
         long ticketTime = Long.parseLong(tokens[1]);
-        
+
         if (!isSameDay(ticketTime, System.currentTimeMillis())) {
             throw new BadCredentialsException("Token expired.");
         }
@@ -121,14 +121,14 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         }
         return new UsernamePasswordAuthenticationToken(tokens[0], null, rights);
     }
-    
+
     boolean isSameDay(long ticketTime, long currentTime) {
         Calendar ticketDay = Calendar.getInstance();
         ticketDay.setTimeInMillis(ticketTime);
-        
+
         Calendar today = Calendar.getInstance();
         today.setTimeInMillis(currentTime);
-        
+
         return ticketDay.get(Calendar.DATE) == today.get(Calendar.DATE);
     }
 
@@ -160,14 +160,16 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             }
             retVal = false;
         }
-        try {
-            successfulAuthentication(request, response, authResult);
-        } catch (IOException e) {
-            logger.error(ExceptionUtils.getFullStackTrace(e));
-            retVal = false;
-        } catch (ServletException e) {
-            logger.error(ExceptionUtils.getFullStackTrace(e));
-            retVal = false;
+        if (authResult != null) {
+            try {
+                successfulAuthentication(request, response, authResult);
+            } catch (IOException e) {
+                logger.error(ExceptionUtils.getFullStackTrace(e));
+                retVal = false;
+            } catch (ServletException e) {
+                logger.error(ExceptionUtils.getFullStackTrace(e));
+                retVal = false;
+            }
         }
         return retVal;
     }
