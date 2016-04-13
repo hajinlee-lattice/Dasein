@@ -7,7 +7,7 @@
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/modeling</Set>
-    <Set name="war"><Property name="jetty.webapps" default="."/>/le-modeling-microservice-2.0.24-SNAPSHOT.war</Set>
+    <Set name="war"><Property name="jetty.webapps" default="."/>/le-modeling-microservice-2.0.25-SNAPSHOT.war</Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
