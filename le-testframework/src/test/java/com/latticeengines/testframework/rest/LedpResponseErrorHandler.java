@@ -29,7 +29,7 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
     public void handleError(ClientHttpResponse response) throws IOException {
         statusCode = getHttpStatusCode(response);
         responseString = getResponseBodyAsString(response);
-        throw new RuntimeException(responseString);
+        throw new RuntimeException(statusCode + ": " + responseString);
     }
 
     private HttpStatus getHttpStatusCode(ClientHttpResponse response) throws IOException {
