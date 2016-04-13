@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 '''
 Created on Mar 30, 2016
 
@@ -64,4 +66,3 @@ def __getAccessToken(tenant, auth_token):
 
 if __name__ == '__main__':
     getToken()
-    pass
