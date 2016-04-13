@@ -50,7 +50,7 @@ public class SessionServiceImpl implements SessionService {
         interpretGARights(session);
         // refresh cache upon attach, because the session object changed
         sessionCache.removeToken(ticket.getData());
-        sessionCache.retrieve(ticket.getData());
+        sessionCache.put(ticket.getData(), session);
         return session;
     }
 

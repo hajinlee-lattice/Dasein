@@ -22,20 +22,20 @@ import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementSer
 public class GASessionCache {
 
     private static Log log = LogFactory.getLog(GASessionCache.class);
-    private static final Integer MAX_RETRY = 3;
-    private ThreadLocal<Long> retryIntervalMsec = new ThreadLocal<>();
+    private static final Integer MAX_RETRY = 5;
+    private static Long retryIntervalMsec = 200L;
     private static Random random = new Random(System.currentTimeMillis());
     private LoadingCache<String, Session> tokenExpirationCache;
 
     public GASessionCache(final GlobalSessionManagementService globalSessionMgr, int cacheExpiration) {
-        retryIntervalMsec.set(200L);
         tokenExpirationCache = CacheBuilder.newBuilder().maximumSize(1000)
-                .expireAfterAccess(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
+                .expireAfterWrite(cacheExpiration, TimeUnit.SECONDS).build(new CacheLoader<String, Session>() {
                     @Override
                     public Session load(String token) throws Exception {
                         try {
+                            log.info("Loading session from GA to cache for token " + token);
                             Ticket ticket = new Ticket(token);
-
+                            Long retryInterval = retryIntervalMsec;
                             Integer retries = 0;
                             Session session = null;
                             while (++retries <= MAX_RETRY) {
@@ -46,15 +46,14 @@ public class GASessionCache {
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
-                                        Long currentInterval = retryIntervalMsec.get();
-                                        retryIntervalMsec.set(currentInterval * (1 + random.nextInt(1000) / 1000));
-                                        Thread.sleep(retryIntervalMsec.get());
+                                        retryInterval = retryInterval * (1 + random.nextInt(1000) / 1000);
+                                        Thread.sleep(retryInterval);
                                     } catch (Exception e) {
                                         // ignore
                                     }
                                 }
                             }
-                            if (session !=null && session.getRights() != null && !session.getRights().isEmpty()) {
+                            if (session != null && session.getRights() != null && !session.getRights().isEmpty()) {
                                 interpretGARights(session);
                             }
                             return session;
@@ -75,7 +74,13 @@ public class GASessionCache {
         }
     }
 
+    public void put(String token, Session session) {
+        log.info("Putting a session into cache for token " + token);
+        tokenExpirationCache.put(token, session);
+    }
+
     public void removeToken(String token) {
+        log.info("Removing token " + token + " from cache.");
         tokenExpirationCache.invalidate(token);
     }
 
@@ -86,7 +91,7 @@ public class GASessionCache {
 
     @VisibleForTesting
     void setRetryIntervalMsec(Long intervalMsec) {
-        retryIntervalMsec.set(intervalMsec);
+        retryIntervalMsec = intervalMsec;
     }
 
     private static void interpretGARights(Session session) {
