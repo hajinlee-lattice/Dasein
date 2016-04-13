@@ -5,11 +5,12 @@
 
 #performanceTab .threshold-explorer-chart {
   margin: -30px 0 0 0px;
-  padding-left: 20px;
+  text-align: center;
 }
 
 #performanceTab #liftChart {
   margin: 0 0 0 20px;
+  text-align: center;
 }
 
 #performanceTab .data-table {
@@ -20,8 +21,6 @@
 #performanceTab .threshold-data .data-table {
   padding: 0;
   margin: 0 0px;
-  border-top: #cccccc solid 1px;
-  border-bottom: #cccccc solid 1px;
   border-radius: 0;
 }
 
