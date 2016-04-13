@@ -161,8 +161,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         if (!AccessLevel.SUPER_ADMIN.equals(accessLevel)) {
             UserUpdateData userUpdateData = new UserUpdateData();
             userUpdateData.setAccessLevel(accessLevel.name());
-            switchToSuperAdmin(tenant);
-            restTemplate.put(plsApiHostPort + "/pls/users/" + username, userUpdateData, new HashMap<String, Object>());
+            magicRestTemplate.put(plsApiHostPort + "/pls/admin/users?username=" + username + "&tenant=" + tenant.getId(),
+                    userUpdateData, new HashMap<String, Object>());
             log.info("Change user " + username + " access level to tenant " + tenant.getId() + " to " + accessLevel);
         }
     }
