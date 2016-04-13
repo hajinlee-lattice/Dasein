@@ -1,37 +1,93 @@
 {
   "ConfigDirectories": [
     {
-      "RootPath": "/VisiDBTemplate",
-      "Nodes": []
-    },
-    {
-      "RootPath": "/PLS",
+      "RootPath": "/BardJams",
       "Nodes": [
         {
-          "Node": "EnrichAttributesMaxNumber",
-          "Data": "10"
+          "Node": "Active",
+          "Data": "1"
         },
         {
-          "Node": "LatticeAdminEmails",
-          "Data": "[]"
+          "Node": "Agent_Name",
+          "Data": "10.51.1.131"
         },
         {
-          "Node": "SuperAdminEmails",
-          "Data": "[]"
+          "Node": "DL_Password",
+          "Data": "adm1nDLpr0d"
         },
         {
-          "Node": "ExternalAdminEmails",
-          "Data": "[]"
+          "Node": "DL_TenantName",
+          "Data": ""
         },
         {
-          "Node": "ThirdPartyUserEmails",
-          "Data": "[]"
+          "Node": "DL_URL",
+          "Data": ""
+        },
+        {
+          "Node": "DL_User",
+          "Data": "admin.dataloader@lattice-engines.com"
+        },
+        {
+          "Node": "DanteManifestPath",
+          "Data": ""
+        },
+        {
+          "Node": "DanteTool_Path",
+          "Data": "C:\\Lattice\\Dante3\\Tools\\bin\\"
+        },
+        {
+          "Node": "Dante_Queue_Name",
+          "Data": ""
+        },
+        {
+          "Node": "DataLoaderTools_Path",
+          "Data": "C:\\LEO\\DLTools\\"
+        },
+        {
+          "Node": "Data_ArchivePath",
+          "Data": ""
+        },
+        {
+          "Node": "Data_LaunchPath",
+          "Data": ""
+        },
+        {
+          "Node": "ImmediateFolderStruct",
+          "Data": "LEO\\DataLoader\\DL PROD\\Immediate Jobs"
+        },
+        {
+          "Node": "JAMSUser",
+          "Data": "PROD\\s-jams"
+        },
+        {
+          "Node": "NotificationEmail",
+          "Data": "platformoperations@lattice-engines.com"
+        },
+        {
+          "Node": "NotifyEmailJob",
+          "Data": "LEO\\DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
+        },
+        {
+          "Node": "Queue_Name",
+          "Data": ""
+        },
+        {
+          "Node": "ScheduledFolderStruct",
+          "Data": "LEO\\DataLoader\\DL PROD\\Scheduled Jobs"
+        },
+        {
+          "Node": "TenantType",
+          "Data": "P"
+        },
+        {
+          "Node": "WeekdaySchedule_Name",
+          "Data": "All_Weekday"
+        },
+        {
+          "Node": "WeekendSchedule_Name",
+          "Data": "All_Weekend"
         }
       ]
-    },
-    {
-      "RootPath": "/DLTemplate",
-      "Nodes": []
     },
     {
       "RootPath": "/VisiDBDL",
@@ -63,7 +119,7 @@
         },
         {
           "Node": "TemplateVersion",
-          "Data": "2.0"
+          "Data": "2.2"
         },
         {
           "Node": "TenantAlias",
@@ -98,7 +154,7 @@
             },
             {
               "Node": "PermanentStoreOption",
-              "Data": "Master"
+              "Data": "StandAlone"
             },
             {
               "Node": "ServerName",
@@ -117,115 +173,59 @@
       ]
     },
     {
+      "RootPath": "/PLS",
+      "Nodes": [
+        {
+          "Node": "EnrichAttributesMaxNumber",
+          "Data": "10"
+        },
+        {
+          "Node": "ExternalAdminEmails",
+          "Data": "[]"
+        },
+        {
+          "Node": "LatticeAdminEmails",
+          "Data": "[\"ysong@lattice-engines.com\"]"
+        },
+        {
+          "Node": "SuperAdminEmails",
+          "Data": "[\"bnguyen@lattice-engines.com\"]"
+        },
+        {
+          "Node": "ThirdPartyUserEmails",
+          "Data": "[]"
+        }
+      ]
+    },
+    {
+      "RootPath": "/DLTemplate",
+      "Nodes": []
+    },
+    {
+      "RootPath": "/VisiDBTemplate",
+      "Nodes": []
+    },
+    {
       "RootPath": "/Modeling",
       "Nodes": [
         {
           "Node": "FeaturesThreshold",
           "Data": "-1"
         }
-        ]
-    },
-    {
-      "RootPath": "/BardJams",
-      "Nodes": [
-        {
-          "Node": "Active",
-          "Data": "1"
-        },
-        {
-          "Node": "Agent_Name",
-          "Data": "10.51.1.131"
-        },
-        {
-          "Node": "DL_Password",
-          "Data": "adm1nDLpr0d"
-        },
-        {
-          "Node": "DL_TenantName",
-          "Data": "${TENANT}"
-        },
-        {
-          "Node": "DL_URL",
-          "Data": "http://bodcdevvint187.dev.lattice.local:8081"
-        },
-        {
-          "Node": "DL_User",
-          "Data": "admin.dataloader@lattice-engines.com"
-        },
-        {
-          "Node": "DanteManifestPath",
-          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Launch"
-        },
-        {
-          "Node": "DanteTool_Path",
-          "Data": "C:\\Lattice\\Dante3\\Tools\\bin\\"
-        },
-        {
-          "Node": "Dante_Queue_Name",
-          "Data": ""
-        },
-        {
-          "Node": "DataLoaderTools_Path",
-          "Data": "C:\\LEO\\DLTools\\"
-        },
-        {
-          "Node": "Data_ArchivePath",
-          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Backup"
-        },
-        {
-          "Node": "Data_LaunchPath",
-          "Data": "\\\\BODCDEVVINT187\\DataLoader\\Customers\\${TENANT}\\Launch"
-        },
-        {
-          "Node": "ImmediateFolderStruct",
-          "Data": "DanteTesting\\Immediate"
-        },
-        {
-          "Node": "JAMSUser",
-          "Data": "PROD\\s-jams"
-        },
-        {
-          "Node": "NotificationEmail",
-          "Data": "platformoperations@lattice-engines.com"
-        },
-        {
-          "Node": "NotifyEmailJob",
-          "Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
-        },
-        {
-          "Node": "Queue_Name",
-          "Data": ""
-        },
-        {
-          "Node": "ScheduledFolderStruct",
-          "Data": "DataLoader\\DL TEST\\Scheduled Jobs"
-        },
-        {
-          "Node": "TenantType",
-          "Data": "P"
-        },
-        {
-          "Node": "WeekdaySchedule_Name",
-          "Data": "All_Weekday"
-        },
-        {
-          "Node": "WeekendSchedule_Name",
-          "Data": "All_Weekend"
-        }
       ]
     }
   ],
   "CustomerSpaceInfo": {
     "properties": {
-      "displayName": "LPA_${TENANT}",
-      "description": "A LPA solution for ${TENANT} in ${TENANT}"
+      "displayName": "${TENANT}",
+      "description": "A LPA solution for test in test"
     },
     "featureFlags": "{\"Dante\":false}"
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "LPA ${TENANT}",
-      "description": "A LPA tenant under the contract ${TENANT}"
+      "displayName": "${TENANT}_LP",
+      "description": "A Lattice tenant under the contract test"
     }
   },
   "ContractInfo": {
@@ -233,6 +233,9 @@
   },
   "SpaceConfig": {
     "Product": "Lead Prioritization",
+    "Products": [
+      "Lead Prioritization"
+    ],
     "Topology": "${TOPOLOGY}",
     "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"
   }

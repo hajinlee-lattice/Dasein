@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -208,6 +209,8 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
         }
         String payload = IOUtils.toString(ins, "UTF-8");
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
+        TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
+        log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
         HttpClientWithOptionalRetryUtils.sendPostRequest(
                 adminApiHostPort + "/admin/tenants/" + dlTenantName + "?contractId=" + dlTenantName, false, adHeaders,
                 payload);

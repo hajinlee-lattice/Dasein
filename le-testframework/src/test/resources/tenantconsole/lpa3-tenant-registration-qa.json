@@ -79,9 +79,9 @@
     "properties": {}
   },
   "SpaceConfig": {
-    "Product": "Prospect Discovery",
+    "Product": "Lead Prioritization 3.0",
     "Products": [
-      "Prospect Discovery"
+      "Lead Prioritization 3.0"
     ],
     "Topology": "${TOPOLOGY}",
     "DL_Address": "http://bodcdevvint187.dev.lattice.local:8081"

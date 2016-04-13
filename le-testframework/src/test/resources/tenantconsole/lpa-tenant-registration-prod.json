@@ -63,7 +63,7 @@
         },
         {
           "Node": "TemplateVersion",
-          "Data": "2.0"
+          "Data": "2.2"
         },
         {
           "Node": "TenantAlias",
@@ -224,7 +224,7 @@
   },
   "TenantInfo": {
     "properties": {
-      "displayName": "LPA ${TENANT}",
+      "displayName": "${TENANT}_LPA",
       "description": "A LPA tenant under the contract ${TENANT}"
     }
   },

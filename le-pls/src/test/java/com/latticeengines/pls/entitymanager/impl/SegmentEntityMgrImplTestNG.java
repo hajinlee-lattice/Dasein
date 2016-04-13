@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.security.exposed.service.TenantService;
 
 public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -24,9 +23,6 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
-    private TenantService tenantService;
 
     private Tenant tenant1;
     private Tenant tenant2;
