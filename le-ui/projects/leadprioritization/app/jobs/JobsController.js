@@ -40,6 +40,11 @@ angular.module('pd.jobs', [
             'sample': 'create_global_target_market',
             'profileAndModel': 'create_global_target_market',
             'activateModel': 'create_global_target_market'
+        },
+        'modelAndEmailWorkflow': {
+            'sample': 'create_global_target_market',
+            'profileAndModel': 'create_global_target_market',
+            'activateModel': 'create_global_target_market'
         }
     };
 
@@ -116,7 +121,6 @@ angular.module('pd.jobs', [
     this.getAllJobs = function() {
         var deferred = $q.defer();
         var result;
-        console.log($stateParams);
         var modelId = $stateParams.modelId;
         var url = modelId 
             ? '/pls/scores/jobs/' + modelId 
@@ -267,6 +271,9 @@ angular.module('pd.jobs', [
         if (job.jobStatus != "Running") {
             //return null;
         }
+        if (job.jobType == "modelAndEmailWorkflow") {
+            return;
+        }
         
         for (var i = 0; i < job.steps.length; i++) {
             var stepRunning = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
@@ -306,7 +313,7 @@ angular.module('pd.jobs', [
     }
 })
 
-.controller('JobsCtrl', function($scope, $state, $stateParams, $rootScope, $http, $timeout, JobsService, BrowserStorageUtility) {
+.controller('JobsCtrl', function($scope, $state, $stateParams, $http, $timeout, JobsService, BrowserStorageUtility) {
     $scope.jobs;
     $scope.expanded = {};
     $scope.statuses = {};
@@ -324,7 +331,7 @@ angular.module('pd.jobs', [
         $scope.timeoutTask = $timeout(function() {
             $scope.jobCreationSuccess = null;
             $state.go('home.jobs.status', { 'jobCreationSuccess': null });
-        }, 15000);
+        }, 30000);
     }
 
     function getAllJobs() {
@@ -344,7 +351,11 @@ angular.module('pd.jobs', [
     
     getAllJobs();
     REFRESH_JOBS_LIST_ID = setInterval(getAllJobs, TIME_BETWEEN_JOB_LIST_REFRESH);
-    
+
+    $scope.$on("JobCompleted", function() {
+        $scope.succeeded = true;
+    });
+
     $scope.$on("$destroy", function() {
         clearInterval(REFRESH_JOBS_LIST_ID);
         $scope.expanded = {};
@@ -353,11 +364,10 @@ angular.module('pd.jobs', [
 
     $scope.handleRescoreClick = function() {
         JobsService.rescoreTrainingData();
-    }
+    };
     
     $scope.closeJobSuccessMessage = function() {
         $scope.succeeded = false;
-        BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(false);
     };
 
     $scope.closeJobCreationMessage = function() {

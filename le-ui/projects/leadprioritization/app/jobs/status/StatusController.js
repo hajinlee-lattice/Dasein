@@ -10,10 +10,9 @@ angular
                 job: '=',
                 statuses: '=',
                 expanded: '=',
-                cancelling: '=',
-                succeeded: '='
+                cancelling: '='
             },
-            controller: ['$scope', '$state', 'JobsService', function ($scope, $state, JobsService) {
+            controller: ['$scope', '$rootScope', '$state', 'JobsService', function ($scope, $rootScope, $state, JobsService) {
                 $scope.jobRunning = false;
                 $scope.jobId = $scope.job.id;
                 $scope.jobRowExpanded = $scope.expanded[$scope.jobId] ? true : false;
@@ -165,8 +164,7 @@ angular
                                 cancelPeriodJobStatusQuery();
                             }
                             if (jobStatus == "Completed") {
-                                $scope.succeeded = true;
-                                BrowserStorageUtility.setSessionShouldShowJobCompleteMessage(true);
+                                $rootScope.$broadcast("JobCompleted");
                             }
                             updateStatesBasedOnJobStatus(response.resultObj);
                         }
