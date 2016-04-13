@@ -8,3 +8,4 @@ export HTTPS_PORT=3000
 export HTTPS_KEY=/etc/pki/tls/private/private.key
 export HTTPS_CRT=/etc/pki/tls/star_lattice-engines_com.crt
 export HTTPS_PASS=Lattice1
+export STACK_ENV=a

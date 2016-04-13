@@ -1,7 +1,8 @@
 export NODE_ENV=qa
 export API_URL=http://${OUTSIDE_TOMCAT}:8081
-export COMPRESSED=false
+export COMPRESSED=true
 export HTTP_PORT=3000
 export HTTPS_PORT=false
 export WHITELIST=${OUTSIDE_TOMCAT}
 export LOGGING=/var/log/ledp
+export STACK_ENV=b
