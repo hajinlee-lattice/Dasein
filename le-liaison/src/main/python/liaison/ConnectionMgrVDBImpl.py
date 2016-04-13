@@ -863,6 +863,150 @@ class ConnectionMgrVDBImpl(ConnectionMgr):
         return(response.json()["Value"])
 
 
+    def setMonitorTenant(self, enable):
+
+        url = self._url + '/DLRestService/UpdateDLTenantSettings'
+
+        payload = {}
+        payload['tenantName'] = self._tenant_name
+        if enable:
+            payload['values'] = [{'Key':'MonitorTenant', 'Value':'1'}]
+        else:
+            payload['values'] = [{'Key':'MonitorTenant', 'Value':'0'}]
+
+        if self.isVerbose():
+            print self.getType() +': Set DataLoader Monitor Tenant...',
+
+        try:
+            response = requests.post(url, json=payload, headers=self._headers, verify=self._verify)
+        except requests.exceptions.ConnectionError as e:
+            raise EndpointError(e)
+
+        if response.status_code != 200:
+            if self.isVerbose():
+                print 'HTTP POST request failed'
+            raise HTTPError('ConnectionMgrVDBImpl.setMonitorTenant(): POST request returned code {0}'.format(response.status_code))
+
+        status = None
+        errmsg = ''
+        try:
+            status = response.json()['Status']
+            errmsg = response.json()['ErrorMessage']
+
+        except ValueError as e:
+            if self.isVerbose():
+                print 'HTTP Endpoint did not return the expected response'
+            raise EndpointError(e)
+
+        if status != 3:
+            if self.isVerbose():
+                print 'Failed to set DL Monitor Tenant'
+                print errmsg
+            raise TenantNotFoundAtURL('ConnectionMgrVDBImpl.setMonitorTenant(): {0}'.format(payload['tenantName']))
+
+        if self.isVerbose():
+            print 'Success'
+
+
+    def getLoadGroupStatus(self, groupName):
+
+        url = self._url + '/DLRestService/GetLoadGroupStatus'
+
+        payload = {}
+        payload['tenantName'] = self._tenant_name
+        payload['groupName'] = groupName
+
+        if self.isVerbose():
+            print self.getType() +': Get DataLoader Load Group Status...',
+
+        try:
+            response = requests.post(url, json=payload, headers=self._headers, verify=self._verify)
+        except requests.exceptions.ConnectionError as e:
+            raise EndpointError(e)
+
+        if response.status_code != 200:
+            if self.isVerbose():
+                print 'HTTP POST request failed'
+            raise HTTPError('ConnectionMgrVDBImpl.getLoadGroupStatus(): POST request returned code {0}'.format(response.status_code))
+
+        status = None
+        errmsg = ''
+        try:
+            status = response.json()['Status']
+            errmsg = response.json()['ErrorMessage']
+
+        except ValueError as e:
+            if self.isVerbose():
+                print 'HTTP Endpoint did not return the expected response'
+            raise EndpointError(e)
+
+        if status != 3:
+            if self.isVerbose():
+                print 'Failed to get DL Load Group Status'
+                print errmsg
+            raise TenantNotFoundAtURL('ConnectionMgrVDBImpl.getLoadGroupStatus(): {0}'.format(payload['tenantName']))
+
+        if self.isVerbose():
+            print 'Success'
+
+        values = {}
+        for d in response.json()['Value']:
+            k = d['Key']
+            v = d['Value']
+            values[k] = v
+
+        return values
+
+
+    def getLaunchStatus(self, launchid):
+
+        url = self._url + '/DLRestService/GetLaunchStatus'
+
+        payload = {}
+        payload['launchId'] = launchid
+
+        if self.isVerbose():
+            print self.getType() +': Get DataLoader Launch Status...',
+
+        try:
+            response = requests.post(url, json=payload, headers=self._headers, verify=self._verify)
+        except requests.exceptions.ConnectionError as e:
+            raise EndpointError(e)
+
+        if response.status_code != 200:
+            if self.isVerbose():
+                print 'HTTP POST request failed'
+            raise HTTPError('ConnectionMgrVDBImpl.getLaunchStatus(): POST request returned code {0}'.format(response.status_code))
+
+        status = None
+        errmsg = ''
+        try:
+            status = response.json()['Status']
+            errmsg = response.json()['ErrorMessage']
+
+        except ValueError as e:
+            if self.isVerbose():
+                print 'HTTP Endpoint did not return the expected response'
+            raise EndpointError(e)
+
+        if status != 3:
+            if self.isVerbose():
+                print 'Failed to get DL Launch Status'
+                print errmsg
+            raise TenantNotFoundAtURL('ConnectionMgrVDBImpl.getLaunchStatus(): {0}'.format(payload['tenantName']))
+
+        if self.isVerbose():
+            print 'Success'
+
+        values = {}
+        for d in response.json()['Value']:
+            k = d['Key']
+            v = d['Value']
+            values[k] = v
+
+        return values
+
+
     @classmethod
     def __getURLForTenant(cls, tenant):
 
