@@ -94,13 +94,8 @@ alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
 
 alias replacePropertyTokens='python $WSHOME/le-config/updateProperty.py'
 
-alias plsdpltc='pushd $WSHOME/le-pls; rm $CATALINA_HOME/webapps/pls/*.war; cp target/le-pls*.war $CATALINA_HOME/webapps/pls/ROOT\#\#`leversion`.war; popd'
-alias admindpltc='pushd $WSHOME/le-admin; rm $CATALINA_HOME/webapps/admin/*.war; cp target/le-admin*.war $CATALINA_HOME/webapps/admin/ROOT\#\#`leversion`.war; popd'
-alias oauthdpltc='pushd $WSHOME/le-oauth2; rm $CATALINA_HOME/webapps/oauth/*.war; cp target/le-oauth*.war $CATALINA_HOME/webapps/oauth/ROOT\#\#`leversion`.war; popd'
-alias pmdpltc='pushd $WSHOME/le-playmaker; rm $CATALINA_HOME/webapps/playmaker/*.war; cp target/le-playmaker*.war $CATALINA_HOME/webapps/playmaker/ROOT\#\#`leversion`.war; popd'
-alias sapidpltc='pushd $WSHOME/le-scoringapi; rm $CATALINA_HOME/webapp/scoringapi/*.war; cp target/le-scoringapi*.war $CATALINA_HOME/webapps/scoringapi/ROOT\#\#`leversion`.war; popd'
-alias msdpltc='pushd $WSHOME/le-microservice; bash ../le-dev/scripts/deployms.sh; popd'
-alias dpltc='$CATALINA_HOME/bin/shutdown.sh; plsdpltc; admindpltc; oauthdpltc; pmdpltc; sapidpltc; msdpltc; pushd $CATALINA_HOME; bin/startup.sh; popd'
+alias dpltc='python $WSHOME/le-dev/scripts/tcdpl.py'
+alias runtc='bash $WSHOME/le-dev/scripts/run-tomcat.sh'
 
 alias runoauth='mvn spring-boot:run -DOAUTH2_PROPDIR=conf/env/dev -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/ -Dserver.port=8072'
 alias runplay='mvn spring-boot:run -DOAUTH2_PROPDIR=../le-oauth2/conf/env/dev -DPLAYMAKER_PROPDIR=conf/env/dev -Dserver.port=8071 -DOAUTH2_DB_PROPDIR=../le-oauth2db/conf/env/dev/'

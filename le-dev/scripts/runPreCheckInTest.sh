@@ -7,6 +7,7 @@ import argparse
 microservicePid = None
 adminPid = None
 plsPid = None
+tomcatPid = None
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ['WSHOME'] = WSHOME
@@ -36,6 +37,8 @@ def killAllRunningServers():
         killProcessAndAllChildProcesses(adminPid)
     if plsPid:
         killProcessAndAllChildProcesses(plsPid)
+    if tomcatPid:
+        killProcessAndAllChildProcesses(tomcatPid)
 
 def killProcessAndAllChildProcesses(parentPid):
     try:
@@ -63,6 +66,8 @@ def waitForServerToStart(checkingUrl, waitminute):
 
     while time.time() - startTime < (waitminute * 60):   # Wait for [waitminute] minutes for the server to start
         try:
+            time.sleep(5)
+            print 'checking service at %s' % checkingUrl
             output = urllib2.urlopen(checkingUrl)
             if output.getcode() == 200:
                 print checkingUrl + " server started"
@@ -153,6 +158,44 @@ def startAllServers(waitminute):
     else:
         print "Tenant Console server is running locally."
 
+
+def startAllServersViaTomcat(waitminute):
+    print "Checking if tomcat is running"
+    psString = "ps -ewf | grep org.apache.catalina.startup.Bootstrap | grep -v grep"
+    ps = subprocess.Popen(psString, shell=True, stdout=subprocess.PIPE)
+    output = ps.stdout.read()
+    ps.stdout.close()
+    ps.wait()
+
+    if output.find('org.apache.catalina.startup.Bootstrap') >= 0:
+        print "tomcat is already running."
+        return
+
+    print "starting tomcat"
+    os.chdir(os.environ['WSHOME'])
+    subprocess.call(['python ./le-dev/scripts/tcdpl.py deploy -a admin,pls,microservice'], shell=True)
+    proc = subprocess.Popen(['./le-dev/scripts/run-tomcat.sh'], shell=True)
+    if proc:
+        global tomcatPid
+        tomcatPid = proc.pid
+
+    microserviceUrl = "http://localhost:8080/doc/status"
+    plsServerUrl = "http://localhost:8081/pls/api-docs"
+    tenantConsoleUrl = "http://localhost:8085/#/login"
+
+    if not waitForServerToStart(microserviceUrl, waitminute):
+        print "Microservice server did not successfully start. Exitting."
+        sys.exit(1)
+
+    if not waitForServerToStart(plsServerUrl, waitminute):
+        print "PLS server did not successfully start. Exitting."
+        sys.exit(1)
+
+    if not waitForServerToStart(tenantConsoleUrl, waitminute):
+        print "Tenant Console server did not successfully start. Exitting."
+        sys.exit(1)
+
+
 def uploadNecessaryFilesToHDFS():
     os.chdir(os.environ['WSHOME'] + '/le-dev/testartifacts/')
     subprocess.call(["hadoop", "fs", "-rm", "-r", "/tmp/Stoplist"])
@@ -183,6 +226,7 @@ def parseCliArgs():
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--skip-setup', dest='skipsetup', action='store_true', help='skip test setup.')
     parser.add_argument('--skip-server', dest='skipserver', action='store_true', help='skip check and start jetty servers.')
+    parser.add_argument('--tomcat', dest='tomcat', action='store_true', help='using tomcat.')
     parser.add_argument('-w', dest='waitminute', type=int, default=5, help='number of minutes wait for jettys to start up, default = 5 min.')
     args = parser.parse_args()
     return args
@@ -194,8 +238,11 @@ if __name__ == "__main__":
     isProcessRunning("zookeeper")
     isProcessRunning("hadoop")
 
-    isEnvVariableSet("JETTY_HOME")
     isEnvVariableSet("WSHOME")
+    if args.tomcat:
+        isEnvVariableSet("CATALINA_HOME")
+    else:
+        isEnvVariableSet("JETTY_HOME")
 
     os.chdir(os.environ['WSHOME'] + '/le-db')
     resetMysql()
@@ -210,7 +257,10 @@ if __name__ == "__main__":
     atexit.register(killAllRunningServers)
 
     if not args.skipserver:
-        startAllServers(args.waitminute)
+        if args.tomcat:
+            startAllServersViaTomcat(args.waitminute)
+        else:
+            startAllServers(args.waitminute)
     else:
         print 'Skip checking servers.'
 
