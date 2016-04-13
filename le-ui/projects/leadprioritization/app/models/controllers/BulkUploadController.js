@@ -96,7 +96,7 @@ angular.module('mainApp.create.csvBulkUpload', [
         $scope.cancelClicked = function() {
             console.log('# Upload Cancelled');
             csvImportStore.Get('cancelXHR', true).abort();
-            $state.go('home.model.jobs');
+            $state.go('home.model.jobs.status');
         };
     }
 ]);
