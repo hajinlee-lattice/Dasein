@@ -101,8 +101,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         TargetMarket targetMarket = restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL
                 + "default", null, TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
-        restTemplate.postForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default", null,
-                TargetMarket.class);
         targetMarket = restTemplate.getForObject(getDeployedRestAPIHostPort() + PLS_TARGETMARKET_URL + "default",
                 TargetMarket.class);
         assertTrue(targetMarket.getIsDefault());
