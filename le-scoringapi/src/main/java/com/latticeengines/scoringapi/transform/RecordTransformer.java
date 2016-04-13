@@ -126,12 +126,12 @@ public class RecordTransformer {
                     }
                     else if (entry.type.type() == Double.class) {
                         try{
-                            if(value.toString().equals("null") == false && value.toString().equals("None") == false) {
-                                value = entry.type.type().cast(Double.valueOf(value.toString()));
-                            } else if(value.toString().toLowerCase().equals("true")) {
+                            if(value.toString().toLowerCase().equals("true") == true) {
                                 value = entry.type.type().cast(Double.valueOf("1.0")); 
-                            } else if(value.toString().toLowerCase().equals("false")) {
+                            } else if(value.toString().toLowerCase().equals("false") == true) {
                                 value = entry.type.type().cast(Double.valueOf("0.0"));
+                            } else if(value.toString().equals("null") == false && value.toString().equals("None") == false) {
+                                value = entry.type.type().cast(Double.valueOf(value.toString()));
                             } else {
                                 value = null;
                             }
