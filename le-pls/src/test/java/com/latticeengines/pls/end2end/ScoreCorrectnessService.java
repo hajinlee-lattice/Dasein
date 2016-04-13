@@ -60,7 +60,7 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 public class ScoreCorrectnessService {
 
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
-    private static final int NUM_LEADS_TO_SCORE = 500;
+    private static final int NUM_LEADS_TO_SCORE = 1000;
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 10;
     // TODO: this threshold was 3.0, increased it to 5.0 (April 12, 2016)
