@@ -7,13 +7,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.CrmCredentialService;
 
-public class CrmCredentialServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class CrmCredentialServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private CrmCredentialService crmService;
@@ -35,8 +36,8 @@ public class CrmCredentialServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        switchToSuperAdmin();
-        fullId = testingTenants.get(0).getId();
+        setupTestEnvironmentWithOneTenant();
+        fullId = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
     @Test(groups = "deployment", enabled = false)

@@ -32,11 +32,11 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 
 
-public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";
@@ -51,15 +51,16 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDep
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironment();
+        setupTestEnvironmentWithOneTenant();
         deleteUserByRestCall(INTERNAL_USER_EMAIL);
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
     }
 
     @AfterClass(groups = { "deployment" })
-    public void tearDown() {
+    public void tearDown() throws Exception {
         deleteUserByRestCall(INTERNAL_USER_EMAIL);
         deleteUserByRestCall(EXTERNAL_USER_EMAIL);
+        super.teardown();
     }
 
     @Test(groups = "deployment", enabled = false)

@@ -2,10 +2,10 @@ package com.latticeengines.testframework.security;
 
 import java.util.List;
 
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 
@@ -23,6 +23,7 @@ public interface GlobalAuthTestBed {
     Tenant getMainTestTenant();
     void setMainTestTenant(Tenant tenant);
 
+    UserDocument loginAndAttach(String username, String password, Tenant tenant);
 
     void switchToSuperAdmin();
     void switchToInternalAdmin();

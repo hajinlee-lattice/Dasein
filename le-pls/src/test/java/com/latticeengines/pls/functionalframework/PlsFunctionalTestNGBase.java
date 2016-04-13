@@ -317,31 +317,4 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         setupSecurityContext(segment.getTenant());
     }
 
-    protected void setupSecurityContext(Tenant t) {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(tenant.getId()).thenReturn(t.getId());
-        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
-    }
-
-    protected void setupSecurityContext(Tenant t, String user) {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(session.getEmailAddress()).thenReturn(user);
-        Mockito.when(tenant.getId()).thenReturn(t.getId());
-        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
-    }
-
 }

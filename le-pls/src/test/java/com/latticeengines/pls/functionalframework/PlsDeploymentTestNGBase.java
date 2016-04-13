@@ -59,4 +59,10 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         switchToSuperAdmin();
     }
 
+    protected void deleteUserByRestCall(String username) {
+        switchToSuperAdmin();
+        String url = getRestAPIHostPort() + "/pls/users/\"" + username + "\"";
+        restTemplate.delete(url);
+    }
+
 }

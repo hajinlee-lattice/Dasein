@@ -1,24 +1,21 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.service.TenantService;
 
-public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Autowired
     private Oauth2Interface oauth2Service;
@@ -27,27 +24,14 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDe
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
     @Autowired
-    private TenantService tenantService;
-
-    @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
     private String tenantId = "Oauth2Tenant";
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        Tenant t = tenantService.findByTenantId(tenantId);
-        if (t != null) {
-            tenantService.discardTenant(t);
-        }
-    }
-
-    @AfterClass(groups = "deployment")
-    public void teardown() throws Exception {
-        Tenant t = tenantService.findByTenantId(tenantId);
-        if (t != null) {
-            tenantService.discardTenant(t);
-        }
+        setupTestEnvironmentWithOneTenant();
+        tenantId = mainTestTenant.getId();
     }
 
     @Test(groups = "deployment")
@@ -58,11 +42,7 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDe
 
     @Test(groups = "deployment")
     public void createAccessAndRefreshToken() {
-        Tenant t = new Tenant();
-        t.setId(tenantId);
-        t.setName(tenantId);
-        tenantEntityMgr.create(t);
-        setupSecurityContext(t);
+        setupSecurityContext(mainTestTenant);
         assertEquals(oauth2AccessTokenEntityMgr.get(tenantId).getAccessToken(), "");
 
         OAuth2AccessToken accessToken = oauth2Service.createOAuth2AccessToken(tenantId);

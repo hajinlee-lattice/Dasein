@@ -25,6 +25,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -36,11 +37,12 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.Constants;
 
-public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PLS_TARGETMARKET_URL = "pls/targetmarkets/";
 
@@ -55,8 +57,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    private RestTemplate microServiceRestTemplate = new RestTemplate();
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -81,13 +81,10 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 DELIVER_PROSPECTS_FROM_EXISTING_ACCOUNTS);
         configuration.setInt(TargetMarketDataFlowOptionName.MaxProspectsPerAccount, MAX_PROSPECTS_PER_ACCOUNT);
 
-        System.out.println("Deleting existing test tenants ...");
-        deleteTwoTenants();
-
-        setupTestEnvironment("pd", true);
-        setupSecurityContext(mainTestTenant);
+        System.out.println("Bootstrapping test tenants using tenant console ...");
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.PD);
         cleanupTargetMarketDB();
-        switchToExternalAdmin();
+        System.out.println("Test environment setup finished.");
     }
 
     @BeforeMethod(groups = "deployment")
@@ -110,9 +107,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     public void testResetDefaultTargetMarket() throws Exception {
         String tenantId = mainTestTenant.getId();
         CustomerSpace space = CustomerSpace.parse(tenantId);
-
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        microServiceRestTemplate.getInterceptors().add(addMagicAuthHeader);
 
         if (metadataProxy.getImportTables(space.toString()).size() == 0) {
             provisionMetadataTables(mainTestTenant);
@@ -165,7 +159,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     }
 
     private void provisionMetadataTables(Tenant tenant) {
-        Boolean success = microServiceRestTemplate.postForObject(microServiceHostPort + "/metadata/admin/provision",
+        Boolean success = magicRestTemplate.postForObject(microServiceHostPort + "/metadata/admin/provision",
                 tenant, Boolean.class);
         if (!success) {
             throw new RuntimeException("Failed to provision metadata component");
@@ -178,7 +172,7 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
         for (Table table : tables) {
             uriVariables.put("tableName", table.getName());
-            microServiceRestTemplate.put(
+            magicRestTemplate.put(
                     String.format("%s/metadata/customerspaces/%s/tables/%s", microServiceHostPort, customerSpace,
                             table.getName()), table);
         }
@@ -331,14 +325,6 @@ public class TargetMarketResourceDeploymentTestNG extends PlsDeploymentTestNGBas
             if (targetMarket.getName().startsWith("TEST") || targetMarket.getIsDefault()) {
                 targetMarketEntityMgr.deleteTargetMarketByName(targetMarket.getName());
             }
-        }
-    }
-
-    private void deleteTwoTenants() throws Exception {
-        turnOffSslChecking();
-        setTestingTenants();
-        for (Tenant tenant : testingTenants) {
-            deleteTenantByRestCall(tenant.getId());
         }
     }
 }
