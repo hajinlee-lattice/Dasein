@@ -10,6 +10,7 @@
                 <value>file:${SECURITY_PROPDIR:/etc/ledp}/security.properties</value>
                 <value>file:${CAMILLE_PROPDIR:/etc/ledp}/camille.properties</value>
                 <value>file:${DB_PROPDIR:/etc/ledp}/db.properties</value>
+                <value>file:${ADMIN_PROPDIR:/etc/ledp}/admin.properties</value>
                 <value>file:${DATAPLATFORM_PROPDIR:/etc/ledp}/dataplatform.properties</value>
             </list>
         </property>
@@ -22,6 +23,7 @@
     <import resource="classpath:test-testframework-yarn-config-context.xml" />
     <import resource="classpath:db-context.xml" />
     <import resource="classpath:security-context.xml" />
+    <import resource="classpath:remote-context.xml" />
     <import resource="classpath:camille-runtime-context.xml" />
 
 </beans>
