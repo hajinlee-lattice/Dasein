@@ -113,7 +113,19 @@ input[type="submit"] {
 }
 button[disabled],
 html input[disabled] {
-  cursor: default;
+  &.blue-button, &.orange-button,
+  &.white-button, &.gray-button {
+    cursor: default;
+    border: #e2e2e4 solid 1px;
+    background-color: #fff;
+    color: #c2c2c2;
+    &:hover {
+      background-color: #fff;
+    }
+    &:active {
+      background-color: #fff;
+    }
+  }
 }
 button::-moz-focus-inner,
 input::-moz-focus-inner {
