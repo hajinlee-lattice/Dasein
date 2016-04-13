@@ -49,6 +49,9 @@ button.button, a.button, .button {
   &.close-button {
   	float: right;
   }
+  &.default-button {
+    border: $black-titanium solid 1px;
+  }
   &.blue-button {
 		background-color: $saphire;
 		&:hover {
