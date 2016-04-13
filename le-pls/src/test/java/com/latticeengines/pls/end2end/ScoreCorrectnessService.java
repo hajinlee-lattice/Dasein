@@ -31,7 +31,6 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Assert;
 import org.python.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +38,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
@@ -101,7 +101,8 @@ public class ScoreCorrectnessService {
 
         double percentDifference = (double) differentRecords.size() / (double) scoreResponses.size() * 100.0;
         System.out.println("PercentDifference:" + percentDifference);
-        Assert.assertTrue(percentDifference <= ACCEPTABLE_PERCENT_DIFFERENCE);
+        Assert.assertTrue(percentDifference <= ACCEPTABLE_PERCENT_DIFFERENCE, "percent different " + percentDifference
+                + " exceeds the maximum allowance " + ACCEPTABLE_PERCENT_DIFFERENCE);
     }
 
     private void outputResults(int totalCompared, Map<String, ComparedRecord> result) {

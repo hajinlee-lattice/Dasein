@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
@@ -71,7 +72,7 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getAll() {
-        assertEquals(segmentEntityMgr.getAll().size(), 2);
+        assertTrue(segmentEntityMgr.getAll().size() >= 2, "should have at least the two segments created in this test");
     }
 
     @Test(groups = "functional")
