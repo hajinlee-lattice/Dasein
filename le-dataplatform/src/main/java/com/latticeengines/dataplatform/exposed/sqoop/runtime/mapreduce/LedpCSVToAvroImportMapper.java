@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +33,9 @@ import com.cloudera.sqoop.lib.SqoopRecord;
 import com.cloudera.sqoop.mapreduce.AutoProgressMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -69,7 +67,6 @@ public class LedpCSVToAvroImportMapper extends
     private long lineNum;
     private int errorLineNumber;
     private long importedLineNum;
-    private Parser parser = new Parser();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -230,12 +227,8 @@ public class LedpCSVToAvroImportMapper extends
             case LONG:
                 if ((attr.getInterfaceName() != null && (attr.getInterfaceName().equals(InterfaceName.CreatedDate) || attr
                         .getInterfaceName().equals(InterfaceName.LastModifiedDate)))) {
-
                     Log.info("Date value from csv: " + fieldCsvValue);
-                    List<DateGroup> groups = parser.parse(fieldCsvValue);
-                    List<Date> dates = groups.get(0).getDates();
-                    Log.info("parse to date:" + dates.get(0));
-                    return dates.get(0).getTime();
+                    return TimeStampConvertUtils.convertToLong(fieldCsvValue);
                 } else {
                     return Long.valueOf(fieldCsvValue);
                 }

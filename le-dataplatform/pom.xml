@@ -577,11 +577,6 @@
             <version>${sqoop.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.joestelmach</groupId>
-            <artifactId>natty</artifactId>
-            <version>0.11</version>
-        </dependency>
     </dependencies>
 
 </project>

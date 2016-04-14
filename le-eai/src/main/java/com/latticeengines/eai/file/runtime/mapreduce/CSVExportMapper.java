@@ -19,6 +19,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
@@ -30,11 +31,12 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     private static final Log log = LogFactory.getLog(CSVExportMapper.class);
 
     private static final String OUTPUT_FILE = "output.csv";
-    
+
     private CSVPrinter csvFilePrinter;
 
     @Override
-    protected AvroRowHandler initialize(Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, Schema schema)
+    protected AvroRowHandler initialize(
+            Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, Schema schema)
             throws IOException, InterruptedException {
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
@@ -68,6 +70,10 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             String fieldValue = String.valueOf(record.get(field.name()));
             if (fieldValue == null) {
                 fieldValue = "";
+            } else if (field.name().equals(InterfaceName.LastModifiedDate.name())
+                    || field.name().equals(InterfaceName.CreatedDate.name())) {
+                fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
+                System.out.println(fieldValue);
             }
             csvFilePrinter.print(fieldValue);
         }
@@ -81,6 +87,5 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     private static boolean outputField(Field field) {
         return field.name() != null && !field.name().equals(InterfaceName.InternalId.toString());
     }
-
 
 }
