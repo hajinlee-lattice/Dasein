@@ -226,7 +226,7 @@ angular.module('mainApp.create.csvImport', [
         $scope.importing = false;
         $scope.showImportSuccess = false;
         $scope.ResourceUtility = ResourceUtility;
-        $scope.accountLeadCheck = false;
+        $scope.accountLeadCheck = true;
 
         $scope.uploadFile = function() {
             $scope.showImportError = false;
