@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.exception.LoginException;
+import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 

@@ -7,17 +7,26 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
 import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.proxy.exposed.dataflowapi.DataFlowApiProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Log log = LogFactory.getLog(RunDataFlow.class);
+
+    @Autowired
+    private DataFlowApiProxy dataFlowApiProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
@@ -28,10 +37,8 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     private void runDataFlow() {
         DataFlowConfiguration dataFlowConfig = setupDataFlow();
-        String url = configuration.getMicroServiceHostPort() + "/dataflowapi/dataflows/";
-
-        AppSubmission submission = restTemplate.postForObject(url, dataFlowConfig, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
+        AppSubmission submission = dataFlowApiProxy.submitDataFlowExecution(dataFlowConfig);
+        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
     }
 
     private DataFlowConfiguration setupDataFlow() {
@@ -58,9 +65,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     @SuppressWarnings("unchecked")
     private List<Table> retrieveRegisteredTablesAndExtraSources() {
-        String url = String.format("%s/metadata/customerspaces/%s/tables", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace());
-        Set<String> tableSet = new HashSet<>(restTemplate.getForObject(url, List.class));
+        Set<String> tableSet = new HashSet<>(metadataProxy.getTableNames(configuration.getCustomerSpace().toString()));
         List<Table> tables = new ArrayList<>();
 
         for (String tableName : tableSet) {
@@ -76,14 +81,11 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
             Table extraSourceTable = MetadataConverter.getTable(yarnConfiguration,
                     configuration.getExtraSources().get(extraSourceName), null, null);
             extraSourceTable.setName(extraSourceName);
-            // register the extra source table
-            url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                    configuration.getCustomerSpace(), extraSourceTable.getName());
-            restTemplate.postForLocation(url, extraSourceTable);
+            metadataProxy.createTable(configuration.getCustomerSpace().toString(), extraSourceTable.getName(),
+                    extraSourceTable);
             tables.add(extraSourceTable);
         }
 
         return tables;
     }
-
 }

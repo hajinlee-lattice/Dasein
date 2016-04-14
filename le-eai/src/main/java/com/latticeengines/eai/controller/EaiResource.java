@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
+import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.network.exposed.eai.EaiInterface;
 import com.wordnik.swagger.annotations.Api;

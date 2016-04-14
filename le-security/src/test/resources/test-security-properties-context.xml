@@ -13,6 +13,7 @@
             <list>
                 <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${SECURITY_PROPDIR}/security.properties</value>
+                <value>file:${MONITOR_PROPDIR}/monitor.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />

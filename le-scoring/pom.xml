@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-scoring</artifactId>
@@ -14,6 +14,7 @@
         <le.db.version>2.0.25-SNAPSHOT</le.db.version>
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
         <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -197,6 +198,18 @@
             <version>${le.dataplatform.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

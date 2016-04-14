@@ -18,6 +18,7 @@
         <le.db.version>2.0.25-SNAPSHOT</le.db.version>
         <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
         <le.security.version>2.0.25-SNAPSHOT</le.security.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
         <spring.batch.version>3.0.3.RELEASE</spring.batch.version>
         <spring.boot.version>1.2.6.RELEASE</spring.boot.version>
     </properties>
@@ -65,6 +66,18 @@
             <version>${le.security.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.batch</groupId>

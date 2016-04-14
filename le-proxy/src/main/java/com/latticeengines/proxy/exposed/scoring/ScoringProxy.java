@@ -10,16 +10,15 @@ import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
 @Component("scoringProxy")
 public class ScoringProxy extends BaseRestApiProxy implements ScoringInterface {
-    
+
     public ScoringProxy() {
         super("scoring/scoringjobs");
     }
 
     @Override
     public AppSubmission createScoringJob(ScoringConfiguration scoringConfig) {
-        String url = constructUrl("");
+        String url = constructUrl();
         return post("createScoringJob", url, scoringConfig, AppSubmission.class);
-
     }
 
     @Override

@@ -18,6 +18,7 @@
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.25-SNAPSHOT</le.scheduler.version>
         <le.security.version>2.0.25-SNAPSHOT</le.security.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -41,7 +42,8 @@
                                 <port>8085</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}
+                                <extraClasspath>
+                                    ${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}
                                 </extraClasspath>
                             </webAppConfig>
                             <systemProperties>
@@ -90,6 +92,18 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.dataflow.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

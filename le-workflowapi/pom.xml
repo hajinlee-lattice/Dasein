@@ -25,6 +25,7 @@
         <le.metadata.version>2.0.25-SNAPSHOT</le.metadata.version>
         <le.proxy.version>2.0.25-SNAPSHOT</le.proxy.version>
         <le.pls.version>2.0.25-SNAPSHOT</le.pls.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -60,6 +61,18 @@
             <artifactId>le-workflow</artifactId>
             <version>${le.workflow.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

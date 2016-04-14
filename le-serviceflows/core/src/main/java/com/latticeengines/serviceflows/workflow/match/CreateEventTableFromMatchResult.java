@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -26,12 +27,20 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("createEventTableFromMatchResult")
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(CreateEventTableFromMatchResult.class);
+
+    @Autowired
+    private ModelProxy modelProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
@@ -109,16 +118,15 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         config.setKeyCols(Arrays.<String> asList(new String[] { "Source_" + idColumn.getName() }));
         config.setTargetHdfsDir(hdfsTargetPath);
 
-        AppSubmission submission = restTemplate.postForObject(url, config, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
+        AppSubmission submission = modelProxy.loadData(config);
+        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
         Table eventTable = MetadataConverter.getTable(yarnConfiguration, hdfsTargetPath, null, null);
         eventTable.setName(matchTableName);
 
         addMetadata(eventTable, dbCreds);
         addMetadataFromPreMatchTable(eventTable, preMatchEventTable);
-        url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), eventTable.getName());
-        restTemplate.postForLocation(url, eventTable);
+
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
 
         deleteMatchTable(dbCreds, matchTableName);
 

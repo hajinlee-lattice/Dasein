@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -56,6 +57,9 @@ public class ModelingFileUploadResource {
 
     @Value("${pls.fileupload.maxUpload.bytes}")
     private long maxUploadSize;
+
+    @Autowired
+    private EaiProxy eaiProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody

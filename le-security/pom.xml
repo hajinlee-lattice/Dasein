@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-security</artifactId>
@@ -14,6 +14,7 @@
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
         <le.camille.version>2.0.25-SNAPSHOT</le.camille.version>
         <le.network.version>2.0.25-SNAPSHOT</le.network.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -74,7 +75,8 @@
                                 <port>8084</port>
                             </httpConnector>
                             <webAppConfig>
-                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar
+                                </extraClasspath>
                             </webAppConfig>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp/WEB-INF/web.xml</webXml>
@@ -183,9 +185,9 @@
                                 <configuration>
                                     <tasks>
                                         <delete
-                                            dir="${project.build.directory}/generated-sources" />
+                                                dir="${project.build.directory}/generated-sources"/>
                                         <mkdir
-                                            dir="${project.build.directory}/generated-sources" />
+                                                dir="${project.build.directory}/generated-sources"/>
                                     </tasks>
                                 </configuration>
                                 <goals>
@@ -210,7 +212,8 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <argument>${env.JAVA_HOME}/lib/tools.jar</argument>
-                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
+                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}
+                                        </argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
                                         <argument>-Xnocompile</argument>
@@ -235,7 +238,8 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <argument>${env.JAVA_HOME}/lib/tools.jar</argument>
-                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
+                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}
+                                        </argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
                                         <argument>-Xnocompile</argument>
@@ -260,7 +264,8 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <argument>${env.JAVA_HOME}/lib/tools.jar</argument>
-                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
+                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}
+                                        </argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
                                         <argument>-Xnocompile</argument>
@@ -285,7 +290,8 @@
                                     <arguments>
                                         <argument>-classpath</argument>
                                         <argument>${env.JAVA_HOME}/lib/tools.jar</argument>
-                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
+                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}
+                                        </argument>
                                         <argument>-Djavax.xml.accessExternalSchema=all</argument>
                                         <argument>com.sun.tools.internal.ws.WsImport</argument>
                                         <argument>-Xnocompile</argument>
@@ -367,7 +373,9 @@
                                     <artifactId>${project.artifactId}</artifactId>
                                     <groupId>${project.parent.groupId}</groupId>
                                     <version>${project.parent.version}</version>
-                                    <file>${project.build.directory}/${project.artifactId}-${project.parent.version}.jar</file>
+                                    <file>
+                                        ${project.build.directory}/${project.artifactId}-${project.parent.version}.jar
+                                    </file>
                                 </configuration>
                             </execution>
                         </executions>
@@ -383,6 +391,18 @@
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

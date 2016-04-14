@@ -13,6 +13,7 @@
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
         <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
+        <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
     </properties>
 
     <parent>
@@ -149,6 +150,18 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-serviceruntime</artifactId>
+            <version>${le.serviceruntime.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

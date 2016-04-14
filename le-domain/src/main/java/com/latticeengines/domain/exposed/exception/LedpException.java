@@ -28,6 +28,7 @@ public class LedpException extends RuntimeException {
 
     public LedpException(LedpCode code, String msg, Throwable t) {
         super(code.name() + ": " + msg, t);
+        this.code = code;
     }
 
     public static String buildMessage(LedpCode code, String[] params) {

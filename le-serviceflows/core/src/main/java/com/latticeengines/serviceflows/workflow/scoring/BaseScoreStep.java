@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -14,20 +15,26 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends BaseWorkflowStep<T> {
     private static final Log log = LogFactory.getLog(Score.class);
+
+    @Autowired
+    private ScoringProxy scoringProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public void execute() {
         log.info("Inside Score execute()");
         Map.Entry<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
         ScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
-        String url = configuration.getMicroServiceHostPort() + "/scoring/scoringjobs";
-        AppSubmission submission = restTemplate.postForObject(url, scoringConfig, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString(), //
-                configuration.getMicroServiceHostPort());
+        AppSubmission submission = scoringProxy.createScoringJob(scoringConfig);
+        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
 
         if (configuration.isRegisterScoredTable()) {
             try {
@@ -41,9 +48,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
     private void registerTable(String tableName, String targetDir) throws Exception {
         Table eventTable = MetadataConverter.getTable(yarnConfiguration, targetDir, null, null);
         eventTable.setName(tableName);
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), tableName);
-        restTemplate.postForLocation(url, eventTable);
+        metadataProxy.createTable(configuration.getCustomerSpace().toString(), tableName, eventTable);
         executionContext.putString(SCORING_RESULT_TABLE_NAME, tableName);
     }
 

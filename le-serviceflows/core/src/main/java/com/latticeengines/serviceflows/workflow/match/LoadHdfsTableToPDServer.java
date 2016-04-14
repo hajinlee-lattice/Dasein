@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.AbstractMap;
 
-import com.latticeengines.domain.exposed.util.ExtractUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -19,12 +19,21 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
+import com.latticeengines.domain.exposed.util.ExtractUtils;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("loadHdfsTableToPDServer")
 public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Log log = LogFactory.getLog(LoadHdfsTableToPDServer.class);
+
+    @Autowired
+    private MetadataProxy metadataProxy;
+
+    @Autowired
+    private ModelProxy modelProxy;
 
     @Override
     public void execute() {
@@ -38,9 +47,8 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
     private AbstractMap.SimpleEntry<Table, DbCreds> loadHdfsTableToPDServer() {
         ExportConfiguration exportConfig = new ExportConfiguration();
-        String url = String.format("%s/metadata/customerspaces/%s/tables/%s", configuration.getMicroServiceHostPort(),
-                configuration.getCustomerSpace(), configuration.getInputTableName());
-        Table prematchFlowTable = restTemplate.getForObject(url, Table.class);
+        Table prematchFlowTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getInputTableName());
         prematchFlowTable.setName(prematchFlowTable.getName() + "_" + System.currentTimeMillis());
 
         String jdbcUrl = configuration.getDbUrl();
@@ -65,9 +73,8 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
         exportConfig.setHdfsDirPath(path);
         exportConfig.setCreds(creds);
 
-        url = String.format("%s/modeling/dataexports", configuration.getMicroServiceHostPort());
-        AppSubmission submission = restTemplate.postForObject(url, exportConfig, AppSubmission.class);
-        waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
+        AppSubmission submission = modelProxy.exportData(exportConfig);
+        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
 
         return new AbstractMap.SimpleEntry<Table, DbCreds>(prematchFlowTable, creds);
     }

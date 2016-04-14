@@ -1,6 +1,5 @@
 package com.latticeengines.proxy.exposed;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
-import com.latticeengines.security.exposed.GetResponseErrorHandler;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 
 public abstract class BaseRestApiProxy {
     private RestTemplate restTemplate = new RestTemplate();
@@ -35,12 +34,13 @@ public abstract class BaseRestApiProxy {
         this(null);
     }
 
-    protected <T, B> T post(String method, String url, B body, Class<T> clazz) {
+    protected <T, B> T post(String method, String url, B body, Class<T> returnValueClazz) {
         log.info(String.format("Invoking %s by posting to url %s with body %s", method, url, body));
         try {
-            return restTemplate.postForObject(url, body, clazz);
+            return restTemplate.postForObject(url, body, returnValueClazz);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+            log.error(String.format("%s: Remote call failure", method), e);
+            throw e;
         }
     }
 
@@ -49,25 +49,28 @@ public abstract class BaseRestApiProxy {
         try {
             restTemplate.put(url, body);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+            log.error(String.format("%s: Remote call failure", method), e);
+            throw e;
         }
     }
 
-    protected <T> T get(String method, String url, Class<T> clazz) {
+    protected <T> T get(String method, String url, Class<T> returnValueClazz) {
         log.info(String.format("Invoking %s by getting from url %s", method, url));
         try {
-            return restTemplate.getForObject(url, clazz);
+            return restTemplate.getForObject(url, returnValueClazz);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+            log.error(String.format("%s: Remote call failure", method), e);
+            throw e;
         }
     }
 
     protected void delete(String method, String url) {
         log.info(String.format("Invoking %s by deleting from url %s", method, url));
         try {
-            restTemplate.delete(new URI(url));
+            restTemplate.delete(url);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("%s: Remote call failure", method), e);
+            log.error(String.format("%s: Remote call failure", method), e);
+            throw e;
         }
     }
 

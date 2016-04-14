@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.exception.LoginException;
+import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserFilter;

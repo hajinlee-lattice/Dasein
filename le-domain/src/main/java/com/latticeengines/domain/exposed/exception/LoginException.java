@@ -1,4 +1,4 @@
-package com.latticeengines.security.exposed.exception;
+package com.latticeengines.domain.exposed.exception;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

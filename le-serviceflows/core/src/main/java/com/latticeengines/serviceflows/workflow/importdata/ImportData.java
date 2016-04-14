@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
@@ -29,6 +30,9 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Autowired
+    private EaiProxy eaiProxy;
+
     @Override
     public void execute() {
         log.info("Inside ImportData execute()");
@@ -37,10 +41,9 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private void importData() {
         ImportConfiguration importConfig = setupImportConfig();
-        String url = configuration.getMicroServiceHostPort() + "/eai/importjobs";
-        AppSubmission submission = restTemplate.postForObject(url, importConfig, AppSubmission.class);
-        putObjectInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0).toString());
-        waitForAppId(submission.getApplicationIds().get(0).toString(), configuration.getMicroServiceHostPort());
+        AppSubmission submission = eaiProxy.createImportDataJob(importConfig);
+        putObjectInContext(IMPORT_DATA_APPLICATION_ID, submission.getApplicationIds().get(0));
+        waitForAppId(submission.getApplicationIds().get(0), configuration.getMicroServiceHostPort());
         if (getConfiguration().getSourceType() == SourceType.FILE) {
             updateSourceFile();
         }
