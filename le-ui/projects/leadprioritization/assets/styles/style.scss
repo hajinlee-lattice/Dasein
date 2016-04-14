@@ -576,8 +576,10 @@ Model List
 }
 
 .model {
-    background: #fff url(/assets/images/bkg-active-model-lp.jpg) no-repeat center center;
-    background-size: 130px;
+    background-color: #fff;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 190px;
     border: #e0e3e6 solid 2px;
     position: relative;
     min-height: 300px;
@@ -590,6 +592,12 @@ Model List
     &:hover {
         border-color: #486d99;
         cursor: pointer;
+    }
+    &.SalesforceLead {
+        background-image: url(/assets/images/bkg-active-model-lead.png);
+    }
+    &.SalesforceAccount {
+        background-image: url(/assets/images/bkg-active-model-account.png);
     }
 }
 
@@ -1318,7 +1326,7 @@ p.welcome-intro {
     cursor:e-resize;
 }
 .threshold-explorer {
-    margin-left:60px;
+    text-align: center
 }
 .threshold-explorer .grip {
     top:-29px;

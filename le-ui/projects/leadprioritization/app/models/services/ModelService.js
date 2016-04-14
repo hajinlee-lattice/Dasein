@@ -73,7 +73,8 @@ angular.module('mainApp.models.services.ModelService', [
                                 DisplayName : rawObj.Name,
                                 CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
                                 Status      : rawObj.Status,
-                                Incomplete  : rawObj.Incomplete
+                                Incomplete  : rawObj.Incomplete,
+                                ModelType   : rawObj.SourceSchemaInterpretation
                             };}
                     );
 
