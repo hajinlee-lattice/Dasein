@@ -73,7 +73,6 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             } else if (field.name().equals(InterfaceName.LastModifiedDate.name())
                     || field.name().equals(InterfaceName.CreatedDate.name())) {
                 fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
-                System.out.println(fieldValue);
             }
             csvFilePrinter.print(fieldValue);
         }
