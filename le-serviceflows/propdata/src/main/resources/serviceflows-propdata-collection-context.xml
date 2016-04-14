@@ -21,4 +21,12 @@
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 
+    <bean id="publicationDao" class="com.latticeengines.propdata.collection.dao.impl.PublicationDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="publicationProgressDao" class="com.latticeengines.propdata.collection.dao.impl.PublicationProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
 </beans>

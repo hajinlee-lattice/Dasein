@@ -9,6 +9,10 @@ public abstract class PropDataCollectionFunctionalTestNGBase extends PropDataCol
 
     protected void prepareCleanPod(Source source) {
         String podId = "Functional" + source.getSourceName();
+        prepareCleanPod(podId);
+    }
+
+    protected void prepareCleanPod(String podId) {
         hdfsPathBuilder.changeHdfsPodId(podId);
         try {
             HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());

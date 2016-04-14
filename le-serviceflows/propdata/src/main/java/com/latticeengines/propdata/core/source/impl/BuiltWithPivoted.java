@@ -10,7 +10,7 @@ import com.latticeengines.propdata.core.source.PivotedSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
-@Component
+@Component("builtWithPivoted")
 public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPresence {
 
     private static final long serialVersionUID = -7458296774400816711L;
