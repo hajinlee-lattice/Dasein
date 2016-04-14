@@ -40,7 +40,7 @@ public class MatchBlock implements HasPid {
     private String blockOperationUid;
 
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
-    @JoinColumn(name = "RootOperationUID", nullable = false)
+    @JoinColumn(name = "FK_MatchCommand", nullable = false)
     private MatchCommand matchCommand;
 
     @Column(name = "NumRows", nullable = false)
