@@ -2,6 +2,7 @@ package com.latticeengines.workflow.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -14,6 +15,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -63,7 +65,6 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
     private Tenant tenant1;
 
     private String customerSpace;
-
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -119,6 +120,29 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         assertTrue(restartedStepNames.contains(failableStep.name()));
         assertTrue(restartedStepNames.contains(anotherSuccessfulStep.name()));
         assertEquals(status, BatchStatus.COMPLETED);
+    }
+
+    @Test(groups = "functional")
+    public void testFailureReporting() throws Exception {
+        failableStep.setFail(true);
+        WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), workflowConfig);
+        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        assertEquals(status, BatchStatus.FAILED);
+        Job job = workflowService.getJob(workflowId);
+        assertEquals(job.getErrorCode(), LedpCode.LEDP_28001);
+        assertNotNull(job.getErrorMessage());
+    }
+
+    @Test(groups = "functional")
+    public void testFailureReportingWithGenericError() throws Exception {
+        failableStep.setFail(true);
+        failableStep.setUseRuntimeException(true);
+        WorkflowExecutionId workflowId = workflowService.start(failableWorkflow.name(), workflowConfig);
+        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        assertEquals(status, BatchStatus.FAILED);
+        Job job = workflowService.getJob(workflowId);
+        assertEquals(job.getErrorCode(), LedpCode.LEDP_00002);
+        assertNotNull(job.getErrorMessage());
     }
 
     @Test(groups = "functional", enabled = true)

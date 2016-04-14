@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
@@ -107,6 +108,11 @@ public class WorkflowExecutionCache {
         if (workflowJob != null) {
             job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
             job.setApplicationId(workflowJob.getApplicationId());
+            ErrorDetails errorDetails = workflowJob.getErrorDetails();
+            if (errorDetails != null) {
+                job.setErrorCode(errorDetails.getErrorCode());
+                job.setErrorMessage(errorDetails.getErrorMsg());
+            }
         }
 
         if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {

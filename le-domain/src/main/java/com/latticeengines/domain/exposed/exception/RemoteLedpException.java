@@ -46,4 +46,12 @@ public class RemoteLedpException extends LedpException {
     public void setRemoteStackTrace(String remoteStackTrace) {
         this.remoteStackTrace = remoteStackTrace;
     }
+
+    @Override
+    public ErrorDetails getErrorDetails() {
+        ErrorDetails details = super.getErrorDetails();
+        details.setStackTrace(details.getStackTrace() + "\nCaused remotely by...\n" + remoteStackTrace);
+        return details;
+    }
+
 }

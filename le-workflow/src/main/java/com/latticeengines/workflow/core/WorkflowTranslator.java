@@ -4,6 +4,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.listener.FailureReportingListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -37,13 +39,16 @@ public class WorkflowTranslator {
     private JobRepository jobRepository;
 
     @Autowired
+    private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
     private StepBuilderFactory stepBuilderFactory;
 
     private BeanValidationService beanValidationService = new BeanValidationServiceImpl();
 
     @PostConstruct
     public void init() {
-        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener());
+        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(), new FailureReportingListener(workflowJobEntityMgr));
     }
 
     public Job buildWorkflow(String name, Workflow workflow) throws Exception {

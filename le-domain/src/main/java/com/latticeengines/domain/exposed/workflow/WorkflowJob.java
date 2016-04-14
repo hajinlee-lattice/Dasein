@@ -18,13 +18,16 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -64,6 +67,10 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
 
     @Column(name = "START_TIME")
     private Long startTimeInMillis;
+
+    @Column(name = "ERROR_DETAILS")
+    @Type(type = "text")
+    private String errorDetailsString;
 
     @Override
     public Long getPid() {
@@ -182,36 +189,24 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.startTimeInMillis = startTimeInMillis;
     }
 
+    @Transient
+    public ErrorDetails getErrorDetails() {
+        if (errorDetailsString == null) {
+            return null;
+        }
+        return JsonUtils.deserialize(errorDetailsString, ErrorDetails.class);
+    }
+
+    @Transient
+    public void setErrorDetails(ErrorDetails details) {
+        if (details == null) {
+            return;
+        }
+        errorDetailsString = JsonUtils.serialize(details);
+    }
+
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        WorkflowJob other = (WorkflowJob) obj;
-        if (tenant == null) {
-            if (other.tenant != null)
-                return false;
-        } else if (!tenant.equals(other.tenant))
-            return false;
-        if (workflowId == null) {
-            if (other.workflowId != null)
-                return false;
-        } else if (!workflowId.equals(other.workflowId)) {
-            return false;
-        }
-        if (applicationId == null) {
-            if (other.applicationId != null)
-                return false;
-        } else if (!applicationId.equals(other.applicationId))
-            return false;
-        if (userId == null) {
-            if (other.userId != null)
-                return false;
-        } else if (!userId.equals(other.userId))
-            return false;
-        return true;
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 
 public class Job implements HasId<Long>, HasName {
 
@@ -28,6 +29,8 @@ public class Job implements HasId<Long>, HasName {
     private List<Report> reports;
     private Map<String, String> inputs;
     private Map<String, String> outputs;
+    private LedpCode errorCode;
+    private String errorMessage;
 
     @Override
     @JsonProperty
@@ -161,6 +164,26 @@ public class Job implements HasId<Long>, HasName {
     @JsonProperty
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
+    }
+
+    @JsonProperty
+    public LedpCode getErrorCode() {
+        return errorCode;
+    }
+
+    @JsonProperty
+    public void setErrorCode(LedpCode errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    @JsonProperty
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    @JsonProperty
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     @Override

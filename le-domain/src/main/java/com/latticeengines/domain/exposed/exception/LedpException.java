@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.exception;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
+
 public class LedpException extends RuntimeException {
 
     private static final long serialVersionUID = 4758154339163073679L;
@@ -21,7 +23,7 @@ public class LedpException extends RuntimeException {
         super(buildMessage(code, params), t);
         this.code = code;
     }
-    
+
     public LedpCode getCode() {
         return code;
     }
@@ -43,5 +45,10 @@ public class LedpException extends RuntimeException {
     public static String buildMessageWithCode(LedpCode code, String[] params) {
         String msg = buildMessage(code, params);
         return code.name() + ": " + msg;
+    }
+
+    public ErrorDetails getErrorDetails() {
+        String stackTrace = ExceptionUtils.getFullStackTrace(this);
+        return new ErrorDetails(code, getMessage(), stackTrace);
     }
 }
