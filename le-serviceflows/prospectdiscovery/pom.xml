@@ -9,6 +9,7 @@
     <properties>
         <le.dataflow.version>2.0.25-SNAPSHOT</le.dataflow.version>
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
+        <le.proxy.version>2.0.25-SNAPSHOT</le.proxy.version>
         <le.serviceflows.core.version>2.0.25-SNAPSHOT</le.serviceflows.core.version>
         <le.workflow.version>2.0.25-SNAPSHOT</le.workflow.version>
         <component-name>prospectdiscovery</component-name>
@@ -22,6 +23,14 @@
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-proxy</artifactId>
+            <version>${le.proxy.version}</version>
+            <classifier>intf</classifier>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
