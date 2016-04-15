@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -69,10 +70,17 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<String> getRequiredColumns(String modelId) {
         List<String> requiredColumns = new ArrayList<String>();
-        List<VdbMetadataField> metadataFields = getMetadata(modelId);
-        for (VdbMetadataField field : metadataFields) {
-            if (field.getCategory().contains(ModelingMetadata.INTERNAL_TAG)) {
-                requiredColumns.add(field.getColumnName());
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        List<Predictor> predictors = modelSummary.getPredictors();
+        if (predictors == null) {
+            throw new RuntimeException(String.format("No predictor is associated with the model %s", modelId));
+        }
+        for (Predictor predictor : predictors) {
+            if (predictor.getCategory().contains(ModelingMetadata.INTERNAL_TAG)) {
+                requiredColumns.add(predictor.getName());
             }
         }
         return requiredColumns;
