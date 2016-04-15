@@ -94,21 +94,6 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>propdata-manage</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
-                            <arguments>
-                                <argument>LDC_ManageDB</argument>
-                                <argument>false</argument>
-                                <argument>com.latticeengines.domain.exposed.propdata.manage</argument>
-                            </arguments>
-                        </configuration>
-                </execution>
                 </executions>
             </plugin>
         </plugins>

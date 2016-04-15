@@ -1,3 +1,5 @@
+USE `LeadScoringDB`;
+
 drop table if exists `Q_EventTable_Nutanix`;
 
 drop table if exists `Q_EventTableDepivot_Nutanix`;

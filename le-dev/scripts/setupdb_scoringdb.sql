@@ -1,0 +1,31 @@
+DROP SCHEMA IF EXISTS `ScoringDB`;
+CREATE SCHEMA IF NOT EXISTS `ScoringDB`;
+GRANT ALL ON ScoringDB.* TO root;
+USE `ScoringDB`;
+
+source WSHOME/ddl_scoringdb_mysql5innodb.sql;
+
+CREATE TABLE TestLeadsTable (
+  Lead_ID INT NOT NULL AUTO_INCREMENT,
+  SEPAL_LENGTH FLOAT,
+  SEPAL_WIDTH FLOAT,
+  PETAL_LENGTH FLOAT,
+  PETAL_WIDTH FLOAT,
+  CATEGORY INT NOT NULL,
+  MODEL_ID nvarchar(510) NOT NULL,
+  PRIMARY KEY(Lead_ID)
+);
+
+LOAD DATA INFILE 'WSHOME/le-scoring/src/test/resources/com/latticeengines/scoring/mysql/nn_train.dat'
+INTO TABLE TestLeadsTable
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY, MODEL_ID);
+
+LOAD DATA INFILE 'WSHOME/le-scoring/src/test/resources/com/latticeengines/scoring/mysql/nn_test.dat'
+INTO TABLE TestLeadsTable
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY, MODEL_ID);
+
+COMMIT;
