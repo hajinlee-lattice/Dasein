@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
+import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.propdata.collection.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.collection.service.PublicationProgressService;
 import com.latticeengines.propdata.collection.service.PublicationProgressUpdater;
@@ -21,7 +22,6 @@ import com.latticeengines.propdata.collection.service.PublicationService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("publicationService")
@@ -44,9 +44,6 @@ public class PublicationServiceImpl implements PublicationService {
     @Autowired
     private WorkflowProxy workflowProxy;
 
-    @Autowired
-    private SourceService sourceService;
-
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
@@ -56,15 +53,12 @@ public class PublicationServiceImpl implements PublicationService {
     }
 
     @Override
-    public PublicationProgress publish(String publicationName, String creator, String hdfsPod) {
+    public PublicationProgress publish(String publicationName, PublicationRequest request, String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             hdfsPathBuilder.changeHdfsPodId(hdfsPod);
         }
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
-        String sourceName = publication.getSourceName();
-        Source source = sourceService.findBySourceName(sourceName);
-        String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-        return publicationProgressService.publishVersion(publication, currentVersion, creator);
+        return publicationProgressService.publishVersion(publication, request.getSourceVersion(), request.getSubmitter());
     }
 
     private List<PublicationProgress> scanForNewWorkFlow(String hdfsPod) {

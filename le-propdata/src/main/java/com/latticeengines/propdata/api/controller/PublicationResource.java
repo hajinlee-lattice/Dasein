@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.propdata.collection.service.PublicationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -35,7 +37,7 @@ public class PublicationResource extends InternalResourceBase implements Publica
     }
 
     @Override
-    public PublicationProgress publish(String publicationName, String submitter, String hdfsPod) {
+    public PublicationProgress publish(String publicationName, PublicationRequest publicationRequest, String hdfsPod) {
         throw new UnsupportedOperationException("This is a place holder of a proxy method.");
     }
 
@@ -61,12 +63,12 @@ public class PublicationResource extends InternalResourceBase implements Publica
             + "url parameter submitter indicates what submitted this job: Quartz, Test, Cli, ..."
             + "url parameter podid is for testing purpose.")
     public PublicationProgress publish(@PathVariable String publicationName,
-            @RequestParam(value = "submitter", required = true) String submitter,
+            @RequestBody PublicationRequest publicationRequest,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
             HttpServletRequest request) {
         checkHeader(request);
         try {
-            return publicationService.publish(publicationName, submitter, hdfsPod);
+            return publicationService.publish(publicationName, publicationRequest, hdfsPod);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25009, e);
         }

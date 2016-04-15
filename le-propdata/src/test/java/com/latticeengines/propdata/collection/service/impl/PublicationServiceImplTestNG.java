@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
+import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
 import com.latticeengines.propdata.collection.entitymgr.PublicationEntityMgr;
@@ -55,6 +56,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
     private BuiltWithPivoted source;
 
     private Publication publication;
+    private PublicationRequest publicationRequest;
 
     private StandaloneHttpServer httpServer;
 
@@ -62,6 +64,9 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
     public void setup() throws Exception {
         prepareCleanPod(POD_ID);
         hdfsSourceEntityMgr.setCurrentVersion(source, CURRENT_VERSION);
+        publicationRequest = new PublicationRequest();
+        publicationRequest.setSubmitter(SUBMITTER);
+        publicationRequest.setSourceVersion(CURRENT_VERSION);
     }
 
     @AfterClass(groups = "functional")
@@ -81,11 +86,11 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
         List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 0, "Should have zero progress at beginning");
 
-        publicationService.publish(PUBLICATION_NAME, SUBMITTER, POD_ID);
+        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should have a new progress");
 
-        publicationService.publish(PUBLICATION_NAME, SUBMITTER, POD_ID);
+        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should still have one progress");
 
@@ -93,7 +98,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
                 .status(PublicationProgress.Status.FAILED).commit();
-        publicationService.publish(PUBLICATION_NAME, SUBMITTER, POD_ID);
+        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
     }
@@ -116,7 +121,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
                 }
             }
         });
-        publicationService.publish(PUBLICATION_NAME, SUBMITTER, POD_ID);
+        publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         publicationService.scan(POD_ID);
     }
 

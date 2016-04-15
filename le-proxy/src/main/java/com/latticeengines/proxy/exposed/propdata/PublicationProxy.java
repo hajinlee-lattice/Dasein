@@ -3,9 +3,11 @@ package com.latticeengines.proxy.exposed.propdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -30,10 +32,10 @@ public class PublicationProxy extends BaseRestApiProxy implements PublicationInt
     }
 
     @Override
-    public PublicationProgress publish(String publicationName, String submitter, String hdfsPod) {
-        String url = constructUrl("/{pubName}?submitter={submitter}&podid={hdfsPod}", publicationName, submitter,
-                hdfsPod);
-        return post("publish", url, "", PublicationProgress.class);
+    public PublicationProgress publish(String publicationName, PublicationRequest publicationRequest, String hdfsPod) {
+        hdfsPod = StringUtils.isEmpty(hdfsPod) ? "" : hdfsPod;
+        String url = constructUrl("/{pubName}?podid={hdfsPod}", publicationName, hdfsPod);
+        return post("publish", url, publicationRequest, PublicationProgress.class);
     }
 
 }
