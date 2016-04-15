@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -15,7 +16,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
-import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.exposed.yarn.runtime.SingleContainerYarnProcessor;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataflow.DataFlowConfiguration;
@@ -44,7 +44,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     private SoftwareLibraryService softwareLibraryService;
 
     @Autowired
-    private MetadataProxy proxy;
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private VersionManager versionManager;
@@ -77,7 +77,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 sources.put(name, dataFlowSource.getRawDataPath());
                 usesPaths = true;
             } else {
-                Table sourceTable = proxy.getMetadata(dataFlowConfig.getCustomerSpace(), name);
+                Table sourceTable = metadataProxy.getTable(dataFlowConfig.getCustomerSpace().toString(), name);
                 if (sourceTable == null) {
                     log.error("Source table " + name + " retrieved from the metadata service is null.");
                 }
@@ -113,7 +113,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         log.info(String.format("Running data transform with bean %s", dataFlowConfig.getDataFlowBeanName()));
         Table table = dataTransformationService.executeNamedTransformation(ctx, dataFlowConfig.getDataFlowBeanName());
         log.info(String.format("Setting metadata for table %s", table.getName()));
-        proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+        metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
         purgeSources(dataFlowConfig);
         return null;
     }
@@ -121,10 +121,10 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
     private void purgeSources(DataFlowConfiguration dataFlowConfig) {
         for (DataFlowSource source : dataFlowConfig.getDataSources()) {
             if (source.getPurgeAfterUse()) {
-                Table table = proxy.getMetadata(dataFlowConfig.getCustomerSpace(), source.getName());
+                Table table = metadataProxy.getTable(dataFlowConfig.getCustomerSpace().toString(), source.getName());
                 if (table != null) {
                     table.setMarkedForPurge(true);
-                    proxy.setMetadata(dataFlowConfig.getCustomerSpace(), table);
+                    metadataProxy.updateTable(dataFlowConfig.getCustomerSpace().toString(), table.getName(), table);
                 }
             }
         }

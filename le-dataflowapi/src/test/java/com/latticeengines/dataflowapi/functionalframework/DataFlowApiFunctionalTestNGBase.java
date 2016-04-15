@@ -7,6 +7,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.logging.Log;
@@ -34,7 +35,6 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataflowapi.util.MetadataProxy;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -77,7 +77,7 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
     private TenantEntityMgr tenantEntityMgr = new TenantEntityMgrImpl();
 
     @Autowired
-    protected MetadataProxy proxy;
+    protected MetadataProxy metadataProxy;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
@@ -180,12 +180,12 @@ public class DataFlowApiFunctionalTestNGBase extends AbstractTestNGSpringContext
         }
 
         try {
-            proxy.deleteMetadata(CUSTOMERSPACE, table);
+            metadataProxy.deleteTable(CUSTOMERSPACE.toString(), table.getName());
         } catch (Exception e) {
             // ignore if table doesn't exist yet
         }
 
-        proxy.setMetadata(CUSTOMERSPACE, table);
+        metadataProxy.updateTable(CUSTOMERSPACE.toString(), table.getName(), table);
     }
 
     protected AppSubmission submitDataFlow(DataFlowConfiguration configuration) {

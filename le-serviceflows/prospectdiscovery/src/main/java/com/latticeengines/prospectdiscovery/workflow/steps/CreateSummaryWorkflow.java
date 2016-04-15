@@ -1,8 +1,12 @@
 package com.latticeengines.prospectdiscovery.workflow.steps;
 
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class CreateSummaryWorkflow<T extends RunAttributeLevelSummaryDataFlowsConfiguration> extends BaseWorkflowStep<T> {
+
+    @Autowired
+    private RunAttributeLevelSummaryDataFlow runAttributeLevelSummaryDataFlow;
 
     protected String getEventTable() {
         return executionContext.getString(EVENT_TABLE);
@@ -16,7 +20,6 @@ public abstract class CreateSummaryWorkflow<T extends RunAttributeLevelSummaryDa
     }
 
     protected RunAttributeLevelSummaryDataFlow getRunAttributeLevelSummaryDataFlow() {
-        RunAttributeLevelSummaryDataFlow runAttributeLevelSummaryDataFlow = new RunAttributeLevelSummaryDataFlow();
         RunAttributeLevelSummaryDataFlowConfiguration dataFlowConfig = new RunAttributeLevelSummaryDataFlowConfiguration();
         dataFlowConfig.setMicroServiceHostPort(configuration.getMicroServiceHostPort());
         dataFlowConfig.setCustomerSpace(configuration.getCustomerSpace());

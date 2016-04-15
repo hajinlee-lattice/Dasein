@@ -106,7 +106,7 @@ public class DataFlowResourceDeploymentTestNG extends DataFlowApiFunctionalTestN
         assertNotNull(appId);
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        Table metadata = proxy.getMetadata(config.getCustomerSpace(), config.getTargetTableName());
+        Table metadata = metadataProxy.getTable(config.getCustomerSpace().toString(), config.getTargetTableName());
         assertNotNull(metadata);
         assertEquals(metadata.getExtracts().size(), 1);
     }
