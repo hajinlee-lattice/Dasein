@@ -396,7 +396,15 @@ angular
                     template: '<div id="sureshot_iframe_container"></div>'
                 }   
             }
-        }) 
+        })
+        .state('home.apiconsole', {
+            url: '/apiconsole',
+            views: {
+                "main@": {
+                    templateUrl: 'app/apiConsole/views/APIConsoleView.html'
+                }
+            }
+        })
         .state('home.signout', {
             url: '/signout', 
             views: {

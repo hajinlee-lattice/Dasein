@@ -20,7 +20,8 @@ var mainApp = angular.module('mainApp', [
     'mainApp.create.csvReport',
     'mainApp.create.csvBulkUpload',
     'pd.navigation',
-    'pd.jobs'
+    'pd.jobs',
+    'pd.apiconsole'
 ])
 
 .config(['$httpProvider', function($httpProvider) {

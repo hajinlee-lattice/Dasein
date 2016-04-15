@@ -1,0 +1,55 @@
+<div class="row-group">
+    <div class="row">
+        <div class="columns left">
+            <label for="modelId" class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_LABEL_MODEL')}}</label>
+        </div>
+        <div class="columns right">
+            <select name="modelId" ng-model="modelId" ng-options="model.Id as model.DisplayName for model in models" ng-change="modelChanged($event)" class="form-control">
+                <option value="">{{ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_LABEL_SELECT_MODEL')}}</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div>
+    <div data-ng-show="fieldsLoading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
+    </div>
+    <div data-ng-show="showFieldsLoadingError" class="global-error local-error">
+        <span><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;{{fieldsLoadingError}}</span>
+    </div>
+    <div data-ng-show="showFields && !fieldsLoading && !showFieldsLoadingError">
+        <div class="row-group">
+            <div class="row">
+                <div class="columns left">
+                    <label class="title">{{fieldsTitle}}</label>
+                </div>
+                <div class="columns right">
+                    <div class="pull-right">
+                         <button type="button" ng-click="clearClicked($event)" class="button gray-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_CLEAR')}}</button>
+                         <button disabled="disabled" type="button" class="button gray-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_RANDOMIZE')}}</button>
+                         <button type="button" ng-click="sentClicked($event)" class="button orange-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_SENT')}}&nbsp;<i class="fa fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row-group">
+            <div class="row" ng-repeat="field in fields">
+                <div class="columns left">
+                    <label for="{{field.name}}" class="form-control">{{field.displayName}}</label>
+                </div>
+                <div class="columns right">
+                    <input type="text" name="{{field.name}}" ng-model="field.value" placeholder="{{field.placeholder}}" class="form-control"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="columns left">
+                <label class="form-control"></label>
+            </div>
+            <div class="columns right">
+                <button type="button" ng-click="sentClicked($event)" class="button orange-button pull-right">{{ResourceUtility.getString('API_CONSOLE_LABEL_SENT')}}&nbsp;<i class="fa fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
