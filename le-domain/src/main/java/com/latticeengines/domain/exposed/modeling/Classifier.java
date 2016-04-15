@@ -27,6 +27,8 @@ public class Classifier implements HasName {
     private String pythonPipelineLibHdfsPath;
     private String pythonPipelineScriptHdfsPath;
     private String pythonMRConfigHdfsPath;
+    private String pipelineDriver;
+    private String pipelineProperties;
     
     @Override
     @JsonProperty("name")
@@ -221,6 +223,26 @@ public class Classifier implements HasName {
     @JsonProperty("python_mr_config")
     public void setPythonMRConfigHdfsPath(String pythonMRConfigHdfsPath) {
         this.pythonMRConfigHdfsPath = pythonMRConfigHdfsPath;
+    }
+
+    @JsonProperty("pipeline_driver")
+    public String getPipelineDriver() {
+        return pipelineDriver;
+    }
+
+    @JsonProperty("pipeline_driver")
+    public void setPipelineDriver(String pipelineDriver) {
+        this.pipelineDriver = pipelineDriver;
+    }
+
+    @JsonProperty("pipeline_properties")
+    public String getPipelineProperties() {
+        return pipelineProperties;
+    }
+
+    @JsonProperty("pipeline_properties")
+    public void setPipelineProperties(String pipelineProperties) {
+        this.pipelineProperties = pipelineProperties;
     }
     
 }

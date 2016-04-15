@@ -27,6 +27,8 @@ public interface Algorithm extends HasName, HasPid {
     String getName();
 
     String getScript();
+    
+    void setScript(String script);
 
     String getContainerProperties();
 
@@ -54,9 +56,23 @@ public interface Algorithm extends HasName, HasPid {
 
     String getPipelineScript();
     
+    void setPipelineScript(String pipelineScript);
+    
     String getPipelineLibScript();
+    
+    void setPipelineLibScript(String pipelineLibScript);
 
     String getMapperSize();
 
     void setMapperSize(String mapperSize);
+    
+    void setPipelineProperties(String pipelineProperties);
+    
+    String getPipelineProperties();
+    
+    Properties getPipelineProps();
+    
+    void setPipelineDriver(String pipelineDriver);
+    
+    String getPipelineDriver();
 }

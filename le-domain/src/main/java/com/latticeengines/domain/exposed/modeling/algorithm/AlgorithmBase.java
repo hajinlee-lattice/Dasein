@@ -42,6 +42,8 @@ public class AlgorithmBase implements Algorithm {
     private String pipelineScript;
     private String pipelineLibScript;
     private String mapperSize = "1";
+    private String pipelineProperties;
+    private String pipelineDriver;
 
     @Override
     @Id
@@ -199,8 +201,42 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
+    public void setPipelineProperties(String pipelineProperties) {
+        this.pipelineProperties = pipelineProperties;
+    }
+
+    @Override
+    @JsonProperty("pipeline_properties")
+    @Column(name = "PIPELINE_PROPERTIES", nullable = true)
+    @Lob
+    public String getPipelineProperties() {
+        return pipelineProperties;
+    }
+
+    @Override
+    @JsonIgnore
+    @Transient
+    public Properties getPipelineProps() {
+        return StringTokenUtils.stringToProperty(getPipelineProperties());
+    }
+
+    @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
+
+    @Override
+    @JsonProperty("pipeline_driver")
+    public void setPipelineDriver(String pipelineDriver) {
+        this.pipelineDriver = pipelineDriver;
+    }
+    
+    @Override
+    @JsonProperty("pipeline_driver")
+    @Column(name = "PIPELINE_DRIVER", nullable = true)
+    public String getPipelineDriver() {
+        return pipelineDriver;
+    }
+
 
 }
