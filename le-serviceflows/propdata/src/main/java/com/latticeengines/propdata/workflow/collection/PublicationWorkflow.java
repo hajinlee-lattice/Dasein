@@ -18,7 +18,7 @@ public class PublicationWorkflow  extends AbstractWorkflow<PublicationWorkflowCo
 
     @Bean
     public Job publicationWorkflow() throws Exception {
-        return publicationWorkflow();
+        return buildWorkflow();
     }
 
     @Override
