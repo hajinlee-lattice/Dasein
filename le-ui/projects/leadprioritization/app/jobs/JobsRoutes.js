@@ -21,6 +21,15 @@ angular
             .state('home.model.jobs.status', {
                 url: '/status',
                 views: {
+                    "summary@": {
+                        resolve: { 
+                            ResourceString: function() {
+                                return 'MODEL_SCORING_SUMMARY_HEADER';
+                            }
+                        },
+                        controller: 'OneLineController',
+                        templateUrl: 'app/navigation/summary/OneLineView.html'
+                    },
                     "main@": {
                         /*
                         resolve: {

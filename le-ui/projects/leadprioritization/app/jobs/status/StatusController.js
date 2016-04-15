@@ -8,25 +8,26 @@ angular
             templateUrl: 'app/jobs/status/JobStatusRow.html',
             scope: {
                 job: '=',
+                state: '=',
                 statuses: '=',
                 expanded: '=',
                 cancelling: '='
             },
             controller: ['$scope', '$rootScope', '$state', 'JobsService', function ($scope, $rootScope, $state, JobsService) {
+                var job = $scope.job;
+
+                $scope.jobType = job.jobType ? job.jobType : 'placeholder';
                 $scope.jobRunning = false;
-                $scope.jobId = $scope.job.id;
-                $scope.jobRowExpanded = $scope.expanded[$scope.jobId] ? true : false;
                 $scope.jobCompleted = false;
-                $scope.cancelClicked = ( $scope.cancelling[$scope.jobId] ? true : false );
-                $scope.jobType = $scope.job.jobType;
-                if (!$scope.jobType) {
-                    $scope.jobType = 'placeholder';
+                $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
+                $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
+
+                switch ($scope.jobType.toLowerCase()) {
+                    case "scoreworkflow": $scope.job.displayName = "Batch Scoring"; break;
+                    case "placeholder": $scope.job.displayName = "Pending..."; break;
+                    default: $scope.job.displayName = "Create Model";
                 }
-                if ($scope.jobType.toLowerCase() == "scoreworkflow") {
-                    $scope.job.displayName = "Batch Scoring";
-                } else {
-                    $scope.job.displayName = "Create Model";
-                }
+
                 $scope.jobFailed = $scope.job.status == 'Failed';
                 $scope.stepsCompletedTimes;
 
@@ -35,19 +36,23 @@ angular
 
                 $scope.cancelJob = function(jobId) {
                     $scope.cancelClicked = true;
-                    $scope.cancelling[$scope.jobId] = true;
+                    $scope.cancelling[job.id] = true;
                     JobsService.cancelJob(jobId);
                 };
 
-                if (! $scope.jobRowExpanded || $scope.statuses[$scope.jobId] == null) {
-                    $scope.jobStepsRunningStates = { load_data: false, match_data: false,
-                            generate_insights: false, create_global_model: false, create_global_target_market: false };
-                    $scope.jobStepsCompletedStates = { load_data: false, match_data: false,
-                            generate_insights: false, create_global_model: false, create_global_target_market: false };
+                if (! $scope.jobRowExpanded || $scope.statuses[job.id] == null) {
+                    $scope.jobStepsRunningStates = { 
+                        load_data: false, match_data: false, generate_insights: false, 
+                        create_global_model: false, create_global_target_market: false 
+                    };
+                    $scope.jobStepsCompletedStates = { 
+                        load_data: false, match_data: false, generate_insights: false, 
+                        create_global_model: false, create_global_target_market: false 
+                    };
                 } else {
-                    $scope.jobStepsRunningStates = $scope.statuses[$scope.jobId].running;
-                    $scope.jobStepsCompletedStates = $scope.statuses[$scope.jobId].completed;
-                    $scope.stepsCompletedTimes = $scope.statuses[$scope.jobId].completedTimes;
+                    $scope.jobStepsRunningStates = $scope.statuses[job.id].running;
+                    $scope.jobStepsCompletedStates = $scope.statuses[job.id].completed;
+                    $scope.stepsCompletedTimes = $scope.statuses[job.id].completedTimes;
                 }
                 if ($scope.job.status == "Running") {
                     $scope.jobRunning = true;
@@ -58,7 +63,7 @@ angular
                 
                 $scope.expandJobStatus = function() {
                     $scope.jobRowExpanded = true;
-                    $scope.expanded[$scope.jobId] = true;
+                    $scope.expanded[job.id] = true;
 
                     if (! isCompleted() && $scope.job.id != null) {
                         JobsService.getJobStatus($scope.job.id).then(function(jobStatus) {
@@ -101,7 +106,7 @@ angular
                 
                 $scope.unexpandJobStatus = function() {
                     $scope.jobRowExpanded = false;
-                    $scope.expanded[$scope.jobId] = false;
+                    $scope.expanded[job.id] = false;
                 };
 
                 function cancelPeriodJobStatusQuery() {
@@ -142,12 +147,12 @@ angular
                 }
 
                 function saveJobStatusInParentScope() {
-                    if (! $scope.statuses[$scope.jobId]) {
-                        $scope.statuses[$scope.jobId] = {};
+                    if (! $scope.statuses[job.id]) {
+                        $scope.statuses[job.id] = {};
                     }
-                    $scope.statuses[$scope.jobId]["running"] = $scope.jobStepsRunningStates;
-                    $scope.statuses[$scope.jobId]["completed"] = $scope.jobStepsCompletedStates;
-                    $scope.statuses[$scope.jobId]["completedTimes"] = $scope.stepsCompletedTimes;
+                    $scope.statuses[job.id]["running"] = $scope.jobStepsRunningStates;
+                    $scope.statuses[job.id]["completed"] = $scope.jobStepsCompletedStates;
+                    $scope.statuses[job.id]["completedTimes"] = $scope.stepsCompletedTimes;
                 }
 
                 function periodicQueryJobStatus(jobId) {

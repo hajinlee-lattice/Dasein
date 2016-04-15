@@ -144,6 +144,7 @@ angular.module('pd.jobs', [
                         timestamp: rawObj.startTimestamp,
                         jobType: rawObj.jobType,
                         status: rawObj.jobStatus,
+                        source: rawObj.inputs.SOURCE_DISPLAY_NAME,
                         user: rawObj.user
                     };
                 });
@@ -199,7 +200,6 @@ angular.module('pd.jobs', [
     this.rescoreTrainingData = function() {
         var deferred = $q.defer();
         var result;
-        console.log($stateParams);
         var modelId = $stateParams.modelId;
 
         $http({
@@ -259,9 +259,10 @@ angular.module('pd.jobs', [
 
     function getStepFailed(job) {
         for (var i = 0; i < job.steps.length; i++) {
-            var stepRunning = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+            var stepRunning = getDictionaryValue(job, i);
+
             if (stepRunning && job.steps[i].stepStatus == "Failed") {
-                return dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+                return stepRunning;
             }
         }
         return null;
@@ -276,13 +277,23 @@ angular.module('pd.jobs', [
         }
         
         for (var i = 0; i < job.steps.length; i++) {
-            var stepRunning = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
-            //console.log('step', i, stepRunning, dictionary[job.jobType][job.steps[i].jobStepType.trim()]);
+            var stepRunning = getDictionaryValue(job, i);
+
             if (stepRunning && job.steps[i].stepStatus == "Running") {
-                return dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+                return stepRunning;
             }
         }
         return null;
+    }
+
+    function getDictionaryValue(job, i) {
+        var JobType = dictionary[job.jobType];
+
+        var stepDisplayName = JobType
+            ? JobType[job.steps[i].jobStepType.trim()]
+            : '';
+
+        return stepDisplayName;
     }
     
     function getStepsCompleted(job) {
@@ -293,7 +304,8 @@ angular.module('pd.jobs', [
         var stepsCompleted = [];
         for (var i = 0; i < job.steps.length; i++) {
             if (job.steps[i].stepStatus == "Completed") {
-                var stepCompleted = dictionary[job.jobType][job.steps[i].jobStepType.trim()];
+                var stepCompleted = getDictionaryValue(job, i);
+
                 if (stepCompleted) {
                     numStepsInGroup[stepCompleted] += 1;
                     stepsCompleted.push(stepCompleted);
@@ -324,15 +336,7 @@ angular.module('pd.jobs', [
     $scope.state = $state.current.name == 'home.model.jobs.status' ? 'model' : 'all';
     //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
     $scope.hideCreationMessage = true;
-    if ($stateParams.jobCreationSuccess) {
-        $scope.jobCreationSuccess = JSON.parse($stateParams.jobCreationSuccess);
-        $scope.hideCreationMessage = false;
 
-        $scope.timeoutTask = $timeout(function() {
-            $scope.jobCreationSuccess = null;
-            $state.go('home.jobs.status', { 'jobCreationSuccess': null });
-        }, 30000);
-    }
 
     function getAllJobs() {
         JobsService.getAllJobs().then(function(result) {
@@ -360,10 +364,26 @@ angular.module('pd.jobs', [
         clearInterval(REFRESH_JOBS_LIST_ID);
         $scope.expanded = {};
         $scope.statuses = {};
+        $timeout.cancel($scope.timeoutTask);
     });
 
-    $scope.handleRescoreClick = function() {
+    $scope.handleJobCreationSuccess = function(data) {
+        if (data) {
+            $scope.jobCreationSuccess = JSON.parse(data);
+            $scope.hideCreationMessage = false;
+
+            $scope.timeoutTask = $timeout(function() {
+                $scope.jobCreationSuccess = null;
+                $scope.hideCreationMessage = true;
+                //$state.go('home.jobs.status', { 'jobCreationSuccess': null });
+            }, 30000);
+        }
+    }
+
+    $scope.handleRescoreClick = function($event) {
         JobsService.rescoreTrainingData();
+        $scope.handleJobCreationSuccess(true);
+        $event.target.disabled = true;
     };
     
     $scope.closeJobSuccessMessage = function() {
@@ -375,8 +395,5 @@ angular.module('pd.jobs', [
         $state.go('home.jobs.status', { 'jobCreationSuccess': null });
     };
 
-    $scope.$on('$destroy', function() {
-        $timeout.cancel($scope.timeoutTask);
-    });
-
+    $scope.handleJobCreationSuccess($stateParams.jobCreationSuccess);
 });

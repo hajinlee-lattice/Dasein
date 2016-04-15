@@ -251,8 +251,10 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
             return config;
         },
         response: function (response) {
+            //console.log(response.status);
             if (response.status === 401) {
                 // handle the case where the user is not authenticated
+                alert('UNAUTHORIZED 401');
             }
             return response || $q.when(response);
         }
@@ -261,4 +263,30 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
 
 mainApp.config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
+});
+
+mainApp.factory('httpErrorsInterceptor', function ($q, $rootScope, EventsDict) {
+    function successHandler(response) {
+        console.log('successHandler',response);
+        return response;
+    }
+
+    function errorHandler(response) {
+        console.log('errorHandler',response);
+
+        var config = response.config;
+
+        if (config.bypassErrorInterceptor) {
+            return $q.reject(response);
+        }
+
+        alert(EventsDict.httpError);
+        $rootScope.$broadcast(EventsDict.httpError, response.data.cause);
+        
+        return $q.reject(response);
+    }
+
+    return function(promise) {
+        return promise.then(successHandler, errorHandler);
+    };
 });

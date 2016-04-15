@@ -36,7 +36,7 @@
                 <a ui-sref="home.jobs.import.credentials"><button type="button" class="button blue-button">Import Data</button></a>
                 -->
                 <a ng-if="state == 'all'" ui-sref="home.models"><button type="button" class="button orange-button">View Models</button></a>
-                <button ng-if="state == 'model'" ng-click="handleRescoreClick(); $event.stopPropagation();" type="button" class="button orange-button">Score Training Data</button>
+                <button ng-if="state == 'model'" ng-click="handleRescoreClick($event); $event.stopPropagation();" type="button" class="button orange-button">Score Training Data</button>
                 <a ng-if="state == 'model'" ui-sref="home.model.scoring"><button type="button" class="button orange-button">Import a Testing Set</button></a>
             </div>
         </div><!-- End .row -->
@@ -45,9 +45,11 @@
     <div class="row jobs-table">
         <div class="columns twelve panel panel-default">
             <div class="row panel-heading custom-heading">
-                <span class="columns four">Timestamp</span>
-                <span class="columns four">Job Type</span>
-                <span class="columns four">Status</span>
+                <span class="columns three">Timestamp</span>
+                <span class="columns three" ng-if="state == 'model'">File Name</span>
+                <span class="columns three" ng-if="state != 'model'">Job Type</span>
+                <span class="columns three">Status</span>
+                <span class="columns three">User</span>
             </div>
             <div class="jobs-table-content">
                 <div 
@@ -57,7 +59,8 @@
                         orderBy: SortOrder | 
                         startFrom: (current - 1) * pagesize |
                         limitTo: pagesize" 
-                    job="job" 
+                    job="job"
+                    state="state"
                     statuses="statuses" 
                     expanded="expanded"
                     cancelling="cancelling"
