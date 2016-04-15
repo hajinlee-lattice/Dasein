@@ -9,4 +9,6 @@ public interface ModelMetadataService {
     List<VdbMetadataField> getMetadata(String modelId);
 
     Table cloneAndUpdateMetadata(String modelSummaryId, List<VdbMetadataField> fields);
+
+    List<String> getRequiredColumns(String modelId);
 }

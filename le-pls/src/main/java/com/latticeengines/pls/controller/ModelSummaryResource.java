@@ -191,4 +191,11 @@ public class ModelSummaryResource {
     public List<VdbMetadataField> getMetadata(@PathVariable String modelId) {
         return modelMetadataService.getMetadata(modelId);
     }
+
+    @RequestMapping(value = "/metadata/required/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get required column names for the event table used for the specified model")
+    public List<String> getRequiredColumns(@PathVariable String modelId) {
+        return modelMetadataService.getRequiredColumns(modelId);
+    }
 }

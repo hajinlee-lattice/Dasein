@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -63,6 +64,18 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         clone.setAttributes(getAttributesFromFields(clone.getAttributes(), fields));
         metadataProxy.updateTable(customerSpace, clone.getName(), clone);
         return clone;
+    }
+
+    @Override
+    public List<String> getRequiredColumns(String modelId) {
+        List<String> requiredColumns = new ArrayList<String>();
+        List<VdbMetadataField> metadataFields = getMetadata(modelId);
+        for (VdbMetadataField field : metadataFields) {
+            if (field.getCategory().contains(ModelingMetadata.INTERNAL_TAG)) {
+                requiredColumns.add(field.getColumnName());
+            }
+        }
+        return requiredColumns;
     }
 
     private List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields) {
