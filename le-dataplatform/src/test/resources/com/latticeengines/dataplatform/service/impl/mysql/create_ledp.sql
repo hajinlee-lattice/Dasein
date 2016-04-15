@@ -1,5 +1,0 @@
-CREATE DATABASE ledp;
-
-commit;
-
-
