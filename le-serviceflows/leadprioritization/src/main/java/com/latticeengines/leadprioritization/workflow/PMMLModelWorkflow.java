@@ -21,7 +21,7 @@ public class PMMLModelWorkflow extends AbstractWorkflow<ModelWorkflowConfigurati
     private ActivateModel activateModel;
 
     @Bean
-    public Job modelWorkflowJob() throws Exception {
+    public Job pmmlModelWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 
