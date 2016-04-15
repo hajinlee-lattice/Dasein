@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.workflow.steps;
+package com.latticeengines.propdata.workflow.match.steps;
 
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 

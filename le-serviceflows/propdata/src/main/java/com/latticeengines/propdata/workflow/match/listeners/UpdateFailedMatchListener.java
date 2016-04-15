@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.workflow.listeners;
+package com.latticeengines.propdata.workflow.match.listeners;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.workflow.steps.BulkMatchContextKey;
+import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;
 
 @Component("updateFailedMatchListener")
 public class UpdateFailedMatchListener implements JobExecutionListener {

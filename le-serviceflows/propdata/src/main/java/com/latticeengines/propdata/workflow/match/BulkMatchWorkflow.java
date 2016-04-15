@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.workflow.listeners.UpdateFailedMatchListener;
-import com.latticeengines.propdata.workflow.steps.ParallelBlockExecution;
-import com.latticeengines.propdata.workflow.steps.PrepareBulkMatchInput;
+import com.latticeengines.propdata.workflow.match.listeners.UpdateFailedMatchListener;
+import com.latticeengines.propdata.workflow.match.steps.ParallelBlockExecution;
+import com.latticeengines.propdata.workflow.match.steps.PrepareBulkMatchInput;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;

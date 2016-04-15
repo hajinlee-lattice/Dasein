@@ -5,8 +5,8 @@ import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.propdata.workflow.steps.ParallelBlockExecutionConfiguration;
-import com.latticeengines.propdata.workflow.steps.PrepareBulkMatchInputConfiguration;
+import com.latticeengines.propdata.workflow.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.propdata.workflow.match.steps.PrepareBulkMatchInputConfiguration;
 
 public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
 
