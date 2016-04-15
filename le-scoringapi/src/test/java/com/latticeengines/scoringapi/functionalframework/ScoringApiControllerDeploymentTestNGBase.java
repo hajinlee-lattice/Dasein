@@ -155,11 +155,11 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         String enhancementsDir = artifactBaseDir + ModelRetrieverImpl.HDFS_ENHANCEMENTS_DIR;
 
         URL eventTableDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + "metadata-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                .getSystemResource(LOCAL_MODEL_PATH + "eventtable-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL modelJsonUrl = ClassLoader.getSystemResource(MODELSUMMARYJSON_LOCALPATH);
         URL rfpmmlUrl = ClassLoader.getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.PMML_FILENAME);
         URL dataScienceDataCompositionUrl = ClassLoader
-                .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
+                .getSystemResource(LOCAL_MODEL_PATH + "datascience-" + ModelRetrieverImpl.DATA_COMPOSITION_FILENAME);
         URL scoreDerivationUrl = ClassLoader
                 .getSystemResource(LOCAL_MODEL_PATH + ModelRetrieverImpl.SCORE_DERIVATION_FILENAME);
 

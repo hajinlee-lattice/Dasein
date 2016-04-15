@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +140,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         fields.setFields(fieldList);
 
         ScoringArtifacts artifacts = getModelArtifacts(customerSpace, modelId);
-        Map<String, FieldSchema> mapFields = artifacts.getDataScienceDataComposition().fields;
+        Map<String, FieldSchema> mapFields = artifacts.getFieldSchemas();
         for (String fieldName : mapFields.keySet()) {
             FieldSchema fieldSchema = mapFields.get(fieldName);
             if (fieldSchema.source.equals(FieldSource.REQUEST)) {
@@ -189,27 +190,48 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
         DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
-        removeDroppedDataScienceFieldEventTableTransforms(eventTableDataComposition, dataScienceDataComposition);
+        Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
+                eventTableDataComposition, dataScienceDataComposition);
         ScoreDerivation scoreDerivation = getScoreDerivation(hdfsScoreArtifactBaseDir);
         ModelEvaluator pmmlEvaluator = getModelEvaluator(hdfsScoreArtifactBaseDir);
         File modelArtifactsDir = extractModelArtifacts(hdfsScoreArtifactBaseDir, customerSpace, modelId);
 
         ScoringArtifacts artifacts = new ScoringArtifacts(modelSummary, modelType, dataScienceDataComposition,
-                eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir);
+                eventTableDataComposition, scoreDerivation, pmmlEvaluator, modelArtifactsDir, mergedFields);
 
         return artifacts;
     }
 
     @VisibleForTesting
     /*
-     * The purpose of this function is to remove certain transforms from the eventtable-generated datacomposition.
-     * This is needed because during profiling certain fields get removed so that the final datascience-generated
-     * datacomposition ends up being a subset of the eventtable-generated datacomposition.
+     * The purpose of this function is to remove certain transforms from the
+     * eventtable-generated datacomposition. This is needed because during
+     * profiling certain fields get removed so that the final
+     * datascience-generated datacomposition ends up being a subset of the
+     * eventtable-generated datacomposition.
      */
-    void removeDroppedDataScienceFieldEventTableTransforms(DataComposition eventTableDataComposition,
-            DataComposition dataScienceDataComposition) {
+    Map<String, FieldSchema> mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
+            DataComposition eventTableDataComposition, DataComposition dataScienceDataComposition) {
+        Map<String, FieldSchema> mergedFields = new HashMap<>();
+
+        Map<String, FieldSchema> eventTableFields = eventTableDataComposition.fields;
+        Map<String, FieldSchema> dataScienceFields = dataScienceDataComposition.fields;
+
+        for (String etField : eventTableFields.keySet()) {
+            FieldSchema etFieldSchema = eventTableFields.get(etField);
+            if (etFieldSchema.source.equals(FieldSource.REQUEST)) {
+                mergedFields.put(etField, etFieldSchema);
+            }
+        }
+        for (String dsField : dataScienceFields.keySet()) {
+            FieldSchema dsFieldSchema = dataScienceFields.get(dsField);
+            if (!dsFieldSchema.source.equals(FieldSource.REQUEST)) {
+                mergedFields.put(dsField, dsFieldSchema);
+            }
+        }
+
         Set<String> difference = new HashSet<>(eventTableDataComposition.fields.keySet());
-        difference.removeAll(dataScienceDataComposition.fields.keySet());
+        difference.removeAll(mergedFields.keySet());
         if (log.isDebugEnabled()) {
             log.debug("Difference in datacompositions:" + JsonUtils.serialize(difference));
         }
@@ -237,6 +259,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         }
 
         eventTableDataComposition.transforms = transformsToKeep;
+
+        return mergedFields;
     }
 
     private AbstractMap.SimpleEntry<String, String> parseModelNameAndVersion(ModelSummary modelSummary) {
@@ -479,19 +503,19 @@ public class ModelRetrieverImpl implements ModelRetriever {
         this.localPathToPersist = localPathToPersist;
     }
 
-    private String determineIdFieldName(DataComposition dataScienceDataComposition) {
+    private String determineIdFieldName(Map<String, FieldSchema> fieldSchemas) {
         // find ID field
         String idFieldName = "";
-        for (String fieldName : dataScienceDataComposition.fields.keySet()) {
-            FieldSchema fieldSchema = dataScienceDataComposition.fields.get(fieldName);
-            if (fieldSchema.interpretation == FieldInterpretation.ID) {
+        for (String fieldName : fieldSchemas.keySet()) {
+            FieldSchema fieldSchema = fieldSchemas.get(fieldName);
+            if (fieldSchema.interpretation == FieldInterpretation.Id) {
                 idFieldName = fieldName;
                 break;
             }
         }
         if (idFieldName == null) {
             throw new LedpException(LedpCode.LEDP_31021,
-                    new String[] { JsonUtils.serialize(dataScienceDataComposition.fields) });
+                    new String[] { JsonUtils.serialize(fieldSchemas) });
         }
         return idFieldName;
     }
@@ -503,17 +527,21 @@ public class ModelRetrieverImpl implements ModelRetriever {
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelSummary);
         String hdfsScoreArtifactBaseDir = artifactBaseAndEventTableDirs.getLeft();
+        String hdfsScoreArtifactTableDir = artifactBaseAndEventTableDirs.getMiddle();
 
         DataComposition dataScienceDataComposition = getDataScienceDataComposition(hdfsScoreArtifactBaseDir);
+        DataComposition eventTableDataComposition = getEventTableDataComposition(hdfsScoreArtifactTableDir);
+        Map<String, FieldSchema> mergedFields = mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(
+                eventTableDataComposition, dataScienceDataComposition);
         String expectedRecords = getModelRecordExportCsv(hdfsScoreArtifactBaseDir);
         String scoredTxt = getScoredTxt(hdfsScoreArtifactBaseDir);
 
         ScoreCorrectnessArtifacts artifacts = new ScoreCorrectnessArtifacts();
-        artifacts.setDataScienceDataComposition(dataScienceDataComposition);
         artifacts.setExpectedRecords(expectedRecords);
         artifacts.setScoredTxt(scoredTxt);
-        artifacts.setIdField(determineIdFieldName(dataScienceDataComposition));
+        artifacts.setIdField(determineIdFieldName(mergedFields));
         artifacts.setPathToSamplesAvro(artifactBaseAndEventTableDirs.getRight());
+        artifacts.setFieldSchemas(mergedFields);
         return artifacts;
     }
 

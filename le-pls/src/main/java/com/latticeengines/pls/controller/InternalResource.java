@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
@@ -692,7 +693,7 @@ public class InternalResource extends InternalResourceBase {
         log.info("Manufacturing security context for " + tenantId);
         Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant == null) {
-            throw new RuntimeException("Could not find tenant:" + tenantId);
+            throw new LedpException(LedpCode.LEDP_18074, new String[] { tenantId });
         }
         manufactureSecurityContextForInternalAccess(tenant);
     }

@@ -255,6 +255,11 @@
             "type": "BOOLEAN",
             "interpretation": "Feature"
         },
+        "FundingStage": {
+            "source": "PROPRIETARY",
+            "type": "STRING",
+            "interpretation": "Feature"
+        },
         "JobsTrendString": {
             "source": "PROPRIETARY",
             "type": "STRING",
@@ -381,6 +386,11 @@
             "interpretation": "Feature"
         },
         "FeatureTermFrequentlyAskedQuestion": {
+            "source": "PROPRIETARY",
+            "type": "INTEGER",
+            "interpretation": "Feature"
+        },
+        "FundingStage1": {
             "source": "PROPRIETARY",
             "type": "INTEGER",
             "interpretation": "Feature"
@@ -955,6 +965,11 @@
             "type": "STRING",
             "interpretation": "Feature"
         },
+        "ModelAction": {
+            "source": "PROPRIETARY",
+            "type": "STRING",
+            "interpretation": "Feature"
+        },
         "BusinessTechnologiesJavascript": {
             "source": "PROPRIETARY",
             "type": "INTEGER",
@@ -1501,9 +1516,9 @@
             "interpretation": "Feature"
         },
         "CreatedDate": {
-            "interpretation": "Date",
             "source": "REQUEST",
-            "type": "STRING"
+            "type": "STRING",
+            "interpretation": "Date"
         },
         "Experian_Source_IsMatched": {
             "source": "PROPRIETARY",
@@ -2032,6 +2047,14 @@
         },
         {
             "name": "encoder",
+            "output": "ModelAction",
+            "type": "LONG",
+            "arguments": {
+                "column": "ModelAction"
+            }
+        },
+        {
+            "name": "encoder",
             "output": "Activity_Count_Click_Email",
             "type": "LONG",
             "arguments": {
@@ -2044,6 +2067,22 @@
             "type": "LONG",
             "arguments": {
                 "column": "JobsTrendString"
+            }
+        },
+        {
+            "name": "encoder",
+            "output": "FundingStage",
+            "type": "LONG",
+            "arguments": {
+                "column": "FundingStage"
+            }
+        },
+        {
+            "name": "encoder",
+            "output": "FundingStage1",
+            "type": "LONG",
+            "arguments": {
+                "column": "FundingStage1"
             }
         },
         {

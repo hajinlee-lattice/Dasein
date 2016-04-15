@@ -34,7 +34,7 @@ public class ProprietaryDataMatcher {
         String email = null;
         List<String> columns = new ArrayList<String>();
         for (Map.Entry<String, FieldSchema> entry : fields.entrySet()) {
-            if (entry.getValue().interpretation == FieldInterpretation.EMAIL_ADDRESS
+            if (entry.getValue().interpretation == FieldInterpretation.Email
                     && entry.getValue().type == FieldType.STRING) {
                 // Cast should be safe because type checking already happened.
                 email = (String) record.get(entry.getKey());

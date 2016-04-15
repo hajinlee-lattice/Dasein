@@ -29,6 +29,8 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
@@ -40,6 +42,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -66,6 +69,8 @@ uniqueConstraints = { @UniqueConstraint(columnNames = { "TENANT_ID", "NAME", "TY
         @Filter(name = "typeFilter", condition = "TYPE = :typeFilterId") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Table implements HasPid, HasName, HasTenantId, GraphNode {
+
+    private static final Log log = LogFactory.getLog(Table.class);
 
     private Long pid;
     private String name;
@@ -406,7 +411,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
                 throw new RuntimeException(e);
             }
         }
-        
+
         Set<String> requestTargets = new HashSet<>();
         for (Attribute attr : getAttributes()) {
             requestTargets.add(attr.getName());
@@ -425,19 +430,26 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
             }
         }
         for (Attribute attr : getAttributes()) {
-            if (attr.getApprovedUsage() == null //
-                    || attr.getApprovedUsage().size() == 0 || attr.getApprovedUsage().get(0).equals("None")) {
-                continue;
+            boolean isRequest = requestTargets.contains(attr.getName());
+            if (isRequest) {
+                if (attr.getInterfaceName() == null
+                        && (attr.getApprovedUsage() == null || attr.getApprovedUsage().size() == 0 || attr
+                                .getApprovedUsage().get(0).equals("None"))) {
+                    // Custom field with no approved usage
+                    continue;
+                } else if (LogicalDataType.isExcludedFromRealTimeMetadata(attr.getLogicalDataType())) {
+                    continue;
+                }
             }
-            fields.put(attr.getName(), createField(attr, requestTargets.contains(attr.getName())));
+            fields.put(attr.getName(), createField(attr, isRequest));
         }
         return new AbstractMap.SimpleEntry<>(fields, rtsTransforms);
     }
-    
+
     private FieldSchema createField(Attribute attr, boolean request) {
         // Same logic as datacompositiongenerator.py
         FieldSchema fieldSchema = new FieldSchema();
-        
+
         List<String> tags = attr.getTags();
         if (tags != null && !tags.isEmpty() && tags.get(0).equals("External")) {
             fieldSchema.source = FieldSource.PROPRIETARY;
@@ -446,49 +458,75 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
         } else {
             fieldSchema.source = FieldSource.TRANSFORMS;
         }
-        
-        String avroType = attr.getPhysicalDataType();
-        fieldSchema.type = FieldType.getFromAvroType(avroType);
-        
-        String name = attr.getName();
-        
-        if (name.equals("Id") || name.equals("LeadID") || name.equals("ExternalId")) {
-            fieldSchema.interpretation = FieldInterpretation.ID;
-        } else if (name.equals("Event")) {
-            fieldSchema.interpretation = FieldInterpretation.EVENT;
-        } else if (name.equals("Domain")) {
-            fieldSchema.interpretation = FieldInterpretation.DOMAIN;
-        } else if (name.equals("LastModifiedDate")) {
-            fieldSchema.interpretation = FieldInterpretation.LAST_MODIFIED_DATE;
-        } else if (name.equals("CreatedDate")) {
-            fieldSchema.interpretation = FieldInterpretation.CREATED_DATE;
-        } else if (name.equals("FirstName")) {
-            fieldSchema.interpretation = FieldInterpretation.FIRST_NAME;
-        } else if (name.equals("LastName")) {
-            fieldSchema.interpretation = FieldInterpretation.LAST_NAME;
-        } else if (name.equals("Title")) {
-            fieldSchema.interpretation = FieldInterpretation.TITLE;
-        } else if (name.equals("Email")) {
-            fieldSchema.interpretation = FieldInterpretation.EMAIL_ADDRESS;
-        } else if (name.equals("City")) {
-            fieldSchema.interpretation = FieldInterpretation.COMPANY_CITY;
-        } else if (name.equals("State")) {
-            fieldSchema.interpretation = FieldInterpretation.COMPANY_STATE;
-        } else if (name.equals("PostalCode")) {
-            fieldSchema.interpretation = FieldInterpretation.POSTAL_CODE;
-        } else if (name.equals("Country")) {
-            fieldSchema.interpretation = FieldInterpretation.COMPANY_COUNTRY;
-        } else if (name.equals("PhoneNumber")) {
-            fieldSchema.interpretation = FieldInterpretation.PHONE_NUMBER;
-        } else if (name.equals("Website")) {
-            fieldSchema.interpretation = FieldInterpretation.WEBSITE;
-        } else if (name.equals("CompanyName")) {
-            fieldSchema.interpretation = FieldInterpretation.COMPANY_NAME;
-        } else if (name.equals("Industry")) {
-            fieldSchema.interpretation = FieldInterpretation.INDUSTRY;
+
+        FieldInterpretation interpretation;
+        if (attr.getInterfaceName() != null) {
+            switch (attr.getInterfaceName()) {
+            case Id:
+                interpretation = FieldInterpretation.Id;
+                break;
+            case Event:
+                interpretation = FieldInterpretation.Event;
+                break;
+            case Domain:
+                interpretation = FieldInterpretation.Domain;
+                break;
+            case FirstName:
+                interpretation = FieldInterpretation.FirstName;
+                break;
+            case LastName:
+                interpretation = FieldInterpretation.LastName;
+                break;
+            case Title:
+                interpretation = FieldInterpretation.Title;
+                break;
+            case Email:
+                interpretation = FieldInterpretation.Email;
+                break;
+            case City:
+                interpretation = FieldInterpretation.City;
+                break;
+            case State:
+                interpretation = FieldInterpretation.State;
+                break;
+            case PostalCode:
+                interpretation = FieldInterpretation.PostalCode;
+                break;
+            case Country:
+                interpretation = FieldInterpretation.Country;
+                break;
+            case PhoneNumber:
+                interpretation = FieldInterpretation.PhoneNumber;
+                break;
+            case Website:
+                interpretation = FieldInterpretation.Website;
+                break;
+            case CompanyName:
+                interpretation = FieldInterpretation.CompanyName;
+                break;
+            case Industry:
+                interpretation = FieldInterpretation.Industry;
+                break;
+            default:
+                interpretation = FieldInterpretation.Feature;
+                break;
+            }
         } else {
-            fieldSchema.interpretation = FieldInterpretation.FEATURE;
+            interpretation = FieldInterpretation.Feature;
         }
+        if (attr.getLogicalDataType() == LogicalDataType.Date) {
+            fieldSchema.type = FieldType.STRING;
+            interpretation = FieldInterpretation.Date;
+        } else {
+            String avroType = attr.getPhysicalDataType();
+            fieldSchema.type = FieldType.getFromAvroType(avroType);
+        }
+        fieldSchema.interpretation = interpretation;
+
+        log.info(String.format(
+                "Added field to realtime metadata -- Name:%s ApprovedUsage:%s LogicalDataType:%s FieldSchema:%s",
+                Strings.nullToEmpty(attr.getName()), StringUtils.join(attr.getApprovedUsage(), ","),
+                attr.getLogicalDataType(), JsonUtils.serialize(fieldSchema)));
 
         return fieldSchema;
     }

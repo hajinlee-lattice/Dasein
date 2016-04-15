@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,13 +39,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
-import com.joestelmach.natty.DateGroup;
-import com.joestelmach.natty.Parser;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.scoringapi.exposed.DebugScoreResponse;
@@ -92,7 +88,7 @@ public class ScoreCorrectnessService {
         Map<String, Double> expectedScores = getExpectedScoresFromScoredTxt(artifacts);
         Map<String, Map<String, Object>> expectedRecords = getExpectedRecords(artifacts);
         Map<String, Map<String, Object>> matchedRecords = getExpectedMatchedRecords(artifacts);
-        Map<String, FieldSchema> schema = artifacts.getDataScienceDataComposition().fields;
+        Map<String, FieldSchema> schema = artifacts.getFieldSchemas();
         Fields fieldsFromScoreApi = getModelingFields(modelId);
         Map<String, Map<String, Object>> inputRecords = getInputRecordsFromInputCsv(artifacts, pathToModelInputCsv,
                 expectedScores, fieldsFromScoreApi.getFields());
@@ -402,7 +398,6 @@ public class ScoreCorrectnessService {
         ClassPathResource csvResource = new ClassPathResource(pathToModelInputCsv);
         try (CSVParser parser = new CSVParser(new InputStreamReader(new BOMInputStream(csvResource.getInputStream())),
                 format)) {
-            Parser dateParser = new Parser();
             for (CSVRecord csvRecord : parser) {
                 String id = csvRecord.get(artifacts.getIdField());
                 if (ids.contains(id)) {
@@ -412,13 +407,6 @@ public class ScoreCorrectnessService {
                         scoreRecord.put(fieldName, csvRecord.get(fieldName));
                         if (csvRecord.get(fieldName).equals("")) {
                             scoreRecord.put(fieldName, null);
-                        } else if (fieldName.equalsIgnoreCase(InterfaceName.CreatedDate.name())
-                                || fieldName.equalsIgnoreCase(InterfaceName.LastModifiedDate.name())) {
-                            // Can remove this conversion case once we set
-                            // ApprovedUsage to none of these fields.
-                            List<DateGroup> groups = dateParser.parse(csvRecord.get(fieldName));
-                            List<Date> dates = groups.get(0).getDates();
-                            scoreRecord.put(fieldName, dates.get(0).getTime());
                         }
                     }
                     records.put(id, scoreRecord);

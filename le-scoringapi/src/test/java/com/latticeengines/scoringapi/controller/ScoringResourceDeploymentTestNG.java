@@ -49,7 +49,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
         Assert.assertEquals(fields.getModelId(), modelId);
 
         for (Field field : fields.getFields()) {
-            FieldSchema expectedSchema = dataScienceDataComposition.fields.get(field.getFieldName());
+            FieldSchema expectedSchema = eventTableDataComposition.fields.get(field.getFieldName());
             Assert.assertEquals(expectedSchema.type, field.getFieldType());
             Assert.assertEquals(expectedSchema.source, FieldSource.REQUEST);
         }
@@ -94,6 +94,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringApiControllerDeploym
 
         DebugScoreResponse scoreResponse = response.getBody();
         Assert.assertEquals(scoreResponse.getScore(), 99.0d);
+        Assert.assertTrue(scoreResponse.getProbability() > 0.4842968639896531);
     }
 
 

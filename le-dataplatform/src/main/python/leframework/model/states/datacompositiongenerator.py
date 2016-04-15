@@ -53,43 +53,43 @@ class DataCompositionGenerator(State):
             else:
                 details["type"] = "STRING"
 
-            # Should identify interesting non-feature columns through metadata.  Keep in sync with Logical Data Type
+            # Keep in sync with FieldInterpretation
             if name in schema["features"]:
-                details["interpretation"] = "FEATURE"
+                details["interpretation"] = "Feature"
             elif name == "Id" or name == "LeadID" or name == "ExternalId":
-                details["interpretation"] = "ID"
+                details["interpretation"] = "Id"
             elif name == "Event":
-                details["interpretation"] = "EVENT"
+                details["interpretation"] = "Event"
             elif name == "Domain":
-                details["interpretation"] = "DOMAIN"
+                details["interpretation"] = "Domain"
             elif name == "LastModifiedDate":
-                details["interpretation"] = "LAST_MODIFIED_DATE"
-            elif name == "CreatedDate":
-                details["interpretation"] = "CREATED_DATE"
-            elif name == "FirstName":
-                details["interpretation"] = "FIRST_NAME"
+                details["interpretation"] = "LastModifiedDate"
+            elif name == "Date":
+                details["interpretation"] = "CreatedDate"
+            elif name == "Date":
+                details["interpretation"] = "FirstName"
             elif name == "LastName":
-                details["interpretation"] = "LAST_NAME"
+                details["interpretation"] = "LastName"
             elif name == "Title":
-                details["interpretation"] = "TITLE"
+                details["interpretation"] = "Title"
             elif name == "Email":
-                details["interpretation"] = "EMAIL_ADDRESS"
+                details["interpretation"] = "Email"
             elif name == "City":
-                details["interpretation"] = "COMPANY_CITY"
+                details["interpretation"] = "City"
             elif name == "State":
-                details["interpretation"] = "COMPANY_STATE"
+                details["interpretation"] = "State"
             elif name == "PostalCode":
-                details["interpretation"] = "POSTAL_CODE"
+                details["interpretation"] = "PostalCode"
             elif name == "Country":
-                details["interpretation"] = "COMPANY_COUNTRY"
+                details["interpretation"] = "Country"
             elif name == "PhoneNumber":
-                details["interpretation"] = "PHONE_NUMBER"
+                details["interpretation"] = "PhoneNumber"
             elif name == "Website":
-                details["interpretation"] = "WEBSITE"
+                details["interpretation"] = "Website"
             elif name == "CompanyName":
-                details["interpretation"] = "COMPANY_NAME"
+                details["interpretation"] = "CompanyName"
             elif name == "Industry":
-                details["interpretation"] = "INDUSTRY"
+                details["interpretation"] = "Industry"
             else:
                 continue
 
@@ -107,7 +107,7 @@ class DataCompositionGenerator(State):
             for column in columns:
                 name = column[0]["name"]
 
-                if step.doColumnCheck() and (name not in fields or fields[name]["interpretation"] != "FEATURE"):
+                if step.doColumnCheck() and (name not in fields or fields[name]["interpretation"] != "Feature"):
                     continue
                 if len(column[1]) == 1:
                     result.append(self.__make_transform(rtsModule, name, column[0]["type"], [("column", k) for k in column[1]]))

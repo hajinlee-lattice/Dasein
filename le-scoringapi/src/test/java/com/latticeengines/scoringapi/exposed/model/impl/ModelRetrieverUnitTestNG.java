@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 import com.google.common.io.Files;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
-import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 
 public class ModelRetrieverUnitTestNG {
 
@@ -33,7 +32,7 @@ public class ModelRetrieverUnitTestNG {
 
         int original = eventTableDataComposition.transforms.size();
         ModelRetrieverImpl modelRetriever = new ModelRetrieverImpl();
-        modelRetriever.removeDroppedDataScienceFieldEventTableTransforms(eventTableDataComposition,
+        modelRetriever.mergeFieldsAndRemoveEventTableTransformsUsingDroppedDataScienceFields(eventTableDataComposition,
                 dataScienceDataComposition);
 
         Assert.assertEquals(original - eventTableDataComposition.transforms.size(), 2);

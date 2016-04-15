@@ -1,14 +1,16 @@
 package com.latticeengines.scoringapi.exposed;
 
-import com.latticeengines.domain.exposed.scoringapi.DataComposition;
+import java.util.Map;
+
+import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 
 public class ScoreCorrectnessArtifacts {
 
     private String idField;
-    private DataComposition dataScienceDataComposition;
     private String expectedRecords;
     private String scoredTxt;
     private String pathToSamplesAvro;
+    private Map<String, FieldSchema> fieldSchemas;
 
     public String getPathToSamplesAvro() {
         return pathToSamplesAvro;
@@ -25,12 +27,6 @@ public class ScoreCorrectnessArtifacts {
     public String getIdField() {
         return idField;
     }
-    public DataComposition getDataScienceDataComposition() {
-        return dataScienceDataComposition;
-    }
-    public void setDataScienceDataComposition(DataComposition dataScienceDataComposition) {
-        this.dataScienceDataComposition = dataScienceDataComposition;
-    }
     public String getExpectedRecords() {
         return expectedRecords;
     }
@@ -42,6 +38,14 @@ public class ScoreCorrectnessArtifacts {
     }
     public void setScoredTxt(String scoredTxt) {
         this.scoredTxt = scoredTxt;
+    }
+
+    public Map<String, FieldSchema> getFieldSchemas() {
+        return fieldSchemas;
+    }
+
+    public void setFieldSchemas(Map<String, FieldSchema> fieldSchemas) {
+        this.fieldSchemas = fieldSchemas;
     }
 
 }

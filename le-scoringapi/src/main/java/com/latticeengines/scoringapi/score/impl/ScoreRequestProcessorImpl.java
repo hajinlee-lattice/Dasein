@@ -21,6 +21,7 @@ import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.rest.HttpStopWatch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringUtils;
+import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
@@ -85,7 +86,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getName());
         requestInfo.put("ModelType", scoringArtifacts.getModelType().name());
 
-        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getDataScienceDataComposition().fields;
+        Map<String, FieldSchema> fieldSchemas = scoringArtifacts.getFieldSchemas();
         split("retrieveModelArtifacts");
 
         checkForMissingFields(fieldSchemas, request.getRecord());
@@ -116,8 +117,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         return scoreResponse;
     }
 
-    private String getIdIfAvailable(InterpretedFields interpretedFields,
-            Map<String, Object> record) {
+    private String getIdIfAvailable(InterpretedFields interpretedFields, Map<String, Object> record) {
         String value = "";
         if (!Strings.isNullOrEmpty(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
@@ -183,10 +183,10 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
         List<String> missingMatchFields = new ArrayList<>();
         List<String> missingFields = new ArrayList<>();
 
-        EnumSet<FieldInterpretation> expectedDomainFields = EnumSet.of(FieldInterpretation.DOMAIN,
-                FieldInterpretation.EMAIL_ADDRESS, FieldInterpretation.WEBSITE);
-        EnumSet<FieldInterpretation> expectedMatchFields = EnumSet.of(FieldInterpretation.COMPANY_COUNTRY,
-                FieldInterpretation.COMPANY_NAME, FieldInterpretation.COMPANY_STATE);
+        EnumSet<FieldInterpretation> expectedDomainFields = EnumSet.of(FieldInterpretation.Domain,
+                FieldInterpretation.Email, FieldInterpretation.Website);
+        EnumSet<FieldInterpretation> expectedMatchFields = EnumSet.of(FieldInterpretation.Country,
+                FieldInterpretation.CompanyName, FieldInterpretation.State);
         expectedMatchFields.addAll(expectedDomainFields);
         boolean hasOneOfDomain = false;
         // PropData does not use City and will default Country to US
@@ -204,17 +204,19 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             }
 
             Object fieldValue = record.get(fieldName);
-            if (expectedMatchFields.contains(fieldSchema.interpretation) && StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+            if (expectedMatchFields.contains(fieldSchema.interpretation)
+                    && StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 missingMatchFields.add(fieldName);
             }
-            if (expectedDomainFields.contains(fieldSchema.interpretation) && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+            if (expectedDomainFields.contains(fieldSchema.interpretation)
+                    && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasOneOfDomain = true;
             }
 
-            if (fieldSchema.interpretation == FieldInterpretation.COMPANY_NAME
+            if (fieldSchema.interpretation == FieldInterpretation.CompanyName
                     && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyName = true;
-            } else if (fieldSchema.interpretation == FieldInterpretation.COMPANY_STATE
+            } else if (fieldSchema.interpretation == FieldInterpretation.State
                     && !StringUtils.objectIsNullOrEmptyString(fieldValue)) {
                 hasCompanyState = true;
             }
@@ -277,28 +279,28 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private void interpretFields(InterpretedFields interpretedFields, String fieldName, FieldSchema schema) {
         switch (schema.interpretation) {
-        case ID:
+        case Id:
             interpretedFields.setRecordId(fieldName);
             break;
-        case EMAIL_ADDRESS:
+        case Email:
             interpretedFields.setEmailAddress(fieldName);
             break;
-        case WEBSITE:
+        case Website:
             interpretedFields.setWebsite(fieldName);
             break;
-        case COMPANY_NAME:
+        case CompanyName:
             interpretedFields.setCompanyName(fieldName);
             break;
-        case COMPANY_CITY:
+        case City:
             interpretedFields.setCompanyCity(fieldName);
             break;
-        case COMPANY_STATE:
+        case State:
             interpretedFields.setCompanyState(fieldName);
             break;
-        case COMPANY_COUNTRY:
+        case Country:
             interpretedFields.setCompanyCountry(fieldName);
             break;
-        case DOMAIN:
+        case Domain:
             interpretedFields.setDomain(fieldName);
             break;
         default:
@@ -313,7 +315,13 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
             FieldType fieldType = schema.type;
 
             try {
-                fieldValue = FieldType.parse(fieldType, fieldValue);
+                if (schema.interpretation == FieldInterpretation.Date) {
+                    if (!StringUtils.objectIsNullOrEmptyString(fieldValue)) {
+                        fieldValue = TimeStampConvertUtils.convertToLong(String.valueOf(fieldValue));
+                    }
+                } else {
+                    fieldValue = FieldType.parse(fieldType, fieldValue);
+                }
                 record.put(fieldName, fieldValue);
             } catch (Exception e) {
                 mismatchedDataTypes.put(fieldName, new AbstractMap.SimpleEntry<Class<?>, Object>(fieldType.type(),
