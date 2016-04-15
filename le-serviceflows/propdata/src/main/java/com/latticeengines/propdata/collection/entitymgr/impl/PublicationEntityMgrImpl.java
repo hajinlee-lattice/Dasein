@@ -19,12 +19,6 @@ public class PublicationEntityMgrImpl implements PublicationEntityMgr {
     private PublicationDao dao;
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<Publication> findBySourceName(String sourceName) {
-        return dao.findAllForSource(sourceName);
-    }
-
-    @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.REPEATABLE_READ)
     public Publication findByPublicationName(String publicationName) {
         return dao.findByField("PublicationName", publicationName);

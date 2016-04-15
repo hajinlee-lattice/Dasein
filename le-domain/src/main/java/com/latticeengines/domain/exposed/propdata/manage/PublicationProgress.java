@@ -19,9 +19,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.util.ConverterUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -64,7 +61,7 @@ public class PublicationProgress implements HasPid {
     private String createdBy;
 
     @Column(name = "ApplicationId")
-    private String appId;
+    private String applicationId;
 
     @Column(name = "Progress")
     private Float progress;
@@ -162,16 +159,6 @@ public class PublicationProgress implements HasPid {
         this.createdBy = createdBy;
     }
 
-    @JsonIgnore
-    private String getAppId() {
-        return appId;
-    }
-
-    @JsonIgnore
-    private void setAppId(String appId) {
-        this.appId = appId;
-    }
-
     @JsonProperty("Progress")
     public Float getProgress() {
         return progress;
@@ -203,13 +190,13 @@ public class PublicationProgress implements HasPid {
     }
 
     @JsonProperty("ApplicationId")
-    public ApplicationId getApplicationId() {
-        return appId == null ? null : ConverterUtils.toApplicationId(appId);
+    public String getApplicationId() {
+        return applicationId;
     }
 
     @JsonProperty("ApplicationId")
-    public void setApplicationId(ApplicationId applicationId) {
-        this.appId = applicationId.toString();
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     @JsonProperty("CreateTime")

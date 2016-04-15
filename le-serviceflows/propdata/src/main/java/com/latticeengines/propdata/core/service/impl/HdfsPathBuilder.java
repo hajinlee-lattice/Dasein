@@ -51,15 +51,15 @@ public class HdfsPathBuilder {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    private String podId = DEFAULT_POD_ID;
+    private ThreadLocal<String> podId = new ThreadLocal<>();
 
     @PostConstruct
     private void postConstruct() {
-        podId = CamilleEnvironment.getPodId();
+        podId.set(CamilleEnvironment.getPodId());
     }
 
     public Path podDir() {
-        return new Path(PODS_ROOT).append(podId);
+        return new Path(PODS_ROOT).append(podId.get());
     }
 
     public Path propDataDir() {
@@ -190,7 +190,7 @@ public class HdfsPathBuilder {
     }
 
     public void changeHdfsPodId(String podId) {
-        this.podId = podId;
+        this.podId.set(podId);
     }
 
     private String replaceHyphenAndMakeLowercase(String text) {

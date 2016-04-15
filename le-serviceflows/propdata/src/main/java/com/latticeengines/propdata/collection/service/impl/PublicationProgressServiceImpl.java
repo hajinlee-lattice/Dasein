@@ -124,7 +124,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         }
 
         public PublicationProgressUpdaterImpl applicationId(ApplicationId applicationId) {
-            progress.setApplicationId(applicationId);
+            progress.setApplicationId(applicationId.toString());
             return this;
         }
 

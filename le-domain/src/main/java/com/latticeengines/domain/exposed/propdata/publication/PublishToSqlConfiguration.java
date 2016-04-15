@@ -10,12 +10,23 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     private String defaultTableName;
     private String username;
     private String encryptedPassword;
+    private Alias alias;
     private PublicationStrategy publicationStrategy;
 
     @Override
     @JsonProperty("ConfigurationType")
     public String getConfigurationType() {
         return this.getClass().getSimpleName();
+    }
+
+    @JsonProperty("Alias")
+    public Alias getAlias() {
+        return alias;
+    }
+
+    @JsonProperty("Alias")
+    public void setAlias(Alias alias) {
+        this.alias = alias;
     }
 
     @JsonProperty("Host")
@@ -86,6 +97,10 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     @JsonProperty("EncryptedPassword")
     public void setEncryptedPassword(String encryptedPassword) {
         this.encryptedPassword = encryptedPassword;
+    }
+
+    public enum Alias {
+        CollectionDB, SourceDB, TestDB
     }
 
     public enum PublicationStrategy {

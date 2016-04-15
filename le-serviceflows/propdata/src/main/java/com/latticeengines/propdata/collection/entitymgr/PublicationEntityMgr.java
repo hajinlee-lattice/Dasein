@@ -6,7 +6,6 @@ import com.latticeengines.domain.exposed.propdata.manage.Publication;
 
 public interface PublicationEntityMgr {
 
-    List<Publication> findBySourceName(String sourceName);
     Publication findByPublicationName(String publicationName);
     Publication addPublication(Publication publication);
     void removePublication(String publicationName);
