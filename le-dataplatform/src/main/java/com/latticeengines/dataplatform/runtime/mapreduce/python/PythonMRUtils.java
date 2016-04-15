@@ -47,6 +47,11 @@ public class PythonMRUtils {
 
         return setupCacheFiles(paths, classifier, version);
     }
+    
+    private static String getScriptPathWithVersion(String script, String version) {
+        String afterPart = StringUtils.substringAfter(script, "/app");
+        return "/app/" + version + afterPart;
+    }
 
     private static String setupCacheFiles(List<String> paths, Classifier classifier, String version) {
         paths.add(String.format("/app/%s/dataplatform/hadoop-metrics2.properties", version));
@@ -62,6 +67,7 @@ public class PythonMRUtils {
         
         if (StringUtils.isEmpty(pipelineDriver)) {
             pipelineDriver = new RandomForestAlgorithm().getPipelineDriver();
+            pipelineDriver = getScriptPathWithVersion(pipelineDriver, version);
         }
         paths.add(pipelineDriver);
         
