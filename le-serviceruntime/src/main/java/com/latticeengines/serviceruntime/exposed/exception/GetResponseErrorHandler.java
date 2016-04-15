@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 
 public class GetResponseErrorHandler implements ResponseErrorHandler {
+    @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(GetResponseErrorHandler.class);
 
     public GetResponseErrorHandler() {
