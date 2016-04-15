@@ -24,7 +24,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
 import com.latticeengines.dellebi.service.FileFlowService;
-import com.latticeengines.dellebi.service.FileType;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
