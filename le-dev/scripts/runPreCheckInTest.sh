@@ -52,14 +52,10 @@ def killProcessAndAllChildProcesses(parentPid):
 
 def resetMysql():
     print "resetting mysql tables"
-    os.chdir(os.environ['WSHOME'] + '/le-db')
-    mysqlCmd = 'mysql -u root -p < ddl_pls_multitenant_mysql5innodb.sql'
-    mysqlProc = pexpect.spawn('/bin/bash', ['-c', mysqlCmd])
-    ret = mysqlProc.expect('Enter password:')
-    assert ret == 0, "Run command 'mysql -u root -p < ddl_pls_multitenant_mysql5innodb.sql' from le-db/ failed"
-    charsWritten = mysqlProc.sendline('welcome')
-    assert charsWritten == 8, "Error with running ddl_pls_multitenant_mysql5innodb.sql script in le-db directory. Please check if script is correct"
-
+    subprocess.call(['bash %s/le-dev/scripts/setupdb_pls_multitenant.sh' % os.environ['WSHOME']], shell=True)
+    subprocess.call(['bash %s/le-dev/scripts/setupdb_ldc_managedb.sh' % os.environ['WSHOME']], shell=True)
+    subprocess.call(['bash %s/le-dev/scripts/setupdb_leadscoringdb.sh' % os.environ['WSHOME']], shell=True)
+    subprocess.call(['bash %s/le-dev/scripts/setupdb_oauth2.sh' % os.environ['WSHOME']], shell=True)
 
 def waitForServerToStart(checkingUrl, waitminute):
     startTime = time.time()
@@ -172,9 +168,8 @@ def startAllServersViaTomcat(waitminute):
         return
 
     print "starting tomcat"
-    os.chdir(os.environ['WSHOME'])
-    subprocess.call(['python ./le-dev/scripts/tcdpl.py deploy -a admin,pls,microservice'], shell=True)
-    proc = subprocess.Popen(['./le-dev/scripts/run-tomcat.sh'], shell=True)
+    subprocess.call(['python %s/le-dev/scripts/tcdpl.py deploy -a admin,pls,microservice' % os.environ['WSHOME']], shell=True)
+    proc = subprocess.Popen(['bash %s/le-dev/scripts/run-tomcat.sh' % os.environ['WSHOME']], shell=True)
     if proc:
         global tomcatPid
         tomcatPid = proc.pid
@@ -219,8 +214,8 @@ def runPDMockedEndToEndTest():
     assert ret == 0, 'PD EndToEnd Test Failed'
 
 def runTestSetupScript():
-    os.chdir(os.environ['WSHOME'])
-    subprocess.call(['./le-dev/scripts/setup.sh'])
+    print 'running setup script le-dev/scripts/setup.sh'
+    subprocess.call(['bash %s/le-dev/scripts/setup.sh' % os.environ['WSHOME']], shell=True)
 
 def parseCliArgs():
     parser = argparse.ArgumentParser(description='Process some integers.')
