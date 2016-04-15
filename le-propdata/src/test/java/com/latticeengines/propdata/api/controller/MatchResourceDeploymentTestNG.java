@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -39,8 +40,6 @@ import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Component
 public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {

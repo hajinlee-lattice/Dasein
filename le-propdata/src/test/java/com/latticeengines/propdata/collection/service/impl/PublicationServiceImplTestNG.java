@@ -11,9 +11,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
-import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
 import com.latticeengines.propdata.collection.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.collection.entitymgr.PublicationProgressEntityMgr;
+import com.latticeengines.propdata.collection.service.PublicationProgressService;
 import com.latticeengines.propdata.collection.service.PublicationService;
 import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
@@ -21,13 +21,13 @@ import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 
 public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTestNGBase {
 
-    public static final String POD_ID = "PublicationServiceImplTestNG";
-    public static final String PUBLICATION_NAME = "TestPublication";
-    public static final String CURRENT_VERSION = "version1";
-    public static final String SUBMITTER = PublicationServiceImplTestNG.class.getSimpleName();
+    public final String POD_ID = this.getClass().getSimpleName();
+    public static final String PUBLICATION_NAME = "TestPublication2";
+    public static final String CURRENT_VERSION = "version2";
+    public final String SUBMITTER = this.getClass().getSimpleName();
 
     @Autowired
-    private BuiltWithPivoted source;
+    private PublicationProgressService publicationProgressService;
 
     @Autowired
     private PublicationService publicationService;
@@ -40,6 +40,9 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
     @Autowired
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private BuiltWithPivoted source;
 
     private Publication publication;
 
@@ -57,46 +60,25 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
     }
 
     @Test(groups = "functional")
-    public void testCanFindExistingProgress() {
-        progressEntityMgr.startNewProgress(publication, getDestination(), CURRENT_VERSION, SUBMITTER);
-        PublicationProgress progress2 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
-                CURRENT_VERSION);
-        Assert.assertNotNull(progress2, "Should find the existing progress");
-    }
+    public void testPublish() {
+        List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
+        Assert.assertEquals(progresses.size(), 0, "Should have zero progress at beginning");
 
-    @Test(groups = "functional", dependsOnMethods = "testCanFindExistingProgress")
-    public void testCheckNewProgress() {
-        List<PublicationProgress> progresses = publicationService.publishLatest(source, SUBMITTER);
-        Assert.assertTrue(progresses.isEmpty(), "Should not allow new progress when there is already one");
+        publicationService.publish(source, SUBMITTER);
+        progresses = progressEntityMgr.findAllForPublication(publication);
+        Assert.assertEquals(progresses.size(), 1, "Should have a new progress");
+
+        publicationService.publish(source, SUBMITTER);
+        progresses = progressEntityMgr.findAllForPublication(publication);
+        Assert.assertEquals(progresses.size(), 1, "Should still have one progress");
 
         PublicationProgress progress1 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
-        publicationService.update(progress1).retry().retry().retry()
+        publicationProgressService.update(progress1).retry().retry().retry()
                 .status(PublicationProgress.Status.FAILED).commit();
-        progresses = publicationService.publishLatest(source, CURRENT_VERSION);
-        Assert.assertFalse(progresses.isEmpty(),
-                "Should allow new progress when the old one exceed max retry and is in FAILED status.");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "testCheckNewProgress")
-    public void testForeignKeyCascading() {
-        Publication publication1 = publicationEntityMgr.findByPublicationName(PUBLICATION_NAME);
-        List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication1);
-        Assert.assertFalse(progresses.isEmpty(), "Should have at least one progress.");
-    }
-
-    @Test(groups = "functional", dependsOnMethods = "testCheckNewProgress")
-    public void testFindNonTerminalProgress() {
-        List<PublicationProgress> progressList = publicationService.scanNonTerminalProgresses();
-        Assert.assertFalse(progressList.isEmpty(), "Should have at least one non-terminal progress");
-        Boolean foundExpectedOne = false;
-        for (PublicationProgress progress : progressList) {
-            if (PUBLICATION_NAME.equals(progress.getPublication().getPublicationName())
-                    && PublicationProgress.Status.NEW.equals(progress.getStatus())) {
-                foundExpectedOne = true;
-            }
-        }
-        Assert.assertTrue(foundExpectedOne, "Should found the NEW progress just created.");
+        publicationService.publish(source, SUBMITTER);
+        progresses = progressEntityMgr.findAllForPublication(publication);
+        Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
     }
 
     private Publication getPublication() {
@@ -112,12 +94,6 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
         publication.setDestinationConfiguration(configuration);
 
         return publicationEntityMgr.addPublication(publication);
-    }
-
-    private SqlDestination getDestination() {
-        SqlDestination destination = new SqlDestination();
-        destination.setTableName("Table1");
-        return destination;
     }
 
 }

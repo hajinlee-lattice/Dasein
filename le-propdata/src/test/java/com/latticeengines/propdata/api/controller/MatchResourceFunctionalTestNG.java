@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +17,6 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
-
-import edu.emory.mathcs.backport.java.util.Collections;
-
 
 public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBase {
     private static final String MATCH_ENDPOINT = "propdata/matches/realtime";
@@ -139,7 +137,6 @@ public class MatchResourceFunctionalTestNG extends PropDataApiFunctionalTestNGBa
         };
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "api")
     public void testNull() {
         Tenant tenant = new Tenant("PD_Test");

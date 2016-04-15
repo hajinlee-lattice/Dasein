@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.api.controller;
 
+import java.util.Collections;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -20,8 +22,6 @@ import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 @Api(value = "inernal", description = "Internal REST resource for propdata jobs.")
 @RestController
@@ -49,7 +49,6 @@ public class InternalResource extends InternalResourceBase implements InternalIn
         throw new UnsupportedOperationException("This is a place holder of a proxy method.");
     }
 
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/sqoopimports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Import data from SQL to HDFS")
@@ -60,7 +59,6 @@ public class InternalResource extends InternalResourceBase implements InternalIn
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/sqoopexports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Export data from HDFS to SQL")
@@ -71,7 +69,6 @@ public class InternalResource extends InternalResourceBase implements InternalIn
         return new AppSubmission(Collections.singletonList(applicationId));
     }
 
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/yarnjobs", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Match a block of input data in yarn container")

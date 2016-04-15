@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,15 +16,12 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.match.testframework.PropDataMatchFunctionalTestNGBase;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 @Component
 public class MatchInputValidatorTestNG extends PropDataMatchFunctionalTestNGBase {
 
     private static final String avroDir = "/tmp/MatchInputValidatorTestNG";
     private static final String fileName = "BulkMatchInput.avro";
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void testBulkInputWithAvroBuffer() {
         cleanupAvroDir(avroDir);

@@ -77,7 +77,7 @@ public class UpdateFailedMatchListener implements JobExecutionListener {
     }
 
     private void killChildrenApplications(JobExecution jobExecution) {
-        List list = (List) jobExecution.getExecutionContext().get(BulkMatchContextKey.APPLICATION_IDS);
+        List<?> list = (List<?>) jobExecution.getExecutionContext().get(BulkMatchContextKey.APPLICATION_IDS);
         List<ApplicationId> applicationIds = new ArrayList<>();
         for (Object obj : list) {
             if (obj instanceof ApplicationId) {

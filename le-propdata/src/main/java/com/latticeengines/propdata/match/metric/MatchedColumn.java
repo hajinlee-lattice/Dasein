@@ -1,6 +1,7 @@
 package com.latticeengines.propdata.match.metric;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Measurement;
@@ -15,8 +16,6 @@ import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.Matched;
 import com.latticeengines.propdata.match.service.impl.MatchContext;
 
-import edu.emory.mathcs.backport.java.util.Collections;
-
 public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.MatchedColumnDimension>
         implements Measurement<Matched, MatchedColumn.MatchedColumnDimension> {
 
@@ -29,10 +28,9 @@ public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.Matche
         this.dimension = new MatchedColumnDimension(input, keyDimension, matchEngine, targetColumn);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<MetricStore> getMetricStores() {
-        return Collections.singletonList(MetricStoreImpl.SPLUNK_LOG);
+        return Collections.singleton((MetricStore) MetricStoreImpl.SPLUNK_LOG);
     }
 
     @Override

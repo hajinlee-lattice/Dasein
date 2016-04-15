@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
-import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
@@ -58,9 +57,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     private ColumnMetadataService columnMetadataService;
-
-    @Autowired
-    private MetricService metricService;
 
     @Autowired
     private PublicDomainService publicDomainService;
