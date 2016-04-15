@@ -1,18 +1,17 @@
 import logging
 import os
-from pandas import Series
 from pandas.core.frame import DataFrame
 import pwd
 import shutil
 import sys
 from urlparse import urlparse
- 
+
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.progressreporter import ProgressReporter
 from leframework.webhdfs import WebHDFS
- 
- 
+
+
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='launcher')
