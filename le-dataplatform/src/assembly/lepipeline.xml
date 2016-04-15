@@ -22,6 +22,9 @@
                 <include>**/*.py</include>
                 <include>**/*.json</include>
             </includes>
+            <excludes>
+                <exclude>pipeline.json</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>src/main/python/</directory>

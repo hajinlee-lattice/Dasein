@@ -47,7 +47,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.sampling.EventDataSamplingProperty;
-import com.latticeengines.dataplatform.service.ParallelDispatchService;
+import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -96,7 +96,7 @@ public class ModelingServiceImpl implements ModelingService {
     private VersionManager versionManager;
 
     @Resource(name = "parallelDispatchService")
-    private ParallelDispatchService parallelDispatchService;
+    private DispatchService dispatchService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -151,7 +151,7 @@ public class ModelingServiceImpl implements ModelingService {
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId createSamples(SamplingConfiguration config) {
 
-        parallelDispatchService.customizeSampleConfig(config, config.isParallelEnabled());
+        dispatchService.customizeSampleConfig(config, config.isParallelEnabled());
 
         Model model = new Model();
         model.setCustomer(config.getCustomer());
@@ -173,7 +173,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(),
                 MRJobUtil.getPlatformShadedJarPath(yarnConfiguration, versionManager.getCurrentVersion()));
 
-        return modelingJobService.submitMRJob(parallelDispatchService.getSampleJobName(config.isParallelEnabled()),
+        return modelingJobService.submitMRJob(dispatchService.getSampleJobName(config.isParallelEnabled()),
                 properties);
     }
 
@@ -200,7 +200,7 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setMapperSize(parallelDispatchService.getNumberOfProfilingMappers(dataProfileConfig
+        dataProfileAlgorithm.setMapperSize(dispatchService.getNumberOfProfilingMappers(dataProfileConfig
                 .isParallelEnabled()));
         if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
             dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
@@ -215,9 +215,9 @@ public class ModelingServiceImpl implements ModelingService {
         m.setModelDefinition(modelDefinition);
 
         ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue,
-                parallelDispatchService.getProfileJobName(dataProfileConfig.isParallelEnabled()));
+                dispatchService.getProfileJobName(dataProfileConfig.isParallelEnabled()));
         m.addModelingJob(modelingJob);
-        return parallelDispatchService.submitJob(modelingJob, dataProfileConfig.isParallelEnabled(), false);
+        return dispatchService.submitJob(modelingJob, dataProfileConfig.isParallelEnabled(), false);
     }
 
     @Override
@@ -261,13 +261,13 @@ public class ModelingServiceImpl implements ModelingService {
             if (StringUtils.isEmpty(algorithm.getContainerProperties())) {
                 algorithm.setContainerProperties(getDefaultContainerProperties());
             }
-            algorithm.setMapperSize(parallelDispatchService.getNumberOfSamplingTrainingSet(model.isParallelEnabled()));
+            algorithm.setMapperSize(dispatchService.getNumberOfSamplingTrainingSet(model.isParallelEnabled()));
             ModelingJob modelingJob = createJob(model, algorithm,
-                    parallelDispatchService.getModelingJobName(model.isParallelEnabled()));
+                    dispatchService.getModelingJobName(model.isParallelEnabled()));
             model.addModelingJob(modelingJob);
 
             // JobService is responsible for persistence during submitJob
-            applicationIds.add(parallelDispatchService.submitJob(modelingJob, model.isParallelEnabled(), true));
+            applicationIds.add(dispatchService.submitJob(modelingJob, model.isParallelEnabled(), true));
         }
 
         return applicationIds;
@@ -318,7 +318,7 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_15004);
         }
         // Parse diagnostics file
-        long sampleSize = parallelDispatchService.getSampleSize(yarnConfiguration, diagnosticsPath,
+        long sampleSize = dispatchService.getSampleSize(yarnConfiguration, diagnosticsPath,
                 model.isParallelEnabled());
 
         if (sampleSize < rowSizeThreshold) {
@@ -326,6 +326,19 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         return;
+    }
+    
+    private void setDefaultValues(Algorithm algorithm) {
+        RandomForestAlgorithm rf = new RandomForestAlgorithm();
+        if (StringUtils.isEmpty(algorithm.getPipelineDriver())) {
+            algorithm.setPipelineDriver(rf.getPipelineDriver());
+        }
+        if (StringUtils.isEmpty(algorithm.getPipelineScript())) {
+            algorithm.setPipelineScript(rf.getPipelineScript());
+        }
+        if (StringUtils.isEmpty(algorithm.getPipelineLibScript())) {
+            algorithm.setPipelineLibScript(rf.getPipelineLibScript());
+        }
     }
 
     private Classifier createClassifier(Model model, Algorithm algorithm) {
@@ -335,42 +348,34 @@ public class ModelingServiceImpl implements ModelingService {
         if (modelName != null) {
             classifier.setName(modelName.replace(' ', '_'));
         }
+        
+        setDefaultValues(algorithm);
 
         classifier.setModelHdfsDir(model.getModelHdfsDir());
         classifier.setFeatures(model.getFeaturesList());
         classifier.setTargets(model.getTargetsList());
         classifier.setKeyCols(model.getKeyColsList());
-        String script = algorithm.getScript();
-        classifier.setPythonScriptHdfsPath(getScriptPathWithVersion(script));
-
-        String pipelineLibScript = algorithm.getPipelineLibScript();
-        if (StringUtils.isEmpty(pipelineLibScript)) {
-            pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
-        }
-        classifier.setPythonPipelineLibHdfsPath(getScriptPathWithVersion(pipelineLibScript));
-
-        String pipelineScript = algorithm.getPipelineScript();
-        if (StringUtils.isEmpty(pipelineScript)) {
-            pipelineScript = "/app/dataplatform/scripts/pipeline.py";
-        }
-        classifier.setPythonPipelineScriptHdfsPath(getScriptPathWithVersion(pipelineScript));
-
+        classifier.setPythonScriptHdfsPath(getScriptPathWithVersion(algorithm.getScript()));
+        classifier.setPipelineDriver(getScriptPathWithVersion(algorithm.getPipelineDriver()));
+        classifier.setPythonPipelineLibHdfsPath(getScriptPathWithVersion(algorithm.getPipelineLibScript()));
+        classifier.setPythonPipelineScriptHdfsPath(getScriptPathWithVersion(algorithm.getPipelineScript()));
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
         classifier.setProvenanceProperties(model.getProvenanceProperties());
+        classifier.setPipelineProperties(algorithm.getPipelineProperties());
         classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
 
         String samplePrefix = algorithm.getSampleName();
-        String trainingFile = parallelDispatchService.getTrainingFile(samplePrefix, model.isParallelEnabled());
+        String trainingFile = dispatchService.getTrainingFile(samplePrefix, model.isParallelEnabled());
         String trainingPath = getAvroFileHdfsPath(trainingFile, model.getSampleHdfsPath());
 
         if (trainingPath == null) {
             throw new LedpException(LedpCode.LEDP_15001, new String[] { trainingFile });
         }
 
-        String testFile = parallelDispatchService.getTestFile(samplePrefix, model.isParallelEnabled());
+        String testFile = dispatchService.getTestFile(samplePrefix, model.isParallelEnabled());
         String testPath = getAvroFileHdfsPath(testFile, model.getSampleHdfsPath());
         if (testPath == null) {
             throw new LedpException(LedpCode.LEDP_15001, new String[] { testFile });
@@ -459,13 +464,11 @@ public class ModelingServiceImpl implements ModelingService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
-        appMasterProperties.put(parallelDispatchService.getMapSizeKeyName(model.isParallelEnabled()),
+        appMasterProperties.put(dispatchService.getMapSizeKeyName(model.isParallelEnabled()),
                 algorithm.getMapperSize());
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);
-        // containerProperties.put(PythonContainerProperty.TABLE.name(),
-        // model.getTable());
         modelingJob.setClient("pythonClient");
         modelingJob.setCustomer(model.getCustomer());
         modelingJob.setAppMasterPropertiesObject(appMasterProperties);

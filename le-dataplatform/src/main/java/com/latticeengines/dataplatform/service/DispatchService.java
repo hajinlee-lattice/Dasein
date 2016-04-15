@@ -6,7 +6,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
-public interface ParallelDispatchService {
+public interface DispatchService {
 
     void customizeSampleConfig(SamplingConfiguration config, boolean isParallelEnabled);
 

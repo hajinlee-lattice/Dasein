@@ -310,9 +310,6 @@
                                     <location>target/lepipeline.tar.gz</location>
                                 </source>
                                 <source>
-                                    <location>src/main/python/configurablepipelinetransformsfromfile</location>
-                                </source>
-                                <source>
                                     <location>src/main/python/launcher.py</location>
                                 </source>
                                 <source>
@@ -320,6 +317,9 @@
                                 </source>
                                 <source>
                                     <location>src/main/python/pipeline/pipeline.py</location>
+                                </source>
+                                <source>
+                                    <location>src/main/python/configurablepipelinetransformsfromfile/pipeline.json</location>
                                 </source>
                             </sources>
                         </mapping>
@@ -334,9 +334,6 @@
                                 </source>
                                 <source>
                                     <location>src/main/python/evpipeline/evpipeline.py</location>
-                                </source>
-                                <source>
-                                    <location>src/main/python/configurablepipelinetransformsfromfile</location>
                                 </source>
                             </sources>
                         </mapping>

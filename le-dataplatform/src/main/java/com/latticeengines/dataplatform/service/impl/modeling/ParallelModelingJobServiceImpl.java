@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 @Component("parallelModelingJobService")
 public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
@@ -46,14 +47,22 @@ public class ParallelModelingJobServiceImpl extends ModelingJobServiceImpl {
 
     @Autowired
     private VersionManager versionManager;
+    
+    private void setDefaultValues(Classifier classifier) {
+        RandomForestAlgorithm rf = new RandomForestAlgorithm();
+        if (StringUtils.isEmpty(classifier.getPipelineDriver())) {
+            classifier.setPipelineDriver(rf.getPipelineDriver());
+        }
+    }
 
-    protected ApplicationId sumbitJobInternal(ModelingJob modelingJob) {
+    protected ApplicationId submitJobInternal(ModelingJob modelingJob) {
         Properties appMasterProperties = modelingJob.getAppMasterPropertiesObject();
         Properties containerProperties = modelingJob.getContainerPropertiesObject();
 
         String metadata = containerProperties.getProperty(ContainerProperty.METADATA.name());
         containerProperties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
         Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
+        setDefaultValues(classifier);
 
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         String cacheArchivePath = PythonMRUtils.setupArchiveFilePath(classifier, versionManager.getCurrentVersion());

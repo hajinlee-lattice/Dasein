@@ -40,7 +40,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId submitJob(ModelingJob modelingJob) {
-        ApplicationId appId = sumbitJobInternal(modelingJob);
+        ApplicationId appId = submitJobInternal(modelingJob);
         modelingJob.setId(appId.toString());
         Model model = ((ModelingJob) modelingJob).getModel();
 
@@ -63,7 +63,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         return appId;
     }
 
-    protected ApplicationId sumbitJobInternal(ModelingJob modelingJob) {
+    protected ApplicationId submitJobInternal(ModelingJob modelingJob) {
         return super.submitJob(modelingJob);
     }
 

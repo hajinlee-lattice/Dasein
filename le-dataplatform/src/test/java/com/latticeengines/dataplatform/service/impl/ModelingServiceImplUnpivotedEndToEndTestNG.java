@@ -77,6 +77,10 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public String getCustomer() {
         return "Nutanix";
     }
+    
+    protected boolean doClearDbTables() {
+        return false;
+    }
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -93,7 +97,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
         randomForestAlgorithm.setSampleName("s0");
-        randomForestAlgorithm.setAlgorithmProperties("features_threshold=" + String.valueOf(featuresThreshold));
+        randomForestAlgorithm.setAlgorithmProperties(randomForestAlgorithm.getAlgorithmProperties() + //
+                " features_threshold=" + String.valueOf(featuresThreshold));
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
@@ -243,7 +248,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
             String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
             assertEquals(modelingService.getFeatures(model, false).size(), featuresThreshold, 
-                    "Expected " + featuresThreshold + " features after setting features_threshold=" + featuresThreshold + " in algorithm_properties");
+                    String.format("Expected %d features after setting features_threshold=%d in algorithm_properties", //
+                            featuresThreshold, featuresThreshold));
             assertNotNull(modelContents);
         }
     }

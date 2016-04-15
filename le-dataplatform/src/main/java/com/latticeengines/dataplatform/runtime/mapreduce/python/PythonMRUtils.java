@@ -13,6 +13,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 public class PythonMRUtils {
     public static final String METADATA_JSON_PATH = "./metadata.json";
@@ -56,6 +57,13 @@ public class PythonMRUtils {
         paths.add(classifier.getSchemaHdfsPath());
         paths.add(classifier.getPythonScriptHdfsPath());
         paths.add(classifier.getPythonPipelineScriptHdfsPath());
+        
+        String pipelineDriver = classifier.getPipelineDriver();
+        
+        if (StringUtils.isEmpty(pipelineDriver)) {
+            pipelineDriver = new RandomForestAlgorithm().getPipelineDriver();
+        }
+        paths.add(pipelineDriver);
         
         String script = new AggregationAlgorithm().getScript();
         String afterPart = StringUtils.substringAfter(script, "/app");

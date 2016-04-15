@@ -8,23 +8,23 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.service.ParallelDispatchService;
+import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 @Component("parallelDispatchService")
-public class ParallelDispatchServiceImpl implements ParallelDispatchService {
+public class ParallelDispatchServiceImpl implements DispatchService {
 
     @Value("${dataplatform.model.parallel.enabled:false}")
     private boolean configParallelEnabled;
 
     @Resource(name = "singleContainerDispatcher")
-    private ParallelDispatchService singleContainerDispatcher;
+    private DispatchService singleContainerDispatcher;
 
     @Resource(name = "mutipleContainerDispatcher")
-    private ParallelDispatchService multipleContainerDispatcher;
+    private DispatchService multipleContainerDispatcher;
 
-    private ParallelDispatchService defaultContainerDispatcher;
+    private DispatchService defaultContainerDispatcher;
 
     @PostConstruct
     public void init() {
@@ -106,7 +106,7 @@ public class ParallelDispatchServiceImpl implements ParallelDispatchService {
         return getContainerDispatcher(isParallelEnabled).getMapSizeKeyName(isParallelEnabled);
     }
 
-    private ParallelDispatchService getContainerDispatcher(boolean isParallelEnabled) {
+    private DispatchService getContainerDispatcher(boolean isParallelEnabled) {
         if (isParallelEnabled) {
             return multipleContainerDispatcher;
         }

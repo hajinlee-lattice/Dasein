@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.runtime.python.PythonMRProperty;
-import com.latticeengines.dataplatform.service.ParallelDispatchService;
+import com.latticeengines.dataplatform.service.DispatchService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 @Component("singleContainerDispatcher")
-public class SingleContainerDispatchImpl implements ParallelDispatchService {
+public class SingleContainerDispatchImpl implements DispatchService {
 
     @Resource(name = "modelingJobService")
     private ModelingJobService modelingJobService;

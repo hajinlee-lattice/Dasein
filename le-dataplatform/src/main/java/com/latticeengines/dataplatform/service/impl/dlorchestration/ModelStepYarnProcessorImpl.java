@@ -244,15 +244,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     private List<ApplicationId> submitModel(String customer, ModelCommand modelCommand,
             ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        // No LR for now.
         List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD,
                 customer, modelCommand, commandParameters));
-        // List<ApplicationId> lrAppIds =
-        // modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION,
-        // customer, commandParameters));
-
         appIds.addAll(unpivotedModelAppIds);
-        // appIds.addAll(lrAppIds);
 
         return appIds;
     }

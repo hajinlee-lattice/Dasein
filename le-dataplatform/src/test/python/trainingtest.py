@@ -40,6 +40,8 @@ class TrainingTest(TrainingTestBase):
                  entry["Key"].find('pipelinesteps') >= 0 or \
                  entry["Key"].find('aggregatedmodel') >= 0 or \
                  entry["Key"].find('make_float') >= 0 or \
+                 entry["Key"].find('pipeline.py') >= 0 or \
+                 entry["Key"].find('pipeline.json') >= 0 or \
                  entry["Key"].find('replace_null_value') >= 0:
                 self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
             else:
