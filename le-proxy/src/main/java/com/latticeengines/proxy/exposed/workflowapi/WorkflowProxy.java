@@ -63,14 +63,12 @@ public class WorkflowProxy extends BaseRestApiProxy implements WorkflowInterface
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid) {
         String url = constructUrl("/jobs/{tenantPid}", tenantPid);
         return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public List<Job> getWorkflowExecutionsForTenant(long tenantPid, String type) {
         String url = constructUrl("/jobs/{tenantPid}/find?type={type}", tenantPid, type);
         return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);

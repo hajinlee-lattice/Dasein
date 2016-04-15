@@ -8,11 +8,8 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
@@ -23,7 +20,6 @@ import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.domain.exposed.pls.Quota;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
@@ -31,9 +27,6 @@ import com.latticeengines.pls.entitymanager.QuotaEntityMgr;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TargetMarketEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.entitymanager.TenantEntityMgr;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.security.impl.GlobalAuthFunctionalTestBed;
 
@@ -49,9 +42,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
     private SegmentEntityMgr segmentEntityMgr;
 
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
     private ModelSummaryParser modelSummaryParser;
 
     @Autowired
@@ -62,9 +52,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired
     private ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
-
-    @Autowired
-    private TenantService tenantService;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")
     private String hostPort;

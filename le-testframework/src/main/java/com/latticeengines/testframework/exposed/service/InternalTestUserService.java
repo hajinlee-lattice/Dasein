@@ -3,7 +3,6 @@ package com.latticeengines.testframework.exposed.service;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;

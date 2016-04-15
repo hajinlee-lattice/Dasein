@@ -59,6 +59,7 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
  */
 public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
     private String tenantId;
 

@@ -73,6 +73,7 @@ public class ModelingServiceExecutor {
         HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, builder.getMetadataContents());
     }
 
+    @SuppressWarnings("deprecation")
     public void loadData() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
 
