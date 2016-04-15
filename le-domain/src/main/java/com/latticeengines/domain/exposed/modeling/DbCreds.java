@@ -50,12 +50,12 @@ public class DbCreds {
     }
 
     @JsonProperty("password")
-    private String getPassword() {
+    public String getPassword() {
         return password;
     }
 
     @JsonProperty("password")
-    private void setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
