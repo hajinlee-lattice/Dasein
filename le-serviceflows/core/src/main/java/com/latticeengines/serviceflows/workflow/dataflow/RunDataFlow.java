@@ -63,7 +63,6 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
         return sources;
     }
 
-    @SuppressWarnings("unchecked")
     private List<Table> retrieveRegisteredTablesAndExtraSources() {
         Set<String> tableSet = new HashSet<>(metadataProxy.getTableNames(configuration.getCustomerSpace().toString()));
         List<Table> tables = new ArrayList<>();
