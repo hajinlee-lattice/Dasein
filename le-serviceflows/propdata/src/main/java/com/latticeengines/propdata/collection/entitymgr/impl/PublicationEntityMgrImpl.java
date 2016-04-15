@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.collection.entitymgr.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -18,8 +20,14 @@ public class PublicationEntityMgrImpl implements PublicationEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public Publication findBySourceName(String sourceName) {
-        return dao.findByField("SourceName", sourceName);
+    public List<Publication> findBySourceName(String sourceName) {
+        return dao.findAllForSource(sourceName);
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.REPEATABLE_READ)
+    public Publication findByPublicationName(String publicationName) {
+        return dao.findByField("PublicationName", publicationName);
     }
 
     @Override
@@ -36,6 +44,12 @@ public class PublicationEntityMgrImpl implements PublicationEntityMgr {
         if (publication != null) {
             dao.delete(publication);
         }
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<Publication> findAll() {
+        return dao.findAll();
     }
 
 }

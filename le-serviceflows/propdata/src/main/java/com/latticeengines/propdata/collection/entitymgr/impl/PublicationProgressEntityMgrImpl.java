@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.collection.entitymgr.impl;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -64,9 +66,47 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         return progressDao.findByKey(progress);
     }
 
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public PublicationProgress findLatestNonTerminalProgress(Publication publication) {
+        Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
+        List<PublicationProgress> progressList = publication1.getProgresses();
+        Collections.sort(progressList, new Comparator<PublicationProgress>() {
+            @Override
+            public int compare(PublicationProgress o1, PublicationProgress o2) {
+                // reverse in create time
+                return o2.getCreateTime().compareTo(o1.getCreateTime());
+            }
+        });
+        for (PublicationProgress progress: progressList) {
+            if (canProceed(publication, progress)) {
+                return progress;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public List<PublicationProgress> findAllForPublication(Publication publication) {
+        if (publication.getPid() == null) {
+            publication = publicationDao.findByField("PublicationName", publication.getPublicationName());
+        }
+        return progressDao.findAllForPublication(publication.getPid());
+    }
+
     private Boolean canBeIgnored(Publication publication, PublicationProgress progress) {
         return (progress.getRetries() >= publication.getNewJobMaxRetry()
                 && PublicationProgress.Status.FAILED.equals(progress.getStatus()));
+    }
+
+    private Boolean canProceed(Publication publication, PublicationProgress progress) {
+        if (progress.getRetries() == null) {
+            progress.setRetries(0);
+        }
+        return PublicationProgress.Status.NEW.equals(progress.getStatus())
+                || (PublicationProgress.Status.FAILED.equals(progress.getStatus())
+                        && progress.getRetries() < publication.getNewJobMaxRetry());
     }
 
 }

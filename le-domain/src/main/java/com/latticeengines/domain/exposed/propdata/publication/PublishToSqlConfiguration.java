@@ -10,7 +10,7 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     private String defaultTableName;
     private String username;
     private String encryptedPassword;
-    private Boolean versioned = true;
+    private PublicationStrategy publicationStrategy;
 
     @Override
     @JsonProperty("ConfigurationType")
@@ -58,14 +58,14 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
         this.defaultTableName = defaultTableName;
     }
 
-    @JsonProperty("Versioned")
-    public Boolean isVersioned() {
-        return versioned;
+    @JsonProperty("Strategy")
+    public PublicationStrategy getPublicationStrategy() {
+        return publicationStrategy;
     }
 
-    @JsonProperty("Versioned")
-    public void setVersioned(Boolean versioned) {
-        this.versioned = versioned;
+    @JsonProperty("Strategy")
+    public void setPublicationStrategy(PublicationStrategy publicationStrategy) {
+        this.publicationStrategy = publicationStrategy;
     }
 
     @JsonProperty("Username")
@@ -87,4 +87,9 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     public void setEncryptedPassword(String encryptedPassword) {
         this.encryptedPassword = encryptedPassword;
     }
+
+    public enum PublicationStrategy {
+        VERSIONED, REPLACE, APPEND
+    }
+
 }

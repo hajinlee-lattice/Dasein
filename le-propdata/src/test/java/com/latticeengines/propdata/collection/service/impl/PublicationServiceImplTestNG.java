@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -23,6 +25,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
     public static final String PUBLICATION_NAME = "TestPublication";
     public static final String CURRENT_VERSION = "version1";
     public static final String SUBMITTER = PublicationServiceImplTestNG.class.getSimpleName();
+
     @Autowired
     private BuiltWithPivoted source;
 
@@ -50,14 +53,12 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
     @AfterClass(groups = "functional")
     public void teardown() throws Exception {
-        // publicationEntityMgr.removePublication(PUBLICATION_NAME);
+        publicationEntityMgr.removePublication(PUBLICATION_NAME);
     }
 
     @Test(groups = "functional")
     public void testCanFindExistingProgress() {
-        PublicationProgress progress1 = progressEntityMgr.startNewProgress(publication, getDestination(),
-                CURRENT_VERSION, SUBMITTER);
-
+        progressEntityMgr.startNewProgress(publication, getDestination(), CURRENT_VERSION, SUBMITTER);
         PublicationProgress progress2 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
         Assert.assertNotNull(progress2, "Should find the existing progress");
@@ -65,16 +66,37 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
     @Test(groups = "functional", dependsOnMethods = "testCanFindExistingProgress")
     public void testCheckNewProgress() {
-        PublicationProgress progress2 = publicationService.startNewProgressIfAppropriate(source, SUBMITTER);
-        Assert.assertNull(progress2, "Should not allow new progress when there is already one");
+        List<PublicationProgress> progresses = publicationService.publishLatest(source, SUBMITTER);
+        Assert.assertTrue(progresses.isEmpty(), "Should not allow new progress when there is already one");
 
         PublicationProgress progress1 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
-        publicationService.update(progress1).incrementRetry().incrementRetry().incrementRetry()
+        publicationService.update(progress1).retry().retry().retry()
                 .status(PublicationProgress.Status.FAILED).commit();
-        progress2 = publicationService.startNewProgressIfAppropriate(source, CURRENT_VERSION);
-        Assert.assertNotNull(progress2,
+        progresses = publicationService.publishLatest(source, CURRENT_VERSION);
+        Assert.assertFalse(progresses.isEmpty(),
                 "Should allow new progress when the old one exceed max retry and is in FAILED status.");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCheckNewProgress")
+    public void testForeignKeyCascading() {
+        Publication publication1 = publicationEntityMgr.findByPublicationName(PUBLICATION_NAME);
+        List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication1);
+        Assert.assertFalse(progresses.isEmpty(), "Should have at least one progress.");
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testCheckNewProgress")
+    public void testFindNonTerminalProgress() {
+        List<PublicationProgress> progressList = publicationService.scanNonTerminalProgresses();
+        Assert.assertFalse(progressList.isEmpty(), "Should have at least one non-terminal progress");
+        Boolean foundExpectedOne = false;
+        for (PublicationProgress progress : progressList) {
+            if (PUBLICATION_NAME.equals(progress.getPublication().getPublicationName())
+                    && PublicationProgress.Status.NEW.equals(progress.getStatus())) {
+                foundExpectedOne = true;
+            }
+        }
+        Assert.assertTrue(foundExpectedOne, "Should found the NEW progress just created.");
     }
 
     private Publication getPublication() {
@@ -86,7 +108,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();
         configuration.setDefaultTableName("DefaultTable");
-        configuration.setVersioned(true);
+        configuration.setPublicationStrategy(PublishToSqlConfiguration.PublicationStrategy.VERSIONED);
         publication.setDestinationConfiguration(configuration);
 
         return publicationEntityMgr.addPublication(publication);

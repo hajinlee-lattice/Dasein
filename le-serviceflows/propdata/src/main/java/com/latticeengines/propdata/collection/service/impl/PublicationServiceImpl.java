@@ -1,9 +1,12 @@
 package com.latticeengines.propdata.collection.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,20 +37,30 @@ public class PublicationServiceImpl implements PublicationService {
     private PublicationProgressEntityMgr progressEntityMgr;
 
     @Override
-    public PublicationProgress startNewProgressIfAppropriate(Source source, String creator) {
+    public List<PublicationProgress> publishLatest(Source source, String creator) {
         String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
-        Publication publication = publicationEntityMgr.findBySourceName(source.getSourceName());
+        List<PublicationProgress> progresses = new ArrayList<>();
+        for (Publication publication: publicationEntityMgr.findBySourceName(source.getSourceName())) {
+            PublicationProgress progress = publishVersion(publication, currentVersion, creator);
+            if (progress != null) {
+                progresses.add(progress);
+            }
+        }
+        return progresses;
+    }
 
+    @Override
+    public PublicationProgress publishVersion(Publication publication, String version, String creator) {
         PublicationProgress existingProgress = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
-                currentVersion);
+                version);
         if (existingProgress != null) {
-            log.info("There is already a progress for current version " + existingProgress);
+            log.info("There is already a progress for version " + existingProgress);
             return null;
         }
 
-        PublicationDestination destination = constructDestination(publication, source, currentVersion);
+        PublicationDestination destination = constructDestination(publication, version);
 
-        return progressEntityMgr.startNewProgress(publication, destination, currentVersion, creator);
+        return progressEntityMgr.startNewProgress(publication, destination, version, creator);
     }
 
     @Override
@@ -55,23 +68,35 @@ public class PublicationServiceImpl implements PublicationService {
         return new PublicationProgressUpdaterImpl(progress);
     }
 
-    private PublicationDestination constructDestination(Publication publication, Source source, String version) {
+    @Override
+    public List<PublicationProgress> scanNonTerminalProgresses() {
+        List<PublicationProgress> progresses = new ArrayList<>();
+        for (Publication publication: publicationEntityMgr.findAll()) {
+            PublicationProgress progress = progressEntityMgr.findLatestNonTerminalProgress(publication);
+            if (progress != null) {
+                progresses.add(progress);
+            }
+        }
+        return progresses;
+    }
+
+    private PublicationDestination constructDestination(Publication publication, String version) {
         try {
             switch (publication.getPublicationType()) {
             case SQL:
-                return constructSqlDestination(publication, source, version);
+                return constructSqlDestination(publication, version);
             default:
                 throw new UnsupportedOperationException(
                         "Unknown publication type: " + publication.getPublicationType());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to construct destination for publication "
-                    + publication.getPublicationName() + ", source " + source.getSourceName() + ", version " + version,
+                    + publication.getPublicationName() + ", version " + version,
                     e);
         }
     }
 
-    private SqlDestination constructSqlDestination(Publication publication, Source source, String version)
+    private SqlDestination constructSqlDestination(Publication publication, String version)
             throws Exception {
         PublishToSqlConfiguration configuration = (PublishToSqlConfiguration) publication.getDestinationConfiguration();
         if (configuration == null) {
@@ -83,7 +108,7 @@ public class PublicationServiceImpl implements PublicationService {
             throw new IllegalArgumentException("PublishToSqlConfiguration for publication "
                     + publication.getPublicationName() + " does not have a default table anme.");
         }
-        if (configuration.isVersioned()) {
+        if (PublishToSqlConfiguration.PublicationStrategy.VERSIONED.equals(configuration.getPublicationStrategy())) {
             tableName += "_" + version;
         }
         SqlDestination destination = new SqlDestination();
@@ -104,12 +129,31 @@ public class PublicationServiceImpl implements PublicationService {
             return this;
         }
 
-        public PublicationProgressUpdaterImpl incrementRetry() {
+        public PublicationProgressUpdaterImpl retry() {
             Integer currentRetry = progress.getRetries();
             if (currentRetry == null) {
                 currentRetry = 0;
             }
             progress.setRetries(currentRetry + 1);
+            progress.setStatus(PublicationProgress.Status.NEW);
+            progress.setErrorMessage(null);
+            progress.setProgress(0f);
+            return this;
+        }
+
+        public PublicationProgressUpdaterImpl applicationId(ApplicationId applicationId) {
+            progress.setApplicationId(applicationId);
+            return this;
+        }
+
+        public PublicationProgressUpdaterImpl progress(Float progress) {
+            this.progress.setProgress(progress);
+            return this;
+        }
+
+        public PublicationProgressUpdaterImpl fail(String errorMessage) {
+            progress.setErrorMessage(errorMessage);
+            progress.setStatus(PublicationProgress.Status.FAILED);
             return this;
         }
 

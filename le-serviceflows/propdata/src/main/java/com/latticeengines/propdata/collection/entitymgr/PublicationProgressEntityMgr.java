@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.collection.entitymgr;
 
+import java.util.List;
+
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
@@ -12,4 +14,9 @@ public interface PublicationProgressEntityMgr {
             String sourceVersion, String creator);
 
     PublicationProgress updateProgress(PublicationProgress progress);
+
+    PublicationProgress findLatestNonTerminalProgress(Publication publication);
+
+    List<PublicationProgress> findAllForPublication(Publication publication);
+
 }

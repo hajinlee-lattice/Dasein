@@ -113,12 +113,12 @@ public class PublicationProgress implements HasPid {
     }
 
     @JsonIgnore
-    public String getDestinationString() {
+    private String getDestinationString() {
         return destinationString;
     }
 
     @JsonIgnore
-    public void setDestinationString(String destinationString) {
+    private void setDestinationString(String destinationString) {
         this.destinationString = destinationString;
     }
 
