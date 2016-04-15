@@ -74,8 +74,8 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         Collections.sort(progressList, new Comparator<PublicationProgress>() {
             @Override
             public int compare(PublicationProgress o1, PublicationProgress o2) {
-                // reverse in create time
-                return o2.getCreateTime().compareTo(o1.getCreateTime());
+                // sort in create time
+                return o1.getCreateTime().compareTo(o2.getCreateTime());
             }
         });
         for (PublicationProgress progress: progressList) {
