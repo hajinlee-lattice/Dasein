@@ -19,12 +19,13 @@ class PivotStep(PipelineStep):
     
     def __init__(self, columnsToPivot={}):
         self.columnsToPivot = columnsToPivot
-
-    def transform(self, dataFrame, configMetadata, test):
+        
+    def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
         if configMetadata is not None and len(self.columnsToPivot) == 0:
             self.__setPivotColumns(configMetadata)
             self.__writeRTSArtifact()
-            
+
+    def transform(self, dataFrame, configMetadata, test):
         columnsToRemove = set()
         for k, v in self.columnsToPivot.items():
             values = v[1]
@@ -70,6 +71,8 @@ class PivotStep(PipelineStep):
                         
                     pValues[1].append(pivotValue["PivotValue"])
                     self.columnsToPivot[pivotColumn] = pValues
+        
+        
 
     def __writeRTSArtifact(self):
         with open("pivotvalues.txt", "w") as fp:

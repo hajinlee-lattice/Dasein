@@ -30,6 +30,15 @@ class Pipeline(object):
             transformed = step.transform(transformed, configMetadata, test)
         return transformed
     
+    '''
+       This method only to be invoked from learning executor since it's learning from the data
+       to determine how it can transform the data
+    '''
+    def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata):
+        for step in self.pipelineSteps:
+            step.learnParameters(trainingDataFrame, testDataFrame, configMetadata)
+        
+    
 class PipelineStep(object):
     modelStep = False
     props = {}
@@ -42,6 +51,8 @@ class PipelineStep(object):
      
     def setModelStep(self, modelStep):
         self.modelStep = modelStep
+        
+    def learnParameters(self, trainingDataFrame, testDataFrame, configMetadata): pass
          
     def transform(self, dataFrame, configMetadata, test): pass
  

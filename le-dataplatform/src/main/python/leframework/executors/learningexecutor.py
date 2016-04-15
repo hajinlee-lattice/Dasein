@@ -1,6 +1,8 @@
 import logging
 import os
 import shutil
+from pandas import Series
+from pandas import DataFrame
 
 from leframework.codestyle import overrides
 from leframework.executor import Executor
@@ -106,10 +108,25 @@ class LearningExecutor(Executor):
         super(LearningExecutor, self).writeToHdfs(hdfs, params)
         
     @overrides(Executor)
+    def preTransformData(self, training, test, params):
+        schema = params["schema"]
+        training[schema["reserved"]["training"]].update(Series([True] * training.shape[0]))
+        test[schema["reserved"]["training"]].update(Series([False] * test.shape[0]))
+        params["allDataPreTransform"] = DataFrame.append(training, test)
+        return (training, test)
+    
+    @overrides(Executor)
+    def postTransformData(self, training, test, params):
+        params["allDataPostTransform"] = DataFrame.append(training, test)
+        return (training, test)
+
+        
+    @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
         configMetadata = params["schema"]["config_metadata"]["Metadata"] if params["schema"]["config_metadata"] is not None else None 
         stringColumns = params["parser"].getStringColumns() - set(params["parser"].getKeys())
+        pipelineDriver = params["schema"]["pipeline_driver"]
         
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
@@ -120,9 +137,10 @@ class LearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
         # Create the data pipeline
-        pipeline, scoringPipeline = globals()["setupPipeline"](metadata[0], stringColumns, params["parser"].target)
+        pipeline, scoringPipeline = globals()["setupPipeline"](pipelineDriver, metadata[0], stringColumns, params["parser"].target)
         params["pipeline"] = pipeline
         params["scoringPipeline"] = scoringPipeline
+        pipeline.learnParameters(params["training"], params["test"], configMetadata)
         training = pipeline.predict(params["training"], configMetadata, False)
         test = pipeline.predict(params["test"], configMetadata, True)
         return (training, test, metadata)

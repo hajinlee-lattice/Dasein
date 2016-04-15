@@ -37,8 +37,8 @@ class ArgumentParser(object):
             configMetadataJson = open(self.stripPath(self.metadataSchema["config_metadata"])).read()
             self.configMetadata = json.loads(configMetadataJson)
             logger.debug("JSON config metadata schema %s" % configMetadataJson)
-        except Exception as e:
-            logger.warn("Errors loading config metadata.", e)
+        except Exception, e:
+            logger.warn("Errors loading config metadata:" + str(e))
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
@@ -51,6 +51,7 @@ class ArgumentParser(object):
 
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
+        self.pipelineProperties = self.__parseProperties("pipeline_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
         logger.debug("Reading runtime properties %s" % str(self.runtimeProperties))
         self.numOfSkippedRow = 0
@@ -119,6 +120,8 @@ class ArgumentParser(object):
     def __parseProperties(self, name):
         element = {}
         try:
+            if self.metadataSchema[name] is None:
+                return element;
             properties = self.metadataSchema[name].strip()
             element = dict(u.split("=") for u in properties.split(" "))
         except Exception, e:

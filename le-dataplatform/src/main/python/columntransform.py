@@ -32,10 +32,15 @@ class ColumnTransform(object):
         if pathToPipelineFiles is not None:
             try:
                 for pipelineFile in pathToPipelineFiles:
+                    logger.info("Opening file %s." % pipelineFile)
                     if os.path.isfile(pipelineFile):
                         with open(pipelineFile) as pipelineFileText:
                             self.pipelineFileAsJson = json.load(pipelineFileText)
+                            logger.info("Pipeline json contents:")
+                            logger.info(self.pipelineFileAsJson)
                             break
+                    else:
+                        logger.info("%s is not a file." % pipelineFile)
             except Exception as e:
                 logger.warn(str(e))
                 logger.exception("Could not load pipeline from provided path:" + str(pathToPipelineFiles))
@@ -87,7 +92,11 @@ class ColumnTransform(object):
             logger.exception("Caught Exception while checking Configurable Pipeline JSON for correctness")
             return False
 
-    def buildPipelineFromFile(self, stringColumns = None, categoricalColumns=None, continuousColumns=None, targetColumn=None, columnsToTransform=None):
+    def buildPipelineFromFile(self, stringColumns = None, 
+                                       categoricalColumns=None, 
+                                       continuousColumns=None, 
+                                       targetColumn=None, 
+                                       columnsToTransform=None):
         # Return Array that holds functions loaded from file
         pipelineAsArrayOfTransformClasses = []
 
@@ -98,7 +107,7 @@ class ColumnTransform(object):
                 return pipelineAsArrayOfTransformClasses
 
             if self.checkJsonForCorrectness(jsonToProcess) == False:
-                logger.info("Couldn't validate JSON that created configurable pipeline")
+                logger.info("Couldn't validate JSON file %s for configurable pipeline" % jsonToProcess)
                 return pipelineAsArrayOfTransformClasses
 
             for _, value in sorted(jsonToProcess[self.columnTransformKey].iteritems(), key=lambda item: item[1][self.sortingKey]):

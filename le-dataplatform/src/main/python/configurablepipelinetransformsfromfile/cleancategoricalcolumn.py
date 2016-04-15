@@ -7,10 +7,10 @@ from pipelinefwk import PipelineStep
 '''
 Description:
 
-This code ingests a categorical varaible list xlist and a threshhold value thresh
+This code ingests a categorical varaible list xlist and a threshold value thresh
 It then keeps only those categories which (from largest to smallest) comprise up to 95%
 of the population.  It also puts a filter on that each category must
-represent at least 1% of the toal population by the variable percMin
+represent at least 1% of the total population by the variable percMin
 
 Running The Code Plus Notes: #note, test is run for eventList floats but in practice they will be integers
     aa=['0']*10+['1']*100+['2']*100+['3']*200+['4']*2+['5']*5+['7']*300+['8']*200+['9']*5
@@ -73,7 +73,7 @@ class CleanCategoricalColumn(PipelineStep):
 
             return outputFrame
         except Exception:
-            logger.exception("Caught Exception trying to use CleanCategolricalColumn Threshold Transformation")
+            logger.exception("Caught Exception trying to use CleanCategoricalColumn Threshold Transformation")
             self.cleanCategoriesWithThreshold = None
             return dataFrame
 
@@ -111,12 +111,12 @@ class CleanCategoricalColumn(PipelineStep):
         self.includedKeys[self.currentColumn] = includedKeys
 
         return map(self.applyEmptyValue, xlist)
+    
     '''
     This code revisits __cleanCateg results via eventList.
     cleanList is output of __cleanCateg
     The new list re-included those categories that are statistically signficant even though they are rare
     '''
-
     def __cleanCategFull(self, categoricalColumn, dataFrame):
         includedKeys=set(self.cleanCategoriesWithThreshold)
         excludedKeys=set(dataFrame[categoricalColumn])-set(self.cleanCategoriesWithThreshold)

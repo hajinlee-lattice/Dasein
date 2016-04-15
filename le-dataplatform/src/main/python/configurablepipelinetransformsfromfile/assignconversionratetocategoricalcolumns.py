@@ -29,7 +29,7 @@ class AssignConversionRateToCategoricalColumns(PipelineStep):
             self.columnList = columnsToPivot.keys()
         else:
             self.columnList = []
-        logger.info("Initialized AssignConversionRate with columnsToPivot" + str(columnsToPivot) 
+        logger.info("Initialized AssignConversionRate with columnsToPivot" + str(columnsToPivot)
                     + ", targetColumn=" + str(targetColumn)
                     + ", positiveThreshold=" + str(self.totalPositiveThreshold))
 
@@ -51,7 +51,7 @@ class AssignConversionRateToCategoricalColumns(PipelineStep):
             return dataFrame
 
     def __assignConversionRateToCategoricalColumns(self, column, dataFrame, tagetColumn):
-        # Use the mapping learnt in training
+        # Use the mapping learned in training
         if self.trainingMode is False:
             if self.targetColumn in dataFrame and len(dataFrame[column]) == len(dataFrame[self.targetColumn]):
                 logger.info("AssignConversionRate training phase. Converting column: " + column)

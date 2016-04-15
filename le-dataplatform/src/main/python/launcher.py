@@ -139,6 +139,12 @@ class Launcher(object):
         params["pipelineScript"] = self.stripPath(schema["python_pipeline_script"])
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
+        
+        try:
+            schema["pipeline_driver"] = self.stripPath(schema["pipeline_driver"])
+        except Exception:
+            logger.warn("Setting pipeline driver to pipeline.json")
+            schema["pipeline_driver"] = "pipeline.json"
  
         loadTrainingData, loadTestData = executor.loadData()
         if loadTrainingData:
@@ -150,19 +156,12 @@ class Launcher(object):
         params["training"] = self.training
         params["test"] = self.test
  
-        allColumnsPreTransform = self.getColumnNames(self.training, self.test) 
-         
-        # Processing steps in learning executor
-        if isinstance(executor, LearningExecutor):
-            self.training[schema["reserved"]["training"]].update(Series([True] * self.training.shape[0]))
-            self.test[schema["reserved"]["training"]].update(Series([False] * self.test.shape[0]))
-            params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
-            (self.training, self.test, metadata) = executor.transformData(params)
-            params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
-        # Processing steps in all other executors (profiling, aggregation, and parallel learning executors)
-        else:
-            (self.training, self.test, metadata) = executor.transformData(params)
- 
+        allColumnsPreTransform = self.getColumnNames(self.training, self.test)
+
+        (self.training, self.test) = executor.preTransformData(self.training, self.test, params)
+        (self.training, self.test, metadata) = executor.transformData(params)
+        (self.training, self.test) = executor.postTransformData(self.training, self.test, params)
+
         params["readouts"] = parser.readouts
         params["training"] = self.training
         params["test"] = self.test

@@ -12,6 +12,12 @@ class Executor(object):
     
     @abstractmethod
     def parseData(self, parser, trainingFile, testFile, postProcessClf): pass
+    
+    def preTransformData(self, training, test, params):
+        return (training, test)
+
+    def postTransformData(self, training, test, params):
+        return (training, test)
 
     @abstractmethod
     def transformData(self, params): pass
