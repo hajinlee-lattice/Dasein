@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertTrue;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.core.io.Resource;
@@ -38,17 +37,5 @@ public class MetadataConverterUnitTestNG {
         Table table = MetadataConverter.getTable(configuration, path + "/*.avro");
         String extractDir = table.getExtractsDirectory();
         assertEquals(extractDir, path);
-    }
-
-    @Test(groups = "unit")
-    public void testExtractsWithDifferentSchemaNotSupported() {
-        String path = getResourceAbsolutePath("com/latticeengines/domain/exposed/util/metadataConverterUnitTestNG/mixedExtracts");
-        boolean thrown = false;
-        try {
-            MetadataConverter.getTable(configuration, path);
-        } catch (Exception e) {
-            thrown = true;
-        }
-        assertTrue(thrown);
     }
 }

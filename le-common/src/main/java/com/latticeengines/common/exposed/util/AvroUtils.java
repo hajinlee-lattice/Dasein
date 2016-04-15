@@ -69,15 +69,7 @@ public class AvroUtils {
         if (matches.size() == 0) {
             throw new RuntimeException(String.format("No such file could be found: %s", path));
         }
-        Set<Schema> schemas = new HashSet<>();
-        for (String match : matches) {
-            schemas.add(AvroUtils.getSchema(config, new Path(match)));
-        }
-        if (schemas.size() != 1) {
-            throw new RuntimeException(String.format("All avro schemas in file glob %s must be the same", path));
-        }
-
-        return (Schema) schemas.toArray()[0];
+        return AvroUtils.getSchema(config, new Path(matches.get(0)));
     }
 
     public static List<GenericRecord> getDataFromGlob(Configuration configuration, String path) {

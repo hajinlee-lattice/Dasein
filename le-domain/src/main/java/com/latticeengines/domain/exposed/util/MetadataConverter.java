@@ -124,17 +124,12 @@ public class MetadataConverter {
     }
 
     public static Schema getAvroSchema(Configuration configuration, Table table) {
-        Set<Schema> set = new HashSet<>();
 
-        for (Extract extract : table.getExtracts()) {
-            set.add(getAvroSchema(configuration, extract));
+        if (table.getExtracts().size() == 0) {
+            throw new RuntimeException(String.format("Table %s does not have any extracts", table.getName()));
         }
 
-        if (set.size() > 1) {
-            throw new RuntimeException(String.format("All schemas in table %s must be equivalent", table.getName()));
-        }
-
-        return (Schema) set.toArray()[0];
+        return getAvroSchema(configuration, table.getExtracts().get(0));
     }
 
     public static Schema getAvroSchema(Configuration configuration, Extract extract) {
