@@ -1,11 +1,10 @@
 package com.latticeengines.domain.exposed.modeling;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.CipherUtils;
 
@@ -23,7 +22,7 @@ public class DbCreds {
     private String instance;
     private String jdbcUrl;
     private String driverClass;
-    
+
     public DbCreds() {
     }
 
@@ -40,14 +39,6 @@ public class DbCreds {
         this.driverClass = builder.driverClass;
     }
 
-    @PostConstruct
-    private void postConstruct() {
-        if (StringUtils.isNotEmpty(this.encryptedPassword)) {
-            log.info("Overwrite clear text password by the encrypted one.");
-            this.password = CipherUtils.decrypt(encryptedPassword);
-        }
-    }
-
     @JsonProperty("user")
     public String getUser() {
         return user;
@@ -59,13 +50,23 @@ public class DbCreds {
     }
 
     @JsonProperty("password")
-    public String getPassword() {
+    private String getPassword() {
         return password;
     }
 
     @JsonProperty("password")
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         this.password = password;
+    }
+
+    @JsonIgnore
+    public String getDecryptedPassword() {
+        if (StringUtils.isNotEmpty(this.encryptedPassword)
+                && StringUtils.isNotEmpty(CipherUtils.decrypt(this.encryptedPassword))) {
+            return CipherUtils.decrypt(this.encryptedPassword);
+        } else {
+            return this.password;
+        }
     }
 
     @JsonProperty("encrypted_password")
@@ -170,20 +171,19 @@ public class DbCreds {
         }
 
         /**
-         * This method uses clear text password. It is depcreated.
-         * Please use encryptedPassword(String) instead.
+         * This method uses clear text password. It is depcreated. Please use
+         * encryptedPassword(String) instead.
+         * 
          * @param password
          * @return
          */
         @Deprecated
         public Builder password(String password) {
-            this.password = password;
             this.encryptedPassword = CipherUtils.encrypt(password);
             return this;
         }
 
         public Builder encryptedPassword(String encryptedPassword) {
-            this.password = CipherUtils.decrypt(encryptedPassword);
             this.encryptedPassword = encryptedPassword;
             return this;
         }
@@ -207,22 +207,22 @@ public class DbCreds {
             this.dbType = dbType;
             return this;
         }
-        
+
         public Builder instance(String instance) {
             this.instance = instance;
             return this;
         }
-        
+
         public Builder jdbcUrl(String jdbcUrl) {
             this.jdbcUrl = jdbcUrl;
             return this;
         }
-        
+
         public Builder driverClass(String driverClass) {
             this.driverClass = driverClass;
             return this;
         }
-        
+
     }
 
 }

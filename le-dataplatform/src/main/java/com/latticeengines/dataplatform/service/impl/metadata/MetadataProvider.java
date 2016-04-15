@@ -75,7 +75,7 @@ public abstract class MetadataProvider {
             url = url.replaceFirst("\\$\\$PORT\\$\\$", Integer.toString(creds.getPort()));
             url = creds.getDb() != null ? url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb()) : url;
             url = creds.getUser() != null ? url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser()) : url;
-            url = creds.getPassword() != null ? url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword()) : url;
+            url = creds.getDecryptedPassword() != null ? url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getDecryptedPassword()) : url;
             url = creds.getInstance() != null ? url.replaceFirst("\\$\\$INSTANCE\\$\\$", creds.getInstance()) : url;
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {

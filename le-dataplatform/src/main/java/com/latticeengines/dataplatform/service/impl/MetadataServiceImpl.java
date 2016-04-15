@@ -140,7 +140,7 @@ public class MetadataServiceImpl implements MetadataService {
     @Override
     public JdbcTemplate constructJdbcTemplate(DbCreds creds) {
         DataSource dataSource = new DriverManagerDataSource(this.getJdbcConnectionUrl(creds), creds.getUser(),
-                creds.getPassword());
+                creds.getDecryptedPassword());
         return new JdbcTemplate(dataSource);
     }
 
