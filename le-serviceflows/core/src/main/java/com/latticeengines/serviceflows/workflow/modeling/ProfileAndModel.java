@@ -38,6 +38,8 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
         Map<String, String> modelApplicationIdToEventColumn;
         try {
             modelApplicationIdToEventColumn = profileAndModel(eventTable);
+        } catch (LedpException e) {
+            throw e;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28007, e, new String[] { eventTable.getName() });
         }

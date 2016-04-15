@@ -1,5 +1,6 @@
 package com.latticeengines.security.exposed.util;
 
+import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,6 +14,7 @@ public abstract class BaseRestApiProxy {
 
     public BaseRestApiProxy() {
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
+        restTemplate.setErrorHandler(new GetResponseErrorHandler());
     }
 
     protected String constructUrl(String... parts) {
