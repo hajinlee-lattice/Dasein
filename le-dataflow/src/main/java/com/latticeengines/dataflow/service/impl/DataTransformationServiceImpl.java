@@ -6,7 +6,6 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -22,12 +21,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
 
-    private static final String CSV_TO_AVRO_PIPE = "pipe";
-
-    private static final String QUOTE = "\"";
-
-    private static final String DELIMITER = ",";
-
     private static final String APPCTX = "APPCTX";
 
     private static final String LOCAL_FS = "file:///";
@@ -40,18 +33,11 @@ public class DataTransformationServiceImpl implements DataTransformationService 
 
     private static final String HADOOPCONF = "HADOOPCONF";
 
-    private static final String QUEUENAME_PROP_DATA = "PropData";
-
-    private static final String MAPREDUCE_JOB_QUEUENAME = "mapreduce.job.queuename";
-
     @Autowired
     private ApplicationContext appContext;
 
     @Autowired
     private VersionManager versionManager;
-
-    @Autowired
-    private YarnConfiguration configuration;
 
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {

@@ -11,7 +11,7 @@
     <import resource="classpath:serviceflows-propdata-collection-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
 
-    <bean id="sourceColumnDao" class="com.latticeengines.propdata.collection.dao.impl.SourceColumnDaoImpl">
+    <bean id="sourceColumnDao" class="com.latticeengines.propdata.engine.common.dao.impl.SourceColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
 

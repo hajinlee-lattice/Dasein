@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
-import com.latticeengines.propdata.collection.service.PublicationService;
+import com.latticeengines.propdata.engine.publication.service.PublicationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;

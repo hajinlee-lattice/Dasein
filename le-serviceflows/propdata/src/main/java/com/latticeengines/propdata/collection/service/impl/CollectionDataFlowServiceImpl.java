@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.propdata.dataflow.MostRecentDataFlowParameters;
 import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
-import com.latticeengines.propdata.collection.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowService;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;

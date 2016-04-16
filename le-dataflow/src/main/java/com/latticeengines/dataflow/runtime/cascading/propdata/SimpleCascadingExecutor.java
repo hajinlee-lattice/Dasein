@@ -7,14 +7,8 @@ import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -26,7 +20,8 @@ import cascading.scheme.util.DelimitedParser;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
-import cascading.tuple.Fields;
+
+import com.latticeengines.common.exposed.util.HdfsUtils;
 
 @Component("simpleCascadingExecutor")
 public class SimpleCascadingExecutor {
@@ -58,29 +53,17 @@ public class SimpleCascadingExecutor {
 
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
 
-        Fields outputFields = Fields.NONE;
-        Tap csvTap = new Hfs(new TextDelimited(true, new DelimitedParser(CSV_DELIMITER, QUOTE, null, false, true)),
+        Tap<?, ?, ?> csvTap = new Hfs(new TextDelimited(true, new DelimitedParser(CSV_DELIMITER, QUOTE, null, false, true)),
                 uncompressedFilePath);
-        Tap avroTap = new Hfs(new AvroScheme(schema), avroDirPath, SinkMode.REPLACE);
+        Tap<?, ?, ?> avroTap = new Hfs(new AvroScheme(schema), avroDirPath, SinkMode.REPLACE);
 
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);
 
         FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE).addSource(csvToAvroPipe, csvTap)
                 .addTailSink(csvToAvroPipe, avroTap);
 
-        Flow wcFlow = flowConnector.connect(flowDef);
+        Flow<?> wcFlow = flowConnector.connect(flowDef);
 
         wcFlow.complete();
-    }
-
-    private Schema getSchemaFromFile(String taregetSchemaPath) {
-        if (taregetSchemaPath != null) {
-            try {
-                return AvroUtils.getSchema(yarnConfiguration, new Path(taregetSchemaPath));
-            } catch (Exception ex) {
-                throw new LedpException(LedpCode.LEDP_26005, ex);
-            }
-        }
-        return null;
     }
 }

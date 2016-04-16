@@ -1,15 +1,12 @@
 package com.latticeengines.propdata.api.testframework;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import javax.annotation.PostConstruct;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -22,9 +19,12 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
+import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.source.Source;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-api-context.xml" })
@@ -38,6 +38,12 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
 
     @Autowired
     private MetricService metricService;
+
+    @Autowired
+    private HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @PostConstruct
     private void postConstruct() {
@@ -63,21 +69,34 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
         return new HttpEntity<>(JsonUtils.serialize(payload), headers);
     }
 
-    protected static void turnOffSslChecking() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] UNQUESTIONING_TRUST_MANAGER = new TrustManager[] { new X509TrustManager() {
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
 
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
+    protected void prepareCleanPod(String podId) {
+        hdfsPathBuilder.changeHdfsPodId(podId);
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+    }
+
+    protected void uploadSourceAtVersion(Source source, String version) {
+        InputStream baseAvroStream = ClassLoader
+                .getSystemResourceAsStream("sources/" + source.getSourceName() + ".avro");
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(source, version).append("part-0000.avro")
+                .toString();
+        try {
+            if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, targetPath);
             }
-        } };
-        final SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, UNQUESTIONING_TRUST_MANAGER, null);
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, baseAvroStream, targetPath);
+            InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+            String successPath = hdfsPathBuilder.constructSnapshotDir(source, version).append("_SUCCESS")
+                    .toString();
+            HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected MatchClient getMatchClient() {

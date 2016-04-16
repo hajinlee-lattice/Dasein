@@ -20,6 +20,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationDestina
 @Access(AccessType.FIELD)
 @Table(name = "PublicationProgress")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicationProgress implements HasPid {
 
     @Id
@@ -96,7 +98,7 @@ public class PublicationProgress implements HasPid {
 
     @JsonProperty("PublicationName")
     private String getPublicationName() {
-        return publication.getPublicationName();
+        return publication == null ? null: publication.getPublicationName();
     }
 
     @JsonProperty("SourceVersion")

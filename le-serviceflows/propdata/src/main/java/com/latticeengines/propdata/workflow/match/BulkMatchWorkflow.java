@@ -25,7 +25,7 @@ public class BulkMatchWorkflow extends AbstractWorkflow<BulkMatchWorkflowConfigu
     private UpdateFailedMatchListener updateFailedMatchListener;
 
     @Bean
-    public Job matchWorkflowJob() throws Exception {
+    public Job bulkMatchWorkflowJob() throws Exception {
         return buildWorkflow();
     }
 

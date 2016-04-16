@@ -5,9 +5,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <context:component-scan base-package="com.latticeengines.propdata.workflow" />
+    <context:component-scan base-package="com.latticeengines.propdata.workflow.match" />
+    <context:component-scan base-package="com.latticeengines.propdata.workflow.engine" />
 
     <import resource="classpath:serviceflows-core-context.xml"/>
     <import resource="classpath:serviceflows-propdata-match-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-collection-context.xml" />
 
 </beans>

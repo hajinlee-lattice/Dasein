@@ -15,7 +15,7 @@ import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
-import com.latticeengines.propdata.workflow.engine.transform.TransformationWorkflowConfiguration;
+import com.latticeengines.propdata.workflow.engine.TransformationWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class TransformationExecutorImpl implements TransformationExecutor {

@@ -9,9 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class DbCreds {
-
-    private static Log log = LogFactory.getLog(DbCreds.class);
-
+    
     private String user;
     private String password;
     private String encryptedPassword;

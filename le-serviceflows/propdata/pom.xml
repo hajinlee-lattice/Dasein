@@ -35,6 +35,13 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataplatform</artifactId>
+            <version>${le.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-dataflow</artifactId>
             <version>${le.version}</version>
             <scope>provided</scope>

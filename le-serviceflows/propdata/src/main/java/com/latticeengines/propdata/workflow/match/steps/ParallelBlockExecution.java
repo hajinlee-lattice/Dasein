@@ -206,7 +206,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             this.progress = overallProgress;
             Long currentTimestamp = System.currentTimeMillis();
             if (currentTimestamp - progressUpdated > MATCH_TIMEOUT) {
-                String errorMsg = "The match has not progressed for "
+                String errorMsg = "The match has been hanging for "
                         + DurationFormatUtils.formatDurationWords(currentTimestamp - progressUpdated, true, false)
                         + ".";
                 throw new RuntimeException(errorMsg);

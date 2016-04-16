@@ -6,6 +6,7 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
 
     private String host;
     private Integer port;
+    private String dbType = "SQLServer";
     private String database;
     private String defaultTableName;
     private String username;
@@ -59,6 +60,16 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
         this.database = database;
     }
 
+    @JsonProperty("DbType")
+    public String getDbType() {
+        return dbType;
+    }
+
+    @JsonProperty("DbType")
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
+    }
+
     @JsonProperty("DefaultTableName")
     public String getDefaultTableName() {
         return defaultTableName;
@@ -100,7 +111,7 @@ public class PublishToSqlConfiguration extends PublicationConfiguration {
     }
 
     public enum Alias {
-        CollectionDB, SourceDB, TestDB
+        CollectionDB, BulkDB, SourceDB, TestDB
     }
 
     public enum PublicationStrategy {

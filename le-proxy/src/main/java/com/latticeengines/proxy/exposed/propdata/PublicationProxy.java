@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
@@ -18,15 +20,17 @@ public class PublicationProxy extends BaseRestApiProxy implements PublicationInt
         super("propdata/publications");
     }
 
+    ObjectMapper mapper = new ObjectMapper();
+
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         String url = constructUrl("/?podid={hdfsPod}", hdfsPod);
         List<?> list = post("scan_publication", url, "", List.class);
         List<PublicationProgress> progresses = new ArrayList<>();
         for (Object obj : list) {
-            if (obj instanceof PublicationProgress) {
-                progresses.add((PublicationProgress) obj);
-            }
+            String json = JsonUtils.serialize(obj);
+            PublicationProgress progress = JsonUtils.deserialize(json, PublicationProgress.class);
+            progresses.add(progress);
         }
         return progresses;
     }

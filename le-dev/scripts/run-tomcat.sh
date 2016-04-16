@@ -27,6 +27,6 @@ export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=2g"
 export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=${WSHOME}/le-security/certificates/laca-ldap.dev.lattice.local.jks"
 export JAVA_OPTS="${JAVA_OPTS} -Dcom.latticeengines.registerBootstrappers=true"
 export JAVA_OPTS="${JAVA_OPTS} -DLOCAL_MODEL_DL_QUARTZ_ENABLED=enabled"
-export CATALINA_CLASSPATH=$TEZ_CONF_DIR:$HADOOP_CONF_DIR:$JAVA_HOME/lib/tools.jar:$HADOOP_COMMON_JAR
+export CATALINA_CLASSPATH=$CLASSPATH:$TEZ_CONF_DIR:$HADOOP_HOME/etc/hadoop:$JAVA_HOME/lib/tools.jar:$HADOOP_COMMON_JAR
 
 $CATALINA_HOME/bin/catalina.sh run
