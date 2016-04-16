@@ -15,6 +15,7 @@
         <le.camille.version>2.0.25-SNAPSHOT</le.camille.version>
         <le.network.version>2.0.25-SNAPSHOT</le.network.version>
         <le.serviceruntime.version>2.0.25-SNAPSHOT</le.serviceruntime.version>
+        <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
         <globalauth.base.url>https://haproxy-test04.lattice.local</globalauth.base.url>
         <certificate.name>laca-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -394,6 +395,12 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceruntime</artifactId>
             <version>${le.serviceruntime.version}</version>
             <classifier>intf</classifier>
@@ -406,8 +413,14 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-db</artifactId>
-            <version>${le.db.version}</version>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-monitor</artifactId>
+            <version>${le.monitor.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
