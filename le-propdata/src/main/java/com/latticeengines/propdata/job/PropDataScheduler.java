@@ -28,8 +28,8 @@ import com.latticeengines.propdata.core.source.DataImportedFromDB;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.transform.TransformationProgressOrchestrator;
-import com.latticeengines.propdata.engine.transform.service.TransformationService;
+import com.latticeengines.propdata.engine.transformation.TransformationProgressOrchestrator;
+import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("propDataScheduler")
 public class PropDataScheduler {

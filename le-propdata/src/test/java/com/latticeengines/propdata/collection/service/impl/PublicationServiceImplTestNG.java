@@ -28,6 +28,7 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.workflow.collection.PublicationWorkflowConfiguration;
 import com.latticeengines.propdata.workflow.collection.steps.PublishConfiguration;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
 public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTestNGBase {
@@ -54,6 +55,9 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
     @Autowired
     private BuiltWithPivoted source;
+
+    @Autowired
+    private WorkflowProxy workflowProxy;
 
     private Publication publication;
     private PublicationRequest publicationRequest;
@@ -121,6 +125,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
                 }
             }
         });
+        workflowProxy.setMicroserviceHostPort("http://localhost:8234");
         publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         publicationService.scan(POD_ID);
     }
@@ -142,7 +147,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
 
     private void startWorkFlowServer(PublicationWorkflowServlet.PayloadVerifier verifier) throws Exception {
         httpServer = new StandaloneHttpServer();
-        httpServer.init(8080);
+        httpServer.init(8234);
         httpServer.addServlet(new PublicationWorkflowServlet(verifier), "/workflowapi/workflows/");
         httpServer.start();
     }

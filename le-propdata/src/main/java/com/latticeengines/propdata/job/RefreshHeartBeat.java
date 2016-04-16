@@ -6,7 +6,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
-import com.latticeengines.propdata.engine.transform.TransformationProgressOrchestrator;
+import com.latticeengines.propdata.engine.transformation.TransformationProgressOrchestrator;
 
 @DisallowConcurrentExecution
 public class RefreshHeartBeat extends QuartzJobBean {

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.engine.transform.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transform.service.TransformationService;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("propdataTransformationStepExecution")

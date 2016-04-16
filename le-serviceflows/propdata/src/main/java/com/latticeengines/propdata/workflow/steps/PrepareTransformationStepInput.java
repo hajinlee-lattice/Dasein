@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
+import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("preparePropdataTransformationStepInput")

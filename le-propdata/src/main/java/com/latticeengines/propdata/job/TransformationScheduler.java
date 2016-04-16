@@ -9,9 +9,9 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.engine.transform.service.TransformationExecutor;
-import com.latticeengines.propdata.engine.transform.service.TransformationService;
-import com.latticeengines.propdata.engine.transform.service.impl.TransformationExecutorImpl;
+import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
+import com.latticeengines.propdata.engine.transformation.service.TransformationService;
+import com.latticeengines.propdata.engine.transformation.service.impl.TransformationExecutorImpl;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class TransformationScheduler extends QuartzJobBean {

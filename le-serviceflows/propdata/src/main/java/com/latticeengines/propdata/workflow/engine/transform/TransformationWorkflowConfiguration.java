@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.propdata.engine.transform.configuration.TransformationConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.workflow.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.propdata.workflow.steps.TransformationStepExecutionConfiguration;
 

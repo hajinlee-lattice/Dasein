@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.source.impl.BomboraFirehose;
-import com.latticeengines.propdata.engine.transform.configuration.TransformationConfiguration;
-import com.latticeengines.propdata.engine.transform.configuration.impl.BomboraFirehoseConfiguration;
-import com.latticeengines.propdata.engine.transform.entitymgr.TransformationProgressEntityMgr;
-import com.latticeengines.propdata.engine.transform.service.TransformationService;
-import com.latticeengines.propdata.engine.transform.service.impl.BomboraFirehoseIngestionService;
+import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
+import com.latticeengines.propdata.engine.transformation.configuration.impl.BomboraFirehoseConfiguration;
+import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
+import com.latticeengines.propdata.engine.transformation.service.TransformationService;
+import com.latticeengines.propdata.engine.transformation.service.impl.BomboraFirehoseIngestionService;
 
 @Component
 public class BomboraFirehoseIngestionServiceImplTestNG extends FirehoseTransformationServiceImplTestNGBase {
