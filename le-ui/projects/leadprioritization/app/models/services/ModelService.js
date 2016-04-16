@@ -70,7 +70,7 @@ angular.module('mainApp.models.services.ModelService', [
                     result.resultObj = _.map(data, function(rawObj) {
                             return {
                                 Id          : rawObj.Id,
-                                DisplayName : rawObj.Name,
+                                DisplayName : rawObj.DisplayName == null ? rawObj.Name : rawObj.DisplayName,
                                 CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
                                 Status      : rawObj.Status,
                                 Incomplete  : rawObj.Incomplete,

@@ -1,6 +1,7 @@
 angular.module('mainApp.setup.modals.UpdateFieldsModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.setup.services.MetadataService'
+    'mainApp.setup.services.MetadataService',
+    'mainApp.appCommon.utilities.StringUtility'
 ])
 .service('UpdateFieldsModal', function ($compile, $templateCache, $rootScope, $http, ResourceUtility) {
     var self = this;
@@ -28,9 +29,8 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
         });
     };
 })
-.controller('UpdateFieldsController', function ($scope, $rootScope, $state, ResourceUtility, MetadataService) {
+.controller('UpdateFieldsController', function ($scope, $rootScope, $state, ResourceUtility, StringUtility, MetadataService) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.modelNameInvalid = false;
     $scope.updateClicked = false;
     $scope.saveInProgress = false;
     $scope.cloneError = false;
@@ -40,10 +40,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             $event.preventDefault();
         }
 
-        if ($scope.modelName == null) {
-            $scope.modelNameInvalid = true;
-            return;
-        }
+        var modelName = StringUtility.SubstitueAllSpecialCharsWithDashes($scope.modelDisplayName);
 
         if ($scope.updateClicked) { return; }
         $scope.cloneError = false;
@@ -51,7 +48,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
 
         $scope.saveInProgress = true;
 
-        MetadataService.UpdateAndCloneFields($scope.modelName, $scope.modelSummaryId, $scope.editedData).then(function(result){
+        MetadataService.UpdateAndCloneFields(modelName, $scope.modelDisplayName, $scope.modelSummaryId, $scope.editedData).then(function(result){
             if (result.Success) {
                 $("#modalContainer").modal('hide');
 

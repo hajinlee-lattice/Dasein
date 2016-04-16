@@ -3,6 +3,7 @@ angular.module('mainApp.create.csvImport', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
     'mainApp.core.utilities.NavUtility',
+    'mainApp.appCommon.utilities.StringUtility',
     '720kb.tooltips'
 ])
 .service('csvImportStore', function() {
@@ -165,7 +166,8 @@ angular.module('mainApp.create.csvImport', [
             data: {
                 'description': 'Self-service Model',
                 'filename': csvMetaData.name,
-                'name': csvMetaData.modelName
+                'name': csvMetaData.modelName,
+                'displayName': csvMetaData.displayName
             },
             headers: { 'Content-Type': 'application/json' }
         })
@@ -219,8 +221,8 @@ angular.module('mainApp.create.csvImport', [
     };
 }])
 .controller('csvImportController', [
-    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
-    function($scope, $rootScope, ModelService, ResourceUtility, csvImportService, csvImportStore, $state, $q) {
+    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', 'StringUtility', 'csvImportService', 'csvImportStore', '$state', '$q',
+    function($scope, $rootScope, ModelService, ResourceUtility, StringUtility, csvImportService, csvImportStore, $state, $q) {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
         $scope.importing = false;
@@ -281,10 +283,11 @@ angular.module('mainApp.create.csvImport', [
                 if (result.Success && result.Result) {
                     var fileName = result.Result.name,
                         metaData = result.Result,
-                        modelName = $scope.modelName;
+                        displayName = $scope.modelDisplayName,
+                        modelName = StringUtility.SubstitueAllSpecialCharsWithDashes($scope.modelDisplayName);
 
-                    console.log('# Upload Complete', fileName, modelName, metaData);
                     metaData.modelName = modelName;
+                    metaData.displayName = displayName;
 
                     csvImportStore.Set(fileName, metaData);
 
