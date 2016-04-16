@@ -20,6 +20,8 @@ then
 fi
 
 jar cvf ROOT.war -C ROOT/ .
+
+rm -rf /usr/share/tomcat/work/PlsEngine
 cp -f ROOT.war /usr/share/tomcat/webapps/pls
 
 chown -R tomcat:tomcat /usr/share/tomcat/webapps/pls

@@ -1,6 +1,6 @@
 import argparse
 import os
-from shutil import copyfile
+from shutil import copyfile, rmtree
 
 WSHOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 print 'WSHOME=%s' % WSHOME
@@ -27,6 +27,13 @@ def cleanupWars():
             if file[-4:] == '.war':
                 print 'removing %s from %s' % (file, dirName)
                 os.remove(dirName + "/" + file)
+
+    print 'clean up workspace ...'
+    for dir_name in os.listdir(os.path.join(CATALINA_HOME, "work")):
+        dir_path = os.path.join(CATALINA_HOME, "work", dir_name)
+        if os.path.isdir(dir_path):
+            print 'cleaning up working directory %s ' % dir_path
+            rmtree(dir_path)
     print ''
 
 

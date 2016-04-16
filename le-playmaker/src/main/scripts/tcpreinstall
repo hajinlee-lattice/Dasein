@@ -1,6 +1,7 @@
 #!/bin/bash
 source /etc/profile
 rm -rf $CATALINA_HOME/webapps/playmaker/*.war
+rm -rf /usr/share/tomcat/work/PlayMakerEngine
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat
