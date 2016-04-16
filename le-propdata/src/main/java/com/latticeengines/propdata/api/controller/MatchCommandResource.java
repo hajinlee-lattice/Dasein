@@ -35,7 +35,7 @@ public class MatchCommandResource implements MatchCommandInterface {
             + "PD130 should be used only in QA.")
     @Override
     public MatchStatusResponse getMatchStatus(@PathVariable Long commandID,
-            @RequestParam(value = "matchClient", required = false, defaultValue = "Default") String clientName) {
+            @RequestParam(value = "client", required = false, defaultValue = "Default") String clientName) {
         MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
         MatchCommandStatus status = matchCommandsService.getMatchCommandStatus(commandID);
         return new MatchStatusResponse(status);
@@ -48,7 +48,7 @@ public class MatchCommandResource implements MatchCommandInterface {
             + "PD130 should be used only in QA.")
     @Override
     public Commands createMatchCommand(@RequestBody CreateCommandRequest request,
-            @RequestParam(value = "matchClient", required = false, defaultValue = "Default") String clientName) {
+            @RequestParam(value = "client", required = false, defaultValue = "Default") String clientName) {
         MatchClientContextHolder.setMatchClient(matchCommandsService.getMatchClientByName(clientName));
         return matchCommandsService.createMatchCommand(request);
     }

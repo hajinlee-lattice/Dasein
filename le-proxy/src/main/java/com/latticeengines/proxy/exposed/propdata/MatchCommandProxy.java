@@ -17,13 +17,13 @@ public class MatchCommandProxy extends BaseRestApiProxy implements MatchCommandI
 
     @Override
     public MatchStatusResponse getMatchStatus(Long commandID, String clientName) {
-        String url = constructUrl("/{commandID}?clientName={clientName}", commandID, clientName);
+        String url = constructUrl("/{commandID}?client={clientName}", commandID, clientName);
         return get("getMatchStatus", url, MatchStatusResponse.class);
     }
 
     @Override
     public Commands createMatchCommand(CreateCommandRequest request, String clientName) {
-        String url = constructUrl("?clientName={clientName}", clientName);
+        String url = constructUrl("?client={clientName}", clientName);
         return post("createMatchCommand", url, request, Commands.class);
     }
 
