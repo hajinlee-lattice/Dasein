@@ -23,8 +23,8 @@ cd $WSHOME/le-db
 mvn -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
-$WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
-$WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
-$WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
-$WSHOME/le-dev/scripts/setupdb_scoringdb.sh
-$WSHOME/le-dev/scripts/setupdb_oauth2.sh
+bash $WSHOME/le-dev/scripts/setupdb_pls_multitenant.sh
+bash $WSHOME/le-dev/scripts/setupdb_ldc_managedb.sh
+bash $WSHOME/le-dev/scripts/setupdb_leadscoringdb.sh
+bash $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
+bash $WSHOME/le-dev/scripts/setupdb_oauth2.sh
