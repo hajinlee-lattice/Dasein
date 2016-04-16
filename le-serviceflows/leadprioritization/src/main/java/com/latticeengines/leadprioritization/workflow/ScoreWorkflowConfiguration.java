@@ -2,6 +2,8 @@ package com.latticeengines.leadprioritization.workflow;
 
 import java.util.Map;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -80,7 +82,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder outputFilename(String outputFilename) {
             export.setExportDestination(ExportDestination.FILE);
-            export.putProperty(ExportProperty.TARGETPATH, outputFilename);
+            export.putProperty(ExportProperty.TARGET_FILE_NAME, outputFilename);
             return this;
         }
 

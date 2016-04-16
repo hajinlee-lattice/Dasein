@@ -3,16 +3,23 @@ package com.latticeengines.leadprioritization.workflow;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.eai.ExportDestination;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration.Builder;
+import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 
 public class ModelWorkflowConfiguration extends WorkflowConfiguration {
     public static class Builder {
         private ModelWorkflowConfiguration configuration = new ModelWorkflowConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
+        private ExportStepConfiguration export = new ExportStepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             model.setMicroServiceHostPort(microServiceHostPort);
+            export.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -24,6 +31,7 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
+            export.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -69,7 +77,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
         }
 
         public ModelWorkflowConfiguration build() {
+            export.setExportDestination(ExportDestination.FILE);
+            export.setExportFormat(ExportFormat.CSV);
+
             configuration.add(model);
+            configuration.add(export);
 
             return configuration;
         }

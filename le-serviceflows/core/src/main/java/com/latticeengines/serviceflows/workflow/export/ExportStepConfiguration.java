@@ -15,6 +15,10 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private ExportDestination exportDestination;
 
+    private String exportInputPath;
+
+    private String exportTargetPath;
+
     private String tableName;
 
     private Map<String, String> properties = new HashMap<>();
@@ -53,5 +57,21 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     public void putProperty(String property, String value) {
         properties.put(property, value);
+    }
+
+    public String getExportInputPath() {
+        return exportInputPath;
+    }
+
+    public void setExportInputPath(String exportInputPath) {
+        this.exportInputPath = exportInputPath;
+    }
+
+    public String getExportTargetPath() {
+        return exportTargetPath;
+    }
+
+    public void setExportTargetPath(String exportTargetPath) {
+        this.exportTargetPath = exportTargetPath;
     }
 }

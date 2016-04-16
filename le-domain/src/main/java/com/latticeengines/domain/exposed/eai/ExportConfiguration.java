@@ -12,6 +12,8 @@ public class ExportConfiguration extends BasePayloadConfiguration {
     private ExportFormat exportFormat;
     private ExportDestination exportDestination;
     private Table table;
+    private String exportInputPath;
+    private String exportTargetPath;
     private Map<String, String> properties = new HashMap<>();
 
     @JsonProperty("export_format")
@@ -32,6 +34,26 @@ public class ExportConfiguration extends BasePayloadConfiguration {
     @JsonProperty("export_destination")
     public void setExportDestination(ExportDestination exportDestination) {
         this.exportDestination = exportDestination;
+    }
+
+    @JsonProperty("export_input_path")
+    public String getExportInputPath() {
+        return this.exportInputPath;
+    }
+
+    @JsonProperty("export_input_path")
+    public void setExportInputPath(String exportInputPath) {
+        this.exportInputPath = exportInputPath;
+    }
+
+    @JsonProperty("export_target_path")
+    public String getExportTargetPath() {
+        return this.exportTargetPath;
+    }
+
+    @JsonProperty("export_target_path")
+    public void setExportTargetPath(String exportTargetPath) {
+        this.exportTargetPath = exportTargetPath;
     }
 
     @JsonProperty("table")

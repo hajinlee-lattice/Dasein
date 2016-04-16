@@ -57,7 +57,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void setup() throws Exception {
         dataUrl = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/file/file.avro");
         sourceAvroPath = "/tmp/sourceFiles/file.avro";
-        targetCSVPath = "output.csv";
+        targetCSVPath = "output";
         HdfsUtils.rmdir(yarnConfiguration, sourceAvroPath);
         HdfsUtils.rmdir(yarnConfiguration, targetCSVPath);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, dataUrl.getPath(), sourceAvroPath);
@@ -78,7 +78,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileExportConfig.setTable(MetadataConverter.getTable(yarnConfiguration, sourceAvroPath));
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
         Map<String, String> props = new HashMap<>();
-        props.put(ExportProperty.TARGETPATH, targetCSVPath);
+        props.put(ExportProperty.TARGET_FILE_NAME, targetCSVPath);
         fileExportConfig.setProperties(props);
         fileExportService.exportDataFromHdfs(fileExportConfig, ctx);
 
@@ -87,7 +87,7 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         String actualTargetPath = PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER)
-                .append(targetCSVPath).toString();
+                .append(targetCSVPath + "_file.csv").toString();
         verifyAllDataNotNullWithNumRows(yarnConfiguration, actualTargetPath, 10);
     }
 

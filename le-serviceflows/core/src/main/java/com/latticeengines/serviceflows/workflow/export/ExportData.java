@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,12 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
         exportConfig.setExportDestination(configuration.getExportDestination());
         exportConfig.setCustomerSpace(configuration.getCustomerSpace());
         exportConfig.setTable(retrieveTable());
+        if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_INPUT_PATH))) {
+            exportConfig.setExportInputPath(getStringValueFromContext(EXPORT_INPUT_PATH));
+        }
+        if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
+            exportConfig.setExportTargetPath(getStringValueFromContext(EXPORT_OUTPUT_PATH));
+        }
         for (String propertyName : configuration.getProperties().keySet()) {
             exportConfig.setProperty(propertyName, configuration.getProperties().get(propertyName));
         }
@@ -69,12 +76,16 @@ public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
     }
 
     private void saveToContext() {
-        Map<String, String> properties = configuration.getProperties();
-        if (properties.containsKey(ExportProperty.TARGETPATH)) {
+        if (StringUtils.isNotEmpty(getStringValueFromContext(EXPORT_OUTPUT_PATH))) {
             putOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
-                    PathBuilder
-                            .buildDataFileExportPath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace())
-                            .append(properties.get(ExportProperty.TARGETPATH)).toString());
+                    getStringValueFromContext(EXPORT_OUTPUT_PATH));
+        } else {
+            Map<String, String> properties = configuration.getProperties();
+            if (properties.containsKey(ExportProperty.TARGET_FILE_NAME)) {
+                putOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH, PathBuilder
+                        .buildDataFileExportPath(CamilleEnvironment.getPodId(), configuration.getCustomerSpace())
+                        .append(properties.get(ExportProperty.TARGET_FILE_NAME)).toString());
+            }
         }
     }
 }

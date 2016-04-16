@@ -32,7 +32,7 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
 
     public static final String CSV_EXPORT_JOB_TYPE = "eaiCSVExportJob";
 
-    public static final String MAPRED_MAP_TASKS_PROPERTY = "mapred.map.tasks";
+    public static final String MAPRED_MAP_TASKS_PROPERTY = "mapreduce.job.maps";
 
     private static final String dependencyPath = "/app/";
 
@@ -54,12 +54,12 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
         this.mapReduceCustomizationRegistry.register(this);
         this.versionManager = versionManager;
     }
-    
+
     @SuppressWarnings("rawtypes")
     protected abstract Class<? extends Mapper> getMapperClass();
-    
+
     protected abstract int getNumMappers();
-    
+
     public abstract String getJobType();
 
     @Override
@@ -73,6 +73,7 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
+
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, ".*.avro$");
             String filename = files.size() > 0 ? files.get(0) : null;
             if (filename == null) {
@@ -89,7 +90,10 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(getMapperClass());
             mrJob.setNumReduceTasks(0);
-            mrJob.getConfiguration().setInt(MAPRED_MAP_TASKS_PROPERTY, getNumMappers());
+            if (getNumMappers() == 1) {
+                AvroKeyInputFormat.setMinInputSplitSize(mrJob, 100000000000L);
+            }
+            config.setInt(MAPRED_MAP_TASKS_PROPERTY, getNumMappers());
 
             MRJobUtil.setLocalizedResources(mrJob, properties);
             List<String> jarFilePaths = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), dependencyPath

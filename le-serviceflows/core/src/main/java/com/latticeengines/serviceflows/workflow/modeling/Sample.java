@@ -31,6 +31,14 @@ public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_28006, e, new String[] { eventTable.getName() });
         }
+        executionContext.putString(EXPORT_TABLE_NAME, eventTable.getName());
+        String inputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
+                + eventTable.getName() + "/samples";
+        executionContext.putString(EXPORT_INPUT_PATH, inputPath);
+
+        String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
+                + eventTable.getName() + "/csv_files/postMatchEventTable.csv";
+        executionContext.putString(EXPORT_OUTPUT_PATH, outputPath);
     }
 
     private Table getEventTable() {
@@ -38,7 +46,7 @@ public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
             return metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getEventTableName());
         } else {
-            return JsonUtils.deserialize(executionContext.getString(EVENT_TABLE), Table.class);
+            return JsonUtils.deserialize(getStringValueFromContext(EVENT_TABLE), Table.class);
         }
     }
 

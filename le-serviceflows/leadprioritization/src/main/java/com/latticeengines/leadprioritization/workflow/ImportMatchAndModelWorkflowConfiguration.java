@@ -4,12 +4,17 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.eai.ExportDestination;
+import com.latticeengines.domain.exposed.eai.ExportFormat;
+import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
@@ -24,6 +29,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
+        private ExportStepConfiguration export = new ExportStepConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
@@ -32,6 +38,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             model.setMicroServiceHostPort(microServiceHostPort);
             match.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
+            export.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -44,6 +51,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             model.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
+            export.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -136,13 +144,19 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+
         public ImportMatchAndModelWorkflowConfiguration build() {
+            export.setExportDestination(ExportDestination.FILE);
+            export.setExportFormat(ExportFormat.CSV);
+
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(dedupEventTable);
             configuration.add(match);
             configuration.add(model);
             configuration.add(addStandardAttributes);
+
+            configuration.add(export);
 
             return configuration;
         }

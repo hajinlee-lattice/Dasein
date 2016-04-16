@@ -39,6 +39,7 @@ import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.sqoop.csvimport.mapreduce.db.CSVDBRecordReader;
@@ -225,8 +226,7 @@ public class LedpCSVToAvroImportMapper extends
             case INT:
                 return Integer.valueOf(fieldCsvValue);
             case LONG:
-                if ((attr.getInterfaceName() != null && (attr.getInterfaceName().equals(InterfaceName.CreatedDate) || attr
-                        .getInterfaceName().equals(InterfaceName.LastModifiedDate)))) {
+                if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                     Log.info("Date value from csv: " + fieldCsvValue);
                     return TimeStampConvertUtils.convertToLong(fieldCsvValue);
                 } else {

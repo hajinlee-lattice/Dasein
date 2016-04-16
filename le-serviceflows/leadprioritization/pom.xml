@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-serviceflows-leadprioritization</artifactId>
@@ -13,6 +13,7 @@
         <le.serviceflows.core.version>2.0.25-SNAPSHOT</le.serviceflows.core.version>
         <le.workflow.version>2.0.25-SNAPSHOT</le.workflow.version>
         <le.proxy.version>2.0.25-SNAPSHOT</le.proxy.version>
+        <le.camille.version>2.0.25-SNAPSHOT</le.camille.version>
         <component-name>leadprioritization</component-name>
     </properties>
 
@@ -28,6 +29,14 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-serviceflows-core</artifactId>
             <version>${le.serviceflows.core.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+            <classifier>intf</classifier>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

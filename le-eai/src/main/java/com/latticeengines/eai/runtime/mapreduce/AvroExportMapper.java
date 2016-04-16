@@ -21,24 +21,25 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
     private Schema schema;
 
     private Configuration config;
-    
+
     private AvroRowHandler avroRowHandler;
-    
-    protected abstract AvroRowHandler initialize(Context context, Schema schema) throws IOException, InterruptedException;
-    
+
+    protected abstract AvroRowHandler initialize(Context context, Schema schema) throws IOException,
+            InterruptedException;
+
     protected abstract void finalize(Context context) throws IOException, InterruptedException;
-    
+
     public AvroExportMapper() {
     }
-    
+
     protected void setAvroRowHandler(AvroRowHandler avroRowHandler) {
         this.avroRowHandler = avroRowHandler;
     }
-    
+
     protected Configuration getConfig() {
         return config;
     }
-    
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         config = context.getConfiguration();
