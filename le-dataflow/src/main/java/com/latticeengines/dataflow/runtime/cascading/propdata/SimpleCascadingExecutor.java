@@ -1,11 +1,14 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,9 +25,12 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
 
 @Component("simpleCascadingExecutor")
 public class SimpleCascadingExecutor {
+    private static final Log log = LogFactory.getLog(SimpleCascadingExecutor.class);
+
     private static final String CSV_TO_AVRO_PIPE = "pipe";
 
     private static final String QUOTE = "\"";
@@ -38,13 +44,14 @@ public class SimpleCascadingExecutor {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private VersionManager versionManager;
+
     public void transformCsvToAvro(String uncompressedFilePath, String avroDirPath, String avroSchemaPath)
             throws IOException {
         Schema schema = new Schema.Parser().parse(HdfsUtils.getHdfsFileContents(yarnConfiguration, avroSchemaPath));
         Properties properties = new Properties();
-        Iterator<Entry<String, String>> confItr = yarnConfiguration.iterator();
-        while (confItr.hasNext()) {
-            Entry<String, String> conf = confItr.next();
+        for (Entry<String, String> conf : yarnConfiguration) {
             properties.put(conf.getKey(), conf.getValue());
         }
 
@@ -61,6 +68,19 @@ public class SimpleCascadingExecutor {
 
         FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE).addSource(csvToAvroPipe, csvTap)
                 .addTailSink(csvToAvroPipe, avroTap);
+
+        try {
+            String artifactVersion = versionManager.getCurrentVersion();
+            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/" : "/app/"
+                    + artifactVersion + "/dataflow/lib/";
+            log.info("Using dataflow lib path = " + dataFlowLibDir);
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dataFlowLibDir);
+            for (String file : files) {
+                flowDef.addToClassPath(file);
+            }
+        } catch (Exception e) {
+            log.warn("Exception retrieving library jars for this flow.", e);
+        }
 
         Flow<?> wcFlow = flowConnector.connect(flowDef);
 
