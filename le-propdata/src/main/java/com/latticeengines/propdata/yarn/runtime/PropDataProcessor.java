@@ -108,6 +108,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private Integer numThreads;
     private Boolean singleBlockMode;
     private MatchInput matchInput;
+    private String podId;
 
     @Override
     public String process(PropDataJobConfiguration jobConfiguration) throws Exception {
@@ -117,7 +118,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
             receivedAt = new Date();
 
-            String podId = jobConfiguration.getHdfsPodId();
+            podId = jobConfiguration.getHdfsPodId();
             singleBlockMode = jobConfiguration.getSingleBlock();
             hdfsPathBuilder.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
@@ -393,6 +394,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
         @Override
         public MatchContext call() {
+            hdfsPathBuilder.changeHdfsPodId(podId);
             try {
                 Thread.sleep(new Random().nextInt(1500));
             } catch (InterruptedException e) {
