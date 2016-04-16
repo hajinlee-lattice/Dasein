@@ -1,0 +1,18 @@
+alter table [LeadScoringCommandLog] drop constraint FK73D5FC0CB951A41C;
+alter table [LeadScoringCommandParameter] drop constraint FK318F5671B951A41C;
+alter table [LeadScoringCommandState] drop constraint FKD6AC0B59B951A41C;
+drop table [LeadScoringCommandId];
+drop table [LeadScoringCommandLog];
+drop table [LeadScoringCommandParameter];
+drop table [LeadScoringCommandState];
+drop table [LeadScoringCommand];
+drop table [LeadScoringResult];
+create table [LeadScoringCommandId] ([CommandId] bigint identity not null unique, [CreateTime] datetime2 not null, [CreatedBy] nvarchar(255) not null, primary key ([CommandId]));
+create table [LeadScoringCommandLog] ([PID] bigint identity not null unique, [Created] datetime2 not null, [Message] nvarchar(max) not null, CommandId bigint not null, primary key ([PID]));
+create table [LeadScoringCommandParameter] ([Key] nvarchar(255) not null, [Value] nvarchar(max), CommandId bigint not null, primary key ([Key], CommandId));
+create table [LeadScoringCommandState] ([PID] bigint identity not null unique, [Created] datetime2 not null, [Diagnostics] nvarchar(max), [ElapsedTimeInMillis] bigint, [ModelCommandStep] nvarchar(255) not null, [Progress] float, [Status] nvarchar(255), [TrackingUrl] nvarchar(max), [YarnApplicationId] nvarchar(255), CommandId bigint not null, primary key ([PID]));
+create table [LeadScoringCommand] ([CommandId] bigint not null, [CommandStatus] int not null, [Contract_External_ID] nvarchar(255) not null, [Deployment_External_ID] nvarchar(255) not null, [LeadInputTableName] nvarchar(255) not null, [ModelCommandStep] nvarchar(255), [ModelId] nvarchar(255) not null, primary key ([CommandId]));
+create table [LeadScoringResult] ([CommandId] bigint not null unique, [BeginTime] datetime2 not null, [EndTime] datetime2 not null, [ProcessStatus] int not null, primary key ([CommandId]));
+alter table [LeadScoringCommandLog] add constraint FK73D5FC0CB951A41C foreign key (CommandId) references [LeadScoringCommand];
+alter table [LeadScoringCommandParameter] add constraint FK318F5671B951A41C foreign key (CommandId) references [LeadScoringCommand];
+alter table [LeadScoringCommandState] add constraint FKD6AC0B59B951A41C foreign key (CommandId) references [LeadScoringCommand];
