@@ -87,6 +87,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         if (StringUtils.isEmpty(hdfsPodId)) {
             hdfsPodId = CamilleEnvironment.getPodId();
         }
+        log.info("PodId = " + hdfsPodId);
 
         if (input.getNumRows() > averageBlockSize) {
             log.info("Submitted rows " + input.getNumRows() + " is more than the average block size " + averageBlockSize
