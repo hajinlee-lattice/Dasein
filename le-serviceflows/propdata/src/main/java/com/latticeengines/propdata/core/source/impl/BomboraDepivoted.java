@@ -2,11 +2,13 @@ package com.latticeengines.propdata.core.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.PurgeStrategy;
 import com.latticeengines.propdata.core.source.Source;
 
+@Component("bomboraDepivoted")
 public class BomboraDepivoted implements FixedIntervalSource {
 
     private static final long serialVersionUID = 2471824706529427531L;

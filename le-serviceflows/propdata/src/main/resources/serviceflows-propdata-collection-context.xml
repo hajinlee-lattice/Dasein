@@ -5,6 +5,7 @@
           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <context:component-scan base-package="com.latticeengines.propdata.collection"/>
+    <context:component-scan base-package="com.latticeengines.propdata.engine"/>
     <context:component-scan base-package="com.latticeengines.propdata.dataflow"/>
 
     <import resource="classpath:serviceflows-propdata-core-context.xml"/>
@@ -24,9 +25,8 @@
     <bean id="publicationDao" class="com.latticeengines.propdata.collection.dao.impl.PublicationDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-
+    
     <bean id="publicationProgressDao" class="com.latticeengines.propdata.collection.dao.impl.PublicationProgressDaoImpl" >
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>
-
 </beans>

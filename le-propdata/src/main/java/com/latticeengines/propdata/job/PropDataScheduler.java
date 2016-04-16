@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -24,8 +25,11 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
 import com.latticeengines.propdata.core.source.DataImportedFromDB;
+import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.transform.TransformationProgressOrchestrator;
+import com.latticeengines.propdata.engine.transform.service.TransformationService;
 
 @Component("propDataScheduler")
 public class PropDataScheduler {
@@ -44,6 +48,9 @@ public class PropDataScheduler {
 
     @Autowired
     private ProgressOrchestrator progressOrchestrator;
+
+    @Autowired
+    private TransformationProgressOrchestrator transformationProgressOrchestrator;
 
     @PostConstruct
     private void registerJobs() throws SchedulerException {
@@ -79,25 +86,31 @@ public class PropDataScheduler {
             registerArchiveJob((DataImportedFromDB) source);
         } else if (source instanceof DerivedSource) {
             registerRefreshJob((DerivedSource) source);
+        } else if (source instanceof DataImportedFromHDFS) {
+            registerIngestionJob((DataImportedFromHDFS) source);
         }
+    }
+
+    private void registerIngestionJob(DataImportedFromHDFS source) throws SchedulerException {
+        TransformationService service = transformationProgressOrchestrator.getTransformationService(source);
+        scheduleJob(source, "transformationService", service, TransformationScheduler.class);
     }
 
     private void registerArchiveJob(DataImportedFromDB source) throws SchedulerException {
         ArchiveService service = progressOrchestrator.getArchiveService(source);
-        if (service != null) {
-            JobDetail job = JobBuilder.newJob(ArchiveScheduler.class).usingJobData("dryrun", dryrun).build();
-            job.getJobDataMap().put("archiveService", service);
-            job.getJobDataMap().put("zkConfigurationService", serviceFlowsZkConfigService);
-
-            scheduler.scheduleJob(job, cronTriggerForSource(source));
-        }
+        scheduleJob(source, "archiveService", service, ArchiveScheduler.class);
     }
 
     private void registerRefreshJob(DerivedSource source) throws SchedulerException {
         RefreshService service = progressOrchestrator.getRefreshService(source);
+        scheduleJob(source, "refreshService", service, RefreshScheduler.class);
+    }
+
+    private void scheduleJob(Source source, String serviceName, Object service, Class<? extends Job> jobClass)
+            throws SchedulerException {
         if (service != null) {
-            JobDetail job = JobBuilder.newJob(RefreshScheduler.class).usingJobData("dryrun", dryrun).build();
-            job.getJobDataMap().put("refreshService", service);
+            JobDetail job = JobBuilder.newJob(jobClass).usingJobData("dryrun", dryrun).build();
+            job.getJobDataMap().put(serviceName, service);
             job.getJobDataMap().put("zkConfigurationService", serviceFlowsZkConfigService);
 
             scheduler.scheduleJob(job, cronTriggerForSource(source));

@@ -17,11 +17,22 @@ import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
+import com.latticeengines.propdata.core.source.IngestedRawSource;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.core.util.TableUtils;
 
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
+
+    private static final long SLEEP_DURATION_IN_EXCEPTION_HADLING = 1000L;
+
+    private static final String SUCCESS_FILE_SUFFIX = "_SUCCESS";
+
+    private static final String AVRO_FILE_EXTENSION = ".avro";
+
+    private static final String WILD_CARD = "*";
+
+    private static final String HDFS_PATH_SEPARATOR = "/";
 
     private static final Log log = LogFactory.getLog(HdfsSourceEntityMgrImpl.class);
 
@@ -39,11 +50,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             try {
                 return HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
             } catch (Exception e) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e2) {
-                    // ignore
-                }
+                sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }
         }
         throw new RuntimeException("Could not determine the current version of source " + source.getSourceName());
@@ -63,7 +70,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
-    public Date getLatestTimestamp(CollectedSource source) {
+    public Date getLatestTimestamp(IngestedRawSource source) {
         String versionFile = hdfsPathBuilder.constructLatestFile(source).toString();
         int retries = 0;
         while (retries++ < 3) {
@@ -71,18 +78,14 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 Long mills = Long.valueOf(HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile));
                 return new Date(mills);
             } catch (Exception e) {
-                try {
-                    Thread.sleep(1000L);
-                } catch (InterruptedException e2) {
-                    // ignore
-                }
+                sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }
         }
         return null;
     }
 
     @Override
-    public synchronized void setLatestTimestamp(CollectedSource source, Date timestamp) {
+    public synchronized void setLatestTimestamp(IngestedRawSource source, Date timestamp) {
         Date currentTimestamp = getLatestTimestamp(source);
         if (currentTimestamp != null && currentTimestamp.after(timestamp)) {
             return;
@@ -101,7 +104,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public synchronized void purgeSourceAtVersion(Source source, String version) {
-        if (source instanceof CollectedSource) {
+        if (source instanceof IngestedRawSource) {
             throw new UnsupportedOperationException("Never purge collected source.");
         }
 
@@ -131,10 +134,12 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         if (source instanceof HasSqlPresence) {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(), path + "/*.avro");
+            return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(),
+                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         } else {
             String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
-            return TableUtils.createTable(source.getSourceName(), path + "/*.avro");
+            return TableUtils.createTable(source.getSourceName(),
+                    path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         }
     }
 
@@ -145,7 +150,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         try {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, snapshot)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
-                    String version = dir.substring(dir.lastIndexOf("/") + 1);
+                    String version = dir.substring(dir.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
                     versions.add(version);
                 }
             }
@@ -156,7 +161,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     }
 
     @Override
-    public Table getCollectedTableSince(CollectedSource source, Date earliest) {
+    public Table getCollectedTableSince(IngestedRawSource source, Date earliest) {
         String firstVersion = HdfsPathBuilder.dateFormat.format(earliest);
 
         String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
@@ -164,10 +169,11 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         try {
             for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, rawDir)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
-                    String version = dir.substring(dir.lastIndexOf("/") + 1);
-                    String success = rawDir + "/" + version + "/_SUCCESS";
+                    String version = dir.substring(dir.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
+                    String success = rawDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;
                     if (version.compareTo(firstVersion) > 0 && HdfsUtils.fileExists(yarnConfiguration, success)) {
-                        avroPaths.add(rawDir + "/" + version + "/*.avro");
+                        avroPaths.add(rawDir + HDFS_PATH_SEPARATOR + version + HDFS_PATH_SEPARATOR + WILD_CARD
+                                + AVRO_FILE_EXTENSION);
                     }
                 }
             }
@@ -184,14 +190,15 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             String avroDir;
             if (source instanceof CollectedSource) {
                 String rawDir = hdfsPathBuilder.constructRawDir(source).toString();
-                avroDir = rawDir + "/" + version;
+                avroDir = rawDir + HDFS_PATH_SEPARATOR + version;
             } else {
                 avroDir = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
             }
             if (HdfsUtils.isDirectory(yarnConfiguration, avroDir)) {
-                String success = avroDir + "/_SUCCESS";
+                String success = avroDir + HDFS_PATH_SEPARATOR + SUCCESS_FILE_SUFFIX;
                 if (HdfsUtils.fileExists(yarnConfiguration, success)) {
-                    return AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
+                    return AvroUtils.count(yarnConfiguration,
+                            avroDir + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
                 } else {
                     throw new RuntimeException(
                             "Cannot find _SUCCESS file in the avro dir, may be it is still being populated.");
@@ -202,6 +209,14 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         } catch (Exception e) {
             throw new RuntimeException("Failed to count source " + source.getSourceName() + " at version " + version,
                     e);
+        }
+    }
+
+    private void sleep(long sleepDuration) {
+        try {
+            Thread.sleep(sleepDuration);
+        } catch (InterruptedException e2) {
+            // ignore
         }
     }
 

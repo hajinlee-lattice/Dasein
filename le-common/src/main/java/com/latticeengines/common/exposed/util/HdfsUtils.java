@@ -89,16 +89,17 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
-            throws IOException {
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
             }
         }
     }
-    
-    public static final void copyInputStreamToHdfsWithoutBom(Configuration configuration, InputStream inputStream, String hdfsPath) throws IOException{
+
+    public static final void copyInputStreamToHdfsWithoutBom(Configuration configuration, InputStream inputStream,
+            String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
@@ -135,6 +136,18 @@ public class HdfsUtils {
 
             try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
                 br.write(contents);
+            }
+        }
+    }
+
+    public static final void uncompressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
+            String uncompressedFilePath) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            Path inputFilePath = new Path(gzHdfsPath);
+            Path outputFilePath = new Path(uncompressedFilePath);
+            try (InputStream is = new GZIPInputStream(fs.open(inputFilePath))) {
+                OutputStream os = fs.create(outputFilePath, true);
+                org.apache.hadoop.io.IOUtils.copyBytes(is, os, configuration);
             }
         }
     }
@@ -206,8 +219,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
-            throws IOException {
+    public static final List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<FileStatus> filePaths = new ArrayList<>();
@@ -265,7 +278,8 @@ public class HdfsUtils {
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths.addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
+                    filePaths
+                            .addAll(getFileStatusesForDirRecursive(configuration, status.getPath().toString(), filter));
                 }
             }
             return new ArrayList<>(filePaths);
@@ -346,7 +360,6 @@ public class HdfsUtils {
             return fs.getFileChecksum(new Path(path));
         }
     }
-
 
     public static Long getFileSize(Configuration configuration, String filePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {

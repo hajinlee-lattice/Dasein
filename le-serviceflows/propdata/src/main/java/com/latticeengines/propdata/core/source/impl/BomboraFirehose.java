@@ -2,6 +2,7 @@ package com.latticeengines.propdata.core.source.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.propdata.core.IngenstionNames;
@@ -9,6 +10,7 @@ import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.RawTransformationType;
 import com.latticeengines.propdata.core.source.TransformedToAvroSource;
 
+@Component("bomboraFirehose")
 public class BomboraFirehose implements TransformedToAvroSource {
 
     private static final long serialVersionUID = -7091007703522407933L;
@@ -26,7 +28,7 @@ public class BomboraFirehose implements TransformedToAvroSource {
 
     @Override
     public String getSourceName() {
-        return "bomboraFirehose";
+        return IngenstionNames.BOMBORA_FIREHOSE;
     }
 
     @Override

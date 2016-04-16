@@ -292,7 +292,8 @@ public enum LedpCode {
     LEDP_24004("ZK operation exception: {0}"), //
 
     // le-propdata
-    LEDP_25000("Can not create new derived entitlement package {0}."), LEDP_25001("Derived entitlement resource error."), //
+    LEDP_25000("Can not create new derived entitlement package {0}."), //
+    LEDP_25001("Derived entitlement resource error."), //
     LEDP_25002("Source entitlement resource error."), //
     LEDP_25003("Source column entitlement resource error."), //
     LEDP_25004("Match client {0} is not available"), //
@@ -301,6 +302,11 @@ public enum LedpCode {
     LEDP_25007("Propdata match failed."), //
     LEDP_25008("Failed to retrieve match status for root operation uid {0}"), //
     LEDP_25009("Failed to scan publication progresses"), //
+    LEDP_25010("Error in handling transformation configuration"), //
+    LEDP_25011("Could not start new transformation for source: {0}"), //
+    LEDP_25012("Error in processing dataflow for transformation for source: {0}, Reason: {1}"), //
+    LEDP_25013("Error in executing workflow for transformation for source: {0}"), //
+    LEDP_25014("Could not create new transformation progress entry"), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //
@@ -362,7 +368,8 @@ public enum LedpCode {
     LEDP_29003("The file {0} is not recorded in the Execution_Log table."), //
     LEDP_29004("Failed to download or unzip File , name={0}."), //
     LEDP_29005("The bean {0} is not found in the DellEBI configuration database. Please check the config database."), //
-    LEDP_29006("The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
+    LEDP_29006(
+            "The file name {0} did not match the file pattern in the DellEBI configuration database. Please check the config database."), //
 
     // le-quartz 30000-31000
     LEDP_30000("Destination Url {0} invalid."), //

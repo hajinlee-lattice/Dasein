@@ -9,8 +9,11 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.propdata.core.source.DerivedSource;
+import com.latticeengines.propdata.core.source.IngestedRawSource;
 import com.latticeengines.propdata.core.source.Source;
 
 @Component("hdfsPathBuilder")
@@ -64,6 +67,32 @@ public class HdfsPathBuilder {
 
     public Path propDataDir() {
         return podDir().append(SERVICES).append(PROP_DATA);
+    }
+
+    public Path constructTransformationSourceDir(Source source) {
+        return constructTransformationSourceDir(source, null);
+    }
+
+    public Path constructTransformationSourceDir(Source source, String version) {
+        Path dir = null;
+        if (source instanceof IngestedRawSource) {
+            dir = constructRawDir(source);
+            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+                dir = dir.append(version);
+            }
+        } else if (source instanceof DerivedSource) {
+            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+                dir = constructSnapshotDir(source, version);
+            } else {
+                dir = constructSnapshotRootDir(source);
+            }
+        } else {
+            dir = constructSourceDir(source);
+            if (!StringUtils.objectIsNullOrEmptyString(version)) {
+                dir = dir.append(version);
+            }
+        }
+        return dir;
     }
 
     public Path constructSourceDir(Source source) {
@@ -191,6 +220,10 @@ public class HdfsPathBuilder {
 
     public void changeHdfsPodId(String podId) {
         this.podId.set(podId);
+    }
+
+    public String getHdfsPodId() {
+        return podId.get();
     }
 
     private String replaceHyphenAndMakeLowercase(String text) {

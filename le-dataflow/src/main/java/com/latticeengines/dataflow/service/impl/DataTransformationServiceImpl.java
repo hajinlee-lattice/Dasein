@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -21,34 +22,60 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Component("dataTransformationService")
 public class DataTransformationServiceImpl implements DataTransformationService {
 
+    private static final String CSV_TO_AVRO_PIPE = "pipe";
+
+    private static final String QUOTE = "\"";
+
+    private static final String DELIMITER = ",";
+
+    private static final String APPCTX = "APPCTX";
+
+    private static final String LOCAL_FS = "file:///";
+
+    private static final String FS_DEFAULT_FS = "fs.defaultFS";
+
+    private static final String JOBPROPERTIES = "JOBPROPERTIES";
+
+    private static final String CHECKPOINT = "CHECKPOINT";
+
+    private static final String HADOOPCONF = "HADOOPCONF";
+
+    private static final String QUEUENAME_PROP_DATA = "PropData";
+
+    private static final String MAPREDUCE_JOB_QUEUENAME = "mapreduce.job.queuename";
+
     @Autowired
     private ApplicationContext appContext;
 
     @Autowired
     private VersionManager versionManager;
 
+    @Autowired
+    private YarnConfiguration configuration;
+
     @Override
     public Table executeNamedTransformation(DataFlowContext context, DataFlowBuilder dataFlow) {
         validateParameters(context);
 
-        boolean doCheckpoint = context.getProperty("CHECKPOINT", Boolean.class);
+        boolean doCheckpoint = context.getProperty(CHECKPOINT, Boolean.class);
 
-        Configuration configuration = context.getProperty("HADOOPCONF", Configuration.class);
+        Configuration configuration = context.getProperty(HADOOPCONF, Configuration.class);
 
         // Ensure that we use the fatjars rather than the hadoop class path to
         // resolve dependencies. This should eventually be set globally.
         configuration.setBoolean("mapreduce.job.user.classpath.first", true);
 
         Properties properties = new Properties();
-        if (context.getProperty("JOBPROPERTIES", Properties.class) != null) {
-            properties.putAll(context.getProperty("JOBPROPERTIES", Properties.class));
+        if (context.getProperty(JOBPROPERTIES, Properties.class) != null) {
+            properties.putAll(context.getProperty(JOBPROPERTIES, Properties.class));
         }
         properties.setProperty("mapred.mapper.new-api", "false");
-        context.setProperty("JOBPROPERTIES", properties);
+        context.setProperty(JOBPROPERTIES, properties);
 
-        dataFlow.setLocal(configuration == null || configuration.get("fs.defaultFS").equals("file:///"));
+        dataFlow.setLocal(configuration == null || configuration.get(FS_DEFAULT_FS).equals(LOCAL_FS));
         dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.setEnforceGlobalOrdering(true);
+
         return dataFlow.runFlow(context, versionManager.getCurrentVersion());
     }
 
@@ -56,13 +83,13 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     public Table executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
         validateParameters(dataFlowCtx);
 
-        ApplicationContext ctx = dataFlowCtx.getProperty("APPCTX", ApplicationContext.class);
+        ApplicationContext ctx = dataFlowCtx.getProperty(APPCTX, ApplicationContext.class);
 
         if (ctx != null) {
             appContext = ctx;
         }
         if (appContext == null) {
-            throw new RuntimeException("ApplicationContext cannot be null");
+            throw new LedpException(LedpCode.LEDP_26001, "ApplicationContext", null);
         }
 
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
@@ -96,7 +123,6 @@ public class DataTransformationServiceImpl implements DataTransformationService 
                 "TARGETPATH", //
                 "CUSTOMER", //
                 "FLOWNAME", //
-                "CHECKPOINT");
+                CHECKPOINT);
     }
-
 }
