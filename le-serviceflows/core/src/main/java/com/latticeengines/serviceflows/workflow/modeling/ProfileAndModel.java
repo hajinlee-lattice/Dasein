@@ -92,6 +92,9 @@ public class ProfileAndModel extends BaseWorkflowStep<ModelStepConfiguration> {
             if (events.size() > 1) {
                 bldr = bldr.modelName(configuration.getModelName() + " (" + event.getDisplayName() + ")");
             }
+            if (configuration.getDisplayName() != null) {
+                bldr = bldr.displayName(configuration.getDisplayName());
+            }
             ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
             modelExecutor.writeMetadataFiles();
             modelExecutor.profile();

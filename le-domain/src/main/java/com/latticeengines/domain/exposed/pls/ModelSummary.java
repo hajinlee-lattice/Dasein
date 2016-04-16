@@ -49,6 +49,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     private String id;
     private String name;
+    private String displayName;
     private Long pid;
     private Tenant tenant;
     private Long tenantId;
@@ -104,6 +105,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("Name")
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty("DisplayName")
+    @Column(name = "DISPLAY_NAME", nullable = true)
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty("DisplayName")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @Override

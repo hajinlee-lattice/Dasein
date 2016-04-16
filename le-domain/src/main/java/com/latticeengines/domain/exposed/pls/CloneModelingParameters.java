@@ -13,6 +13,9 @@ public class CloneModelingParameters {
     private String name;
 
     @JsonProperty
+    private String displayName;
+
+    @JsonProperty
     private String description;
 
     @JsonProperty
@@ -24,6 +27,14 @@ public class CloneModelingParameters {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDescription() {

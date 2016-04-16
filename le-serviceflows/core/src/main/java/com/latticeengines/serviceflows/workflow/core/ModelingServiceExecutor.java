@@ -156,6 +156,9 @@ public class ModelingServiceExecutor {
         Model model = new Model();
         model.setModelDefinition(modelDef);
         model.setName(builder.getModelName());
+        if (builder.getDisplayName() != null) {
+            model.setDisplayName(builder.getDisplayName());
+        }
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
@@ -303,6 +306,7 @@ public class ModelingServiceExecutor {
         private String metadataContents;
         private String dataCompositionContents;
         private String modelName;
+        private String displayName;
         private String eventTableName;
         private String sourceSchemaInterpretation;
         private String trainingTableName;
@@ -407,6 +411,11 @@ public class ModelingServiceExecutor {
 
         public Builder modelName(String modelName) {
             this.setModelName(modelName);
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            this.setDisplayName(displayName);
             return this;
         }
 
@@ -620,6 +629,14 @@ public class ModelingServiceExecutor {
 
         public void setModelName(String modelName) {
             this.modelName = modelName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
         }
 
         public String getModelSubmissionUrl() {

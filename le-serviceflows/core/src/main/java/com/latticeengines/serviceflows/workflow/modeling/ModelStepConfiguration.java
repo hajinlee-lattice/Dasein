@@ -15,6 +15,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String modelName;
 
+    private String displayName;
+
     private String eventTableName;
 
     private String productType;
@@ -41,6 +43,16 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty
     public void setModelName(String modelName) {
         this.modelName = modelName;
+    }
+
+    @JsonProperty
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getEventTableName() {

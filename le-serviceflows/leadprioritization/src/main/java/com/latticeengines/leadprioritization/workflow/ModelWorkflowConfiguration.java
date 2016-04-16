@@ -43,6 +43,11 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder displayName(String displayName) {
+            model.setDisplayName(displayName);
+            return this;
+        }
+
         public Builder eventTableName(String eventTableName) {
             model.setEventTableName(eventTableName);
             return this;

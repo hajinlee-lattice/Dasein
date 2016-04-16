@@ -69,6 +69,7 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .modelName(parameters.getName()) //
+                .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .trainingTableName(trainingTableName) //
                 .inputProperties(inputProperties) //

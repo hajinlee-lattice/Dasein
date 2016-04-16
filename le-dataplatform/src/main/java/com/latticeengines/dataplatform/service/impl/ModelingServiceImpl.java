@@ -348,6 +348,11 @@ public class ModelingServiceImpl implements ModelingService {
         if (modelName != null) {
             classifier.setName(modelName.replace(' ', '_'));
         }
+        if (model.getDisplayName() != null) {
+            classifier.setDisplayName(model.getDisplayName());
+        } else {
+            classifier.setDisplayName(classifier.getName());
+        }
         
         setDefaultValues(algorithm);
 

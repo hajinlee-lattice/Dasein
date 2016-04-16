@@ -14,6 +14,9 @@ public class ModelingParameters {
     private String name;
 
     @JsonProperty
+    private String displayName;
+
+    @JsonProperty
     private String description;
 
     public String getFilename() {
@@ -30,6 +33,14 @@ public class ModelingParameters {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public String getDescription() {

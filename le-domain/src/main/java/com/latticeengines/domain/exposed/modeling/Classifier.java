@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 public class Classifier implements HasName {
 
     private String name;
+    private String displayName;
     private String trainingDataHdfsPath;
     private String testDataHdfsPath;
     private String pythonScriptHdfsPath;
@@ -40,6 +41,16 @@ public class Classifier implements HasName {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty("display_name")
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty("display_name")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @JsonProperty("training_data")

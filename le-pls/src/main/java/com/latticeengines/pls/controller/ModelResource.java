@@ -73,7 +73,7 @@ public class ModelResource {
         ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(parameters.getSourceModelSummaryId());
 
         return ResponseDocument.successResponse( //
-                modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(),
+                modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(), parameters.getDisplayName(),
                         modelSummary.getSourceSchemaInterpretation()).toString());
     }
 

@@ -33,6 +33,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private Long pid;
     private String id;
     private String name;
+    private String displayName;
     private String dataHdfsPath;
     private String metadataHdfsPath;
     private String schemaHdfsPath;
@@ -77,6 +78,17 @@ public class Model implements HasName, HasPid, HasId<String> {
     @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
+    }
+
+    @JsonProperty("display_name")
+    @Column(name = "DISPLAY_NAME")
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty("display_name")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     @JsonProperty("model_definition")

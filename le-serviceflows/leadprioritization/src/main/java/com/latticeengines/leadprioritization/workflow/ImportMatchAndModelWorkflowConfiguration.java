@@ -126,6 +126,11 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder displayName(String displayName) {
+            model.setDisplayName(displayName);
+            return this;
+        }
+
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;
