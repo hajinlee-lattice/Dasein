@@ -55,7 +55,7 @@ public class ModelingFileUploadResource {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${pls.fileupload.maxUpload.bytes}")
+    @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
 
     @Autowired

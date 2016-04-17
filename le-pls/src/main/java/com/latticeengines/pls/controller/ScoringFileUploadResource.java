@@ -36,7 +36,7 @@ public class ScoringFileUploadResource {
     @Autowired
     private FileUploadService fileUploadService;
 
-    @Value("${pls.fileupload.maxUpload.bytes}")
+    @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
