@@ -27,6 +27,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -100,6 +101,12 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
 
+        dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID) + "/data/ANY_TABLE/csv_files";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+                + "/postMatchEventTable_allTraining-r-00000.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+                + "/postMatchEventTable_allTest-r-00000.csv");
+
     }
 
     @AfterClass(groups = { "functional" })
@@ -163,7 +170,9 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBaseDeprec
                 { "application/csv", ".*_readoutsample.csv" }, //
                 { "text/plain", ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
-                { "text/plain", "rf_model.txt" } };
+                { "text/plain", "rf_model.txt" }, //
+                { "application/csv", "postMatchEventTable.*Training.*.csv" }, //
+                { "application/csv", "postMatchEventTable.*Test.*.csv" } };
     }
 
     @DataProvider(name = "dataFileProviderNotFound")

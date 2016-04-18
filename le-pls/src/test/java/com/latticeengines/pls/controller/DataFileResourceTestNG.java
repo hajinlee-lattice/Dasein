@@ -26,6 +26,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
@@ -76,12 +77,18 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/metadata.avsc");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils
+                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
+        dir = modelingServiceHdfsBaseDir + "/" + CustomerSpace.parse(TENANT_ID) + "/data/ANY_TABLE/csv_files";
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+                + "/postMatchEventTable_allTraining-r-00000.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir
+                + "/postMatchEventTable_allTest-r-00000.csv");
     }
 
     @AfterClass(groups = { "functional", "deployment" })
@@ -104,7 +111,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         Map<String, String> map = (Map) response.get(0);
 
         String modelId = map.get("Id");
-        restTemplate.execute(getRestAPIHostPort() + "/pls/datafiles/" + fileType + "/" + modelId, HttpMethod.GET,
+        restTemplate.execute(getRestAPIHostPort() + "/pls/datafiles/" + fileType + "?modelId=" + modelId, HttpMethod.GET,
                 new RequestCallback() {
                     @Override
                     public void doWithRequest(ClientHttpRequest request) throws IOException {
@@ -133,8 +140,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", "text/plain" }, //
                 { "explorercsv", "application/csv" }, //
-                { "rfmodelcsv", "text/plain" }
-
-        };
+                { "rfmodelcsv", "text/plain" }, //
+                { "postmatcheventtablecsv/training", "application/csv" }, //
+                { "postmatcheventtablecsv/testing", "application/csv" } };
     }
 }

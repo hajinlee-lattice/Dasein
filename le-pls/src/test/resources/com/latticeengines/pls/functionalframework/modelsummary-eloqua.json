@@ -11179,6 +11179,7 @@
     "EventTableProvenance": {
         "SourceURL": "https://bodcdevvint187.dev.lattice.local:8080//DLRestService", 
         "TenantName": "BD_ADEDTBDd69264296nJ26263627n1", 
-        "QueryName": "Q_PLS_Modeling"
+        "QueryName": "Q_PLS_Modeling",
+        "EventTableName": "ANY_TABLE"
     }
 }
