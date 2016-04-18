@@ -63,8 +63,6 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
     private void waitForMatchCommand(Commands commands) {
         log.info(String.format("Waiting for match command %d to complete", commands.getPid()));
 
-        int maxTries = 1000;
-        int i = 0;
         MatchCommandStatus matchCommandStatus = null;
         do {
             MatchStatusResponse status = matchCommandProxy.getMatchStatus(commands.getPid(),
@@ -80,11 +78,6 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
                 // Ignore InterruptedException
-            }
-            i++;
-
-            if (i == maxTries) {
-                break;
             }
 
         } while (matchCommandStatus != null && !TERMINAL_MATCH_STATUS.contains(matchCommandStatus));
