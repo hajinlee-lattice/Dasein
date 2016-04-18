@@ -1213,6 +1213,9 @@ select[multiple].input-lg {
     width: auto;
     vertical-align: middle;
   }
+  .model-title .form-inline .form-control {
+    width: 100%;
+  }
   .form-inline .form-control-static {
     display: inline-block;
   }
