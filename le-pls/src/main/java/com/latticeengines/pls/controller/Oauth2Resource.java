@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -38,5 +37,15 @@ public class Oauth2Resource {
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId) {
         log.info("Generating access token for tenant " + tenantId);
         return oauth2Service.createOAuth2AccessToken(tenantId).getValue();
+    }
+
+    @RequestMapping(value = "/accesstoken/json", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
+    @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
+    public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId) {
+        log.info("Generating access token for tenant " + tenantId);
+        String token = oauth2Service.createOAuth2AccessToken(tenantId).getValue();
+        return "{\"token\":\"" + token + "\"}";
     }
 }
