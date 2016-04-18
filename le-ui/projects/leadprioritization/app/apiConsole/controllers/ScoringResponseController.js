@@ -10,8 +10,8 @@ angular.module('pd.apiconsole.ScoringResponseController', [
             $scope.ResourceUtility = ResourceUtility;
 
             $scope.scoringRequested = false;
-            $scope.showScoringRequestError = true;
-            $scope.scoringRequestErrorMessage = "This is a mockup data in local.";
+            $scope.scoreRecordLoading = false;
+            $scope.scoringRequestError = "This is a mockup data in local.";
             $scope.score = 82;
             var json = {id: "string",score: 0,timestamp: "string",warnings: [{"warning": "string","warning_description": "string"}]};
             $scope.jsonData = JSON.stringify(json, null, "    ");

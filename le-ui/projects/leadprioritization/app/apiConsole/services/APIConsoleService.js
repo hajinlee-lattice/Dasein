@@ -4,9 +4,79 @@ angular.module('pd.apiconsole.APIConsoleService', [
 
 .service('APIConsoleService', function ($http, $q, $location, ResourceUtility) {
 
-    this.GetModelFields = function () {
+    this.GetOAuthAccessToken = function (tenantId) {
         var deferred = $q.defer();
-        deferred.resolve(getMockupFields());
+
+        var result = {
+            Success: true,
+            ResultObj: '6c0ffb8d-fa10-4bf5-ac66-44a944cfc7d1',
+            ResultErrors: null
+        };
+        deferred.resolve(result);
+        /*
+        $http({
+            method: 'GET',
+            url: '/pls/oauth2/accesstoken?tenantId=' + tenantId + '.' + tenantId + '.Production',
+            headers: {
+                'Content-Type': "application/json"
+            }
+        }).success(function (data, status, headers, config) {
+            var result = {
+                Success: true,
+                ResultObj: data,
+                ResultErrors: null
+            };
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            console.log(data)
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_ACCESS_TOKEN_ERROR')
+            };
+            deferred.resolve(result);
+        });
+        */
+
+        return deferred.promise;
+    };
+
+
+    this.GetModelFields = function (accessToken, modelId) {
+        var deferred = $q.defer();
+        var result = {
+            Success: true,
+            ResultObj: getMockupFields(),
+            ResultErrors: null
+        };
+        deferred.resolve(result);
+        /*
+        $http({
+            method: 'GET',
+            url: getScoringApiUrl() + '/models/' + modelId + '/fields',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
+            }
+        })
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: true,
+                ResultObj: data,
+                ResultErrors: null
+            };
+            deferred.resolve(result);
+        })
+        .error(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: null,
+                ResultErrors: ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_MODEL_FIELDS_ERROR')
+            };
+            deferred.resolve(result);
+        });
+        */
         return deferred.promise;
     };
 
@@ -51,66 +121,60 @@ angular.module('pd.apiconsole.APIConsoleService', [
         return { name: name, displayName: displayName, placeholder: placeholder };
     }
 
-    this.GetAccessToken = function (tenantId) {
-        var deferred = $q.defer();
-
-        $http({
-            method: 'GET',
-            url: '/pls/oauth2/accesstoken?tenantId=' + tenantId + '.' + tenantId + '.Production',
-            headers: {
-                'Content-Type': "application/json"
-            }
-        })
-        .success(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultObj: data,
-                ResultErrors: null
-            };
-            deferred.resolve(result);
-        })
-        .error(function (data, status, headers, config) {
-            var result = {
-                Success: false,
-                ResultObj: null,
-                ResultErrors: 'We are cannot obtain an access token from the OAuth Authorization Server.'
-            };
-            deferred.resolve(result);
-        });
-
-        return deferred.promise;
-    };
-
     this.GetScoreRecord = function (accessToken, scoreRequest) {
         var deferred = $q.defer();
 
-        // TODO: need to request scoring api in LP back end?
         $http({
             method: 'POST',
-            url: '/pls/score/record',
+            url: getScoringApiUrl() + '/record',
             data: scoreRequest,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + accessToken
             }
         })
         .success(function (data, status, headers, config) {
             var result = {
-                Success: false,
+                Success: true,
                 ResultObj: data,
-                ResultErrors: null
+                ResultErrors: null,
             };
             deferred.resolve(result);
         })
         .error(function (data, status, headers, config) {
+            var jsonData = null;
+            if (typeof data === 'string') {
+                jsonData = { error: data, code: status };
+            } else if (data != null) {
+                jsonData = data;
+                jsonData.code = status;
+            }
             var result = {
                 Success: false,
-                ResultObj: null,
-                ResultErrors: 'We are cannot get score data.'
+                ResultObj: jsonData,
+                ResultErrors: ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_SCORE_RECORD_ERROR')
             };
             deferred.resolve(result);
         });
 
         return deferred.promise;
     };
+
+    function getScoringApiUrl() {
+        var apiUrl = $location.protocol() + '://' + $location.host();
+        var port = $location.port();
+        if (port != 80) {
+            apiUrl += ":" + port;
+        }
+
+        if (apiUrl.charAt(apiUrl.length - 1) ===  '/') {
+            apiUrl += 'score';
+        } else {
+            apiUrl += '/score';
+        }
+
+        apiUrl = apiUrl.replace(/app/i, 'api');
+        return apiUrl;
+    }
 
 });

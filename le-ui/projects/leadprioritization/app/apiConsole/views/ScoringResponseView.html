@@ -1,15 +1,21 @@
 <div data-ng-show="!scoringRequested">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_TEST_API')}}</div>
 <div data-ng-show="scoringRequested">
-    <div class="global-error local-error" data-ng-show="showScoringRequestError">
-        <span><i class="fa fa-exclamation-triangle fa-inverse"></i>{{scoringRequestErrorMessage}}</span>
+    <div data-ng-show="scoreRecordLoading">
+        <div class="loader"> </div>
+        <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
     </div>
-    <div class="score">
-        <label class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_SCORE_')}}&nbsp;{{score}}</label>
-    </div>
-    <div class="resonse-json">
-        <pre>{{jsonData}}</pre>
-    </div>
-    <div>
-        <label>{{ResourceUtility.getString('API_CONSOLE_LABEL_TIME_ELAPSED')}}</label>&nbsp;<span>{{timeElapsed}}</span>
+    <div data-ng-show="!scoreRecordLoading">
+        <div class="global-error local-error" data-ng-show="scoringRequestError != null">
+            <span><i class="fa fa-exclamation-triangle fa-inverse"></i>{{scoringRequestError}}</span>
+        </div>
+        <div data-ng-show="score != null" class="score">
+            <label class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_SCORE_')}}&nbsp;{{score}}</label>
+        </div>
+        <div data-ng-show="jsonData != null" class="resonse-json">
+            <pre>{{jsonData}}</pre>
+        </div>
+        <div data-ng-show="timeElapsed != null">
+            <label>{{ResourceUtility.getString('API_CONSOLE_LABEL_TIME_ELAPSED')}}</label>&nbsp;<span>{{timeElapsed}}</span>
+        </div>
     </div>
 </div>

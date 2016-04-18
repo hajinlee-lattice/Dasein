@@ -29,7 +29,10 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
     
     this._sessionLastActiveTimestampStorageKey = "GriotSessionLastActiveTimestamp";
     this._sessionShouldShowJobCompleteMessage = "GriotSessionShowJobCompleteMessage";
-    
+
+    this._OAuthAccessTokenStorageKey = "GriotOAuthAccessToken";
+    this._OAuthAccessToken = null; // actual client session object
+
     this.setSessionLastActiveTimestamp = function(timeStamp) {
         $.jStorage.set(this._sessionLastActiveTimestampStorageKey, timeStamp);
     };
@@ -118,6 +121,14 @@ angular.module('mainApp.core.utilities.BrowserStorageUtility', [])
 
     this.getWidgetConfigDocument = function () {
         return this._getProperty("_widgetConfigDocument", "_widgetConfigDocumentStorageKey");
+    };
+
+    this.setOAuthAccessToken = function (data, successHandler) {
+        this._setProperty(data, successHandler, "_OAuthAccessToken", "_OAuthAccessTokenStorageKey");
+    };
+
+    this.getOAuthAccessToken = function () {
+        return this._getProperty("_OAuthAccessToken", "_OAuthAccessTokenStorageKey");
     };
 
     // Helper method to set a property
