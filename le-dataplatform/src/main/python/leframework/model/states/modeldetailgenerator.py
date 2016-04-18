@@ -20,7 +20,8 @@ class ModelDetailGenerator(State):
         mediator.modelId = self.generateModelID()
 
         result["Name"] = mediator.schema["name"]
-        result["DisplayName"] = mediator.schema["display_name"]
+        if mediator.schema.has_key("display_name"):
+            result["DisplayName"] = mediator.schema["display_name"]
         result["LookupID"] = self.lookupID()
         result["ModelID"] = mediator.modelId
         # Leads
