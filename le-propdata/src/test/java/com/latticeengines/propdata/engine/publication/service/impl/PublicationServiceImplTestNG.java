@@ -18,14 +18,14 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationConfigu
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
 import com.latticeengines.propdata.engine.publication.service.PublicationService;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.engine.testframework.PublicationWorkflowServlet;
-import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
-import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.workflow.engine.PublishWorkflowConfiguration;
 import com.latticeengines.propdata.workflow.engine.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -115,19 +115,27 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
                 String json = configuration.getConfigRegistry().get(PublishConfiguration.class.getCanonicalName());
                 ObjectMapper mapper = new ObjectMapper();
                 try {
-                    JsonNode jsonNode = mapper.readTree(json).get("pub_config");
-                    PublicationConfiguration pubConfig = mapper.treeToValue(jsonNode, PublicationConfiguration.class);
+                    JsonNode jsonNode = mapper.readTree(json).get("publication");
+                    Publication publication = mapper.treeToValue(jsonNode, Publication.class);
+                    PublicationConfiguration pubConfig = publication.getDestinationConfiguration();
                     Assert.assertTrue(pubConfig instanceof PublishToSqlConfiguration);
-                    Assert.assertNotNull(pubConfig.getDestination());
-                    Assert.assertTrue(pubConfig.getDestination() instanceof SqlDestination);
+
+                    jsonNode = mapper.readTree(json).get("progress");
+                    PublicationProgress progress = mapper.treeToValue(jsonNode, PublicationProgress.class);
+                    Assert.assertNotNull(progress.getDestination());
+                    Assert.assertTrue(progress.getDestination() instanceof SqlDestination);
                 } catch (IOException e) {
                     Assert.fail("Failed to parse publication configuration.", e);
                 }
             }
         });
-        workflowProxy.setMicroserviceHostPort("http://localhost:8234");
         publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
-        publicationService.scan(POD_ID);
+        try {
+            workflowProxy.setMicroserviceHostPort("http://localhost:8234");
+            publicationService.scan(POD_ID);
+        } catch (Exception e) {
+            Assert.fail("Error from workflow proxy.", e);
+        }
     }
 
     private Publication getPublication() {
@@ -135,6 +143,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
         publication.setPublicationName(PUBLICATION_NAME);
         publication.setSourceName(source.getSourceName());
         publication.setNewJobMaxRetry(3);
+        publication.setSchedularEnabled(true);
         publication.setPublicationType(Publication.PublicationType.SQL);
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();

@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.match.service;
+package com.latticeengines.propdata.core.service;
 
 public interface PropDataTenantService {
 

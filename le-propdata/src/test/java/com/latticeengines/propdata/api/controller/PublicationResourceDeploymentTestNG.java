@@ -63,12 +63,9 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         publicationEntityMgr.removePublication(PUBLICATION_NAME);
         Publication publication = registerPublication();
 
-        PublicationProgress progress = publicationProxy.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
-        Assert.assertNotNull(progress, "Should return a progress object");
-
         List<PublicationProgress> progressList = publicationProxy.scan(POD_ID);
         Assert.assertTrue(progressList.size() >= 1, "Should trigger at least one progress.");
-        progress = progressList.get(0);
+        PublicationProgress progress = progressList.get(0);
 
         ApplicationId appId = ConverterUtils.toApplicationId(progress.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId, 3600);
@@ -86,6 +83,7 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
         publication.setPublicationName(PUBLICATION_NAME);
         publication.setSourceName(source.getSourceName());
         publication.setNewJobMaxRetry(3);
+        publication.setSchedularEnabled(true);
         publication.setPublicationType(Publication.PublicationType.SQL);
 
         PublishToSqlConfiguration configuration = new PublishToSqlConfiguration();

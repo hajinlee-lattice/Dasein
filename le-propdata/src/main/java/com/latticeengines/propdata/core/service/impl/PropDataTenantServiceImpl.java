@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.match.service.impl;
+package com.latticeengines.propdata.core.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,7 +10,9 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.propdata.match.service.PropDataTenantService;
+import com.latticeengines.propdata.core.PropDataConstants;
+import com.latticeengines.propdata.core.service.PropDataTenantService;
+import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -26,7 +28,7 @@ public class PropDataTenantServiceImpl implements PropDataTenantService {
     @Autowired
     private UserService userService;
 
-    private String tenantId = MatchConstants.SERVICE_CUSTOMERSPACE;
+    private String tenantId = PropDataConstants.SERVICE_CUSTOMERSPACE;
 
     @Value("${propdata.ga.username}")
     private String username;

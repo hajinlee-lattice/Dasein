@@ -15,8 +15,12 @@ import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
+import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.SourceService;
+import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
+import com.latticeengines.propdata.engine.publication.service.PublicationNewProgressValidator;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressUpdater;
 
@@ -31,12 +35,32 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
     @Autowired
     private PublicationProgressEntityMgr progressEntityMgr;
 
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    private SourceService sourceService;
+
+    @Autowired
+    private PublicationNewProgressValidator newProgressValidator;
+
+    @Override
+    public PublicationProgress kickoffNewProgress(Publication publication, String creator) {
+        String sourceName = publication.getSourceName();
+        Source source = sourceService.findBySourceName(sourceName);
+        String currentVersion = hdfsSourceEntityMgr.getCurrentVersion(source);
+        if (newProgressValidator.isValidToStartNewProgress(publication, currentVersion)) {
+            return publishVersion(publication, currentVersion, creator);
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public PublicationProgress publishVersion(Publication publication, String version, String creator) {
         PublicationProgress existingProgress = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 version);
         if (existingProgress != null) {
-            log.info("There is already a progress for version " + existingProgress);
             return null;
         }
         PublicationDestination destination = constructDestination(publication, version);
@@ -44,6 +68,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
         log.info("Kick off new progress [" + progress + "]");
         return progress;
     }
+
 
     @Override
     public PublicationProgressUpdaterImpl update(PublicationProgress progress) {

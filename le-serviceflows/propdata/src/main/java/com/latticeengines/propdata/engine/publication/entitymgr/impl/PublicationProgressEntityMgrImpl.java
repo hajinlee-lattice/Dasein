@@ -88,6 +88,26 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    public PublicationProgress findLatestUnderMaximumRetry(Publication publication) {
+        Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
+        List<PublicationProgress> progressList = publication1.getProgresses();
+        Collections.sort(progressList, new Comparator<PublicationProgress>() {
+            @Override
+            public int compare(PublicationProgress o1, PublicationProgress o2) {
+                // sort in create time
+                return o1.getCreateTime().compareTo(o2.getCreateTime());
+            }
+        });
+        for (PublicationProgress progress: progressList) {
+            if (!canBeIgnored(publication, progress)) {
+                return progress;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public List<PublicationProgress> findAllForPublication(Publication publication) {
         if (publication.getPid() == null) {
             publication = publicationDao.findByField("PublicationName", publication.getPublicationName());

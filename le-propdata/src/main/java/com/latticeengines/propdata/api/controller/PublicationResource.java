@@ -56,11 +56,10 @@ public class PublicationResource extends InternalResourceBase implements Publica
         }
     }
 
-    @RequestMapping(value = "/{publicationName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "internal/{publicationName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Trigger a new publication for a source at its latest version. "
+    @ApiOperation(value = "Forcefully trigger a new publication for a source at its latest version. "
             + "If a publication with the same source version already exists, skip operation. "
-            + "url parameter submitter indicates what submitted this job: Quartz, Test, Cli, ..."
             + "url parameter podid is for testing purpose.")
     public PublicationProgress publish(@PathVariable String publicationName,
             @RequestBody PublicationRequest publicationRequest,

@@ -1,8 +1,10 @@
 package com.latticeengines.propdata.workflow.engine;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.workflow.engine.steps.EngineConstants;
 import com.latticeengines.propdata.workflow.engine.steps.PublishConfiguration;
 
@@ -36,6 +38,7 @@ public class PublishWorkflowConfiguration extends WorkflowConfiguration {
         public PublishWorkflowConfiguration build() {
             configuration.setContainerConfiguration("publishWorkflow", EngineConstants.PRODATA_CUSTOMERSPACE,
                     "PublishWorkflow");
+            configuration.setCustomerSpace(CustomerSpace.parse(PropDataConstants.SERVICE_CUSTOMERSPACE));
             configuration.add(publishConfig);
             return configuration;
         }

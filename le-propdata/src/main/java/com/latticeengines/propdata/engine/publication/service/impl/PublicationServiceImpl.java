@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
+import com.latticeengines.propdata.core.PropDataConstants;
+import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.Source;
@@ -40,6 +42,9 @@ public class PublicationServiceImpl implements PublicationService {
     private SourceService sourceService;
 
     @Autowired
+    private PropDataTenantService propDataTenantService;
+
+    @Autowired
     private WorkflowProxy workflowProxy;
 
     @Override
@@ -47,6 +52,7 @@ public class PublicationServiceImpl implements PublicationService {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             hdfsPathBuilder.changeHdfsPodId(hdfsPod);
         }
+        publishAll(hdfsPod);
         return scanForNewWorkFlow(hdfsPod);
     }
 
@@ -56,13 +62,38 @@ public class PublicationServiceImpl implements PublicationService {
             hdfsPathBuilder.changeHdfsPodId(hdfsPod);
         }
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
-        return publicationProgressService.publishVersion(publication, request.getSourceVersion(), request.getSubmitter());
+        PublicationProgress progress =  publicationProgressService.publishVersion(publication, request.getSourceVersion(),
+                request.getSubmitter());
+        if (progress == null) {
+            log.info("There is already a progress for version " + request.getSourceVersion());
+        }
+        return progress;
+    }
+
+    private void publishAll(String hdfsPod) {
+        if (StringUtils.isNotEmpty(hdfsPod)) {
+            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+        }
+        for (Publication publication : publicationEntityMgr.findAll()) {
+            if (publication.isSchedularEnabled()) {
+                try {
+                    publicationProgressService.kickoffNewProgress(publication, PropDataConstants.SCAN_SUBMITTER);
+                } catch (Exception e) {
+                    log.error("Failed to trigger publication " + publication.getPublicationName());
+                }
+            }
+        }
     }
 
     private List<PublicationProgress> scanForNewWorkFlow(String hdfsPod) {
         List<PublicationProgress> progresses = new ArrayList<>();
+        Boolean serviceTenantBootstrapped = false;
         for (PublicationProgress progress : publicationProgressService.scanNonTerminalProgresses()) {
             try {
+                if (!serviceTenantBootstrapped) {
+                    propDataTenantService.bootstrapServiceTenant();
+                    serviceTenantBootstrapped = true;
+                }
                 Publication publication = progress.getPublication();
                 Source source = sourceService.findBySourceName(publication.getSourceName());
                 String avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
@@ -76,7 +107,7 @@ public class PublicationServiceImpl implements PublicationService {
                 log.info("Send progress [" + progress + "] to workflow api: ApplicationID=" + applicationId);
             } catch (Exception e) {
                 // do not block scanning other progresses
-                log.error(e);
+                log.error("Failed to proceed progress " + progress, e);
             }
         }
         return progresses;

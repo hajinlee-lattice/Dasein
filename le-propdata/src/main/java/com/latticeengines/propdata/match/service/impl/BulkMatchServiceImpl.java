@@ -25,12 +25,12 @@ import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
-import com.latticeengines.propdata.match.service.PropDataTenantService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 

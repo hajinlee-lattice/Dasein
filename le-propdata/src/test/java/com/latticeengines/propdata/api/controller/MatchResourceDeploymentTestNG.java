@@ -35,9 +35,9 @@ import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
+import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.match.service.MatchCommandService;
-import com.latticeengines.propdata.match.service.impl.MatchConstants;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 
@@ -131,7 +131,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     private MatchInput createAvroBulkMatchInput() {
         MatchInput matchInput = new MatchInput();
-        matchInput.setTenant(new Tenant(MatchConstants.SERVICE_CUSTOMERSPACE));
+        matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
         inputBuffer.setAvroDir(avroDir);

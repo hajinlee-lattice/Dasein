@@ -10,6 +10,8 @@ public interface PublicationProgressEntityMgr {
 
     PublicationProgress findBySourceVersionUnderMaximumRetry(Publication publication, String sourceVersion);
 
+    PublicationProgress findLatestUnderMaximumRetry(Publication publication);
+
     PublicationProgress startNewProgress(Publication publication, PublicationDestination destination,
             String sourceVersion, String creator);
 
