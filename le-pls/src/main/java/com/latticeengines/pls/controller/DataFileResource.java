@@ -108,7 +108,7 @@ public class DataFileResource {
         if (eventTableType.equalsIgnoreCase("training")) {
             dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
                     "postMatchEventTable.*Training.*.csv");
-        } else if (eventTableType.equalsIgnoreCase("testing")) {
+        } else if (eventTableType.equalsIgnoreCase("test")) {
             dataFileProviderService.downloadFile(request, response, modelId, "application/csv",
                     "postMatchEventTable.*Test.*.csv");
         }

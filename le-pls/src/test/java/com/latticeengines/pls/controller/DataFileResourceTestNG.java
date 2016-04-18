@@ -142,6 +142,6 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
                 { "explorercsv", "application/csv" }, //
                 { "rfmodelcsv", "text/plain" }, //
                 { "postmatcheventtablecsv/training", "application/csv" }, //
-                { "postmatcheventtablecsv/testing", "application/csv" } };
+                { "postmatcheventtablecsv/test", "application/csv" } };
     }
 }
