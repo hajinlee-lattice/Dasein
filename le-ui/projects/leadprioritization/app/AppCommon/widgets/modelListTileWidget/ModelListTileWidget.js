@@ -65,10 +65,9 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     
 })
 .controller('ChangeModelNameController', function ($scope, $state, $rootScope, NavUtility, ResourceUtility, ModelService) {
-    $scope.data = {name: $scope.$parent.displayName};
     $scope.submitting = false;
     $scope.showNameEditError = false;
-    $scope.displayName = $scope.$parent.displayName;
+    $scope.displayName = $scope.$parent.displayName == null ? $scope.$parent.name : $scope.$parent.displayName;
 
     $scope.closeErrorClick = function ($event) {
         if ($event != null) {
@@ -86,7 +85,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if ($scope.submitting) {return;}
         $scope.submitting = true;
 
-        var validationResult = ModelService.validateModelName($scope.data.name);
+        var validationResult = ModelService.validateModelName($scope.displayName);
 
         if (!validationResult.valid) {
             $scope.nameEditErrorMessage = validationResult.errMsg;
@@ -95,13 +94,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             return;
         }
 
-        ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
+        ModelService.ChangeModelDisplayName($scope.$parent.data.Id, $scope.displayName).then(function(result) {
 
             if (result.Success) {
                 $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
 
                 $scope.nameStatus.editing = false;
-                $scope.displayName = $scope.data.name;
 
                 $state.go('.', {}, { reload: true });
 
@@ -119,7 +117,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.cancel = function($event) {
         if ($event != null) $event.stopPropagation();
         $scope.showNameEditError = false;
-        $scope.data = {name: $scope.$parent.displayName};
+        $scope.displayName = $scope.$parent.displayName == null ? $scope.$parent.name : $scope.$parent.displayName;
         $scope.nameStatus.editing = false;
     };
 

@@ -81,7 +81,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         System.out.println("Resolving Metadata");
         resolveMetadata();
         System.out.println("Creatinging Model");
-        createModel();
+        createModelWithMockedMatchStep();
         retrieveModelSummary();
         ModelSummary modelSummary = getModelSummary();
         String modelId = modelSummary.getId();
@@ -163,7 +163,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "resolveMetadata")
-    public void createModel() {
+    public void createModelWithMockedMatchStep() {
         ModelingParameters parameters = new ModelingParameters();
         parameters.setName("SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis());
         parameters.setDescription("Test");
@@ -206,7 +206,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         return originalModelSummary;
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModelWithMockedMatchStep")
     public void retrieveReport() {
         Job job = restTemplate.getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", getPLSRestAPIHostPort(), modelingWorkflowApplicationId), //
@@ -216,7 +216,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(reports.size(), 1);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "createModelWithMockedMatchStep", timeOut = 120000)
     public void retrieveModelSummary() throws InterruptedException {
         originalModelSummary = getModelSummary(modelName);
         assertNotNull(originalModelSummary);
@@ -226,7 +226,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertFalse(originalModelSummary.getTrainingTableName().isEmpty());
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModel")
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "createModelWithMockedMatchStep")
     public void retrieveErrorsFile() {
         // Relies on error in Account.csv
         restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());

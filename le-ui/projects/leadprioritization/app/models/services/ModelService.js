@@ -70,7 +70,7 @@ angular.module('mainApp.models.services.ModelService', [
                     result.resultObj = _.map(data, function(rawObj) {
                             return {
                                 Id          : rawObj.Id,
-                                DisplayName : rawObj.DisplayName == null ? rawObj.Name : rawObj.DisplayName,
+                                DisplayName : rawObj.DisplayName == null || rawObj.DisplayName == "" ? rawObj.Name : rawObj.DisplayName,
                                 CreatedDate : DateTimeFormatUtility.FormatShortDate(rawObj.ConstructionTime),
                                 Status      : rawObj.Status,
                                 Incomplete  : rawObj.Incomplete,
@@ -246,14 +246,14 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     };
 
-    this.ChangeModelName = function (modelId, name) {
+    this.ChangeModelDisplayName = function (modelId, displayName) {
         var deferred = $q.defer();
         var result;
 
         $http({
             method: 'PUT',
             url: '/pls/modelsummaries/'+ modelId,
-            data: { Name: name },
+            data: { DisplayName: displayName },
             headers: {
                 "Content-Type": "application/json"
             }

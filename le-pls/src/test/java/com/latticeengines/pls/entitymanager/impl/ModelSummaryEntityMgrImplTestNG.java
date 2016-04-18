@@ -275,10 +275,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         setupSecurityContext(summary1);
         ModelSummary s = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Name", "XYZ");
+        attrMap.put("DisplayName", "XYZ");
         modelSummaryEntityMgr.updateModelSummary(s, attrMap);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
-        assertEquals(retrievedSummary.getName(), "XYZ");
+        assertEquals(retrievedSummary.getDisplayName(), "XYZ");
     }
 
     /**
@@ -289,7 +289,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDepr
         ModelSummary summaryToUpdate = new ModelSummary();
         summaryToUpdate.setId(summary2.getId());
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Name", "ABC");
+        attrMap.put("DisplayName", "ABC");
 
         setupSecurityContext(summary1);
         boolean exception = false;

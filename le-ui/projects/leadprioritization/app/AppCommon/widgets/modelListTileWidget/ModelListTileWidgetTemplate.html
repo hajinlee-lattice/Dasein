@@ -11,7 +11,7 @@
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
         <div novalidate class="form-inline editable-container editableform" name="form">
             <div class="control-group">
-                <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
+                <input type="text" class="form-control" data-ng-model="displayName" placeholder="{{displayName}}"/>
                 <div class="editable-buttons">
                     <button class="button blue-button editable-cancel" data-ng-click="cancel($event)">Cancel</button>
                     <button class="button orange-button editable-submit" data-ng-click="submit($event)">Save</button>

@@ -181,6 +181,7 @@ angular
                 "navigation@": {
                     controller: function($scope, Model, FeatureFlagService) {
                         $scope.name = Model.ModelDetails.Name;
+                        $scope.displayName = Model.ModelDetails.DisplayName;
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);

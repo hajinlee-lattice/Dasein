@@ -192,22 +192,22 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = { "functional" }, dependsOnMethods = { "getModelSummariesAndPredictorsHasViewPlsModelsRight" })
     public void testUpdateModelSummary() {
         switchToSuperAdmin();
-        assertChangeModelNameSuccess();
+        assertChangeModelDisplayNameSuccess();
 
         switchToInternalAdmin();
-        assertChangeModelNameSuccess();
+        assertChangeModelDisplayNameSuccess();
 
         switchToInternalAdmin();
-        assertChangeModelIdFail();
+        assertChangeModelDisplayNameFail();
 
         switchToInternalUser();
-        assertChangeModelNameGet403();
+        assertChangeModelDisplayNameGet403();
 
         switchToExternalAdmin();
-        assertChangeModelNameGet403();
+        assertChangeModelDisplayNameGet403();
 
         switchToExternalUser();
-        assertChangeModelNameGet403();
+        assertChangeModelDisplayNameGet403();
     }
 
     @Test(groups = { "functional" }, dependsOnMethods = { "testUpdateModelSummary" })
@@ -415,35 +415,35 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void assertChangeModelNameSuccess() {
+    private void assertChangeModelDisplayNameSuccess() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
-        String originalName = map.get("Name");
+        String originalDisplayName = map.get("DisplayName");
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Name", "xyz");
+        attrMap.put("DisplayName", "xyz");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
 
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
-        assertEquals(summary.getName(), "xyz");
+        assertEquals(summary.getDisplayName(), "xyz");
         assertNotNull(summary.getDetails());
 
-        attrMap.put("Name", originalName);
+        attrMap.put("DisplayName", originalDisplayName);
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
         summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"),
                 ModelSummary.class);
-        assertEquals(summary.getName(), originalName);
+        assertEquals(summary.getDisplayName(), originalDisplayName);
     }
 
     @SuppressWarnings({ "rawtypes" })
-    private void assertChangeModelIdFail() {
+    private void assertChangeModelDisplayNameFail() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
         AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Name", "xyz");
+        attrMap.put("DisplayName", "xyz");
         HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
         ResponseEntity<Boolean> responseEntity = restTemplate.exchange(getRestAPIHostPort() + "/pls/modelsummaries/"
                 + "ms__4192dfb1-d78c-4521-80d5-cebf477b2978-Ron’s_Mo", HttpMethod.PUT, requestEntity, Boolean.class);
@@ -452,7 +452,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private void assertChangeModelNameGet403() {
+    private void assertChangeModelDisplayNameGet403() {
         boolean exception = false;
         try {
             List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
@@ -460,7 +460,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(response.size(), 1);
             Map<String, String> map = (Map) response.get(0);
             AttributeMap attrMap = new AttributeMap();
-            attrMap.put("Name", "xyz");
+            attrMap.put("DisplayName", "xyz");
             restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
         } catch (Exception e) {
             exception = true;

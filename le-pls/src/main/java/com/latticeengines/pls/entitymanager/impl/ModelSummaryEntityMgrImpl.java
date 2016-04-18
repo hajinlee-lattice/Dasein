@@ -199,7 +199,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         updateStatus(summary, attrMap);
 
         // Update name
-        updateName(summary, attrMap);
+        updateDisplayName(summary, attrMap);
     }
 
     @Override
@@ -229,12 +229,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         updateStatusByModelId(summary.getId(), ModelSummaryStatus.getByStatusCode(status));
     }
 
-    private void updateName(ModelSummary summary, AttributeMap attrMap) {
-        String name = attrMap.get("Name");
-        if (name != null) {
-            if (newModelNameIsValid(summary, name)) {
-                summary.setName(name);
-            }
+    private void updateDisplayName(ModelSummary summary, AttributeMap attrMap) {
+        String displayName = attrMap.get("DisplayName");
+        if (displayName != null) {
+            summary.setDisplayName(displayName);
 
             super.update(summary);
         }
