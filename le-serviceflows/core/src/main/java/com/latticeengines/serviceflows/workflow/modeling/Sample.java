@@ -37,7 +37,7 @@ public class Sample extends BaseWorkflowStep<ModelStepConfiguration> {
         executionContext.putString(EXPORT_INPUT_PATH, inputPath);
 
         String outputPath = configuration.getModelingServiceHdfsBaseDir() + configuration.getCustomerSpace() + "/data/"
-                + eventTable.getName() + "/csv_files/postMatchEventTable.csv";
+                + eventTable.getName() + "/csv_files/postMatchEventTable";
         executionContext.putString(EXPORT_OUTPUT_PATH, outputPath);
     }
 
