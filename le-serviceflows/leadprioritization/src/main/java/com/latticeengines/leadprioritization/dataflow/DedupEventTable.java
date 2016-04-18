@@ -68,7 +68,8 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         } else {
             long optimalCreationTime = DateTime.now().minusDays(OPTIMAL_CREATION_TIME_DAYS_FROM_TODAY).getMillis();
             String lastModifiedField = sourceSchema.getLastModifiedKey().getAttributes().get(0);
-            String expression = String.format("(%s != null && %s ? 1.0 : 0.0) + (1.0 / ((double)Math.abs(%s - %dL) + 1.1))",
+            String expression = String.format(
+                    "(%s != null && %s ? 1.0 : 0.0) + (1.0 / ((double)Math.abs(%s - %dL) + 1.1))", eventColumn,
                     eventColumn, lastModifiedField, optimalCreationTime);
             return last.addFunction(expression, new FieldList(eventColumn, lastModifiedField), targetField);
         }
