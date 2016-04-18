@@ -9,7 +9,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
@@ -103,16 +102,14 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
             return null;
         }
 
-        if (latestVersion == null) {
+        if (latestVersion == null || latestBaseVersion.compareTo(latestVersion) > 0) {
             newLatestVersion = latestBaseVersion;
-        } else {
-            if (latestBaseVersion.compareTo(latestVersion) > 0) {
-                newLatestVersion = latestBaseVersion;
+        }
+        if (newLatestVersion != null) {
 
-                TransformationConfiguration configuration = createNewConfiguration(latestBaseVersion, newLatestVersion);
+            TransformationConfiguration configuration = createNewConfiguration(latestBaseVersion, newLatestVersion);
 
-                return configuration;
-            }
+            return configuration;
         }
 
         return null;

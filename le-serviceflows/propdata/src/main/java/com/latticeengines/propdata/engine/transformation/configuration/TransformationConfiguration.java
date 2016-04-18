@@ -12,4 +12,6 @@ public interface TransformationConfiguration {
     InputSourceConfig getInputSourceConfig(String inputSourceName) throws MethodNotSupportedException;
 
     String getVersion();
+
+    String getServiceBeanName();
 }

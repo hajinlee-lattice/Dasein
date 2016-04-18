@@ -307,6 +307,7 @@ public enum LedpCode {
     LEDP_25012("Error in processing dataflow for transformation for source: {0}, Reason: {1}"), //
     LEDP_25013("Error in executing workflow for transformation for source: {0}"), //
     LEDP_25014("Could not create new transformation progress entry"), //
+    LEDP_25015("Failed to find a chance to kick off a refresh of {0} after {1} retries."), //
 
     // le-dataflow
     LEDP_26000("Builder bean {0} not instance of builder."), //

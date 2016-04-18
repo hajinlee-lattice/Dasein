@@ -95,4 +95,9 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
         return om.readValue(confStr, BomboraDepivotConfiguration.class);
     }
+
+    @Override
+    public Class<? extends TransformationConfiguration> getConfigurationClass() {
+        return BomboraDepivotConfiguration.class;
+    }
 }

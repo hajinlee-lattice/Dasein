@@ -13,6 +13,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
+
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
@@ -20,12 +23,10 @@ import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.pipe.Pipe;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
+import cascading.scheme.util.FieldTypeResolver;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
-
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 
 @Component("simpleCascadingExecutor")
 public class SimpleCascadingExecutor {
@@ -47,8 +48,8 @@ public class SimpleCascadingExecutor {
     @Autowired
     private VersionManager versionManager;
 
-    public void transformCsvToAvro(String uncompressedFilePath, String avroDirPath, String avroSchemaPath)
-            throws IOException {
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
+            String avroSchemaPath) throws IOException {
         Schema schema = new Schema.Parser().parse(HdfsUtils.getHdfsFileContents(yarnConfiguration, avroSchemaPath));
         Properties properties = new Properties();
         for (Entry<String, String> conf : yarnConfiguration) {
@@ -59,10 +60,13 @@ public class SimpleCascadingExecutor {
         properties.put(MAPREDUCE_JOB_QUEUENAME, QUEUENAME_PROP_DATA);
 
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
+        AvroScheme avroScheme = new AvroScheme(schema);
+        FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
+        DelimitedParser delimitedParser = new CustomDelimitedParser(fieldMapping, CSV_DELIMITER, QUOTE, false, true,
+                fieldTypeResolver);
 
-        Tap<?, ?, ?> csvTap = new Hfs(new TextDelimited(true, new DelimitedParser(CSV_DELIMITER, QUOTE, null, false, true)),
-                uncompressedFilePath);
-        Tap<?, ?, ?> avroTap = new Hfs(new AvroScheme(schema), avroDirPath, SinkMode.REPLACE);
+        Tap<?, ?, ?> csvTap = new Hfs(new TextDelimited(true, delimitedParser), uncompressedFilePath);
+        Tap<?, ?, ?> avroTap = new Hfs(avroScheme, avroDirPath, SinkMode.REPLACE);
 
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);
 
@@ -71,8 +75,8 @@ public class SimpleCascadingExecutor {
 
         try {
             String artifactVersion = versionManager.getCurrentVersion();
-            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/" : "/app/"
-                    + artifactVersion + "/dataflow/lib/";
+            String dataFlowLibDir = StringUtils.isEmpty(artifactVersion) ? "/app/dataflow/lib/"
+                    : "/app/" + artifactVersion + "/dataflow/lib/";
             log.info("Using dataflow lib path = " + dataFlowLibDir);
             List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, dataFlowLibDir);
             for (String file : files) {

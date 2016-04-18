@@ -14,9 +14,11 @@ public interface TransformationService {
 
     String getVersionString(TransformationProgress progress);
 
-    boolean isNewDataAvailable();
+    boolean isNewDataAvailable(TransformationConfiguration transformationConfiguration);
 
     Source getSource();
 
     TransformationConfiguration createTransformationConfiguration();
+
+    Class<? extends TransformationConfiguration> getConfigurationClass();
 }

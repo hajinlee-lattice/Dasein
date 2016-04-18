@@ -44,7 +44,7 @@ public class TransformationProceedProgressStepExecution
         try {
             log.info("Inside TransformationStepExecution execute()");
             initializeYarnClient();
-            if (transformationService.isNewDataAvailable()) {
+            if (transformationService.isNewDataAvailable(null)) {
                 String creator = (String) executionContext.get(CREATOR);
                 TransformationConfiguration transformationConfiguration = (TransformationConfiguration) executionContext
                         .get(TRANSFORMATION_CONFIGURATION);

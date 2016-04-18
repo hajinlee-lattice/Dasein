@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 
 public interface TransformationExecutor {
 
-    void kickOffNewProgress();
+    TransformationProgress kickOffNewProgress();
 
     void proceedProgress(TransformationProgress progress);
 

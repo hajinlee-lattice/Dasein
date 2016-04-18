@@ -12,6 +12,7 @@ public class BomboraFirehoseConfiguration implements TransformationConfiguration
     private String sourceName;
     private Map<String, String> sourceConfigurations;
     private String inputFirehoseVersion;
+    private String serviceBeanName = "bomboraFirehoseIngestionService";
 
     @Override
     public String getSourceName() {
@@ -31,6 +32,11 @@ public class BomboraFirehoseConfiguration implements TransformationConfiguration
     @Override
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public String getServiceBeanName() {
+        return serviceBeanName;
     }
 
     public void setVersion(String version) {

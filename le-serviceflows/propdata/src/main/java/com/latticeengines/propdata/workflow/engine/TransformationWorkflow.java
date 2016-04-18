@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.propdata.workflow.engine.steps.PrepareTransformationStepInput;
 import com.latticeengines.propdata.workflow.engine.steps.TransformationStepExecution;
 import com.latticeengines.propdata.workflow.match.listeners.UpdateFailedMatchListener;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -14,9 +13,6 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("propdataTransformationWorkflow")
 public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkflowConfiguration> {
-
-    @Autowired
-    private PrepareTransformationStepInput prepareTransformationStepInput;
 
     @Autowired
     private TransformationStepExecution transformationStepExecution;
@@ -32,7 +28,6 @@ public class TransformationWorkflow extends AbstractWorkflow<TransformationWorkf
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(prepareTransformationStepInput) //
                 .next(transformationStepExecution) //
                 .listener(updateFailedMatchListener) //
                 .build();

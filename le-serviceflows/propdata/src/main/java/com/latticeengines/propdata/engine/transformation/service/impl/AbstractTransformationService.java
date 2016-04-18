@@ -122,7 +122,7 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     @Override
-    public boolean isNewDataAvailable() {
+    public boolean isNewDataAvailable(TransformationConfiguration transformationConfiguration) {
         return true;
     }
 
@@ -131,8 +131,7 @@ public abstract class AbstractTransformationService extends TransformationServic
         if (!CollectionUtils.isEmpty(files)) {
             String latestFilePath = files.get(files.size() - 1);
             if (latestFilePath.contains(HDFS_PATH_SEPARATOR)) {
-                return latestFilePath.substring(latestFilePath.lastIndexOf(HDFS_PATH_SEPARATOR),
-                        latestFilePath.length());
+                return latestFilePath.substring(latestFilePath.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
             }
 
             return latestFilePath;
@@ -141,10 +140,12 @@ public abstract class AbstractTransformationService extends TransformationServic
     }
 
     protected List<String> findSortedVersionsInDir(String dir) throws IOException {
-        List<String> files = HdfsUtils.getFilesForDir(getYarnConfiguration(), dir);
-        if (!CollectionUtils.isEmpty(files)) {
-            java.util.Collections.sort(files);
-            return files;
+        if (HdfsUtils.fileExists(getYarnConfiguration(), dir)) {
+            List<String> files = HdfsUtils.getFilesForDir(getYarnConfiguration(), dir);
+            if (!CollectionUtils.isEmpty(files)) {
+                java.util.Collections.sort(files);
+                return files;
+            }
         }
         return null;
     }

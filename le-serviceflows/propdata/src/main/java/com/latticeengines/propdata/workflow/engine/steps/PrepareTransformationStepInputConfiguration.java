@@ -27,6 +27,10 @@ public class PrepareTransformationStepInputConfiguration extends BaseStepConfigu
     @NotNull
     private String hdfsPodId;
 
+    @NotEmptyString
+    @NotNull
+    private String serviceBeanName;
+
     @JsonProperty("customer_space")
     public CustomerSpace getCustomerSpace() {
         return customerSpace;
@@ -75,5 +79,15 @@ public class PrepareTransformationStepInputConfiguration extends BaseStepConfigu
     @JsonProperty("transformation_configuration_classpath")
     public void setTransformationConfigurationClasspath(String transformationConfigurationClasspath) {
         this.transformationConfigurationClasspath = transformationConfigurationClasspath;
+    }
+
+    @JsonProperty("service_bean_name")
+    public String getServiceBeanName() {
+        return serviceBeanName;
+    }
+
+    @JsonProperty("service_bean_name")
+    public void setServiceBeanName(String serviceBeanName) {
+        this.serviceBeanName = serviceBeanName;
     }
 }

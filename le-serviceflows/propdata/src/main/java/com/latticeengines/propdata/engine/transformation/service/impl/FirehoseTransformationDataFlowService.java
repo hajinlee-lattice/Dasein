@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -46,12 +47,15 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     @Value("${propdata.collection.cascading.platform:tez}")
     private String cascadingPlatform;
 
+    private CsvToAvroFieldMapping fieldTypeMapping;
+
     @Override
     public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
             String dataFlowBean) {
-        if (StringUtils.isEmpty(dataFlowBean)) {
+        if (StringUtils.isEmpty(dataFlowBean) || fieldTypeMapping == null) {
             throw new LedpException(LedpCode.LEDP_25012,
-                    new String[] { source.getSourceName(), "Name of FlowBean cannot be null" });
+                    new String[] { source.getSourceName(), (fieldTypeMapping == null
+                            ? "CsvToAvroFieldMapping cannot be null" : "Name of FlowBean cannot be null") });
         }
 
         if (source instanceof DataImportedFromHDFS) {
@@ -71,7 +75,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
             try {
                 untarGZFile(gzHdfsPath, uncompressedFilePath);
-                convertCsvToAvro(uncompressedFilePath, avroDirPath, avroSchemaPath);
+                convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, avroSchemaPath);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
@@ -106,9 +110,9 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, gzHdfsPath, uncompressedFilePath);
     }
 
-    private void convertCsvToAvro(String uncompressedFilePath, String avroDirPath, String avroSchemaPath)
-            throws IOException {
-        simpleCascadingExecutor.transformCsvToAvro(uncompressedFilePath, avroDirPath, avroSchemaPath);
+    private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String uncompressedFilePath,
+            String avroDirPath, String avroSchemaPath) throws IOException {
+        simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath, avroSchemaPath);
     }
 
     @Override
@@ -119,6 +123,10 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
     @Override
     String getCascadingPlatform() {
         return cascadingPlatform;
+    }
+
+    public void setFieldTypeMapping(CsvToAvroFieldMapping fieldTypeMapping) {
+        this.fieldTypeMapping = fieldTypeMapping;
     }
 
 }

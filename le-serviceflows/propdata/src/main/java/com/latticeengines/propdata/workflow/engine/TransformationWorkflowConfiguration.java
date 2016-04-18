@@ -25,21 +25,26 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
         private String rootOperationUid;
         private String hdfsPodId;
         private TransformationConfiguration transformationConfiguration;
+        private String internalResourceHostPort;
+        private String serviceBeanName;
 
         public TransformationWorkflowConfiguration build() {
             configuration.setContainerConfiguration(workflowName, customerSpace, payloadName);
             prepareConfig.setCustomerSpace(customerSpace);
             prepareConfig.setRootOperationUid(rootOperationUid);
             prepareConfig.setHdfsPodId(hdfsPodId);
+            prepareConfig.setInternalResourceHostPort(internalResourceHostPort);
             try {
                 prepareConfig.setTransformationConfiguration(om.writeValueAsString(transformationConfiguration));
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25013, e.getMessage(), e);
             }
+            prepareConfig.setServiceBeanName(serviceBeanName);
             prepareConfig
                     .setTransformationConfigurationClasspath(transformationConfiguration.getClass().getCanonicalName());
             configuration.add(prepareConfig);
             configuration.add(parallelExecConfig);
+
             return configuration;
         }
 
@@ -70,6 +75,16 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder payloadName(String payloadName) {
             this.payloadName = payloadName;
+            return this;
+        }
+
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            this.internalResourceHostPort = internalResourceHostPort;
+            return this;
+        }
+
+        public Builder serviceBeanName(String serviceBeanName) {
+            this.serviceBeanName = serviceBeanName;
             return this;
         }
 

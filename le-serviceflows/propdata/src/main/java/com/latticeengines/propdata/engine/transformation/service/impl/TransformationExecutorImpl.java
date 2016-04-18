@@ -7,6 +7,8 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
@@ -34,35 +36,30 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         this.transformationService = transformationService;
         this.jobSubmitter = transformationService.getClass().getSimpleName();
         this.workflowProxy = workflowProxy;
-        this.customerSpace = new CustomerSpace("lattice.propdata.source", "transformationEngine", "transform");
+        this.customerSpace = new CustomerSpace("PropDataService", "PropDataService", "Production");
     }
 
     @Override
-    public void kickOffNewProgress() {
-        int retries = 0;
+    public TransformationProgress kickOffNewProgress() {
+        Integer retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
                 TransformationConfiguration transformationConfiguration = transformationService
                         .createTransformationConfiguration();
                 if (transformationConfiguration != null) {
-                    transformationService.startNewProgress(transformationConfiguration, jobSubmitter);
-                    return;
+                    TransformationProgress progress = transformationService
+                            .startNewProgress(transformationConfiguration, jobSubmitter);
+                    scheduleTransformationWorkflow(transformationConfiguration, progress);
+                    return progress;
                 }
             } catch (Exception e) {
                 log.error(e);
+                throw e;
             } finally {
-                try {
-                    Thread.sleep(1800 * 1000L);
-                } catch (InterruptedException e) {
-                    log.error(e);
-                }
             }
         }
-        log.error(
-                "Failed to find a chance to kick off a refresh of " + transformationService.getSource().getSourceName()
-                        + " after " + MAX_RETRY + " retries with 0.5 hour intervals.");
-
-        scheduleTransformationWorkflow();
+        throw new LedpException(LedpCode.LEDP_25015,
+                new String[] { transformationService.getSource().getSourceName(), retries.toString() });
     }
 
     @Override
@@ -74,12 +71,13 @@ public class TransformationExecutorImpl implements TransformationExecutor {
     public void purgeOldVersions() {
     }
 
-    private void scheduleTransformationWorkflow() {
-        TransformationConfiguration transformationConfiguration = null;
-        String rootOperationUid = null;
+    private void scheduleTransformationWorkflow(TransformationConfiguration transformationConfiguration,
+            TransformationProgress progress) {
         TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
                 .payloadName("Transformation").customerSpace(customerSpace).hdfsPodId(hdfsPathBuilder.getHdfsPodId())
-                .transformationConfiguration(transformationConfiguration).rootOperationUid(rootOperationUid).build();
+                .transformationConfiguration(transformationConfiguration)
+                .rootOperationUid(progress.getRootOperationUID()).internalResourceHostPort("propdata")
+                .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
 
         AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
         ApplicationId appId = ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));
@@ -95,7 +93,8 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
                     .payloadName("Transformation").customerSpace(customerSpace)
                     .hdfsPodId(hdfsPathBuilder.getHdfsPodId()).transformationConfiguration(transformationConfiguration)
-                    .rootOperationUid(rootOperationUid).build();
+                    .rootOperationUid(rootOperationUid).internalResourceHostPort("propdata")
+                    .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
             AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
             ApplicationId appId = ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));
             break;
