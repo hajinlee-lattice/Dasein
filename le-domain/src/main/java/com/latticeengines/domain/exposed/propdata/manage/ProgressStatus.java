@@ -9,5 +9,6 @@ public enum ProgressStatus {
     TRANSFORMED,
     UPLOADING,
     UPLOADED,
+    PROCESSING,
     FINISHED
 }
