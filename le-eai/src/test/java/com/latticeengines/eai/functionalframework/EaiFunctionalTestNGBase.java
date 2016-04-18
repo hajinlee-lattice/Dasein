@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -193,6 +194,7 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
             if (attr.getName().equals(InterfaceName.LastModifiedDate.name())) {
                 attr.setInterfaceName(InterfaceName.LastModifiedDate);
                 attr.setPhysicalDataType(Type.LONG.name());
+                attr.setLogicalDataType(LogicalDataType.Date);
             }
             file.addAttribute(attr);
         }
@@ -213,8 +215,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                     for (; reader.hasNext(); numRows++) {
                         GenericRecord record = reader.next();
                         assertEquals(
-                                Long.valueOf(record.get(InterfaceName.InternalId.name()).toString()).compareTo(numRows + 1),
-                                0);
+                                Long.valueOf(record.get(InterfaceName.InternalId.name()).toString()).compareTo(
+                                        numRows + 1), 0);
                     }
                 }
             }
