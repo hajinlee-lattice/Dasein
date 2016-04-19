@@ -369,6 +369,19 @@ angular.module('pd.jobs', [
         if (data) {
             $scope.jobCreationSuccess = JSON.parse(data);
             $scope.hideCreationMessage = false;
+            if ($scope.jobCreationSuccess) {
+                if ($scope.state == "all") {
+                    $scope.jobQueuedMessage = "Your model has been queued for creation."
+                } else if ($scope.jobCreationSuccess == true) {
+                    $scope.jobQueuedMessage = "Your scoring job has been queued";
+                }
+            } else {
+                if ($scope.state == "all") {
+                    $scope.jobQueuedMessage = "Your model has failed to start running.";
+                } else {
+                    $scope.jobQueuedMessage = "Your scoring job has failed to start running";
+                }
+            }
 
             $scope.timeoutTask = $timeout(function() {
                 $scope.jobCreationSuccess = null;
