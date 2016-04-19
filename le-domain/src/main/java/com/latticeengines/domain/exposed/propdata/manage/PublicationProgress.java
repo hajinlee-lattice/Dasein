@@ -19,6 +19,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -30,6 +34,8 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationDestina
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "PublicationProgress")
+@FilterDef(name = "hdfsPodFilter", parameters = {@ParamDef(name="hdfsPod", type="string")})
+@Filter(name = "hdfsPodFilter", condition = "HdfsPod = :hdfsPod")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PublicationProgress implements HasPid {
@@ -73,6 +79,9 @@ public class PublicationProgress implements HasPid {
 
     @Column(name = "Retries")
     private Integer retries;
+
+    @Column(name = "HdfsPod")
+    private String hdfsPod;
 
     @Override
     @JsonProperty("PID")
@@ -229,6 +238,16 @@ public class PublicationProgress implements HasPid {
     @JsonProperty("Destination")
     public void setDestination(PublicationDestination destination) {
         destinationString = JsonUtils.serialize(destination);
+    }
+
+    @JsonProperty("HdfsPod")
+    public String getHdfsPod() {
+        return hdfsPod;
+    }
+
+    @JsonProperty("HdfsPod")
+    public void setHdfsPod(String hdfsPod) {
+        this.hdfsPod = hdfsPod;
     }
 
     @Override

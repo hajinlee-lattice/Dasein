@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
@@ -37,9 +36,6 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
 
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
-
     @Override
     public void execute() {
         try {
@@ -57,7 +53,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
             if (transformationService.isNewDataAvailable(transformationConfiguration)) {
                 String creator = (String) executionContext.get(CREATOR);
                 String podId = prepareTransformationConfiguration.getHdfsPodId();
-                hdfsPathBuilder.changeHdfsPodId(podId);
+                HdfsPodContext.changeHdfsPodId(podId);
                 log.info("About to create transformation progress entry for podId: " + podId);
                 TransformationProgress transformConfig = transformationService
                         .startNewProgress(transformationConfiguration, creator);

@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.aspect.MatchStepAspect;
 import com.latticeengines.propdata.match.metric.MatchResponse;
@@ -120,7 +121,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
             podId = jobConfiguration.getHdfsPodId();
             singleBlockMode = jobConfiguration.getSingleBlock();
-            hdfsPathBuilder.changeHdfsPodId(podId);
+            HdfsPodContext.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
 
             rootOperationUid = jobConfiguration.getRootOperationUid();
@@ -394,7 +395,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
         @Override
         public MatchContext call() {
-            hdfsPathBuilder.changeHdfsPodId(podId);
+            HdfsPodContext.changeHdfsPodId(podId);
             try {
                 Thread.sleep(new Random().nextInt(1500));
             } catch (InterruptedException e) {

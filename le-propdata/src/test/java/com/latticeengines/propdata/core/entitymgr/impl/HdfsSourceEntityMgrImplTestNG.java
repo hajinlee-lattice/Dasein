@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.impl.Feature;
 import com.latticeengines.propdata.core.testframework.PropDataCoreFunctionalTestNGBase;
 
@@ -26,7 +27,7 @@ public class HdfsSourceEntityMgrImplTestNG extends PropDataCoreFunctionalTestNGB
 
     @BeforeMethod(groups = "functional")
     public void setUp() throws Exception {
-        hdfsPathBuilder.changeHdfsPodId("FunctionalTestHdfsSource");
+        HdfsPodContext.changeHdfsPodId("FunctionalTestHdfsSource");
         HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
     }
 

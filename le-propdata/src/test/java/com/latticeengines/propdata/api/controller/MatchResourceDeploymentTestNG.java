@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiDeploymentTestNGBase;
 import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 import com.latticeengines.proxy.exposed.propdata.MatchProxy;
@@ -107,7 +108,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() {
-        hdfsPathBuilder.changeHdfsPodId(podId);
+        HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
         uploadTestAVro(avroDir, fileName);

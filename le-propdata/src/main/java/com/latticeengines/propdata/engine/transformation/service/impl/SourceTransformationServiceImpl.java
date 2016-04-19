@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
@@ -35,7 +36,7 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     @Override
     public List<TransformationProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
-            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         return scanForNewWorkFlow(hdfsPod);
     }
@@ -43,7 +44,7 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     @Override
     public TransformationProgress transform(String transformationName, TransformationRequest request, String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
-            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
 
         TransformationService transformationService = (TransformationService) applicationContext

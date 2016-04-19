@@ -8,11 +8,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.publication.dao.PublicationDao;
 import com.latticeengines.propdata.engine.publication.dao.PublicationProgressDao;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
@@ -27,7 +29,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     private PublicationDao publicationDao;
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public PublicationProgress findBySourceVersionUnderMaximumRetry(Publication publication, String sourceVersion) {
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
@@ -48,6 +50,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         progress.setSourceVersion(sourceVersion);
         progress.setCreatedBy(creator);
         progress.setDestination(destination);
+        progress.setHdfsPod(HdfsPodContext.getHdfsPodId());
 
         progress.setCreateTime(new Date());
         progress.setLatestStatusUpdate(new Date());
@@ -67,7 +70,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public PublicationProgress findLatestNonTerminalProgress(Publication publication) {
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
@@ -87,7 +90,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public PublicationProgress findLatestUnderMaximumRetry(Publication publication) {
         Publication publication1 = publicationDao.findByField("PublicationName", publication.getPublicationName());
         List<PublicationProgress> progressList = publication1.getProgresses();
@@ -107,7 +110,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public List<PublicationProgress> findAllForPublication(Publication publication) {
         if (publication.getPid() == null) {
             publication = publicationDao.findByField("PublicationName", publication.getPublicationName());
@@ -116,7 +119,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
     }
 
     @Override
-    @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public PublicationProgress findByPid(Long pid) {
         return progressDao.findByKey(PublicationProgress.class, pid);
     }

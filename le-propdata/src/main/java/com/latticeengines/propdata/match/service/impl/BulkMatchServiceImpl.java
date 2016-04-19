@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
@@ -88,7 +89,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
             hdfsPodId = CamilleEnvironment.getPodId();
         }
         log.info("PodId = " + hdfsPodId);
-        hdfsPathBuilder.changeHdfsPodId(hdfsPodId);
+        HdfsPodContext.changeHdfsPodId(hdfsPodId);
 
         if (input.getNumRows() > averageBlockSize) {
             log.info("Submitted rows " + input.getNumRows() + " is more than the average block size " + averageBlockSize

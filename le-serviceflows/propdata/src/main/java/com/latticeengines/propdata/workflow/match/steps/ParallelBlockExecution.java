@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.propdata.manage.MatchCommand;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
@@ -82,7 +83,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     }
                 }
             }
-            hdfsPathBuilder.changeHdfsPodId(getConfiguration().getPodId());
+            HdfsPodContext.changeHdfsPodId(getConfiguration().getPodId());
 
             rootOperationUid = (String) executionContext.get(BulkMatchContextKey.ROOT_OPERATION_UID);
             submitMatchBlocks(jobConfigurations);

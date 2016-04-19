@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgressStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.util.DateRange;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
@@ -74,7 +75,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
     private void scheduleTransformationWorkflow(TransformationConfiguration transformationConfiguration,
             TransformationProgress progress) {
         TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
-                .payloadName("Transformation").customerSpace(customerSpace).hdfsPodId(hdfsPathBuilder.getHdfsPodId())
+                .payloadName("Transformation").customerSpace(customerSpace).hdfsPodId(HdfsPodContext.getHdfsPodId())
                 .transformationConfiguration(transformationConfiguration)
                 .rootOperationUid(progress.getRootOperationUID()).internalResourceHostPort("propdata")
                 .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
@@ -92,7 +93,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             TransformationConfiguration transformationConfiguration = null;
             TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
                     .payloadName("Transformation").customerSpace(customerSpace)
-                    .hdfsPodId(hdfsPathBuilder.getHdfsPodId()).transformationConfiguration(transformationConfiguration)
+                    .hdfsPodId(HdfsPodContext.getHdfsPodId()).transformationConfiguration(transformationConfiguration)
                     .rootOperationUid(rootOperationUid).internalResourceHostPort("propdata")
                     .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
             AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);

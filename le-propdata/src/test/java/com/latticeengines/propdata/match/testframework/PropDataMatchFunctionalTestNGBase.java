@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-propdata-match-context.xml" })
@@ -62,7 +63,7 @@ public abstract class PropDataMatchFunctionalTestNGBase extends AbstractTestNGSp
     }
 
     protected void switchHdfsPod(String podId) {
-        hdfsPathBuilder.changeHdfsPodId(podId);
+        HdfsPodContext.changeHdfsPodId(podId);
     }
 
     @SuppressWarnings("unchecked")

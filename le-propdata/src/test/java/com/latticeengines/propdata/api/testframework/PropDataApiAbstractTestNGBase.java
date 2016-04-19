@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.propdata.MatchClient;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.Source;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -71,7 +72,7 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
 
 
     protected void prepareCleanPod(String podId) {
-        hdfsPathBuilder.changeHdfsPodId(podId);
+        HdfsPodContext.changeHdfsPodId(podId);
         try {
             HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
         } catch (Exception e) {

@@ -7,6 +7,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 
 public abstract class PropDataApiFunctionalTestNGBase extends PropDataApiAbstractTestNGBase {
 
@@ -26,7 +27,7 @@ public abstract class PropDataApiFunctionalTestNGBase extends PropDataApiAbstrac
     }
 
     protected void prepareCleanPod(String podId) {
-        hdfsPathBuilder.changeHdfsPodId(podId);
+        HdfsPodContext.changeHdfsPodId(podId);
         try {
             HdfsUtils.rmdir(yarnConfiguration, hdfsPathBuilder.podDir().toString());
         } catch (Exception e) {

@@ -4,11 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -53,15 +51,8 @@ public class HdfsPathBuilder {
         dateFormat.setTimeZone(TimeZone.getTimeZone(UTC));
     }
 
-    private ThreadLocal<String> podId = new ThreadLocal<>();
-
-    @PostConstruct
-    private void postConstruct() {
-        podId.set(CamilleEnvironment.getPodId());
-    }
-
     public Path podDir() {
-        return new Path(PODS_ROOT).append(podId.get());
+        return new Path(PODS_ROOT).append(HdfsPodContext.getHdfsPodId());
     }
 
     public Path propDataDir() {
@@ -218,11 +209,12 @@ public class HdfsPathBuilder {
     }
 
     public void changeHdfsPodId(String podId) {
-        this.podId.set(podId);
+        HdfsPodContext.changeHdfsPodId(podId);
     }
 
-    public String getHdfsPodId() {
-        return podId.get();
+    @VisibleForTesting
+    String getHdfsPodId() {
+        return HdfsPodContext.getHdfsPodId();
     }
 
     private String replaceHyphenAndMakeLowercase(String text) {

@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
 import com.latticeengines.propdata.engine.publication.service.PublishConfigurationParser;
 import com.latticeengines.proxy.exposed.propdata.InternalProxy;
@@ -39,9 +39,6 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
     private static final Integer HANGING_THRESHOLD_HOURS = 24;
 
     private static final Integer MAX_ERRORS = 100;
-
-    @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
     private PublicationProgressService progressService;
@@ -62,7 +59,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
     public void execute() {
         try {
             log.info("Inside Publish execute()");
-            hdfsPathBuilder.changeHdfsPodId(getConfiguration().getHdfsPodId());
+            HdfsPodContext.changeHdfsPodId(getConfiguration().getHdfsPodId());
             progress = getConfiguration().getProgress();
             Publication publication = getConfiguration().getPublication();
             progress.setPublication(publication);

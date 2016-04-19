@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.propdata.PropDataJobConfiguration;
 import com.latticeengines.domain.exposed.propdata.match.MatchStatus;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
@@ -49,7 +50,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     public void execute() {
         log.info("Inside PrepareBulkMatchInput execute()");
         String avroDir = getConfiguration().getInputAvroDir();
-        hdfsPathBuilder.changeHdfsPodId(getConfiguration().getHdfsPodId());
+        HdfsPodContext.changeHdfsPodId(getConfiguration().getHdfsPodId());
         Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
         schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
         Integer[] blocks = determineBlockSizes(count);

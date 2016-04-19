@@ -17,6 +17,7 @@ import com.latticeengines.propdata.core.PropDataConstants;
 import com.latticeengines.propdata.core.service.PropDataTenantService;
 import com.latticeengines.propdata.core.service.SourceService;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
+import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
@@ -50,7 +51,7 @@ public class PublicationServiceImpl implements PublicationService {
     @Override
     public List<PublicationProgress> scan(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
-            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         publishAll(hdfsPod);
         return scanForNewWorkFlow(hdfsPod);
@@ -59,7 +60,7 @@ public class PublicationServiceImpl implements PublicationService {
     @Override
     public PublicationProgress publish(String publicationName, PublicationRequest request, String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
-            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         Publication publication = publicationEntityMgr.findByPublicationName(publicationName);
         PublicationProgress progress =  publicationProgressService.publishVersion(publication, request.getSourceVersion(),
@@ -72,7 +73,7 @@ public class PublicationServiceImpl implements PublicationService {
 
     private void publishAll(String hdfsPod) {
         if (StringUtils.isNotEmpty(hdfsPod)) {
-            hdfsPathBuilder.changeHdfsPodId(hdfsPod);
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
         for (Publication publication : publicationEntityMgr.findAll()) {
             if (publication.isSchedularEnabled()) {
