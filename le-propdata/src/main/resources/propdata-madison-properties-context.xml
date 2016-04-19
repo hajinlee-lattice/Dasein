@@ -12,6 +12,7 @@
                 <value>file:${DB_PROPDIR}/db.properties</value>
                 <value>file:${CAMILLE_PROPDIR}/camille.properties</value>
                 <value>file:${PROXY_PROPDIR}/proxy.properties</value>
+                <value>file:${SECURITY_PROPDIR}/security.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
