@@ -91,8 +91,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             ctx.setProperty(ImportProperty.APPID, appId);
             updateContextProperties(ctx, table);
         } finally {
-            FileUtils.deleteQuietly(new File(table.getName() + ".csv"));
-            FileUtils.deleteQuietly(new File("." + table.getName() + ".csv.crc"));
+            FileUtils.deleteQuietly(new File(localFileName + ".csv"));
+            FileUtils.deleteQuietly(new File("." + localFileName + ".csv.crc"));
         }
     }
 
