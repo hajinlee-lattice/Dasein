@@ -15,7 +15,7 @@ class PercentileBucketGenerator(State, JsonGenBase):
     @overrides(State)
     def execute(self):
         mediator = self.getMediator()
-        scoredSorted = mediator.data[[mediator.schema["reserved"]["score"]]]
+        scoredSorted = mediator.allDataPreTransform[[mediator.schema["reserved"]["score"]]]
         scoredSorted.sort([mediator.schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
         scoredSortedLen = scoredSorted.shape[0]
         numElementsInBucket = int(scoredSortedLen/100.0)
@@ -26,7 +26,7 @@ class PercentileBucketGenerator(State, JsonGenBase):
         self.percentileBuckets = []
         # This means that the test set length is less than 100
         if numElementsInBucket == 0:
-            self.logger.info("Test set length is less than 100 so no buckets can be created.")
+            self.logger.info("Dataset length is less than 100 so no buckets can be created.")
         else:
             self.logger.info("Length of test set array = %d." % scoredSortedLen)
             self.logger.info("Bucket size = %d." % numElementsInBucket)

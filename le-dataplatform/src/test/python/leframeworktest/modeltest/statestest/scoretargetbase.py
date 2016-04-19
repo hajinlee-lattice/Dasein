@@ -12,5 +12,6 @@ class ScoreTargetBase(TestBase):
         mediator.schema["reserved"] = dict()
         mediator.schema["reserved"]["score"] = "Score"
         mediator.data = pd.DataFrame(scoreTarget, columns=["Score", "Target"])
+        mediator.allDataPreTransform = pd.DataFrame(scoreTarget, columns=["Score", "Target"])
         mediator.algorithmProperties = { "calibration_width" : 1.0 }
         generator.setMediator(mediator)
