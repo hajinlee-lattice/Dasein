@@ -28,6 +28,10 @@ class ModelGenerator(State, JsonGenBase):
         model["ColumnMetadata"] = None
         model["InitialTransforms"] = None
         model["Target"] = 1
+        version = self.__getLatticeVersion()
+        if version is not None:
+            model["LatticeVersion"] = version
+            
         with open("leframework.tar.gz/leframework/scoringengine.py", "r") as pythonFile:
             model["Script"] = "".join(pythonFile.readlines())
 
@@ -78,6 +82,12 @@ class ModelGenerator(State, JsonGenBase):
                 self.logger.warn(str(e));
         
         self.model = model
+        
+    def __getLatticeVersion(self):
+        provenanceProperties = self.mediator.provenanceProperties
+        if "Lattice_Version" in provenanceProperties:
+            return provenanceProperties["Lattice_Version"]
+        return None
         
     def __getSwlibPath(self):
         provenanceProperties = self.mediator.provenanceProperties

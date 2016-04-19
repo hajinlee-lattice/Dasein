@@ -84,6 +84,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             
             properties.put(PythonContainerProperty.VERSION.name(), versionManager.getCurrentVersion());
             properties.put(PythonContainerProperty.SWLIBARTIFACT.name(), getSwlibArtifactHdfsPath(classifier));
+            setLatticeVersion(classifier, properties);
             metadata = JsonUtils.serialize(classifier);
             File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
@@ -92,6 +93,14 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+    }
+    
+    private void setLatticeVersion(Classifier classifier, Properties properties) {
+        if (classifier == null) {
+            return;
+        }
+        classifier.setProvenanceProperties(classifier.getProvenanceProperties() + //
+                " Lattice_Version=" + properties.getProperty(PythonContainerProperty.VERSION.name()));
     }
     
     @VisibleForTesting
