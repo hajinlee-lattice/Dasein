@@ -23,7 +23,7 @@
 
 	<div class="six columns offset-three">
 
-		<p ng-hide="vm.errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING')}}&nbsp;{{ vm.data.length }}.</p>
+		<p ng-hide="vm.errors">{{ResourceUtility.getString('MODEL_COLUMNS_CSV_LABEL_DISPLAYING', [vm.data.length])}}</p>
 
 		<table ng-hide="vm.errors" class="unstyled">
 			<thead>

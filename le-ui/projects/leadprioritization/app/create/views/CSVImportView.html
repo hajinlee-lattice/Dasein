@@ -34,12 +34,13 @@
             placeholder="Choose File" />
           <div class="fileUpload button blue-button">
               <span>{{ResourceUtility.getString('MODEL_IMPORT_CSV_BUTTON_BROWSE')}}</span>
-              <input 
+              <input
                 id="uploadBtn"
                 name="csvFileName"
                 ng-model="csvFileName"
                 required
-                type="file" 
+                type="file"
+                accept=".csv"
                 class="upload"
                 csv-uploader="csvFile" />
           </div>

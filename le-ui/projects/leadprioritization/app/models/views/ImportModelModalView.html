@@ -10,7 +10,7 @@
                 <h2 class="text-center">{{ResourceUtility.getString('MODEL_IMPORT_WAIT')}}</h2>
             </div>
             <div class="modal-body" data-ng-show="!importing && !showImportSuccess">
-                <input type="file" json-uploader="jsonFile"/>
+                <input type="file" json-uploader="jsonFile" accept=".json"/>
                 <div class="global-error" data-ng-show="showImportError">
                     <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{importErrorMsg}}</span>
                     <button class="close btn btn-link" data-ng-click="showImportError = false;"><i class="fa fa-times fa-inverse"></i></button>

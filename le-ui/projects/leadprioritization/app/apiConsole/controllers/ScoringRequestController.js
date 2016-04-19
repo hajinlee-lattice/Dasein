@@ -21,6 +21,8 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     initValues();
                 } else {
                     $scope.fieldsLoading = true;
+                    // Note: Consider access token will be available in 24 hours, we store it in storage.
+                    // If user login one account in different browsers, the saved access token in prior browser will invalid.
                     var token = BrowserStorageUtility.getOAuthAccessToken();
                     if (token != null) {
                         getModelFields(token);
@@ -73,6 +75,18 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 for (var i = 0; i < $scope.fields.length; i++) {
                     $scope.fields[i].value = null;
                 }
+            };
+
+            $scope.randomizeClicked = function ($event) {
+                if ($event != null) {
+                    $event.preventDefault();
+                }
+                // TODO: randomize work
+                $scope.scoringRequested = true;
+                $scope.scoringRequestError = 'Randomize was not completed.';
+                $scope.score = null;
+                $scope.jsonData = null;
+                $scope.timeElapsed = null;
             };
 
             $scope.sentClicked = function ($event) {

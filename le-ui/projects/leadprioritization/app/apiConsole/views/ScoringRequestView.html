@@ -22,12 +22,12 @@
         <div class="row-group">
             <div class="row">
                 <div class="columns left">
-                    <label class="title">{{fieldsTitle}}</label>
+                    <label class="title">{{ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_LABEL_LEAD_INFO')}}</label>
                 </div>
                 <div class="columns right">
                     <div class="pull-right">
                          <button type="button" ng-click="clearClicked($event)" class="button gray-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_CLEAR')}}</button>
-                         <button disabled="disabled" type="button" class="button gray-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_RANDOMIZE')}}</button>
+                         <button type="button" ng-click="randomizeClicked($event)" class="button gray-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_RANDOMIZE')}}</button>
                          <button type="button" ng-click="sentClicked($event)" class="button orange-button pull-left">{{ResourceUtility.getString('API_CONSOLE_LABEL_SENT')}}&nbsp;<i class="fa fa-arrow-right"></i></button>
                     </div>
                 </div>

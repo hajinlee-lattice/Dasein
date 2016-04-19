@@ -15,15 +15,15 @@
 
         <div class="row" data-ng-hide="showNoModels || loading">
             <div class="twelve columns">
-                Displaying {{ length }} models
+                {{ResourceUtility.getString('MODEL_LIST_TOTAL_MODELS', [length])}}
                 <button ui-sref="home.models.import" type="button" class="button orange-button pull-right create-model">Create Model</button>
             </div>
         </div>
 
-        <div class="row" data-ng-hide="showNoModels || loading" style="margin-top:1em;">        
+        <div class="row" data-ng-hide="showNoModels || loading" style="margin-top:1em;">
             <div id="modelListContainer" class="twelve columns model-list"></div>
         </div>
 
     </section>
-    
+
 </div>

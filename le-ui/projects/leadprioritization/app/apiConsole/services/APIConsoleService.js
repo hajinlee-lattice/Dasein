@@ -7,29 +7,21 @@ angular.module('pd.apiconsole.APIConsoleService', [
     this.GetOAuthAccessToken = function (tenantId) {
         var deferred = $q.defer();
 
-        var result = {
-            Success: true,
-            ResultObj: '6c0ffb8d-fa10-4bf5-ac66-44a944cfc7d1',
-            ResultErrors: null
-        };
-        deferred.resolve(result);
-        /*
         $http({
             method: 'GET',
-            url: '/pls/oauth2/accesstoken?tenantId=' + tenantId + '.' + tenantId + '.Production',
+            url: '/pls/oauth2/accesstoken/json?tenantId=' + tenantId + '.' + tenantId + '.Production',
             headers: {
                 'Content-Type': "application/json"
             }
         }).success(function (data, status, headers, config) {
             var result = {
-                Success: true,
-                ResultObj: data,
-                ResultErrors: null
+                Success: (data && data.token) ? true : false,
+                ResultObj: (data && data.token) ? data.token : null,
+                ResultErrors: (data && data.token) ? null : ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_ACCESS_TOKEN_ERROR')
             };
             deferred.resolve(result);
         })
         .error(function (data, status, headers, config) {
-            console.log(data)
             var result = {
                 Success: false,
                 ResultObj: null,
@@ -37,7 +29,6 @@ angular.module('pd.apiconsole.APIConsoleService', [
             };
             deferred.resolve(result);
         });
-        */
 
         return deferred.promise;
     };
@@ -45,6 +36,8 @@ angular.module('pd.apiconsole.APIConsoleService', [
 
     this.GetModelFields = function (accessToken, modelId) {
         var deferred = $q.defer();
+
+        // TODO: cross origin problem
         var result = {
             Success: true,
             ResultObj: getMockupFields(),
@@ -62,9 +55,9 @@ angular.module('pd.apiconsole.APIConsoleService', [
         })
         .success(function (data, status, headers, config) {
             var result = {
-                Success: true,
-                ResultObj: data,
-                ResultErrors: null
+                Success: (data && data.Filelds) ? true : false,
+                ResultObj: (data && data.Filelds) ? data.Filelds : null,
+                ResultErrors: (data && data.Filelds) ? null : ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_MODEL_FIELDS_ERROR')
             };
             deferred.resolve(result);
         })
@@ -124,6 +117,7 @@ angular.module('pd.apiconsole.APIConsoleService', [
     this.GetScoreRecord = function (accessToken, scoreRequest) {
         var deferred = $q.defer();
 
+        // TODO: cross origin problem
         $http({
             method: 'POST',
             url: getScoringApiUrl() + '/record',
@@ -135,9 +129,9 @@ angular.module('pd.apiconsole.APIConsoleService', [
         })
         .success(function (data, status, headers, config) {
             var result = {
-                Success: true,
+                Success: data ? true : false,
                 ResultObj: data,
-                ResultErrors: null,
+                ResultErrors: data ? null : ResourceUtility.getString('API_CONSOLE_SCORING_REQUEST_GET_SCORE_RECORD_ERROR')
             };
             deferred.resolve(result);
         })
@@ -161,19 +155,20 @@ angular.module('pd.apiconsole.APIConsoleService', [
     };
 
     function getScoringApiUrl() {
-        var apiUrl = $location.protocol() + '://' + $location.host();
+        var appUrl = $location.protocol() + '://' + $location.host();
         var port = $location.port();
         if (port != 80) {
-            apiUrl += ":" + port;
+            appUrl += ":" + port;
         }
 
+        // e.g. http://app.lattice.local --> http://api.lattice.local
+        var apiUrl = appUrl.replace(/app/i, 'api');
         if (apiUrl.charAt(apiUrl.length - 1) ===  '/') {
             apiUrl += 'score';
         } else {
             apiUrl += '/score';
         }
 
-        apiUrl = apiUrl.replace(/app/i, 'api');
         return apiUrl;
     }
 
