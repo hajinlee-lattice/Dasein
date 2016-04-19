@@ -15,14 +15,8 @@ angular
             .state('home.model.jobs', {
                 url: '/jobs',
                 views: {
-                },
-                redirectTo: 'home.model.jobs.status'
-            })
-            .state('home.model.jobs.status', {
-                url: '/status',
-                views: {
                     "summary@": {
-                        resolve: { 
+                        resolve: {
                             ResourceString: function() {
                                 return 'MODEL_SCORING_SUMMARY_HEADER';
                             }

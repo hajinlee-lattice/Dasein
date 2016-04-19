@@ -331,9 +331,7 @@ angular.module('pd.jobs', [
     $scope.statuses = {};
     $scope.cancelling = {};
     $scope.showEmptyJobsMessage = false;
-    $scope.succeeded = BrowserStorageUtility.getSessionShouldShowJobCompleteMessage();
-    //console.log($state.current.name, $state);
-    $scope.state = $state.current.name == 'home.model.jobs.status' ? 'model' : 'all';
+    $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
     //$scope.query = $scope.state == 'model' ? 'importMatchAndModelWorkflow' : '';
     $scope.hideCreationMessage = true;
 
