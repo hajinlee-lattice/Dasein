@@ -108,6 +108,7 @@ public class WorkflowExecutionCache {
         if (workflowJob != null) {
             job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
             job.setApplicationId(workflowJob.getApplicationId());
+            job.setUser(workflowJob.getUserId());
             ErrorDetails errorDetails = workflowJob.getErrorDetails();
             if (errorDetails != null) {
                 job.setErrorCode(errorDetails.getErrorCode());

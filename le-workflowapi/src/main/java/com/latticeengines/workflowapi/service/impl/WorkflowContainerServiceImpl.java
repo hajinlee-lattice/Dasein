@@ -176,12 +176,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         Map<String, String> inputProperties = workflowService.getInputs(workflowJob.getInputContext());
         job.setInputs(inputProperties);
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
-
+        job.setUser(workflowJob.getUserId());
         // WorkflowId null, try to get state from db directly without talking to
         // Yarn
         if (workflowJob.getState() != null && YarnUtils.TERMINAL_APP_STATE.contains(workflowJob.getState())) {
             job.setJobStatus(JobStatus.FAILED);
             job.setApplicationId(workflowJob.getApplicationId());
+
             if (workflowJob.getStartTimeInMillis() != null) {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
