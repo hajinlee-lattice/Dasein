@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS `ScoringDB`;
 GRANT ALL ON ScoringDB.* TO root;
 USE `ScoringDB`;
 
-source WSHOME/ddl_scoringdb_mysql5innodb.sql;
+source WSHOME/le-scoring/ddl_scoringdb_mysql5innodb.sql;
 
 CREATE TABLE TestLeadsTable (
   Lead_ID INT NOT NULL AUTO_INCREMENT,

@@ -3,7 +3,7 @@ CREATE SCHEMA IF NOT EXISTS `LDC_ManageDB`;
 GRANT ALL ON LDC_ManageDB.* TO root;
 USE `LDC_ManageDB`;
 
-source WSHOME/ddl_ldc_managedb_mysql5innodb.sql;
+source WSHOME/le-propdata/ddl_ldc_managedb_mysql5innodb.sql;
 
 LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/SourceColumn.txt' INTO TABLE `SourceColumn`
 FIELDS TERMINATED BY '\t'
