@@ -12,6 +12,7 @@
         <le.common.version>2.0.25-SNAPSHOT</le.common.version>
         <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
         <le.scheduler.version>2.0.25-SNAPSHOT</le.scheduler.version>
+        <le.transform.version>2.0.25-SNAPSHOT</le.transform.version>
     </properties>
 
     <parent>
@@ -264,6 +265,11 @@
                     <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-transform</artifactId>
+            <version>${le.transform.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
