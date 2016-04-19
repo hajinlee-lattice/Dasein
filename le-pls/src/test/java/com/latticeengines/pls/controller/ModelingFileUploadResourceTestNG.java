@@ -7,6 +7,7 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,20 +61,22 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
         map.add("file", new ClassPathResource(filePath));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        String displayName = filePath.substring(StringUtils.lastIndexOf(filePath, '/') + 1);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<LinkedMultiValueMap<String, Object>>(
                 map, headers);
         if (unnamed) {
-            String uri = String.format("/pls/models/fileuploads/unnamed?schema=%s&compressed=%s",
-                    SchemaInterpretation.SalesforceAccount, compressed);
+            String uri = String.format("/pls/models/fileuploads/unnamed?schema=%s&compressed=%s&displayName=%s",
+                    SchemaInterpretation.SalesforceAccount, compressed, displayName);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {
             });
         } else {
             String filename = DateTime.now().getMillis() + ".csv";
-            String uri = String.format("/pls/models/fileuploads?fileName=%s&schema=%s&compressed=%s", filename,
-                    SchemaInterpretation.SalesforceAccount, compressed);
+            String uri = String.format("/pls/models/fileuploads?fileName=%s&schema=%s&compressed=%s&displayName=%s",
+                    filename, SchemaInterpretation.SalesforceAccount, compressed, displayName);
+            System.out.println(uri);
             ResponseEntity<String> result = restTemplate.exchange(getRestAPIHostPort() + uri, HttpMethod.POST,
                     requestEntity, String.class);
             return JsonUtils.deserialize(result.getBody(), new TypeReference<ResponseDocument<SourceFile>>() {

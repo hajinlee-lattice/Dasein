@@ -7,6 +7,7 @@ public enum LogicalDataType {
     InternalId, //
     Date, //
     Event, //
+    StageName, //
     Reference, //
     RowId, //
     Opportunity;
@@ -17,4 +18,12 @@ public enum LogicalDataType {
     public static boolean isExcludedFromRealTimeMetadata(LogicalDataType type) {
         return typesExcludedFromRealTimeMetadata.contains(type);
     }
+
+    private static EnumSet<LogicalDataType> acausalDataTypes = EnumSet.of(LogicalDataType.Event,
+            LogicalDataType.StageName);
+
+    public static boolean isEventTypeOrDerviedFromEventType(LogicalDataType type) {
+        return acausalDataTypes.contains(type);
+    }
+
 }

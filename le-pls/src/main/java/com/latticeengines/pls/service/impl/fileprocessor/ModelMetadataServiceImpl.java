@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.ModelMetadataService;
@@ -18,7 +17,7 @@ import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
-@Component("ModelMetadataService")
+@Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Autowired
@@ -29,21 +28,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
 
     @Override
     public List<VdbMetadataField> getMetadata(String modelId) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (modelSummary == null) {
-            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
-        }
-        String tableName = modelSummary.getEventTableName();
-        if (tableName == null) {
-            throw new RuntimeException(String.format("Model %s does not have an event tableName", modelId));
-        }
-
-        Table table = metadataProxy.getTable(customerSpace, tableName);
-        if (table == null) {
-            throw new RuntimeException(String.format("No such table with name %s for model %s", tableName, modelId));
-        }
-
+        Table table = getEventTableFromModelId(modelId);
         List<VdbMetadataField> fields = new ArrayList<>();
         for (Attribute attribute : table.getAttributes()) {
             VdbMetadataField field = getFieldFromAttribute(attribute);
@@ -53,14 +38,9 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     }
 
     @Override
-    public Table cloneAndUpdateMetadata(String modelSummaryId, List<VdbMetadataField> fields) {
+    public Table cloneAndUpdateMetadata(String modelId, List<VdbMetadataField> fields) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelSummaryId);
-        String eventTableName = summary.getEventTableName();
-        Table eventTable = metadataProxy.getTable(customerSpace, eventTableName);
-        if (eventTable == null) {
-            throw new RuntimeException(String.format("Could not find event table with name %s", eventTableName));
-        }
+        Table eventTable = getEventTableFromModelId(modelId);
         Table clone = metadataProxy.cloneTable(customerSpace, eventTable.getName());
         clone.setAttributes(getAttributesFromFields(clone.getAttributes(), fields));
         metadataProxy.updateTable(customerSpace, clone.getName(), clone);
@@ -70,17 +50,16 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<String> getRequiredColumns(String modelId) {
         List<String> requiredColumns = new ArrayList<String>();
-        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
-        if (modelSummary == null) {
-            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        Table eventTable = getEventTableFromModelId(modelId);
+        List<Attribute> attributes = eventTable.getAttributes();
+        if (attributes == null) {
+            throw new RuntimeException(String.format("Model %s does not have attribuets in the event tableName",
+                    modelId));
         }
-        List<Predictor> predictors = modelSummary.getPredictors();
-        if (predictors == null) {
-            throw new RuntimeException(String.format("No predictor is associated with the model %s", modelId));
-        }
-        for (Predictor predictor : predictors) {
-            if (predictor.getCategory().contains(ModelingMetadata.INTERNAL_TAG)) {
-                requiredColumns.add(predictor.getName());
+        for (Attribute attribute : attributes) {
+            LogicalDataType logicalDataType = attribute.getLogicalDataType();
+            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)) {
+                requiredColumns.add(attribute.getDisplayName());
             }
         }
         return requiredColumns;
@@ -161,6 +140,24 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         } else {
             return VdbMetadataConstants.SOURCE_LATTICE_DATA_SCIENCE;
         }
+    }
+
+    private Table getEventTableFromModelId(String modelId) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        String tableName = modelSummary.getEventTableName();
+        if (tableName == null) {
+            throw new RuntimeException(String.format("Model %s does not have an event tableName", modelId));
+        }
+
+        Table table = metadataProxy.getTable(customerSpace, tableName);
+        if (table == null) {
+            throw new RuntimeException(String.format("No such table with name %s for model %s", tableName, modelId));
+        }
+        return table;
     }
 
 }

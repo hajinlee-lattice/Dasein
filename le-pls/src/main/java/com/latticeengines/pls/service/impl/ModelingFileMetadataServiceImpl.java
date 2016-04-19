@@ -3,17 +3,11 @@ package com.latticeengines.pls.service.impl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.Logger;
@@ -34,6 +28,7 @@ import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionS
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.pls.util.ValidateCSVFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -81,61 +76,49 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema, CloseableResourcePool closeableResourcePool, String fileName) {
+    public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
+            CloseableResourcePool closeableResourcePool, String fileDisplayName) {
+        if (!stream.markSupported()) {
+            stream = new BufferedInputStream(stream);
+        }
+
+        stream.mark(ValidateCSVFileHeaderUtils.BIT_PER_BYTE * ValidateCSVFileHeaderUtils.BYTE_NUM);
+        Set<String> headerFields = ValidateCSVFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
-            if (!stream.markSupported()) {
-                stream = new BufferedInputStream(stream);
-            }
-
-            stream.mark(1024 * 500);
-
-            Set<String> headerFields = null;
-            InputStreamReader reader = new InputStreamReader(new BOMInputStream(stream, false, ByteOrderMark.UTF_8,
-                    ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
-                    StandardCharsets.UTF_8);
-            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-            CSVParser parser = new CSVParser(reader, format);
-            closeableResourcePool.addCloseable(parser);
-            headerFields = parser.getHeaderMap().keySet();
-
-            SchemaRepository repository = SchemaRepository.instance();
-            Table metadata = repository.getSchema(schema);
-
-            Set<String> missingRequiredFields = new HashSet<>();
-            List<Attribute> attributes = metadata.getAttributes();
-            Iterator<Attribute> iterator = attributes.iterator();
-            while (iterator.hasNext()) {
-                Attribute attribute = iterator.next();
-                boolean missing = !headerFields.contains(attribute.getName());
-                if (missing && !attribute.isNullable()) {
-                    missingRequiredFields.add(attribute.getName());
-                }
-                if (missing) {
-                    iterator.remove();
-                }
-            }
-
-            if (!missingRequiredFields.isEmpty()) {
-                throw new LedpException(LedpCode.LEDP_18087, //
-                        new String[] { StringUtils.join(missingRequiredFields, ","), fileName });
-            }
-
-            for (final String field : headerFields) {
-                if (StringUtils.isEmpty(field)) {
-                    throw new LedpException(LedpCode.LEDP_18096, new String[] { fileName });
-                } else if (!NameValidationUtils.validateColumnName(field)) {
-                    throw new LedpException(LedpCode.LEDP_18095, new String[] { field, fileName });
-                }
-            }
-
             stream.reset();
-
-            return stream;
-
         } catch (IOException e) {
             log.error(e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
+
+        SchemaRepository repository = SchemaRepository.instance();
+        Table metadata = repository.getSchema(schema);
+
+        Set<String> missingRequiredFields = new HashSet<>();
+        List<Attribute> attributes = metadata.getAttributes();
+        Iterator<Attribute> iterator = attributes.iterator();
+        while (iterator.hasNext()) {
+            Attribute attribute = iterator.next();
+            boolean missing = !headerFields.contains(attribute.getName());
+            if (missing && !attribute.isNullable()) {
+                missingRequiredFields.add(attribute.getName());
+            }
+        }
+
+        if (!missingRequiredFields.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_18087, //
+                    new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
+        }
+
+        for (final String field : headerFields) {
+            if (StringUtils.isEmpty(field)) {
+                throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
+            } else if (!NameValidationUtils.validateColumnName(field)) {
+                throw new LedpException(LedpCode.LEDP_18095, new String[] { field, fileDisplayName });
+            }
+        }
+
+        return stream;
     }
 
     private SourceFile getSourceFile(String sourceFileName) {

@@ -68,7 +68,7 @@ public class ModelingFileUploadResource {
             @RequestParam("fileName") String fileName, //
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
-            @RequestParam(value = "displayName", required = false) String displayName, //
+            @RequestParam(value = "displayName", required = true) String displayName, //
             @RequestParam("file") MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
@@ -79,11 +79,13 @@ public class ModelingFileUploadResource {
             }
 
             InputStream stream = file.getInputStream();
+
             if (compressed) {
                 stream = ZipUtils.decompressStream(stream);
             }
 
-            stream = modelingFileMetadataService.validateHeaderFields(stream, schema, closeableResourcePool, fileName);
+            stream = modelingFileMetadataService.validateHeaderFields(stream, schema, closeableResourcePool,
+                    displayName);
 
             return ResponseDocument
                     .successResponse(fileUploadService.uploadFile(fileName, schema, displayName, stream));
@@ -104,7 +106,7 @@ public class ModelingFileUploadResource {
     public ResponseDocument<SourceFile> uploadFile( //
             @RequestParam("schema") SchemaInterpretation schema, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
-            @RequestParam(value = "displayName", required = false) String displayName, //
+            @RequestParam(value = "displayName", required = true) String displayName, //
             @RequestParam("file") MultipartFile file) {
         return uploadFile("file_" + DateTime.now().getMillis() + ".csv", schema, compressed, displayName, file);
     }
