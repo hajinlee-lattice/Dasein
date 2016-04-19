@@ -34,26 +34,26 @@
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/modeljson/{{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/modeljson?modelId={{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/predictorcsv/{{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/predictorcsv?modelId={{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/diagnosticsjson/{{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/diagnosticsjson?modelId={{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_METADATA_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/metadataavsc/{{ModelId}}" filename="metadata.avsc" filetype="application/json"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/metadataavsc?modelId={{ModelId}}" filename="metadata.avsc" filetype="application/json"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/readoutcsv/{{ModelId}}" filename="readout.csv" filetype="text/csv"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/readoutcsv?modelId={{ModelId}}" filename="readout.csv" filetype="text/csv"></data-file-downloader>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/scorecsv/{{ModelId}}" filename="scores.csv" filetype="text/csv"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/scorecsv?modelId={{ModelId}}" filename="scores.csv" filetype="text/csv"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>
@@ -63,7 +63,7 @@
                         <a href="#" data-ng-click="exportThresholdClicked()">{{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD')}}</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/rfmodelcsv/{{ModelId}}" filename="rfmodel.csv" filetype="text/csv"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/rfmodelcsv?modelId={{ModelId}}" filename="rfmodel.csv" filetype="text/csv"></data-file-downloader>
                     </td>
                 </tr>
             </tbody>
