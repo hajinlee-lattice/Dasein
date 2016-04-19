@@ -74,7 +74,7 @@ public class LedpCSVToAvroImportMapper extends
         Configuration conf = context.getConfiguration();
         schema = AvroJob.getMapOutputSchema(conf);
         Log.info("schema is: " + schema.toString());
-        table = JsonUtils.deserialize(conf.get("lattice.eai.file.schema"), Table.class);
+        table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         attributes = table.getAttributes();
         interpretation = table.getInterpretation();
         LOG.info("table is:" + table);

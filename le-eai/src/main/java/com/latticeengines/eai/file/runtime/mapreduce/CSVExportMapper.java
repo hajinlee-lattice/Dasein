@@ -21,9 +21,13 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
@@ -38,11 +42,14 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
 
     private String splitName;
 
+    private Table table;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         super.setup(context);
         FileSplit split = (FileSplit) context.getInputSplit();
         splitName = StringUtils.substringBeforeLast(split.getPath().getName(), ".");
+        table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
     }
 
     @Override
@@ -55,8 +62,8 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 headers.add(field.name());
             }
         }
-        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180
-                .withDelimiter(',').withHeader(headers.toArray(new String[] {})));
+        csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
+                headers.toArray(new String[] {})));
         return this;
     }
 
@@ -67,7 +74,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         csvFilePrinter.flush();
         String outputFileName = context.getConfiguration().get(MapReduceProperty.OUTPUT.name());
         HdfsUtils.mkdir(config, new Path(outputFileName).getParent().toString());
-        HdfsUtils.copyLocalToHdfs(config, OUTPUT_FILE, outputFileName  + "_" + splitName + ".csv");
+        HdfsUtils.copyLocalToHdfs(config, OUTPUT_FILE, outputFileName + "_" + splitName + ".csv");
         csvFilePrinter.close();
     }
 
@@ -79,10 +86,10 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
     public void handleField(Record record, Field field) throws IOException {
         if (outputField(field)) {
             String fieldValue = String.valueOf(record.get(field.name()));
+            Attribute attr = table.getAttribute(field.name());
             if (fieldValue.equals("null")) {
                 fieldValue = "";
-            } else if (field.name().equals(InterfaceName.LastModifiedDate.name())
-                    || field.name().equals(InterfaceName.CreatedDate.name())) {
+            } else if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Date)) {
                 fieldValue = TimeStampConvertUtils.convertToDate(Long.valueOf(fieldValue));
             }
             csvFilePrinter.print(fieldValue);

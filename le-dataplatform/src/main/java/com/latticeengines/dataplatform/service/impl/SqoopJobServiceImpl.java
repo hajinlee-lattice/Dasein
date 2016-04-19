@@ -390,9 +390,9 @@ public class SqoopJobServiceImpl {
                 yarnConfiguration.set("avro.schema", schema);
             }
 
-            String tableMetadata = props.getProperty("lattice.eai.file.schema");
+            String tableMetadata = props.getProperty("eai.table.schema");
             if (tableMetadata != null) {
-                yarnConfiguration.set("lattice.eai.file.schema", tableMetadata);
+                yarnConfiguration.set("eai.table.schema", tableMetadata);
             }
 
             String importType = props.getProperty("importType");

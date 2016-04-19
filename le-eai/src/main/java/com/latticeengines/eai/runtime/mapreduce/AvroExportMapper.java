@@ -20,9 +20,9 @@ public abstract class AvroExportMapper extends Mapper<AvroKey<Record>, NullWrita
 
     private Schema schema;
 
-    private Configuration config;
-
     private AvroRowHandler avroRowHandler;
+
+    protected Configuration config;
 
     protected abstract AvroRowHandler initialize(Context context, Schema schema) throws IOException,
             InterruptedException;

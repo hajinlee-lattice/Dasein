@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.eai.ExportContext;
@@ -27,7 +28,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 public class CSVFileExportStrategyBase extends ExportStrategy {
 
     private static final Log log = LogFactory.getLog(CSVFileExportStrategyBase.class);
-    
+
     @Autowired
     private JobService jobService;
 
@@ -75,6 +76,8 @@ public class CSVFileExportStrategyBase extends ExportStrategy {
 
         String targetHdfsPath = ctx.getProperty(ExportProperty.TARGETPATH, String.class);
         props.setProperty(MapReduceProperty.OUTPUT.name(), targetHdfsPath);
+
+        props.setProperty("eai.table.schema", JsonUtils.serialize(table));
         return props;
     }
 }

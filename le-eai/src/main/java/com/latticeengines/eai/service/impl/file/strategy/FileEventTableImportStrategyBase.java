@@ -133,7 +133,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
         props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, localFileName));
-        props.put("lattice.eai.file.schema", JsonUtils.serialize(table));
+        props.put("eai.table.schema", JsonUtils.serialize(table));
         return props;
     }
 

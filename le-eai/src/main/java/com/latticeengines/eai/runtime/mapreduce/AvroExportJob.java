@@ -86,6 +86,11 @@ public abstract class AvroExportJob extends Configured implements Tool, MRJobCus
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
 
+            String tableSchema = properties.getProperty("eai.table.schema");
+            if (tableSchema != null) {
+                config.set("eai.table.schema", tableSchema);
+            }
+
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(getMapperClass());
