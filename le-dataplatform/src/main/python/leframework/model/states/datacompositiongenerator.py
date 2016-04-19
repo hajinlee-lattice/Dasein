@@ -63,10 +63,10 @@ class DataCompositionGenerator(State):
             elif name == "Domain":
                 details["interpretation"] = "Domain"
             elif name == "LastModifiedDate":
-                details["interpretation"] = "LastModifiedDate"
-            elif name == "Date":
-                details["interpretation"] = "CreatedDate"
-            elif name == "Date":
+                details["interpretation"] = "Date"
+            elif name == "CreatedDate":
+                details["interpretation"] = "Date"
+            elif name == "FirstName":
                 details["interpretation"] = "FirstName"
             elif name == "LastName":
                 details["interpretation"] = "LastName"
