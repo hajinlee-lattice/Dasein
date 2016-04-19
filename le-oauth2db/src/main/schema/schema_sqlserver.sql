@@ -51,6 +51,11 @@ CREATE TABLE [dbo].[oauth_access_token](
     [authentication] [varbinary](max) NULL,
     [refresh_token] [varchar](256) NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+
+ALTER TABLE [oauth_access_token] ADD CONSTRAINT UNIQUE_USERNAME UNIQUE (user_name)
+
+
 CREATE UNIQUE NONCLUSTERED INDEX [token_id_idx] ON [dbo].[oauth_access_token] 
 ([token_id] ASC
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
