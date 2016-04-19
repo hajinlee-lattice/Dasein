@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.PostConstruct;
 
@@ -24,6 +25,9 @@ public class SessionServiceImpl implements SessionService {
 
     private static final Log LOGGER = LogFactory.getLog(SessionServiceImpl.class);
     private static final int CACHE_TIMEOUT_IN_SEC = 60; // compare to the session timeout in GA, 1 min is negligible
+    private static final Integer MAX_RETRY = 3;
+    private static final Long RETRY_INTERVAL_MSEC = 200L;
+    private static Random random = new Random(System.currentTimeMillis());
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
@@ -46,8 +50,29 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public Session attach(Ticket ticket){
-        Session session = globalSessionManagementService.attach(ticket);
-        interpretGARights(session);
+        Long retryInterval = RETRY_INTERVAL_MSEC;
+        Integer retries = 0;
+        Session session = null;
+        while (++retries <= MAX_RETRY) {
+            try {
+                session = globalSessionManagementService.attach(ticket);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
+                        + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
+            } finally {
+                try {
+                    retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+                    Thread.sleep(retryInterval);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+        if (session != null) {
+            interpretGARights(session);
+        } else {
+            throw new RuntimeException("Failed to attach ticket against GA.");
+        }
         // refresh cache upon attach, because the session object changed
         sessionCache.removeToken(ticket.getData());
         sessionCache.put(ticket.getData(), session);

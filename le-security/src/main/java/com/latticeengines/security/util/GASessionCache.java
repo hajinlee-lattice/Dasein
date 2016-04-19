@@ -22,7 +22,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementSer
 public class GASessionCache {
 
     private static Log log = LogFactory.getLog(GASessionCache.class);
-    private static final Integer MAX_RETRY = 5;
+    private static final Integer MAX_RETRY = 3;
     private static Long retryIntervalMsec = 200L;
     private static Random random = new Random(System.currentTimeMillis());
     private LoadingCache<String, Session> tokenExpirationCache;
@@ -46,7 +46,7 @@ public class GASessionCache {
                                             + " out of " + MAX_RETRY + " times", e);
                                 } finally {
                                     try {
-                                        retryInterval = retryInterval * (1 + random.nextInt(1000) / 1000);
+                                        retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
                                         Thread.sleep(retryInterval);
                                     } catch (Exception e) {
                                         // ignore

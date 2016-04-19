@@ -7,6 +7,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -145,6 +146,62 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testConcurrentAttach() throws InterruptedException, ExecutionException {
+        sessionService.attach(ticket);
+
+        int numTestCases = 10;
+        ExecutorService executor = Executors.newFixedThreadPool(numTestCases);
+        List<Future<Integer>> futures = new ArrayList<>();
+        for (int i = 0; i < numTestCases; i++) {
+            Future<Integer> future = executor.submit(new Callable<Integer>() {
+                @Override
+                public Integer call() throws InterruptedException {
+                    try {
+                        test();
+                        return 1;
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                        return 0;
+                    }
+                }
+
+                private void test() throws InterruptedException {
+                    for (int i = 0; i < 5; i++) {
+                        String passwd = DigestUtils.sha256Hex(adminPassword);
+                        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername,
+                                passwd);
+                        assertNotNull(ticket);
+                        Session session = login(adminUsername, adminPassword);
+                        Tenant tenant = session.getTenant();
+                        ticket.setTenants(Collections.singletonList(tenant));
+
+                        session = sessionService.attach(ticket);
+                        assertNotNull(session);
+                        assertEquals(session.getTenant().getId(), tenant.getId());
+
+                        ticket = session.getTicket();
+                        session = sessionService.retrieve(ticket);
+                        assertNotNull(session);
+                        // random delay
+                        Thread.sleep(ThreadLocalRandom.current().nextInt(10, 50));
+                    }
+                }
+
+            });
+            futures.add(future);
+        }
+
+        int successCases = 0;
+        for (Future<Integer> future: futures) {
+            successCases += future.get();
+        }
+
+        Assert.assertEquals(successCases, numTestCases,
+                String.format("Only %d out of %d test cases passed.", successCases, numTestCases));
+    }
+
+
+    @Test(groups = "functional")
     public void testConcurrentRetrieve() throws InterruptedException, ExecutionException {
         sessionService.attach(ticket);
 
@@ -165,7 +222,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
                 }
 
                 private void test() throws InterruptedException {
-                    for (int i = 0; i < 20; i++) {
+                    for (int i = 0; i < 10; i++) {
                         Ticket t2 = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
                         Session session = sessionService.retrieve(t2);
                         assertNotNull(session);
@@ -189,5 +246,4 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         Assert.assertEquals(successCases, numTestCases,
                 String.format("Only %d out of %d test cases passed.", successCases, numTestCases));
     }
-
 }
