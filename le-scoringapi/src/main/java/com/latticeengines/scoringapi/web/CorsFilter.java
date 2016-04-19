@@ -23,12 +23,16 @@ public class CorsFilter extends OncePerRequestFilter {
         if (request.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(request.getMethod())) {
             // CORS "pre-flight" request
             log.info("Enabling CORS in response header for pre-flight request.");
-            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+            response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            response.addHeader("Access-Control-Allow-Headers", "Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization");
             response.addHeader("Access-Control-Max-Age", "300"); // 5 min
         }
 
-        filterChain.doFilter(request, response);
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            filterChain.doFilter(request, response);
+        }
     }
 
 }
