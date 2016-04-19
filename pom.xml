@@ -14,6 +14,7 @@
     </parent>
 
     <modules>
+        <module>le-transform</module>
         <module>le-common</module>
         <module>le-testframework</module>
         <module>le-network</module>
