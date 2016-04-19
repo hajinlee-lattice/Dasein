@@ -56,10 +56,6 @@ public class WorkflowClientCustomization extends SingleContainerClientCustomizat
         // there are propdata workflow steps need cascading, le-dataflow is the place to hold cascading dependency
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                String.format("/app/%s/dataflow/lib/*", versionManager.getCurrentVersion()), //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
                 String.format("/app/%s/dataflow/dataflow.properties", versionManager.getCurrentVersion()),//
                 false));
 
