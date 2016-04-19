@@ -10,5 +10,6 @@
     <import resource="classpath:dataplatform-context.xml"/>
     <import resource="classpath:camille-runtime-context.xml"/>
     <import resource="classpath:proxy-context.xml"/>
+    <import resource="classpath:security-context.xml"/>
 
 </beans>
