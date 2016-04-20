@@ -56,6 +56,7 @@ class TrainingTestBase(TestBase):
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
         os.symlink("../../main/python/pipeline/pipeline.py", "pipeline.py")
         os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipeline.json", "pipeline.json")
+        os.symlink("../../main/python/configurablepipelinetransformsfromfile/pipelinenullconversionrate.json", "pipelinenullconversionrate.json")
         os.symlink("../../main/python/evpipeline/evpipeline.py", "evpipeline.py")
         shutil.copy("../../main/python" + enginedir, fwkdir + enginedir)
         
@@ -67,7 +68,7 @@ class TrainingTestBase(TestBase):
         shutil.copy("../../main/python/pipeline/encoder.py", evpipelinefwkdir)
 
         for filename in glob.glob(os.path.join("../../main/python/configurablepipelinetransformsfromfile", "*")):
-            if filename.find("/pipeline.json") >= 0:
+            if filename.find("/pipelinenullconversionrate.json") >= 0:
                 continue
             shutil.copy(filename, pipelinefwkdir)
             shutil.copy(filename, evpipelinefwkdir)
