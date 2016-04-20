@@ -17,8 +17,9 @@ import com.latticeengines.propdata.collection.testframework.PropDataCollectionFu
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
+import com.latticeengines.propdata.engine.testframework.PropDataEngineFunctionalTestNGBase;
 
-public class PublicationProgressServiceImplTestNG extends PropDataCollectionFunctionalTestNGBase {
+public class PublicationProgressServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     public static final String POD_ID = "PublicationServiceImplTestNG";
     public static final String PUBLICATION_NAME = "TestPublication";

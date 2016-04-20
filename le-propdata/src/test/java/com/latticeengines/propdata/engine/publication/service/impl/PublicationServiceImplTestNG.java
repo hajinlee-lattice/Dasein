@@ -19,20 +19,20 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationConfigu
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.source.impl.BuiltWithPivoted;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
 import com.latticeengines.propdata.engine.publication.service.PublicationService;
+import com.latticeengines.propdata.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.propdata.engine.testframework.PublicationWorkflowServlet;
 import com.latticeengines.propdata.workflow.engine.PublishWorkflowConfiguration;
 import com.latticeengines.propdata.workflow.engine.steps.PublishConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.rest.StandaloneHttpServer;
 
-public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTestNGBase {
+public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     public final String POD_ID = this.getClass().getSimpleName();
     public static final String PUBLICATION_NAME = "TestPublication2";

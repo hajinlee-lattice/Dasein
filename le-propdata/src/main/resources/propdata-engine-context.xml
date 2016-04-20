@@ -4,16 +4,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <context:component-scan base-package="com.latticeengines.propdata.collection"/>
+    <context:component-scan base-package="com.latticeengines.propdata.engine"/>
 
+    <import resource="classpath:propdata-core-context.xml"/>
     <import resource="classpath:serviceflows-propdata-dataflow-context.xml"/>
-
-    <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
-    </bean>
-
-    <bean id="refreshProgressDao" class="com.latticeengines.propdata.collection.dao.impl.RefreshProgressDaoImpl">
-        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
-    </bean>
 
 </beans>
