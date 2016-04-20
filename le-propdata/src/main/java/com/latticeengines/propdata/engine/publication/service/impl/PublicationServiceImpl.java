@@ -10,6 +10,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
@@ -100,7 +101,7 @@ public class PublicationServiceImpl implements PublicationService {
                 String avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
                 ApplicationId applicationId = submitWorkflow(progress, avroDir, hdfsPod);
                 PublicationProgressUpdater updater = publicationProgressService.update(progress);
-                if (PublicationProgress.Status.FAILED.equals(progress.getStatus())) {
+                if (ProgressStatus.FAILED.equals(progress.getStatus())) {
                     updater.retry();
                 }
                 PublicationProgress progress1 = updater.applicationId(applicationId).commit();

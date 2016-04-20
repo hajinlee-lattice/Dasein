@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
@@ -101,7 +102,7 @@ public class PublicationServiceImplTestNG extends PropDataCollectionFunctionalTe
         PublicationProgress progress1 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
-                .status(PublicationProgress.Status.FAILED).commit();
+                .status(ProgressStatus.FAILED).commit();
         publicationService.publish(PUBLICATION_NAME, publicationRequest, POD_ID);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");

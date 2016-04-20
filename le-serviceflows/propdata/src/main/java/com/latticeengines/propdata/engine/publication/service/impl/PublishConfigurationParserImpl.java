@@ -173,6 +173,13 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     }
 
     @Override
+    public Long countPublishedTable(PublishToSqlConfiguration sqlConfiguration, JdbcTemplate jdbcTemplate) {
+        SqlDestination destination = (SqlDestination) sqlConfiguration.getDestination();
+        String tableName = destination.getTableName();
+        return jdbcTemplate.queryForObject(countTableSql(tableName), Long.class);
+    }
+
+    @Override
     public JdbcTemplate getJdbcTemplate(PublishToSqlConfiguration sqlConfiguration) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         MetadataProvider metadataProvider = new SQLServerMetadataProvider();
@@ -202,6 +209,10 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     private String swapTableNames(String srcTable, String destTable) {
         return "IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'" + srcTable
                 + "') AND type in (N'U')) EXEC sp_rename '" + srcTable + "', '" + destTable + "';\n";
+    }
+
+    private String countTableSql(String tableName) {
+        return "SELECT COUNT(*) FROM [" + tableName + "]";
     }
 
 }

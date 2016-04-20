@@ -8,14 +8,15 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.propdata.publication.SqlDestination;
+import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationEntityMgr;
 import com.latticeengines.propdata.engine.publication.entitymgr.PublicationProgressEntityMgr;
 import com.latticeengines.propdata.engine.publication.service.PublicationProgressService;
-import com.latticeengines.propdata.collection.testframework.PropDataCollectionFunctionalTestNGBase;
 
 public class PublicationProgressServiceImplTestNG extends PropDataCollectionFunctionalTestNGBase {
 
@@ -63,7 +64,7 @@ public class PublicationProgressServiceImplTestNG extends PropDataCollectionFunc
         PublicationProgress progress1 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
-                .status(PublicationProgress.Status.FAILED).commit();
+                .status(ProgressStatus.FAILED).commit();
         progress = publicationProgressService.publishVersion(publication, CURRENT_VERSION, CURRENT_VERSION);
         Assert.assertNotNull(progress,
                 "Should allow new progress when the old one exceed max retry and is in FAILED status.");
@@ -83,7 +84,7 @@ public class PublicationProgressServiceImplTestNG extends PropDataCollectionFunc
         Boolean foundExpectedOne = false;
         for (PublicationProgress progress : progressList) {
             if (PUBLICATION_NAME.equals(progress.getPublication().getPublicationName())
-                    && PublicationProgress.Status.NEW.equals(progress.getStatus())) {
+                    && ProgressStatus.NEW.equals(progress.getStatus())) {
                 foundExpectedOne = true;
             }
         }

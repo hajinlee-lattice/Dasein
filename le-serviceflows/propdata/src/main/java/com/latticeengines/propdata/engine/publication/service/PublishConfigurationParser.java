@@ -15,5 +15,7 @@ public interface PublishConfigurationParser {
 
     String postPublishSql(PublishToSqlConfiguration sqlConfiguration, String sourceName);
 
+    Long countPublishedTable(PublishToSqlConfiguration sqlConfiguration, JdbcTemplate jdbcTemplate);
+
     JdbcTemplate getJdbcTemplate(PublishToSqlConfiguration sqlConfiguration);
 }

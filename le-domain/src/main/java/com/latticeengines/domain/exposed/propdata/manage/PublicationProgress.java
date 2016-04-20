@@ -1,9 +1,6 @@
 package com.latticeengines.domain.exposed.propdata.manage;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -55,9 +52,12 @@ public class PublicationProgress implements HasPid {
     @Column(name = "Destination", nullable = false, length = 1000)
     private String destinationString;
 
+    @Column(name = "RowsPublished")
+    private Long rowsPublished;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false, length = 20)
-    private Status status;
+    private ProgressStatus status;
 
     @Column(name = "CreateTime", nullable = false)
     protected Date createTime = new Date();
@@ -130,13 +130,23 @@ public class PublicationProgress implements HasPid {
         this.destinationString = destinationString;
     }
 
+    @JsonProperty("RowsPublished")
+    public Long getRowsPublished() {
+        return rowsPublished;
+    }
+
+    @JsonProperty("RowsPublished")
+    public void setRowsPublished(Long rowsPublished) {
+        this.rowsPublished = rowsPublished;
+    }
+
     @JsonProperty("Status")
-    public Status getStatus() {
+    public ProgressStatus getStatus() {
         return status;
     }
 
     @JsonProperty("Status")
-    public void setStatus(Status status) {
+    public void setStatus(ProgressStatus status) {
         this.status = status;
     }
 
@@ -253,17 +263,6 @@ public class PublicationProgress implements HasPid {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
-    }
-
-    public enum Status {
-        FAILED,
-        NEW,
-        PUBLISHING,
-        FINISHED;
-
-        public static Set<Status> terminalStatus() {
-            return new HashSet<>(Arrays.asList(FAILED, FINISHED));
-        }
     }
 
 }

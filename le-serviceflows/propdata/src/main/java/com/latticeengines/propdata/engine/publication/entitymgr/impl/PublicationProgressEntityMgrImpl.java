@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
@@ -56,7 +57,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         progress.setLatestStatusUpdate(new Date());
         progress.setProgress(0f);
         progress.setRetries(0);
-        progress.setStatus(PublicationProgress.Status.NEW);
+        progress.setStatus(ProgressStatus.NEW);
         progressDao.create(progress);
 
         return findBySourceVersionUnderMaximumRetry(publication, sourceVersion);
@@ -81,7 +82,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
                 return o1.getCreateTime().compareTo(o2.getCreateTime());
             }
         });
-        for (PublicationProgress progress: progressList) {
+        for (PublicationProgress progress : progressList) {
             if (canProceed(publication, progress)) {
                 return progress;
             }
@@ -101,7 +102,7 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
                 return o1.getCreateTime().compareTo(o2.getCreateTime());
             }
         });
-        for (PublicationProgress progress: progressList) {
+        for (PublicationProgress progress : progressList) {
             if (!canBeIgnored(publication, progress)) {
                 return progress;
             }
@@ -124,19 +125,17 @@ public class PublicationProgressEntityMgrImpl implements PublicationProgressEnti
         return progressDao.findByKey(PublicationProgress.class, pid);
     }
 
-
     private Boolean canBeIgnored(Publication publication, PublicationProgress progress) {
         return (progress.getRetries() >= publication.getNewJobMaxRetry()
-                && PublicationProgress.Status.FAILED.equals(progress.getStatus()));
+                && ProgressStatus.FAILED.equals(progress.getStatus()));
     }
 
     private Boolean canProceed(Publication publication, PublicationProgress progress) {
         if (progress.getRetries() == null) {
             progress.setRetries(0);
         }
-        return PublicationProgress.Status.NEW.equals(progress.getStatus())
-                || (PublicationProgress.Status.FAILED.equals(progress.getStatus())
-                        && progress.getRetries() < publication.getNewJobMaxRetry());
+        return ProgressStatus.NEW.equals(progress.getStatus()) || (ProgressStatus.FAILED.equals(progress.getStatus())
+                && progress.getRetries() < publication.getNewJobMaxRetry());
     }
 
 }

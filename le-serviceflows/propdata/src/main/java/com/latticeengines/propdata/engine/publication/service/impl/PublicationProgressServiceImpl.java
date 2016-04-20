@@ -10,6 +10,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationDestination;
@@ -132,7 +133,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
             this.progress = progress;
         }
 
-        public PublicationProgressUpdaterImpl status(PublicationProgress.Status status) {
+        public PublicationProgressUpdaterImpl status(ProgressStatus status) {
             this.progress.setStatus(status);
             return this;
         }
@@ -143,7 +144,7 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
                 currentRetry = 0;
             }
             progress.setRetries(currentRetry + 1);
-            progress.setStatus(PublicationProgress.Status.NEW);
+            progress.setStatus(ProgressStatus.NEW);
             progress.setErrorMessage(null);
             progress.setProgress(0f);
             return this;
@@ -161,7 +162,12 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
 
         public PublicationProgressUpdaterImpl fail(String errorMessage) {
             progress.setErrorMessage(errorMessage.substring(0, Math.min(1000, errorMessage.length())));
-            progress.setStatus(PublicationProgress.Status.FAILED);
+            progress.setStatus(ProgressStatus.FAILED);
+            return this;
+        }
+
+        public PublicationProgressUpdater rowsPublished(Long rows) {
+            progress.setRowsPublished(rows);
             return this;
         }
 

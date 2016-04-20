@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationConfiguration;
@@ -65,8 +66,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
             progress.setPublication(publication);
 
             sourceName = getConfiguration().getPublication().getSourceName();
-            progress = progressService.update(progress).progress(0.05f).status(PublicationProgress.Status.PUBLISHING)
-                    .commit();
+            progress = progressService.update(progress).progress(0.05f).status(ProgressStatus.PROCESSING).commit();
 
             PublicationConfiguration pubConfig = publication.getDestinationConfiguration();
             PublicationDestination destination = progress.getDestination();
@@ -101,13 +101,13 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         log.info("Executing pre publish sql: " + preSql);
         jdbcTemplate.execute(preSql);
 
-        SqoopExporter exporter = configurationParser.constructSqoopExporter(sqlConfiguration, getConfiguration().getAvroDir());
+        SqoopExporter exporter = configurationParser.constructSqoopExporter(sqlConfiguration,
+                getConfiguration().getAvroDir());
         AppSubmission appSub = internalProxy.exportTable(exporter);
         ApplicationId appId = ConverterUtils.toApplicationId(appSub.getApplicationIds().get(0));
         FinalApplicationStatus finalStatus = waitForApplicationToFinish(appId);
         if (FinalApplicationStatus.SUCCEEDED.equals(finalStatus)) {
-            progress = progressService.update(progress).progress(0.95f).status(PublicationProgress.Status.FINISHED)
-                    .commit();
+            progress = progressService.update(progress).progress(0.95f).commit();
         } else {
             throw new RuntimeException(
                     "The final status is " + finalStatus + " instead of " + FinalApplicationStatus.SUCCEEDED);
@@ -116,8 +116,10 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         String postSql = configurationParser.postPublishSql(sqlConfiguration, sourceName);
         log.info("Executing post publish sql: " + postSql);
         jdbcTemplate.execute(postSql);
+        Long count = configurationParser.countPublishedTable(sqlConfiguration, jdbcTemplate);
+        progress = progressService.update(progress).progress(0.97f).rowsPublished(count).status(ProgressStatus.FINISHED)
+                .commit();
     }
-
 
     private FinalApplicationStatus waitForApplicationToFinish(ApplicationId appId) {
         Long timeout = TimeUnit.HOURS.toMillis(HANGING_THRESHOLD_HOURS);
