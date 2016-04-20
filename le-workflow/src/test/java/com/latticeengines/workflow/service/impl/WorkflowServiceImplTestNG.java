@@ -130,7 +130,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         assertEquals(status, BatchStatus.FAILED);
         Job job = workflowService.getJob(workflowId);
         assertEquals(job.getErrorCode(), LedpCode.LEDP_28001);
-        assertNotNull(job.getErrorMessage());
+        assertNotNull(job.getErrorMsg());
     }
 
     @Test(groups = "functional")
@@ -142,7 +142,7 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         assertEquals(status, BatchStatus.FAILED);
         Job job = workflowService.getJob(workflowId);
         assertEquals(job.getErrorCode(), LedpCode.LEDP_00002);
-        assertNotNull(job.getErrorMessage());
+        assertNotNull(job.getErrorMsg());
     }
 
     @Test(groups = "functional", enabled = true)

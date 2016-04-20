@@ -47,6 +47,8 @@ public class FailureReportingListener implements JobExecutionListener {
                     }
                     job.setErrorDetails(details);
                     workflowJobEntityMgr.update(job);
+                } else {
+                    job.setErrorDetails(new ErrorDetails(LedpCode.LEDP_00002, LedpCode.LEDP_00002.getMessage(), null));
                 }
             } else {
                 log.warn(String.format("Could not find workflow job with id %s", jobExecution.getId()));

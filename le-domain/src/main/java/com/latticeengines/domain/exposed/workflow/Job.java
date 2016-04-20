@@ -30,7 +30,7 @@ public class Job implements HasId<Long>, HasName {
     private Map<String, String> inputs;
     private Map<String, String> outputs;
     private LedpCode errorCode;
-    private String errorMessage;
+    private String errorMsg;
 
     @Override
     @JsonProperty
@@ -177,13 +177,13 @@ public class Job implements HasId<Long>, HasName {
     }
 
     @JsonProperty
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getErrorMsg() {
+        return errorMsg;
     }
 
     @JsonProperty
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
     }
 
     @Override

@@ -112,7 +112,7 @@ public class WorkflowExecutionCache {
             ErrorDetails errorDetails = workflowJob.getErrorDetails();
             if (errorDetails != null) {
                 job.setErrorCode(errorDetails.getErrorCode());
-                job.setErrorMessage(errorDetails.getErrorMsg());
+                job.setErrorMsg(errorDetails.getErrorMsg());
             }
         }
 
