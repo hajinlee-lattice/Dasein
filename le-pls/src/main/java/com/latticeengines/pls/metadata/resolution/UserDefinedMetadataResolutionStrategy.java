@@ -152,10 +152,9 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     private Set<String> getHeaderFields() {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
-            try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
-                InputStream is = fs.open(new Path(csvPath));
-                return ValidateFileHeaderUtils.getCSVHeaderFields(is, closeableResourcePool);
-            }
+            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
+            InputStream is = fs.open(new Path(csvPath));
+            return ValidateFileHeaderUtils.getCSVHeaderFields(is, closeableResourcePool);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         } finally {
