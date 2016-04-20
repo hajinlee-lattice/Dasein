@@ -20,6 +20,12 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $("body").toggleClass("open-nav");
     }
 
+    $('html').click(function() {
+        if ($scope.showProfileNav) {
+            $scope.showProfileNav = false;
+        }
+    });
+
     function checkBrowserWidth(){
         if (window.matchMedia("(min-width: 1200px)").matches) {
             $("body").addClass("open-nav");
