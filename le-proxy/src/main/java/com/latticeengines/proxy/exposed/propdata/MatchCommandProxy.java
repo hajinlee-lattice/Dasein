@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.propdata;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.Commands;
@@ -18,18 +19,21 @@ public class MatchCommandProxy extends BaseRestApiProxy implements MatchCommandI
     @Override
     public MatchStatusResponse getMatchStatus(Long commandID, String clientName) {
         String url = constructUrl("/{commandID}?client={clientName}", commandID, clientName);
-        return get("getMatchStatus", url, MatchStatusResponse.class);
+        RetryTemplate retry = getRetryTemplate(1000, 10);
+        return get("getMatchStatus", url, MatchStatusResponse.class, retry);
     }
 
     @Override
     public Commands createMatchCommand(CreateCommandRequest request, String clientName) {
         String url = constructUrl("?client={clientName}", clientName);
-        return post("createMatchCommand", url, request, Commands.class);
+        RetryTemplate retry = getRetryTemplate(1000, 10);
+        return post("createMatchCommand", url, request, Commands.class, retry);
     }
 
     @Override
     public MatchClientDocument getBestMatchClient(int numRows) {
         String url = constructUrl("bestclient?rows={numRows}", numRows);
-        return get("getBestMatchClient", url, MatchClientDocument.class);
+        RetryTemplate retry = getRetryTemplate(1000, 10);
+        return get("getBestMatchClient", url, MatchClientDocument.class, retry);
     }
 }
