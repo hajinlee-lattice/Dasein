@@ -8,11 +8,11 @@
         <img class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
 
         <div class="profile-nav dropdown">
-            <a ng-click="showProfileNav = !showProfileNav" href="javascript:void(0)" ng-class="{'active' : showProfileNav}">
+            <a ng-click="headerClicked($event)" href="javascript:void(0)" ng-class="{'active' : showProfileNav}">
                 <span class="pd-header-username">{{userDisplayName}}</span>
                 <span class="pd-header-downarrow fa fa-angle-down"></span>
             </a>
-            <ul ng-show="showProfileNav" ng-click="showProfileNav = !showProfileNav">
+            <ul ng-show="showProfileNav" ng-click="headerClicked($event)">
                 <li><a ui-sref="home.updatepassword" data-ng-hide="mandatePasswordChange">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
 
 

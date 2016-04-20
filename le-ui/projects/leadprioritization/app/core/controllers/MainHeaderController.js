@@ -6,7 +6,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('MainHeaderController', function ($scope, $rootScope, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
@@ -15,16 +15,23 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
     checkBrowserWidth();
     $(window).resize(checkBrowserWidth);
+    $scope.showProfileNav = false;
 
     $scope.handleSidebarToggle = function ($event) {
         $("body").toggleClass("open-nav");
     }
 
-    $('html').click(function() {
+    $(document.body).click(function() {
         if ($scope.showProfileNav) {
             $scope.showProfileNav = false;
+            $scope.$apply();
         }
     });
+
+    $scope.headerClicked = function($event) {
+        $scope.showProfileNav = !$scope.showProfileNav;
+        $event.stopPropagation();
+    };
 
     function checkBrowserWidth(){
         if (window.matchMedia("(min-width: 1200px)").matches) {
