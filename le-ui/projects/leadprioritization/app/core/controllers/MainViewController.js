@@ -59,6 +59,15 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Fetch the view and make it Angular aware
         $state.go('home.users', {}, { reload: true } );
     }
+
+    $scope.$on(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT, function (event, data) {
+        modelCreationHistoryView();
+    });
+
+    function modelCreationHistoryView() {
+        $state.go('home.history', {}, { reload: true } );
+    }
+
     /*
     function createMainContentViewAndRefreshFeatures() {
         FeatureFlagService.GetAllFlags().then(function() {
@@ -122,18 +131,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
         });
     }
 
-    $scope.$on(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT, function (event, data) {
-        modelCreationHistoryView();
-    });
 
-    function modelCreationHistoryView() {
-        //window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
-
-        $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            $compile($("#mainContentView").html(html))(scope);
-        });
-    }
 
     // Handle when the Model List link is clicked
     $scope.$on(NavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
