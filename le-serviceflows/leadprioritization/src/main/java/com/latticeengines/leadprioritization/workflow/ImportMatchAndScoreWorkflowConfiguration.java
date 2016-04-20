@@ -53,6 +53,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             importDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
+            scoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

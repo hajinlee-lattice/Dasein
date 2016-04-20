@@ -2,8 +2,6 @@ package com.latticeengines.leadprioritization.workflow;
 
 import java.util.Map;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -47,6 +45,11 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            return this;
+        }
+
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            score.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
