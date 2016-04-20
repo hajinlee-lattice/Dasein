@@ -171,6 +171,11 @@ table {
     left: 14px;
 }
 
+
+
+.required-fields-pagination {
+    margin-bottom: 2em;
+}
 .jobs-table-content {
     background: white;
     font-size: 125%;
@@ -179,6 +184,10 @@ table {
         padding: 0.5em 0.5em 0.5em 0em;
     }
 }
+
+
+
+
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
 .breadcrumb a:after {

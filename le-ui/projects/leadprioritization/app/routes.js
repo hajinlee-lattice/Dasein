@@ -295,6 +295,29 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
+                    resolve: {
+                        RequiredFields: function($q, $http, $stateParams) {
+                            
+                            var deferred = $q.defer(),
+                                modelId = $stateParams.modelId;
+
+                            $http({
+                                'method': "GET",
+                                'url': '/pls/modelsummaries/metadata/required/' + modelId
+                            })
+                            .then(
+                                function onSuccess(response) {
+                                    deferred.resolve(response.data);
+                                    console.log("success");
+                                }, function onError(response) {
+                                    console.log("error");
+                                    deferred.reject(response.data);
+                                }
+                            );
+                            return deferred.promise; 
+                        }
+                    },
+                    controller: 'csvBulkUploadController',
                     templateUrl: 'app/models/views/BulkScoringImportData.html'
                 }   
             }

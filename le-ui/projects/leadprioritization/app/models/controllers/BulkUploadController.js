@@ -5,14 +5,15 @@ angular.module('mainApp.create.csvBulkUpload', [
     'mainApp.core.utilities.NavUtility'
 ])
 .controller('csvBulkUploadController', [
-    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', '$state', '$q', 'csvImportService', 'csvImportStore',
-    function($scope, $rootScope, ModelService, ResourceUtility, $state, $q, csvImportService, csvImportStore) {
+    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', '$state', '$q', 'csvImportService', 'csvImportStore', 'RequiredFields',
+    function($scope, $rootScope, ModelService, ResourceUtility, $state, $q, csvImportService, csvImportStore, RequiredFields) {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
         $scope.importing = false;
         $scope.showImportSuccess = false;
         $scope.ResourceUtility = ResourceUtility;
         $scope.accountLeadCheck = false;
+        $scope.requiredFields = RequiredFields;
 
         $scope.uploadFile = function() {
             $scope.showImportError = false;

@@ -1,5 +1,5 @@
 <section class="container setup-import">
-<form name="uploadForm" ng-controller="csvBulkUploadController" novalidate>
+<form name="uploadForm" novalidate>
   
 	<div class="row">
     	<div class="six columns offset-three">
@@ -41,29 +41,19 @@
     				</tr>
     			</thead>
     			<tbody>
-    				<tr><td>Lead ID</td></tr>
-    				<tr><td>Email</td></tr>
-    				<tr><td>Won</td></tr>
-    				<tr><td>Company/Account</td></tr>
-    				<tr><td>City</td></tr>
-    				<tr><td>State</td></tr>
-    				<tr><td>Country</td></tr>
-    				<tr><td>Created Date</td></tr>
-    				<tr><td>Last Modified Date</td></tr>
-    				<tr><td>Zip/Postal Code</td></tr>
-    				<tr><td>First Name</td></tr>
-    				<tr><td>Last Name</td></tr>
-    				<tr><td>Title</td></tr>
-    				<tr><td>Lead Source</td></tr>
-    				<tr><td>Closed</td></tr>
-    				<tr><td>Stage</td></tr>
-    				<tr><td>Phone</td></tr>
-    				<tr><td>Annual Revenue</td></tr>
-    				<tr><td>No. of Employees</td></tr>
-    				<tr><td>Industry</td></tr>
+                    <tr ng-repeat="requiredField in requiredFields | startFrom: (current - 1) * pagesize | limitTo: pagesize">
+                        <td>{{requiredField}}</td>
+                    </tr>
     			</tbody>
     		</table>
     	</div>
+    </div>
+
+    <div class="row required-fields-pagination" ng-init="pagesize = 10; current = 1" ng-show="max > 1">
+        <div class="twelve columns">
+            <pd-pagination-controls current="current" max="max = requiredFields.length / pagesize">
+            </pd-pagination-controls>
+        </div>
     </div>
 
     <div class="row">
