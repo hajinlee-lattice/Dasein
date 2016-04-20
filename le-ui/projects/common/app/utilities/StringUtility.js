@@ -19,6 +19,7 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
     };
 
     this.SubstitueAllSpecialCharsWithDashes = function (stringToChange) {
+        stringToChange = stringToChange.trim();
         return stringToChange.replace(/[^a-zA-Z0-9]/g, '-');
     };
 });
