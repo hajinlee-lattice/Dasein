@@ -92,7 +92,7 @@ public class MatchCommandServiceImpl implements MatchCommandService {
     public MatchBlockUpdaterImpl updateBlock(String blockOperationUid) {
         MatchBlock matchBlock = matchBlockEntityMgr.findByBlockUid(blockOperationUid);
         if (matchBlock == null) {
-            throw new RuntimeException("Cannot find a match block with block operation uid " + matchBlock);
+            throw new RuntimeException("Cannot find a match block with block operation uid " + blockOperationUid);
         }
         return new MatchBlockUpdaterImpl(matchBlock);
     }
