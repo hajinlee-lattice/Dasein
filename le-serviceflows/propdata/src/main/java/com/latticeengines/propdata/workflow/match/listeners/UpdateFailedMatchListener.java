@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.latticeengines.workflow.listener.LEJobListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -27,7 +28,7 @@ import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.workflow.match.steps.BulkMatchContextKey;
 
 @Component("updateFailedMatchListener")
-public class UpdateFailedMatchListener implements JobExecutionListener {
+public class UpdateFailedMatchListener extends LEJobListener {
 
     private static final Log log = LogFactory.getLog(UpdateFailedMatchListener.class);
 
@@ -41,11 +42,11 @@ public class UpdateFailedMatchListener implements JobExecutionListener {
     private Configuration yarnConfiguration;
 
     @Override
-    public void beforeJob(JobExecution jobExecution) {
+    public void beforeJobExecution(JobExecution jobExecution) {
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJobExecution(JobExecution jobExecution) {
         ExitStatus exitStatus = jobExecution.getExitStatus();
         log.info("In AfterMatchListener.afterJob. ExitStatus=" + exitStatus);
         if (ExitStatus.FAILED.equals(exitStatus)) {

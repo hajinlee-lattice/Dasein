@@ -103,7 +103,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
             return fs.open(new Path(path));
 
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18102, new String[] { workflowJobId });
+            throw new LedpException(LedpCode.LEDP_18102, e, new String[] { workflowJobId });
         }
     }
 
