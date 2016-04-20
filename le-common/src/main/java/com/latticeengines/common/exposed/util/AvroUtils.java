@@ -152,6 +152,7 @@ public class AvroUtils {
                 recordBuilder = recordBuilder.prop(k, v);
             }
         }
+
         String s1uuid = s1.getProp("uuids");
         if (s1uuid == null) {
             s1uuid = s1.getProp("uuid");
@@ -204,6 +205,19 @@ public class AvroUtils {
         }
         Schema schema = fieldAssembler.endRecord();
         return new Object[] { schema, map };
+    }
+
+    public static Schema constructSchema(String tableName, Map<String, Class<?>> classMap) {
+        RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(tableName);
+        FieldAssembler<Schema> fieldAssembler = recordBuilder.fields();
+        FieldBuilder<Schema> fieldBuilder;
+        for (Map.Entry<String, Class<?>> classEntry: classMap.entrySet()) {
+            fieldBuilder = fieldAssembler.name(classEntry.getKey());
+            Type type = getAvroType(classEntry.getValue());
+            fieldAssembler = constructFieldWithType(fieldAssembler, fieldBuilder, type);
+        }
+        Schema schema = fieldAssembler.endRecord();
+        return schema;
     }
 
     public static FieldAssembler<Schema> constructFieldWithType(FieldAssembler<Schema> fieldAssembler,

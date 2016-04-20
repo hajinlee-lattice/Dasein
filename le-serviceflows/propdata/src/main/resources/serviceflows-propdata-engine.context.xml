@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <context:component-scan base-package="com.latticeengines.propdata.engine"/>
+
+    <import resource="classpath:dataflow-context.xml"/>
+    <import resource="classpath:serviceflows-propdata-core-context.xml"/>
+
+    <bean id="simpleCascadingExecutor" class="com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor">
+        <constructor-arg name="yarnConfiguration" ref="yarnConfiguration" />
+    </bean>
+
+    <bean id="sourceColumnDao" class="com.latticeengines.propdata.engine.common.dao.impl.SourceColumnDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="publicationDao" class="com.latticeengines.propdata.engine.publication.dao.impl.PublicationDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="publicationProgressDao" class="com.latticeengines.propdata.engine.publication.dao.impl.PublicationProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+    <bean id="transformationProgressDao" class="com.latticeengines.propdata.engine.transformation.dao.impl.TransformationProgressDaoImpl" >
+        <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
+    </bean>
+
+</beans>

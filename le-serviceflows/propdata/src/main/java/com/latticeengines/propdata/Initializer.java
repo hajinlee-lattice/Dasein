@@ -9,7 +9,7 @@ public class Initializer implements SoftwarePackageInitializer {
 
     @Override
     public ApplicationContext initialize(ApplicationContext applicationContext) {
-        return new ClassPathXmlApplicationContext(new String[] { "serviceflows-propdata-context.xml" }, //
+        return new ClassPathXmlApplicationContext(new String[] { "serviceflows-propdata-dataflow-context.xml" }, //
                 applicationContext);
     }
 
