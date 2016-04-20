@@ -26,7 +26,8 @@ public enum ReportPurpose {
     /**
      * Generic
      */
-    IMPORT_DATA_SUMMARY("ImportDataSummary");
+    IMPORT_DATA_SUMMARY("ImportDataSummary"), //
+    EVENT_TABLE_IMPORT_SUMMARY("EventTableImportSummary");
 
     private String key;
 
