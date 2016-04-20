@@ -15,15 +15,15 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
 @Component("createEventTableReport")
-public class CreateEventTableReport extends BaseReportStep<BaseReportStepConfiguration> {
-    private static final Logger log = Logger.getLogger(CreateEventTableReport.class);
+public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfiguration> {
+    private static final Logger log = Logger.getLogger(CreateTableImportReport.class);
 
     @Autowired
     private JobProxy jobProxy;
 
     @Override
     protected ReportPurpose getPurpose() {
-        return ReportPurpose.EVENT_TABLE_IMPORT_SUMMARY;
+        return ReportPurpose.IMPORT_DATA_SUMMARY;
     }
 
     @Override

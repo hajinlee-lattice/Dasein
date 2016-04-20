@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -24,6 +23,7 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowSource;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
@@ -77,10 +77,15 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                 sources.put(name, dataFlowSource.getRawDataPath());
                 usesPaths = true;
             } else {
+                log.info(String.format("Retrieving source table %s for customer space %s", name,
+                        dataFlowConfig.getCustomerSpace()));
                 Table sourceTable = metadataProxy.getTable(dataFlowConfig.getCustomerSpace().toString(), name);
                 if (sourceTable == null) {
                     log.error("Source table " + name + " retrieved from the metadata service is null.");
+                    continue;
                 }
+                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
+                        .getExtracts().get(0).getPath()));
                 sourceTables.put(name, sourceTable);
                 usesTables = true;
             }
@@ -102,6 +107,7 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         Path baseTargetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(),
                 dataFlowConfig.getCustomerSpace());
         String targetPath = baseTargetPath.append(dataFlowConfig.getTargetTableName()).toString();
+        log.info(String.format("Target path is %s", targetPath));
         ctx.setProperty("TARGETPATH", targetPath);
         ctx.setProperty("QUEUE", LedpQueueAssigner.getModelingQueueNameForSubmission());
         ctx.setProperty("FLOWNAME", dataFlowConfig.getDataFlowBeanName());

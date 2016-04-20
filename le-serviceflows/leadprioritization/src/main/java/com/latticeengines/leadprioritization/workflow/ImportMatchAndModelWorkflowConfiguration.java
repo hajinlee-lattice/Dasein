@@ -6,13 +6,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration.Builder;
 import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.leadprioritization.workflow.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
@@ -25,6 +24,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         private ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration();
         private ImportStepConfiguration importData = new ImportStepConfiguration();
         private BaseReportStepConfiguration registerReport = new BaseReportStepConfiguration();
+        private CreatePrematchEventTableReportConfiguration createEventTableReport = new CreatePrematchEventTableReportConfiguration();
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private ModelStepConfiguration model = new ModelStepConfiguration();
         private MatchStepConfiguration match = new MatchStepConfiguration();
@@ -34,6 +34,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
             registerReport.setMicroServiceHostPort(microServiceHostPort);
+            createEventTableReport.setMicroServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             model.setMicroServiceHostPort(microServiceHostPort);
             match.setMicroServiceHostPort(microServiceHostPort);
@@ -47,6 +48,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
                     "ImportMatchAndModelWorkflow");
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
+            createEventTableReport.setCustomerSpace(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
@@ -63,6 +65,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public Builder dedupTargetTableName(String targetTableName) {
             dedupEventTable.setTargetTableName(targetTableName);
             match.setInputTableName(targetTableName);
+            createEventTableReport.setSourceTableName(targetTableName);
             return this;
         }
 
@@ -74,6 +77,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             importData.setInternalResourceHostPort(internalResourceHostPort);
             registerReport.setInternalResourceHostPort(internalResourceHostPort);
+            createEventTableReport.setInternalResourceHostPort(internalResourceHostPort);
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             model.setInternalResourceHostPort(internalResourceHostPort);
             match.setInternalResourceHostPort(internalResourceHostPort);
@@ -81,8 +85,13 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-        public Builder reportName(String reportName) {
+        public Builder importReportName(String reportName) {
             registerReport.setReportName(reportName);
+            return this;
+        }
+
+        public Builder eventTableReportName(String eventTableReportName) {
+            createEventTableReport.setReportName(eventTableReportName);
             return this;
         }
 
@@ -144,13 +153,13 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
-
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
             configuration.add(importData);
             configuration.add(registerReport);
+            configuration.add(createEventTableReport);
             configuration.add(dedupEventTable);
             configuration.add(match);
             configuration.add(model);

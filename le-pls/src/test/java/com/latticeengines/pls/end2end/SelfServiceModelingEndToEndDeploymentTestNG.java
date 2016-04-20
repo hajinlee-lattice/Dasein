@@ -1,9 +1,9 @@
 package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -109,7 +109,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info("Test environment setup finished.");
         System.out.println("Test environment setup finished.");
 
-        fileName = "Mulesoft_SFDC_LP3_1000.csv";
+        fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
     }
 
     private void deleteTwoTenants() throws Exception {
@@ -213,7 +213,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 Job.class);
         assertNotNull(job);
         List<Report> reports = job.getReports();
-        assertEquals(reports.size(), 1);
+        assertEquals(reports.size(), 2);
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel", timeOut = 120000)

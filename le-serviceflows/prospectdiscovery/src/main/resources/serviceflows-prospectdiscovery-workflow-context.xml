@@ -17,6 +17,6 @@
 
     <context:component-scan base-package="com.latticeengines.prospectdiscovery.workflow" />
 
-    <import resource="classpath:serviceflows-core-context.xml"/>
+    <import resource="classpath:serviceflows-core-workflow-context.xml"/>
 
 </beans>

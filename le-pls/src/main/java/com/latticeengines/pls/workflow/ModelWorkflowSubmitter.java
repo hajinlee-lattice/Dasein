@@ -19,7 +19,8 @@ public class ModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = Logger.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
-    public ApplicationId submit(String eventTableName, String modelName, String displayName, String sourceSchemaInterpretation) {
+    public ApplicationId submit(String eventTableName, String modelName, String displayName,
+            String sourceSchemaInterpretation) {
         Table eventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(), eventTableName);
 
         if (eventTable == null) {

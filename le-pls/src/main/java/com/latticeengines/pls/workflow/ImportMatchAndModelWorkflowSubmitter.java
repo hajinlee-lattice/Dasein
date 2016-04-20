@@ -60,7 +60,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .sourceFileName(sourceFile.getName()) //
                 .sourceType(SourceType.FILE) //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .reportName(sourceFile.getName() + "_Report") //
+                .importReportName(sourceFile.getName() + "_Report") //
+                .eventTableReportName(sourceFile.getName() + "_EventTableReport") //
                 .dedupDataFlowBeanName("dedupEventTable") //
                 .dedupDataFlowParams(new DedupEventTableParameters(sourceFile.getTableName())) //
                 .dedupTargetTableName(sourceFile.getTableName() + "_deduped") //

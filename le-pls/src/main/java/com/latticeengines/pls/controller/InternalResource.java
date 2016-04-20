@@ -228,6 +228,17 @@ public class InternalResource extends InternalResourceBase {
         reportService.createOrUpdateReport(report);
     }
 
+    @RequestMapping(value = "/reports/{reportName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Retrieve a Report")
+    public Report findReportByName(@PathVariable("reportName") String reportName,
+            @PathVariable("tenantId") String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+
+        return reportService.getReportByName(reportName);
+    }
+
     @RequestMapping(value = "/sourcefiles/{sourceFileName}/" + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve a SourceFile")

@@ -163,6 +163,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         for (Extract extract : extracts) {
             String path = null;
             try {
+                log.info(String.format("Retrieving extract for table %s located at %s", sourceTableName,
+                        extract.getPath()));
                 List<String> matches = HdfsUtils.getFilesByGlob(config, extract.getPath());
                 if (HdfsUtils.isDirectory(config, extract.getPath())) {
                     matches = HdfsUtils.getFilesByGlob(config, extract.getPath() + "/*.avro");
@@ -222,6 +224,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         // group and sort the extracts
         if (sourceTable.getPrimaryKey() != null && sourceTable.getLastModifiedKey() != null) {
+            log.info(String.format("Deduping %s by %s using %s to resolve ties", sourceTable.getName(), //
+                    sourceTable.getPrimaryKey().getAttributes().get(0), //
+                    sourceTable.getLastModifiedKey().getAttributes().get(0)));
             String lastModifiedKeyColName = sourceTable.getLastModifiedKey().getAttributes().get(0);
             Fields sortFields = new Fields(lastModifiedKeyColName);
             sortFields.setComparator(lastModifiedKeyColName, Collections.reverseOrder());

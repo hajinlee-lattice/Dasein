@@ -36,12 +36,16 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public boolean setup() {
         String stepStringConfig = jobParameters.getString(configurationClass.getName());
         if (stepStringConfig != null) {
-            configuration = JsonUtils.deserialize(stepStringConfig, configurationClass);
-            log.info("Configuration instance set for " + configurationClass.getName());
-            onConfigurationInitialized();
+            setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
             return true;
         } else
             return false;
+    }
+
+    public void setConfiguration(T configuration) {
+        this.configuration = configuration;
+        log.info("Configuration instance set for " + configurationClass.getName());
+        onConfigurationInitialized();
     }
 
     protected void onConfigurationInitialized() {

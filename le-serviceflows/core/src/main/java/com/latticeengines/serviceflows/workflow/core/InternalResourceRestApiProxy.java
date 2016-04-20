@@ -119,6 +119,16 @@ public class InternalResourceRestApiProxy extends BaseRestApiProxy {
         }
     }
 
+    public Report findReportByName(String name, String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/reports", name, tenantId);
+            log.info(String.format("Getting from %s", url));
+            return restTemplate.getForObject(url, Report.class);
+        } catch (Exception e) {
+            throw new RuntimeException("findReportByName: Remote call failure", e);
+        }
+    }
+
     public SourceFile findSourceFileByName(String name, String tenantId) {
         try {
             String url = constructUrl("pls/internal/sourcefiles", name, tenantId);

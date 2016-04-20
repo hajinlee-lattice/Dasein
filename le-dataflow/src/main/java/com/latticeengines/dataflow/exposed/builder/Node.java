@@ -289,7 +289,7 @@ public class Node {
     }
 
     public Attribute getSourceAttribute(final InterfaceName interfaceName) {
-        return getSourceSchema().getAttribute(interfaceName);
+        return getSourceSchema().getAttribute(interfaceName.toString());
     }
 
     public Attribute getSourceAttribute(String attributeName) {

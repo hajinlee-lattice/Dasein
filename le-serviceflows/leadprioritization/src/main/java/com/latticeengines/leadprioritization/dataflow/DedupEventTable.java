@@ -24,21 +24,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         Node eventTable = addSource(parameters.eventTable);
         Node last = eventTable;
 
-        Attribute websiteColumn = eventTable.getSourceAttribute(InterfaceName.Website);
-        Attribute domainColumn = eventTable.getSourceAttribute(InterfaceName.Domain);
-        Attribute emailColumn = eventTable.getSourceAttribute(InterfaceName.Email);
-
-        if (domainColumn != null) {
-            last = last.rename(new FieldList(domainColumn.getName()), new FieldList(DOMAIN));
-        } else if (websiteColumn != null) {
-            last = DataFlowUtils.normalizeDomain(last, websiteColumn.getName(), DOMAIN);
-        } else if (emailColumn != null) {
-            last = DataFlowUtils.extractDomainFromEmail(last, emailColumn.getName(), DOMAIN);
-            last = DataFlowUtils.normalizeDomain(last, DOMAIN);
-        } else {
-            throw new RuntimeException("Need a website, domain, or email column");
-        }
-
+        last = DataFlowUtils.extractDomain(last, DOMAIN);
         last = addSortColumn(last, eventTable, SORT);
         Node emptyDomains = last //
                 .filter(String.format("%s == null || %s.equals(\"\")", DOMAIN, DOMAIN), new FieldList(DOMAIN)) //

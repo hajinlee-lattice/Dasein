@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.leadprioritization.workflow.steps.CreateEventTableReport;
+import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -18,7 +18,7 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
     private ImportData importData;
 
     @Autowired
-    private CreateEventTableReport createEventTableReport;
+    private CreateTableImportReport createTableImportReport;
 
     @Autowired
     private ScoreWorkflow scoreWorkflow;
@@ -32,7 +32,7 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(importData) //
-                .next(createEventTableReport) //
+                .next(createTableImportReport) //
                 .next(scoreWorkflow)//
                 .build();
     }

@@ -144,9 +144,4 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         this.proxy = proxy;
     }
 
-    @VisibleForTesting
-    void setConfiguration(ChooseModelStepConfiguration configuration) {
-        this.configuration = configuration;
-    }
-
 }

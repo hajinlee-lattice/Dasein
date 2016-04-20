@@ -177,6 +177,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
     }
 
+    protected Report retrieveReport(CustomerSpace space, String name) {
+        if (name == null) {
+            return null;
+        }
+        InternalResourceRestApiProxy proxy = getInternalResourceProxy();
+        return proxy.findReportByName(name, space.toString());
+    }
+
     protected SourceFile retrieveSourceFile(CustomerSpace space, String name) {
         if (name == null) {
             return null;

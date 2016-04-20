@@ -21,7 +21,12 @@ public enum ReportPurpose {
     /**
      * Lead Prioritization
      */
-    EVENT_TABLE_IMPORT_SUMMARY("EventTableImportSummary");
+    PREMATCH_EVENT_TABLE_SUMMARY("PreMatchEventTableSummary"), //
+
+    /**
+     * Generic
+     */
+    IMPORT_DATA_SUMMARY("ImportDataSummary");
 
     private String key;
 

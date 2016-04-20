@@ -5,9 +5,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration.Builder;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 
@@ -25,6 +23,7 @@ public class ModelWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             model.setInternalResourceHostPort(internalResourceHostPort);
+            export.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 

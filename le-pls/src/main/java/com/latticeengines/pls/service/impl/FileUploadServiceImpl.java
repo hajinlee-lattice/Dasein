@@ -106,7 +106,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             return fs.open(schemaPath);
 
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18085, new String[] { sourceFile.getDisplayName() });
+            throw new LedpException(LedpCode.LEDP_18085, e, new String[] { sourceFile.getDisplayName() });
         }
     }
 

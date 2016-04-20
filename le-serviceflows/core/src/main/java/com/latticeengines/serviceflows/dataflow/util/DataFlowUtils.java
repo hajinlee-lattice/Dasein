@@ -15,6 +15,21 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class DataFlowUtils {
+    public static Node extractDomain(Node last, String columnName) {
+
+        if (last.getFieldNames().contains(InterfaceName.Domain.toString())) {
+            last = last.rename(new FieldList(InterfaceName.Domain.toString()), new FieldList(columnName));
+        } else if (last.getFieldNames().contains(InterfaceName.Website.toString())) {
+            last = DataFlowUtils.normalizeDomain(last, InterfaceName.Website.toString(), columnName);
+        } else if (last.getFieldNames().contains(InterfaceName.Email.toString())) {
+            last = DataFlowUtils.extractDomainFromEmail(last, InterfaceName.Email.toString(), columnName);
+            last = DataFlowUtils.normalizeDomain(last, columnName);
+        } else {
+            throw new RuntimeException("Need a website, domain, or email column");
+        }
+        return last;
+    }
+
     public static Node normalizeDomain(Node last, String fieldName) {
         return normalizeDomain(last, fieldName, fieldName);
     }
@@ -43,9 +58,9 @@ public class DataFlowUtils {
     public static Node addInternalId(Node last) {
         if (!hasInternalId(last)) {
             FieldMetadata fm = new FieldMetadata(InterfaceName.InternalId.toString(), Long.class);
-            fm.setPropertyValue("LogicalType", LogicalDataType.InternalId.toString());
+            fm.setPropertyValue("logicalType", LogicalDataType.InternalId.toString());
             fm.setPropertyValue("ApprovedUsage", ModelingMetadata.NONE_APPROVED_USAGE);
-            fm.setPropertyValue("DisplayName", "Id");
+            fm.setPropertyValue("displayName", "Id");
             last = last.addRowID(fm);
         }
         return last;
@@ -56,7 +71,7 @@ public class DataFlowUtils {
         return Iterables.any(fields, new Predicate<FieldMetadata>() {
             @Override
             public boolean apply(@Nullable FieldMetadata input) {
-                String value = input.getPropertyValue("LogicalDataType");
+                String value = input.getPropertyValue("logicalType");
                 return value != null && value.equals(LogicalDataType.InternalId.toString());
             }
         });
@@ -67,7 +82,7 @@ public class DataFlowUtils {
             Iterable<FieldMetadata> filtered = Iterables.filter(last.getSchema(), new Predicate<FieldMetadata>() {
                 @Override
                 public boolean apply(@Nullable FieldMetadata input) {
-                    String value = input.getPropertyValue("LogicalDataType");
+                    String value = input.getPropertyValue("logicalType");
                     return value != null && value.equals(LogicalDataType.InternalId.toString());
                 }
             });
