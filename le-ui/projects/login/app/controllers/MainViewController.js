@@ -5,11 +5,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
     'mainApp.config.services.ConfigService',
+    'mainApp.login.services.LoginService',
     'mainApp.login.controllers.UpdatePasswordController',
     'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, LoginService, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
@@ -200,4 +201,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
+
+    $scope.logoutClicked = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        LoginService.Logout();
+    };
 });

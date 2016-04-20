@@ -2,27 +2,29 @@
     <div id="mainHeaderView"></div>
     <div id="mainContentView">
 
-        <div class="content-header text-centered">
-            <div class="container row">
-                <div class="columns twelve">
-                    <h1><span class="blue-text">Choose</span> Your <span class="orange-text">Weapon</span>:</h1>
+        <div class="summary blue-fire">
+            <div class="content-header text-centered">
+                <div class="container row">
+                    <div class="columns twelve">
+                        <h3><span class="white-text">You are already logged in</span></h3>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="content-body">
-            <div class="container row">
-                <div class="columns four">
-                    <h2><a href="/lp/">Lead Prioritization</a></h2>
-                </div>
-                <div class="columns four">
-                    <h2><a href="/pd/">Prospect Discovery</a></h2>
-                </div>
-                <div class="columns four">
-                    <h2><a href="/demo/">Lattice Saphire Design System</a></h2>
+            <div class="content-body">
+                <div class="container row">
+                    <div class="offset-four columns two">
+                        <a ng-click="logoutClicked()" class="button icon-button white-button">
+                            Sign Out
+                        </a>
+                    </div>
+                    <div class="columns two">
+                        <a href="/lp/" class="button icon-button orange-button">
+                            Go to the model list
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        
     </div>
 </div>

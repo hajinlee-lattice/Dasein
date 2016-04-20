@@ -68,6 +68,13 @@ var mainApp = angular.module('mainApp', [
         }
     },0)
 
+    $rootScope.$on('$stateChangeStart', function(ev, toState, toParams, fromState, fromParams) {
+        if (fromState.name == 'home.models' && toState.name == 'home') {
+            ev.preventDefault();
+            window.open("/login", "_self");
+        }
+    });
+
     $scope.$on("LoggedIn", function() {
         startObservingUserActivtyThroughMouseAndKeyboard();
         startCheckingIfSessionIsInactive();
