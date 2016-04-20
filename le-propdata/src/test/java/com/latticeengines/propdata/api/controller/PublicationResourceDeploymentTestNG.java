@@ -12,6 +12,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.domain.exposed.propdata.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.propdata.manage.Publication;
 import com.latticeengines.domain.exposed.propdata.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest;
@@ -73,8 +74,8 @@ public class PublicationResourceDeploymentTestNG extends PropDataApiDeploymentTe
 
         List<PublicationProgress> progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertTrue(progresses.size() >= 1, "Should have at least one progress for the testing publication");
-        Assert.assertEquals(progresses.get(0).getStatus(), PublicationProgress.Status.FINISHED,
-                "The final status of the progress is not " + PublicationProgress.Status.FINISHED + ", but "
+        Assert.assertEquals(progresses.get(0).getStatus(), ProgressStatus.FINISHED,
+                "The final status of the progress is not " + ProgressStatus.FINISHED + ", but "
                         + progresses.get(0).getStatus());
     }
 
