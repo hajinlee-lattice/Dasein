@@ -16,9 +16,9 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class ValidateCSVFileHeaderUtils {
+public class ValidateFileHeaderUtils {
 
-    private static final Logger log = Logger.getLogger(ValidateCSVFileHeaderUtils.class);
+    private static final Logger log = Logger.getLogger(ValidateFileHeaderUtils.class);
 
     public static final int BIT_PER_BYTE = 1024;
     public static final int BYTE_NUM = 500;

@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 
-public class ValidateCSVFileHeaderUtilsUnitTestNG {
+public class ValidateFileHeaderUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetCSVFileHeader() throws FileNotFoundException {
@@ -23,7 +23,7 @@ public class ValidateCSVFileHeaderUtilsUnitTestNG {
         File csvFile = new File(topPredictorCSVFileUrl.getFile());
         InputStream stream = new FileInputStream(csvFile);
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
-        Set<String> headers = ValidateCSVFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        Set<String> headers = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         assertTrue(!headers.isEmpty());
         assertEquals(headers.size(), 17);
     }

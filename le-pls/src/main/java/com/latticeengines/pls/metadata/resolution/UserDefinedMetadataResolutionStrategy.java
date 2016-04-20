@@ -2,8 +2,6 @@ package com.latticeengines.pls.metadata.resolution;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,16 +11,13 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.apache.avro.Schema;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.io.ByteOrderMark;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -31,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
 public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStrategy {
     private String csvPath;
@@ -154,24 +150,20 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
     }
 
     private Set<String> getHeaderFields() {
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
-                try (InputStream is = fs.open(new Path(csvPath))) {
-                    try (InputStreamReader reader = new InputStreamReader(new BOMInputStream(is, false,
-                            ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-                            ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)) {
-                        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
-                        try (CSVParser parser = new CSVParser(reader, format)) {
-                            return parser.getHeaderMap().keySet();
-                        } catch (IOException e) {
-                            throw new LedpException(LedpCode.LEDP_18094, e);
-                        }
-                    }
-
-                }
+                InputStream is = fs.open(new Path(csvPath));
+                return ValidateFileHeaderUtils.getCSVHeaderFields(is, closeableResourcePool);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
+        } finally {
+            try {
+                closeableResourcePool.close();
+            } catch (IOException e) {
+                throw new RuntimeException("Problem when closing the pool", e);
+            }
         }
     }
 

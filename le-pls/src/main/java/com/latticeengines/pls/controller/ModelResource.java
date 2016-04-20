@@ -74,7 +74,7 @@ public class ModelResource {
 
         return ResponseDocument.successResponse( //
                 modelWorkflowSubmitter.submit(clone.getName(), parameters.getName(), parameters.getDisplayName(),
-                        modelSummary.getSourceSchemaInterpretation()).toString());
+                        modelSummary.getSourceSchemaInterpretation(), modelSummary.getTrainingTableName()).toString());
     }
 
 }

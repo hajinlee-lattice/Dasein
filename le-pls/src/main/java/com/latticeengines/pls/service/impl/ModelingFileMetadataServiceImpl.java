@@ -28,7 +28,7 @@ import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionS
 import com.latticeengines.pls.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
-import com.latticeengines.pls.util.ValidateCSVFileHeaderUtils;
+import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.util.MultiTenantContext;
 
@@ -82,8 +82,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             stream = new BufferedInputStream(stream);
         }
 
-        stream.mark(ValidateCSVFileHeaderUtils.BIT_PER_BYTE * ValidateCSVFileHeaderUtils.BYTE_NUM);
-        Set<String> headerFields = ValidateCSVFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
+        stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
             stream.reset();
         } catch (IOException e) {

@@ -17,7 +17,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
-import com.latticeengines.pls.util.ValidateCSVFileHeaderUtils;
+import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
 @Component("scoringFileMetadataService")
 public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataService {
@@ -30,8 +30,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
-        stream.mark(ValidateCSVFileHeaderUtils.BIT_PER_BYTE * ValidateCSVFileHeaderUtils.BYTE_NUM);
-        Set<String> headerFields = ValidateCSVFileHeaderUtils.getCSVHeaderFields(stream, leCsvParser);
+        stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+        Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, leCsvParser);
         try {
             stream.reset();
         } catch (IOException e) {

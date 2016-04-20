@@ -7,6 +7,6 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 
 public interface ScoringFileMetadataService {
 
-    InputStream validateHeaderFields(InputStream stream, List<String> requiredColumns,
-            CloseableResourcePool leCsvParser, String fileName);
+    InputStream validateHeaderFields(InputStream stream, List<String> requiredColumns, CloseableResourcePool pool,
+            String fileName);
 }
