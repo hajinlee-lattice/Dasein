@@ -11,6 +11,10 @@
     <import resource="classpath:dataflow-context.xml"/>
     <import resource="classpath:serviceflows-propdata-core-context.xml"/>
 
+    <bean id="simpleCascadingExecutor" class="com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor">
+        <constructor-arg name="yarnConfiguration" ref="yarnConfiguration" />
+    </bean>
+
     <bean id="archiveProgressDao" class="com.latticeengines.propdata.collection.dao.impl.ArchiveProgressDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
     </bean>

@@ -11,10 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.version.VersionManager;
 
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
@@ -28,7 +24,9 @@ import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 
-@Component("simpleCascadingExecutor")
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.version.VersionManager;
+
 public class SimpleCascadingExecutor {
     private static final Log log = LogFactory.getLog(SimpleCascadingExecutor.class);
 
@@ -42,8 +40,11 @@ public class SimpleCascadingExecutor {
 
     private static final String MAPREDUCE_JOB_QUEUENAME = "mapreduce.job.queuename";
 
-    @Autowired
-    private Configuration yarnConfiguration;
+    private final Configuration yarnConfiguration;
+
+    public SimpleCascadingExecutor(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
 
     @Autowired
     private VersionManager versionManager;

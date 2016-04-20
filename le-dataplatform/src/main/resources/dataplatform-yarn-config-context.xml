@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xmlns:yarn="http://www.springframework.org/schema/yarn"
-   xmlns:context="http://www.springframework.org/schema/context"
-   xsi:schemaLocation="
-      http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
-      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:yarn="http://www.springframework.org/schema/yarn"
+       xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <yarn:configuration>
+    <yarn:configuration id="yarnConfiguration">
         dfs.client.failover.proxy.provider.${dataplatform.dfs.nameservices}=${dataplatform.dfs.client.failover.proxy.provider}
         dfs.nameservices=${dataplatform.dfs.nameservices}
         dfs.ha.namenodes.${dataplatform.dfs.nameservices}=nn1,nn2
