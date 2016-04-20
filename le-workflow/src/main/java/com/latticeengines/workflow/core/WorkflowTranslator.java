@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.FailureReportingListener;
+import com.latticeengines.workflow.listener.LEJobListener;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -65,8 +66,8 @@ public class WorkflowTranslator {
             }
         }
 
-        if (workflow.getListener() != null) {
-            simpleJobBuilder.listener(workflow.getListener());
+        for (LEJobListener listener : workflow.getListeners()) {
+            simpleJobBuilder = simpleJobBuilder.listener(listener);
         }
         return simpleJobBuilder.build();
     }

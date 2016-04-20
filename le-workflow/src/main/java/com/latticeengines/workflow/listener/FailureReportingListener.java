@@ -6,7 +6,6 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
 
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -14,7 +13,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
-public class FailureReportingListener implements JobExecutionListener {
+public class FailureReportingListener extends LEJobListener {
     private static final Logger log = Logger.getLogger(FailureReportingListener.class);
 
     private WorkflowJobEntityMgr workflowJobEntityMgr;
@@ -24,11 +23,11 @@ public class FailureReportingListener implements JobExecutionListener {
     }
 
     @Override
-    public void beforeJob(JobExecution jobExecution) {
+    public void beforeJobExecution(JobExecution jobExecution) {
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJobExecution(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
             WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
             if (job != null) {

@@ -1,6 +1,6 @@
 package com.latticeengines.workflow.exposed.build;
 
-import org.springframework.batch.core.JobExecutionListener;
+import com.latticeengines.workflow.listener.LEJobListener;
 
 public class WorkflowBuilder {
 
@@ -24,7 +24,7 @@ public class WorkflowBuilder {
         return this;
     }
 
-    public WorkflowBuilder listener(JobExecutionListener listener) {
+    public WorkflowBuilder listener(LEJobListener listener) {
         workflow.listener(listener);
         return this;
     }

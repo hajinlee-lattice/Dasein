@@ -1,5 +1,6 @@
 package com.latticeengines.leadprioritization.workflow.listeners;
 
+import com.latticeengines.workflow.listener.LEJobListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.core.JobExecution;
@@ -10,16 +11,16 @@ import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProx
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 
 @Component("sendEmailAfterModelCompletionListener")
-public class SendEmailAfterModelCompletionListener implements JobExecutionListener {
+public class SendEmailAfterModelCompletionListener extends LEJobListener {
 
     private static final Log log = LogFactory.getLog(SendEmailAfterModelCompletionListener.class);
 
     @Override
-    public void beforeJob(JobExecution jobExecution) {
+    public void beforeJobExecution(JobExecution jobExecution) {
     }
 
     @Override
-    public void afterJob(JobExecution jobExecution) {
+    public void afterJobExecution(JobExecution jobExecution) {
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
         log.info("tenantid: " + tenantId);
         String stepConfiguration = jobExecution.getJobParameters().getString(ImportStepConfiguration.class.getCanonicalName());

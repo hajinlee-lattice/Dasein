@@ -25,11 +25,14 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
 import com.latticeengines.workflow.functionalframework.FailableWorkflow;
+import com.latticeengines.workflow.functionalframework.FailingListener;
 import com.latticeengines.workflow.functionalframework.RunCompletedStepAgainWorkflow;
 import com.latticeengines.workflow.functionalframework.SleepableStep;
 import com.latticeengines.workflow.functionalframework.SleepableWorkflow;
+import com.latticeengines.workflow.functionalframework.SuccessfulListener;
 import com.latticeengines.workflow.functionalframework.SuccessfulStep;
 import com.latticeengines.workflow.functionalframework.WorkflowFunctionalTestNGBase;
+import com.latticeengines.workflow.functionalframework.WorkflowWithFailingListener;
 
 public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
 
@@ -59,6 +62,9 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
 
     @Autowired
     private SuccessfulStep successfulStep;
+
+    @Autowired
+    private WorkflowWithFailingListener workflowWithFailingListener;
 
     private WorkflowConfiguration workflowConfig;
 
@@ -150,6 +156,17 @@ public class WorkflowServiceImplTestNG extends WorkflowFunctionalTestNGBase {
         List<String> workflowNames = workflowService.getNames();
         assertTrue(workflowNames.contains(failableWorkflow.name()));
         assertTrue(workflowNames.contains(runCompletedStepAgainWorkflow.name()));
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testWorkflowWithFailingListener() throws Exception {
+        int successfulListenerCalls = SuccessfulListener.calls;
+        int failureListenerCalls = FailingListener.calls;
+        WorkflowExecutionId workflowId = workflowService.start(workflowWithFailingListener.name(), workflowConfig);
+        BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT).getStatus();
+        assertEquals(status, BatchStatus.COMPLETED);
+        assertEquals(SuccessfulListener.calls, successfulListenerCalls + 1);
+        assertEquals(FailingListener.calls, failureListenerCalls + 1);
     }
 
     @Test(groups = "functional", enabled = true)

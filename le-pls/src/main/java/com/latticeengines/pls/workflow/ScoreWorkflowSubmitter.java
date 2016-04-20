@@ -65,6 +65,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .matchClientDocument(matchClientDocument) //
                 .microServiceHostPort(microserviceHostPort) //
+                .internalResourcePort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName(tableToScore) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
