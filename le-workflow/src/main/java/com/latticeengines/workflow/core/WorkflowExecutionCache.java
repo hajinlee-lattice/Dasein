@@ -214,12 +214,12 @@ public class WorkflowExecutionCache {
             break;
         case STARTED:
         case STARTING:
-        case STOPPING:
             jobStatus = JobStatus.RUNNING;
             break;
         case COMPLETED:
             jobStatus = JobStatus.COMPLETED;
             break;
+        case STOPPING:
         case STOPPED:
             jobStatus = JobStatus.CANCELLED;
             break;
