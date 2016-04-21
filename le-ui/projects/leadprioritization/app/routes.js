@@ -151,6 +151,10 @@ angular
                                 });
                             });
                         }
+
+                        if (this.data == null || this.data.length == 0) {
+                            this.csvSubmitColumns();
+                        }
                     },
                     controllerAs: 'vm',
                     templateUrl: 'app/create/views/CustomFieldsView.html'
