@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
+import com.sun.tools.classfile.Attributes;
 
 public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler {
 
@@ -59,7 +60,11 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
-                headers.add(table.getAttribute(field.name()).getDisplayName().replace(",", "_"));
+                String displayName = table.getAttribute(field.name()).getDisplayName();
+                if (headers.contains(displayName)) {
+                    displayName += "_" + field.name();
+                }
+                headers.add(displayName);
             }
         }
         csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
