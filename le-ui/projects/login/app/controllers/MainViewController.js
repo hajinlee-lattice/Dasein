@@ -10,7 +10,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.services.FeatureFlagService'
 ])
 
-.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, LoginService, FeatureFlagService, ConfigService) {
+.controller('MainViewController', function ($scope, $templateCache, $http, $rootScope, $compile, $window, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, NavUtility, LoginService, FeatureFlagService, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
 
     if ($scope.isLoggedInWithTempPassword || $scope.isPasswordOlderThanNinetyDays) {
@@ -201,6 +201,14 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
+
+    $scope.modelListClicked = function($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $window.location.href = '/lp/';
+    };
 
     $scope.logoutClicked = function ($event) {
         if ($event != null) {
