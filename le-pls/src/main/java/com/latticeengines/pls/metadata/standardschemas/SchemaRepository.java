@@ -1,10 +1,12 @@
 package com.latticeengines.pls.metadata.standardschemas;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
@@ -49,6 +51,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Id", "ACCOUNT", "Account ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Id) //
@@ -56,10 +59,12 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Website") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Website" })) //
                 .type(Schema.Type.STRING) //
                 .required().interfaceName(InterfaceName.Website) //
                 .build());
         table.addAttribute(attr("Event") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
                 .type(Schema.Type.BOOLEAN) //
                 .required() //
                 .interfaceName(InterfaceName.Event) //
@@ -68,66 +73,78 @@ public class SchemaRepository {
                 .build());
 
         table.addAttribute(attr("CompanyName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Account Name" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator("Website") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("City") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "City", "Billing City" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
                 .withValidator("Website") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("State") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Billing State", "Billing Province" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .withValidator("Website") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Country") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Country", "Billing Country" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
                 .withValidator("Website") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PostalCode") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PostalCode", "Billing Zip", "Postal Code" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
 
         table.addAttribute(attr("Industry") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Industry" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .build());
         table.addAttribute(attr("CreatedDate") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CreatedDate", "Created Date" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastModifiedDate", "Last Modified Date" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("YearStarted") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "YearStarted", "Year Started" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.YearStarted) //
                 .approvedUsage(ModelingMetadata.MODEL_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Phone", "PhoneNumber" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -142,6 +159,7 @@ public class SchemaRepository {
         table.setPrimaryKey(createPrimaryKey("Id"));
 
         table.addAttribute(attr("Id") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Id", "LEAD", "Lead ID" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Id) //
@@ -149,104 +167,123 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Email") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Email" })) //
                 .type(Schema.Type.STRING) //
                 .required() //
                 .interfaceName(InterfaceName.Email) //
                 .build());
         table.addAttribute(attr("Event") //
                 .type(Schema.Type.BOOLEAN) //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Event", "Won" })) //
                 .required().interfaceName(InterfaceName.Event) //
                 .logicalType(LogicalDataType.Event) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
 
         table.addAttribute(attr("CompanyName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CompanyName", "Company", "Account" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CompanyName) //
                 .withValidator("Email") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("City") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "City" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.City) //
                 .withValidator("Email") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("State") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "State", "Province" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .withValidator("Email") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Country") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Country" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Country) //
                 .withValidator("Email") //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PostalCode") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "PostalCode", "Zip", "Postal Code" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
 
         table.addAttribute(attr("CreatedDate") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "CreatedDate", "Created Date" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.CreatedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("LastModifiedDate") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastModifiedDate", "Last Modified Date" })) //
                 .type(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("FirstName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "FirstName", "First Name" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.FirstName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("LastName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LastName", "Last Name" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("Title") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Title" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Title) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("LeadSource") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "LeadSource", "Lead Source" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LeadSource) //
                 .build());
         table.addAttribute(attr("IsClosed") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "IsClosed", "Closed" })) //
                 .type(Schema.Type.BOOLEAN) //
                 .interfaceName(InterfaceName.IsClosed) //
                 .logicalType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("StageName") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "StageName", "Stage" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .logicalType(LogicalDataType.Opportunity) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("PhoneNumber") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Phone", "PhoneNumber" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PhoneNumber) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr("AnnualRevenue") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "AnnualRevenue", "Annual Revenue" })) //
                 .type(Schema.Type.DOUBLE) //
                 .interfaceName(InterfaceName.AnnualRevenue) //
                 .build());
         table.addAttribute(attr("NumberOfEmployees") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "NumberOfEmployees", "No. of Employees" })) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.NumberOfEmployees) //
                 .build());
         table.addAttribute(attr("Industry") //
+                .allowedDisplayNames(Sets.newHashSet(new String[] { "Industry" })) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Industry) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -331,6 +368,11 @@ public class SchemaRepository {
 
         public AttributeBuilder logicalType(LogicalDataType logicalDataType) {
             attribute.setLogicalDataType(logicalDataType);
+            return this;
+        }
+
+        public AttributeBuilder allowedDisplayNames(Set<String> allowedDisplayNames) {
+            attribute.setAllowedDisplayNames(allowedDisplayNames);
             return this;
         }
     }

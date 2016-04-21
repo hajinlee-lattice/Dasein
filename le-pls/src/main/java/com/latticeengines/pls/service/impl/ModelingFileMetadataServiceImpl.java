@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -78,11 +77,13 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public InputStream validateHeaderFields(InputStream stream, SchemaInterpretation schema,
             CloseableResourcePool closeableResourcePool, String fileDisplayName) {
+
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
         }
 
-        stream.mark(ValidateFileHeaderUtils.BIT_PER_BYTE * ValidateFileHeaderUtils.BYTE_NUM);
+        stream.mark(1024 * 500);
+
         Set<String> headerFields = ValidateFileHeaderUtils.getCSVHeaderFields(stream, closeableResourcePool);
         try {
             stream.reset();
@@ -96,15 +97,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = metadata.getAttributes();
-        Iterator<Attribute> iterator = attributes.iterator();
-        while (iterator.hasNext()) {
-            Attribute attribute = iterator.next();
-            boolean missing = !headerFields.contains(attribute.getName());
-            if (missing && !attribute.isNullable()) {
+        Iterator<Attribute> attrIterator = attributes.iterator();
+
+        iterateAttr: while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            Iterator<String> headerIterator = headerFields.iterator();
+
+            while (headerIterator.hasNext()) {
+                String header = headerIterator.next();
+                if (attribute.getAllowedDisplayNames().contains(header)) {
+                    attrIterator.remove();
+                    headerIterator.remove();
+                    continue iterateAttr;
+                }
+            }
+            if (!attribute.isNullable()) {
                 missingRequiredFields.add(attribute.getName());
             }
         }
-
         if (!missingRequiredFields.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18087, //
                     new String[] { StringUtils.join(missingRequiredFields, ","), fileDisplayName });
@@ -113,12 +123,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         for (final String field : headerFields) {
             if (StringUtils.isEmpty(field)) {
                 throw new LedpException(LedpCode.LEDP_18096, new String[] { fileDisplayName });
-            } else if (!NameValidationUtils.validateColumnName(field)) {
-                throw new LedpException(LedpCode.LEDP_18095, new String[] { field, fileDisplayName });
             }
         }
 
         return stream;
+
     }
 
     private SourceFile getSourceFile(String sourceFileName) {

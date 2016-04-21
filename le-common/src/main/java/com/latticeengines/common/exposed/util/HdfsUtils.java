@@ -89,8 +89,8 @@ public class HdfsUtils {
         }
     }
 
-    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
-            String hdfsPath) throws IOException {
+    public static final void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -300,6 +300,17 @@ public class HdfsUtils {
             throw new RuntimeException(e2);
         }
         return log;
+    }
+
+    public static InputStream getInputStream(Configuration configuration, String hdfsPath) throws IOException {
+        FileSystem fs = FileSystem.newInstance(configuration);
+        return fs.open(new Path(hdfsPath));
+    }
+    
+    public static void copyFromLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws IOException{
+        try(FileSystem fs = FileSystem.newInstance(configuration)){
+            fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
+        }
     }
 
     private static InputStream getInputStream(Configuration configuration, String user, String applicationId)

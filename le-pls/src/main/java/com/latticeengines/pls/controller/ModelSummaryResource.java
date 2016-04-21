@@ -196,6 +196,6 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get required column names for the event table used for the specified model")
     public List<String> getRequiredColumns(@PathVariable String modelId) {
-        return modelMetadataService.getRequiredColumns(modelId);
+        return modelMetadataService.getRequiredColumnDisplayNames(modelId);
     }
 }

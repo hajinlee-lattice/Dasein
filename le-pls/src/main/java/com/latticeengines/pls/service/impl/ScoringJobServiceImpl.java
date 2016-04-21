@@ -4,14 +4,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -94,13 +95,19 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         }
 
         String path = job.getOutputs().get(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
+
         if (path == null) {
             throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
         }
 
         try {
-            FileSystem fs = FileSystem.newInstance(yarnConfiguration);
-            return fs.open(new Path(path));
+            String hdfsDir = StringUtils.substringBeforeLast(path, "/");
+            String filePrefix = StringUtils.substringAfterLast(path, "/");
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, filePrefix + ".*");
+            if (CollectionUtils.isEmpty(paths)) {
+                throw new LedpException(LedpCode.LEDP_18103, new String[] { workflowJobId });
+            }
+            return HdfsUtils.getInputStream(yarnConfiguration, paths.get(0));
 
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18102, e, new String[] { workflowJobId });

@@ -68,32 +68,32 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
         // asserting that no required columns have been removed
         Set<String> missingRequiredFields = new HashSet<>();
         List<Attribute> attributes = result.metadata.getAttributes();
-        Iterator<Attribute> iterator = attributes.iterator();
-        while (iterator.hasNext()) {
-            Attribute attribute = iterator.next();
-            boolean missing = !headerFields.contains(attribute.getName());
-            if (missing && !attribute.isNullable()) {
+        Iterator<Attribute> attrIterator = attributes.iterator();
+
+        iterateAttr: while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            Iterator<String> headerIterator = headerFields.iterator();
+
+            while (headerIterator.hasNext()) {
+                String header = headerIterator.next();
+                if (attribute.getAllowedDisplayNames().contains(header)) {
+                    headerIterator.remove();
+                    attribute.setDisplayName(header);
+                    continue iterateAttr;
+                }
+            }
+            if (!attribute.isNullable()) {
                 missingRequiredFields.add(attribute.getName());
             }
-            if (missing) {
-                iterator.remove();
-            }
+            attrIterator.remove();
         }
 
         // Add columns that are not in metadata to unknown columns
         for (final String field : headerFields) {
-            if (!Iterables.any(attributes, new Predicate<Attribute>() {
-
-                @Override
-                public boolean apply(@Nullable Attribute attribute) {
-                    return field.equals(attribute.getName());
-                }
-            })) {
-                ColumnTypeMapping ctm = new ColumnTypeMapping();
-                ctm.setColumnName(field);
-                ctm.setColumnType(Schema.Type.STRING.toString());
-                result.unknownColumns.add(ctm);
-            }
+            ColumnTypeMapping ctm = new ColumnTypeMapping();
+            ctm.setColumnName(field);
+            ctm.setColumnType(Schema.Type.STRING.toString());
+            result.unknownColumns.add(ctm);
         }
 
         // Go through unknown columns and remove ones that are specified in the
@@ -123,7 +123,7 @@ public class UserDefinedMetadataResolutionStrategy extends MetadataResolutionStr
             } else {
                 // Add an attribute
                 attribute = new Attribute();
-                attribute.setName(ctm.getColumnName());
+                attribute.setName(ctm.getColumnName().replaceAll("[^A-Za-z0-9_]", "_"));
                 attribute.setPhysicalDataType(ctm.getColumnType());
                 attribute.setDisplayName(ctm.getColumnName());
                 attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);

@@ -94,6 +94,7 @@ public class CSVDBRecordReader<T extends DBWritable> extends DataDrivenDBRecordR
             if (null == this.results) {
                 // First time into this method, run the query.
                 LOG.info("Working on split: " + split);
+                LOG.info("query is: " + getSelectQuery() );
                 this.results = executeQuery(getSelectQuery());
             }
 

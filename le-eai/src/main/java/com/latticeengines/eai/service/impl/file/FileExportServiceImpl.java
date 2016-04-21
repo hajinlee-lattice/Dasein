@@ -34,8 +34,7 @@ public class FileExportServiceImpl extends ExportService {
     @Override
     public void exportDataFromHdfs(ExportConfiguration exportConfig, ExportContext context) {
         if (StringUtils.isNotEmpty(exportConfig.getExportTargetPath())) {
-            context.setProperty(ExportProperty.TARGETPATH, //
-                    exportConfig.getExportTargetPath());
+            context.setProperty(ExportProperty.TARGETPATH, exportConfig.getExportTargetPath());
         } else {
             String targetPath = exportConfig.getProperties().get(ExportProperty.TARGET_FILE_NAME);
             context.setProperty(ExportProperty.TARGETPATH, //

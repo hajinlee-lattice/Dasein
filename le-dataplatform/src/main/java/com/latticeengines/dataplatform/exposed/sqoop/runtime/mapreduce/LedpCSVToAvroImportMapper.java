@@ -143,7 +143,7 @@ public class LedpCSVToAvroImportMapper extends
                 Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
                     @Override
                     public boolean apply(Attribute attribute) {
-                        return attribute.getPhysicalName().equals(s);
+                        return attribute.getName().equals(s);
                     }
                 });
                 InterfaceName interfaceName = attr.getInterfaceName();
@@ -162,7 +162,7 @@ public class LedpCSVToAvroImportMapper extends
             Attribute attr = Iterables.find(attributes, new Predicate<Attribute>() {
                 @Override
                 public boolean apply(Attribute attribute) {
-                    return attribute.getPhysicalName().equals(fieldKey);
+                    return attribute.getName().equals(fieldKey);
                 }
             });
 
@@ -174,7 +174,7 @@ public class LedpCSVToAvroImportMapper extends
             try {
                 validateRowValueBeforeConvertToAvro(interpretation, attr, fieldCsvValue);
                 LOG.info(String.format("Validation Passed for %s! Starting to convert to avro value.", attrKey));
-                if (attr.isNullable() && fieldCsvValue.equals("")) {
+                if (attr.isNullable() && StringUtils.isEmpty(fieldCsvValue)) {
                     fieldAvroValue = null;
                 } else {
                     fieldAvroValue = toAvro(fieldCsvValue, avroType, attr);
@@ -196,7 +196,7 @@ public class LedpCSVToAvroImportMapper extends
         } else if ((interfaceName.equals(InterfaceName.Id) || interfaceName.equals(InterfaceName.Event))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
-            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getPhysicalName()));
+            throw new RuntimeException(String.format("Required Column %s is missing value.", attr.getDisplayName()));
         } else if (interpretation.equals(SchemaInterpretation.SalesforceAccount.name())
                 && interfaceName.equals(InterfaceName.Website) && StringUtils.isEmpty(fieldCsvValue)) {
             emailOrWebsiteIsEmpty = true;
@@ -208,11 +208,10 @@ public class LedpCSVToAvroImportMapper extends
                         || interfaceName.equals(InterfaceName.State) || interfaceName.equals(InterfaceName.Country))
                 && StringUtils.isEmpty(fieldCsvValue)) {
             missingRequiredColValue = true;
-            String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? table.getAttribute(
-                    InterfaceName.Website).getPhysicalName() : table.getAttribute(InterfaceName.Email)
-                    .getPhysicalName();
+            String colName = interpretation.equals(SchemaInterpretation.SalesforceAccount.name()) ? InterfaceName.Website
+                    .name() : InterfaceName.Email.name();
             throw new RuntimeException(String.format("%s column is empty, so %s cannot be empty.", colName,
-                    attr.getPhysicalName()));
+                    attr.getDisplayName()));
         }
     }
 

@@ -1,4 +1,4 @@
-Id,Website,Event,Column3,Column4,Column5,LastUpdatedDate
+Account ID,Website,Event,Billing Country,Account Name,Some Column,Last Modified Date
 1,a,b,c,d,e,10-20-2014
 2,f,g,h,i,j,10-20-2014
 3,k,l,m,n,o,10-20-2014

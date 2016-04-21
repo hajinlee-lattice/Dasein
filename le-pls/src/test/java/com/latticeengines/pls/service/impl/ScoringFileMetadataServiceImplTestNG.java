@@ -46,6 +46,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
             noException = true;
         } catch (Exception e) {
             Assert.fail("Should not throw exception");
+            e.printStackTrace();
         }
         Assert.assertTrue(noException);
     }

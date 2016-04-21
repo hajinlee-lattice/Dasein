@@ -162,37 +162,44 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
         file.setInterpretation(SchemaInterpretation.SalesforceLead.name());
         for (Field field : schema.getFields()) {
             Attribute attr = new Attribute();
-            attr.setName(field.getName());
-            attr.setDisplayName(field.getName());
+            attr.setDisplayName(field.getColumnName());
             attr.setNullable(true);
-            if (attr.getName().equals(InterfaceName.Id.name())) {
+            if (attr.getDisplayName().equals("LEAD")) {
+                attr.setName(InterfaceName.Id.name());
                 attr.setInterfaceName(InterfaceName.Id);
                 attr.setPhysicalDataType(Type.STRING.name());
             }
-            if (attr.getName().equals(InterfaceName.Country.name())) {
+            if (attr.getDisplayName().equals("Country")) {
+                attr.setName(InterfaceName.Country.name());
                 attr.setInterfaceName(InterfaceName.Country);
                 attr.setPhysicalDataType(Type.STRING.name());
             }
-            if (attr.getName().equals(InterfaceName.CompanyName.name())) {
+            if (attr.getDisplayName().equals("Company")) {
+                attr.setName(InterfaceName.CompanyName.name());
                 attr.setInterfaceName(InterfaceName.CompanyName);
                 attr.setPhysicalDataType(Type.STRING.name());
             }
-            if (attr.getName().equals(InterfaceName.Email.name())) {
+            if (attr.getDisplayName().equals("Email")) {
+                attr.setName(InterfaceName.Email.name());
                 attr.setInterfaceName(InterfaceName.Email);
                 attr.setPhysicalDataType(Type.STRING.name());
             }
-            if (attr.getName().equals(InterfaceName.City.name())) {
+            if (attr.getDisplayName().equals("City")) {
                 attr.setInterfaceName(InterfaceName.City);
+                attr.setName("City");
                 attr.setPhysicalDataType(Type.STRING.name());
             }
-            if (attr.getName().equals("DS_CompanyName_Length")) {
+            if (attr.getDisplayName().equals("DS CompanyName Length")) {
+                attr.setName("DS_CompanyName_Length");
                 attr.setPhysicalDataType(Type.INT.name());
             }
-            if (attr.getName().equals("DS_CompanyName_Entropy")) {
+            if (attr.getDisplayName().equals("DS CompanyName Entropy")) {
+                attr.setName("DS_CompanyName_Entropy");
                 attr.setPhysicalDataType(Type.FLOAT.name());
             }
-            if (attr.getName().equals(InterfaceName.LastModifiedDate.name())) {
+            if (attr.getDisplayName().equals("Last Modified Date")) {
                 attr.setInterfaceName(InterfaceName.LastModifiedDate);
+                attr.setName(InterfaceName.LastModifiedDate.name());
                 attr.setPhysicalDataType(Type.LONG.name());
                 attr.setLogicalDataType(LogicalDataType.Date);
             }

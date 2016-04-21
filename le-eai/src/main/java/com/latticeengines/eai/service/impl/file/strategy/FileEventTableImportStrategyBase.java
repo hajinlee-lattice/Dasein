@@ -1,7 +1,10 @@
 package com.latticeengines.eai.service.impl.file.strategy;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +15,10 @@ import java.util.UUID;
 
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -76,7 +83,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         log.info(String.format("Importing data for table %s with filter %s", table, filter));
 
         DbCreds creds = getCreds(ctx);
-        String localFileName = createLocalFileForClassGeneration(ctx);
+        String localFileName = createLocalFileForClassGeneration(ctx, table);
         Properties props = getProperties(ctx, table, localFileName);
 
         try {
@@ -132,26 +139,64 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("avro.schema", TableUtils.createSchema(table.getName(), table).toString());
 
         String hdfsFileToImport = ctx.getProperty(ImportProperty.HDFSFILE, String.class);
-        props.put("yarn.mr.hdfs.resources", String.format("%s#%s.csv", hdfsFileToImport, localFileName));
+        props.put("yarn.mr.hdfs.resources", createLatticeCSVFilePath(hdfsFileToImport, localFileName));
         props.put("eai.table.schema", JsonUtils.serialize(table));
         return props;
     }
 
-    private String createLocalFileForClassGeneration(ImportContext context) {
+    private String createLocalFileForClassGeneration(ImportContext context, Table table) {
         String hdfsFileToImport = context.getProperty(ImportProperty.HDFSFILE, String.class);
 
+        CSVParser parser = null;
+        CSVPrinter printer = null;
         try {
             String[] tokens = hdfsFileToImport.split("/");
             String[] fileNameTokens = tokens[tokens.length - 1].split("\\.");
             String fileName = fileNameTokens[fileNameTokens.length - 2] + //
-                    "-" + UUID.randomUUID();
+                    "-" + UUID.randomUUID() + "_Lattice";
             fileName = fileName.replaceAll("-", "_");
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFileToImport, //
-                    fileName + ".csv");
+            // HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFileToImport, //
+            // fileName + ".csv");
+            InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, hdfsFileToImport);
+            InputStreamReader reader = new InputStreamReader(stream);
+            CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+            parser = new CSVParser(reader, format);
+
+            List<String> headers = new ArrayList<>();
+            for (String header : parser.getHeaderMap().keySet()) {
+                for (Attribute attr : table.getAttributes()) {
+                    if (attr.getDisplayName().equals(header)) {
+                        headers.add(attr.getName());
+                        break;
+                    }
+                }
+            }
+
+            printer = new CSVPrinter(new FileWriter(fileName + ".csv"), CSVFormat.RFC4180.withDelimiter(',')
+                    .withHeader(headers.toArray(new String[] {})));
+
+            for (CSVRecord record : parser.getRecords()) {
+                printer.printRecord(record);
+            }
+            printer.flush();
+            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, fileName + ".csv",
+                    createLatticeCSVFilePath(hdfsFileToImport, fileName));
             return fileName;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18068, e, new String[] { hdfsFileToImport });
+        } finally {
+            try {
+                parser.close();
+                printer.close();
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_00002, e);
+            }
+
         }
+    }
+
+    private String createLatticeCSVFilePath(String hdfsFileToImport, String fileName) {
+        return StringUtils.substringBeforeLast(hdfsFileToImport, "/") + "/" + fileName + ".csv";
     }
 
     @Override
@@ -179,7 +224,6 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         for (Attribute attr : table.getAttributes()) {
             ModelingMetadata.AttributeMetadata attrMetadata = attrMap.get(attr.getName());
-            attr.setPhysicalName(attr.getName());
             if (attr.getInterfaceName() != null) {
                 attr.setName(attr.getInterfaceName().name());
             }
@@ -193,7 +237,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         return table;
     }
 
-    private void addInternalId(Table table){
+    private void addInternalId(Table table) {
         Attribute internalId = new Attribute();
         internalId.setName(InterfaceName.InternalId.name());
         internalId.setDisplayName(internalId.getName());

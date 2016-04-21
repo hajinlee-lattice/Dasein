@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.ZipUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
@@ -68,7 +69,7 @@ public class ScoringFileUploadResource {
                 stream = ZipUtils.decompressStream(stream);
             }
 
-            List<String> requiredColumns = modelMetadataService.getRequiredColumns(modelId);
+            List<String> requiredColumns = modelMetadataService.getRequiredColumnDisplayNames(modelId);
             stream = scoringFileMetadataService.validateHeaderFields(stream, requiredColumns, closeableResourcePool,
                     displayName);
 

@@ -48,8 +48,21 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     }
 
     @Override
-    public List<String> getRequiredColumns(String modelId) {
-        List<String> requiredColumns = new ArrayList<String>();
+    public List<String> getRequiredColumnDisplayNames(String modelId) {
+        List<String> requiredColumnDisplayNames = new ArrayList<String>();
+
+        for (Attribute attribute : getRequiredColumns(modelId)) {
+            LogicalDataType logicalDataType = attribute.getLogicalDataType();
+            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)) {
+                requiredColumnDisplayNames.add(attribute.getDisplayName());
+            }
+        }
+        return requiredColumnDisplayNames;
+    }
+
+    @Override
+    public List<Attribute> getRequiredColumns(String modelId) {
+        List<Attribute> requiredColumns = new ArrayList<>();
         Table eventTable = getEventTableFromModelId(modelId);
         List<Attribute> attributes = eventTable.getAttributes();
         if (attributes == null) {
@@ -59,7 +72,7 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         for (Attribute attribute : attributes) {
             LogicalDataType logicalDataType = attribute.getLogicalDataType();
             if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)) {
-                requiredColumns.add(attribute.getDisplayName());
+                requiredColumns.add(attribute);
             }
         }
         return requiredColumns;

@@ -73,14 +73,11 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
                 .getPath());
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
-        try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
-                    closeableResourcePool, dataFile.getName());
-        } catch (Exception e) {
-            assertTrue(e instanceof LedpException);
-            assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18095);
-        } finally {
-            closeableResourcePool.close();
-        }
+
+        modelingFileMetadataService.validateHeaderFields(fileInputStream, SchemaInterpretation.SalesforceAccount,
+                closeableResourcePool, dataFile.getName());
+
+        closeableResourcePool.close();
+
     }
 }

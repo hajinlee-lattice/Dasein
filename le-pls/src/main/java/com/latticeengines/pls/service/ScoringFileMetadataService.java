@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public interface ScoringFileMetadataService {
 
