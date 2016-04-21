@@ -84,8 +84,10 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
                     log.error("Source table " + name + " retrieved from the metadata service is null.");
                     continue;
                 }
-                log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
-                        .getExtracts().get(0).getPath()));
+                if (sourceTable.getExtracts().size() > 0) {
+                    log.info(String.format("The first extract of table %s is located at %s", name, sourceTable
+                            .getExtracts().get(0).getPath()));
+                }
                 sourceTables.put(name, sourceTable);
                 usesTables = true;
             }
