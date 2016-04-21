@@ -56,7 +56,6 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
             Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, Schema schema)
             throws IOException, InterruptedException {
         table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
-        System.out.println(table);
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
