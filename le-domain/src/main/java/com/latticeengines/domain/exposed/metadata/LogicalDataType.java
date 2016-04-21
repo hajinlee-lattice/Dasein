@@ -19,11 +19,17 @@ public enum LogicalDataType {
         return typesExcludedFromRealTimeMetadata.contains(type);
     }
 
-    private static EnumSet<LogicalDataType> acausalDataTypes = EnumSet.of(LogicalDataType.Event, LogicalDataType.Event,
+    private static EnumSet<LogicalDataType> acausalDataTypes = EnumSet.of(LogicalDataType.Event,
             LogicalDataType.StageName);
 
     public static boolean isEventTypeOrDerviedFromEventType(LogicalDataType type) {
         return acausalDataTypes.contains(type);
+    }
+
+    private static EnumSet<LogicalDataType> systemGeneratedDataTypes = EnumSet.of(LogicalDataType.InternalId);
+
+    public static boolean isSystemGeneratedEventType(LogicalDataType type) {
+        return systemGeneratedDataTypes.contains(type);
     }
 
 }
