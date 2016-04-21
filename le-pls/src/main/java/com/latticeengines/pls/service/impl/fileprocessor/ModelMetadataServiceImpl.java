@@ -63,8 +63,8 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<Attribute> getRequiredColumns(String modelId) {
         List<Attribute> requiredColumns = new ArrayList<>();
-        Table eventTable = getEventTableFromModelId(modelId);
-        List<Attribute> attributes = eventTable.getAttributes();
+        Table trainingTable = getTrainingTableFromModelId(modelId);
+        List<Attribute> attributes = trainingTable.getAttributes();
         if (attributes == null) {
             throw new RuntimeException(String.format("Model %s does not have attribuets in the event tableName",
                     modelId));
@@ -169,6 +169,25 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table table = metadataProxy.getTable(customerSpace, tableName);
         if (table == null) {
             throw new RuntimeException(String.format("No such table with name %s for model %s", tableName, modelId));
+        }
+        return table;
+    }
+
+    private Table getTrainingTableFromModelId(String modelId) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        String trainingTableName = modelSummary.getTrainingTableName();
+        if (trainingTableName == null) {
+            throw new RuntimeException(String.format("Model %s does not have an training table name", modelId));
+        }
+
+        Table table = metadataProxy.getTable(customerSpace, trainingTableName);
+        if (table == null) {
+            throw new RuntimeException(String.format("No training table with name %s for model %s", trainingTableName,
+                    modelId));
         }
         return table;
     }
