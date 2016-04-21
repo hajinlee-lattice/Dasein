@@ -1,6 +1,7 @@
 #!/bin/bash
 source /etc/profile
 rm -rf  $CATALINA_HOME/webapps/job/*.war
+rm -rf /tmp/le-job-tc-rpm
 
 id -u tomcat &>/dev/null || useradd tomcat
 getent group tomcat || groupadd tomcat

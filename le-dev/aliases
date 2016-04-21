@@ -89,6 +89,7 @@ alias runjettyeai='bash -c "rm -f /var/log/ledp/le-eai*.log" && MAVEN_OPTS="-Xde
 alias runjettymds='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -Pfunctional jetty:run'
 alias runjettydfapi='MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4003,server=y,suspend=n -Xmx1024m -XX:MaxPermSize=256m" mvn -Pfunctional -DargLine="" -DexcludeArtifactIds=jetty-servlets,jetty-continuation clean jetty:run'
 alias runjettyscoringapi='bash -c "rm -f /var/log/ledp/le-scoringapi*.log" && MAVEN_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4004,server=y,suspend=n -Xmx4048m -XX:MaxPermSize=256m" mvn -Djetty.port=8073 jetty:run'
+alias runjettyjobpd='source $WSHOME/le-dev/latticerc && cd $WSHOME/le-job && bash -c "rm -f /var/log/ledp/le-job*.log" && CLASSPATH=$HADOOP_CONF_DIR:$TEZ_CONF_DIR:$HADOOP_COMMON_JAR mvn -Ppropdata jetty:run'
 
 alias runprecheckintest='$WSHOME/le-dev/scripts/runPreCheckInTest.sh'
 

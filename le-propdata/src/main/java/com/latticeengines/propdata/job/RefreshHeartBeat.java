@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.job;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -12,6 +14,8 @@ import com.latticeengines.proxy.exposed.propdata.PublicationProxy;
 @DisallowConcurrentExecution
 public class RefreshHeartBeat extends QuartzJobBean {
 
+    private static final Log log = LogFactory.getLog(RefreshHeartBeat.class);
+
     private ProgressOrchestrator orchestrator;
     private TransformationProgressOrchestrator transformationOrchestrator;
     private PropDataScheduler scheduler;
@@ -23,6 +27,7 @@ public class RefreshHeartBeat extends QuartzJobBean {
         transformationOrchestrator.executeRefresh();
         scheduler.reschedule();
 
+        log.debug(this.getClass().getSimpleName() + " invoking publication proxy scan.");
         publicationProxy.scan("");
     }
 
