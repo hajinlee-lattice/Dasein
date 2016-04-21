@@ -1,2 +1,2 @@
 PID,CronExpression,DestinationConfig,NewJobMaxRetry,NewJobRetryInterval,PublicationName,PublicationType,SchedularEnabled,SourceName
-1,NULL,"{""DefaultTableName"":""MadisonLogicDepivoted"", ""Alias"":""CollectionDB""}",3,NULL,BomboraDepivotedAppend,SQL,0,BomboraDepivoted
+1,NULL,"{""DestinationType"":""SqlDestination"",""Alias"":""CollectionDB"",""DefaultTableName"":""MadisonLogicDepivoted"",""Strategy"":""APPEND""}",3,NULL,BomboraDepivotedAppend,SQL,0,BomboraDepivoted
