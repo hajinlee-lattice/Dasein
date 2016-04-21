@@ -22,6 +22,7 @@ fi
 jar cvf ROOT.war -C ROOT/ .
 
 rm -rf /usr/share/tomcat/work/PlsEngine
+mkdir -p /usr/share/tomcat/webapps/pls
 cp -f ROOT.war /usr/share/tomcat/webapps/pls
 
 chown -R tomcat:tomcat /usr/share/tomcat/webapps/pls
