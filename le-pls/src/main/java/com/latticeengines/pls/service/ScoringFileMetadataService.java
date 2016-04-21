@@ -8,6 +8,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public interface ScoringFileMetadataService {
 
-    InputStream validateHeaderFields(InputStream stream, List<String> requiredColumns, CloseableResourcePool pool,
+    InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredColumns, CloseableResourcePool pool,
             String fileName);
 }

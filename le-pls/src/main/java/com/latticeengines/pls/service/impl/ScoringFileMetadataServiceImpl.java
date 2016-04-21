@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
@@ -25,7 +26,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
     private static final Log log = LogFactory.getLog(ScoringFileMetadataServiceImpl.class);
 
     @Override
-    public InputStream validateHeaderFields(InputStream stream, List<String> requiredFileds,
+    public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFileds,
             CloseableResourcePool leCsvParser, String displayName) {
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -39,15 +40,23 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         Set<String> missingRequiredFields = new HashSet<>();
-        Iterator<String> iterator = requiredFileds.iterator();
-        while (iterator.hasNext()) {
-            String field = iterator.next();
-            if (!headerFields.contains(field)) {
-                missingRequiredFields.add(field);
-            }
-        }
+        Iterator<Attribute> attrIterator = requiredFileds.iterator();
 
-        if (!missingRequiredFields.isEmpty()) {
+        iterateAttr: while (attrIterator.hasNext()) {
+            Attribute attribute = attrIterator.next();
+            Iterator<String> headerIterator = headerFields.iterator();
+
+            while (headerIterator.hasNext()) {
+                String header = headerIterator.next();
+                if (attribute.getDisplayName().equals(header) || attribute.getName().equals(header)) {
+                    attrIterator.remove();
+                    headerIterator.remove();
+                    continue iterateAttr;
+                }
+            }
+            missingRequiredFields.add(attribute.getDisplayName());
+        }
+        if (!requiredFileds.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18087, //
                     new String[] { StringUtils.join(missingRequiredFields, ","), displayName });
         }

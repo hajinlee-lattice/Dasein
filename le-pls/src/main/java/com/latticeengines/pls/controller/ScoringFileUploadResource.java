@@ -69,7 +69,7 @@ public class ScoringFileUploadResource {
                 stream = ZipUtils.decompressStream(stream);
             }
 
-            List<String> requiredColumns = modelMetadataService.getRequiredColumnDisplayNames(modelId);
+            List<Attribute> requiredColumns = modelMetadataService.getRequiredColumns(modelId);
             stream = scoringFileMetadataService.validateHeaderFields(stream, requiredColumns, closeableResourcePool,
                     displayName);
 
