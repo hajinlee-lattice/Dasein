@@ -197,7 +197,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${le.camille.version}</version>
-            <classifier>intf</classifier>            
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -236,7 +236,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <version>${commons.lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>

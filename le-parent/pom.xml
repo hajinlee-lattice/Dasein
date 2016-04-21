@@ -58,6 +58,8 @@
         <joda.version>2.3</joda.version>
         <influxdb.version>2.1</influxdb.version>
         <jcraft.version>0.1.53</jcraft.version>
+        <commons.io.version>2.2</commons.io.version>
+        <commons.lang3.version>3.4</commons.lang3.version>
 
         <load.classes.include>**/*LoadTestNG.java</load.classes.include>
         <deployment.classes.include>**/*DeploymentTestNG.java</deployment.classes.include>
@@ -195,7 +197,7 @@
                             </artifactSet>
 
                             <filters>
-                                <!-- Strip any signatures to avoid security errors running the shaded 
+                                <!-- Strip any signatures to avoid security errors running the shaded
                                     JAR. -->
                                 <filter>
                                     <artifact>*:*</artifact>
@@ -556,11 +558,11 @@
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
-                <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add 
-                    it to any webapp project that is structured according to the usual Maven defaults. The plugin can then 
-                    periodically scan your project for changes and automatically redeploy the webapp if any are found. This 
-                    makes the development cycle more productive by eliminating the build and deploy steps: you use your IDE 
-                    to make changes to the project, and the running web container automatically picks them up, allowing you 
+                <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add
+                    it to any webapp project that is structured according to the usual Maven defaults. The plugin can then
+                    periodically scan your project for changes and automatically redeploy the webapp if any are found. This
+                    makes the development cycle more productive by eliminating the build and deploy steps: you use your IDE
+                    to make changes to the project, and the running web container automatically picks them up, allowing you
                     to test them straight away. To run - mvn jetty:run -->
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>

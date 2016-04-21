@@ -42,7 +42,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError: 
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError:
             javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -73,7 +73,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.4</version>
+            <version>${commons.lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mortbay.jetty</groupId>
