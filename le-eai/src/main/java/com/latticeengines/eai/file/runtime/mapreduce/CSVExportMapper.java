@@ -49,17 +49,18 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         super.setup(context);
         FileSplit split = (FileSplit) context.getInputSplit();
         splitName = StringUtils.substringBeforeLast(split.getPath().getName(), ".");
-        table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
     }
 
     @Override
     protected AvroRowHandler initialize(
             Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable>.Context context, Schema schema)
             throws IOException, InterruptedException {
+        table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
+        System.out.println(table);
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
-                headers.add(field.name());
+                headers.add(table.getAttribute(field.name()).getDisplayName());
             }
         }
         csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
