@@ -59,7 +59,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
         List<String> headers = new ArrayList<>();
         for (Field field : schema.getFields()) {
             if (outputField(field)) {
-                headers.add(table.getAttribute(field.name()).getDisplayName());
+                headers.add(field.name());
             }
         }
         csvFilePrinter = new CSVPrinter(new FileWriter(OUTPUT_FILE), CSVFormat.RFC4180.withDelimiter(',').withHeader(
