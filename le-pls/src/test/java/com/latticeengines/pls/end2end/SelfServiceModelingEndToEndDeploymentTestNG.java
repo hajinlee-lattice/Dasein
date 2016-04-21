@@ -7,11 +7,13 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -32,6 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -57,48 +60,35 @@ import com.latticeengines.security.exposed.AccessLevel;
 
 @Component
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+
+    private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
+    private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
+
     @Autowired
     private WorkflowProxy workflowProxy;
 
     @Autowired
     private SourceFileService sourceFileService;
 
-    private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
-    private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private Tenant tenantToAttach;
     private SourceFile sourceFile;
     private String modelingWorkflowApplicationId;
     private String modelName;
     private ModelSummary originalModelSummary;
     private String fileName;
-
-    public String prepareModel() throws InterruptedException {
-        setFileName(fileName);
-        System.out.println("Uploading File");
-        uploadFile();
-        sourceFile = getSourceFile();
-        System.out.println(sourceFile.getName());
-        System.out.println("Resolving Metadata");
-        resolveMetadata();
-        System.out.println("Creatinging Model");
-        createModel();
-        retrieveModelSummary();
-        ModelSummary modelSummary = getModelSummary();
-        String modelId = modelSummary.getId();
-        System.out.println("modeling id: " + modelId);
-        return modelId;
-    }
+    private SchemaInterpretation schemaInterpretation = SchemaInterpretation.SalesforceLead;
+    private Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler;
 
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
 
-        System.out.println("Deleting existing test tenants ...");
+        log.info("Deleting existing test tenants ...");
         deleteTwoTenants();
 
-        System.out.println("Bootstrapping test tenants using tenant console ...");
+        log.info("Bootstrapping test tenants using tenant console ...");
         setupTestEnvironment("pd", true);
 
-        System.out.println("Setting up testing users ...");
+        log.info("Setting up testing users ...");
         tenantToAttach = testingTenants.get(1);
         if (tenantToAttach.getName().contains("Tenant 1")) {
             tenantToAttach = testingTenants.get(0);
@@ -107,7 +97,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         useSessionDoc(doc);
 
         log.info("Test environment setup finished.");
-        System.out.println("Test environment setup finished.");
 
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
     }
@@ -120,21 +109,12 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         }
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public SourceFile getSourceFile() {
-        return sourceFile;
-    }
-
-    public RestTemplate getRestTemplate() {
-        return restTemplate;
-    }
-
     @SuppressWarnings("rawtypes")
     @Test(groups = "deployment.lp", enabled = true)
     public void uploadFile() {
+        if (schemaInterpretation == null) {
+            schemaInterpretation = SchemaInterpretation.SalesforceLead;
+        }
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
         HttpHeaders headers = new HttpHeaders();
@@ -143,10 +123,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = restTemplate.postForObject( //
                 String.format("%s/pls/models/fileuploads/unnamed?schema=%s&displayName=%s", getPLSRestAPIHostPort(),
-                        SchemaInterpretation.SalesforceLead, "SelfServiceModeling Test File.csv"), //
+                        schemaInterpretation, "SelfServiceModeling Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
-        System.out.println(sourceFile.getName());
+        log.info(sourceFile.getName());
     }
 
     @SuppressWarnings("rawtypes")
@@ -156,7 +136,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
                         sourceFile.getName()), ResponseDocument.class);
         @SuppressWarnings("unchecked")
-        List<Object> unknownColumns = new ObjectMapper().convertValue(response.getResult(), List.class);
+        List<LinkedHashMap<String, String>> unknownColumns = new ObjectMapper().convertValue(response.getResult(),
+                List.class);
+        if (unknownColumnHandler != null) {
+            unknownColumnHandler.apply(unknownColumns);
+        }
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/fileuploads/%s/metadata/unknown", getPLSRestAPIHostPort(),
                         sourceFile.getName()), unknownColumns, ResponseDocument.class);
@@ -180,7 +164,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 ResponseDocument.class);
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
-        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         waitForWorkflowStatus(modelingWorkflowApplicationId, true);
 
         boolean thrown = false;
@@ -196,14 +180,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
-    }
-
-    public Tenant getTenant() {
-        return tenantToAttach;
-    }
-
-    public ModelSummary getModelSummary() {
-        return originalModelSummary;
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "createModel")
@@ -268,14 +244,14 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         parameters.setAttributes(fields);
         parameters.setSourceModelSummaryId(originalModelSummary.getId());
 
-        ResponseDocument response;
+        ResponseDocument<?> response;
         response = restTemplate.postForObject(
                 String.format("%s/pls/models/%s/clone", getPLSRestAPIHostPort(), modelName), parameters,
                 ResponseDocument.class);
 
         modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
 
-        System.out.println(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
 
         WorkflowStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         assertEquals(completedStatus.getStatus(), BatchStatus.COMPLETED);
@@ -341,7 +317,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
             try {
                 status = workflowProxy.getWorkflowStatusFromApplicationId(applicationId);
             } catch (Exception e) {
-                System.out.println(String.format("Workflow status exception: %s", e.getMessage()));
+                log.info(String.format("Workflow status exception: %s", e.getMessage()));
 
                 status = null;
                 if (--retryOnException == 0)
@@ -359,6 +335,48 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public String prepareModel(SchemaInterpretation schemaInterpretation,
+            Function<List<LinkedHashMap<String, String>>, Void> unknownColumnHandler, String fileName) throws InterruptedException {
+        if (!StringUtils.isBlank(fileName)) {
+            this.fileName = fileName;
+        }
+        if (schemaInterpretation != null) {
+            this.schemaInterpretation = schemaInterpretation;
+        }
+        if (unknownColumnHandler != null) {
+            this.unknownColumnHandler = unknownColumnHandler;
+        }
+        log.info("Uploading File");
+        uploadFile();
+        sourceFile = getSourceFile();
+        log.info(sourceFile.getName());
+        log.info("Resolving Metadata");
+        resolveMetadata();
+        log.info("Creating Model");
+        createModel();
+        retrieveModelSummary();
+        ModelSummary modelSummary = getModelSummary();
+        String modelId = modelSummary.getId();
+        log.info("modeling id: " + modelId);
+        return modelId;
+    }
+
+    public SourceFile getSourceFile() {
+        return sourceFile;
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
+    public Tenant getTenant() {
+        return tenantToAttach;
+    }
+
+    public ModelSummary getModelSummary() {
+        return originalModelSummary;
     }
 
 }

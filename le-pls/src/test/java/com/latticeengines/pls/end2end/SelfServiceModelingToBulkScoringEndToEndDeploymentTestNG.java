@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
@@ -48,7 +49,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        modelId = selfServiceModeling.prepareModel();
+        modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, null, null);
     }
 
     @Test(groups = "deployment.lp")

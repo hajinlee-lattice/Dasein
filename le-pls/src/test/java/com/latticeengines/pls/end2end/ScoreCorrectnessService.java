@@ -56,11 +56,11 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 public class ScoreCorrectnessService {
 
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
-    private static final int NUM_LEADS_TO_SCORE = 1000;
     private static final int TIMEOUT_IN_MIN = 60;
     private static final int THREADPOOL_SIZE = 10;
     // TODO: this threshold was 3.0, increased it to 5.0 (April 12, 2016)
-    // to make modeling to scoring deployment test to pass, should change back after release.
+    // to make modeling to scoring deployment test to pass, should change back
+    // after release.
     private static final double ACCEPTABLE_PERCENT_DIFFERENCE = 5.0;
     private static final double THRESHOLD = 0.000001;
     private RestTemplate scoringRestTemplate = new RestTemplate();
@@ -77,7 +77,7 @@ public class ScoreCorrectnessService {
     @Autowired
     private ModelRetriever modelRetriever;
 
-    public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId) throws IOException {
+    public void analyzeScores(String tenantId, String pathToModelInputCsv, String modelId, int numRecordsToScore) throws IOException {
         String accessToken = oauth2RestApiProxy.createOAuth2AccessToken(tenantId).getValue();
         Oauth2HeaderHttpRequestInterceptor interceptor = new Oauth2HeaderHttpRequestInterceptor(accessToken);
         scoringRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { interceptor }));
@@ -85,7 +85,7 @@ public class ScoreCorrectnessService {
         ScoreCorrectnessArtifacts artifacts = modelRetriever.retrieveScoreCorrectnessArtifactsFromHdfs(
                 CustomerSpace.parse(tenantId), modelId);
 
-        Map<String, Double> expectedScores = getExpectedScoresFromScoredTxt(artifacts);
+        Map<String, Double> expectedScores = getExpectedScoresFromScoredTxt(artifacts, numRecordsToScore);
         Map<String, Map<String, Object>> expectedRecords = getExpectedRecords(artifacts);
         Map<String, Map<String, Object>> matchedRecords = getExpectedMatchedRecords(artifacts);
         Map<String, FieldSchema> schema = artifacts.getFieldSchemas();
@@ -473,7 +473,7 @@ public class ScoreCorrectnessService {
     }
 
     // omit duplicate ID's from the test set
-    private Map<String, Double> getExpectedScoresFromScoredTxt(ScoreCorrectnessArtifacts artifacts) {
+    private Map<String, Double> getExpectedScoresFromScoredTxt(ScoreCorrectnessArtifacts artifacts, int numRecordsToScore) {
         Map<String, Double> expectedScores = new HashMap<>();
         Map<String, Double> scoresToTest = new HashMap<>();
 
@@ -503,7 +503,7 @@ public class ScoreCorrectnessService {
                 scoresToTest.put(id, expectedScores.get(id));
             }
             rowNum++;
-            if (rowNum > NUM_LEADS_TO_SCORE) {
+            if (rowNum > numRecordsToScore) {
                 break;
             }
         }
