@@ -19,7 +19,7 @@ public enum LogicalDataType {
         return typesExcludedFromRealTimeMetadata.contains(type);
     }
 
-    private static EnumSet<LogicalDataType> acausalDataTypes = EnumSet.of(LogicalDataType.Event,
+    private static EnumSet<LogicalDataType> acausalDataTypes = EnumSet.of(LogicalDataType.Event, LogicalDataType.Event,
             LogicalDataType.StageName);
 
     public static boolean isEventTypeOrDerviedFromEventType(LogicalDataType type) {

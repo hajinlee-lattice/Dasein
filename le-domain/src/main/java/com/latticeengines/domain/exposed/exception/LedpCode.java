@@ -198,6 +198,7 @@ public enum LedpCode {
     LEDP_18102("Failed to download results CSV file for job {0}."), //
     LEDP_18103("Scoring job is not completed yet for job {0}."), //
     LEDP_18104("No job could be found with id {0}."), //
+    LEDP_18105("Model {0} does not have attribuets in the event tableName."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."),
