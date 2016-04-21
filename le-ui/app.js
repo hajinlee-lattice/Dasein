@@ -25,7 +25,8 @@ const options   = {
     COMPRESSED: process.env.COMPRESSED  || false,
     LOGGING:    process.env.LOGGING     || './server/log',
     STACK_ENV:  process.env.STACK_ENV   || 'none',
-    TIMESTAMP:  (ts.getMonth()+1)+'/'+ts.getDate()+'/'+ts.getFullYear()+' '+ts.getHours()+':'+ts.getMinutes()+':'+ts.getSeconds(),
+    TIMESTAMP:  (ts.getMonth()+1)+'/'+ts.getDate()+'/'+ts.getFullYear()+' '+
+                ts.getHours()+':'+ts.getMinutes()+':'+ts.getSeconds(),
     APP_ROOT:   __dirname,
     SRC_PATH:   '/projects'
 };
