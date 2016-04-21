@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.core.testframework;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,13 +22,5 @@ public abstract class PropDataCoreFunctionalTestNGBase extends AbstractTestNGSpr
 
     @Autowired
     protected Configuration yarnConfiguration;
-
-    @Autowired
-    private SQLInitializer sqlInitializer;
-
-    @PostConstruct
-    private void postConstruct() {
-        sqlInitializer.initialize();
-    }
 
 }

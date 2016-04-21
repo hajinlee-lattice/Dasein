@@ -1,7 +1,5 @@
 package com.latticeengines.propdata.collection.testframework;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,7 +15,6 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
-import com.latticeengines.propdata.core.testframework.SQLInitializer;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -64,14 +61,6 @@ public abstract class PropDataCollectionAbstractTestNGBase extends AbstractTestN
     @Autowired
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
-
-    @Autowired
-    private SQLInitializer sqlInitializer;
-
-    @PostConstruct
-    private void postConstruct() {
-        sqlInitializer.initialize();
-    }
 
     protected void uploadAvroToCollectionDB(String avroDir, String destTable) {
         String assignedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();

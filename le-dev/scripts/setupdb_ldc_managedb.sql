@@ -5,26 +5,32 @@ USE `LDC_ManageDB`;
 
 source WSHOME/le-propdata/ddl_ldc_managedb_mysql5innodb.sql;
 
-LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/SourceColumn.txt' INTO TABLE `SourceColumn`
-FIELDS TERMINATED BY '\t'
-ENCLOSED BY ';'
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/SourceColumn.csv' INTO TABLE `SourceColumn`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (SourceColumnID, SourceName, ColumnName, ColumnType, BaseSource, Preparation, Priority, GroupBy, Calculation, Arguments, Groups);
 
-LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ExternalColumn.txt' INTO TABLE `ExternalColumn`
-FIELDS TERMINATED BY '\t'
-ENCLOSED BY ';'
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ExternalColumn.csv' INTO TABLE `ExternalColumn`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID, ExternalColumnID, DefaultColumnName, Description, DataType, DisplayName, Category, StatisticalType, DisplayDiscretizationStrategy, FundamentalType, ApprovedUsage, Tags);
 
-LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ColumnMapping.txt' INTO TABLE `ColumnMapping`
-FIELDS TERMINATED BY '\t'
-ENCLOSED BY ';'
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/ColumnMapping.csv' INTO TABLE `ColumnMapping`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
 (PID, ExternalColumnID, SourceName, SourceColumn, Priority);
+
+LOAD DATA INFILE 'WSHOME/le-propdata/src/test/resources/sql/Publication.csv' INTO TABLE `Publication`
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
 
 SET SQL_SAFE_UPDATES = 0;
 
