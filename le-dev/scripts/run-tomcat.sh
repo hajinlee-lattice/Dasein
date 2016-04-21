@@ -21,6 +21,7 @@ export WORKFLOW_PROPDIR=$WSHOME/le-workflow/conf/env/dev
 export PROPDATA_PROPDIR=$WSHOME/le-propdata/conf/env/dev
 export JOB_PROPDIR=$WSHOME/le-job/conf/env/dev
 export DELLEBI_PROPDIR=$WSHOME/le-dellebi/conf/env/dev
+export TRANSFORM_PROPDIR=$WSHOME/le-transform/conf/env/dev
 
 export JAVA_OPTS="-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=n -XX:MaxPermSize=2g"
 export JAVA_OPTS="${JAVA_OPTS} -Dsqoop.throwOnError=true -XX:MaxPermSize=2g"
