@@ -2,6 +2,7 @@ package com.latticeengines.scoringapi.exposed.model;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,9 @@ public class ModelEvaluator {
                  */
                 value = 0.0d;
             }
+            if (value instanceof BigInteger) {
+                value = ((BigInteger) value).doubleValue();
+            }
             if (value instanceof Long) {
                 value = ((Long) value).doubleValue();
             }
@@ -96,9 +100,6 @@ public class ModelEvaluator {
 
         Map<FieldName, ?> results = null;
         try {
-            if (log.isDebugEnabled()) {
-                log.debug(JsonUtils.serialize(arguments));
-            }
             results = evaluator.evaluate(arguments);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31014, e, new String[] { JsonUtils.serialize(arguments) });
@@ -158,10 +159,6 @@ public class ModelEvaluator {
                     break;
                 }
             }
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(JsonUtils.serialize(result));
         }
 
         return result;

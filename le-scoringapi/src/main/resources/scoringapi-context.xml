@@ -9,6 +9,7 @@
 
     <import resource="classpath:scoringapi-properties-context.xml" />
     <import resource="classpath:scoringapi-yarn-config-context.xml" />
+    <import resource="classpath:transform-properties-context.xml" />
     <import resource="classpath:proxy-context.xml" />
     <import resource="classpath:monitor-alerts-context.xml" />
     <import resource="classpath:monitor-metric-context.xml" />
@@ -18,7 +19,7 @@
     <context:annotation-config />
 
     <context:component-scan
-        base-package="com.latticeengines.scoringapi, com.latticeengines.common.exposed.rest">
+        base-package="com.latticeengines.scoringapi, com.latticeengines.common.exposed.rest, com.latticeengines.transform">
         <!-- Need to exclude instantiating the swagger config except for
             bringing up the API since the servlet container instances are not available
             when running tests. -->

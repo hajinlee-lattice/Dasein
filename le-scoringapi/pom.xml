@@ -23,6 +23,7 @@
         <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
         <le.oauth2.db.version>2.0.25-SNAPSHOT</le.oauth2.db.version>
         <le.proxy.version>2.0.25-SNAPSHOT</le.proxy.version>
+        <le.transform.version>2.0.25-SNAPSHOT</le.transform.version>
         <le.testframework.version>2.0.25-SNAPSHOT</le.testframework.version>
         <le.transform.version>2.0.25-SNAPSHOT</le.transform.version>
         <jpmml.version>2.0.0</jpmml.version>
@@ -220,6 +221,12 @@
 
         <dependency>
             <groupId>com.latticeengines</groupId>
+            <artifactId>le-transform</artifactId>
+            <version>${le.transform.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
@@ -363,17 +370,10 @@
             <artifactId>jstl</artifactId>
             <version>1.2</version>
         </dependency>
-
         <dependency>
-            <groupId>com.latticeengines.scoringapi</groupId>
-            <artifactId>transform.impl</artifactId>
-            <version>0.0.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.voc</groupId>
-            <artifactId>python-java</artifactId>
-            <version>0.0.2</version>
+           <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.1</version>
         </dependency>
 
     </dependencies>

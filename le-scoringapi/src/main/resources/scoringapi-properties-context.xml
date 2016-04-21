@@ -28,6 +28,7 @@
                 <value>file:${PROXY_PROPDIR:/etc/ledp}/proxy.properties</value>
                 <value>file:${MONITOR_PROPDIR:/etc/ledp}/monitor.properties</value>
                 <value>file:${OAUTH2_DB_PROPDIR:/etc/ledp}/oauth2.properties</value>
+                <value>file:${TRANSFORM_PROPDIR:/etc/ledp}/transform.properties</value>
             </list>
         </property>
         <property name="ignoreUnresolvablePlaceholders" value="false" />
