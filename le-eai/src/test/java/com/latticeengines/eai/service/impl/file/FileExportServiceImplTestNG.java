@@ -74,7 +74,8 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @AfterClass(groups = "functional")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
-        HdfsUtils.rmdir(yarnConfiguration, PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER).toString());
+        HdfsUtils.rmdir(yarnConfiguration,
+                PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId(), TEST_CUSTOMER).toString());
     }
 
     @Test(groups = "functional")
@@ -85,11 +86,12 @@ public class FileExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         fileExportConfig.setExportFormat(ExportFormat.CSV);
         fileExportConfig.setExportDestination(ExportDestination.FILE);
         fileExportConfig.setCustomerSpace(TEST_CUSTOMER);
-        Table table = createFile(new File( csvUrl.getPath()).getParentFile(), "file2");
 
+        Table table = createFile(new File(csvUrl.getPath()).getParentFile(), "file2");
         Extract extract = new Extract();
-        extract.setPath(sourceFilePath + "/file.avro"); 
-        table.setExtracts(Arrays.<Extract>asList(new Extract[]{extract}));
+        extract.setPath(sourceFilePath + "/file.avro");
+        table.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
+
         fileExportConfig.setTable(table);
         Map<String, String> props = new HashMap<>();
         props.put(ExportProperty.TARGET_FILE_NAME, targetCSVPath);
