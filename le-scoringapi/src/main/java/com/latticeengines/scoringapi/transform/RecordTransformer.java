@@ -27,25 +27,23 @@ public class RecordTransformer {
             List<TransformDefinition> definitions, //
             Map<String, Object> record) {
 
-        synchronized (transformRetriever) {
-            Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
-            result.putAll(record);
+        Map<String, Object> result = new HashMap<>(record.size() + definitions.size());
+        result.putAll(record);
 
-            for (TransformDefinition entry : definitions) {
-                TransformId id = new TransformId(modelPath, entry.name, null);
-                try {
-                    RealTimeTransform transform = transformRetriever.getTransform(id);
-                    Object value = transform.transform(entry.arguments, result);
-                    result.put(entry.output, value);
-                } catch (Exception e) {
-                    if (log.isWarnEnabled()) {
-                        log.warn(String.format("Problem invoking %s", entry.name), e);
-                    }
+        for (TransformDefinition entry : definitions) {
+            TransformId id = new TransformId(modelPath, entry.name, null);
+            try {
+                RealTimeTransform transform = transformRetriever.getTransform(id);
+                Object value = transform.transform(entry.arguments, result);
+                result.put(entry.output, value);
+            } catch (Exception e) {
+                if (log.isWarnEnabled()) {
+                    log.warn(String.format("Problem invoking %s", entry.name), e);
                 }
             }
-
-            return result;
         }
+
+        return result;
     }
 
     public Map<String, Object> transformOld(String modelPath, List<TransformDefinition> definitions,
@@ -63,7 +61,8 @@ public class RecordTransformer {
                     value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                     successfulInvocation = true;
                     if (numTries > 1) {
-                        log.warn(String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
+                        log.warn(
+                                String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
                     }
                     break;
                 } catch (Exception e) {
