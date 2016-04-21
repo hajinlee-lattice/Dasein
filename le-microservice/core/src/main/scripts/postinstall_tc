@@ -4,6 +4,7 @@ source /etc/profile
 echo "getting environment information"
 echo $ENV_TYPE
 rm -rf /usr/share/tomcat/webapps/ms/*.war
+mkdir -p /usr/share/tomcat/webapps/ms
 rm -rf /usr/share/tomcat/work/MicrosereviceEngine
 
 echo "repackaging wars"
