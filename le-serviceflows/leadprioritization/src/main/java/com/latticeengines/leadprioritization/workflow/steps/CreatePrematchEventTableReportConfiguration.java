@@ -9,11 +9,33 @@ public class CreatePrematchEventTableReportConfiguration extends BaseDataFlowRep
     @NotEmptyString
     private String sourceTableName;
 
+    @NotNull
+    private Double minEventPercentage;
+
+    @NotNull
+    private Long minDedupedRows;
+
     public String getSourceTableName() {
         return sourceTableName;
     }
 
     public void setSourceTableName(String sourceTableName) {
         this.sourceTableName = sourceTableName;
+    }
+
+    public Double getMinEventPercentage() {
+        return minEventPercentage;
+    }
+
+    public void setMinEventPercentage(Double minEventPercentage) {
+        this.minEventPercentage = minEventPercentage;
+    }
+
+    public Long getMinDedupedRows() {
+        return minDedupedRows;
+    }
+
+    public void setMinDedupedRows(Long minDedupedRows) {
+        this.minDedupedRows = minDedupedRows;
     }
 }

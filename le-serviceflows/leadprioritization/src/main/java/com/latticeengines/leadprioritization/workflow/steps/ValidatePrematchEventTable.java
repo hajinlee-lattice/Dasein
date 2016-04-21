@@ -25,11 +25,11 @@ public class ValidatePrematchEventTable extends BaseWorkflowStep<CreatePrematchE
         JsonNode count = json.get("count");
         JsonNode events = json.get("events");
         double eventPercentage = 100.0 * (double) events.longValue() / count.longValue();
-        if (count.longValue() < 1000L) {
+        if (count.longValue() < configuration.getMinDedupedRows()) {
             errors.add(String
                     .format("Number of rows with unique domains (website, email address, etc...) must be greater than or equal to 1000.  Found %d",
                             count.longValue()));
-        } else if (eventPercentage < 0.5) {
+        } else if (eventPercentage < configuration.getMinEventPercentage()) {
             errors.add(String.format("Event percentage must be greater than or equal to 0.5%%.  Found %f%%",
                     eventPercentage));
         }

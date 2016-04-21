@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.DedupEventTableParameters;
@@ -31,6 +32,12 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Value("${pls.modeling.minDedupedRows:1000}")
+    private long minDedupedRows;
+
+    @Value("${pls.modeling.minEventPercentage:0.5}")
+    private double minEventPercentage;
 
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {
         SourceFile sourceFile = sourceFileService.findByName(parameters.getFilename());
@@ -74,6 +81,8 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .sourceSchemaInterpretation(sourceFile.getSchemaInterpretation().toString()) //
                 .trainingTableName(trainingTableName) //
                 .inputProperties(inputProperties) //
+                .minDedupedRows(minDedupedRows) //
+                .minEventPercentage(minEventPercentage) //
                 .build();
         return configuration;
     }

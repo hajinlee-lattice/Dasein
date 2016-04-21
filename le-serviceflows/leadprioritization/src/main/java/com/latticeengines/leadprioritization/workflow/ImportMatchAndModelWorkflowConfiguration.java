@@ -69,6 +69,16 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder minEventPercentage(Double minEventPercentage) {
+            createEventTableReport.setMinEventPercentage(minEventPercentage);
+            return this;
+        }
+
+        public Builder minDedupedRows(Long minDedupedRows) {
+            createEventTableReport.setMinDedupedRows(minDedupedRows);
+            return this;
+        }
+
         public Builder sourceType(SourceType sourceType) {
             importData.setSourceType(sourceType);
             return this;
