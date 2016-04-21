@@ -26,7 +26,8 @@ public enum LogicalDataType {
         return acausalDataTypes.contains(type);
     }
 
-    private static EnumSet<LogicalDataType> systemGeneratedDataTypes = EnumSet.of(LogicalDataType.InternalId);
+    private static EnumSet<LogicalDataType> systemGeneratedDataTypes = EnumSet.of(LogicalDataType.InternalId,
+            LogicalDataType.RowId);
 
     public static boolean isSystemGeneratedEventType(LogicalDataType type) {
         return systemGeneratedDataTypes.contains(type);

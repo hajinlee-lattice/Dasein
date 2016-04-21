@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.ZipUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
@@ -73,8 +74,12 @@ public class ScoringFileUploadResource {
             stream = scoringFileMetadataService.validateHeaderFields(stream, requiredColumns, closeableResourcePool,
                     displayName);
 
-            return fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+            SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                     SchemaInterpretation.TestingData, displayName, stream);
+
+            Table metadataTable = scoringFileMetadataService.registerMetadataTable(sourceFile, modelId);
+            sourceFile.setTableName(metadataTable.getName());
+            return sourceFile;
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
         } finally {

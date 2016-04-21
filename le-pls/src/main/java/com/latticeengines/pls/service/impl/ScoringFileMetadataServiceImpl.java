@@ -11,19 +11,41 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.metadata.resolution.ColumnTypeMapping;
+import com.latticeengines.pls.metadata.resolution.MetadataResolutionStrategy;
+import com.latticeengines.pls.metadata.resolution.UserDefinedMetadataResolutionStrategy;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("scoringFileMetadataService")
 public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataService {
 
     private static final Log log = LogFactory.getLog(ScoringFileMetadataServiceImpl.class);
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, List<Attribute> requiredFileds,
@@ -62,5 +84,34 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
 
         return stream;
+    }
+
+    @Override
+    public Table registerMetadataTable(SourceFile sourceFile, String modelId) {
+        ModelSummary modelSummary = modelSummaryEntityMgr.findValidByModelId(modelId);
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary with id %s", modelId));
+        }
+        String schemaInterpretationStr = modelSummary.getSourceSchemaInterpretation();
+        if (schemaInterpretationStr == null) {
+            throw new LedpException(LedpCode.LEDP_18087, new String[] { schemaInterpretationStr });
+        }
+        SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
+
+        MetadataResolutionStrategy strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
+                schemaInterpretation, null, yarnConfiguration);
+        strategy.calculate();
+        if (!strategy.isMetadataFullyDefined()) {
+            List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
+            strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
+                    sourceFile.getSchemaInterpretation(), unknown, yarnConfiguration);
+            strategy.calculate();
+        }
+
+        Table table = strategy.getMetadata();
+        table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
+        Tenant tenant = MultiTenantContext.getTenant();
+        metadataProxy.createTable(tenant.getId(), table.getName(), table);
+        return table;
     }
 }

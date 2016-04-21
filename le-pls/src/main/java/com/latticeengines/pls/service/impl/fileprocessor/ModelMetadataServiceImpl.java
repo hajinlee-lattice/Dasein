@@ -1,11 +1,16 @@
 package com.latticeengines.pls.service.impl.fileprocessor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -19,6 +24,8 @@ import com.latticeengines.security.exposed.util.MultiTenantContext;
 
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
+
+    private static final Log log = LogFactory.getLog(ModelMetadataServiceImpl.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -50,12 +57,9 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
     @Override
     public List<String> getRequiredColumnDisplayNames(String modelId) {
         List<String> requiredColumnDisplayNames = new ArrayList<String>();
-
-        for (Attribute attribute : getRequiredColumns(modelId)) {
-            LogicalDataType logicalDataType = attribute.getLogicalDataType();
-            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)) {
-                requiredColumnDisplayNames.add(attribute.getDisplayName());
-            }
+        List<Attribute> requiredColumns = getRequiredColumns(modelId);
+        for (Attribute column : requiredColumns) {
+            requiredColumnDisplayNames.add(column.getDisplayName());
         }
         return requiredColumnDisplayNames;
     }
@@ -66,15 +70,17 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table trainingTable = getTrainingTableFromModelId(modelId);
         List<Attribute> attributes = trainingTable.getAttributes();
         if (attributes == null) {
-            throw new RuntimeException(String.format("Model %s does not have attribuets in the event tableName",
-                    modelId));
+            log.error(String.format("Model %s does not have attribuets in the event tableName", modelId));
+            throw new LedpException(LedpCode.LEDP_18105, new String[] { modelId });
         }
         for (Attribute attribute : attributes) {
             LogicalDataType logicalDataType = attribute.getLogicalDataType();
-            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)) {
+            if (!LogicalDataType.isEventTypeOrDerviedFromEventType(logicalDataType)
+                    && !LogicalDataType.isSystemGeneratedEventType(logicalDataType)) {
                 requiredColumns.add(attribute);
             }
         }
+        log.info("The required columns are : " + Arrays.toString(requiredColumns.toArray()));
         return requiredColumns;
     }
 
