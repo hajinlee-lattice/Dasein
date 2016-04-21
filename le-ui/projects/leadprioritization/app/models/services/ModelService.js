@@ -1,5 +1,4 @@
 angular.module('mainApp.models.services.ModelService', [
-    'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.StringUtility',
@@ -33,7 +32,7 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     }
 })
-.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
+.service('ModelService', function ($http, $q, _, ResourceUtility, StringUtility, DateTimeFormatUtility, SessionService, ModelSummaryValidationService) {
 
     this.GetAllModels = function (isValidOnly) {
             var deferred = $q.defer();

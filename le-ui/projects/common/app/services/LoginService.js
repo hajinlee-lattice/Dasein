@@ -1,12 +1,11 @@
 angular.module('mainApp.login.services.LoginService', [
-    'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('LoginService', function ($http, $q, $location, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
+.service('LoginService', function ($http, $q, $location, BrowserStorageUtility, ResourceUtility, StringUtility, SessionService) {
     
     this.Login = function (username, password) {
         var deferred = $q.defer();

@@ -4,6 +4,7 @@ module.exports = [
     {
         path: '/projects/common',
         folders: {
+            '/app/views': '/app/views',
             '/assets': '/assets',
             '/lib': '/lib',
             '/fonts': '/assets/fonts',

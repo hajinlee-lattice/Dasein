@@ -1,0 +1,14 @@
+<div id="ServiceErrorModalController" class="modal-dialog modal-sm" data-ng-controller="ServiceErrorModalController">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h4 class="modal-title">{{ status }} - {{ statusText }}</h4>
+        </div>
+        <div class="modal-body">
+            {{ errorMsg }}
+        </div>
+        <div class="modal-footer">
+            <button class="button orange-button ng-binding" type="button" data-dismiss="modal" aria-hidden="true">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+        </div>
+    </div>
+</div>

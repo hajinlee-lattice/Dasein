@@ -22,17 +22,47 @@ angular.module('mainApp.create.csvImport', [
         }
     }
 })
-.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorUtility) {
+.service('csvImportService', function($q, $http, ModelService, ResourceUtility, BrowserStorageUtility, csvImportStore, ServiceErrorModalUtility) {
     this.Upload = function(options) {
         var deferred = $q.defer(),
             formData = new FormData(),
             params = options.params;
         
-        formData.append('file', options.file);
-        
         if (params.schema) {
             formData.append('schema', params.schema);
         }
+        
+        if (params.modelId) {
+            formData.append('modelId', params.modelId);
+        }
+        
+        if (params.compressed) {
+            var FR = new FileReader();
+
+            FR.onload = function(){
+                var convertedData = new Uint8Array(FR.result);
+
+                // Zipping Uint8Array to Uint8Array
+                var zippedResult = pako.gzip(convertedData, {to : "Uint8Array"});
+
+                // Need to convert back Uint8Array to ArrayBuffer for blob
+                var convertedZipped = zippedResult.buffer;
+
+                var arrayBlob = new Array(1);
+                arrayBlob[0] = convertedZipped;
+
+                // Creating a blob file with array of ArrayBuffer
+                var oMyBlob = new Blob(arrayBlob); // the blob (we need to set file.type if not it defaults to application/octet-stream since it's a gzip, up to you)
+                formData.append('file', oMyBlob, params.displayName || 'csv_file.csv'); // we need to gzip the data
+            };
+
+            FR.readAsArrayBuffer(options.file);
+
+            formData.append('compressed', params.compressed);
+        } else {
+            formData.append('file', options.file);
+        }
+        
         
         if (params.displayName) {
             var name = params.displayName.replace('C:\\fakepath\\','');
@@ -46,15 +76,21 @@ angular.module('mainApp.create.csvImport', [
         }
 
         xhr.addEventListener('load', function(event) {
-            deferred.resolve(JSON.parse(this.responseText));
+            xhr.data = JSON.parse(this.responseText);
+            ServiceErrorModalUtility.check(xhr);
+            deferred.resolve(xhr.data);
         });
 
         xhr.addEventListener('error', function(event) {
+            xhr.data = JSON.parse(this.responseText);
+            ServiceErrorModalUtility.check(xhr);
+
             var result = {
                 Success: false,
                 ResultErrors: ResourceUtility.getString('MODEL_IMPORT_CONNECTION_ERROR'),
                 Result: null
             };
+
             deferred.resolve(result);
         });
 
@@ -67,6 +103,8 @@ angular.module('mainApp.create.csvImport', [
         if (BrowserStorageUtility.getTokenDocument()) {
             xhr.setRequestHeader("Authorization", BrowserStorageUtility.getTokenDocument());
         }
+
+        xhr.setRequestHeader("Content-Encoding", "gzip");
 
         xhr.send(formData);
 
@@ -201,6 +239,49 @@ angular.module('mainApp.create.csvImport', [
 
         return deferred.promise;
     };
+
+    this.StartTestingSet = function(modelId, fileName) {
+        var deferred = $q.defer();
+        console.log('TestingSet', modelId, fileName)
+        $http({
+            method: 'POST',
+            url: '/pls/scores/' + modelId,
+            data: {
+                modelId: modelId,
+                fileName: fileName
+            },
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .success(function(data, status, headers, config) {
+            console.log('TestingSet POST SUCCESS', status, data);
+            if (data == null) {
+                result = {
+                    Success: false,
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR'),
+                    Result: null
+                };
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: data.Errors,
+                    Result: data.Result
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            console.log('TestingSet POST ERROR', status, data);
+            var result = {
+                Success: false,
+                ResultErrors: data.errorMsg
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 })
 .directive('csvUploader', ['$parse', function ($parse) {
     return {
@@ -235,7 +316,7 @@ angular.module('mainApp.create.csvImport', [
             $scope.importErrorMsg = "";
             $scope.importing = true;
 
-            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+            var fileType = $scope.accountLeadCheck ? 'SalesforceAccount' : 'SalesforceLead',
                 startTime = new Date();
             
             this.cancelDeferred = cancelDeferred = $q.defer();

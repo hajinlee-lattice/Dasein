@@ -5,8 +5,8 @@ angular.module('mainApp.create.csvBulkUpload', [
     'mainApp.core.utilities.NavUtility'
 ])
 .controller('csvBulkUploadController', [
-    '$scope', '$rootScope', 'ModelService', 'ResourceUtility', '$state', '$q', 'csvImportService', 'csvImportStore', 'RequiredFields',
-    function($scope, $rootScope, ModelService, ResourceUtility, $state, $q, csvImportService, csvImportStore, RequiredFields) {
+    '$scope', '$rootScope', '$stateParams', 'ModelService', 'ResourceUtility', '$state', '$q', 'csvImportService', 'csvImportStore', 'RequiredFields',
+    function($scope, $rootScope, $stateParams, ModelService, ResourceUtility, $state, $q, csvImportService, csvImportStore, RequiredFields) {
         $scope.showImportError = false;
         $scope.importErrorMsg = "";
         $scope.importing = false;
@@ -20,15 +20,16 @@ angular.module('mainApp.create.csvBulkUpload', [
             $scope.importErrorMsg = "";
             $scope.importing = true;
 
-            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
+            var modelId = $stateParams.modelId,
                 startTime = new Date();
 
             csvImportService.Upload({
                 file: $scope.csvFile, 
-                url: '/pls/scores/fileuploads/unnamed',
+                url: '/pls/scores/fileuploads',
                 params: {
-                    schema: fileType,
-                    displayName: $scope.csvFileName
+                    modelId: modelId,
+                    displayName: $scope.csvFileName,
+                    compressed: true
                 },
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {
@@ -63,23 +64,22 @@ angular.module('mainApp.create.csvBulkUpload', [
                     $('#file_progress').html(html);
                 }
             }).then(function(result) {
-                console.log('# Upload Successful:' + result.Success, result);
-                if (result.Success && result.Result) {
-                    var fileName = result.Result.name,
-                        metaData = result.Result,
-                        modelName = $scope.modelName;
+                console.log('# Upload Successful:' + result.state, result);
+                if (result.state == "Uploaded" && result.name) {
+                    var fileName = result.name;
 
-                    console.log('# CSV Upload Complete', fileName, modelName, metaData);
-                    metaData.modelName = modelName;
+                    console.log('# CSV Upload Complete', fileName, modelId);
+                    //csvImportStore.Set(fileName, metaData);
 
-                    csvBulkUploadStore.Set(fileName, metaData);
-
-                    $state.go('home.model.jobs');
+                    csvImportService.StartTestingSet(modelId, fileName).then(function(result) {
+                        console.log('scoring testing set',result);
+                        $state.go('home.model.jobs', { 'jobCreationSuccess': true });
+                    });
                 } else {
                     $('div.loader').css({'display':'none'});
 
                     var errorCode = result.errorCode || 'LEDP_ERR';
-                    var errorMsg  = result.errorMsg || result.ResultErrors || 'Unknown error while uploading file.';
+                    var errorMsg  = result.errorMsg || result.ResultErrors || 'Undefined error while uploading file.';
 
                     html = '<span style="display:block;margin:4em auto 0.5em;max-width:27em;">' + errorMsg + '</span><span style="margin-bottom:3em;display:block;font-size:8pt;color:#666;">' + errorCode + '</span>';
                     $('#file_progress').html(html);
@@ -97,7 +97,7 @@ angular.module('mainApp.create.csvBulkUpload', [
         $scope.cancelClicked = function() {
             console.log('# Upload Cancelled');
             csvImportStore.Get('cancelXHR', true).abort();
-            $state.go('home.model.jobs.status');
+            $state.go('home.model.jobs');
         };
     }
 ]);

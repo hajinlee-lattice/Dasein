@@ -1,11 +1,10 @@
 angular.module('mainApp.config.services.ConfigService', [
-    'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.URLUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('ConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
+.service('ConfigService', function ($http, $q, BrowserStorageUtility, ResourceUtility, URLUtility, SessionService) {
     
     this.GetWidgetConfigDocument = function () {
         var deferred = $q.defer();

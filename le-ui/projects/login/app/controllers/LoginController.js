@@ -2,7 +2,6 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.appCommon.directives.ngEnterDirective',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
@@ -14,7 +13,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
+.controller('LoginController', function ($scope, $templateCache, $http, $rootScope, $compile, ResourceUtility, TimestampIntervalUtility, NavUtility, EvergageUtility,
                                          BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal, FeatureFlagService) {
 
     $("body").addClass("login-body");

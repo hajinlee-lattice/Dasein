@@ -12,7 +12,6 @@ var mainApp = angular.module('mainApp', [
     'mainApp.config.services.ConfigService',
     'mainApp.login.controllers.LoginController',
     'mainApp.core.controllers.MainViewController',
-    'mainApp.appCommon.modals.SimpleModal',
     'pd.navigation'
 ])
 
@@ -54,7 +53,7 @@ var mainApp = angular.module('mainApp', [
 }])
 */
 .controller('MainController', function ($scope, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal, $templateCache) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, $templateCache) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
     

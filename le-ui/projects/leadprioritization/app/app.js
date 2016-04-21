@@ -4,10 +4,10 @@ var mainApp = angular.module('mainApp', [
     'ui.router',
     'ui.bootstrap',
     'oc.lazyLoad',
-    'mainApp.appCommon.modals.SimpleModal',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.TimestampIntervalUtility',
+    'mainApp.core.modals.ServiceErrorModal',
     'mainApp.core.controllers.MainViewController',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService',
@@ -44,7 +44,7 @@ var mainApp = angular.module('mainApp', [
 })
 
 .controller('MainController', function ($scope, $templateCache, $http, $rootScope, $compile, $interval, $modal, $timeout, BrowserStorageUtility, ResourceUtility,
-    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService, SimpleModal) {
+    TimestampIntervalUtility, EvergageUtility, ResourceStringsService, HelpService, LoginService, ConfigService) {
     $scope.showFooter = true;
     $scope.sessionExpired = false;
 
@@ -246,9 +246,9 @@ var mainApp = angular.module('mainApp', [
     }
 });
 
-mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
+mainApp.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtility) {
     return {
-        request: function (config) {
+        request: function(config) {
             config.headers = config.headers || {};
             
             if (BrowserStorageUtility.getTokenDocument()) {
@@ -257,12 +257,7 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
             
             return config;
         },
-        response: function (response) {
-            //console.log(response.status);
-            if (response.status === 401) {
-                // handle the case where the user is not authenticated
-                alert('UNAUTHORIZED 401');
-            }
+        response: function(response) {
             return response || $q.when(response);
         }
     };
@@ -270,30 +265,4 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
 
 mainApp.config(function ($httpProvider) {
     $httpProvider.interceptors.push('authInterceptor');
-});
-
-mainApp.factory('httpErrorsInterceptor', function ($q, $rootScope, EventsDict) {
-    function successHandler(response) {
-        console.log('successHandler',response);
-        return response;
-    }
-
-    function errorHandler(response) {
-        console.log('errorHandler',response);
-
-        var config = response.config;
-
-        if (config.bypassErrorInterceptor) {
-            return $q.reject(response);
-        }
-
-        alert(EventsDict.httpError);
-        $rootScope.$broadcast(EventsDict.httpError, response.data.cause);
-        
-        return $q.reject(response);
-    }
-
-    return function(promise) {
-        return promise.then(successHandler, errorHandler);
-    };
 });
