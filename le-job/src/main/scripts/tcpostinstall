@@ -22,6 +22,7 @@ fi
 jar cvf ROOT.war -C ROOT/ .
 
 rm -rf /usr/share/tomcat/work/JobEngine
+mkdir -p /usr/share/tomcat/webapps/job
 cp -f ROOT.war /usr/share/tomcat/webapps/job
 
 chown -R tomcat:tomcat /usr/share/tomcat/webapps/job
