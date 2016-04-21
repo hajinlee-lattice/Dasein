@@ -143,6 +143,8 @@ angular
                     if (jobStatus.jobStatus == "Completed") {
                         $scope.jobRunning = false;
                         $scope.jobCompleted = true;
+                    } else if (jobStatus.jobStatus == "Failed" || jobStatus.jobStatus == "Cancelled") {
+                        $scope.jobRunning = false;
                     }
                 }
 

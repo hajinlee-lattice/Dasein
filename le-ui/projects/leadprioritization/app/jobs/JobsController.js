@@ -386,7 +386,7 @@ angular.module('pd.jobs', [
             $scope.timeoutTask = $timeout(function() {
                 $scope.jobCreationSuccess = null;
                 $scope.hideCreationMessage = true;
-                //$state.go('home.jobs.status', { 'jobCreationSuccess': null });
+                $state.go('home.jobs.status', { 'jobCreationSuccess': null });
             }, 30000);
         }
     }
