@@ -58,7 +58,12 @@ public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepCon
         Schema schema = record.getSchema();
         // TODO Autodetect schema types
         for (Schema.Field field : schema.getFields()) {
-            json.put(field.name(), ((Long) record.get(field.name())).longValue());
+            Object value = record.get(field.name());
+            if (value != null) {
+                json.put(field.name(), ((Long) value).longValue());
+            } else {
+                json.put(field.name(), 0L);
+            }
         }
 
         return json;
