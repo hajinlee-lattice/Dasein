@@ -59,4 +59,14 @@ public class BomboraDepivoted implements FixedIntervalSource {
         return 7;
     }
 
+    @Override
+    public String getDirForBaseVersionLookup() {
+        return "Raw";
+    }
+
+    @Override
+    public String getTransformationServiceBeanName() {
+        return "bomboraDepivotedService";
+    }
+
 }

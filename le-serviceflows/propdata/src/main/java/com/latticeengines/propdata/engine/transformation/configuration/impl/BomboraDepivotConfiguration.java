@@ -11,6 +11,7 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
     private Map<String, String> sourceConfigurations;
     private BomboraFirehoseInputSourceConfig bomboraFirehoseInputSourceConfig;
     private String serviceBeanName = "bomboraDepivotedService";
+    private String rootOperationId;
 
     @Override
     public String getSourceName() {
@@ -51,6 +52,14 @@ public class BomboraDepivotConfiguration implements TransformationConfiguration 
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getRootOperationId() {
+        return rootOperationId;
+    }
+
+    public void setRootOperationId(String rootOperationId) {
+        this.rootOperationId = rootOperationId;
     }
 
 }

@@ -14,15 +14,22 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class AbstractTransformationDataFlowService implements TransformationDataFlowService {
 
+    abstract Configuration getYarnConfiguration();
+
+    abstract String getCascadingPlatform();
+
     protected DataFlowContext dataFlowContext(Source source, Map<String, Table> sources, DataFlowParameters parameters,
             String outputDir) {
         String sourceName = source.getSourceName();
         DataFlowContext ctx = new DataFlowContext();
-        if ("mr".equalsIgnoreCase(getCascadingPlatform())) {
-            ctx.setProperty("ENGINE", "MR");
-        } else {
-            ctx.setProperty("ENGINE", "TEZ");
-        }
+        // TODO - anoop - enable TEZ once object mapper jar version conflict is
+        // fixed
+        // if ("mr".equalsIgnoreCase(getCascadingPlatform())) {
+        // ctx.setProperty("ENGINE", "MR");
+        // } else {
+        // ctx.setProperty("ENGINE", "TEZ");
+        // }
+        ctx.setProperty("ENGINE", "MR");
 
         ctx.setProperty("PARAMETERS", parameters);
         ctx.setProperty("SOURCETABLES", sources);
@@ -37,9 +44,4 @@ public abstract class AbstractTransformationDataFlowService implements Transform
         ctx.setProperty("JOBPROPERTIES", new Properties());
         return ctx;
     }
-
-    abstract Configuration getYarnConfiguration();
-
-    abstract String getCascadingPlatform();
-
 }

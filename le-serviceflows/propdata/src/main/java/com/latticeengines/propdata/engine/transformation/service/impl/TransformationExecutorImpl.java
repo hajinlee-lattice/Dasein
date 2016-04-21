@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -45,8 +46,12 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         Integer retries = 0;
         while (retries++ < MAX_RETRY) {
             try {
+                String unprocessedVersion = transformationService.findUnprocessedVersion();
+                if (StringUtils.objectIsNullOrEmptyString(unprocessedVersion)) {
+                    return null;
+                }
                 TransformationConfiguration transformationConfiguration = transformationService
-                        .createTransformationConfiguration();
+                        .createTransformationConfiguration(unprocessedVersion);
                 if (transformationConfiguration != null) {
                     TransformationProgress progress = transformationService
                             .startNewProgress(transformationConfiguration, jobSubmitter);
@@ -92,9 +97,9 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             String rootOperationUid = progress.getRootOperationUID();
             TransformationConfiguration transformationConfiguration = null;
             TransformationWorkflowConfiguration configuration = builder.workflowName("propdataTransformationWorkflow")
-                    .payloadName("Transformation").customerSpace(customerSpace)
-                    .hdfsPodId(HdfsPodContext.getHdfsPodId()).transformationConfiguration(transformationConfiguration)
-                    .rootOperationUid(rootOperationUid).internalResourceHostPort("propdata")
+                    .payloadName("Transformation").customerSpace(customerSpace).hdfsPodId(HdfsPodContext.getHdfsPodId())
+                    .transformationConfiguration(transformationConfiguration).rootOperationUid(rootOperationUid)
+                    .internalResourceHostPort("propdata")
                     .serviceBeanName(transformationConfiguration.getServiceBeanName()).build();
             AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);
             ApplicationId appId = ConverterUtils.toApplicationId(appSubmission.getApplicationIds().get(0));

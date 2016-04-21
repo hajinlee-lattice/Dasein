@@ -18,7 +18,9 @@ public interface TransformationService {
 
     Source getSource();
 
-    TransformationConfiguration createTransformationConfiguration();
+    String findUnprocessedVersion();
 
     Class<? extends TransformationConfiguration> getConfigurationClass();
+
+    TransformationConfiguration createTransformationConfiguration(String versionToProcess);
 }

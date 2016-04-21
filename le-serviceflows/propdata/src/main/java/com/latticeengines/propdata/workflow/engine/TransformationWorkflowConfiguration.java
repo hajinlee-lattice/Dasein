@@ -1,12 +1,7 @@
 package com.latticeengines.propdata.workflow.engine;
 
-import java.io.IOException;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.propdata.workflow.engine.steps.PrepareTransformationStepInputConfiguration;
@@ -15,7 +10,7 @@ import com.latticeengines.propdata.workflow.engine.steps.TransformationStepExecu
 public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
 
     public static class Builder {
-        private ObjectMapper om = new ObjectMapper();
+        private JsonUtils om = new JsonUtils();
         private TransformationWorkflowConfiguration configuration = new TransformationWorkflowConfiguration();
         private PrepareTransformationStepInputConfiguration prepareConfig = new PrepareTransformationStepInputConfiguration();
         private TransformationStepExecutionConfiguration parallelExecConfig = new TransformationStepExecutionConfiguration();
@@ -34,11 +29,8 @@ public class TransformationWorkflowConfiguration extends WorkflowConfiguration {
             prepareConfig.setRootOperationUid(rootOperationUid);
             prepareConfig.setHdfsPodId(hdfsPodId);
             prepareConfig.setInternalResourceHostPort(internalResourceHostPort);
-            try {
-                prepareConfig.setTransformationConfiguration(om.writeValueAsString(transformationConfiguration));
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_25013, e.getMessage(), e);
-            }
+            prepareConfig.setTransformationConfiguration(om.serialize(transformationConfiguration));
+
             prepareConfig.setServiceBeanName(serviceBeanName);
             prepareConfig
                     .setTransformationConfigurationClasspath(transformationConfiguration.getClass().getCanonicalName());

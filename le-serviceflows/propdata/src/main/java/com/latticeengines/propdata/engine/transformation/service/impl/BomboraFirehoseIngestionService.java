@@ -30,6 +30,8 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService
         implements TransformationService {
 
+    private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
+
     private static final Log log = LogFactory.getLog(BomboraFirehoseIngestionService.class);
 
     private static final String PATH_SEPARATOR = "/";
@@ -76,7 +78,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     protected void executeDataFlow(TransformationProgress progress, String workflowDir) {
         transformationDataFlowService.setFieldTypeMapping(fieldTypeMapping);
         transformationDataFlowService.executeDataProcessing(source, workflowDir, getVersion(progress),
-                progress.getRootOperationUID(), "bomboraUntarAndConvertToAvroFlow");
+                progress.getRootOperationUID(), DATA_FLOW_BEAN_NAME);
     }
 
     @Override
@@ -111,7 +113,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
 
     @Override
     TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
-        return om.readValue(confStr, BomboraFirehoseConfiguration.class);
+        return om.deserialize(confStr, BomboraFirehoseConfiguration.class);
     }
 
     @Override

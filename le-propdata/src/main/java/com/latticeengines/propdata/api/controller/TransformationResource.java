@@ -3,9 +3,9 @@ package com.latticeengines.propdata.api.controller;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -41,7 +41,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
         throw new UnsupportedOperationException("This is a place holder of a proxy method.");
     }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Scan all transformation progresses that can be proceeded. "
             + "url parameter podid is for testing purpose.")
@@ -56,22 +56,29 @@ public class TransformationResource extends InternalResourceBase implements Tran
         }
     }
 
-    @RequestMapping(value = "/{transformationName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "internal", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Trigger a new transformation for a source at its latest version. "
             + "If a transformation with the same source version already exists, skip operation. "
             + "url parameter submitter indicates what submitted this job: Quartz, Test, Cli, ..."
             + "url parameter podid is for testing purpose.")
-    public TransformationProgress publish(@PathVariable String transformationName,
-            @RequestBody TransformationRequest transformationRequest,
+    public TransformationProgress transform(@RequestBody TransformationRequest transformationRequest,
             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod,
-            HttpServletRequest request) {
+            HttpServletRequest request, HttpServletResponse response) {
         checkHeader(request);
         try {
-            return sourceTransformationService.transform(transformationName, transformationRequest, hdfsPod);
+            TransformationProgress progress = sourceTransformationService.transform(transformationRequest, hdfsPod);
+            if (progress == null) {
+                response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                response.getWriter().write("No unprocessed version found.");
+                response.getWriter().flush();
+                response.getWriter().close();
+                return null;
+            }
+            response.setStatus(HttpServletResponse.SC_ACCEPTED);
+            return progress;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25011, e, new String[] { transformationRequest.getSourceBeanName() });
         }
     }
-
 }

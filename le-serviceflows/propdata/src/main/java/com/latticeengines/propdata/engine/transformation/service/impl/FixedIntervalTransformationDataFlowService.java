@@ -1,10 +1,13 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +19,21 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.propdata.dataflow.PivotDataFlowParameters;
-import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
+import com.latticeengines.domain.exposed.propdata.dataflow.DepivotDataFlowParameters;
 import com.latticeengines.propdata.collection.service.CollectionDataFlowKeys;
 import com.latticeengines.propdata.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.common.entitymgr.SourceColumnEntityMgr;
 
 @Component("fixedIntervalTransformationDataFlowService")
 public class FixedIntervalTransformationDataFlowService extends AbstractTransformationDataFlowService {
+
+    private static final String SOURCETABLES = "SOURCETABLES";
+
+    private static final String SCHEMA_BOMBORA_FIREHOSE_AVRO = "schema/BomboraFirehoseAvroSchema.avsc";
 
     private static final String SPLIT_REGEX = "\\|";
 
@@ -72,12 +79,20 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
         for (Source baseSource : fixedIntervalSource.getBaseSources()) {
             String version = versions[i];
             Table baseTable = hdfsSourceEntityMgr.getTableAtVersion(baseSource, version);
+            try (InputStream schemaContent = this.getClass().getClassLoader()
+                    .getResourceAsStream(SCHEMA_BOMBORA_FIREHOSE_AVRO)) {
+                Schema schema = new Schema.Parser().parse(schemaContent);
+                baseTable.setSchema(schema);
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_25012, e,
+                        new String[] { source.getSourceName(), e.getMessage() });
+            }
             sources.put(baseSource.getSourceName(), baseTable);
             baseTables.add(baseSource.getSourceName());
             i++;
         }
 
-        PivotDataFlowParameters parameters = new PivotDataFlowParameters();
+        DepivotDataFlowParameters parameters = new DepivotDataFlowParameters();
         parameters.setTimestampField(source.getTimestampField());
         parameters.setColumns(sourceColumnEntityMgr.getSourceColumns(fixedIntervalSource));
         parameters.setBaseTables(baseTables);
@@ -86,6 +101,7 @@ public class FixedIntervalTransformationDataFlowService extends AbstractTransfor
 
         DataFlowContext ctx = dataFlowContext(source, sources, parameters, targetPath);
         ctx.setProperty(FLOWNAME, source.getSourceName() + HIPHEN + flowName);
+        ctx.setProperty(SOURCETABLES, sources);
 
         dataTransformationService.executeNamedTransformation(ctx, dataFlowBean);
     }

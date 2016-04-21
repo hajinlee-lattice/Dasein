@@ -11,4 +11,6 @@ public interface DataImportedFromHDFS extends IngestedRawSource {
      * this directory
      */
     Path getHDFSPathToImportFrom();
+
+    String getTransformationServiceBeanName();
 }

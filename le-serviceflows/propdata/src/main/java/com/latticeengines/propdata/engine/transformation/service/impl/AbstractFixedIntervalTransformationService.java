@@ -3,7 +3,8 @@ package com.latticeengines.propdata.engine.transformation.service.impl;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.util.CollectionUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -13,6 +14,9 @@ import com.latticeengines.propdata.core.source.Source;
 import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 public abstract class AbstractFixedIntervalTransformationService extends AbstractTransformationService {
+
+    private static Logger LOG = LogManager.getLogger(AbstractFixedIntervalTransformationService.class);
+
     protected TransformationProgress transformHook(TransformationProgress progress) {
         if (!transformDataAndUpdateProgress(progress)) {
             return progress;
@@ -21,18 +25,19 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
     }
 
     private boolean transformDataAndUpdateProgress(TransformationProgress progress) {
-        String targetDir = workflowDirInHdfs(progress);
-        if (!cleanupHdfsDir(targetDir, progress)) {
-            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + targetDir, null);
+        String workflowDir = workflowDirInHdfs(progress);
+        if (!cleanupHdfsDir(workflowDir, progress)) {
+            updateStatusToFailed(progress, "Failed to cleanup HDFS path " + workflowDir, null);
             return false;
         }
         try {
-            executeDataFlow(progress, targetDir);
+            executeDataFlow(progress, workflowDir);
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to transform data.", e);
             return false;
         }
-        return true;
+
+        return doPostProcessing(progress, workflowDir);
     }
 
     @Override
@@ -42,49 +47,72 @@ public abstract class AbstractFixedIntervalTransformationService extends Abstrac
     }
 
     @Override
-    public TransformationConfiguration createTransformationConfiguration() {
+    public String findUnprocessedVersion() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
         String rootBaseSourceDir = getRootBaseSourceDirPath();
-        String latestVersion = null;
+        String rootDirForVersionLookup = rootBaseSourceDir + HDFS_PATH_SEPARATOR
+                + ((FixedIntervalSource) source).getDirForBaseVersionLookup();
         List<String> latestVersions = null;
-        String newLatestVersion = null;
-        String latestBaseVersion = null;
         List<String> latestBaseVersions = null;
-
         try {
-            // in next txn, fix this logic to support any missing version
-            // as well. for now it is latest version comparison only
-            latestVersions = findSortedVersionsInDir(rootSourceDir.toString());
-            if (CollectionUtils.isEmpty(latestVersions)) {
-                latestVersion = latestVersions.get(latestVersions.size() - 1);
+            latestVersions = findSortedVersionsInDir(rootSourceDir);
+            latestBaseVersions = findSortedVersionsInDir(rootDirForVersionLookup);
+
+            if (latestBaseVersions.isEmpty()) {
+                LOG.info("No version if found in base source");
+                return null;
             }
 
-            latestBaseVersions = findSortedVersionsInDir(rootBaseSourceDir.toString());
-
-            if (CollectionUtils.isEmpty(latestBaseVersions)) {
-                latestBaseVersion = latestBaseVersions.get(latestBaseVersions.size() - 1);
+            String versionToProcess = compareVersionLists(latestBaseVersions, latestVersions);
+            if (versionToProcess == null) {
+                LOG.info("Didn't find any unprocessed version in base source");
+                return null;
             }
+            return versionToProcess;
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);
         }
+    }
 
-        if (latestBaseVersion == null) {
-            return null;
+    @Override
+    public TransformationConfiguration createTransformationConfiguration(String versionToProcess) {
+        TransformationConfiguration configuration;
+        configuration = createNewConfiguration(versionToProcess, versionToProcess);
+        return configuration;
+    }
+
+    /*
+     * GOAL: Ensure that over the period of time missing versions and also
+     * handled.
+     * 
+     * LOGIC: return the first element (in high-to-low order) from
+     * latestBaseVersions for which there is no entry in latestVersions list
+     */
+    private String compareVersionLists(List<String> latestBaseVersions, List<String> latestVersions) {
+        String unprocessedVersion = null;
+        if (latestVersions.size() == 0) {
+            // if there is no version in source then then pick latest from base
+            // source version list
+            return (latestBaseVersions.size() == 0) ? null : latestBaseVersions.get(0);
         }
 
-        if (latestVersion == null) {
-            newLatestVersion = latestBaseVersion;
-        } else {
-            if (latestBaseVersion.compareTo(latestVersion) > 0) {
-                newLatestVersion = latestBaseVersion;
-
-                TransformationConfiguration configuration = createNewConfiguration(latestBaseVersion, newLatestVersion);
-
-                return configuration;
+        for (String baseVersion : latestBaseVersions) {
+            for (String latestVersion : latestVersions) {
+                LOG.info("Compare: " + unprocessedVersion);
+                if (baseVersion.compareTo(latestVersion) <= 0) {
+                    if (baseVersion.equals(latestVersion)) {
+                        // if found equal version then skip further checking for
+                        // this version
+                        continue;
+                    }
+                    // if we found a version that is smaller than baseVersion
+                    // then we return base version as this is a missing version
+                    return baseVersion;
+                }
             }
         }
 
-        return null;
+        return unprocessedVersion;
     }
 }

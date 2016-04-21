@@ -50,4 +50,9 @@ public class BomboraFirehose implements TransformedToAvroSource {
     public String[] getPrimaryKey() {
         return new String[] { "ID", "LE_Last_Upload_Date" };
     }
+
+    @Override
+    public String getTransformationServiceBeanName() {
+        return "bomboraFirehoseIngestionService";
+    }
 }

@@ -28,6 +28,8 @@ import com.latticeengines.propdata.engine.transformation.service.TransformationS
 public class BomboraDepivotedService extends AbstractFixedIntervalTransformationService
         implements TransformationService {
 
+    private static final String DEPIVOT_FLOW = "DepivotFlow";
+
     private static final String VERSION = "VERSION";
 
     private static final Log log = LogFactory.getLog(BomboraDepivotedService.class);
@@ -93,11 +95,16 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
 
     @Override
     TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
-        return om.readValue(confStr, BomboraDepivotConfiguration.class);
+        return om.deserialize(confStr, BomboraDepivotConfiguration.class);
     }
 
     @Override
     public Class<? extends TransformationConfiguration> getConfigurationClass() {
         return BomboraDepivotConfiguration.class;
+    }
+
+    @Override
+    String workflowAvroDir(TransformationProgress progress) {
+        return dataFlowDirInHdfs(progress, DEPIVOT_FLOW);
     }
 }

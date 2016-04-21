@@ -3,13 +3,13 @@ package com.latticeengines.propdata.workflow.engine.steps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
@@ -26,7 +26,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
 
     private static Log log = LogFactory.getLog(TransformationStepExecution.class);
 
-    private ObjectMapper om = new ObjectMapper();
+    private JsonUtils om = new JsonUtils();
 
     private TransformationService transformationService;
 
@@ -49,7 +49,7 @@ public class TransformationStepExecution extends BaseWorkflowStep<PrepareTransfo
 
             String transformationConfigurationStr = prepareTransformationConfiguration.getTransformationConfiguration();
             TransformationConfiguration transformationConfiguration = (TransformationConfiguration) om
-                    .readValue(transformationConfigurationStr, configurationClass);
+                    .deserialize(transformationConfigurationStr, configurationClass);
             if (transformationService.isNewDataAvailable(transformationConfiguration)) {
                 String creator = (String) executionContext.get(CREATOR);
                 String podId = prepareTransformationConfiguration.getHdfsPodId();

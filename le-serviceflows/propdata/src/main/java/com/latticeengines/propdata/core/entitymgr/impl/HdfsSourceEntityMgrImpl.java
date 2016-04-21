@@ -19,6 +19,7 @@ import com.latticeengines.propdata.core.source.CollectedSource;
 import com.latticeengines.propdata.core.source.HasSqlPresence;
 import com.latticeengines.propdata.core.source.IngestedRawSource;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.core.source.TransformedToAvroSource;
 import com.latticeengines.propdata.core.util.TableUtils;
 
 @Component("hdfsSourceEntityMgr")
@@ -137,10 +138,16 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             return TableUtils.createTable(((HasSqlPresence) source).getSqlTableName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         } else {
-            String path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            String path = null;
+            if (source instanceof TransformedToAvroSource) {
+                path = hdfsPathBuilder.constructRawDir(source).append(version).toString();
+            } else {
+                path = hdfsPathBuilder.constructSnapshotDir(source, version).toString();
+            }
             return TableUtils.createTable(source.getSourceName(),
                     path + HDFS_PATH_SEPARATOR + WILD_CARD + AVRO_FILE_EXTENSION);
         }
+
     }
 
     @Override
