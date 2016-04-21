@@ -104,7 +104,7 @@
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar;${env.TEZ_CONF_DIR}</extraClasspath>
                             </webAppConfig>
                             <httpConnector>
-                                <port>8074</port>
+                                <port>8079</port>
                             </httpConnector>
                             <useTestClasspath>true</useTestClasspath>
                             <webXml>${basedir}/src/test/webapp-propdata/WEB-INF/web.xml</webXml>
