@@ -252,11 +252,6 @@ public abstract class DataFlowBuilder {
 
         Extract extract = new Extract();
         extract.setName("extract");
-        if (targetPath.endsWith("/")) {
-            targetPath = targetPath + "*.avro";
-        } else {
-            targetPath = targetPath + "/*.avro";
-        }
         extract.setPath(targetPath);
         extract.setExtractionTimestamp(DateTime.now().getMillis());
         table.addExtract(extract);

@@ -21,7 +21,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
         setupForWorkflow();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void modelAccount() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/Account.csv", SchemaInterpretation.SalesforceAccount);
         ModelingParameters params = new ModelingParameters();

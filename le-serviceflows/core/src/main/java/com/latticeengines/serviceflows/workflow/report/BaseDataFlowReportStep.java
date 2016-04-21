@@ -1,6 +1,5 @@
 package com.latticeengines.serviceflows.workflow.report;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -12,8 +11,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.CreateReportParameters;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.DataFlowStepConfiguration;
 
@@ -45,11 +44,8 @@ public abstract class BaseDataFlowReportStep<T extends BaseDataFlowReportStepCon
         Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
                 configuration.getTargetTableName());
 
-        List<String> paths = new ArrayList<>();
-        for (Extract extract : table.getExtracts()) {
-            paths.add(extract.getPath());
-        }
-        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, paths);
+        List<String> paths = ExtractUtils.getExtractPaths(yarnConfiguration, table);
+        List<GenericRecord> records = AvroUtils.getData(yarnConfiguration, paths);
 
         ObjectNode json = new ObjectMapper().createObjectNode();
 
