@@ -30,14 +30,19 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.DataSourcePool;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.match.MatchInput;
+import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 import com.latticeengines.domain.exposed.propdata.match.NameLocation;
 import com.latticeengines.domain.exposed.propdata.match.OutputRecord;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.propdata.core.datasource.DataSourceService;
 import com.latticeengines.propdata.match.annotation.MatchStep;
+import com.latticeengines.propdata.match.metric.MatchedAccount;
 import com.latticeengines.propdata.match.service.ColumnMetadataService;
 import com.latticeengines.propdata.match.service.DisposableEmailService;
 import com.latticeengines.propdata.match.service.MatchExecutor;
@@ -63,6 +68,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     private DisposableEmailService disposableEmailService;
+
+    @Autowired
+    protected MetricService metricService;
 
     @PostConstruct
     private void postConstruct() {
@@ -334,6 +342,29 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             return matchOutput;
         }
         throw new RuntimeException("Cannot find the requested metadata.");
+    }
+
+     @MatchStep
+     protected void generateAccountMetric(MatchContext matchContext) {
+        try {
+            MatchInput input = matchContext.getInput();
+            List<MatchedAccount> accountMeasurements = new ArrayList<>();
+            List<InternalOutputRecord> recordList = matchContext.getInternalResults();
+            for (InternalOutputRecord record : recordList) {
+                if (record.isFailed()) {
+                    continue;
+                }
+                MatchKeyDimension keyDimension =
+                        new MatchKeyDimension(record.getParsedDomain(), record.getParsedNameLocation());
+                MatchedAccount measurement = new MatchedAccount(input, keyDimension, matchContext.getMatchEngine(),
+                        record.isMatched());
+                accountMeasurements.add(measurement);
+            }
+
+            metricService.write(MetricDB.LDC_Match, accountMeasurements);
+        } catch (Exception e) {
+            log.warn("Failed to extract account based metric.", e);
+        }
     }
 
     private boolean isDomainSource(String sourceName) {

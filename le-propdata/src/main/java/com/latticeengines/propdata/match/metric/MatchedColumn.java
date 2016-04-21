@@ -1,7 +1,7 @@
 package com.latticeengines.propdata.match.metric;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Measurement;
@@ -9,7 +9,6 @@ import com.latticeengines.common.exposed.metric.MetricStore;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
-import com.latticeengines.domain.exposed.monitor.metric.MetricStoreImpl;
 import com.latticeengines.domain.exposed.propdata.match.InputAccount;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyDimension;
@@ -30,7 +29,7 @@ public class MatchedColumn extends BaseMeasurement<Matched, MatchedColumn.Matche
 
     @Override
     public Collection<MetricStore> getMetricStores() {
-        return Collections.singleton((MetricStore) MetricStoreImpl.SPLUNK_LOG);
+        return new ArrayList<>();
     }
 
     @Override
