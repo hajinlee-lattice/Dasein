@@ -10,12 +10,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
-
 import javax.annotation.Nullable;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +57,6 @@ import com.latticeengines.security.exposed.AccessLevel;
 @Component
 public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
-    private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
 
     @Autowired

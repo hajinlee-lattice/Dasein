@@ -3,14 +3,12 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
 import java.util.Arrays;
 import java.util.List;
-
 import javax.annotation.Nullable;
-
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,13 +16,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
@@ -33,12 +35,18 @@ import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
+    private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
+
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
 
     private String modelId;
     private String applicationId;
     private Long jobId;
+
+    private String fileName;
+
+    private SourceFile sourceFile;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -50,6 +58,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     public void setup() throws Exception {
         selfServiceModeling.setup();
         modelId = selfServiceModeling.prepareModel(SchemaInterpretation.SalesforceLead, null, null);
+        fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
     }
 
     @Test(groups = "deployment.lp")
@@ -119,6 +128,48 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(results.length() > 0);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv", enabled = false)
+    public void uploadTestingDataFile() {
+        LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
+        map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
+        ResponseDocument response = restTemplate.postForObject( //
+                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getPLSRestAPIHostPort(), modelId,
+                        "SelfServiceScoring Test File.csv"), //
+                requestEntity, ResponseDocument.class);
+        sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
+        log.info(sourceFile.getName());
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = false)
+    public void testScoreTestingData() throws Exception {
+        System.out.println(String.format("%s/pls/scores/%s", getPLSRestAPIHostPort(), modelId));
+        applicationId = selfServiceModeling.getRestTemplate().postForObject(
+                String.format("%s/pls/scores/%s?fileName=%s", getPLSRestAPIHostPort(), modelId, sourceFile.getName()), //
+                null, String.class);
+        System.out.println(String.format("Score training data applicationId = %s", applicationId));
+        assertNotNull(applicationId);
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 60000, enabled = false)
+    public void testScoringTestDataJobIsListed() {
+        testJobIsListed();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 1800000, enabled = false)
+    public void pollScoringTestDataJob() {
+        poll();
+    }
+
+    @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = false)
+    public void downloadTestingDataScoreResultCsv() {
+        downloadCsv();
     }
 
     private void sleep(long msec) {

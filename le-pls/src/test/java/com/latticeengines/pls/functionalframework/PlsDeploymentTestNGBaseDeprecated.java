@@ -5,6 +5,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -14,6 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.security.exposed.Constants;
 
 public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDeprecated {
+
+    protected static final Log log = LogFactory.getLog(PlsDeploymentTestNGBaseDeprecated.class);
+
     @Value("${pls.test.deployment.api}")
     private String deployedHostPort;
 
