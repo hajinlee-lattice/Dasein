@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
-import com.sun.tools.classfile.Attributes;
 
 public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler {
 
