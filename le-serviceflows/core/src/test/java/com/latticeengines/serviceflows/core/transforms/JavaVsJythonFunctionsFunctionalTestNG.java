@@ -6,18 +6,30 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.input.BOMInputStream;
+import org.junit.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.jython.JythonEngine;
+import com.latticeengines.transform.exposed.RealTimeTransform;
+import com.latticeengines.transform.exposed.TransformId;
+import com.latticeengines.transform.exposed.TransformRetriever;
 
-public class JythonFunctionsUnitTestNG {
+@WebAppConfiguration
+@ContextConfiguration(locations = { "classpath:test-serviceflows-context.xml" })
+public class JavaVsJythonFunctionsFunctionalTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Boolean DEBUGGING_OUTPUT = Boolean.FALSE;
     private static final Boolean EXECUTION_DETAILS_OUTPUT = Boolean.TRUE;
@@ -25,6 +37,9 @@ public class JythonFunctionsUnitTestNG {
     private static final double FLOATING_POINT_PRECISION = 1.0e-15;
 
     private JythonEngine engine = new JythonEngine(null);
+
+    @Autowired
+    private TransformRetriever transformRetriever;
 
     @DataProvider(name = "functions")
     public Object[][] getFunctions() {
@@ -34,7 +49,7 @@ public class JythonFunctionsUnitTestNG {
         };
     }
 
-    @Test(groups = "unit", dataProvider = "functions")
+    @Test(groups = "functional", dataProvider = "functions")
     public void testFunctions(String moduleName, //
             String functionName, //
             Class<?> returnType, //
@@ -45,14 +60,16 @@ public class JythonFunctionsUnitTestNG {
         assertEquals(result, expectedResult);
     }
 
-    @SuppressWarnings("unused")
-    @Test(groups = "unit")
+    @Test(groups = "functional")
     public void testLegacyFunctionsWithDatasets() throws Exception {
         String testDataDSAPACMKTO = "src/test/resources/testdata_legacy_DS_APAC_MKTO.csv";
 
         String outputFileName = "delta_floating_point.csv";
         CSVPrinter output = null;
         CSVFormat outputCSVFormat = CSVFormat.DEFAULT.withRecordSeparator("\n");
+
+        int numberOfErrors = 0;
+        int maxNumberOfErrors = 5;
 
         try (InputStreamReader readerTestDataDSAPACMKTO = new InputStreamReader(new BOMInputStream(new FileInputStream(
                 testDataDSAPACMKTO))); FileWriter writer = new FileWriter(outputFileName)) {
@@ -76,11 +93,13 @@ public class JythonFunctionsUnitTestNG {
 
             for (CSVRecord record : CSVFormat.EXCEL.withHeader().parse(readerTestDataDSAPACMKTO)) {
 
+                if(i++ % 200 == 1)
+                    System.out.println(i);
+
                 long startReadTime = System.currentTimeMillis();
                 if (lastLoopEndTime > 0) {
                     totalReadTime += startReadTime - lastLoopEndTime;
                 }
-                i++;
 
                 String leadID = record.get("LeadID");
                 String email = record.get("Email");
@@ -117,9 +136,10 @@ public class JythonFunctionsUnitTestNG {
                 long attributeTime = System.currentTimeMillis();
                 totalAttTime = attributeTime - startReadTime;
 
+                String functionName = "std_visidb_ds_companyname_entropy";
                 Object resultCompanyEntropy = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
-                        "std_visidb_ds_companyname_entropy", "std_visidb_ds_companyname_entropy",
+                        functionName, functionName,
                         new String[] { company }, Double.class);
 
                 long fc1Time = System.currentTimeMillis();
@@ -127,12 +147,22 @@ public class JythonFunctionsUnitTestNG {
 
                 Boolean passesCompanyEntropy = passesDoubleValues(resultCompanyEntropy, dsCompanyEntropy);
                 assertEquals(passesCompanyEntropy, Boolean.TRUE);
+                Object value = this.applyJavaTransform(functionName, new String[] { company });
+                if(value != null && resultCompanyEntropy != null)
+                    Assert.assertTrue(Math.abs( (double)resultCompanyEntropy - (double)value) < 0.000001 );
+                else if(value != null && resultCompanyEntropy == null)
+                    Assert.assertTrue(false);
+                else if(resultCompanyEntropy != null && value == null)
+                    Assert.assertTrue(false);
 
+                functionName = "std_length";
                 Object resultTitleLength = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_length", "std_length", new String[] { title }, Integer.class);
 
                 Boolean passesTitleLength = passesIntegerValues(resultTitleLength, dsTitleLength);
                 assertEquals(passesTitleLength, Boolean.TRUE);
+                value = this.applyJavaTransform(functionName, new String[] { title });
+                assertEquals(resultTitleLength.toString(), value.toString());
 
                 Object resultCompanyLength = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_length", "std_length", new String[] { company }, Integer.class);
@@ -140,10 +170,13 @@ public class JythonFunctionsUnitTestNG {
                 Boolean passesCompanyLength = passesIntegerValues(resultCompanyLength, dsCompanyLength);
                 assertEquals(passesCompanyLength, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_pd_alexa_relatedlinks_count";
                 Object resultAlexaRelatedLinks = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_alexa_relatedlinks_count", "std_visidb_ds_pd_alexa_relatedlinks_count",
                         new String[] { alexaRelatedLinks }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { alexaRelatedLinks });
+                assertEquals(checkForEquality(resultAlexaRelatedLinks, value), Boolean.TRUE);
 
                 Boolean passesAlexaRelatedLinks = Boolean.FALSE;
                 if (emailDomain.equals("") || emailDomainIsPublic.equals("1")) {
@@ -164,10 +197,13 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesAlexaRelatedLinks, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_pd_modelaction_ordered";
                 Object resultModelAction = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_modelaction_ordered", "std_visidb_ds_pd_modelaction_ordered",
                         new String[] { modelAction }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { modelAction });
+                assertEquals(checkForEquality(resultModelAction, value), Boolean.TRUE);
 
                 Boolean passesModelAction = Boolean.FALSE;
                 if (emailDomain.equals("") || emailDomainIsPublic.equals("1")) {
@@ -188,10 +224,13 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesModelAction, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_pd_jobstrendstring_ordered";
                 Object resultJobsTrend = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_jobstrendstring_ordered", "std_visidb_ds_pd_jobstrendstring_ordered",
                         new String[] { jobsTrendString }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { jobsTrendString });
+                assertEquals(checkForEquality(resultJobsTrend, value), Boolean.TRUE);
 
                 Boolean passesJobsTrend = Boolean.FALSE;
                 if (emailDomain.equals("") || emailDomainIsPublic.equals("1")) {
@@ -212,10 +251,13 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesJobsTrend, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_pd_fundingstage_ordered";
                 Object resultFundingStage = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_pd_fundingstage_ordered", "std_visidb_ds_pd_fundingstage_ordered",
                         new String[] { fundingStage }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { fundingStage });
+                assertEquals(checkForEquality(resultFundingStage, value), Boolean.TRUE);
 
                 Boolean passesFundingStage = Boolean.FALSE;
                 if (emailDomain.equals("") || emailDomainIsPublic.equals("1")) {
@@ -236,22 +278,41 @@ public class JythonFunctionsUnitTestNG {
                 }
                 assertEquals(passesFundingStage, Boolean.TRUE);
 
+                functionName = "std_length";
                 Object resultDomainLength = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_length", "std_length", new String[] { emailDomain }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { emailDomain });
+                assertEquals(checkForEquality(resultDomainLength, value), Boolean.TRUE);
 
                 Boolean passesDomainLength = passesIntegerValues(resultDomainLength, dsDomainLength);
                 assertEquals(passesDomainLength, Boolean.TRUE);
 
+                functionName = "std_entropy";
                 Object resultPhoneEntropy = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_entropy", "std_entropy", new String[] { phone }, Double.class);
+                value = this.applyJavaTransform(functionName, new String[] { phone });
+                if(value != null && resultPhoneEntropy != null)
+                    Assert.assertTrue(Math.abs( (double)resultPhoneEntropy - (double)value) < 0.000001 );
+                else if(value != null && resultPhoneEntropy == null)
+                    Assert.assertTrue(false);
+                else if(resultPhoneEntropy != null && value == null)
+                    Assert.assertTrue(false);
 
                 Boolean passesPhoneEntropy = passesDoubleValues(resultPhoneEntropy, dsPhoneEntropy);
                 assertEquals(passesPhoneEntropy, Boolean.TRUE);
 
+                functionName = "std_visidb_alexa_monthssinceonline";
                 Object resultMonthsSinceOnline = engine.invoke(
                         "com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_alexa_monthssinceonline", "std_visidb_alexa_monthssinceonline",
                         new String[] { alexaOnlineSince }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { alexaOnlineSince });
+                if(value != null && resultMonthsSinceOnline != null)
+                    Assert.assertTrue(Math.abs( (int)resultMonthsSinceOnline - (int)value) < 2 );
+                else if(value != null && resultMonthsSinceOnline == null)
+                    Assert.assertTrue(false);
+                else if(resultMonthsSinceOnline != null && value == null)
+                    Assert.assertTrue(false);
 
                 Boolean passesMonthsSinceOnline = passesIntegerValues(resultMonthsSinceOnline, alexaMonthsSinceOnline);
                 //
@@ -266,44 +327,77 @@ public class JythonFunctionsUnitTestNG {
                 // }
                 // assertEquals(passesMonthsSinceOnline, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_firstname_sameas_lastname";
                 Object resultFirstLastName = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_firstname_sameas_lastname", "std_visidb_ds_firstname_sameas_lastname", //
                         new String[] { firstName, lastName }, Boolean.class);
+                value = this.applyJavaTransform(functionName, new String[] { firstName, lastName });
+                assertEquals(checkForEquality(resultFirstLastName, value), Boolean.TRUE);
 
                 Boolean passesFirstLastName = passesBooleanValues(resultFirstLastName, dsFirstLastName);
                 assertEquals(passesFirstLastName, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_title_level";
                 Object resultTitleLevel = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_title_level", "std_visidb_ds_title_level", //
                         new String[] { title }, Integer.class);
+                value = this.applyJavaTransform(functionName, new String[] { title });
+                if(!checkForEquality(resultTitleLevel, value)) {
+                    System.out.println("1: " + resultTitleLevel + " " + value + " " + title);
+                    numberOfErrors++;
+                }
 
                 Boolean passesTitleLevel = passesIntegerValues(resultTitleLevel, dsTitleLevel);
                 assertEquals(passesTitleLevel, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_title_istechrelated";
                 Object resultTitleIsTechRelated = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_title_istechrelated", "std_visidb_ds_title_istechrelated", //
                         new String[] { title }, Boolean.class);
+                value = this.applyJavaTransform(functionName, new String[] { title });
+                if(!checkForEquality(resultTitleIsTechRelated, value)) {
+                    System.out.println("2: " + resultTitleIsTechRelated + " " + value + " " + title);
+                    numberOfErrors++;
+                }
 
                 Boolean passesTitleIsTechRelated = passesBooleanValues(resultTitleIsTechRelated, dsTitleIsTechRelated);
                 assertEquals(passesTitleIsTechRelated, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_title_isacademic";
                 Object resultTitleIsAcademic = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_title_isacademic", "std_visidb_ds_title_isacademic", //
                         new String[] { title }, Boolean.class);
+                value = this.applyJavaTransform(functionName, new String[] { title });
+                if(!checkForEquality(resultTitleIsAcademic, value)) {
+                    System.out.println("3: " + resultTitleIsAcademic + " " + value + " " + title);
+                    numberOfErrors++;
+                }
 
                 Boolean passesTitleIsAcademic = passesBooleanValues(resultTitleIsAcademic, dsTitleIsAcademic);
                 assertEquals(passesTitleIsAcademic, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_industry_group";
                 Object resultIndustryGroup = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_industry_group", "std_visidb_ds_industry_group", //
                         new String[] { industry }, String.class);
+                value = this.applyJavaTransform(functionName, new String[] { industry });
+                if(!checkForEquality(resultIndustryGroup, value)) {
+                    System.out.println("4: " + resultIndustryGroup + " " + value + " " + industry);
+                    numberOfErrors++;
+                }
 
                 Boolean passesIndustryGroup = passesStringValues(resultIndustryGroup, dsIndustryGroup);
                 assertEquals(passesIndustryGroup, Boolean.TRUE);
 
+                functionName = "std_visidb_ds_spamindicator";
                 Object resultSpamIndicator = engine.invoke("com.latticeengines.serviceflows.core.transforms", //
                         "std_visidb_ds_spamindicator", "std_visidb_ds_spamindicator", //
                         new String[] { firstName, lastName, title, phone, company }, String.class);
+                value = this.applyJavaTransform(functionName, new String[] { firstName, lastName, title, phone, company });
+                if(!checkForEquality(resultSpamIndicator, value)) {
+                    System.out.println("5: " + resultSpamIndicator + " " + value + " " + firstName + " " + lastName + " " + title + " " + phone + " " + company);
+                    numberOfErrors++;
+                }
 
                 Boolean passesSpamIndicator = passesIntegerValues(resultSpamIndicator, dsSpamIndicator);
                 assertEquals(passesSpamIndicator, Boolean.TRUE);
@@ -342,6 +436,51 @@ public class JythonFunctionsUnitTestNG {
                         / (double) i));
                 System.out.println(String.format("Valid FundingStage Calculation: %f", (double) nValidFundingStage
                         / (double) i));
+            }
+
+            Assert.assertTrue("Java vs Jython transformation test failed. Unacceptable number of mismatches. ", numberOfErrors < maxNumberOfErrors);
+        }
+    }
+
+    private Object applyJavaTransform(String functionName, String[] values) {
+        String modelPath = "";
+        String buildVersion = null;
+        TransformId id = new TransformId(modelPath, functionName, buildVersion);
+        RealTimeTransform transform = transformRetriever.getTransform(id);
+
+        Map<String, Object> recordAsMap = new HashMap<>();
+        if(values.length == 1)
+            recordAsMap.put(functionName, values[0]);
+        else {
+            int i = 1;
+            for(String value:values)
+                recordAsMap.put("column" + i++, value);
+        }
+        Map<String, Object> argumentsAsMap = new HashMap<>();
+        if(values.length == 1)
+            argumentsAsMap.put("column", functionName);
+        else {
+            int i = 1;
+            for(String value:values)
+                argumentsAsMap.put("column" + i++, "column" + (i - 1));
+        }
+        return transform.transform(argumentsAsMap, recordAsMap);
+    }
+
+    private Boolean checkForEquality(Object value1, Object value2) {
+        if(value1 == null && value2 == null)
+            return true;
+        else {
+            try {
+                if(value1.toString().equals(value2.toString()))
+                   return value1.toString().equals(value2.toString());
+                else {
+                    System.out.println(value1 + " " + value2);
+                    return value1.toString().equals(value2.toString());
+                }
+            } catch(NullPointerException npe) {
+                System.out.println(value1 + " " + value2);
+                return false;
             }
         }
     }
