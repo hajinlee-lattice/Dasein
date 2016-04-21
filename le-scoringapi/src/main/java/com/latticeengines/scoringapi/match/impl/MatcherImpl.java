@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -166,7 +167,7 @@ public class MatcherImpl implements Matcher {
             Map<String, Object> record) {
         Object value = record.get(field);
 
-        if (value == null || Strings.isNullOrEmpty(String.valueOf(value))) {
+        if (StringUtils.objectIsNullOrEmptyString(value)) {
             return;
         }
         List<String> keyFields = keyMap.get(matchKey);

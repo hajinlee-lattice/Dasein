@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +20,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.python.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -156,7 +156,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         ModelSummary modelSummary = internalResourceRestApiProxy.getModelSummaryFromModelId(modelId, customerSpace);
         if (modelSummary == null) {
             throw new ScoringApiException(LedpCode.LEDP_31102, new String[] { modelId });
-        } else if (Strings.isNullOrEmpty(modelSummary.getEventTableName())) {
+        } else if (StringUtils.isBlank(modelSummary.getEventTableName())) {
             throw new LedpException(LedpCode.LEDP_31008, new String[] { modelId });
         }
         return modelSummary;
@@ -277,7 +277,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
      */
     private String getModelAppIdSubfolder(CustomerSpace customerSpace, ModelSummary modelSummary) {
         String appId = modelSummary.getApplicationId().substring("application_".length());
-        if (!Strings.isNullOrEmpty(appId)) {
+        if (!StringUtils.isBlank(appId)) {
             return appId;
         }
 
@@ -304,7 +304,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+            if (!StringUtils.isBlank(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
@@ -319,7 +319,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+            if (!StringUtils.isBlank(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + "metadata-"
                         + DATA_COMPOSITION_FILENAME);
             }
@@ -400,7 +400,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         String content = null;
         try {
             content = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+            if (!StringUtils.isBlank(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + SCORE_DERIVATION_FILENAME);
             }
         } catch (IOException e) {
@@ -419,7 +419,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             FileSystem fs = FileSystem.newInstance(yarnConfiguration);
             is = fs.open(new Path(path));
             modelEvaluator = new ModelEvaluator(is);
-            if (!Strings.isNullOrEmpty(localPathToPersist)) {
+            if (!StringUtils.isBlank(localPathToPersist)) {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + PMML_FILENAME);
             }
         } catch (IOException e) {
@@ -456,7 +456,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
         if (modelJsonHdfsPath.size() == 1) {
             try {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localModelJsonCacheDir);
-                if (!Strings.isNullOrEmpty(localPathToPersist)) {
+                if (!StringUtils.isBlank(localPathToPersist)) {
                     HdfsUtils.copyHdfsToLocal(yarnConfiguration, modelJsonHdfsPath.get(0), localPathToPersist
                             + MODEL_JSON);
                 }

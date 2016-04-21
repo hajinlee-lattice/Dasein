@@ -1,6 +1,5 @@
 package com.latticeengines.common.exposed.util;
 
-import com.google.common.base.Strings;
 
 public class StringUtils {
 
@@ -9,7 +8,7 @@ public class StringUtils {
             return true;
         } else {
             String value = String.valueOf(obj);
-            return Strings.isNullOrEmpty(value);
+            return org.apache.commons.lang.StringUtils.isBlank(value);
         }
     }
 

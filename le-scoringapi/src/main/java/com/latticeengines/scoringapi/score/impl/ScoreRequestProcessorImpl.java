@@ -74,7 +74,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
     @Override
     public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug) {
         split("requestPreparation");
-        if (Strings.isNullOrEmpty(request.getModelId())) {
+        if (org.apache.commons.lang.StringUtils.isBlank(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
         }
 
@@ -119,7 +119,7 @@ public class ScoreRequestProcessorImpl implements ScoreRequestProcessor {
 
     private String getIdIfAvailable(InterpretedFields interpretedFields, Map<String, Object> record) {
         String value = "";
-        if (!Strings.isNullOrEmpty(interpretedFields.getRecordId())) {
+        if (!org.apache.commons.lang.StringUtils.isBlank(interpretedFields.getRecordId())) {
             Object id = record.get(interpretedFields.getRecordId());
             if (!StringUtils.objectIsNullOrEmptyString(id)) {
                 value = String.valueOf(id);
