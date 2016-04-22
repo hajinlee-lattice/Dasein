@@ -17,6 +17,8 @@ import com.latticeengines.propdata.core.source.Source;
 @Component("hdfsPathBuilder")
 public class HdfsPathBuilder {
 
+    public static final String SUCCESS_FILE = "_SUCCESS";
+
     private static final String MATCH_PREFIX = "match_";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     private static final String UTC = "UTC";
