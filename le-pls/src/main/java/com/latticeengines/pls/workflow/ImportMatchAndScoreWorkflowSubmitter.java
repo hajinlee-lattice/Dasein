@@ -94,7 +94,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .outputFileFormat(ExportFormat.CSV) //
-                .outputFilename("/Export_" + DateTime.now().getMillis() + ".csv") //
+                .outputFilename("/Export_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
                 .build();
 
