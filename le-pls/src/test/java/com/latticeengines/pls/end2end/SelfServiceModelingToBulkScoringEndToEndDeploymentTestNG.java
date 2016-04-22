@@ -3,9 +3,13 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.List;
+
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -67,6 +71,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s/training", getPLSRestAPIHostPort(), modelId), //
                 null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
         assertNotNull(applicationId);
     }
@@ -139,7 +144,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
-        ResponseDocument response = restTemplate.postForObject( //
+        ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getPLSRestAPIHostPort(), modelId,
                         "SelfServiceScoring Test File.csv"), //
                 requestEntity, ResponseDocument.class);
@@ -153,6 +158,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
                 String.format("%s/pls/scores/%s?fileName=%s", getPLSRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
+        applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
         assertNotNull(applicationId);
     }
