@@ -103,8 +103,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         strategy.calculate();
         if (!strategy.isMetadataFullyDefined()) {
             List<ColumnTypeMapping> unknown = strategy.getUnknownColumns();
-            strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(),
-                    sourceFile.getSchemaInterpretation(), unknown, yarnConfiguration);
+            strategy = new UserDefinedMetadataResolutionStrategy(sourceFile.getPath(), schemaInterpretation, unknown,
+                    yarnConfiguration);
             strategy.calculate();
         }
 
