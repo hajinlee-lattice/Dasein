@@ -8,7 +8,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -46,6 +49,6 @@ public class Oauth2Resource {
     public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId) {
         log.info("Generating access token for tenant " + tenantId);
         String token = oauth2Service.createOAuth2AccessToken(tenantId).getValue();
-        return "{\"token\":\"" + token + "\"}";
+        return JsonUtils.serialize(ImmutableMap.<String, String> of("token", token));
     }
 }

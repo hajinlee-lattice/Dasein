@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.pls.service.ScoringJobService;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -28,13 +30,15 @@ public class ScoreResource {
     public String score( //
             @PathVariable String modelId, //
             @RequestParam(value = "fileName") String fileName) {
-        return "{\"applicationId\":\"" + scoringJobService.scoreTestingData(modelId, fileName) + "\"}";
+        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+                scoringJobService.scoreTestingData(modelId, fileName)));
     }
 
     @RequestMapping(value = "/{modelId}/training", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Score the training data for the provided model.")
     public String scoreTrainingData(@PathVariable String modelId) {
-        return "{\"applicationId\":\"" + scoringJobService.scoreTrainingData(modelId) + "\"}";
+        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+                scoringJobService.scoreTrainingData(modelId)));
     }
 }
