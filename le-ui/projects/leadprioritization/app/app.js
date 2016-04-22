@@ -251,7 +251,7 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, BrowserStorageUtili
         request: function(config) {
             config.headers = config.headers || {};
             
-            if (BrowserStorageUtility.getTokenDocument()) {
+            if (config.headers.Authorization == null && BrowserStorageUtility.getTokenDocument()) {
                 config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
             }
             

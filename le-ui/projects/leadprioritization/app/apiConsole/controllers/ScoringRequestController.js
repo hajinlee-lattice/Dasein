@@ -12,6 +12,8 @@ angular.module('pd.apiconsole.ScoringRequestController', [
             $scope.ResourceUtility = ResourceUtility;
             initValues();
 
+            var displayOrder = ["Email", "CompanyName", "State", "Country", "Id", "FirstName", "LastName", "PhoneNumber", "City", "State", "Title", "Industry"];
+
             $scope.modelChanged = function ($event) {
                 if ($event != null) {
                     $event.preventDefault();
@@ -60,6 +62,13 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 });
             }
 
+            function transformFieldsToDisplayReadyFields(fields) {
+                for (var i = 0; i < fields.length; i++) {
+
+                }
+
+            }
+
             function handleGetModelFieldsError(result) {
                 $scope.showFields = false;
                 $scope.showFieldsLoadingError = true;
@@ -77,18 +86,6 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 }
             };
 
-            $scope.randomizeClicked = function ($event) {
-                if ($event != null) {
-                    $event.preventDefault();
-                }
-                // TODO: randomize work
-                $scope.scoringRequested = true;
-                $scope.scoringRequestError = 'Randomize was not completed.';
-                $scope.score = null;
-                $scope.jsonData = null;
-                $scope.timeElapsed = null;
-            };
-
             $scope.sentClicked = function ($event) {
                 $scope.scoringRequested = true;
                 $scope.scoreRecordLoading = true;
@@ -100,7 +97,11 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 var scoreRequest = { modelId: $scope.modelId, record: {} };
                 for (var i = 0; i < $scope.fields.length; i++) {
                     if ($scope.fields[i].value != null) {
-                        scoreRequest.record[$scope.fields[i].name] = $scope.fields[i].value;
+                        if ($scope.fields[i].fieldType.toUpperCase() == 'FLOAT') {
+                            scoreRequest.record[$scope.fields[i].name] = Number($scope.fields[i].value);
+                        } else {
+                            scoreRequest.record[$scope.fields[i].name] = $scope.fields[i].value;
+                        }
                     }
                 }
                 var token = BrowserStorageUtility.getOAuthAccessToken();
@@ -128,7 +129,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                         $scope.jsonData = JSON.stringify(result.ResultObj, null, "    ");
                     }
                     if (result.Success) {
-                        // TODO: init score
+                        $scope.score = result.ResultObj.score;
                     } else {
                         $scope.scoringRequestError = result.ResultErrors;
                     }
