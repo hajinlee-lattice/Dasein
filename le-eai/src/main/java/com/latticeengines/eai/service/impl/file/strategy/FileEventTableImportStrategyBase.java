@@ -233,7 +233,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
                 throw new LedpException(LedpCode.LEDP_17002, new String[] { attr.getName() });
             }
         }
-        if (table.getAttribute(InterfaceName.InternalId) == null) {
+        if (table.getAttribute(InterfaceName.InternalId.name()) == null) {
             addInternalId(table);
         }
         return table;
