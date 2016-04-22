@@ -62,6 +62,10 @@ def updateContents(environment, filename, conents, dictionary, file):
                 line = pair[0] + '=' + pair[1] \
                     .replace('${OUTSIDE_TOMCAT}', dictionary['%s.outside.tomcat' % environment])
                 print filename + ' : ' + environment + " : " + line.replace('\n', '')
+            if '${API_TOMCAT}' in pair[1]:
+                line = pair[0] + '=' + pair[1] \
+                    .replace('${API_TOMCAT}', dictionary['%s.api.tomcat' % environment])
+                print filename + ' : ' + environment + " : " + line.replace('\n', '')
         file.write(line)
 
 def loadContents(conents):
