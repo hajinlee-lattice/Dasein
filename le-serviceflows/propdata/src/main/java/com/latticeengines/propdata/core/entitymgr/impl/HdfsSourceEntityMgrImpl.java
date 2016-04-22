@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
@@ -49,7 +50,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         int retries = 0;
         while (retries++ < 3) {
             try {
-                return HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
+                String version = HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile);
+                version = version.replace("\n", "");
+                return StringUtils.trim(version);
             } catch (Exception e) {
                 sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }

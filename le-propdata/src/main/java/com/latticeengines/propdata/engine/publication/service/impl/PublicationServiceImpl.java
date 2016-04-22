@@ -54,8 +54,8 @@ public class PublicationServiceImpl implements PublicationService {
         if (StringUtils.isNotEmpty(hdfsPod)) {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
-        publishAll(hdfsPod);
-        return scanForNewWorkFlow(hdfsPod);
+        publishAll();
+        return scanForNewWorkFlow();
     }
 
     @Override
@@ -72,22 +72,19 @@ public class PublicationServiceImpl implements PublicationService {
         return progress;
     }
 
-    private void publishAll(String hdfsPod) {
-        if (StringUtils.isNotEmpty(hdfsPod)) {
-            HdfsPodContext.changeHdfsPodId(hdfsPod);
-        }
+    private void publishAll() {
         for (Publication publication : publicationEntityMgr.findAll()) {
             if (publication.isSchedularEnabled()) {
                 try {
                     publicationProgressService.kickoffNewProgress(publication, PropDataConstants.SCAN_SUBMITTER);
                 } catch (Exception e) {
-                    log.error("Failed to trigger publication " + publication.getPublicationName());
+                    log.error("Failed to trigger publication " + publication.getPublicationName(), e);
                 }
             }
         }
     }
 
-    private List<PublicationProgress> scanForNewWorkFlow(String hdfsPod) {
+    private List<PublicationProgress> scanForNewWorkFlow() {
         List<PublicationProgress> progresses = new ArrayList<>();
         Boolean serviceTenantBootstrapped = false;
         for (PublicationProgress progress : publicationProgressService.scanNonTerminalProgresses()) {
@@ -99,7 +96,7 @@ public class PublicationServiceImpl implements PublicationService {
                 Publication publication = progress.getPublication();
                 Source source = sourceService.findBySourceName(publication.getSourceName());
                 String avroDir = hdfsPathBuilder.constructSnapshotDir(source, progress.getSourceVersion()).toString();
-                ApplicationId applicationId = submitWorkflow(progress, avroDir, hdfsPod);
+                ApplicationId applicationId = submitWorkflow(progress, avroDir, HdfsPodContext.getHdfsPodId());
                 PublicationProgressUpdater updater = publicationProgressService.update(progress);
                 if (ProgressStatus.FAILED.equals(progress.getStatus())) {
                     updater.retry();

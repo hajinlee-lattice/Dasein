@@ -97,9 +97,16 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         sqlConfiguration = configurationParser.parseSqlAlias(sqlConfiguration);
 
         JdbcTemplate jdbcTemplate = configurationParser.getJdbcTemplate(sqlConfiguration);
-        String preSql = configurationParser.prePublishSql(sqlConfiguration, sourceName);
-        log.info("Executing pre publish sql: " + preSql);
-        jdbcTemplate.execute(preSql);
+        switch (sqlConfiguration.getPublicationStrategy()) {
+            case VERSIONED:
+            case REPLACE:
+                String preSql = configurationParser.prePublishSql(sqlConfiguration, sourceName);
+                log.info("Executing pre publish sql: " + preSql);
+                jdbcTemplate.execute(preSql);
+                break;
+            case APPEND:
+                break;
+        }
 
         SqoopExporter exporter = configurationParser.constructSqoopExporter(sqlConfiguration,
                 getConfiguration().getAvroDir());
