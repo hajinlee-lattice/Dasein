@@ -125,7 +125,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         log.info("Executing post publish sql: " + postSql);
         jdbcTemplate.execute(postSql);
         Long count = configurationParser.countPublishedTable(sqlConfiguration, jdbcTemplate);
-        progress = progressService.update(progress).progress(0.97f).rowsPublished(count).status(ProgressStatus.FINISHED)
+        progress = progressService.update(progress).progress(1.0f).rowsPublished(count).status(ProgressStatus.FINISHED)
                 .commit();
     }
 
