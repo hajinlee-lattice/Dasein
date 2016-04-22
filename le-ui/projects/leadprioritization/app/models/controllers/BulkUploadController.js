@@ -28,7 +28,8 @@ angular.module('mainApp.create.csvBulkUpload', [
                 url: '/pls/scores/fileuploads',
                 params: {
                     modelId: modelId,
-                    displayName: $scope.csvFileName
+                    displayName: $scope.csvFileName,
+                    compressed: false
                 },
                 progress: function(e) {
                     if (e.total / 1024 > 486000) {

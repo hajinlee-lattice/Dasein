@@ -86,7 +86,7 @@ angular.module('mainApp.create.csvImport', [
                 var convertedData = new Uint8Array(FR.result);
 
                 // Zipping Uint8Array to Uint8Array
-                var zippedResult = pako.gzip(convertedData, { to : "Uint8Array" });
+                var zippedResult = pako.gzip(convertedData, { to : "string" });
 
                 // Need to convert back Uint8Array to ArrayBuffer for blob
                 var convertedZipped = zippedResult.buffer;
@@ -96,9 +96,9 @@ angular.module('mainApp.create.csvImport', [
 
                 // Creating a blob file with array of ArrayBuffer
                 var oMyBlob = new Blob(arrayBlob); // the blob (we need to set file.type if not it defaults to application/octet-stream since it's a gzip, up to you)
-                formData.append('file', oMyBlob); // we need to gzip the data
+                formData.append('file', oMyBlob, { type: 'application/zip' }); // we need to gzip the data
                 xhr.send(formData);
-                console.log('filereader onload send', formData);
+                console.log('filereader onload send', formData, name || params.displayName);
             };
 
             FR.readAsArrayBuffer(options.file);
@@ -247,8 +247,7 @@ angular.module('mainApp.create.csvImport', [
         $http({
             method: 'POST',
             url: '/pls/scores/' + modelId,
-            data: {
-                modelId: modelId,
+            params: {
                 fileName: fileName
             },
             headers: { 'Content-Type': 'application/json' }
@@ -317,7 +316,7 @@ angular.module('mainApp.create.csvImport', [
             $scope.importErrorMsg = "";
             $scope.importing = true;
 
-            var fileType = $scope.accountLeadCheck ? 'SalesforceAccount' : 'SalesforceLead',
+            var fileType = $scope.accountLeadCheck ? 'SalesforceLead' : 'SalesforceAccount',
                 startTime = new Date();
             
             this.cancelDeferred = cancelDeferred = $q.defer();

@@ -143,6 +143,7 @@ USER_MANAGEMENT_GET_USERS_ERROR=We are unable to access users at this time. Plea
 UNEXPECTED_SERVICE_ERROR=Unknown error occurred.
 GENERAL_LOADING=Loading data ...
 GENERAL_SAVING=Saving data ...
+SERVICE_ERROR_MODAL_TITLE=Remote Service Warning
 MODEL_LIST_TITLE=All Models
 MODEL_LIST_CREATION_HISTORY=Model Creation History
 MODEL_LIST_NO_MODELs=There are currently no models.

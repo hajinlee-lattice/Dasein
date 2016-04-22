@@ -150,6 +150,13 @@ span.chevron-content.chevron-content-text {
             color: rgb(233, 33, 45);
         }
     }
+
+    span.job-status-username {
+        padding-right: 2em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
 }
 
 /*adding the arrows for the breadcrumbs using rotated pseudo elements*/
