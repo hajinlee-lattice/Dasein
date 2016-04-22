@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,10 +17,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -109,6 +114,13 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         }
 
         Table table = strategy.getMetadata();
+        Iterables.removeIf(table.getAttributes(), new Predicate<Attribute>() {
+            @Override
+            public boolean apply(@Nullable Attribute attr) {
+                return attr.getName().equals(InterfaceName.InternalId.name());
+            }
+        });
+
         table.setName("SourceFile_" + sourceFile.getName().replace(".", "_"));
         Tenant tenant = MultiTenantContext.getTenant();
         metadataProxy.createTable(tenant.getId(), table.getName(), table);
