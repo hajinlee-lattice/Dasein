@@ -40,5 +40,5 @@ public class OrbIntelligenceRefreshServiceImplTestNG extends MostRecentServiceIm
     }
 
     @Override
-    protected Integer getExpectedRows() { return 142; }
+    protected Integer getExpectedRows() { return 400; }
 }

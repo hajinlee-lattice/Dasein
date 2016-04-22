@@ -25,7 +25,7 @@ public class OrbIntelligence implements CollectedSource {
 
     @Override
     public String getCollectedTableName() {
-        return "OrbIntelligenceV2";
+        return "OrbIntelligence";
     }
 
     @Override
@@ -35,7 +35,7 @@ public class OrbIntelligence implements CollectedSource {
 
     @Override
     public String[] getPrimaryKey() {
-        return new String[] { "domain", "address_city", "address_state", "address_country", "LE_Last_Upload_Date" };
+        return new String[] { "orb_num", "LE_Last_Upload_Date" };
     }
 
     @Override

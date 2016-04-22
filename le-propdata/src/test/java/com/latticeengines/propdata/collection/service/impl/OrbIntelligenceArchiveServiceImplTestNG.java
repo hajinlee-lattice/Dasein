@@ -36,13 +36,13 @@ public class OrbIntelligenceArchiveServiceImplTestNG extends CollectionArchiveSe
     Date[] getDates() {
         Date[] dates = new Date[3];
 
-        calendar.set(2015, Calendar.AUGUST, 31);
+        calendar.set(2016, Calendar.MARCH, 1);
         dates[0] = calendar.getTime();
 
-        calendar.set(2015, Calendar.OCTOBER, 1);
+        calendar.set(2016, Calendar.APRIL, 1);
         dates[1] = calendar.getTime();
 
-        calendar.set(2015, Calendar.NOVEMBER, 2);
+        calendar.set(2016, Calendar.MAY, 1);
         dates[2] = calendar.getTime();
 
         return dates;
