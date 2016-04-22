@@ -1,11 +1,13 @@
 package com.latticeengines.leadprioritization.workflow;
 
 import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.propdata.MatchJoinType;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
@@ -104,6 +106,11 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
 
         public Builder internalResourcePort(String internalResourceHostPort) {
             scoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
+        public Builder matchJoinType(MatchJoinType matchJoinType) {
+            scoreWorkflowConfigurationBuilder.matchJoinType(matchJoinType);
             return this;
         }
 

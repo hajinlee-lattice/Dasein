@@ -21,6 +21,7 @@ public class CommandParameter implements HasPid {
 
     public static final String KEY_INTERPRETED_DOMAIN = "InterpretedDomain";
     public static final String VALUE_YES = "Yes";
+    public static final String JOIN_TYPE = "JoinType";
 
     @Id
     @Column(name = "MatchFramework_CommandParameter_ID", unique = true, nullable = false)

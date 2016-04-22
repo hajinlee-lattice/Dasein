@@ -51,6 +51,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
 
         Map<String, String> commandParameters = new HashMap<>();
         commandParameters.put(CommandParameter.KEY_INTERPRETED_DOMAIN, CommandParameter.VALUE_YES);
+        commandParameters.put(CommandParameter.JOIN_TYPE, configuration.getMatchJoinType().name());
         matchCommand.setParameters(commandParameters);
 
         Commands response = matchCommandProxy.createMatchCommand(matchCommand, configuration.getMatchClient());

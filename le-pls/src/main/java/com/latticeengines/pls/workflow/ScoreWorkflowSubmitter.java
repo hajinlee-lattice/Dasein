@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.propdata.MatchJoinType;
 import com.latticeengines.leadprioritization.workflow.ScoreWorkflowConfiguration;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -68,6 +69,7 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .internalResourcePort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .inputTableName(tableToScore) //
+                .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .outputFileFormat(ExportFormat.CSV) //
