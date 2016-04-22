@@ -146,7 +146,6 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
             sql += sourceColumnService.createTableSql(source, stageTable);
             break;
         case APPEND:
-            sql = sourceColumnService.createTableSql(source, tableName);
             break;
         }
 
@@ -166,7 +165,6 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
             sql += swapTableNames(stageTable, tableName);
             return sql;
         case APPEND:
-            return sourceColumnService.createIndicesSql(source, tableName);
         default:
             return "";
         }

@@ -97,6 +97,7 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
         sqlConfiguration = configurationParser.parseSqlAlias(sqlConfiguration);
 
         JdbcTemplate jdbcTemplate = configurationParser.getJdbcTemplate(sqlConfiguration);
+        log.info("Publication Strategy = " + sqlConfiguration.getPublicationStrategy());
         switch (sqlConfiguration.getPublicationStrategy()) {
             case VERSIONED:
             case REPLACE:
