@@ -79,7 +79,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceDisplayName);
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importAndScoreWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "importMatchAndScoreWorkflow");
 
         ImportMatchAndScoreWorkflowConfiguration importMatchAndScoreWorkflowConfig = new ImportMatchAndScoreWorkflowConfiguration.Builder()
                 .customer(MultiTenantContext.getCustomerSpace()) //
