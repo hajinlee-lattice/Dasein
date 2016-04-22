@@ -26,7 +26,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
         private ScoreWorkflowConfiguration.Builder scoreWorkflowConfigurationBuilder = new ScoreWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importAndScoreWorkflow", customerSpace, "importAndScoreWorkflow");
+            configuration.setContainerConfiguration("importMatchAndScoreWorkflow", customerSpace, "importAndScoreWorkflow");
             importDataConfiguration.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             scoreWorkflowConfigurationBuilder.customer(customerSpace);
