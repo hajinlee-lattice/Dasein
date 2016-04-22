@@ -25,6 +25,7 @@ angular
                 switch ($scope.jobType.toLowerCase()) {
                     case "scoreworkflow": $scope.job.displayName = "Batch Scoring"; break;
                     case "placeholder": $scope.job.displayName = "Pending..."; break;
+                    case "importmatchandscoreworkflow": $scope.job.displayName = "Bulk Scoring"; break;
                     default: $scope.job.displayName = "Create Model";
                 }
 
