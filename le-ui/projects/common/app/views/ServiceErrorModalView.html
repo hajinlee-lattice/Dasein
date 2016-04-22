@@ -5,7 +5,7 @@
             <h4 class="modal-title">{{ResourceUtility.getString('SERVICE_ERROR_MODAL_TITLE')}}</h4>
         </div>
         <div class="modal-body">
-            {{ errorMsg }}
+            {{ errorCode }}: {{ errorMsg }}
         </div>
         <div class="modal-footer">
             <button class="button orange-button ng-binding" type="button" data-dismiss="modal" aria-hidden="true">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
