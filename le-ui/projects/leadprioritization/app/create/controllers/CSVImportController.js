@@ -365,7 +365,7 @@ angular.module('mainApp.create.csvImport', [
                     var fileName = result.Result.name,
                         metaData = result.Result,
                         displayName = $scope.modelDisplayName,
-                        modelName = StringUtility.SubstitueAllSpecialCharsWithDashes($scope.modelDisplayName);
+                        modelName = StringUtility.SubstituteAllSpecialCharsWithDashes($scope.modelDisplayName);
 
                     metaData.modelName = modelName;
                     metaData.displayName = displayName;
