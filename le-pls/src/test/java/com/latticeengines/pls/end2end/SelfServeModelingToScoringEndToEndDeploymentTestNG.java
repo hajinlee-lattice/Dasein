@@ -17,10 +17,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 @Component
-public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(SelfServeModelingToScoringEndToEndDeploymentTestNG.class);
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
@@ -36,7 +36,6 @@ public class SelfServeModelingToScoringEndToEndDeploymentTestNG extends PlsDeplo
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
         selfServiceModeling.setup();
-        switchToSuperAdmin();
         tenant = selfServiceModeling.getTenant();
         log.info(tenant);
     }

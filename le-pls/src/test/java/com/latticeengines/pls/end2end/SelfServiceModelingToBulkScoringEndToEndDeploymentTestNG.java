@@ -10,6 +10,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -33,13 +35,14 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
-public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
+    private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -67,9 +70,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     @Test(groups = "deployment.lp")
     public void testScoreTrainingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s/training", getPLSRestAPIHostPort(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s/training", getPLSRestAPIHostPort(), modelId), //
+                String.format("%s/pls/scores/%s/training", getRestAPIHostPort(), modelId), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
@@ -82,7 +85,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         while (true) {
             @SuppressWarnings("unchecked")
             List<Object> raw = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/scores/jobs/%s", getPLSRestAPIHostPort(), modelId), List.class);
+                    String.format("%s/pls/scores/jobs/%s", getRestAPIHostPort(), modelId), List.class);
             List<Job> jobs = JsonUtils.convertList(raw, Job.class);
             any = Iterables.any(jobs, new Predicate<Job>() {
 
@@ -108,7 +111,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         JobStatus terminal;
         while (true) {
             Job job = selfServiceModeling.getRestTemplate().getForObject(
-                    String.format("%s/pls/jobs/yarnapps/%s", getPLSRestAPIHostPort(), applicationId), Job.class);
+                    String.format("%s/pls/jobs/yarnapps/%s", getRestAPIHostPort(), applicationId), Job.class);
             assertNotNull(job);
             jobId = job.getId();
             if (Job.TERMINAL_JOB_STATUS.contains(job.getJobStatus())) {
@@ -128,7 +131,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         headers.setAccept(Arrays.asList(MediaType.ALL));
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = selfServiceModeling.getRestTemplate().exchange(
-                String.format("%s/pls/scores/jobs/%d/results", getPLSRestAPIHostPort(), jobId), HttpMethod.GET, entity,
+                String.format("%s/pls/scores/jobs/%d/results", getRestAPIHostPort(), jobId), HttpMethod.GET, entity,
                 byte[].class);
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
@@ -145,7 +148,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
-                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getPLSRestAPIHostPort(), modelId,
+                String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
                         "SelfServiceScoring Test File.csv"), //
                 requestEntity, ResponseDocument.class);
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
@@ -154,9 +157,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = false)
     public void testScoreTestingData() throws Exception {
-        System.out.println(String.format("%s/pls/scores/%s", getPLSRestAPIHostPort(), modelId));
+        System.out.println(String.format("%s/pls/scores/%s", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
-                String.format("%s/pls/scores/%s?fileName=%s", getPLSRestAPIHostPort(), modelId, sourceFile.getName()), //
+                String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
