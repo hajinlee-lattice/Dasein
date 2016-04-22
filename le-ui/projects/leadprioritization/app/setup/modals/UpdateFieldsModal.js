@@ -40,7 +40,7 @@ angular.module('mainApp.setup.modals.UpdateFieldsModal', [
             $event.preventDefault();
         }
 
-        var modelName = StringUtility.SubstitueAllSpecialCharsWithDashes($scope.modelDisplayName);
+        var modelName = StringUtility.SubstituteAllSpecialCharsWithDashes($scope.modelDisplayName);
 
         if ($scope.updateClicked) { return; }
         $scope.cloneError = false;

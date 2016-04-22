@@ -18,8 +18,13 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
         return parts.join(".");
     };
 
-    this.SubstitueAllSpecialCharsWithDashes = function (stringToChange) {
+    this.SubstituteAllSpecialCharsWithDashes = function (stringToChange) {
         stringToChange = stringToChange.trim();
         return stringToChange.replace(/[^a-zA-Z0-9]/g, '-');
+    };
+
+    this.SubstituteAllSpecialCharsWithSpaces = function(stringToChange) {
+        stringToChange = stringToChange.trim();
+        return stringToChange.replace(/[^a-zA-Z0-9]/g, ' ');
     };
 });
