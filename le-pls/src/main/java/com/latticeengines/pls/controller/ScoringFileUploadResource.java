@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
+import com.latticeengines.pls.service.SourceFileService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -44,6 +45,9 @@ public class ScoringFileUploadResource {
 
     @Autowired
     private ScoringFileMetadataService scoringFileMetadataService;
+
+    @Autowired
+    private SourceFileService sourceFileService;
 
     @Autowired
     private ModelMetadataService modelMetadataService;
@@ -79,6 +83,8 @@ public class ScoringFileUploadResource {
 
             Table metadataTable = scoringFileMetadataService.registerMetadataTable(sourceFile, modelId);
             sourceFile.setTableName(metadataTable.getName());
+
+            sourceFileService.update(sourceFile);
             return sourceFile;
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
