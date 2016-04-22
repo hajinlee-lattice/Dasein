@@ -33,7 +33,7 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     public void setup() throws Exception {
     }
 
-    @Test(groups = "deployment.lp", enabled = true)
+    @Test(groups = "deployment.lp", enabled = false)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
         SSLUtils.turnOffSslChecking();
         String modelId = "ms__bed30518-9c78-4d5d-bd15-dfb74a8a4f93-SelfServ";
