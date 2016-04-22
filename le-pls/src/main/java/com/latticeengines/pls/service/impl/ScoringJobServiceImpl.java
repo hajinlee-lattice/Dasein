@@ -65,7 +65,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
 
     @Override
     public String scoreTestingData(String modelId, String fileName) {
-        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName, "Testing Data").toString();
+        return importMatchAndScoreWorkflowSubmitter.submit(modelId, fileName).toString();
     }
 
     @Override

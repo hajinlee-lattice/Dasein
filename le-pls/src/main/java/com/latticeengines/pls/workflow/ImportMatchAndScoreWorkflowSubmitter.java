@@ -43,7 +43,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
     @Autowired
     private ModelSummaryService modelSummaryService;
 
-    public ApplicationId submit(String modelId, String fileName, String sourceDisplayName) {
+    public ApplicationId submit(String modelId, String fileName) {
         SourceFile sourceFile = sourceFileService.findByName(fileName);
 
         if (sourceFile == null) {
@@ -62,7 +62,7 @@ public class ImportMatchAndScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18081, new String[] { sourceFile.getDisplayName() });
         }
 
-        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceDisplayName);
+        WorkflowConfiguration configuration = generateConfiguration(modelId, sourceFile, sourceFile.getDisplayName());
 
         log.info(String
                 .format("Submitting testing data score workflow for modelId %s and tableToScore %s for customer %s and source %s",
