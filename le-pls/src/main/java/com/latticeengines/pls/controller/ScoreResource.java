@@ -28,13 +28,13 @@ public class ScoreResource {
     public String score( //
             @PathVariable String modelId, //
             @RequestParam(value = "fileName") String fileName) {
-        return scoringJobService.scoreTestingData(modelId, fileName);
+        return "{\"applicationId\":\"" + scoringJobService.scoreTestingData(modelId, fileName) + "\"}";
     }
 
     @RequestMapping(value = "/{modelId}/training", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Score the training data for the provided model.")
     public String scoreTrainingData(@PathVariable String modelId) {
-        return scoringJobService.scoreTrainingData(modelId);
+        return "{\"applicationId\":\"" + scoringJobService.scoreTrainingData(modelId) + "\"}";
     }
 }
