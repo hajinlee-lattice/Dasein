@@ -1,7 +1,6 @@
 package com.latticeengines.leadprioritization.workflow;
 
 import java.util.Map;
-
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -26,7 +25,8 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
         private ScoreWorkflowConfiguration.Builder scoreWorkflowConfigurationBuilder = new ScoreWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importMatchAndScoreWorkflow", customerSpace, "importMatchAndScoreWorkflow");
+            configuration.setContainerConfiguration("importMatchAndScoreWorkflow", customerSpace,
+                    "importMatchAndScoreWorkflow");
             importDataConfiguration.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             scoreWorkflowConfigurationBuilder.customer(customerSpace);
@@ -102,11 +102,17 @@ public class ImportMatchAndScoreWorkflowConfiguration extends WorkflowConfigurat
             return this;
         }
 
+        public Builder internalResourcePort(String internalResourceHostPort) {
+            scoreWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public ImportMatchAndScoreWorkflowConfiguration build() {
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);
             configuration.add(scoreWorkflowConfigurationBuilder.build());
             return configuration;
         }
+
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.leadprioritization.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,6 +24,9 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
     @Autowired
     private ScoreWorkflow scoreWorkflow;
 
+    @Autowired
+    private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
+
     @Bean
     public Job importMatchAndScoreWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -34,6 +38,7 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(importData) //
                 .next(createTableImportReport) //
                 .next(scoreWorkflow)//
+                .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
     }
 
