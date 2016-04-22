@@ -75,6 +75,13 @@ public class ModelEvaluator {
                  */
                 value = 0.0d;
             }
+            if(value instanceof Boolean) {
+                Boolean booleanValue = ((Boolean) value).booleanValue();
+                if(booleanValue)
+                    value = new Double("1.0");
+                else
+                    value = new Double("0.0");
+            }
             if (value instanceof BigInteger) {
                 value = ((BigInteger) value).doubleValue();
             }
