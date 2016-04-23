@@ -15,7 +15,7 @@ public class StdEntropy implements RealTimeTransform {
     public Object transform(Map<String, Object> arguments,
             Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        String n = (String) record.get(column);
+        String n = String.valueOf(record.get(column));
 
         return calculateStdEntropy(n);
     }
