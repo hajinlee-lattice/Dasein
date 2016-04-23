@@ -18,7 +18,7 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
         String s = column == null ? null : String.valueOf(record.get(column));
 
         if(s.equals("null"))
-            return "";
+            return null;
 
 
         return calculateStdVisidbDsIndustryGroup(s);
@@ -26,7 +26,7 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
 
     public static String calculateStdVisidbDsIndustryGroup(String industryGroup) {
         if (StringUtils.isEmpty(industryGroup))
-            return "";
+            return null;
 
         industryGroup = industryGroup.trim().toLowerCase();
 

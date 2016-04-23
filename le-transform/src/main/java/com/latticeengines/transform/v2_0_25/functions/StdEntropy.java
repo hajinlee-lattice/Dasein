@@ -18,7 +18,7 @@ public class StdEntropy implements RealTimeTransform {
         String n = String.valueOf(record.get(column));
 
         if(n.equals("null"))
-            return 0.0;
+            return null;
 
         return calculateStdEntropy(n);
     }

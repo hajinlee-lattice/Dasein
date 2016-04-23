@@ -28,7 +28,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
         if(firstName.equals("null") || lastName.equals("null") || title.equals("null") ||
                 phone.equals("null") || companyName.equals("null"))
-            return 0;
+            return null;
 
         return calculateStdVisidbDsSpamindicator(firstName, lastName, title,
                 phone, companyName);

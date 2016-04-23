@@ -18,7 +18,7 @@ public class StdVisidbDsCompanynameEntropy implements RealTimeTransform {
         String companyName = column == null ? null : String.valueOf(record.get(column));
 
         if(companyName.equals("null"))
-            return 0.0;
+            return null;
 
         return calculateStdVisidbDsCompanynameEntropy(companyName);
     }

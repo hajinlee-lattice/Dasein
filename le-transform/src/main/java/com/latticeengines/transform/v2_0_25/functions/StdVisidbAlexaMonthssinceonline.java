@@ -23,7 +23,7 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
         String s = column == null ? null : String.valueOf(record.get(column));
 
         if(s.equals("null"))
-            return 0;
+            return null;
 
         return calculateStdVisidbAlexaMonthssinceonline(s);
     }
