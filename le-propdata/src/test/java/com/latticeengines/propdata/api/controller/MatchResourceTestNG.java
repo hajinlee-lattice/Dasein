@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.propdata.api.testframework.PropDataApiFunctionalTestNGBase;
 import com.latticeengines.propdata.match.testframework.TestMatchInputUtils;
 
-public class MatchResourcelTestNG extends PropDataApiFunctionalTestNGBase {
+public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
     private static final String MATCH_ENDPOINT = "propdata/matches/realtime";
 
     @Test(groups = { "api" })
