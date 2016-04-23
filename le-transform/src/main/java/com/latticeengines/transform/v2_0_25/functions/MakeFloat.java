@@ -2,9 +2,14 @@ package com.latticeengines.transform.v2_0_25.functions;
 
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class MakeFloat implements RealTimeTransform {
+
+    private static final Log log = LogFactory.getLog(MakeFloat.class);
 
     public MakeFloat(String modelPath) {
     }
@@ -17,7 +22,12 @@ public class MakeFloat implements RealTimeTransform {
         if (o == null) {
             return null;
         }
-        return Double.class.cast(o);
+        try {
+            return Double.valueOf(String.valueOf(o));
+        } catch (Exception e) {
+            log.error("Failed to cast " + o + " to Double.");
+            return null;
+        }
     }
 
 }
