@@ -15,7 +15,7 @@ public class StdVisidbDsPdModelactionOrdered implements RealTimeTransform {
     public Object transform(Map<String, Object> arguments,
             Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        String modelAction = String.valueOf(record.get(column));
+        String modelAction = column == null ? null : String.valueOf(record.get(column));
 
         return calculateStdVisidbDsPdModelactionOrdered(modelAction);
     }

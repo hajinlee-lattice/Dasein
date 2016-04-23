@@ -16,8 +16,8 @@ public class StdVisidbDsFirstnameSameasLastname implements RealTimeTransform {
         String column1 = (String) arguments.get("column1");
         String column2 = (String) arguments.get("column2");
 
-        String firstName = String.valueOf(record.get(column1));
-        String lastName = String.valueOf(record.get(column2));
+        String firstName = column1 == null ? null : String.valueOf(record.get(column1));
+        String lastName = column2 == null ? null : String.valueOf(record.get(column2));
 
         return calcualteStdVisidbDsFirstnameSameasLastname(firstName, lastName);
     }
