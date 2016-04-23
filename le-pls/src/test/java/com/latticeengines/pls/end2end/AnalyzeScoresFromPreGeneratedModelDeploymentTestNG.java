@@ -2,22 +2,30 @@ package com.latticeengines.pls.end2end;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.SSLUtils;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDeprecated;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
-public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
+public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final int NUM_RECORDS_TO_SCORE = 1000;
+    private static final Log log  = LogFactory.getLog(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
+
+    private static final int NUM_RECORDS_TO_SCORE = 10;
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
-    private static final String TENANT_ID = "DevelopTestPLSTenant2.DevelopTestPLSTenant2.Production";
+    private static final String TENANT_ID = "LETest1461389755276.LETest1461389755276.Production";
     private static final String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
 
     @Value("${pls.scoringapi.rest.endpoint.hostport}")
@@ -29,14 +37,33 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     @Autowired
     private ScoreCorrectnessService scoreCorrectnessService;
 
+    @Autowired
+    private TenantService tenantService;
+
     @BeforeClass(groups = "deployment.lp")
     public void setup() throws Exception {
+        Tenant tenant = tenantService.findByTenantId(TENANT_ID);
+        if (tenant == null) {
+            tenant = new Tenant();
+            tenant.setId(TENANT_ID);
+            tenant.setName(CustomerSpace.parse(TENANT_ID).getTenantId());
+            tenantService.registerTenant(tenant);
+        }
+        tenant.setRegisteredTime(12345L);
+        tenantService.updateTenant(tenant);
+
+        log.info("wait 10 sec for model to be downloaded.");
+        Thread.sleep(10000L);
+    }
+
+    @AfterClass(groups = "deployment.lp")
+    public void teardown() throws Exception {
     }
 
     @Test(groups = "deployment.lp", enabled = false)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
         SSLUtils.turnOffSslChecking();
-        String modelId = "ms__bed30518-9c78-4d5d-bd15-dfb74a8a4f93-SelfServ";
+        String modelId = "ms__7a2db4c9-6185-4ab5-882c-d12245c71a57-SelfServ";
 
         String pathToModelInputCsv = RESOURCE_BASE + "/" + fileName;
         scoreCorrectnessService.analyzeScores(TENANT_ID, pathToModelInputCsv, modelId, NUM_RECORDS_TO_SCORE);
