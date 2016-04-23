@@ -383,11 +383,7 @@ angular.module('pd.jobs', [
                 }
             }
 
-            $scope.timeoutTask = $timeout(function() {
-                $scope.jobCreationSuccess = null;
-                $scope.hideCreationMessage = true;
-                $state.go('home.jobs.status', { 'jobCreationSuccess': null });
-            }, 30000);
+            $scope.timeoutTask = $timeout($scope.closeJobCreationMessage, 30000);
         }
     }
 
@@ -402,8 +398,13 @@ angular.module('pd.jobs', [
     };
 
     $scope.closeJobCreationMessage = function() {
+        $scope.jobCreationSuccess = null;
         $scope.hideCreationMessage = true;
-        $state.go('home.jobs.status', { 'jobCreationSuccess': null });
+        if ($scope.state == 'model') {
+            $state.go('home.model.jobs', { 'jobCreationSuccess' : null });
+        } else {
+            $state.go('home.jobs.status', { 'jobCreationSuccess': null });
+        }
     };
 
     $scope.handleJobCreationSuccess($stateParams.jobCreationSuccess);
