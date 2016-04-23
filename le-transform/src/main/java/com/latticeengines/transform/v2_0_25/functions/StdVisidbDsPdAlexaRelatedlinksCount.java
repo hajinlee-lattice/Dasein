@@ -17,7 +17,7 @@ public class StdVisidbDsPdAlexaRelatedlinksCount implements RealTimeTransform {
         Object n = record.get(column);
 
         if (n == null)
-            return null;
+            return 0;
 
         String s = n.toString().trim().toLowerCase();
 
@@ -27,7 +27,7 @@ public class StdVisidbDsPdAlexaRelatedlinksCount implements RealTimeTransform {
     public static Integer calculateStdVisidbDsPdAlexaRelatedlinksCount(
             String alexaRelatedLinks) {
         if (StringUtils.isEmpty(alexaRelatedLinks))
-            return null;
+            return 0;
 
         return StringUtils.countMatches(alexaRelatedLinks, ",") + 1;
     }

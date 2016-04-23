@@ -14,6 +14,9 @@ public class TitleLength implements RealTimeTransform {
         String column = (String) arguments.get("column");
         Object value = record.get(column);
 
+        if(value == null)
+            return 0;
+
         return value.toString().length();
     }
 }

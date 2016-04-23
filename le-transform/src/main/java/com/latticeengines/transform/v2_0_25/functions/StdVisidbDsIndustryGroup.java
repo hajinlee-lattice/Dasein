@@ -17,12 +17,16 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
         String column = (String) arguments.get("column");
         String s = column == null ? null : String.valueOf(record.get(column));
 
+        if(s.equals("null"))
+            return "";
+
+
         return calculateStdVisidbDsIndustryGroup(s);
     }
 
     public static String calculateStdVisidbDsIndustryGroup(String industryGroup) {
         if (StringUtils.isEmpty(industryGroup))
-            return null;
+            return "";
 
         industryGroup = industryGroup.trim().toLowerCase();
 

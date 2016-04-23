@@ -22,12 +22,15 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
         String column = (String) arguments.get("column");
         String s = column == null ? null : String.valueOf(record.get(column));
 
+        if(s.equals("null"))
+            return 0;
+
         return calculateStdVisidbAlexaMonthssinceonline(s);
     }
 
     public static Integer calculateStdVisidbAlexaMonthssinceonline(String date) {
         if (StringUtils.isEmpty(date) || "null".equals(date))
-            return null;
+            return 0;
 
         Date dt = null;
 
