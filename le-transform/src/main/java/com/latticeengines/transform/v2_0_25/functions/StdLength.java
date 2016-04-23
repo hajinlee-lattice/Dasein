@@ -14,7 +14,7 @@ public class StdLength implements RealTimeTransform {
     public Object transform(Map<String, Object> arguments,
             Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        String value = (String) record.get(column);
+        String value = String.valueOf(record.get(column));
 
         return calculateStdLength(value);
     }

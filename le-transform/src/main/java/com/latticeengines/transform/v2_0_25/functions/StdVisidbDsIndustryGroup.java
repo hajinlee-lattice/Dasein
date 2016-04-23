@@ -15,7 +15,7 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
     public Object transform(Map<String, Object> arguments,
             Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        String s = (String) record.get(column);
+        String s = String.valueOf(record.get(column));
 
         return calculateStdVisidbDsIndustryGroup(s);
     }

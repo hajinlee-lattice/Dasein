@@ -20,11 +20,11 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         String column4 = (String) arguments.get("column4");
         String column5 = (String) arguments.get("column5");
 
-        String firstName = (String) record.get(column1);
-        String lastName = (String) record.get(column2);
-        String title = (String) record.get(column3);
-        String phone = (String) record.get(column4);
-        String companyName = (String) record.get(column5);
+        String firstName = String.valueOf(record.get(column1));
+        String lastName = String.valueOf(record.get(column2));
+        String title = String.valueOf(record.get(column3));
+        String phone = String.valueOf(record.get(column4));
+        String companyName = String.valueOf(record.get(column5));
 
         return calculateStdVisidbDsSpamindicator(firstName, lastName, title,
                 phone, companyName);
@@ -34,7 +34,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
             String lastName, String title, String phone, String companyName) {
         if (StdVisidbDsFirstnameSameasLastname
                 .calcualteStdVisidbDsFirstnameSameasLastname(firstName,
-                        lastName) == true)
+                        lastName))
             return 1;
 
         int score = 0;
