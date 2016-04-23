@@ -23,7 +23,11 @@ source $WSHOME/le-dev/aliases
 echo "Changing dir into workspace"
 cd $WSHOME
 echo "Top-level compile"
-mvn -T4 -Pgenerate -DskipTests clean install 2> /tmp/errors.txt
+mvn -T8 -Pgenerate -DskipTests clean install 2> /tmp/errors.txt
+processErrors
+
+echo "Top-level playmaker compile"
+mvn -T6 -f playmaker-pom.xml -DskipTests clean install 2> /tmp/errors.txt
 processErrors
 
 echo "Deploying framework properties to local Hadoop"
@@ -31,7 +35,7 @@ fwkdpl 2> /tmp/errors.txt
 processErrors
 
 echo "Top-level shaded yarn compile"
-mvn -T8 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
+mvn -T6 -f shaded-pom.xml -Pshaded-yarn -DskipTests clean package 2> /tmp/errors.txt
 processErrors
 
 for servicecmd in 'dataplatform|dpdplnobld' 'eai|eaidplnobld' 'dataflow|dfdplnobld' 'dataflowapi|dfapidplnobld' 'propdata|pddplnobld' 'dellebi|dedplnobld'
