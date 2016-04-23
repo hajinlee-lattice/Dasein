@@ -26,7 +26,7 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
     }
 
     public static Integer calculateStdVisidbAlexaMonthssinceonline(String date) {
-        if (StringUtils.isEmpty(date))
+        if (StringUtils.isEmpty(date) || "null".equals(date))
             return null;
 
         Date dt = null;
