@@ -35,6 +35,25 @@ public class RecordTransformer {
             try {
                 RealTimeTransform transform = transformRetriever.getTransform(id);
                 Object value = transform.transform(entry.arguments, result);
+
+                if(value == null) {
+                    value = null;
+                } else if (entry.type.type() == Double.class) {
+                    try{
+                        if(value.toString().toLowerCase().equals("true") == true) {
+                            value = entry.type.type().cast(Double.valueOf("1.0"));
+                        } else if(value.toString().toLowerCase().equals("false") == true) {
+                            value = entry.type.type().cast(Double.valueOf("0.0"));
+                        } else if(value.toString().equals("null") == false && value.toString().equals("None") == false) {
+                            value = entry.type.type().cast(Double.valueOf(value.toString()));
+                        } else {
+                            value = null;
+                        }
+                    } catch(Exception e) {
+                        log.warn(String.format("Problem casting Transform value to Java Double"), e);
+                    }
+                }
+
                 result.put(entry.output, value);
             } catch (Exception e) {
                 if (log.isWarnEnabled()) {
