@@ -20,6 +20,7 @@ import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -51,6 +52,7 @@ public class InternalResource extends InternalResourceBase implements InternalIn
 
     @RequestMapping(value = "/sqoopimports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Import data from SQL to HDFS")
     public AppSubmission importTable(@RequestBody SqoopImporter importer, HttpServletRequest request) {
         checkHeader(request);
@@ -61,6 +63,7 @@ public class InternalResource extends InternalResourceBase implements InternalIn
 
     @RequestMapping(value = "/sqoopexports", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Export data from HDFS to SQL")
     public AppSubmission exportTable(@RequestBody SqoopExporter exporter, HttpServletRequest request) {
         checkHeader(request);
@@ -71,6 +74,7 @@ public class InternalResource extends InternalResourceBase implements InternalIn
 
     @RequestMapping(value = "/yarnjobs", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Match a block of input data in yarn container")
     public AppSubmission submitYarnJob(@RequestBody PropDataJobConfiguration jobConfiguration, HttpServletRequest request) {
         checkHeader(request);

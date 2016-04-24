@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.transformation.TransformationR
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -58,6 +59,7 @@ public class TransformationResource extends InternalResourceBase implements Tran
 
     @RequestMapping(value = "internal", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Trigger a new transformation for a source at its latest version. "
             + "If a transformation with the same source version already exists, skip operation. "
             + "url parameter submitter indicates what submitted this job: Quartz, Test, Cli, ..."

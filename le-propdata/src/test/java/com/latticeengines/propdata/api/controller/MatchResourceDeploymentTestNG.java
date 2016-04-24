@@ -1,20 +1,15 @@
 package com.latticeengines.propdata.api.controller;
 
-import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -169,44 +163,20 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 }
                 rowNum++;
             }
-
-            uploadAvroData(data, fieldNames, avroDir, fileName);
+            List<Class<?>> fieldTypes = new ArrayList<>();
+            fieldTypes.add(Integer.class);
+            fieldTypes.add(String.class);
+            fieldTypes.add(String.class);
+            fieldTypes.add(String.class);
+            fieldTypes.add(String.class);
+            fieldTypes.add(String.class);
+            uploadAvroData(data, fieldNames, fieldTypes, avroDir, fileName);
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload test avro.", e);
         }
     }
 
-    private void uploadAvroData(List<List<Object>> data, List<String> fieldNames, String avroDir, String fileName) {
-        List<GenericRecord> records = new ArrayList<>();
-        Schema.Parser parser = new Schema.Parser();
-        Schema schema = parser.parse("{\"type\":\"record\",\"name\":\"Test\",\"doc\":\"Testing data\",\"fields\":["
-                + "{\"name\":\"" + fieldNames.get(0) + "\",\"type\":[\"int\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(1) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(2) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(3) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(4) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(5) + "\",\"type\":[\"string\",\"null\"]}"
-                + "]}");
-        GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        for (List<Object> tuple : data) {
-            for (int i = 0; i < tuple.size(); i++) {
-                builder.set(fieldNames.get(i), tuple.get(i));
-            }
-            records.add(builder.build());
-        }
 
-        try {
-            AvroUtils.writeToLocalFile(schema, records, fileName);
-            if (HdfsUtils.fileExists(yarnConfiguration, avroDir + "/" + fileName)) {
-                HdfsUtils.rmdir(yarnConfiguration, avroDir + "/" + fileName);
-            }
-            HdfsUtils.copyLocalToHdfs(yarnConfiguration, fileName, avroDir + "/" + fileName);
-        } catch (Exception e) {
-            Assert.fail("Failed to upload " + fileName, e);
-        }
-
-        FileUtils.deleteQuietly(new File(fileName));
-    }
 
 
     private void uploadTestAVro(String avroDir, String fileName) {

@@ -2,20 +2,27 @@ package com.latticeengines.propdata.match.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.propdata.match.annotation.MatchStep;
 import com.latticeengines.propdata.match.service.MatchExecutor;
+import com.latticeengines.propdata.match.service.MatchFetcher;
 
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
     private static final Log log = LogFactory.getLog(BulkMatchExecutor.class);
 
+    @Autowired
+    @Qualifier(value = "bulkMatchFetcher")
+    private MatchFetcher fetcher;
+
     @Override
     @MatchStep
     public MatchContext execute(MatchContext matchContext) {
-        matchContext = fetch(matchContext);
+        matchContext = fetcher.fetch(matchContext);
         matchContext = complete(matchContext);
         generateAccountMetric(matchContext);
         return matchContext;

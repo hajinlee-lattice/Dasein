@@ -53,7 +53,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
                 "Test package should exist after creation.");
     }
 
-    @Test(groups = "api")
+    @Test(groups = "api", enabled = false)
     public void testGrantPackageToCustomer() {
         getLogger().info("Testing grant package to customer ... ");
 
@@ -67,7 +67,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
         Assert.assertFalse(customerHasPackage(contractId, packageName));
     }
 
-    @Test(groups = "api")
+    @Test(groups = "api", enabled = false)
     public void testAddContentToPackage() {
         getLogger().info("Testing add content to customer ... ");
 
@@ -81,7 +81,7 @@ public abstract class EntitlementServiceImplTestNGBase<Package extends HasPid & 
         Assert.assertFalse(packageHasContent(packageId));
     }
 
-    @Test(groups = "api")
+    @Test(groups = "api", enabled = false)
     public void testDeletionCascade() {
         getLogger().info("Testing cascading on deletion ... ");
 

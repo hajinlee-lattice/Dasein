@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.publication.PublicationRequest
 import com.latticeengines.network.exposed.propdata.PublicationInterface;
 import com.latticeengines.propdata.engine.publication.service.PublicationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
+import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -58,6 +59,7 @@ public class PublicationResource extends InternalResourceBase implements Publica
 
     @RequestMapping(value = "internal/{publicationName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @ApiIgnore
     @ApiOperation(value = "Forcefully trigger a new publication for a source at its latest version. "
             + "If a publication with the same source version already exists, skip operation. "
             + "url parameter podid is for testing purpose.")
