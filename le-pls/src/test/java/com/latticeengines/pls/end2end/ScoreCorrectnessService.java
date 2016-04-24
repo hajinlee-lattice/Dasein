@@ -57,7 +57,7 @@ public class ScoreCorrectnessService {
 
     private static final Log log = LogFactory.getLog(ScoreCorrectnessService.class);
     private static final int TIMEOUT_IN_MIN = 60;
-    private static final int THREADPOOL_SIZE = 10;
+    private static final int THREADPOOL_SIZE = 16;
     // TODO: this threshold was 3.0, increased it to 5.0 (April 12, 2016)
     // to make modeling to scoring deployment test to pass, should change back
     // after release.
@@ -305,14 +305,18 @@ public class ScoreCorrectnessService {
     }
 
     private Map<String, DebugScoreResponse> scoreRecords(String modelId, Map<String, Map<String, Object>> inputRecords) {
-        Queue<String> inputQueue = new ConcurrentLinkedQueue<>();
+        final Queue<String> inputQueue = new ConcurrentLinkedQueue<>();
         Set<String> problemScores = new ConcurrentSkipListSet<>();
         Map<String, DebugScoreResponse> responses = new ConcurrentHashMap<>();
         ExecutorService scoreExecutorService = Executors.newFixedThreadPool(THREADPOOL_SIZE);
+        final AtomicInteger counter = new AtomicInteger(0);
 
         inputQueue.addAll(inputRecords.keySet());
-        scoreExecutorService.execute(new ScoreApiCallable(scoreApiHostPort, scoringRestTemplate, modelId, inputRecords,
-                inputQueue, problemScores, responses));
+        final int inputQueueSize = inputQueue.size();
+        for (int i = 0; i < THREADPOOL_SIZE; i++) {
+            scoreExecutorService.execute(new ScoreApiCallable(scoreApiHostPort, scoringRestTemplate, modelId, inputRecords,
+                    inputQueue, problemScores, responses, inputQueueSize, counter));
+        }
 
         scoreExecutorService.shutdown();
         try {
@@ -335,12 +339,12 @@ public class ScoreCorrectnessService {
         private Queue<String> inputQueue;
         private Set<String> problemScores;
         private Map<String, DebugScoreResponse> responses;
-        private AtomicInteger counter = new AtomicInteger(0);
         private int initialInputQueueSize;
+        private AtomicInteger counter;
 
         public ScoreApiCallable(String scoreApiHostPort, RestTemplate scoringRestTemplate, String modelId,
                 Map<String, Map<String, Object>> inputRecords, Queue<String> inputQueue, Set<String> problemScores,
-                Map<String, DebugScoreResponse> responses) {
+                Map<String, DebugScoreResponse> responses, int initialInputQueueSize, AtomicInteger counter) {
             super();
             this.scoreApiHostPort = scoreApiHostPort;
             this.scoringRestTemplate = scoringRestTemplate;
@@ -349,7 +353,8 @@ public class ScoreCorrectnessService {
             this.problemScores = problemScores;
             this.responses = responses;
             this.inputQueue = inputQueue;
-            this.initialInputQueueSize = inputQueue.size();
+            this.initialInputQueueSize = initialInputQueueSize;
+            this.counter = counter;
         }
 
         @Override
