@@ -56,6 +56,7 @@ public class PropDataYarnServiceImplTestNG extends PropDataMatchFunctionalTestNG
 
         PropDataJobConfiguration jobConfiguration = new PropDataJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);
+        jobConfiguration.setReturnUnmatched(true);
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(CustomerSpace.parse("PDTest"));
         jobConfiguration.setAvroPath(avroPath);
