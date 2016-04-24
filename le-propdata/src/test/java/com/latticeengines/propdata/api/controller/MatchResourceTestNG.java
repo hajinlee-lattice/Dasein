@@ -60,6 +60,7 @@ public class MatchResourceTestNG extends PropDataApiFunctionalTestNGBase {
                 { 123, "notexists123454321fadsfsdacv.com", null, null, null, null } };
 
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
+        input.setReturnUnmatched(false);
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
