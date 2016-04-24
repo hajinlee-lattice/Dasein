@@ -78,7 +78,7 @@ public class MatchKeyUtils {
             }
         }
 
-        log.info("Resolved KeyMap from fields " + fields + " : " + JsonUtils.serialize(keyMap));
+        log.debug("Resolved KeyMap from fields " + fields + " : " + JsonUtils.serialize(keyMap));
 
         return keyMap;
     }

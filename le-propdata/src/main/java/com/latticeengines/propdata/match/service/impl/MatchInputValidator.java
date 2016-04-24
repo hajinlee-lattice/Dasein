@@ -85,7 +85,7 @@ class MatchInputValidator {
         Map<MatchKey, List<String>> keyMap = MatchKeyUtils.resolveKeyMap(input.getFields());
         if (input.getKeyMap() != null && !input.getKeyMap().keySet().isEmpty()) {
             for (Map.Entry<MatchKey, List<String>> entry: input.getKeyMap().entrySet()) {
-                log.info("Overwriting key map entry " + JsonUtils.serialize(entry));
+                log.debug("Overwriting key map entry " + JsonUtils.serialize(entry));
                 keyMap.put(entry.getKey(), entry.getValue());
             }
         }
