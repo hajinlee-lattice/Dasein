@@ -35,6 +35,9 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     private String hdfsPodId;
 
     @NotNull
+    private Boolean returnUnmatched;
+
+    @NotNull
     private ColumnSelection.Predefined predefinedSelection;
 
     @JsonProperty("input_avro_dir")
@@ -95,6 +98,16 @@ public class PrepareBulkMatchInputConfiguration extends BaseStepConfiguration {
     @JsonProperty("predefined_selection")
     public void setPredefinedSelection(ColumnSelection.Predefined predefinedSelection) {
         this.predefinedSelection = predefinedSelection;
+    }
+
+    @JsonProperty("return_unmatched")
+    public Boolean getReturnUnmatched() {
+        return returnUnmatched;
+    }
+
+    @JsonProperty("return_unmatched")
+    public void setReturnUnmatched(Boolean returnUnmatched) {
+        this.returnUnmatched = returnUnmatched;
     }
 
     @JsonProperty("average_block_size")

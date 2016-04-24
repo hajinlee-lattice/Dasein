@@ -52,6 +52,11 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder returnUnmatched(Boolean returnUnmatched) {
+            prepareConfig.setReturnUnmatched(returnUnmatched);
+            return this;
+        }
+
         public BulkMatchWorkflowConfiguration build() {
             configuration.setContainerConfiguration("bulkMatchWorkflow", customerSpace, "BulkMatchWorkflow");
             configuration.add(prepareConfig);

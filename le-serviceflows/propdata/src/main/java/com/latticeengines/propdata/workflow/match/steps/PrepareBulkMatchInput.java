@@ -132,6 +132,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     private PropDataJobConfiguration generateJobConfiguration() {
         PropDataJobConfiguration jobConfiguration = new PropDataJobConfiguration();
         jobConfiguration.setHdfsPodId(getConfiguration().getHdfsPodId());
+        jobConfiguration.setReturnUnmatched(getConfiguration().getReturnUnmatched());
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(getConfiguration().getCustomerSpace());
         jobConfiguration.setPredefinedSelection(getConfiguration().getPredefinedSelection());

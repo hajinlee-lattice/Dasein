@@ -43,6 +43,11 @@ public class BulkMatchWorkflowSubmitter {
         return this;
     }
 
+    public BulkMatchWorkflowSubmitter returnUnmatched(Boolean returnUnmatched) {
+        builder = builder.returnUnmatched(returnUnmatched);
+        return this;
+    }
+
     public ApplicationId submit() {
         BulkMatchWorkflowConfiguration configuration = builder.build();
         AppSubmission appSubmission = workflowProxy.submitWorkflowExecution(configuration);

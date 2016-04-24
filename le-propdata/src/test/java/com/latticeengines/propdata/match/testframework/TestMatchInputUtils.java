@@ -17,6 +17,7 @@ public class TestMatchInputUtils {
 
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData, boolean resolveKeyMap) {
         MatchInput input = new MatchInput();
+        input.setReturnUnmatched(true);
         input.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         input.setTenant(new Tenant("PD_Test"));
         List<String> fields = Arrays.asList("ID", "Domain", "Name", "City", "State", "Country");

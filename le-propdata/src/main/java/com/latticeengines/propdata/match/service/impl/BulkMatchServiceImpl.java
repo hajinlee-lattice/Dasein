@@ -112,6 +112,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         BulkMatchWorkflowSubmitter submitter = new BulkMatchWorkflowSubmitter();
         ApplicationId appId = submitter //
                 .matchInput(input) //
+                .returnUnmatched(input.getReturnUnmatched()) //
                 .hdfsPodId(hdfsPodId) //
                 .rootOperationUid(uuid) //
                 .workflowProxy(workflowProxy) //
@@ -126,6 +127,7 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         String inputAvro = hdfsPathBuilder.constructMatchBlockInputAvro(uuid, uuid).toString();
 
         PropDataJobConfiguration jobConfiguration = new PropDataJobConfiguration();
+        jobConfiguration.setReturnUnmatched(input.getReturnUnmatched());
         jobConfiguration.setHdfsPodId(hdfsPodId);
         jobConfiguration.setName("PropDataMatchBlock");
         jobConfiguration.setCustomerSpace(customerSpace);

@@ -22,7 +22,7 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
         Object[][] data = new Object[][] {
                 { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        MatchOutput output = matchService.match(input, true);
+        MatchOutput output = matchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
@@ -33,7 +33,7 @@ public class RealTimeMatchServiceImplTestNG extends PropDataMatchFunctionalTestN
         Object[][] data = new Object[][] {
                 { 123, "my@gmail.com", null, null, null, null } };
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
-        MatchOutput output = matchService.match(input, true);
+        MatchOutput output = matchService.match(input);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
 

@@ -41,13 +41,11 @@ public class MatchResource implements MatchInterface {
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
-            + "The url flag \"unmatched\" toggles whether to return the unmatched records."
 
     )
-    public MatchOutput matchRealTime(@RequestBody MatchInput input,
-            @RequestParam(value = "unmatched", required = false, defaultValue = "true") Boolean returnUnmatched) {
+    public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
-            return realTimeMatchService.match(input, returnUnmatched);
+            return realTimeMatchService.match(input);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, e);
         }

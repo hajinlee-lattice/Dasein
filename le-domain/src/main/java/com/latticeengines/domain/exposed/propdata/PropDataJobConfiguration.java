@@ -22,6 +22,7 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     private String blockOperationUid;
     private String appName;
     private Boolean singleBlock;
+    private Boolean returnUnmatched;
 
     @JsonProperty("hdfs_pod_id")
     public String getHdfsPodId() {
@@ -131,6 +132,16 @@ public class PropDataJobConfiguration extends BasePayloadConfiguration {
     @JsonProperty("single_block")
     public void setSingleBlock(Boolean singleBlock) {
         this.singleBlock = singleBlock;
+    }
+
+    @JsonProperty("return_unmatched")
+    public Boolean getReturnUnmatched() {
+        return returnUnmatched;
+    }
+
+    @JsonProperty("return_unmatched")
+    public void setReturnUnmatched(Boolean returnUnmatched) {
+        this.returnUnmatched = returnUnmatched;
     }
 
     @Override

@@ -81,7 +81,7 @@ public class MatcherImpl implements Matcher {
         if (log.isDebugEnabled()) {
             log.debug("matchInput:" + JsonUtils.serialize(matchInput));
         }
-        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput, true);
+        MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
         if (log.isDebugEnabled()) {
             log.debug("matchOutput:" + JsonUtils.serialize(matchOutput));
         }

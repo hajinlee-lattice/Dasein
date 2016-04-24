@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+
+    <task:annotation-driven executor="matchExecutor" scheduler="matchScheduler"/>
+
+    <task:executor id="matchExecutor"
+                   pool-size="${propdata.match.task.core.pool.size}-${propdata.match.task.max.pool.size}"
+                   queue-capacity="${propdata.match.task.queue.capapcity}"
+                   keep-alive="${propdata.match.task.keep.alive}"
+                   rejection-policy="CALLER_RUNS" />
+
+    <task:scheduler id="matchScheduler" pool-size="${propdata.match.scheduler.pool.size}" />
+
+</beans>

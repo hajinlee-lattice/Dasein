@@ -225,19 +225,17 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             }
 
             // make *_IsMatched columns not null
-            if (matchedAnyColumn) {
-                for (int i = 0; i < outputFields.size(); i++) {
-                    String field = outputFields.get(i);
-                    Object value = output.get(i);
-                    if (field.toLowerCase().contains("ismatched") && value == null) {
-                        output.set(i, false);
-                    }
-                    if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
-                        output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
-                    }
-                    if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
-                        output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
-                    }
+            for (int i = 0; i < outputFields.size(); i++) {
+                String field = outputFields.get(i);
+                Object value = output.get(i);
+                if (field.toLowerCase().contains("ismatched") && value == null) {
+                    output.set(i, false);
+                }
+                if (MatchConstants.IS_PUBLIC_DOMAIN.equalsIgnoreCase(field)) {
+                    output.set(i, publicDomainService.isPublicDomain(internalRecord.getParsedDomain()));
+                }
+                if (MatchConstants.DISPOSABLE_EMAIL.equalsIgnoreCase(field)) {
+                    output.set(i, disposableEmailService.isDisposableEmailDomain(internalRecord.getParsedDomain()));
                 }
             }
 
@@ -253,20 +251,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 internalRecord.getErrorMessages().add("The input does not match to any source.");
             }
 
+            internalRecord.setResultsInSource(null);
+            OutputRecord outputRecord = new OutputRecord();
             if (returnUnmatched || matchedAnyColumn) {
-                internalRecord.setResultsInSource(null);
-                OutputRecord outputRecord = new OutputRecord();
-                if (matchedAnyColumn) {
-                    outputRecord.setOutput(internalRecord.getOutput());
-                }
-                outputRecord.setInput(internalRecord.getInput());
-                outputRecord.setMatched(internalRecord.isMatched());
-                outputRecord.setMatchedDomain(internalRecord.getParsedDomain());
-                outputRecord.setMatchedNameLocation(internalRecord.getParsedNameLocation());
-                outputRecord.setRowNumber(internalRecord.getRowNumber());
-                outputRecord.setErrorMessages(internalRecord.getErrorMessages());
-                outputRecords.add(outputRecord);
+                outputRecord.setOutput(internalRecord.getOutput());
             }
+            outputRecord.setInput(internalRecord.getInput());
+            outputRecord.setMatched(internalRecord.isMatched());
+            outputRecord.setMatchedDomain(internalRecord.getParsedDomain());
+            outputRecord.setMatchedNameLocation(internalRecord.getParsedNameLocation());
+            outputRecord.setRowNumber(internalRecord.getRowNumber());
+            outputRecord.setErrorMessages(internalRecord.getErrorMessages());
+            outputRecords.add(outputRecord);
         }
 
         matchContext.getOutput().setResult(outputRecords);

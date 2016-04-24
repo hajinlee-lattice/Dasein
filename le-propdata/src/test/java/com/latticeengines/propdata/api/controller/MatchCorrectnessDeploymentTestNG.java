@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -58,8 +59,7 @@ import com.latticeengines.proxy.exposed.propdata.MatchProxy;
 public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
 
     private static final Log log = LogFactory.getLog(MatchCorrectnessDeploymentTestNG.class);
-    private static final Integer NUM_RECORDS = 100;
-    private static final Integer REALTIME_THREADS = 16;
+    private static final Integer REALTIME_THREADS = 32;
     private static final String AVRO_DIR = "/tmp/MatchCorrectnessDeploymentTestNG";
     private static final String HDFS_POD = "MatchCorrectnessDeploymentTestNG";
     private static final List<String> fields = Arrays.asList("Domain", "Name", "City", "State", "Country");
@@ -77,16 +77,19 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
     private List<Map<String, Object>> bulkResult = new ArrayList<>();
     private List<Map<String, Object>> realtimeResult = new ArrayList<>();
 
+    @Value("${propdata.test.correctness.rows}")
+    private Integer numRecords;
+
     @BeforeClass(groups = "deployment")
     private void setUp() {
         prepareCleanPod(HDFS_POD);
         loadAccountPool();
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testMatchCorrectness() {
-        Integer numGoodAccounts = new Double(NUM_RECORDS * 0.8).intValue();
-        Integer numBadAccounts = NUM_RECORDS - numGoodAccounts;
+        Integer numGoodAccounts = new Double(numRecords * 0.8).intValue();
+        Integer numBadAccounts = numRecords - numGoodAccounts;
 
         List<List<Object>> data = getGoodAccounts(numGoodAccounts);
         data.addAll(getGarbageDomainAccounts(numBadAccounts));
@@ -158,8 +161,8 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
         String summary = "Realtime Match missed " + missingRealtimeInputs.size() + " inputs.\n" + "Bulk Match missed "
                 + missingBulkInputs.size() + " inputs.\n" + "Got different results on " + numDifference + " inputs.";
 
-//        Assert.assertTrue(missingBulkInputs.isEmpty() && missingRealtimeInputs.isEmpty() && numDifference == 0,
-//                summary);
+        Assert.assertTrue(missingBulkInputs.isEmpty() && missingRealtimeInputs.isEmpty() && numDifference == 0,
+                summary);
 
         System.out.println(summary);
     }
@@ -215,7 +218,6 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
         private Log log = LogFactory.getLog(RealtimeMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private ConcurrentLinkedDeque<Map<String, Object>> result = new ConcurrentLinkedDeque<>();
-        private ConcurrentLinkedDeque<Boolean> count = new ConcurrentLinkedDeque<>();
 
         RealtimeMatchCallable(List<List<Object>> data) {
             for (List<Object> row : data) {
@@ -228,27 +230,19 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
             try {
                 ExecutorService executor = Executors.newFixedThreadPool(REALTIME_THREADS);
 
-                int startIdx = 0;
-                int endIdx;
                 int count = 0;
-                while (startIdx < data.size()) {
-                    endIdx = Math.min(startIdx + REALTIME_THREADS, data.size());
-                    List<Future<MatchOutput>> futures = new ArrayList<>();
-                    for (int i = startIdx; i < endIdx; i++) {
-                        Future<MatchOutput> future = singleRun(data.get(i), executor);
-                        futures.add(future);
-                    }
+                List<Future<MatchOutput>> futures = new ArrayList<>();
+                for (List<Object> row: data) {
+                    Future<MatchOutput> future = singleRun(row, executor);
+                    futures.add(future);
+                }
 
-                    for (int i = 0; i < futures.size(); i++) {
-                        Future<MatchOutput> future = futures.get(i);
-                        MatchOutput output = future.get();
-                        if (output != null) {
-                            readMatchOutput(output);
-                        }
-                        log.info("finished " + (++count) + " out of " + data.size() + " matches.");
+                for (Future<MatchOutput> future: futures) {
+                    MatchOutput output = future.get();
+                    if (output != null) {
+                        readMatchOutput(output);
                     }
-
-                    startIdx = endIdx;
+                    log.info("finished " + (++count) + " out of " + data.size() + " matches.");
                 }
                 realtimeResult.addAll(result);
                 log.info("Loaded real time match result.");
@@ -261,6 +255,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
 
         private Future<MatchOutput> singleRun(List<Object> row, ExecutorService executor) {
             final MatchInput input = new MatchInput();
+            input.setReturnUnmatched(true);
             input.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
             input.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             input.setFields(fields);
@@ -300,7 +295,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
             @Override
             public MatchOutput call() {
                 try {
-                    return matchProxy.matchRealTime(matchInput, true);
+                    return matchProxy.matchRealTime(matchInput);
                 } catch (Exception e) {
                     log.error(e);
                     throw new RuntimeException(e);
@@ -340,6 +335,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
 
         private MatchInput constructMatchInput() {
             MatchInput matchInput = new MatchInput();
+            matchInput.setReturnUnmatched(true);
             matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
             matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
             AvroInputBuffer inputBuffer = new AvroInputBuffer();
@@ -374,7 +370,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
                 log.info(logMsg);
 
                 try {
-                    Thread.sleep(10000L);
+                    Thread.sleep(5000L);
                 } catch (InterruptedException e) {
                     // Ignore InterruptedException
                 }

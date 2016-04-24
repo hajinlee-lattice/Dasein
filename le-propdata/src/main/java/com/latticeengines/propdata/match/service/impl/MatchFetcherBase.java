@@ -7,12 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -33,11 +28,9 @@ import com.latticeengines.propdata.core.datasource.DataSourceService;
 
 public abstract class MatchFetcherBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(MatchFetcherBase.class);
     private LoadingCache<String, Set<String>> tableColumnsCache;
-    private static final Integer MAX_FETCH_THREADS = 32;
-    private ExecutorService executor = new ThreadPoolExecutor(1, MAX_FETCH_THREADS, 1, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<Runnable>(2 * MAX_FETCH_THREADS));
 
     @Autowired
     private DataSourceService dataSourceService;
@@ -67,34 +60,22 @@ public abstract class MatchFetcherBase {
                 });
     }
 
-    protected MatchContext executeFetch(MatchContext context) {
+    protected MatchContext fetchSync(MatchContext context) {
         Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
         Map<String, List<String>> sourceColumnsMap = context.getSourceColumnsMap();
-
-        Map<String, Future<List<Map<String, Object>>>> futureMap = new HashMap<>();
         for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-            MatchCallable callable = getMatchCallable(sourceColumns.getKey(), sourceColumns.getValue(), context);
-            Future<List<Map<String, Object>>> future = executor.submit(callable);
-            futureMap.put(sourceColumns.getKey(), future);
+            QueryExecutor queryExecutor = getQueryExecutor(sourceColumns.getKey(), sourceColumns.getValue(), context);
+            List<Map<String, Object>> queryResult = queryExecutor.query();
+            resultMap.put(sourceColumns.getKey(), queryResult);
         }
-        for (Map.Entry<String, List<String>> sourceColumns : sourceColumnsMap.entrySet()) {
-            Future<List<Map<String, Object>>> future = futureMap.get(sourceColumns.getKey());
-            try {
-                resultMap.put(sourceColumns.getKey(), future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Failed to fetch data from " + sourceColumns.getKey(), e);
-                throw new RuntimeException("Failed to fetch data from " + sourceColumns.getKey(), e);
-            }
-        }
-
         context.setResultsBySource(resultMap);
         return context;
     }
 
-    private MatchCallable getMatchCallable(String sourceName, List<String> targetColumns, MatchContext matchContext) {
+    private QueryExecutor getQueryExecutor(String sourceName, List<String> targetColumns, MatchContext matchContext) {
         JdbcTemplate jdbcTemplate = dataSourceService.getJdbcTemplateFromDbPool(DataSourcePool.SourceDB);
         if (MatchConstants.MODEL.equals(sourceName) || MatchConstants.DERIVED_COLUMNS.equals(sourceName)) {
-            CachedMatchCallable callable = new CachedMatchCallable("Domain", "Name", "Country", "State", "City");
+            CachedMatchQueryExecutor callable = new CachedMatchQueryExecutor("Domain", "Name", "Country", "State", "City");
             callable.setSourceName(sourceName);
             callable.setTargetColumns(targetColumns);
             callable.setJdbcTemplate(jdbcTemplate);
@@ -107,9 +88,9 @@ public abstract class MatchFetcherBase {
         }
     }
 
-    private class CachedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
+    private class CachedMatchQueryExecutor extends QueryExecutor {
 
-        private Log log = LogFactory.getLog(CachedMatchCallable.class);
+        private Log log = LogFactory.getLog(CachedMatchQueryExecutor.class);
 
         private String domainField;
         private String nameField;
@@ -117,7 +98,7 @@ public abstract class MatchFetcherBase {
         private String stateField;
         private String cityField;
 
-        CachedMatchCallable(String domainField, String nameField, String countryField, String stateField,
+        CachedMatchQueryExecutor(String domainField, String nameField, String countryField, String stateField,
                             String cityField) {
             this.domainField = domainField;
             this.nameField = nameField;
@@ -138,9 +119,9 @@ public abstract class MatchFetcherBase {
         }
 
         @Override
-        public List<Map<String, Object>> call() {
+        public List<Map<String, Object>> query() {
             Long beforeQuerying = System.currentTimeMillis();
-            log.info("Querying SQL table " + getSourceTableName());
+            log.debug("Querying SQL table " + getSourceTableName());
             List<Map<String, Object>> results = jdbcTemplate
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet, nameLocationSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
@@ -196,9 +177,9 @@ public abstract class MatchFetcherBase {
     }
 
     @SuppressWarnings("unused")
-    private class DomainBasedMatchCallable extends MatchCallable implements Callable<List<Map<String, Object>>> {
+    private class DomainBasedQueryExecutor extends QueryExecutor {
 
-        private Log log = LogFactory.getLog(DomainBasedMatchCallable.class);
+        private Log log = LogFactory.getLog(DomainBasedQueryExecutor.class);
 
         private Set<String> domainSet;
 
@@ -207,9 +188,9 @@ public abstract class MatchFetcherBase {
         }
 
         @Override
-        public List<Map<String, Object>> call() {
+        public List<Map<String, Object>> query() {
             Long beforeQuerying = System.currentTimeMillis();
-            log.info("Querying SQL table " + getSourceTableName());
+            log.debug("Querying SQL table " + getSourceTableName());
             List<Map<String, Object>> results = jdbcTemplate
                     .queryForList(constructSqlQuery(targetColumns, getSourceTableName(), domainSet));
             log.info("Retrieved " + results.size() + " results from SQL table " + getSourceTableName() + ". Duration="
@@ -223,7 +204,7 @@ public abstract class MatchFetcherBase {
         }
     }
 
-    private abstract static class MatchCallable implements Callable<List<Map<String, Object>>> {
+    private abstract static class QueryExecutor {
 
         protected String sourceName;
         protected List<String> targetColumns;
@@ -248,6 +229,8 @@ public abstract class MatchFetcherBase {
                 return null;
             }
         }
+
+        protected abstract List<Map<String, Object>> query();
 
     }
 

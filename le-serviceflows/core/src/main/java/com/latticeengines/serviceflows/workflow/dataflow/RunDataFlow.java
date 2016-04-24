@@ -30,8 +30,7 @@ public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkfl
 
     @Override
     public void execute() {
-        log.info("Inside RunDataFlow execute()");
-
+        log.info("Inside RunDataFlow execute() [" + configuration.getBeanName() + "]");
         runDataFlow();
     }
 

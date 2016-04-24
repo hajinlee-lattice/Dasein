@@ -9,7 +9,7 @@ public class BulkMatchFetcher extends MatchFetcherBase implements MatchFetcher {
 
     @Override
     public MatchContext fetch(MatchContext matchContext) {
-        return executeFetch(matchContext);
+        return fetchSync(matchContext);
     }
 
 }

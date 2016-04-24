@@ -110,6 +110,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private Boolean singleBlockMode;
     private MatchInput matchInput;
     private String podId;
+    private Boolean returnUnmatched;
 
     @Override
     public String process(PropDataJobConfiguration jobConfiguration) throws Exception {
@@ -121,6 +122,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
 
             podId = jobConfiguration.getHdfsPodId();
             singleBlockMode = jobConfiguration.getSingleBlock();
+            returnUnmatched = jobConfiguration.getReturnUnmatched();
             HdfsPodContext.changeHdfsPodId(podId);
             log.info("Use PodId=" + podId);
 
@@ -214,6 +216,7 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private MatchInput constructMatchInputFromData(List<List<Object>> data) {
         MatchInput matchInput = new MatchInput();
         matchInput.setUuid(UUID.fromString(rootOperationUid));
+        matchInput.setReturnUnmatched(returnUnmatched);
         matchInput.setTenant(tenant);
         matchInput.setPredefinedSelection(predefinedSelection);
         matchInput.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
@@ -247,7 +250,8 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
     private void writeDataToAvro(List<OutputRecord> outputRecords) throws IOException {
         List<GenericRecord> records = new ArrayList<>();
         for (OutputRecord outputRecord : outputRecords) {
-            if (!outputRecord.isMatched() || outputRecord.getOutput() == null || outputRecord.getOutput().isEmpty()) {
+            if (!(returnUnmatched || outputRecord.isMatched()) || outputRecord.getOutput() == null
+                    || outputRecord.getOutput().isEmpty()) {
                 continue;
             }
 
@@ -294,10 +298,18 @@ public class PropDataProcessor extends SingleContainerYarnProcessor<PropDataJobC
         generateOutputMetric(matchInput, blockOutput);
         Long count = AvroUtils.count(yarnConfiguration, outputAvro);
         log.info("There are in total " + count + " records in the avro " + outputAvro);
-        if (!blockOutput.getStatistics().getRowsMatched().equals(count.intValue())) {
-            throw new RuntimeException(
-                    String.format("RowsMatched in MatchStatistics [%d] does not equal to the count of the avro [%d].",
-                            blockOutput.getStatistics().getRowsMatched(), count));
+        if (returnUnmatched) {
+            if (!blockSize.equals(count.intValue())) {
+                throw new RuntimeException(String
+                        .format("Block size [%d] does not equal to the count of the avro [%d].", blockSize, count));
+            }
+        } else {
+            // check matched rows
+            if (!blockOutput.getStatistics().getRowsMatched().equals(count.intValue())) {
+                throw new RuntimeException(String.format(
+                        "RowsMatched in MatchStatistics [%d] does not equal to the count of the avro [%d].",
+                        blockOutput.getStatistics().getRowsMatched(), count));
+            }
         }
 
         if (singleBlockMode) {

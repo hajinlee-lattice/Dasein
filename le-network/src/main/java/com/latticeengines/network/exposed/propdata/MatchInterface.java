@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchOutput;
 
 public interface MatchInterface {
-    MatchOutput matchRealTime(MatchInput input, Boolean returnUnmatched);
+    MatchOutput matchRealTime(MatchInput input);
     MatchCommand matchBulk(MatchInput input, String hdfsPod);
     MatchCommand bulkMatchStatus(String rootOperationUid);
 }

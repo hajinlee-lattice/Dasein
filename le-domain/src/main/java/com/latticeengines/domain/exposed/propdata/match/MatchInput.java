@@ -27,6 +27,8 @@ public class MatchInput implements Fact, Dimension {
     private List<List<Object>> data;
     private int numRows;
 
+    private Boolean returnUnmatched = true;
+
     private InputBuffer inputBuffer;
     private IOBufferType outputBufferType;
 
@@ -44,6 +46,16 @@ public class MatchInput implements Fact, Dimension {
     private Integer numSelectedColumns;
 
     private UUID uuid;
+
+    @JsonProperty("ReturnUnmatched")
+    public Boolean getReturnUnmatched() {
+        return returnUnmatched;
+    }
+
+    @JsonProperty("ReturnUnmatched")
+    public void setReturnUnmatched(Boolean returnUnmatched) {
+        this.returnUnmatched = returnUnmatched;
+    }
 
     @JsonProperty("KeyMap")
     public Map<MatchKey, List<String>> getKeyMap() {

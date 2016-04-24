@@ -26,11 +26,11 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
 
     @Override
     @MatchStep
-    public MatchOutput match(MatchInput input, boolean returnUnmatched) {
+    public MatchOutput match(MatchInput input) {
         input.setUuid(UUID.randomUUID());
         MatchContext matchContext = prepare(input);
         matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
-        matchContext.setReturnUnmatched(returnUnmatched);
+        matchContext.setReturnUnmatched(input.getReturnUnmatched());
         matchContext = executeMatch(matchContext);
         return matchContext.getOutput();
     }

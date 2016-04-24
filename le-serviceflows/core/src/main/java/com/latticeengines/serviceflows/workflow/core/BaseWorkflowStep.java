@@ -45,6 +45,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String DB_CREDS = "DB_CREDS";
     protected static final String MATCH_COMMAND_ID = "MATCH_COMMAND_ID";
     protected static final String MATCH_TABLE = "MATCH_TABLE";
+    protected static final String MATCH_ROOT_UID = "MATCH_ROOT_UID";
+    protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
     protected static final String MODELING_SERVICE_EXECUTOR_BUILDER = "MODELING_SERVICE_EXECUTOR_BUILDER";
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";

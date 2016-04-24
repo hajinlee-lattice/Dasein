@@ -16,8 +16,8 @@ public class MatchProxy extends BaseRestApiProxy implements MatchInterface {
     }
 
     @Override
-    public MatchOutput matchRealTime(MatchInput input, Boolean returnUnmatched) {
-        String url = constructUrl("/realtime?unmatched={unmatched}", String.valueOf(returnUnmatched));
+    public MatchOutput matchRealTime(MatchInput input) {
+        String url = constructUrl("/realtime");
         return post("realtime_match", url, input, MatchOutput.class);
     }
 

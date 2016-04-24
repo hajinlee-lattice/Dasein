@@ -14,6 +14,7 @@
     <import resource="classpath:dataflow-context.xml"/>
     <import resource="classpath:security-no-controller-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml" />
+    <import resource="classpath:propdata-match-task-context.xml" />
 
     <bean id="externalColumnDao" class="com.latticeengines.propdata.match.dao.impl.ExternalColumnDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPropDataManage"/>
