@@ -365,6 +365,7 @@ public enum LedpCode {
     LEDP_28021("Could not get customerspace from workflow configuration."), //
     LEDP_28022("Could not get workflow job from null applicationId."), //
     LEDP_28023("Could not find workflow job by applicationId {0}."), //
+    LEDP_28024("Received Null propdata match status for this root operation uid: {0}."), //
 
     // le-dellebi
     LEDP_29000(
