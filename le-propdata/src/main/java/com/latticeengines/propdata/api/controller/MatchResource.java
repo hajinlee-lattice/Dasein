@@ -1,5 +1,6 @@
 package com.latticeengines.propdata.api.controller;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +48,7 @@ public class MatchResource implements MatchInterface {
         try {
             return realTimeMatchService.match(input);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, e);
+            throw new LedpException(LedpCode.LEDP_25007, e, new String[] {ExceptionUtils.getFullStackTrace(e) });
         }
     }
 
@@ -63,7 +64,7 @@ public class MatchResource implements MatchInterface {
         try {
             return bulkMatchService.match(input, hdfsPod);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_25007, e);
+            throw new LedpException(LedpCode.LEDP_25007, e, new String[] {ExceptionUtils.getFullStackTrace(e) });
         }
     }
 

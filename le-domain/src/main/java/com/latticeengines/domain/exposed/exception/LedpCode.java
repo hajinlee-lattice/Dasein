@@ -301,7 +301,7 @@ public enum LedpCode {
     LEDP_25004("Match client {0} is not available"), //
     LEDP_25005("Column selection type {0} is not supported"), //
     LEDP_25006("Failed to get metadata for predefined column selection [{0}]"), //
-    LEDP_25007("Propdata match failed."), //
+    LEDP_25007("Propdata match failed. {0}"), //
     LEDP_25008("Failed to retrieve match status for root operation uid {0}"), //
     LEDP_25009("Failed to scan publication progresses"), //
     LEDP_25010("Error in handling transformation configuration"), //
