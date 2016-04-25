@@ -46,13 +46,21 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     @Value("${propdata.match.group.size:20}")
     private Integer groupSize;
 
+    private String avroGlobs;
+
     @Override
     public void execute() {
         log.info("Inside PrepareBulkMatchInput execute()");
         String avroDir = getConfiguration().getInputAvroDir();
         HdfsPodContext.changeHdfsPodId(getConfiguration().getHdfsPodId());
-        Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
-        schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroDir + "/*.avro");
+
+        avroGlobs = avroDir;
+        if (!avroGlobs.endsWith(".avro")) {
+            avroGlobs += "/*.avro";
+        }
+
+        Long count = AvroUtils.count(yarnConfiguration, avroGlobs);
+        schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlobs);
         Integer[] blocks = determineBlockSizes(count);
         List<PropDataJobConfiguration> configurations = readAndSplitInputAvro(blocks);
         executionContext.put(BulkMatchContextKey.YARN_JOB_CONFIGS, configurations);
@@ -90,8 +98,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
     }
 
     private List<PropDataJobConfiguration> readAndSplitInputAvro(Integer[] blocks) {
-        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration,
-                getConfiguration().getInputAvroDir() + "/*.avro");
+        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroGlobs);
         List<PropDataJobConfiguration> configurations = new ArrayList<>();
 
         int blockIdx = 0;
