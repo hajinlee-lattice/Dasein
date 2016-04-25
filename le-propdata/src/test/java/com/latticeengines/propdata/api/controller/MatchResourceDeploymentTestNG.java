@@ -104,7 +104,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
 
         // use avro file
-        input = createAvroBulkMatchInput(true);
+        input = createAvroBulkMatchInput(false);
         command = matchProxy.matchBulk(input, podId);
         appId = ConverterUtils.toApplicationId(command.getApplicationId());
         status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -123,7 +123,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         uploadTestAVro(avroDir, fileName);
 
         // use avro dir
-        MatchInput input = createAvroBulkMatchInput(false);
+        MatchInput input = createAvroBulkMatchInput(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -141,7 +141,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
 
         // use avro file
-        input = createAvroBulkMatchInput(true);
+        input = createAvroBulkMatchInput(false);
         command = matchProxy.matchBulk(input, podId);
         appId = ConverterUtils.toApplicationId(command.getApplicationId());
         status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
