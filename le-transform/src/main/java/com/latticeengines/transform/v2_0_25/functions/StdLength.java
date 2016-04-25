@@ -17,7 +17,7 @@ public class StdLength implements RealTimeTransform {
         String value = column == null ? null : String.valueOf(record.get(column));
 
         if(value.equals("null"))
-            return null;
+            return 1;
 
         return calculateStdLength(value);
     }

@@ -37,7 +37,7 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
         if (Pattern.matches("\\d+", date)) {
             try {
                 Long dateAsLong = new Long(date);
-                dt = new Date(dateAsLong / 1000);
+                dt = new Date(dateAsLong);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
