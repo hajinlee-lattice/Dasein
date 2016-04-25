@@ -9,16 +9,16 @@
 
     <properties>
         <component-name>serviceruntime</component-name>
-        <le.common.version>2.0.25-SNAPSHOT</le.common.version>
-        <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
-        <le.monitor.version>2.0.25-SNAPSHOT</le.monitor.version>
+        <le.common.version>2.0.26-SNAPSHOT</le.common.version>
+        <le.domain.version>2.0.26-SNAPSHOT</le.domain.version>
+        <le.monitor.version>2.0.26-SNAPSHOT</le.monitor.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>2.0.25-SNAPSHOT</version>
+        <version>2.0.26-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

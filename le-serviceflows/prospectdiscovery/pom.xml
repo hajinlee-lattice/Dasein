@@ -7,18 +7,18 @@
     <name>le-serviceflows-${component-name}</name>
 
     <properties>
-        <le.dataflow.version>2.0.25-SNAPSHOT</le.dataflow.version>
-        <le.domain.version>2.0.25-SNAPSHOT</le.domain.version>
-        <le.proxy.version>2.0.25-SNAPSHOT</le.proxy.version>
-        <le.serviceflows.core.version>2.0.25-SNAPSHOT</le.serviceflows.core.version>
-        <le.workflow.version>2.0.25-SNAPSHOT</le.workflow.version>
+        <le.dataflow.version>2.0.26-SNAPSHOT</le.dataflow.version>
+        <le.domain.version>2.0.26-SNAPSHOT</le.domain.version>
+        <le.proxy.version>2.0.26-SNAPSHOT</le.proxy.version>
+        <le.serviceflows.core.version>2.0.26-SNAPSHOT</le.serviceflows.core.version>
+        <le.workflow.version>2.0.26-SNAPSHOT</le.workflow.version>
         <component-name>prospectdiscovery</component-name>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-serviceflows</artifactId>
-        <version>2.0.25-SNAPSHOT</version>
+        <version>2.0.26-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
