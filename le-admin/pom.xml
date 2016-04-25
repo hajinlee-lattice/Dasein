@@ -72,7 +72,7 @@
                         <version>${jetty.version}</version>
                         <configuration>
                             <httpConnector>
-                                <port>8076</port>
+                                <port>8085</port>
                             </httpConnector>
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
