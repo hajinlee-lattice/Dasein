@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.domain.exposed.propdata.match.MatchKey;
 import com.latticeengines.domain.exposed.propdata.match.MatchKeyUtils;
+import com.latticeengines.propdata.match.util.MatchUtils;
 
 class MatchInputValidator {
     private static Log log = LogFactory.getLog(MatchInputValidator.class);
@@ -138,7 +139,7 @@ class MatchInputValidator {
 
             Long count;
             try {
-                count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
+                count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
                 log.info("Find " + count + " records in the avro buffer dir " + avroDir);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to count input data", e);
@@ -162,7 +163,7 @@ class MatchInputValidator {
     }
 
     private static Schema extractSchema(String avroDir, Configuration yarnConfiguration) throws Exception {
-        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
+        List<String> files = HdfsUtils.getFilesByGlob(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
         if (files.size() > 0) {
             String avroPath = files.get(0);
             return AvroUtils.getSchema(yarnConfiguration, new org.apache.hadoop.fs.Path(avroPath));

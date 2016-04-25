@@ -28,4 +28,12 @@ public class MatchUtils {
         return mergedStats;
     }
 
+    public static String toAvroGlobs(String avroDirOrFile) {
+        String avroGlobs = avroDirOrFile;
+        if (!avroDirOrFile.endsWith(".avro")) {
+            avroGlobs += "/*.avro";
+        }
+        return avroGlobs;
+    }
+
 }

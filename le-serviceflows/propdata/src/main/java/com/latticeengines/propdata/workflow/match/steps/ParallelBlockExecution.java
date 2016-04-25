@@ -139,8 +139,8 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             String outputFile = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
             HdfsUtils.writeToFile(yarnConfiguration, outputFile, JsonUtils.serialize(matchOutput));
             String avroDir = hdfsPathBuilder.constructMatchOutputDir(rootOperationUid).toString();
-            Long count = AvroUtils.count(yarnConfiguration, avroDir + "/*.avro");
-            log.info("Generated " + count + " results in " + avroDir);
+            Long count = AvroUtils.count(yarnConfiguration, MatchUtils.toAvroGlobs(avroDir));
+            log.info("Generated " + count + " results in " + MatchUtils.toAvroGlobs(avroDir));
 
             matchCommandService.update(rootOperationUid) //
                     .resultLocation(avroDir) //

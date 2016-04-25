@@ -33,6 +33,7 @@ import com.latticeengines.propdata.match.service.BulkMatchService;
 import com.latticeengines.propdata.match.service.MatchCommandService;
 import com.latticeengines.propdata.match.service.MatchPlanner;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
+import com.latticeengines.propdata.match.util.MatchUtils;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("bulkMatchService")
@@ -154,8 +155,9 @@ public class BulkMatchServiceImpl implements BulkMatchService {
         String inputDir = avroInputBuffer.getAvroDir();
         String matchInputAvro = hdfsPathBuilder.constructMatchBlockInputAvro(rootOperationUid, rootOperationUid)
                 .toString();
-        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, inputDir + "/*.avro");
-        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir + "/*.avro");
+        String avroGlobs = MatchUtils.toAvroGlobs(inputDir);
+        Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroGlobs);
+        Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroGlobs);
         List<GenericRecord> data = new ArrayList<>();
         while (iterator.hasNext()) {
             data.add(iterator.next());

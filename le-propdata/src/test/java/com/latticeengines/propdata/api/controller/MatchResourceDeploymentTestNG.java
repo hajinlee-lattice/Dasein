@@ -52,7 +52,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Autowired
     private MatchCommandService matchCommandService;
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testPredefined() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data);
@@ -66,7 +66,7 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testAutoResolvedKeyMap() {
         List<List<Object>> data = TestMatchInputUtils.getGoodInputData();
         MatchInput input = TestMatchInputUtils.prepareSimpleMatchInput(data, false);
@@ -80,11 +80,13 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testSingleBlockBulkMatch() throws Exception {
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
-        MatchInput input = createAvroBulkMatchInput();
+
+        // use avr dir
+        MatchInput input = createAvroBulkMatchInput(true);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -100,15 +102,28 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+
+        // use avro file
+        input = createAvroBulkMatchInput(true);
+        command = matchProxy.matchBulk(input, podId);
+        appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
+
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = true)
     public void testMultiBlockBulkMatch() {
         HdfsPodContext.changeHdfsPodId(podId);
         cleanupAvroDir(hdfsPathBuilder.podDir().toString());
         cleanupAvroDir(avroDir);
         uploadTestAVro(avroDir, fileName);
-        MatchInput input = createAvroBulkMatchInput();
+
+        // use avro dir
+        MatchInput input = createAvroBulkMatchInput(false);
         MatchCommand command = matchProxy.matchBulk(input, podId);
         ApplicationId appId = ConverterUtils.toApplicationId(command.getApplicationId());
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
@@ -124,14 +139,28 @@ public class MatchResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         Assert.assertEquals(finalStatus.getMatchStatus(), MatchStatus.FINISHED);
         Assert.assertEquals(finalStatus.getResultLocation(),
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
+
+        // use avro file
+        input = createAvroBulkMatchInput(true);
+        command = matchProxy.matchBulk(input, podId);
+        appId = ConverterUtils.toApplicationId(command.getApplicationId());
+        status = YarnUtils.waitFinalStatusForAppId(yarnConfiguration, appId);
+        Assert.assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
+        matchCommand = matchCommandService.getByRootOperationUid(command.getRootOperationUid());
+        Assert.assertEquals(matchCommand.getMatchStatus(), MatchStatus.FINISHED);
     }
 
-    private MatchInput createAvroBulkMatchInput() {
+    private MatchInput createAvroBulkMatchInput(boolean useDir) {
         MatchInput matchInput = new MatchInput();
         matchInput.setTenant(new Tenant(PropDataConstants.SERVICE_CUSTOMERSPACE));
         matchInput.setPredefinedSelection(ColumnSelection.Predefined.DerivedColumns);
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
-        inputBuffer.setAvroDir(avroDir);
+        if (useDir) {
+            inputBuffer.setAvroDir(avroDir);
+        } else {
+            inputBuffer.setAvroDir(avroDir + "/" + fileName);
+        }
         matchInput.setInputBuffer(inputBuffer);
         return matchInput;
     }
