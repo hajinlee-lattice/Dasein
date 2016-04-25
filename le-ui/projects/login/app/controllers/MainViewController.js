@@ -207,7 +207,15 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $event.preventDefault();
         }
 
-        $window.location.href = '/lp/';
+        var clientSession = BrowserStorageUtility.getClientSession();
+        var uiAddress;
+        if (clientSession != null && clientSession.Tenant != null && clientSession.Tenant.UIVersion == "2.0") {
+            uiAddress = '/lp2/';
+        } else {
+            uiAddress = '/lp/';
+        }
+
+        $window.location.href = uiAddress;
     };
 
     $scope.logoutClicked = function ($event) {
