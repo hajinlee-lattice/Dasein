@@ -294,8 +294,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                     "com/latticeengines/eai/service/impl/salesforce/%s.json", tableName).toString());
             String str = FileUtils.readFileToString(new File(url.getFile()));
             Table table = JsonUtils.deserialize(str, Table.class);
-            DateTime date = new DateTime();
-            table.getLastModifiedKey().setLastModifiedTimestamp(date.minusMonths(6).getMillis());
+            DateTime date = new DateTime(2014, 1, 1, 0, 0);
+            table.getLastModifiedKey().setLastModifiedTimestamp(date.getMillis());
             tables.add(table);
         }
         return tables;
