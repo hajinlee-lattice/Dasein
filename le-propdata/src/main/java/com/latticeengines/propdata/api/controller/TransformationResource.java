@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
@@ -20,7 +22,6 @@ import com.latticeengines.domain.exposed.propdata.transformation.TransformationR
 import com.latticeengines.network.exposed.propdata.TransformationInterface;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 

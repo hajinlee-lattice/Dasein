@@ -4,37 +4,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.latticeengines.microservice.exposed.AppInfoProvider;
-import com.mangofactory.swagger.configuration.SpringSwaggerConfig;
-import com.mangofactory.swagger.models.dto.ApiInfo;
-import com.mangofactory.swagger.plugin.EnableSwagger;
-import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import com.latticeengines.microservice.exposed.DocketProvider;
 
 @Configuration
-@EnableSwagger
+@EnableSwagger2
 public class SwaggerConfig {
-    
-    private SpringSwaggerConfig springSwaggerConfig;
-    private AppInfoProvider appInfoProvider;
 
     @Autowired
-    public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
-        this.springSwaggerConfig = springSwaggerConfig;
-    }
-    
-    @Autowired
-    public void setAppInfoProvider(AppInfoProvider appInfoProvider) {
-        this.appInfoProvider = appInfoProvider;
-    }
+    private DocketProvider docketProvider;
 
     @Bean
-    public SwaggerSpringMvcPlugin customImplementation() {
-        return new SwaggerSpringMvcPlugin(springSwaggerConfig).apiInfo(apiInfo());
+    public Docket api() {
+        return docketProvider.getDocket();
     }
-
-    private ApiInfo apiInfo() {
-        return appInfoProvider.apiInfo();
-    }
-
 }

@@ -43,11 +43,11 @@ public class StatusController {
         Boolean overall = true;
         for (String microservice : microservices) {
             try {
-                String response = restTemplate.getForObject(String.format("%s/%s/api-docs", microserviceHostPort, microservice), String.class);
-                if (response.contains("\"apiVersion\"")) {
+                String response = restTemplate.getForObject(String.format("%s/%s/v2/api-docs", microserviceHostPort, microservice), String.class);
+                if (response.contains("\"swagger\":\"2.0\"")) {
                     status.put(microservice, "OK");
                 } else {
-                    status.put(microservice, "Unknow api-doc: " + response);
+                    status.put(microservice, "Unknown api-doc: " + response);
                     overall = false;
                 }
             } catch (Exception e) {

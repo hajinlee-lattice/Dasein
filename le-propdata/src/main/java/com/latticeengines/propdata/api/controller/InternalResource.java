@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
@@ -20,7 +22,6 @@ import com.latticeengines.network.exposed.propdata.InternalInterface;
 import com.latticeengines.propdata.core.service.SqoopService;
 import com.latticeengines.propdata.match.service.PropDataYarnService;
 import com.latticeengines.security.exposed.InternalResourceBase;
-import com.mangofactory.swagger.annotations.ApiIgnore;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 

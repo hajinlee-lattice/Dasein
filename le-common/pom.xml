@@ -209,6 +209,12 @@
             <artifactId>natty</artifactId>
             <version>0.11</version>
         </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${springfox.swagger.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

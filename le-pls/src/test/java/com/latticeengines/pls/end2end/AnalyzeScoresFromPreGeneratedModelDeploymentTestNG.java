@@ -23,9 +23,11 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
 
     private static final Log log  = LogFactory.getLog(AnalyzeScoresFromPreGeneratedModelDeploymentTestNG.class);
 
-    private static final int NUM_RECORDS_TO_SCORE = 10;
+    private static final String TENANT_ID = "LETest1461548608603.LETest1461548608603.Production";
+    private static final String MODEL_ID = "ms__2c5744c9-13bc-48e6-abcf-955c5581c294-SelfServ";
+
+    private static final int NUM_RECORDS_TO_SCORE = 100;
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
-    private static final String TENANT_ID = "LETest1461389755276.LETest1461389755276.Production";
     private static final String fileName = "Mulesoft_MKTO_LP3_ScoringLead_20160316_170113.csv";
 
     @Value("${pls.scoringapi.rest.endpoint.hostport}")
@@ -63,10 +65,8 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     @Test(groups = "deployment.lp", enabled = false)
     public void useLocalScoredTextAndCompareScores() throws InterruptedException, IOException {
         SSLUtils.turnOffSslChecking();
-        String modelId = "ms__7a2db4c9-6185-4ab5-882c-d12245c71a57-SelfServ";
-
         String pathToModelInputCsv = RESOURCE_BASE + "/" + fileName;
-        scoreCorrectnessService.analyzeScores(TENANT_ID, pathToModelInputCsv, modelId, NUM_RECORDS_TO_SCORE);
+        scoreCorrectnessService.analyzeScores(TENANT_ID, pathToModelInputCsv, MODEL_ID, NUM_RECORDS_TO_SCORE);
     }
 
 }

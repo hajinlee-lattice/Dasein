@@ -16,6 +16,7 @@ import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWit
 import com.latticeengines.serviceflows.workflow.core.MicroserviceStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
+import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.scoring.ScoreStepConfiguration;
 
 public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
@@ -32,6 +33,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
+        private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("scoreWorkflow", customerSpace, "scoreWorkflow");
@@ -41,6 +43,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
+            matchResult.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -55,6 +58,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            matchResult.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -122,6 +126,7 @@ public class ScoreWorkflowConfiguration extends WorkflowConfiguration {
             export.microserviceStepConfiguration(microserviceStepConfiguration);
 
             configuration.add(match);
+            configuration.add(matchResult);
             configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);

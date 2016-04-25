@@ -10,6 +10,7 @@ import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttribute
 import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportReport;
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
+import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -33,6 +34,9 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private MatchWorkflow matchWorkflow;
 
     @Autowired
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
+
+    @Autowired
     private AddStandardAttributes addStandardAttributes;
 
     @Autowired
@@ -52,7 +56,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(createTableImportReport) //
                 .next(dedupEventTable) //
                 .next(modelValidationWorkflow) //
-                .next(matchWorkflow) //
+                .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributes) //
                 .next(modelWorkflow) //
                 .listener(sendEmailAfterModelCompletionListener) //

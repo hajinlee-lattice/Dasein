@@ -16,6 +16,7 @@ import com.latticeengines.leadprioritization.workflow.steps.DedupEventTableConfi
 import com.latticeengines.serviceflows.workflow.export.ExportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.importdata.ImportStepConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchStepConfiguration;
+import com.latticeengines.serviceflows.workflow.match.ProcessMatchResultConfiguration;
 import com.latticeengines.serviceflows.workflow.modeling.ModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStepConfiguration;
 
@@ -30,6 +31,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
         private MatchStepConfiguration match = new MatchStepConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
+        private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             importData.setMicroServiceHostPort(microServiceHostPort);
@@ -40,6 +42,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             match.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
+            matchResult.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -54,6 +57,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             match.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
+            matchResult.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -174,6 +178,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends WorkflowConfigurat
             configuration.add(match);
             configuration.add(model);
             configuration.add(addStandardAttributes);
+            configuration.add(matchResult);
 
             configuration.add(export);
 

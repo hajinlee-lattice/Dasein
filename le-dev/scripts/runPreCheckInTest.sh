@@ -78,7 +78,7 @@ def waitForServerToStart(checkingUrl, waitminute):
     return False
 
 def startAllServers(waitminute):
-    microserviceUrl = "http://localhost:8080/doc/doc/api-docs"
+    microserviceUrl = "http://localhost:8080/doc/status"
     isMicroserviceRunning = False
     try:
         restCallOutput = urllib2.urlopen(microserviceUrl).read()
@@ -101,7 +101,7 @@ def startAllServers(waitminute):
     else:
         print "Microservice server is running locally."
 
-    plsServerUrl = "http://localhost:8081/pls/api-docs"
+    plsServerUrl = "http://localhost:8081/pls/v2/api-docs"
     isPLSServerRunning = False
     try:
         restCallOutput = urllib2.urlopen(plsServerUrl).read()
@@ -127,7 +127,7 @@ def startAllServers(waitminute):
     else:
         print "PLS server is running locally."
 
-    tenantConsoleUrl = "http://localhost:8085/#/login"
+    tenantConsoleUrl = "http://localhost:8085/admin/v2/api-docs"
     isTenantConsoleRunning = False
     try:
         restCallOutput = urllib2.urlopen(tenantConsoleUrl).read()
@@ -175,8 +175,8 @@ def startAllServersViaTomcat(waitminute):
         tomcatPid = proc.pid
 
     microserviceUrl = "http://localhost:8080/doc/status"
-    plsServerUrl = "http://localhost:8081/pls/api-docs"
-    tenantConsoleUrl = "http://localhost:8085/#/login"
+    plsServerUrl = "http://localhost:8081/pls/v2/api-docs"
+    tenantConsoleUrl = "http://localhost:8085/admin/v2/api-docs"
 
     if not waitForServerToStart(microserviceUrl, waitminute):
         print "Microservice server did not successfully start. Exitting."

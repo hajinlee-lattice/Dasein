@@ -10,6 +10,7 @@ import com.latticeengines.leadprioritization.workflow.steps.AddStandardAttribute
 import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -20,6 +21,9 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
 
     @Autowired
     private MatchWorkflow matchWorkflow;
+
+    @Autowired
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Autowired
     private AddStandardAttributes addStandardAttributes;
@@ -43,7 +47,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(matchWorkflow) //
+        return new WorkflowBuilder().next(matchDataCloudWorkflow) //
                 .next(addStandardAttributes) //
                 .next(score) //
                 .next(combineInputTableWithScore) //
