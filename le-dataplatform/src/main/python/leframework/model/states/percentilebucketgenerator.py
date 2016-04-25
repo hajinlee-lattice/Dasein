@@ -24,6 +24,8 @@ class PercentileBucketGenerator(State, JsonGenBase):
         indexForMin = i + numElementsInBucket - 1
         pct = 100
         self.percentileBuckets = []
+        self.maxPctScore = 99
+        self.minPctScore = 5
         # This means that the test set length is less than 100
         if numElementsInBucket == 0:
             self.logger.info("Dataset length is less than 100 so no buckets can be created.")
@@ -44,8 +46,13 @@ class PercentileBucketGenerator(State, JsonGenBase):
 
     def createBucket(self, scoredSorted, scoredSortedLen, i, indexForMin, pct):
         bucket = OrderedDict()
-        bucket["Percentile"] = pct
-        
+        if pct > self.maxPctScore:
+            bucket["Percentile"] = self.maxPctScore
+        elif pct < self.minPctScore:
+            bucket["Percentile"] = self.minPctScore
+        else:
+            bucket["Percentile"] = pct
+
         try:
             if indexForMin > scoredSortedLen:
                 indexForMin = scoredSortedLen - 1
