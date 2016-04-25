@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.ZipUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -58,7 +59,7 @@ public class ScoringFileUploadResource {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public SourceFile uploadFile( //
+    public ResponseDocument<SourceFile> uploadFile( //
             @RequestParam(value = "displayName", required = true) String displayName, //
             @RequestParam(value = "modelId") String modelId, //
             @RequestParam(value = "compressed", required = false) boolean compressed, //
@@ -85,7 +86,7 @@ public class ScoringFileUploadResource {
             sourceFile.setTableName(metadataTable.getName());
 
             sourceFileService.update(sourceFile);
-            return sourceFile;
+            return ResponseDocument.successResponse(sourceFile);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
         } finally {

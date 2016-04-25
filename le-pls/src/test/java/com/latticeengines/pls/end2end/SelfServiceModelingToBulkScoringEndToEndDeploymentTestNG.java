@@ -4,11 +4,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
-
+import java.util.Set;
 import javax.annotation.Nullable;
-
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,7 +30,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.LinkedMultiValueMap;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -43,6 +47,9 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
     private static final Log log = LogFactory.getLog(SelfServiceModelingEndToEndDeploymentTestNG.class);
+
+    // expected lines in data set to output to csv after bulk scoring
+    private static final int TOTAL_QUALIFIED_LINES = 4161;
 
     @Autowired
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
@@ -125,7 +132,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "poll")
-    public void downloadCsv() {
+    public void downloadCsv() throws IOException {
         selfServiceModeling.getRestTemplate().getMessageConverters().add(new ByteArrayHttpMessageConverter());
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
@@ -136,10 +143,30 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String results = new String(response.getBody());
         assertTrue(results.length() > 0);
+        CSVParser parser = null;
+        InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(response.getBody()));
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');
+        try {
+            parser = new CSVParser(reader, format);
+            Set<String> csvHeaders = parser.getHeaderMap().keySet();
+            assertTrue(csvHeaders.contains("LEAD"));
+            assertTrue(csvHeaders.contains("Phone"));
+            assertTrue(csvHeaders.contains("Some Column"));
+            int line = 1;
+            for (CSVRecord record : parser.getRecords()) {
+                assertTrue(StringUtils.isNotEmpty(record.get("Percentile")));
+                line++;
+            }
+            assertEquals(line, TOTAL_QUALIFIED_LINES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            parser.close();
+        }
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv", enabled = false)
+    @Test(groups = "deployment.lp", dependsOnMethods = "downloadCsv")
     public void uploadTestingDataFile() {
         LinkedMultiValueMap<String, Object> map = new LinkedMultiValueMap<>();
         map.add("file", new ClassPathResource(RESOURCE_BASE + "/" + fileName));
@@ -149,13 +176,13 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         HttpEntity<LinkedMultiValueMap<String, Object>> requestEntity = new HttpEntity<>(map, headers);
         ResponseDocument response = selfServiceModeling.getRestTemplate().postForObject( //
                 String.format("%s/pls/scores/fileuploads?modelId=%s&displayName=%s", getRestAPIHostPort(), modelId,
-                        "SelfServiceScoring Test File.csv"), //
-                requestEntity, ResponseDocument.class);
+                        "SelfServiceScoring Test File.csv"), requestEntity, ResponseDocument.class);
+        assertTrue(response.isSuccess());
         sourceFile = new ObjectMapper().convertValue(response.getResult(), SourceFile.class);
         log.info(sourceFile.getName());
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = false)
+    @Test(groups = "deployment.lp", dependsOnMethods = "uploadTestingDataFile", enabled = true)
     public void testScoreTestingData() throws Exception {
         System.out.println(String.format("%s/pls/scores/%s", getRestAPIHostPort(), modelId));
         applicationId = selfServiceModeling.getRestTemplate().postForObject(
@@ -166,18 +193,18 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
         assertNotNull(applicationId);
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 60000, enabled = false)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoreTestingData", timeOut = 60000, enabled = true)
     public void testScoringTestDataJobIsListed() {
         testJobIsListed();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 1800000, enabled = false)
+    @Test(groups = "deployment.lp", dependsOnMethods = "testScoringTestDataJobIsListed", timeOut = 1800000, enabled = true)
     public void pollScoringTestDataJob() {
         poll();
     }
 
-    @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = false)
-    public void downloadTestingDataScoreResultCsv() {
+    @Test(groups = "deployment.lp", dependsOnMethods = "pollScoringTestDataJob", enabled = true)
+    public void downloadTestingDataScoreResultCsv() throws IOException {
         downloadCsv();
     }
 
