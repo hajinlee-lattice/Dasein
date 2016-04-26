@@ -406,7 +406,7 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
                     if (val instanceof Utf8) {
                         map.put(fieldName, ((Utf8) val).toString());
                     } else {
-                        map.put(fieldName, record.get(i));
+                        map.put(fieldName, val);
                     }
                 }
                 toReturn.add(map);
