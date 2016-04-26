@@ -21,7 +21,7 @@ public class DocketProviderImpl extends DocketProviderBase implements DocketProv
     }
 
     protected String contextPath()  {
-        return "/workflowapi";
+        return "/";
     }
 
 }
