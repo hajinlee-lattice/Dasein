@@ -189,7 +189,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                 String.format("%s/pls/scores/%s?fileName=%s", getRestAPIHostPort(), modelId, sourceFile.getName()), //
                 null, String.class);
         applicationId = StringUtils.substringBetween(applicationId.split(":")[1], "\"");
-        System.out.println(String.format("Score training data applicationId = %s", applicationId));
+        System.out.println(String.format("Score testing data applicationId = %s", applicationId));
         assertNotNull(applicationId);
     }
 
