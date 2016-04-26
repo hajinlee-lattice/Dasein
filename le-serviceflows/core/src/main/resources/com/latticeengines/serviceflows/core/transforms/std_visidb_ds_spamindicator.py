@@ -14,6 +14,7 @@ from std_length import std_length
 def metadata():
     return {  'ApprovedUsage'   : 'ModelAndModelInsights'
             , 'Description'     : 'Indicator for spam leads'
+            , 'FundamentalType' : 'boolean'
             , 'DisplayName'     : 'Spam Lead'
             , 'Category'        : 'Lead Information'
             , 'StatisticalType' : 'nominal'
