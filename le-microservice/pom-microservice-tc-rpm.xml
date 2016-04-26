@@ -88,9 +88,6 @@
                         <scriptFile>core/src/main/scripts/postinstall_tc</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
-                    <requires>
-                        <require>le-config-rpm</require>
-                    </requires>
                 </configuration>
             </plugin>
         </plugins>

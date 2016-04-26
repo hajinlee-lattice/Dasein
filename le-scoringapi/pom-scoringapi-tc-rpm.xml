@@ -55,9 +55,6 @@
                         <scriptFile>src/main/resources/scripts/tcpostinstall</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
-                    <requires>
-                        <require>le-config-rpm</require>
-                    </requires>
                 </configuration>
             </plugin>
         </plugins>
