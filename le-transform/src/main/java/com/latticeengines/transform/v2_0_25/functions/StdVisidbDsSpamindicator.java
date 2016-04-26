@@ -9,6 +9,11 @@ import com.latticeengines.transform.exposed.RealTimeTransform;
 
 public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
+    private static Pattern pattern = Pattern.compile("(^|\\s+)[\\[]*(none|no|not|delete|"
+            + "asd|sdf|unknown|undisclosed|"
+            + "null|dont|don\'t|n/a|n.a"
+            + "|abc|xyz|noname|nocompany)($|\\s+)");
+
     public StdVisidbDsSpamindicator(String modelPath) {
     }
 
@@ -30,6 +35,12 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
             firstName = "";
         if(lastName.equals("null"))
             lastName = "";
+        if(title.equals("null"))
+            title = "";
+        if(phone.equals("null"))
+            phone = "";
+        if(companyName.equals("null"))
+            companyName = "";
 
         return calculateStdVisidbDsSpamindicator(firstName, lastName, title,
                 phone, companyName);
@@ -51,7 +62,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         Double companyNameEntropy = StdVisidbDsCompanynameEntropy
                 .calculateStdVisidbDsCompanynameEntropy(companyName);
 
-        if (!companyNameEntropy.equals("null") && companyNameEntropy <= 0.03)
+        if (companyNameEntropy != null && companyNameEntropy <= 0.03)
             score += 1;
 
         if (StdLength.calculateStdLength(title) <= 2)
@@ -59,7 +70,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
         Double phoneEntropy = StdEntropy.calculateStdEntropy(phone);
 
-        if (!phoneEntropy.equals("null") && phoneEntropy <= 0.03)
+        if (phoneEntropy != null && phoneEntropy <= 0.03)
             score += 1;
 
         if (score >= 2)
@@ -77,14 +88,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         if (Pattern.matches(".*[\"#$%+:<=>?@\\^_`{}~].*", companyName) == true)
             return 1;
 
-        // (.*?\\b)no(\\b.*?) - this will match a "no" by itself
-        if (Pattern
-                .matches(
-                        "(^|\\s+)[\\[]*(none|(.*?\\b)no(\\b.*?)|(.*?\\b)not(\\b.*?)|(.*?\\b)delete(\\b.*?)|"
-                                + "(.*?\\b)asd(\\b.*?)|(.*?\\b)sdf(\\b.*?)|(.*?\\b)unknown(\\b.*?)|(.*?\\b)undisclosed(\\b.*?)|"
-                                + "(.*?\\b)null(\\b.*?)|(.*?\\b)dont(\\b.*?)|(.*?\\b)don\'t(\\b.*?)|(.*?\\b)n/a(\\b.*?)|(.*?\\b)n\\.a(\\b.*?)"
-                                + "|(.*?\\b)abc(?!\\w)|(.*?\\b)xyz(\\b.*?)|(.*?\\b)noname(\\b.*?)|(.*?\\b)nocompany(\\b.*?))",
-                        companyName))
+        if (pattern.matcher(companyName).find())
             return 1;
 
         try {

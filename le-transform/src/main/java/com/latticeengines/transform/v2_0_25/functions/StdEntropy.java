@@ -24,7 +24,7 @@ public class StdEntropy implements RealTimeTransform {
     }
 
     static Double calculateStdEntropy(String s) {
-        if (StringUtils.isEmpty(s))
+        if (StringUtils.isEmpty(s) || "null".equals(s))
             return null;
 
         HashMap<Character, Integer> occurences = new HashMap<Character, Integer>();

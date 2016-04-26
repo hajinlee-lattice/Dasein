@@ -27,6 +27,9 @@ public class StdVisidbDsFirstnameSameasLastname implements RealTimeTransform {
 
     public static boolean calcualteStdVisidbDsFirstnameSameasLastname(
             String firstName, String lastName) {
+        if(firstName.equals("null") || lastName.equals("null"))
+            return false;
+
         if (StringUtils.isEmpty(firstName) || StringUtils.isEmpty(lastName))
             return false;
 

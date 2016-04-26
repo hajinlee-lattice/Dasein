@@ -24,8 +24,8 @@ public class StdVisidbDsCompanynameEntropy implements RealTimeTransform {
     }
 
     public static Double calculateStdVisidbDsCompanynameEntropy(String s) {
-        if (StringUtils.isEmpty(s) || argument_length(s) == 0)
-            return 0.0;
+        if (StringUtils.isEmpty(s) || argument_length(s) == 0 || "null".equals(s))
+            return null;
 
         s = s.toLowerCase();
 
