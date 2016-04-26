@@ -25,6 +25,9 @@ public class YarnUtils {
     public static final EnumSet<YarnApplicationState> TERMINAL_APP_STATE = EnumSet.of(YarnApplicationState.FAILED,
             YarnApplicationState.KILLED, YarnApplicationState.FINISHED);
 
+    public static final EnumSet<YarnApplicationState> FAILED_STATUS = EnumSet.of(YarnApplicationState.FAILED,
+            YarnApplicationState.KILLED);
+
     public static boolean isPrempted(String diagnostics) {
         if (Strings.isNullOrEmpty(diagnostics))
             return false;
