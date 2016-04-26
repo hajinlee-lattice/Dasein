@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -140,7 +141,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
         WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
         if (workflowId == null) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobStatusForJobWithoutWorkflowId(workflowJob);
+            com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
             return job;
         }
         return workflowService.getJob(workflowId);
@@ -155,12 +156,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
-            if (workflowId == null) {
-                com.latticeengines.domain.exposed.workflow.Job job = getJobStatusForJobWithoutWorkflowId(workflowJob);
+            com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
+            if(job.getJobStatus() != null){
                 jobs.add(job);
-            } else {
-                workflowIds.add(workflowId);
+            }
+            else{
+                workflowIds.add(workflowJob.getAsWorkflowId());
             }
         }
 
@@ -175,32 +176,34 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJobStatusForJobWithoutWorkflowId(WorkflowJob workflowJob) {
+    public com.latticeengines.domain.exposed.workflow.Job getJobStatusFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
         Map<String, String> inputProperties = workflowService.getInputs(workflowJob.getInputContext());
         job.setInputs(inputProperties);
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
         job.setUser(workflowJob.getUserId());
-        // WorkflowId null, try to get state from db directly without talking to
-        // Yarn
-        if (workflowJob.getState() != null && YarnUtils.TERMINAL_APP_STATE.contains(workflowJob.getState())) {
+
+        String applicationId = workflowJob.getApplicationId();
+        // get state first from database
+        if (workflowJob.getStatus() != null && workflowJob.getStatus().equals(FinalApplicationStatus.FAILED)) {
             job.setJobStatus(JobStatus.FAILED);
-            job.setApplicationId(workflowJob.getApplicationId());
+            job.setApplicationId(applicationId);
 
             if (workflowJob.getStartTimeInMillis() != null) {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
         } else {
-            String applicationId = workflowJob.getApplicationId();
-            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
-                    .getJobStatus(applicationId);
-            if (YarnUtils.TERMINAL_APP_STATE.contains(yarnJobStatus.getState())) {
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy.getJobStatus(applicationId);
+            //query yarn for jobs which have failed, killed final status, and finished state without workflowId
+            if (YarnUtils.FAILED_STATUS.contains(yarnJobStatus.getStatus()) //
+                    || yarnJobStatus.getState().equals(YarnApplicationState.FINISHED) //
+                    && workflowJob.getAsWorkflowId() == null) {
                 job.setJobStatus(JobStatus.FAILED);
                 job.setStartTimestamp(new Date(yarnJobStatus.getStartTime()));
-                workflowJob.setState(YarnApplicationState.FAILED);
+                workflowJob.setStatus(FinalApplicationStatus.FAILED);
                 workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
                 workflowJobEntityMgr.update(workflowJob);
-            } else {
+            } else if (workflowJob.getAsWorkflowId() == null) {
                 job.setJobStatus(JobStatus.PENDING);
             }
         }

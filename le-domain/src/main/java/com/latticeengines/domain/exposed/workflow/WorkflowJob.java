@@ -19,7 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -61,9 +61,9 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "INPUT_CONTEXT", length = 4000)
     private String inputContextString;
 
-    @Column(name = "STATE")
+    @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
-    private YarnApplicationState state;
+    private FinalApplicationStatus status;
 
     @Column(name = "START_TIME")
     private Long startTimeInMillis;
@@ -173,12 +173,12 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
         this.inputContextString = inputContextString;
     }
 
-    public YarnApplicationState getState() {
-        return state;
+    public FinalApplicationStatus getStatus() {
+        return status;
     }
 
-    public void setState(YarnApplicationState state) {
-        this.state = state;
+    public void setStatus(FinalApplicationStatus status) {
+        this.status = status;
     }
 
     public Long getStartTimeInMillis() {

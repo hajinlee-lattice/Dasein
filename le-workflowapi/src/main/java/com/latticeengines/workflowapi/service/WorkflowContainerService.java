@@ -23,5 +23,5 @@ public interface WorkflowContainerService {
 
     List<Job> getJobsByTenant(long tenantPid);
 
-    Job getJobStatusForJobWithoutWorkflowId(WorkflowJob workflowJob);
+    Job getJobStatusFromWorkflowJobAndYarn(WorkflowJob workflowJob);
 }

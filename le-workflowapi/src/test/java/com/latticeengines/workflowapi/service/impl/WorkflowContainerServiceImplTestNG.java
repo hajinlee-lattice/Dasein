@@ -2,6 +2,7 @@ package com.latticeengines.workflowapi.service.impl;
 
 import java.util.Date;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -40,11 +41,11 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
 
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(t);
-        workflowJob.setState(YarnApplicationState.FINISHED);
+        workflowJob.setStatus(FinalApplicationStatus.FAILED);
         workflowJob.setStartTimeInMillis(100000000L);
         workflowJobEntityMgr.create(workflowJob);
 
-        Job job = workflowContainerService.getJobStatusForJobWithoutWorkflowId(workflowJob);
+        Job job = workflowContainerService.getJobStatusFromWorkflowJobAndYarn(workflowJob);
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));
@@ -76,13 +77,13 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
                 });
 
         ((WorkflowContainerServiceImpl) workflowContainerService).setJobProxy(jobProxy);
-        Job job = workflowContainerService.getJobStatusForJobWithoutWorkflowId(workflowJob);
+        Job job = workflowContainerService.getJobStatusFromWorkflowJobAndYarn(workflowJob);
 
         assertEquals(job.getJobStatus(), JobStatus.FAILED);
         assertEquals(job.getStartTimestamp(), new Date(workflowJob.getStartTimeInMillis()));
 
         workflowJob = workflowJobEntityMgr.findByApplicationId("applicationid_0001");
-        assertEquals(workflowJob.getState(), YarnApplicationState.FAILED);
+        assertEquals(workflowJob.getStatus(), FinalApplicationStatus.FAILED);
         assertEquals(workflowJob.getStartTimeInMillis().longValue(), 100000001L);
 
     }
