@@ -23,7 +23,7 @@ public class RecordTransformer {
     @Autowired
     private TransformRetriever transformRetriever;
 
-    public Map<String, Object> transformFast(String modelPath, //
+    public Map<String, Object> transform(String modelPath, //
             List<TransformDefinition> definitions, //
             Map<String, Object> record) {
 
@@ -65,7 +65,7 @@ public class RecordTransformer {
         return result;
     }
 
-    public Map<String, Object> transform(String modelPath, List<TransformDefinition> definitions,
+    public Map<String, Object> transformOld(String modelPath, List<TransformDefinition> definitions,
             Map<String, Object> record) {
         Map<String, Object> result = new HashMap<String, Object>(record.size() + definitions.size());
         result.putAll(record);
@@ -79,7 +79,6 @@ public class RecordTransformer {
                 try {
                     value = engine.invoke(entry.name, entry.arguments, result, entry.type.type());
                     successfulInvocation = true;
-                    System.out.println("Jython Invoked");
                     if (numTries > 1) {
                         log.warn(
                                 String.format("Transform invocation on %s succeeded on try #%d", entry.name, numTries));
