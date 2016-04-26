@@ -42,16 +42,14 @@
                 <div class="col-toggle">
                     <div class="btn-area-middle">
                         <button id="addLeadEnrichmentAttribute" class="btn btn-right" data-ng-click="addAttributeButtonClicked($event)"
-                                data-ng-class="{'disabled': attributesToAdd.length === 0 || selectedAttributes.length >= 20}"><i class="fa fa-chevron-right fa-2"></i></button>
+                                data-ng-class="{'disabled': attributesToAdd.length === 0}"><i class="fa fa-chevron-right fa-2"></i></button>
                         <button id="reomveLeadEnrichmentAttribute" class="btn btn-left" data-ng-click="removeAttributeButtonClicked($event)"
                                 data-ng-class="{'disabled': attributesToRemove.length === 0}"><i class="fa fa-chevron-left fa-2"></i></button>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div id="selectedAttributesLabel" class="sub-title"
-                        data-ng-mouseenter="selectedAttributesLabelMouseEnter($event)"
-                        data-ng-mouseleave="selectedAttributesLabelMouseLeave($event)"
-                        data-ng-class="{'warning': selectedAttributes.length >= maxSelectedAttributes}">{{ResourceUtility.getString('LEAD_ENRICHMENT_SELECTED_ATTRIBUTES_LABEL', [selectedAttributes.length])}}</div>
+                        data-ng-mouseleave="selectedAttributesLabelMouseLeave($event)">{{ResourceUtility.getString('LEAD_ENRICHMENT_SELECTED_ATTRIBUTES_LABEL', [selectedAttributes.length])}}</div>
                     <ul id="selectedAttributesList" class="list-group" data-ng-dblclick="removeAttributeButtonClicked($event)">
                         <li class="list-group-item"
                             data-ng-repeat="a in selectedAttributes"

@@ -71,7 +71,6 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
         $scope.showSaveAttributesError = false;
         $scope.showAttributesDetails = false;
         $scope.showAttributesExcessAlert = false;
-        $scope.maxSelectedAttributes = 20;
         $scope.attributesToAdd = [];
         $scope.ctrlAttributesToAdd = [];
         $scope.attributesToRemove = [];
@@ -97,14 +96,6 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
         LeadEnrichmentAttributesDetailsModel.show($scope, title, $scope.allAvariableAttributes);
     };
 
-    $scope.selectedAttributesLabelMouseEnter = function ($event) {
-        if ($scope.selectedAttributes.length >= $scope.maxSelectedAttributes) {
-            $scope.tooltip = ResourceUtility.getString('LEAD_ENRICHMENT_MAX_SELECTED_ATTRIBUTES_TOOLTIP',
-                    [$scope.maxSelectedAttributes]);
-            showAttributeHover($($event.currentTarget), $event);
-        }
-    };
-
     $scope.selectedAttributesLabelMouseLeave = function ($event) {
         hideAttributeHover();
     };
@@ -117,16 +108,7 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
         if ($('#addLeadEnrichmentAttribute').hasClass('disabled')) {
             return;
         }
-        if ($scope.attributesToAdd.length + $scope.selectedAttributes.length > $scope.maxSelectedAttributes) {
-            $scope.attributesExcessAlert = ResourceUtility.getString('LEAD_ENRICHMENT_EXCESS_ATTRIBUTES_ALERT',
-                    [$scope.attributesToAdd.length, $scope.maxSelectedAttributes]);
-            $scope.showAttributesExcessAlert = true;
-            return;
-        }
-
-        if ($scope.attributesToAdd.length > 0 && $scope.selectedAttributes.length < $scope.maxSelectedAttributes) {
-            $scope.showAttributesExcessAlert = false;
-            $('#leadEnrichmentAttributeHover').addClass('hide');
+        if ($scope.attributesToAdd.length > 0) {
             var obj = removeAttributes($scope.availableAttributes, $scope.attributesToAdd);
             $scope.availableAttributes = sortAttributes(obj.remainingAttributes);
             $scope.selectedAttributes = sortAttributes($scope.selectedAttributes.concat(obj.removedAttributes));
@@ -263,11 +245,6 @@ angular.module('mainApp.setup.controllers.LeadEnrichmentController', [
         }
 
         $scope.showSaveAttributesError = false;
-        if ($scope.selectedAttributes.length > $scope.maxSelectedAttributes) {
-            $scope.attributesExcessAlert = ResourceUtility.getString('LEAD_ENRICHMENT_CANNOT_SAVE_FOR_EXCESS_ATTRIBUTES', $scope.maxSelectedAttributes);
-            $scope.showAttributesExcessAlert = true;
-            return;
-        }
 
         var attributes = [];
         for (var i = 0; i < $scope.selectedAttributes.length; i++) {
