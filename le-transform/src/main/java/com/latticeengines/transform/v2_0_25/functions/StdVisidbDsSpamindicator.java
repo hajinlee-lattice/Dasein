@@ -51,7 +51,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         Double companyNameEntropy = StdVisidbDsCompanynameEntropy
                 .calculateStdVisidbDsCompanynameEntropy(companyName);
 
-        if (companyNameEntropy != null && companyNameEntropy <= 0.03)
+        if (!companyNameEntropy.equals("null") && companyNameEntropy <= 0.03)
             score += 1;
 
         if (StdLength.calculateStdLength(title) <= 2)
@@ -59,7 +59,7 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
 
         Double phoneEntropy = StdEntropy.calculateStdEntropy(phone);
 
-        if (phoneEntropy != null && phoneEntropy <= 0.03)
+        if (!phoneEntropy.equals("null") && phoneEntropy <= 0.03)
             score += 1;
 
         if (score >= 2)
