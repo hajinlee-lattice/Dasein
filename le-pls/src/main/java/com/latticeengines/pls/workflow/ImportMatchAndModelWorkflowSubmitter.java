@@ -33,10 +33,10 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
     @Autowired
     private MatchCommandProxy matchCommandProxy;
 
-    @Value("${pls.modeling.minDedupedRows:1000}")
+    @Value("${pls.modeling.validation.min.dedupedrows:1000}")
     private long minDedupedRows;
 
-    @Value("${pls.modeling.minEventPercentage:0.5}")
+    @Value("${pls.modeling.validation.min.eventpercentage:0.5}")
     private double minEventPercentage;
 
     public ImportMatchAndModelWorkflowConfiguration generateConfiguration(ModelingParameters parameters) {

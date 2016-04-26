@@ -6,40 +6,48 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 
 public class AttributeUtils {
     private static Logger log = Logger.getLogger(AttributeUtils.class);
 
-    public static void mergeAttributes(Attribute source, Attribute dest) {
+    public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
+        copyPropertiesFromAttribute(source, dest, true);
+    }
+
+    public static void copyPropertiesFromAttribute(Attribute source, Attribute dest, boolean includeEmptySourceValues) {
         PropertyDescriptor[] descriptors = getPropertyDescriptors();
 
         for (PropertyDescriptor descriptor : descriptors) {
             if (descriptor.getReadMethod() != null && descriptor.getWriteMethod() != null) {
-
+                Object sourceValue = getValue(source, descriptor);
                 Object destValue = getValue(dest, descriptor);
-                if (destValue == null) {
-                    Object sourceValue = getValue(source, descriptor);
-                    if (sourceValue != null) {
+                if (!isPropertyBag(descriptor)) {
+                    boolean sourceEmpty = sourceValue == null
+                            || (sourceValue instanceof List && ((List) sourceValue).size() == 0)
+                            || (sourceValue instanceof Set && ((Set) sourceValue).size() == 0);
+                    if (includeEmptySourceValues || !sourceEmpty) {
                         setValue(dest, descriptor, sourceValue);
-                        log.info(String.format("Setting property %s to be %s from source", descriptor.getName(),
-                                sourceValue));
+                        log.info(String.format("Setting property %s to be %s from source.  Value was previously %s",
+                                descriptor.getName(), sourceValue, destValue));
                     } else {
-                        log.debug(String.format(
-                                "Ignoring property %s because both source and dest properties are null",
+                        log.debug(String.format("Ignoring property %s because it is null/empty on source",
                                 descriptor.getName()));
                     }
-                } else {
-                    log.debug(String.format(String.format(
-                            "Ignoring property %s because the value is already defined on dest to be %s",
-                            descriptor.getName(), destValue)));
                 }
             }
         }
+    }
+
+    private static boolean isPropertyBag(PropertyDescriptor descriptor) {
+        return descriptor.getWriteMethod().isAnnotationPresent(AttributePropertyBag.class);
     }
 
     public static void setPropertyFromString(Attribute attribute, String propertyName, String propertyValue) {

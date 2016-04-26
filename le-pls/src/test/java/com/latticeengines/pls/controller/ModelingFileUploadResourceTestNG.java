@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ZipUtils;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -36,7 +36,7 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDepreca
 public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
-    private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.zip";
+    private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.gz";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -116,11 +116,13 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
     @Test(groups = "functional")
     public void uploadCompressedFile() throws Exception {
         switchToExternalAdmin();
+
         ResponseDocument<SourceFile> response = submitFile(false, COMPRESSED_PATH, true);
         assertTrue(response.isSuccess());
         String path = response.getResult().getPath();
         String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, path);
-        String expectedContents = ZipUtils.decompressFileToString(ClassLoader.getSystemResource(COMPRESSED_PATH)
+
+        String expectedContents = GzipUtils.decompressFileToString(ClassLoader.getSystemResource(COMPRESSED_PATH)
                 .getPath());
         assertEquals(contents, expectedContents);
 

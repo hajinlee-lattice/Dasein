@@ -29,6 +29,8 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
     private String matchClient;
 
+    private boolean retainMatchTables;
+
     @NotNull
     private MatchCommandType matchCommandType;
 
@@ -116,5 +118,15 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("join_type")
     public void setMatchJoinType(MatchJoinType matchJoinType) {
         this.matchJoinType = matchJoinType;
+    }
+
+    @JsonProperty("retain_match_tables")
+    public boolean isRetainMatchTables() {
+        return retainMatchTables;
+    }
+
+    @JsonProperty("retain_match_tables")
+    public void setRetainMatchTables(boolean retainMatchTables) {
+        this.retainMatchTables = retainMatchTables;
     }
 }

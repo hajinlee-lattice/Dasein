@@ -57,9 +57,11 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
             throw new LedpException(LedpCode.LEDP_28005, e, new String[] { String.valueOf(matchCommandId) });
         } finally {
             try {
-                boolean deleted = deleteEventTableFromMatchDB(preMatchEventTable, dbCreds);
-                if (!deleted) {
-                    log.warn("Table " + preMatchEventTable.getName() + " was not dropped from the PD match db.");
+                if (!configuration.isRetainMatchTables()) {
+                    boolean deleted = deleteEventTableFromMatchDB(preMatchEventTable, dbCreds);
+                    if (!deleted) {
+                        log.warn("Table " + preMatchEventTable.getName() + " was not dropped from the PD match db.");
+                    }
                 }
             } catch (Exception e) {
                 log.error(e);
@@ -128,7 +130,9 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
 
         metadataProxy.createTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
 
-        deleteMatchTable(dbCreds, matchTableName);
+        if (!configuration.isRetainMatchTables()) {
+            deleteMatchTable(dbCreds, matchTableName);
+        }
 
         return eventTable;
     }
@@ -195,7 +199,7 @@ public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepC
         for (Attribute preMatchAttribute : preMatchEventTable.getAttributes()) {
             Attribute postMatchAttribute = eventTable.getAttribute(preMatchAttribute.getName());
             if (postMatchAttribute != null) {
-                AttributeUtils.mergeAttributes(preMatchAttribute, postMatchAttribute);
+                AttributeUtils.copyPropertiesFromAttribute(preMatchAttribute, postMatchAttribute, false);
             }
         }
     }

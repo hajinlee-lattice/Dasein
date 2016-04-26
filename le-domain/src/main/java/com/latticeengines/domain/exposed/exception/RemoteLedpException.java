@@ -1,33 +1,19 @@
 package com.latticeengines.domain.exposed.exception;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 
 public class RemoteLedpException extends LedpException {
 
-    private String remoteStackTrace;
     private HttpStatus httpStatus;
 
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code) {
-        super(code);
-        this.remoteStackTrace = remoteStackTrace;
+    public RemoteLedpException(HttpStatus httpStatus, LedpCode code, Throwable remoteException) {
+        super(code, remoteException);
         this.httpStatus = httpStatus;
     }
 
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, Throwable t) {
-        super(code, t);
-        this.remoteStackTrace = remoteStackTrace;
-        this.httpStatus = httpStatus;
-    }
-
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, String msg) {
-        super(code, msg, null);
-        this.remoteStackTrace = remoteStackTrace;
-        this.httpStatus = httpStatus;
-    }
-
-    public RemoteLedpException(String remoteStackTrace, HttpStatus httpStatus, LedpCode code, String msg, Throwable t) {
-        super(code, msg, t);
-        this.remoteStackTrace = remoteStackTrace;
+    public RemoteLedpException(HttpStatus httpStatus, LedpCode code, String msg, Throwable remoteException) {
+        super(code, msg, remoteException);
         this.httpStatus = httpStatus;
     }
 
@@ -39,19 +25,16 @@ public class RemoteLedpException extends LedpException {
         this.httpStatus = httpStatus;
     }
 
-    public String getRemoteStackTrace() {
-        return remoteStackTrace;
-    }
-
-    public void setRemoteStackTrace(String remoteStackTrace) {
-        this.remoteStackTrace = remoteStackTrace;
-    }
-
     @Override
     public ErrorDetails getErrorDetails() {
-        ErrorDetails details = super.getErrorDetails();
-        details.setStackTrace(details.getStackTrace() + "\nCaused remotely by...\n" + remoteStackTrace);
-        return details;
-    }
+        String stackTrace = ExceptionUtils.getStackTrace(this);
 
+        Throwable remote = getCause();
+        if (remote != null) {
+            stackTrace += "\nCaused remotely by...\n";
+        }
+        stackTrace += remote.getMessage() + "\n";
+        stackTrace += ExceptionUtils.getFullStackTrace(remote);
+        return new ErrorDetails(getCode(), getMessage(), stackTrace);
+    }
 }

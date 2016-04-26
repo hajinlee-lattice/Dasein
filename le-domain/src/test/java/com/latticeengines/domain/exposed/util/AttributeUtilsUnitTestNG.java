@@ -26,8 +26,8 @@ public class AttributeUtilsUnitTestNG {
         dest.setNullable(false);
         dest.setCategory("Internal");
 
-        AttributeUtils.mergeAttributes(source, dest);
-        assertEquals(dest.getDisplayName(), "bar");
+        AttributeUtils.copyPropertiesFromAttribute(source, dest, false);
+        assertEquals(dest.getDisplayName(), "foo");
         assertEquals(dest.isNullable(), Boolean.FALSE);
         assertEquals(dest.getCategory(), "Internal");
         assertEquals(dest.getLogicalDataType(), LogicalDataType.Reference);

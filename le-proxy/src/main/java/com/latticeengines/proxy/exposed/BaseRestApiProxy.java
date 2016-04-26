@@ -15,6 +15,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.serviceruntime.exposed.exception.GetResponseErrorHandler;
 
@@ -30,6 +31,15 @@ public abstract class BaseRestApiProxy {
     @Value("${proxy.quartz.rest.endpoint.hostport}")
     private String quartzHostPort;
 
+    @Value("${proxy.retry.initialwaitmsec:1000}")
+    private long initialWaitMsec;
+
+    @Value("${proxy.retry.multiplier:2}")
+    private double multiplier;
+
+    @Value("${proxy.retry.maxAttempts:10}")
+    private int maxAttempts;
+
     protected BaseRestApiProxy(String rootpath, Object... urlVariables) {
         this.rootpath = rootpath == null ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         restTemplate.getInterceptors().add(new MagicAuthenticationHeaderHttpRequestInterceptor());
@@ -40,95 +50,105 @@ public abstract class BaseRestApiProxy {
         this(null);
     }
 
-    protected <T, B> T post(String method, String url, B body, Class<T> returnValueClazz) {
-        log.info(String.format("Invoking %s by posting to url %s with body %s", method, url, body));
-        try {
-            return restTemplate.postForObject(url, body, returnValueClazz);
-        } catch (Exception e) {
-            log.error(String.format("%s: Remote call failure", method), e);
-            throw e;
-        }
+    protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(new RetryCallback<T, RuntimeException>() {
+            @Override
+            public T doWithRetry(RetryContext context) throws RuntimeException {
+                try {
+                    log.info(String.format("Invoking %s by posting to url %s with body %s.  (Attempt=%d)", method, url,
+                            body, context.getRetryCount() + 1));
+                    return restTemplate.postForObject(url, body, returnValueClazz);
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
+            }
+        });
     }
 
-    protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
-            RetryTemplate retryTemplate) {
-        return retryTemplate.execute(new RetryCallback<T, RuntimeException>() {
+    private void logError(Exception e, String method) {
+        log.error(String.format("%s: Remote call failure", method), e);
+    }
+
+    protected <B> void put(final String method, final String url, final B body) {
+        RetryTemplate retry = getRetryTemplate();
+        retry.execute(new RetryCallback<Void, RuntimeException>() {
+            @Override
+            public Void doWithRetry(RetryContext context) throws RuntimeException {
+                try {
+                    log.info(String.format("Invoking %s by putting to url %s with body %s.  (Attempt=%d)", method, url,
+                            body, context.getRetryCount() + 1));
+                    restTemplate.put(url, body);
+                    return null;
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
+
+            }
+        });
+    }
+
+    protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate();
+        return retry.execute(new RetryCallback<T, RuntimeException>() {
             @Override
             public T doWithRetry(RetryContext context) {
-                return post(method, url, body, returnValueClazz);
+                try {
+                    log.info(String.format("Invoking %s by getting from url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1));
+                    return restTemplate.getForObject(url, returnValueClazz);
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
             }
         });
     }
 
-    protected <B> void put(String method, String url, B body) {
-        log.info(String.format("Invoking %s by putting to url %s with body %s", method, url, body));
-        try {
-            restTemplate.put(url, body);
-        } catch (Exception e) {
-            log.error(String.format("%s: Remote call failure", method), e);
-            throw e;
-        }
-    }
-
-    protected <B> void put(final String method, final String url, final B body, RetryTemplate retryTemplate) {
-        retryTemplate.execute(new RetryCallback<Void, RuntimeException>() {
+    protected void delete(final String method, final String url) {
+        RetryTemplate retry = getRetryTemplate();
+        retry.execute(new RetryCallback<Void, RuntimeException>() {
             @Override
             public Void doWithRetry(RetryContext context) {
-                put(method, url, body);
-                return null;
+                try {
+                    log.info(String.format("Invoking %s by deleting from url %s.  (Attempt=%d)", method, url,
+                            context.getRetryCount() + 1));
+                    restTemplate.delete(url);
+                    return null;
+                } catch (LedpException e) {
+                    context.setExhaustedOnly();
+                    logError(e, method);
+                    throw e;
+                } catch (Exception e) {
+                    logError(e, method);
+                    throw e;
+                }
             }
         });
     }
 
-    protected <T> T get(String method, String url, Class<T> returnValueClazz) {
-        log.info(String.format("Invoking %s by getting from url %s", method, url));
-        try {
-            return restTemplate.getForObject(url, returnValueClazz);
-        } catch (Exception e) {
-            log.error(String.format("%s: Remote call failure", method), e);
-            throw e;
-        }
-    }
-
-    protected <T> T get(final String method, final String url, final Class<T> returnValueClazz,
-            RetryTemplate retryTemplate) {
-        return retryTemplate.execute(new RetryCallback<T, RuntimeException>() {
-
-            @Override
-            public T doWithRetry(RetryContext context) {
-                return get(method, url, returnValueClazz);
-            }
-        });
-    }
-
-    protected void delete(String method, String url) {
-        log.info(String.format("Invoking %s by deleting from url %s", method, url));
-        try {
-            restTemplate.delete(url);
-        } catch (Exception e) {
-            log.error(String.format("%s: Remote call failure", method), e);
-            throw e;
-        }
-    }
-
-    protected void delete(final String method, final String url, RetryTemplate retryTemplate) {
-        retryTemplate.execute(new RetryCallback<Void, RuntimeException>() {
-            @Override
-            public Void doWithRetry(RetryContext context) {
-                delete(method, url);
-                return null;
-            }
-        });
-    }
-
-    protected RetryTemplate getRetryTemplate(long initialWaitMsec, int maxAttempts) {
+    private RetryTemplate getRetryTemplate() {
         RetryTemplate retry = new RetryTemplate();
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
         retryPolicy.setMaxAttempts(maxAttempts);
         retry.setRetryPolicy(retryPolicy);
         ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
         backOffPolicy.setInitialInterval(initialWaitMsec);
-        backOffPolicy.setMultiplier(2);
+        backOffPolicy.setMultiplier(multiplier);
         retry.setBackOffPolicy(backOffPolicy);
         return retry;
     }

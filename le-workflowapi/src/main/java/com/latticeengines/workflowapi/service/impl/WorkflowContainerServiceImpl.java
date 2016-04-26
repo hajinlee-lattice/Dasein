@@ -120,7 +120,11 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         if (applicationId == null) {
             throw new LedpException(LedpCode.LEDP_28022);
         }
+        log.info(String.format("Looking up workflow for application id %s", applicationId));
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        if (workflowJob == null) {
+            throw new RuntimeException(String.format("No workflow job found with application id %s", applicationId));
+        }
         long jobExecutionId = workflowService.startWorkflowJob(workflowName, workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
         workflowJobEntityMgr.update(workflowJob);

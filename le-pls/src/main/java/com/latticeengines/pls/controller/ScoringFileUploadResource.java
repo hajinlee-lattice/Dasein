@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.common.exposed.util.ZipUtils;
+import com.latticeengines.common.exposed.util.GzipUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -72,7 +72,7 @@ public class ScoringFileUploadResource {
 
             InputStream stream = file.getInputStream();
             if (compressed) {
-                stream = ZipUtils.decompressStream(stream);
+                stream = GzipUtils.decompressStream(stream);
             }
 
             List<Attribute> requiredColumns = modelMetadataService.getRequiredColumns(modelId);

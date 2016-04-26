@@ -11,7 +11,6 @@ import com.latticeengines.leadprioritization.workflow.steps.CreateTableImportRep
 import com.latticeengines.leadprioritization.workflow.steps.DedupEventTable;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
-import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -29,9 +28,6 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
 
     @Autowired
     private ModelDataValidationWorkflow modelValidationWorkflow;
-
-    @Autowired
-    private MatchWorkflow matchWorkflow;
 
     @Autowired
     private MatchDataCloudWorkflow matchDataCloudWorkflow;

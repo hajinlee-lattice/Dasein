@@ -36,6 +36,7 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
+import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.metadata.validators.InputValidator;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -357,10 +358,12 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @Column(name = "PROPERTIES", nullable = false)
     @Lob
     @org.hibernate.annotations.Type(type = "org.hibernate.type.SerializableToBlobType")
+    @AttributePropertyBag
     public Map<String, Object> getProperties() {
         return properties;
     }
 
+    @AttributePropertyBag
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }

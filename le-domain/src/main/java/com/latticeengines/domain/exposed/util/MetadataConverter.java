@@ -136,6 +136,7 @@ public class MetadataConverter {
         return AvroUtils.getSchema(configuration, new Path(extract.getPath()));
     }
 
+    @SuppressWarnings("deprecated")
     public static Attribute getAttribute(Schema.Field field) {
         try {
             Attribute attribute = new Attribute();
@@ -171,7 +172,7 @@ public class MetadataConverter {
                 attribute.setCleanedUpEnumValues(enumValues);
                 attribute.setEnumValues(enumValues);
             }
-            attribute.setInterfaceName(field.getProp("InterfaceName"));
+            AttributeUtils.setPropertiesFromStrings(attribute, field.props());
 
             return attribute;
         } catch (Exception e) {

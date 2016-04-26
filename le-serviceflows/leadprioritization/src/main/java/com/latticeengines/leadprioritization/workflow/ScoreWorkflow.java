@@ -11,16 +11,12 @@ import com.latticeengines.leadprioritization.workflow.steps.CombineInputTableWit
 import com.latticeengines.leadprioritization.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
-import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("scoreWorkflow")
 public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> {
-
-    @Autowired
-    private MatchWorkflow matchWorkflow;
 
     @Autowired
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
