@@ -1,5 +1,6 @@
 angular.module('pd.apiconsole.ScoringRequestController', [
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.directives.charts.ArcChartDirective',
     'mainApp.core.utilities.BrowserStorageUtility',
     'pd.apiconsole.APIConsoleService'
 ])

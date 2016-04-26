@@ -1,9 +1,10 @@
 angular.module('pd.apiconsole.APIConsoleService', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.StringUtility'
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.appCommon.utilities.AnimationUtility'
 ])
 
-.service('APIConsoleService', function ($http, $q, $location, ResourceUtility, StringUtility) {
+.service('APIConsoleService', function ($http, $q, $location, ResourceUtility, StringUtility, AnimationUtility) {
 
     this.GetOAuthAccessToken = function (tenantId) {
         var deferred = $q.defer();
@@ -64,6 +65,28 @@ angular.module('pd.apiconsole.APIConsoleService', [
         });
 
         return deferred.promise;
+    };
+
+    this.CalculateArcColor = function (score) {
+        if (score == null) {
+            return null;
+        }
+
+        var highestRgb = {R:27, G:172, B:94};
+        var midRangeRgb = {R:255, G:255, B:102};
+        var lowestRgb = {R:178, G:0, B:0};
+
+        var rgbColor = null;
+        if (score > 50) {
+            rgbColor = AnimationUtility.CalculateRgbBetweenValues(highestRgb, midRangeRgb, score);
+            return AnimationUtility.ConvertRgbToHex(rgbColor.R, rgbColor.G, rgbColor.B);
+        } else {
+            // Need to double the score when it is below 50
+            // because we use a different color scale from 0-50
+            score = score * 2;
+            rgbColor = AnimationUtility.CalculateRgbBetweenValues(midRangeRgb, lowestRgb, score);
+            return AnimationUtility.ConvertRgbToHex(rgbColor.R, rgbColor.G, rgbColor.B);
+        }
     };
 
     function getDisplayFieldsFromResponseFields(responseFields) {

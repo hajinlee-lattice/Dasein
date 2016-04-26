@@ -32,7 +32,7 @@ angular.module('mainApp.appCommon.directives.charts.ArcChartDirective', [])
                     .attr("transform", "translate(" + chartSize / 2 + "," + chartSize / 2 + ")");
                 var arc = d3.svg.arc()
                     .startAngle(0)
-                    .innerRadius((chartSize/2)-9)
+                    .innerRadius((chartSize/2)-2)
                     .outerRadius(chartSize/2);
                 
                 // Add the background arc, from 0 to 100% (τ).
@@ -66,17 +66,10 @@ angular.module('mainApp.appCommon.directives.charts.ArcChartDirective', [])
                 svg.append("text")
                     .attr("class", "arc-chart-value")
                     .style("fill", "#555555")
-                    .attr("dy", ".20em")
+                    .attr("font-size", "12px")
+                    .attr("dx", "-0.55em")
+                    .attr("dy", ".37em")
                     .text(value);
-                
-                // Add a label below the arc if it exists
-                if (label != null) {
-                    svg.append("text")
-                        .attr("class", "arc-chart-label")
-                        .attr("dy", "1.85em")
-                        .style("fill", "#BBBBBB")
-                        .text(label);
-                }
             };
         }
     };

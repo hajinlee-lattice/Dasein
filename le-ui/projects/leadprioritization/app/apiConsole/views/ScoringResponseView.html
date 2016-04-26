@@ -8,8 +8,19 @@
         <div class="global-error local-error" data-ng-show="scoringRequestError != null">
             <span><i class="fa fa-exclamation-triangle fa-inverse"></i>{{scoringRequestError}}</span>
         </div>
-        <div data-ng-show="score != null" class="score">
-            <label class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_SCORE_')}}&nbsp;{{score}}</label>
+        <div data-ng-if="score != null" class="score circle">
+            <label class="form-control">{{ResourceUtility.getString('API_CONSOLE_SCORING_RESPONSE_LABEL_SCORE_')}}&nbsp;
+                <div id="scoreResponseContainer" class="score-response">
+                    <div id="scoreArcDisplay">
+                        <div data-arc-chart
+                            data-chart-size="{{ChartSize}}"
+                            data-chart-value="{{score}}"
+                            data-chart-total="{{ChartTotal}}"
+                            data-chart-color="{{ChartColor}}"
+                            data-chart-label="{{ChartLabel}}"></div>
+                    </div>
+                </div>
+            </label>
         </div>
         <div data-ng-show="jsonData != null" class="resonse-json">
             <pre>{{jsonData}}</pre>
