@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.util.Utf8;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -401,7 +402,12 @@ public class MatchCorrectnessDeploymentTestNG extends PropDataApiDeploymentTestN
                     if (fieldName.startsWith("Source_")) {
                         fieldName = fieldName.replaceFirst("Source_", "");
                     }
-                    map.put(fieldName, record.get(i));
+                    Object val = record.get(i);
+                    if (val instanceof Utf8) {
+                        map.put(fieldName, ((Utf8) val).toString());
+                    } else {
+                        map.put(fieldName, record.get(i));
+                    }
                 }
                 toReturn.add(map);
             }
