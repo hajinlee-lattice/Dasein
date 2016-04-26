@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.exposed;
+package com.latticeengines.domain.exposed.workflow;
 
 public class WorkflowContextConstants {
     public static final String REPORTS = "__REPORTS__";

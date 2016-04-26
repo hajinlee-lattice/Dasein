@@ -32,10 +32,10 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.JobStep;
 import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -106,7 +106,7 @@ public class WorkflowExecutionCache {
         job.setReports(getReports(jobExecution));
         job.setOutputs(getOutputs(jobExecution));
         if (workflowJob != null) {
-            job.setInputs(workflowService.getInputs(workflowJob.getInputContext()));
+            job.setInputs(workflowJob.getInputContext());
             job.setApplicationId(workflowJob.getApplicationId());
             job.setUser(workflowJob.getUserId());
             ErrorDetails errorDetails = workflowJob.getErrorDetails();

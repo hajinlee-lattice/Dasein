@@ -1,5 +1,8 @@
 package com.latticeengines.propdata.match.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 
@@ -7,6 +10,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.propdata.match.MatchInput;
 import com.latticeengines.propdata.workflow.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 public class BulkMatchWorkflowSubmitter {
 
@@ -45,6 +49,13 @@ public class BulkMatchWorkflowSubmitter {
 
     public BulkMatchWorkflowSubmitter returnUnmatched(Boolean returnUnmatched) {
         builder = builder.returnUnmatched(returnUnmatched);
+        return this;
+    }
+
+    public BulkMatchWorkflowSubmitter inputProperties() {
+        Map<String, String> inputProperties = new HashMap<>();
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "bulkMatchWorkflow");
+        builder = builder.inputProperties(inputProperties);
         return this;
     }
 

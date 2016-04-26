@@ -17,10 +17,10 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.MatchClientDocument;
 import com.latticeengines.domain.exposed.propdata.MatchCommandType;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.propdata.MatchCommandProxy;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component
 public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {

@@ -14,9 +14,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.leadprioritization.workflow.PMMLModelWorkflowConfiguration;
 import com.latticeengines.pls.service.MetadataFileUploadService;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 
 @Component("pmmlModelWorkflowSubmitter")
 public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {

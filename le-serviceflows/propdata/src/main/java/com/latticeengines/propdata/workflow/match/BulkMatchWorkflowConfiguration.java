@@ -1,5 +1,7 @@
 package com.latticeengines.propdata.workflow.match;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.propdata.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.propdata.match.InputBuffer;
@@ -57,6 +59,11 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
+            return this;
+        }
+
         public BulkMatchWorkflowConfiguration build() {
             configuration.setContainerConfiguration("bulkMatchWorkflow", customerSpace, "BulkMatchWorkflow");
             configuration.add(prepareConfig);
@@ -65,7 +72,5 @@ public class BulkMatchWorkflowConfiguration extends WorkflowConfiguration {
         }
 
     }
-
-
 
 }

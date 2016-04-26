@@ -155,8 +155,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
             String fileName = fileNameTokens[fileNameTokens.length - 2] + //
                     "-" + UUID.randomUUID() + "_Lattice";
             fileName = fileName.replaceAll("-", "_");
-            // HdfsUtils.copyHdfsToLocal(yarnConfiguration, hdfsFileToImport, //
-            // fileName + ".csv");
+
             InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, hdfsFileToImport);
             InputStreamReader reader = new InputStreamReader(stream);
             CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',');

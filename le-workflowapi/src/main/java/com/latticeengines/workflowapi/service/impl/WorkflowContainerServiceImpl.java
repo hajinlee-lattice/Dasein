@@ -27,12 +27,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.workflow.exposed.WorkflowContextConstants;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
@@ -156,12 +156,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
-            if(job.getJobStatus() != null){
-                jobs.add(job);
-            }
-            else{
-                workflowIds.add(workflowJob.getAsWorkflowId());
+            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals("bulkMatchWorkflow")) {
+                com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
+                if (job.getJobStatus() != null) {
+                    jobs.add(job);
+                } else {
+                    workflowIds.add(workflowJob.getAsWorkflowId());
+                }
             }
         }
 
@@ -178,7 +179,7 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Override
     public com.latticeengines.domain.exposed.workflow.Job getJobStatusFromWorkflowJobAndYarn(WorkflowJob workflowJob) {
         com.latticeengines.domain.exposed.workflow.Job job = new com.latticeengines.domain.exposed.workflow.Job();
-        Map<String, String> inputProperties = workflowService.getInputs(workflowJob.getInputContext());
+        Map<String, String> inputProperties = workflowJob.getInputContext();
         job.setInputs(inputProperties);
         job.setJobType(inputProperties.get(WorkflowContextConstants.Inputs.JOB_TYPE));
         job.setUser(workflowJob.getUserId());
@@ -193,8 +194,10 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
                 job.setStartTimestamp(new Date(workflowJob.getStartTimeInMillis()));
             }
         } else {
-            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy.getJobStatus(applicationId);
-            //query yarn for jobs which have failed, killed final status, and finished state without workflowId
+            com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus = jobProxy
+                    .getJobStatus(applicationId);
+            // query yarn for jobs which have failed, killed final status, and
+            // finished state without workflowId
             if (YarnUtils.FAILED_STATUS.contains(yarnJobStatus.getStatus()) //
                     || yarnJobStatus.getState().equals(YarnApplicationState.FINISHED) //
                     && workflowJob.getAsWorkflowId() == null) {
