@@ -89,7 +89,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         try {
             ApplicationId appId = sqoopSyncJobService.importData(localFileName, //
                     new HdfsUriGenerator().getHdfsUriForSqoop(ctx, table), creds, //
-                    LedpQueueAssigner.getPropDataQueueNameForSubmission(), //
+                    LedpQueueAssigner.getEaiQueueNameForSubmission(), //
                     ctx.getProperty(ImportProperty.CUSTOMER, String.class), //
                     Arrays.<String> asList(new String[] { table.getAttributes().get(0).getName() }), //
                     null, //

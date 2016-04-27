@@ -27,7 +27,10 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -35,6 +38,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.JobCounters;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -66,6 +70,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Value("${dataplatform.mapreduce.jobhistory.webapp.api.address}")
     private String mrJobHistoryServerUrl;
 
+    @Value("${dataplatform.queueScheme:legacy}")
+    private String queueScheme;
+
     @Override
     public List<ApplicationReport> getJobReportsAll() {
         return defaultYarnClient.listApplications();
@@ -88,9 +95,45 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return userReports;
     }
 
+    private String overwriteQueueInternal(String queue) {
+        String translatedQueue = queue;
+        if (queueScheme.equalsIgnoreCase("default"))
+            translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
+        else if (queueScheme.equalsIgnoreCase("legacy")) {
+            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
+                queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
+                queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
+                translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+            }
+        }
+        if (!translatedQueue.equals(queue)) {
+            log.info("Overwite queue " + queue + " to " + translatedQueue);
+        }
+
+        return translatedQueue;
+    }
+
+    private void overwriteAMQueueAssignment(Properties appMasterProperties) {
+        String queue = (String)appMasterProperties.get(AppMasterProperty.QUEUE.name());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), overwriteQueueInternal(queue)); 
+    }
+
+    private void overwriteContainerQueueAssignment(Properties containerProperties) {
+        String queue = (String)containerProperties.get("QUEUE");
+        containerProperties.put("QUEUE", overwriteQueueInternal(queue)); 
+    }
+
+    private void overwriteMRQueueAssignment(Properties mRProperties) {
+        String queue = (String)mRProperties.get(MapReduceProperty.QUEUE.name());
+        mRProperties.put(MapReduceProperty.QUEUE.name(), overwriteQueueInternal(queue)); 
+    }
+
     @Override
     public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
             Properties containerProperties) {
+
+        overwriteAMQueueAssignment(appMasterProperties);
+        overwriteContainerQueueAssignment(containerProperties);
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
         yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
@@ -134,6 +177,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Override
     public ApplicationId submitMRJob(String mrJobName, Properties properties) {
+        overwriteMRQueueAssignment(properties);
         Job job = getJob(mrJobName);
         mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
         if (properties != null) {

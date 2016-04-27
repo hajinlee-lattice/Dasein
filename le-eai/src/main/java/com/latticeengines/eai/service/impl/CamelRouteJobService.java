@@ -48,7 +48,7 @@ public class CamelRouteJobService {
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getPropDataQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), LedpQueueAssigner.getEaiQueueNameForSubmission());
 
         Properties containerProperties = new Properties();
         containerProperties.put(ImportProperty.EAICONFIG, importConfig.toString());
