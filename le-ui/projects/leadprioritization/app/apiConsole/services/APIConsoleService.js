@@ -13,7 +13,8 @@ angular.module('pd.apiconsole.APIConsoleService', [
             method: 'GET',
             url: '/pls/oauth2/accesstoken/json?tenantId=' + tenantId + '.' + tenantId + '.Production',
             headers: {
-                'Content-Type': "application/json"
+                'Content-Type': "application/json",
+                'ErrorDisplayMethod': 'modal|home.models'
             }
         }).success(function (data, status, headers, config) {
             var result = {
