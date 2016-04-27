@@ -5,7 +5,8 @@
             <span class="fa fa-bars"></span>
         </button>
 
-        <img class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
+        <img ng-show="!isModelDetailsPage" class="no-nav-logo" src="/assets/images/logo-lattice-color.png" alt="Lattice Logo" />
+        <span ng-show="isModelDetailsPage" class="model-name">{{ displayName }}</span>
 
         <div class="profile-nav dropdown">
             <a ng-click="headerClicked($event)" href="javascript:void(0)" ng-class="{'active' : showProfileNav}">

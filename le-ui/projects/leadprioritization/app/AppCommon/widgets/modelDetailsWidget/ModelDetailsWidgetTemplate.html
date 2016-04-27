@@ -6,10 +6,9 @@
         <h1 id="detail-display-name">{{displayName}}</h1>
     </div>
 -->
-    <div class="summary blue-fire">
+    <div class="summary blue-fire model-summary">
 
-        <div class="container row">
-            <div class="two columns type-overview">
+            <div class="type-overview">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">Overview</h3>
                     <dl>
@@ -21,9 +20,9 @@
                         <dd id="detail-created">{{createdDate}}</dd>
                     </dl>
                 </div>
-            </div><!-- End .three.columns -->
+            </div><!-- End .type-overview -->
 
-            <div class="four columns type-leads">
+            <div class="type-leads">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_LEADS_TITLE')}}</h3>
                     <dl>
@@ -39,9 +38,9 @@
                         <dd id="detail-train-leads">{{trainingSet}}</dd>
                     </dl>
                 </div>
-            </div><!-- End .three.columns -->
+            </div><!-- End .type-leads -->
 
-            <div class="three columns type-conversions">
+            <div class="type-conversions">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
                     <dl>
@@ -53,9 +52,9 @@
                         <dd id="detail-conversion-rate">{{conversionRate}}%</dd>
                     </dl>
                 </div>
-            </div><!-- End .three.columns -->
+            </div><!-- End .type-conversions -->
 
-            <div class="three columns type-attribute">
+            <div class="type-attribute">
                 <div class="stats black-summary-list stats-group">
                     <h3 class="summary-title">{{ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
                     <dl>
@@ -67,8 +66,7 @@
                         <dd id="detail-internal-attributes">{{internalAttributes}} / {{totalInternalPredictors}}</dd>
                     </dl>
                 </div>
-            </div><!-- End .three.columns -->
-        </div><!-- End .container.row -->
+            </div><!-- End .type-attribute -->
 
 
     </div><!-- End .summary -->

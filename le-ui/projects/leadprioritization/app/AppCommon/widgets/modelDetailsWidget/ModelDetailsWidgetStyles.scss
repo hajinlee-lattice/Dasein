@@ -1,28 +1,7 @@
-@media screen and (max-width: 1480px) {
-    #ModelDetailsArea {
-        .columns.two {
-            width: 48%;
-        }
-        .columns.four {
-            width: 49%;
-            margin-bottom: 14px;
-        }
-        .columns.three.type-conversions {
-            width: 48%;
-            margin-left: 0;
-        }
-        .columns.three.type-attribute {
-            width: 49%;
-        }    
-    }
-}
-@media screen and (max-width: 660px) {
-    #ModelDetailsArea {
-        .columns.two, .columns.four, 
-        .columns.three.type-conversions, .columns.three.type-attribute {
-            width: 100%;
-            margin-bottom: 14px;
-            margin-left: 0;
-        }
+.model-summary {
+    display: flex;
+    justify-content: center;
+    & > div {
+        margin: 7px;
     }
 }

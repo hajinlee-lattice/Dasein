@@ -34,6 +34,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.isActive = data[widgetConfig.StatusProperty] === "Active";
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+
     var incomplete = data[widgetConfig.IncompleteProperty];
     
     $scope.modelNameEditClick = function ($event) {

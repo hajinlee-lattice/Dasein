@@ -5,17 +5,22 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.login.services.LoginService',
     'mainApp.core.services.FeatureFlagService'
 ])
-
-.controller('MainHeaderController', function ($scope, $rootScope, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
+.controller('MainHeaderController', function ($scope, $rootScope, $location, $routeParams, $document, ResourceUtility, BrowserStorageUtility, NavUtility, LoginService, FeatureFlagService) {
     $scope.ResourceUtility = ResourceUtility;
+
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession != null) {
-        $scope.userDisplayName = clientSession.DisplayName;
+        $scope.userDisplayName = clientSession.displayName;
     }
-
-    checkBrowserWidth();
-    $(window).resize(checkBrowserWidth);
     $scope.showProfileNav = false;
+
+    
+    // $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
+    //   console.log('Current route name: ' + $location.path());
+    //   // Get all URL parameter
+    //   console.log($routeParams);
+    // });
+    // $scope.isModelDetailsPage = true;
 
     $scope.handleSidebarToggle = function ($event) {
         $("body").toggleClass("open-nav");
@@ -33,11 +38,4 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         $event.stopPropagation();
     };
 
-    function checkBrowserWidth(){
-        if (window.matchMedia("(min-width: 1200px)").matches) {
-            $("body").addClass("open-nav");
-        } else {
-            $("body").removeClass("open-nav");
-        }
-    }
 });

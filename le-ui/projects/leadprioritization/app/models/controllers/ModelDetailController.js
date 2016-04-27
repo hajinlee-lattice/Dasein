@@ -13,13 +13,11 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.TopPredictorService',
     'mainApp.appCommon.services.ThresholdExplorerService'
 ])
-
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
     NavUtility, WidgetFrameworkService, WidgetService, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $stateParams.modelId;
-    //$scope.displayName = $scope.data.DisplayName;
 
     var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {

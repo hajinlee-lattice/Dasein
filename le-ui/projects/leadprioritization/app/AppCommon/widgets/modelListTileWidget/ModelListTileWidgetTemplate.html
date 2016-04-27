@@ -1,6 +1,4 @@
-
-
-<div class="model {{isActive ? '' : 'inactive'}}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
+<div class="model {{isActive ? '' : 'inactive'}} {{ data.ModelType }}" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)" ui-sref="home.model.attributes({ modelId: '{{ data.Id | escape }}' })">
 
     <div class="model-title" data-ng-hide="nameStatus.editing">
         <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
