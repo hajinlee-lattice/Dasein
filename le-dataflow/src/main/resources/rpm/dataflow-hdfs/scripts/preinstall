@@ -1,5 +1,14 @@
 #!/bin/bash
+echo 'check env var STACK_NAME'
+echo $STACK_NAME
+
 echo 'Running Preinstall'
+
+if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+    VERSION=${STACK_NAME}/${VERSION}
+fi
+
+echo $VERSION
 
 RPMFILE=`ls /tmp/le-dataflow-hdfs-*.rpm`
 VERSION=`echo $RPMFILE | cut -d \- -f 5`
@@ -9,6 +18,13 @@ if [[ $SNAPSHOT = SNAPSHOT* ]]
     then
         VERSION=$VERSION-"SNAPSHOT"
 fi
+
+if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
+    VERSION=${STACK_NAME}/${VERSION}
+fi
+
+echo $VERSION
+
 
 if [ -d "/tmp/app/dataflow" ]; then
     rm -rf /tmp/app/dataflow/le-dataflow*-shaded.jar

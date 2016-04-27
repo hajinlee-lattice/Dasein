@@ -17,6 +17,8 @@ if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
     VERSION=${STACK_NAME}/${VERSION}
 fi
 
+echo $VERSION
+
 hdfs dfs -rm -r -f /app/$VERSION/dataflow/lib/*
 hdfs dfs -put /tmp/app/dataflow/le-dataflow*-shaded.jar /app/$VERSION/dataflow/lib
 hdfs dfs -copyFromLocal /tmp/app/dataflow/dataflow.properties /app/$VERSION/dataflow
