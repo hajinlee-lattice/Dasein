@@ -78,6 +78,9 @@
         margin: 0;
         border-color: transparent !important;
     }
+    input.mandatory {
+        border-left: #ef6a30 solid 5px;
+    }
     .score {
         margin-top: 16px;
     }

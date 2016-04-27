@@ -8,12 +8,12 @@ angular.module('pd.apiconsole.ScoringRequestController', [
 .directive('scoringRequest', function () {
     return {
         templateUrl: 'app/apiConsole/views/ScoringRequestView.html',
-        controller: ['$scope', '$stateParams', 'ResourceUtility', 'BrowserStorageUtility', 'APIConsoleService',
-                     function ($scope, $stateParams, ResourceUtility, BrowserStorageUtility, APIConsoleService) {
+        controller: ['$scope', '$stateParams', '_', 'ResourceUtility', 'BrowserStorageUtility', 'APIConsoleService',
+                     function ($scope, $stateParams, _, ResourceUtility, BrowserStorageUtility, APIConsoleService) {
             $scope.ResourceUtility = ResourceUtility;
             initValues();
 
-            var displayOrder = ["Email", "CompanyName", "State", "Country", "Id", "FirstName", "LastName", "PhoneNumber", "City", "State", "Title", "Industry"];
+            var displayOrder = ["Email", "CompanyName", "State", "Country", "Website", "FirstName", "LastName"];
 
             $scope.modelChanged = function ($event) {
                 if ($event != null) {
@@ -24,6 +24,8 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                     initValues();
                 } else {
                     $scope.fieldsLoading = true;
+                    $scope.fields = [];
+                    $scope.showFieldsLoadingError = false;
                     // Note: Consider access token will be available in 24 hours, we store it in storage.
                     // If user login one account in different browsers, the saved access token in prior browser will invalid.
                     var token = BrowserStorageUtility.getOAuthAccessToken();
@@ -54,7 +56,7 @@ angular.module('pd.apiconsole.ScoringRequestController', [
             function getModelFields(token) {
                 APIConsoleService.GetModelFields(token, $scope.modelId).then(function (result) {
                     if (result.Success) {
-                        $scope.fields = result.ResultObj;
+                        shuffleFieldsInOrder(result.ResultObj);
                         $scope.showFields = true;
                         $scope.fieldsLoading = false;
                     } else {
@@ -63,11 +65,21 @@ angular.module('pd.apiconsole.ScoringRequestController', [
                 });
             }
 
-            function transformFieldsToDisplayReadyFields(fields) {
-                for (var i = 0; i < fields.length; i++) {
-
+            function shuffleFieldsInOrder(fields) {
+                for (var i = 0; i < displayOrder.length; i++) {
+                    for (var j = 0; j < fields.length; j++) {
+                        if (displayOrder[i] == fields[j].name) {
+                            if (fields[j].name != 'FirstName' && fields[j].name != 'LastName') {
+                                fields[j].mandatory = true;
+                            }
+                            $scope.fields.push(fields[j]);
+                            fields.splice(j, 1);
+                        }
+                    }
                 }
 
+                fields = _.sortBy(fields, 'name');
+                $scope.fields = $scope.fields.concat(fields);
             }
 
             function handleGetModelFieldsError(result) {

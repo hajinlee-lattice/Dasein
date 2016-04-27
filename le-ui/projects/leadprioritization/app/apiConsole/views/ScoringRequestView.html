@@ -38,7 +38,7 @@
                     <label for="{{field.name}}" class="form-control">{{field.displayName}}</label>
                 </div>
                 <div class="columns right">
-                    <input type="text" name="{{field.name}}" ng-model="field.value" placeholder="{{field.placeholder}}" class="form-control"/>
+                    <input type="text" name="{{field.name}}" ng-model="field.value" placeholder="{{field.placeholder}}" ng-class="{{field.mandatory == true}} ? 'mandatory' : ''" class="form-control"/>
                 </div>
             </div>
         </div>
