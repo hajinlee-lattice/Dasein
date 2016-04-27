@@ -107,14 +107,7 @@ var mainApp = angular.module('mainApp', [
             $scope.getWidgetConfigDoc();
         });
     };
-    
-    $scope.privacyPolicyClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-        HelpService.OpenPrivacyPolicy();
-    };
-    
+
     $scope.getWidgetConfigDoc = function () {
         ConfigService.GetWidgetConfigDocument().then(function(result) {
             $http.get('./app/core/views/MainView.html').success(function (html) {
