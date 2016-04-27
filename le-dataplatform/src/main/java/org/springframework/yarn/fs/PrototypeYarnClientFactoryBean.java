@@ -17,6 +17,10 @@ public class PrototypeYarnClientFactoryBean extends YarnClientFactoryBean
         implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
+    
+    public PrototypeYarnClientFactoryBean() {
+        super.setClientClass(CustomYarnClient.class);
+    }
 
     @Override
     public boolean isSingleton() {

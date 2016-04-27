@@ -1,11 +1,14 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.conf.HAUtil;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
@@ -27,23 +30,43 @@ public class YarnServiceImpl implements YarnService {
     private Configuration yarnConfiguration;
 
     private String getResourceManagerEndpoint() {
-        String rmHostPort = yarnConfiguration.get("yarn.resourcemanager.webapp.address");
-        return "http://" + rmHostPort + "/ws/v1/cluster";
+        if (yarnConfiguration.getBoolean(YarnConfiguration.RM_HA_ENABLED, false)) {
+            String currentId = yarnConfiguration.get(YarnConfiguration.RM_HA_ID);
+            String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + currentId);
+            return "http://" + rmHostPort + "/ws/v1/cluster";
+        } else {
+            String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS);
+            return "http://" + rmHostPort + "/ws/v1/cluster";
+        }        
     }
 
     @Override
     public SchedulerTypeInfo getSchedulerInfo() {
-        String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+        try {
+            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+        } catch (Exception e) {
+            String rmRestEndpointBaseUrl = performFailover();
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class); 
+        }
     }
 
     @Override
     public AppsInfo getApplications(String queryString) {
-        String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        if (queryString == null || queryString.length() == 0) {
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
-        } else {
-            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
+        try {
+            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+            if (queryString == null || queryString.length() == 0) {
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
+            } else {
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
+            }
+        } catch (Exception e) {
+            String rmRestEndpointBaseUrl = performFailover();
+            if (queryString == null || queryString.length() == 0) {
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
+            } else {
+                return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
+            }
         }
     }
 
@@ -86,8 +109,30 @@ public class YarnServiceImpl implements YarnService {
 
     @Override
     public AppInfo getApplication(String appId) {
-        String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+        try {
+            String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+        } catch (Exception e) {
+            String rmRestEndpointBaseUrl = performFailover();
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+        }
+    }
+    
+    private String performFailover() {
+        Collection<String> rmIds = HAUtil.getRMHAIds(yarnConfiguration);
+        String[] rmServiceIds = rmIds.toArray(new String[rmIds.size()]);
+        int currentIndex = 0;
+        String currentHAId = yarnConfiguration.get(YarnConfiguration.RM_HA_ID);
+        for (int i = 0; i < rmServiceIds.length; i++) {
+            if (currentHAId.equals(rmServiceIds[i])) {
+                currentIndex = i;
+                break;
+            }
+        }
+        currentIndex = (currentIndex + 1) % rmServiceIds.length;
+        yarnConfiguration.set(YarnConfiguration.RM_HA_ID, rmServiceIds[currentIndex]);
+        String rmHostPort = yarnConfiguration.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + rmServiceIds[currentIndex]);
+        return "http://" + rmHostPort + "/ws/v1/cluster";        
     }
 
 }

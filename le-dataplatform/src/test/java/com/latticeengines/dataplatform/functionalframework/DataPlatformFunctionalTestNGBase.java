@@ -25,6 +25,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -131,6 +132,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @BeforeMethod(enabled = true, firstTimeOnly = true, alwaysRun = true)
     public void beforeEachTest() {
+        yarnClient = getYarnClient("defaultYarnClient");
     }
 
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
@@ -291,14 +293,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public YarnClient getYarnClient() {
         return yarnClient;
     }
-
+    
     /**
      * Sets the {@link YarnClient}.
      *
      * @param yarnClient
      *            the Yarn client
      */
-    @Autowired
     public void setYarnClient(YarnClient yarnClient) {
         this.yarnClient = yarnClient;
     }
@@ -373,6 +374,24 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             Thread.sleep(1000);
         } while (System.currentTimeMillis() - start < waitTimeInMillis);
         return status;
+    }
+    
+    private YarnClient getYarnClient(String yarnClientName) {
+        ConfigurableApplicationContext context = null;
+        try {
+            if (StringUtils.isEmpty(yarnClientName)) {
+                throw new IllegalStateException("Yarn client name cannot be empty.");
+            }
+            YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
+            return client;
+        } catch (Throwable e) {
+            log.error("Error while getting yarnClient for application " + yarnClientName, e);
+        } finally {
+            if (context != null) {
+                context.close();
+            }
+        }
+        return null;
     }
 
     /**
