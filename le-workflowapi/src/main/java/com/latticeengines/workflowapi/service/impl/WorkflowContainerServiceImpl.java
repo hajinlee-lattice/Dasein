@@ -116,16 +116,8 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     }
 
     @Override
-    public WorkflowExecutionId start(String workflowName, String applicationId,
+    public WorkflowExecutionId start(String workflowName, WorkflowJob workflowJob,
             WorkflowConfiguration workflowConfiguration) {
-        if (applicationId == null) {
-            throw new LedpException(LedpCode.LEDP_28022);
-        }
-        log.info(String.format("Looking up workflow for application id %s", applicationId));
-        WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
-        if (workflowJob == null) {
-            throw new RuntimeException(String.format("No workflow job found with application id %s", applicationId));
-        }
         long jobExecutionId = workflowService.startWorkflowJob(workflowName, workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
         workflowJobEntityMgr.update(workflowJob);
@@ -159,11 +151,12 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null
                     && !workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals(
                             "bulkMatchWorkflow")) {
-                com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
-                if (job.getJobStatus() != null) {
+                WorkflowExecutionId workflowId = workflowJob.getAsWorkflowId();
+                if (workflowId == null) {
+                    com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
                     jobs.add(job);
                 } else {
-                    workflowIds.add(workflowJob.getAsWorkflowId());
+                    workflowIds.add(workflowId);
                 }
             }
         }
@@ -201,14 +194,13 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
             // query yarn for jobs which have failed, killed final status, and
             // finished state without workflowId
             if (YarnUtils.FAILED_STATUS.contains(yarnJobStatus.getStatus()) //
-                    || yarnJobStatus.getState().equals(YarnApplicationState.FINISHED) //
-                    && workflowJob.getAsWorkflowId() == null) {
+                    || yarnJobStatus.getState().equals(YarnApplicationState.FINISHED)) {
                 job.setJobStatus(JobStatus.FAILED);
                 job.setStartTimestamp(new Date(yarnJobStatus.getStartTime()));
                 workflowJob.setStatus(FinalApplicationStatus.FAILED);
                 workflowJob.setStartTimeInMillis(yarnJobStatus.getStartTime());
                 workflowJobEntityMgr.update(workflowJob);
-            } else if (workflowJob.getAsWorkflowId() == null) {
+            } else {
                 job.setJobStatus(JobStatus.PENDING);
             }
         }
