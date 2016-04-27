@@ -20,6 +20,8 @@ import org.apache.hadoop.mapreduce.v2.app.LedpMRAppMaster;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.sqoop.LedpSqoop;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.dataplatform.exposed.mapreduce.MRJobUtil;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
@@ -28,11 +30,14 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @SuppressWarnings("deprecation")
 public class SqoopJobServiceImpl {
 
     private static final Log log = LogFactory.getLog(SqoopJobServiceImpl.class);
+    @Value("${dataplatform.queueScheme:legacy}")
+    private String queueScheme;
 
     protected ApplicationId exportData(String table, //
             String sourceDir, //
@@ -50,7 +55,7 @@ public class SqoopJobServiceImpl {
 
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
-        cmds.add("-Dmapreduce.job.queuename=" + queue);
+        cmds.add("-Dmapreduce.job.queuename=" + overwriteQueue(queue));
         cmds.add("--connect");
         cmds.add(metadataService.getJdbcConnectionUrl(creds));
         cmds.add("--table");
@@ -310,7 +315,7 @@ public class SqoopJobServiceImpl {
         List<String> cmds = new ArrayList<>();
         String connectionUrl = metadataService.getJdbcConnectionUrl(creds);
         cmds.add("import");
-        cmds.add("-Dmapreduce.job.queuename=" + queue);
+        cmds.add("-Dmapreduce.job.queuename=" + overwriteQueue(queue));
         cmds.add("--connect");
         cmds.add(connectionUrl);
 
@@ -463,4 +468,24 @@ public class SqoopJobServiceImpl {
         return "/tmp/sqoop-yarn/generate/outdir/" + uuid;
     }
 
+    protected String overwriteQueue(String queue) {
+        String translatedQueue = queue;
+        if (queue == null) {
+           return queue;
+        }
+        if (queueScheme.equalsIgnoreCase("default"))
+            translatedQueue = LedpQueueAssigner.getDefaultQueueNameForSubmission();
+        else if (queueScheme.equalsIgnoreCase("legacy")) {
+            if (queue.equals(LedpQueueAssigner.getWorkflowQueueNameForSubmission()) ||
+                queue.equals(LedpQueueAssigner.getDataflowQueueNameForSubmission()) ||
+                queue.equals(LedpQueueAssigner.getEaiQueueNameForSubmission())) {
+                translatedQueue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+            }
+        }
+        if (!translatedQueue.equals(queue)) {
+            log.info("Overwite queue " + queue + " to " + translatedQueue);
+        }
+
+        return translatedQueue;
+    }
 }
