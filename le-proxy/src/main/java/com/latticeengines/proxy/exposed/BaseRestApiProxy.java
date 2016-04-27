@@ -150,6 +150,7 @@ public abstract class BaseRestApiProxy {
         backOffPolicy.setInitialInterval(initialWaitMsec);
         backOffPolicy.setMultiplier(multiplier);
         retry.setBackOffPolicy(backOffPolicy);
+        retry.setThrowLastExceptionOnExhausted(true);
         return retry;
     }
 

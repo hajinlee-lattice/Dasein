@@ -15,6 +15,7 @@ import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 
 public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandler {
@@ -22,10 +23,26 @@ public abstract class FrontEndFacingExceptionHandler extends BaseExceptionHandle
     @Autowired
     private AlertService alertService;
 
+    public FrontEndFacingExceptionHandler() {
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ModelAndView handleException(RemoteLedpException e) {
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+                .getStackTrace(e);
+        if (e.getRemoteStackTrace() != null) {
+            stackTrace = stackTrace + "\nCaused remotely by...\n" + e.getRemoteStackTrace();
+        }
+        logError(stackTrace);
+        return getModelAndView(e);
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException e) {
-        String stackTrace = e.getErrorDetails().getStackTrace();
+        String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils
+                .getStackTrace(e);
         logError(e.getCode() + "\n" + stackTrace);
         return getModelAndView(e);
     }
