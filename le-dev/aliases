@@ -4,7 +4,7 @@ alias leversion='cat ../le-parent/pom.xml | grep \<version\> | head -n 1 | cut -
 alias dfdplnobld='hadoop fs -rm -r -f "/app/dataflow/*" && hadoop fs -mkdir -p /app/dataflow/lib && hadoop fs -put $WSHOME/le-dataflow/target/le-dataflow*shaded.jar /app/dataflow/lib && hadoop fs -put conf/env/dev/dataflow.properties /app/dataflow'
 alias dfdpl='mvn -Pshaded-yarn -DskipTests clean install && dfdplnobld'
 
-alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow/lib && hadoop fs -put $WSHOME/le-workflow/target/le-workflow*shaded.jar /app/workflow/lib && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
+alias wfdplnobld='hadoop fs -rm -r -f "/app/workflow/*" && hadoop fs -mkdir -p /app/workflow && hadoop fs -put conf/env/dev/workflow.properties /app/workflow'
 alias wfdpl='mvn -Pshaded-yarn -DskipTests clean install && wfdplnobld'
 
 alias dfapidplnobld='hadoop fs -rm -r /app/dataflowapi || true && hadoop fs -mkdir -p /app/dataflowapi/lib && hadoop fs -copyFromLocal $WSHOME/le-dataflowapi/target/le-dataflowapi*shaded.jar /app/dataflowapi/lib && hadoop fs -copyFromLocal conf/env/dev/dataflowapi.properties /app/dataflowapi'
