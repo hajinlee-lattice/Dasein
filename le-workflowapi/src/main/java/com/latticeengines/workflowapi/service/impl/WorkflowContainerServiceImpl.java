@@ -156,7 +156,9 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         List<WorkflowExecutionId> workflowIds = new ArrayList<>();
 
         for (WorkflowJob workflowJob : workflowJobs) {
-            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals("bulkMatchWorkflow")) {
+            if (workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE) != null
+                    && !workflowJob.getInputContextValue(WorkflowContextConstants.Inputs.JOB_TYPE).equals(
+                            "bulkMatchWorkflow")) {
                 com.latticeengines.domain.exposed.workflow.Job job = getJobStatusFromWorkflowJobAndYarn(workflowJob);
                 if (job.getJobStatus() != null) {
                     jobs.add(job);
