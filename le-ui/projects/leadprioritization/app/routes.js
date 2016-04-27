@@ -1,4 +1,4 @@
-angular
+
 .module('mainApp')
 
 // add ability to redirect with redirectTo
@@ -192,9 +192,8 @@ angular
             resolve: ModelDependencies,
             views: {
                 "navigation@": {
-                    controller: function($scope, Model, FeatureFlagService) {
-                        $scope.name = Model.ModelDetails.Name;
-                        $scope.displayName = Model.ModelDetails.DisplayName;
+                    controller: function($scope, $rootScope, Model, FeatureFlagService) {
+                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.Name });
                         FeatureFlagService.GetAllFlags().then(function() {
                             var flags = FeatureFlagService.Flags();
                             $scope.showModelSummary = FeatureFlagService.FlagIsEnabled(flags.ADMIN_PAGE);

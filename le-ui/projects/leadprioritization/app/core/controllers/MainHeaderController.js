@@ -15,12 +15,24 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showProfileNav = false;
 
     
-    // $rootScope.$on('$routeChangeSuccess', function(e, current, pre) {
-    //   console.log('Current route name: ' + $location.path());
-    //   // Get all URL parameter
-    //   console.log($routeParams);
-    // });
-    // $scope.isModelDetailsPage = true;
+    $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
+        if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
+            $scope.isModelDetailsPage = false;
+        }
+    });
+
+    function isModelDetailState(stateName) {
+        var stateNameArr = stateName.split('.');
+        if (stateNameArr[0] == 'home' && stateNameArr[1] == 'model') {
+            return true;
+        }
+        return false;
+    }
+
+    $scope.$on('model-details', function(event, args) {
+        $scope.isModelDetailsPage = true;
+        $scope.displayName = args.displayName;
+    });
 
     $scope.handleSidebarToggle = function ($event) {
         $("body").toggleClass("open-nav");

@@ -127,14 +127,17 @@ Secondary Nav (Hamburger and Profile Nav)
   border-bottom: #ddd solid 1px;
   button {
     float: left;
-    padding: 18px;
+    padding: 10px;
     &:focus {
       outline: 0;
     }
   }
   .model-name {
     display: inline-block;
-    padding: 10px;
+    font-family: 'ProximaNova-Bold','Open Sans',sans-serif;
+    color: #a9a9a9;
+    font-size: 16px;
+    padding-top: 17px;
   }
   .profile-nav {
     float: right;
