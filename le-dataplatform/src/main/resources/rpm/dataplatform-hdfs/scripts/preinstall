@@ -20,6 +20,8 @@ if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
     VERSION=${STACK_NAME}/${VERSION}
 fi
 
+echo $VERSION
+
 hdfs dfs -rm -f -r /app/$VERSION/dataflowapi || true
 hdfs dfs -rm -f -r /app/$VERSION/dataplatform || true
 hdfs dfs -rm -f -r /app/$VERSION/db || true

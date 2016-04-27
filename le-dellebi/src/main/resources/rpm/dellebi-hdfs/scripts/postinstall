@@ -17,6 +17,8 @@ if [ ! -z "$STACK_NAME" -a "$STACK_NAME" != " " ]; then
     VERSION=${STACK_NAME}/${VERSION}
 fi
 
+echo $VERSION
+
 hdfs dfs -rm -r -f /app/$VERSION/dellebi/lib/*
 hdfs dfs -put /tmp/app/dellebi/le-dellebi*-shaded.jar /app/$VERSION/dellebi/lib
 hdfs dfs -copyFromLocal /tmp/app/dellebi/dellebi.properties /app/$VERSION/dellebi
