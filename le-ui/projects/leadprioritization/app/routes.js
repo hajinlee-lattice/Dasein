@@ -1,4 +1,4 @@
-
+angular
 .module('mainApp')
 
 // add ability to redirect with redirectTo
