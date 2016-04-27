@@ -59,6 +59,9 @@ public class TransformationProgress implements HasPid {
     @Column(name = "Version")
     protected String version;
 
+    @Column(name = "YarnAppId")
+    protected String yarnAppId;
+
     @Override
     public Long getPid() {
         return pid;
@@ -158,6 +161,14 @@ public class TransformationProgress implements HasPid {
         return version;
     }
 
+    public void setYarnAppId(String yarnAppId) {
+        this.yarnAppId = yarnAppId;
+    }
+
+    public String getYarnAppId() {
+        return yarnAppId;
+    }
+
     public static TransformationProgress constructByDates(String sourceName, Date startDate, Date endDate)
             throws InstantiationException, IllegalAccessException {
         TransformationProgress progress = new TransformationProgress();
@@ -175,4 +186,5 @@ public class TransformationProgress implements HasPid {
     public String toString() {
         return String.format("TransformationProgress %s [%s]", sourceName, rootOperationUID);
     }
+
 }

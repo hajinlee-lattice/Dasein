@@ -77,10 +77,13 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
-    public TransformationProgress findEarliestFailureUnderMaxRetry(Source source) {
+    public TransformationProgress findEarliestFailureUnderMaxRetry(Source source, String version) {
         List<TransformationProgress> progresses = progressDao.findFailedProgresses(source);
         for (TransformationProgress progress : progresses) {
             if (progress.getNumRetries() < MAX_RETRIES) {
+                if (version != null && !version.equals(progress.getVersion())) {
+                    continue;
+                }
                 return progress;
             }
         }
@@ -103,6 +106,22 @@ public class TransformationProgressEntityMgrImpl implements TransformationProgre
         List<TransformationProgress> progresses = progressDao.findUnfinishedProgresses(source);
         if (!progresses.isEmpty()) {
             return progresses.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public TransformationProgress findRunningProgress(Source source, String version) {
+        List<TransformationProgress> progresses = progressDao.findUnfinishedProgresses(source);
+        if (!progresses.isEmpty()) {
+            for (TransformationProgress progress : progresses) {
+                if (source.getSourceName().equals(progress.getSourceName())) {
+                    return progress;
+                }
+            }
+            return null;
         } else {
             return null;
         }

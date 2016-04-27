@@ -14,9 +14,11 @@ public interface TransformationProgressEntityMgr {
 
     TransformationProgress findProgressByRootOperationUid(String rootOperationUid);
 
-    TransformationProgress findEarliestFailureUnderMaxRetry(Source source);
+    TransformationProgress findEarliestFailureUnderMaxRetry(Source source, String version);
 
     TransformationProgress findRunningProgress(Source source);
+
+    TransformationProgress findRunningProgress(Source source, String version);
 
     void deleteAllProgressesOfSource(Source source);
 

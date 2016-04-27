@@ -16,8 +16,8 @@ public class ProgressHelper {
         return progressEntityMgr.findRunningProgress(source);
     }
 
-    public TransformationProgress findJobToRetry(TransformationProgressEntityMgr progressEntityManager, Source source) {
-        return progressEntityManager.findEarliestFailureUnderMaxRetry(source);
+    public TransformationProgress findJobToRetry(TransformationProgressEntityMgr progressEntityManager, Source source, String version) {
+        return progressEntityManager.findEarliestFailureUnderMaxRetry(source, version);
     }
 
     public boolean checkProgressStatus(TransformationProgress progress, Log logger) {

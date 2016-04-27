@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.runtime.cascading.propdata.BomboraFirehoseFieldMapping;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -93,9 +95,10 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
     }
 
     @Override
-    protected TransformationConfiguration createNewConfiguration(String latestBaseVersion, String newLatestVersion) {
+    protected TransformationConfiguration createNewConfiguration(List<String> latestBaseVersion,
+            String newLatestVersion) {
         BomboraFirehoseConfiguration configuration = new BomboraFirehoseConfiguration();
-        configuration.setInputFirehoseVersion(latestBaseVersion);
+        configuration.setInputFirehoseVersion(latestBaseVersion.get(0));
         configuration.setSourceName(source.getSourceName());
         Map<String, String> sourceConfigurations = new HashMap<>();
         configuration.setSourceConfigurations(sourceConfigurations);
@@ -113,7 +116,7 @@ public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformat
 
     @Override
     TransformationConfiguration readTransformationConfigurationObject(String confStr) throws IOException {
-        return om.deserialize(confStr, BomboraFirehoseConfiguration.class);
+        return JsonUtils.deserialize(confStr, BomboraFirehoseConfiguration.class);
     }
 
     @Override

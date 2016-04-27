@@ -31,8 +31,8 @@ public abstract class TransformationServiceBase {
         return progressHelper.findRunningJob(getProgressEntityMgr(), getSource());
     }
 
-    public TransformationProgress findJobToRetry() {
-        return progressHelper.findJobToRetry(getProgressEntityMgr(), getSource());
+    public TransformationProgress findJobToRetry(String version) {
+        return progressHelper.findJobToRetry(getProgressEntityMgr(), getSource(), version);
     }
 
     protected boolean checkProgressStatus(TransformationProgress progress) {

@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.propdata.transformation.TransformationRequest;
-import com.latticeengines.propdata.core.service.impl.HdfsPathBuilder;
 import com.latticeengines.propdata.core.service.impl.HdfsPodContext;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.FixedIntervalSource;
 import com.latticeengines.propdata.core.source.Source;
+import com.latticeengines.propdata.engine.transformation.entitymgr.TransformationProgressEntityMgr;
 import com.latticeengines.propdata.engine.transformation.service.SourceTransformationService;
 import com.latticeengines.propdata.engine.transformation.service.TransformationExecutor;
 import com.latticeengines.propdata.engine.transformation.service.TransformationService;
@@ -38,10 +38,10 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
     private List<DataImportedFromHDFS> hdfsImportedSources;
 
     @Autowired
-    private HdfsPathBuilder hdfsPathBuilder;
+    private WorkflowProxy workflowProxy;
 
     @Autowired
-    private WorkflowProxy workflowProxy;
+    private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
     private ApplicationContext applicationContext;
 
@@ -61,10 +61,9 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
 
         TransformationService transformationService = (TransformationService) applicationContext
                 .getBean(request.getSourceBeanName());
-        TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy,
-                hdfsPathBuilder);
+        TransformationExecutor executor = new TransformationExecutorImpl(transformationService, workflowProxy);
 
-        return executor.kickOffNewProgress();
+        return executor.kickOffNewProgress(transformationProgressEntityMgr);
     }
 
     private List<TransformationProgress> scanForNewWorkFlow(String hdfsPod) {

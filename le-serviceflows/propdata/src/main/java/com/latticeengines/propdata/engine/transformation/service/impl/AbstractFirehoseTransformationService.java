@@ -1,17 +1,24 @@
 package com.latticeengines.propdata.engine.transformation.service.impl;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.TransformationProgress;
 import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.transformation.configuration.TransformationConfiguration;
 
 public abstract class AbstractFirehoseTransformationService extends AbstractTransformationService {
+    private static Logger LOG = LogManager.getLogger(AbstractFirehoseTransformationService.class);
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
+
+    abstract void uploadSourceSchema(String workflowDir) throws IOException;
 
     protected TransformationProgress transformHook(TransformationProgress progress) {
         if (!ingestDataFromFirehoseAndUpdateProgress(progress)) {
@@ -38,8 +45,6 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
         return doPostProcessing(progress, workflowDir);
     }
 
-    abstract void uploadSourceSchema(String workflowDir) throws IOException;
-
     @Override
     protected String getRootBaseSourceDirPath() {
         DataImportedFromHDFS source = (DataImportedFromHDFS) getSource();
@@ -47,16 +52,18 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
     }
 
     @Override
-    public String findUnprocessedVersion() {
+    public List<String> findUnprocessedVersions() {
         Source source = getSource();
         String rootSourceDir = sourceDirInHdfs(source);
         String rootBaseSourceDir = getRootBaseSourceDirPath();
         String latestVersion = null;
         String latestBaseVersion = null;
+        List<String> unprocessedBaseVersions = new ArrayList<>();
 
         try {
             latestVersion = findLatestVersionInDir(rootSourceDir.toString());
             latestBaseVersion = findLatestVersionInDir(rootBaseSourceDir.toString());
+            LOG.info("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);
         }
@@ -66,17 +73,18 @@ public abstract class AbstractFirehoseTransformationService extends AbstractTran
         }
 
         if (latestVersion == null || latestBaseVersion.compareTo(latestVersion) > 0) {
-            return latestBaseVersion;
+            try {
+                String pathForSuccessFlagLookup = rootBaseSourceDir + HDFS_PATH_SEPARATOR + latestBaseVersion;
+                if (!isAlreadyBeingProcessed(source, latestBaseVersion) && hasSuccessFlag(pathForSuccessFlagLookup)) {
+                    unprocessedBaseVersions.add(latestBaseVersion);
+                    return unprocessedBaseVersions;
+                }
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_25010, e);
+            }
         }
 
-        return null;
-    }
-
-    @Override
-    public TransformationConfiguration createTransformationConfiguration(String versionToProcess) {
-        TransformationConfiguration configuration;
-        configuration = createNewConfiguration(versionToProcess, versionToProcess);
-        return configuration;
+        return unprocessedBaseVersions;
     }
 
     @Override

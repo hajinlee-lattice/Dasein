@@ -25,11 +25,8 @@ import com.latticeengines.propdata.collection.service.RefreshService;
 import com.latticeengines.propdata.collection.service.impl.ProgressOrchestrator;
 import com.latticeengines.propdata.core.service.ServiceFlowsZkConfigService;
 import com.latticeengines.propdata.core.source.DataImportedFromDB;
-import com.latticeengines.propdata.core.source.DataImportedFromHDFS;
 import com.latticeengines.propdata.core.source.DerivedSource;
 import com.latticeengines.propdata.core.source.Source;
-import com.latticeengines.propdata.engine.transformation.TransformationProgressOrchestrator;
-import com.latticeengines.propdata.engine.transformation.service.TransformationService;
 
 @Component("propDataScheduler")
 public class PropDataScheduler {
@@ -48,9 +45,6 @@ public class PropDataScheduler {
 
     @Autowired
     private ProgressOrchestrator progressOrchestrator;
-
-    @Autowired
-    private TransformationProgressOrchestrator transformationProgressOrchestrator;
 
     @PostConstruct
     private void registerJobs() throws SchedulerException {
@@ -86,14 +80,7 @@ public class PropDataScheduler {
             registerArchiveJob((DataImportedFromDB) source);
         } else if (source instanceof DerivedSource) {
             registerRefreshJob((DerivedSource) source);
-        } else if (source instanceof DataImportedFromHDFS) {
-            registerIngestionJob((DataImportedFromHDFS) source);
         }
-    }
-
-    private void registerIngestionJob(DataImportedFromHDFS source) throws SchedulerException {
-        TransformationService service = transformationProgressOrchestrator.getTransformationService(source);
-        scheduleJob(source, "transformationService", service, TransformationScheduler.class);
     }
 
     private void registerArchiveJob(DataImportedFromDB source) throws SchedulerException {
