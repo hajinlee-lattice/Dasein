@@ -95,7 +95,7 @@ angular.module('pd.jobs', [
             url: '/pls/scores/jobs/' + job.id + '/results',
             headers: { 
                 'Accept': 'application/csv;charset=utf-8',
-                'ErrorDisplayMethod': 'banner|home.models.list'
+                'ErrorDisplayMethod': 'banner|home.models'
             }
         }).then(
             function onSuccess(response) {

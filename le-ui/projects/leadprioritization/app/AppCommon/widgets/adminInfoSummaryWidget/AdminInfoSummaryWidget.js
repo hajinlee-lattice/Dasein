@@ -86,21 +86,29 @@ angular.module('mainApp.appCommon.widgets.AdminInfoSummaryWidget', [
                 }
 
                 $scope.$emit('download-start');
-                $http.get($attrs.url).then(function (response) {
-                    if ($attrs.filetype === "application/json") {
-                        $scope.blob = new Blob([JSON.stringify(response.data)], {type : $attrs.filetype});
-                    } else {
-                        $scope.blob = new Blob([response.data], {type : $attrs.filetype});
+                $http({
+                    method: 'GET',
+                    url: $attrs.url,
+                    headers: {
+                        'ErrorDisplayMethod': 'modal|home.models'
                     }
-                    $scope.downloadFile();
-                    $scope.$emit('download-finished');
-                }, function (response) {
-                    SessionService.HandleResponseErrors(response.data, response.status);
-                    $scope.$parent.Error.ShowError = true;
-                    $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
-                    $scope.fetching = false;
-                    $scope.$emit('download-finished');
-                });
+                }).then(
+                    function (response) {
+                        if ($attrs.filetype === "application/json") {
+                            $scope.blob = new Blob([JSON.stringify(response.data)], {type : $attrs.filetype});
+                        } else {
+                            $scope.blob = new Blob([response.data], {type : $attrs.filetype});
+                        }
+                        $scope.downloadFile();
+                        $scope.$emit('download-finished');
+                    }, function (response) {
+                        SessionService.HandleResponseErrors(response.data, response.status);
+                        $scope.$parent.Error.ShowError = true;
+                        $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
+                        $scope.fetching = false;
+                        $scope.$emit('download-finished');
+                    }
+                );
             };
         }]
     };

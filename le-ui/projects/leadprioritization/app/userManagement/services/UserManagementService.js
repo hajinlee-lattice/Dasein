@@ -39,7 +39,10 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
 
         $http({
             method: 'GET',
-            url: '/pls/users?' + new Date().getTime()
+            url: '/pls/users?' + new Date().getTime(),
+            headers: {
+                'ErrorDisplayMethod': 'modal|home.models'
+            }
         })
             .success(function (data, status, headers, config) {
                 var result = {

@@ -40,6 +40,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         JOBS_PAGE: 'JobsPage',
         MARKETO_SETTINGS_PAGE: 'MarketoSettingsPage',
+        API_CONSOLE_PAGE: 'APIConsolePage'
     };
     this.Flags = function(){ return flags; };
 
@@ -129,6 +130,7 @@ mod.service('FeatureFlagService', function ($q, $http, BrowserStorageUtility, Ri
 
         UpdateFlag(flags.JOBS_PAGE, RightsUtility.currentUserMay("View", "Jobs"));
         UpdateFlag(flags.MARKETO_SETTINGS_PAGE, RightsUtility.currentUserMay("Edit", "Configurations"));
+        UpdateFlag(flags.API_CONSOLE_PAGE, RightsUtility.currentUserMay("Create", "Oauth2Token"));
     }
 
 });

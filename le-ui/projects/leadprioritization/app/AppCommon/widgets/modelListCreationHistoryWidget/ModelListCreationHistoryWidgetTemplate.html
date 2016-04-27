@@ -21,7 +21,7 @@
                         <td>{{model.Id}}</td>
                         <td>{{model.CreatedDate}}</td>
                         <td>{{model.Status}}&nbsp;
-                            <a data-ng-show="model.Status == 'Deleted'"
+                            <a data-ng-show="model.Status == 'Deleted' && showUploadModel"
                              href="javascript:void(0)" data-ng-click="undoDeleteModel(model.Id)">{{ResourceUtility.getString('MODEL_LIST_MODEL_DELETED_UNDO_LABEL')}}</a>
                          </td>
                     </tr>
