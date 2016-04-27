@@ -49,7 +49,7 @@ public class ExternalColumn implements HasPid, Serializable {
     @Column(name = "DefaultColumnName", nullable = false, length = 100)
     private String defaultColumnName;
 
-    @Column(name = "Description", nullable = false, length = 1000)
+    @Column(name = "Description", nullable = true, length = 1000)
     private String description;
 
     @Column(name = "DataType", nullable = false, length = 50)
